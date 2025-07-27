@@ -1,0 +1,162 @@
+BLOCKS: 2
+Quiz de Matemática 4º ano
+3.
+EF04MA04 - Resolver problemas de multiplicação
+41-Para o lanche dos funcionários de uma empresa, João comprou pão todos os 7 dias da semana. Em cada dia ele comprou 12 pães. Quantos pães João comprou ao todo nessa semana?
+#
+19
+74
+84 (resposta)
+714
+
+EF04MA01 - Ler, escrever e identificar valor posicional de números naturais
+42-Carina ganhou de seu pai a quantia de R$ 243,00. Indique a resposta por extenso abaixo:
+#
+Duzentos e quarenta e três (resposta)
+Duzentos e três
+Quarenta e três
+Trezentos e quarenta e dois
+
+EF04MA12 - Reconhecer e compor valores monetários e números por extenso
+43-Carlos comprou uma bicicleta por R$ 250,00 reais. Essa bicicleta custou:
+#
+cinquenta e dois reais
+duzentos e cinquenta reais (resposta)
+duzentos reais
+vinte e cinco reais
+
+EF04MA04 - Resolver problemas de multiplicação
+44-Em uma sala de aula há 4 mesas com 6 cadeiras em cada mesa. Quantas cadeiras têm, no total, nessa sala?
+#
+10
+20
+24 (resposta)
+28
+
+EF04MA05 - Resolver problemas de divisão
+45-A professora Amanda distribuiu igualmente 10 balas para 2 alunos. Quantas balas cada um desses alunos ganhou da professora Amanda?
+#
+12
+10
+8
+5 (resposta)
+
+EF04MA03 - Resolver problemas de adição e subtração
+46-Lucas tem 19 carrinhos e Marcos tem 6. Quantos carrinhos Lucas tem a mais que Marcos?
+#
+13 (resposta)
+14
+19
+25
+
+EF04MA12 - Reconhecer e compor valores monetários e números por extenso
+47-Fátima comprou para seu filho um berço que custou seiscentos e noventa e dois reais. Quantos reais custou esse berço que Fátima comprou?
+#
+602
+609
+690
+692 (resposta)
+
+EF04MA22 -Calcular intervalos de tempo e conversões (horas, dias, semanas)
+48-A avó de Patrícia mora muito longe. Para ir visitá-la a menina gastou 36 horas de viagem. Quantos dias durou a viagem de Patrícia?
+#
+1 dia
+1 dia e meio (resposta)
+3 dias
+36 dias
+
+EF04MA04 - Resolver problemas de multiplicação
+49-Em uma sala de aula, um professor organizou as carteiras em 5 fileiras com 7 carteiras em cada uma. Quantas carteiras esse professor organizou no total?
+#
+12
+35 (resposta)
+37
+40
+
+EF04MA03 - Resolver problemas de adição e subtração
+50-Na biblioteca da escola de Júlia há 547 livros, a diretora dessa escola comprou mais 103 livros. Com quantos livros a escola de Júlia ficou no total?
+#
+444
+600
+640
+650 (resposta)
+
+EF04MA04 - Resolver problemas de multiplicação
+51-O médico receitou a Paula alguns comprimidos contra alergia. Ela comprou 4 cartelas desse comprimido. Em cada cartela havia 12 comprimidos. Quantos comprimidos Paula comprou no total?
+#
+12
+16
+46
+48 (resposta)
+
+EF04MA04 - Resolver problemas de multiplicação
+52-Em uma gaveta do seu guarda-roupa, Maria organizou as suas blusas em 5 fileiras com 13 blusas em cada uma dessas fileiras. Quantas blusas Maria organizou, ao todo, nessa gaveta?
+#
+13
+18
+55
+65 (resposta)
+
+EF04MA03 - Resolver problemas de adição e subtração
+53-Antônia trabalha como manicure em um salão de beleza e tinha 137 vidros de esmaltes. Ao organizar seus materiais, ela jogou fora 45 vidros de esmaltes que já estavam vencidos e comprou mais 58 vidros de esmalte. Com quantos vidros de esmaltes Antônia ficou no total?
+#
+195
+150 (resposta)
+140
+92
+
+EF04MA04 - Resolver problemas de multiplicação
+54-A professora Gabriela possui 14 alunos e deu 3 lápis para cada um deles. Quantos lápis, ao todo, Gabriela deu para os seus alunos?
+#
+11
+17
+32
+42 (resposta)
+
+EF04MA03 - Resolver problemas de adição e subtração
+55-Gabriel e Marcelo vendem picolés. Gabriel vendeu 23 picolés e Marcelo, 18. Quantos picolés Marcelo precisa vender para igualar a quantidade de picolés vendidos por Gabriel?
+#
+5 (resposta)
+6
+7
+8
+
+EF04MA04 - Resolver problemas de multiplicação
+56-Luisa viajou em suas férias e tirou muitas fotos. Ela organizou todas elas em um álbum com 50 páginas. Sabendo que em cada página cabem 16 fotos e o álbum ficou completamente cheio, quantas fotos ao todo Luísa colocou no álbum?
+#
+800 fotos (resposta)
+700 fotos
+500 fotos
+300 fotos
+
+EF04MA22 -Calcular intervalos de tempo e conversões (horas, dias, semanas)
+57-Falta 1 semana para a festa de aniversário de Roberta. A quantidade de dias que faltam para a festa de Roberta é:
+#
+5 dias
+6 dias
+8 dias
+7 dias (resposta)
+
+EF04MA04 - Resolver problemas de multiplicação
+58-Arnaldo comprou 5 cadernos iguais. Cada caderno custou R$ 9,00. Quanto Arnaldo pagou por esses cadernos?
+#
+R$ 14,00
+R$ 40,00
+R$ 18,00
+R$ 45,00 (resposta)
+
+EF04MA05 - Resolver problemas de divisão
+59-Maria distribuiu igualmente 75 livros para cada um de seus 25 alunos. Quantos livros, no total, cada aluno recebeu?
+#
+2
+3 (resposta)
+31
+50
+
+EF04MA10 - Ordenar números e completar sequências numéricas
+60-Marcos, Pedro, Luciano e Gabriel estão disputando o melhor tempo para definir a posição de largada na corrida anual de bicicleta. Marcos fez o tempo de 56 minutos, Pedro obteve 30 minutos, Luciano 42 minutos e Gabriel 37 minutos. Considerando que o menor tempo será o primeiro da fila, a ordem correta da posição da largada é:
+#
+1º Marcos, 2º Pedro, 3º Luciano e 4º Gabriel
+1º Pedro, 2º Gabriel, 3º Luciano e 4º Marcos (resposta)
+1º Gabriel, 2º Pedro, 3º Luciano e 4º Marcos
+1º Pedro, 2º Gabriel, 3º Marcos e 4º Luciano
