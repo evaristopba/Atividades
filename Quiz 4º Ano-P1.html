@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz BNCC Matemática - Parte 1</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Comic Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #fff3e0 0%, #e6f3fa 100%);
+      padding: 20px;
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff6f61;
+      font-size: 2.5em;
+      margin-bottom: 25px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 700;
+      transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      background: #43a047;
+      transform: scale(1.05);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    button:disabled {
+      background: #b0bec5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    #fileInputContainer {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .fileInputLabel {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #ffca28;
+      color: #333;
+      border: 2px solid #ffb300;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .fileInputLabel:hover {
+      background: #ffb300;
+      transform: scale(1.05);
+    }
+
+    #fileInput {
+      display: none; /* Escondido, mas acionado pelo label */
+    }
+
+    #progress {
+      text-align: center;
+      margin: 20px auto;
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #ff6f61;
+      background: #fff8e1;
+      padding: 12px;
+      border-radius: 12px;
+      max-width: 600px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #blockTabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 12px 25px;
+      background: #ffffff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #333;
+      transition: all 0.3s;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+      border: 2px solid #ffca28;
+    }
+
+    .tab.active {
+      background: #ffca28;
+      color: #333;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      transform: scale(1.1);
+    }
+
+    .tab:hover {
+      background: #fff8e1;
+      transform: scale(1.05);
+    }
+
+    #quizContainer {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .question-block {
+      display: none;
+    }
+
+    .question-block.active {
+      display: block;
+    }
+
+    .block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #ffca28;
+    }
+
+    .block-title {
+      font-size: 1.6em;
+      font-weight: 700;
+      color: #ff6f61;
+    }
+
+    .block-nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    .question {
+      margin-bottom: 35px;
+      background: #e6f3fa;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .bncc-info {
+      background: #fff8e1;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 5px solid #ff6f61;
+      font-size: 1em;
+      color: #333;
+      font-weight: 400;
+    }
+
+    .options {
+      margin-top: 20px;
+      display: grid;
+      gap: 15px;
+    }
+
+    .option {
+      position: relative;
+    }
+
+    .option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .option label {
+      display: block;
+      padding: 15px 25px;
+      background: #ffffff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid #e0e0e0;
+      font-size: 1.1em;
+      color: #333;
+      font-weight: 400;
+    }
+
+    .option input[type="radio"]:checked + label {
+      background: #4caf50;
+      color: white;
+      border-color: #43a047;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      transform: scale(1.02);
+    }
+
+    .option label:hover {
+      background: #e6f3fa;
+      border-color: #ff6f61;
+      transform: scale(1.02);
+    }
+
+    .correct-answer {
+      background: #c8e6c9 !important;
+      border-color: #4caf50 !important;
+      color: #2e7d32 !important;
+    }
+
+    .incorrect-answer {
+      background: #ffcdd2 !important;
+      border-color: #e57373 !important;
+      color: #c62828 !important;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 15px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .navigation span {
+      font-weight: 700;
+      color: #ff6f61;
+      font-size: 1.2em;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.4s ease-in-out;
+    }
+
+    .modal-content h2 {
+      color: #ff6f61;
+      margin-bottom: 25px;
+      font-size: 1.7em;
+      font-weight: 700;
+    }
+
+    .modal-content input {
+      padding: 12px;
+      width: 85%;
+      margin: 20px 0;
+      border: 2px solid #ffca28;
+      border-radius: 10px;
+      font-size: 1.1em;
+      font-family: 'Comic Neue', Arial, sans-serif;
+    }
+
+    .modal-content button {
+      margin: 15px 10px;
+    }
+
+    #loadingQuiz, #loadingPdf {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 1.7em;
+      flex-direction: column;
+      font-family: 'Comic Neue', Arial, sans-serif;
+    }
+
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #ff6f61;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 25px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      .controls, .block-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      button, .fileInputLabel {
+        width: 100%;
+        max-width: 280px;
+        font-size: 1em;
+      }
+
+      .tab {
+        padding: 10px 20px;
+        font-size: 1em;
+      }
+
+      .question {
+        padding: 20px;
+      }
+
+      .modal-content {
+        width: 95%;
+        padding: 20px;
+      }
+
+      .modal-content h2 {
+        font-size: 1.4em;
+      }
+
+      .modal-content input {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="quizTitle">Quiz BNCC Interdisciplinar</h1>
+  
+  <div id="loadingQuiz">
+    <div class="spinner"></div>
+    <p>Carregando quiz, por favor aguarde...</p>
+  </div>
+  
+  <div id="fileInputContainer">
+    <label for="fileInput" class="fileInputLabel"><i class="fas fa-upload"></i> Carregar Arquivo de Questões</label>
+    <input type="file" id="fileInput" accept=".txt">
+  </div>
+
+  <div class="controls">
+    <button id="restartQuizBtn" disabled><i class="fas fa-redo"></i> Reiniciar Quiz</button>
+    <button id="exportFullPdf" disabled><i class="fas fa-file-pdf"></i> Exportar Resultado</button>
+  </div>
+
+  <div id="progress"></div>
+  <div id="blockTabs"></div>
+  <div id="quizContainer"></div>
+  <div class="navigation" id="blockNavigation" style="display: none;">
+    <button id="prevBlock"><i class="fas fa-arrow-left"></i> Bloco Anterior</button>
+    <span id="blockCounter"></span>
+    <button id="nextBlock">Próximo Bloco <i class="fas fa-arrow-right"></i></button>
+  </div>
+
+  <div class="modal" id="summaryModal">
+    <div class="modal-content">
+      <h2>Resumo do Bloco</h2>
+      <p id="summaryText"></p>
+      <div id="bnccSummary"></div>
+      <button id="generateBlockPdf"><i class="fas fa-file-pdf"></i> Gerar PDF do Bloco</button>
+      <button id="closeSummary"><i class="fas fa-times"></i> Fechar</button>
+    </div>
+  </div>
+
+  <div class="modal" id="pdfModal">
+    <div class="modal-content">
+      <h2>Gerar PDF</h2>
+      <p>Digite o nome do arquivo:</p>
+      <input type="text" id="pdfFilename" placeholder="Ex.: quiz_bncc.pdf">
+      <button id="confirmPdf"><i class="fas fa-check"></i> Gerar PDF</button>
+      <button id="cancelPdf"><i class="fas fa-times"></i> Cancelar</button>
+    </div>
+  </div>
+
+  <div class="modal" id="alertModal">
+    <div class="modal-content">
+      <h2>Atenção</h2>
+      <p id="alertMessage"></p>
+      <button id="closeAlert"><i class="fas fa-check"></i> Ok</button>
+    </div>
+  </div>
+
+  <div id="loadingPdf">
+    <div class="spinner"></div>
+    <p>Gerando PDF, por favor aguarde...</p>
+  </div>
+
+  <script>
+    const DEFAULT_QUIZ_URL = 'https://raw.githubusercontent.com/evaristopba/Atividades/refs/heads/main/Quiz-01';
+
+    function isValidUrl(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function convertGoogleDriveUrl(url) {
+      const match = url.match(/\/file\/d\/(.+?)\/view/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+      return url;
+    }
+
+    let jsPDFLoaded = false;
+    if (window.jsPDF) {
+      jsPDFLoaded = true;
+      console.log('jsPDF versão 1.5.3 carregada com sucesso');
+    } else {
+      console.warn('jsPDF não carregado. Exportação de PDF desabilitada.');
+      showAlert('Erro: Biblioteca jsPDF não carregada. Verifique a conexão com a internet ou desbloqueie scripts no navegador.');
+      document.getElementById('exportFullPdf').disabled = true;
+      document.getElementById('generateBlockPdf').disabled = true;
+    }
+
+    function testJsPdf() {
+      if (!jsPDFLoaded) return false;
+      try {
+        const testDoc = new jsPDF();
+        testDoc.text('Teste jsPDF', 10, 10);
+        const blob = testDoc.output('blob');
+        if (!(blob instanceof Blob)) {
+          throw new Error('jsPDF não está gerando Blobs corretamente');
+        }
+        console.log('Biblioteca jsPDF testada e funcionando');
+        return true;
+      } catch (error) {
+        console.error('Falha no teste do jsPDF:', error);
+        showAlert(`Erro na biblioteca PDF: ${error.message}. Exportação de PDF pode não funcionar.`);
+        jsPDFLoaded = false;
+        document.getElementById('exportFullPdf').disabled = true;
+        document.getElementById('generateBlockPdf').disabled = true;
+        return false;
+      }
+    }
+
+    if (jsPDFLoaded) {
+      testJsPdf();
+    }
+
+    function sanitizeFilename(filename) {
+      if (!filename) return 'quiz_bncc.pdf';
+      let safe = filename.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚâêîôÂÊÎÔãõÃÕçÇ_\-. ]/g, '');
+      if (!safe.toLowerCase().endsWith('.pdf')) {
+        safe += '.pdf';
+      }
+      return safe;
+    }
+
+    function addWrappedText(doc, text, x, y, maxWidth, lineHeight) {
+      const lines = doc.splitTextToSize(text, maxWidth);
+      for (let i = 0; i < lines.length; i++) {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(lines[i], x, y);
+        y += lineHeight;
+      }
+      return y;
+    }
+
+    let quizData = [];
+    let originalQuizData = [];
+    let currentBlocks = [];
+    let correctAnswers = [];
+    let showAnswers = false;
+    let currentBlockIndex = 0;
+    let submittedBlocks = [];
+    let blockScores = [];
+    let bnccStats = [];
+    let numBlocks = 3;
+
+    async function loadQuiz() {
+      document.getElementById('loadingQuiz').style.display = 'flex';
+      let quizUrl = DEFAULT_QUIZ_URL;
+
+      if (quizUrl.includes('drive.google.com')) {
+        quizUrl = convertGoogleDriveUrl(quizUrl);
+        console.log(`URL do Google Drive convertida: ${quizUrl}`);
+      }
+
+      console.log(`Tentando carregar quiz da URL: ${quizUrl}`);
+
+      if (!isValidUrl(quizUrl)) {
+        console.warn('URL inválida:', quizUrl);
+        showAlert(`URL inválida: ${quizUrl}. Por favor, selecione o arquivo .txt manualmente.`);
+        document.getElementById('loadingQuiz').style.display = 'none';
+        return;
+      }
+
+      try {
+        const response = await fetch(quizUrl, { method: 'GET', mode: 'cors' });
+        console.log(`Resposta do fetch: status=${response.status}, ok=${response.ok}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const content = await response.text();
+        if (!content.trim()) {
+          throw new Error('O arquivo .txt está vazio.');
+        }
+        const result = parseQuiz(content);
+        if (result.questions.length > 0) {
+          quizData = result.questions;
+          originalQuizData = JSON.parse(JSON.stringify(result.questions));
+          numBlocks = result.numBlocks;
+          console.log(`Quiz carregado da URL: ${quizData.length} questões, ${numBlocks} blocos`);
+          startQuiz();
+        } else {
+          throw new Error('Formato de arquivo inválido. Verifique a estrutura (ex.: BLOCKS: N, código BNCC, pergunta, 4 alternativas).');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar quiz:', error);
+        showAlert(`Erro ao carregar o quiz da URL "${quizUrl}": ${error.message}. Verifique a conexão, a URL (deve ser pública e no formato de download direto) ou use um arquivo local.`);
+      } finally {
+        document.getElementById('loadingQuiz').style.display = 'none';
+      }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        showAlert('Nenhum arquivo selecionado.');
+        return;
+      }
+
+      document.getElementById('loadingQuiz').style.display = 'flex';
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const result = parseQuiz(e.target.result);
+          if (result.questions.length > 0) {
+            quizData = result.questions;
+            originalQuizData = JSON.parse(JSON.stringify(result.questions));
+            numBlocks = result.numBlocks;
+            console.log(`Arquivo local carregado: ${quizData.length} questões, ${numBlocks} blocos`);
+            startQuiz();
+          } else {
+            showAlert('Formato de arquivo inválido. Verifique a estrutura do arquivo (ex.: BLOCKS: N, código BNCC, pergunta, 4 alternativas).');
+          }
+        } catch (error) {
+          console.error('Erro ao processar arquivo:', error);
+          showAlert(`Erro ao processar o arquivo: ${error.message}. Verifique o formato e tente novamente.`);
+        } finally {
+          document.getElementById('loadingQuiz').style.display = 'none';
+        }
+      };
+      reader.onerror = function() {
+        showAlert('Erro ao ler o arquivo. Verifique se é um arquivo de texto válido.');
+        document.getElementById('loadingQuiz').style.display = 'none';
+      };
+      reader.readAsText(file);
+    });
+
+    function parseQuiz(content) {
+      console.log('Iniciando parsing do arquivo .txt');
+      const lines = content.split(/\r?\n/).map(line => line.trim());
+      const questions = [];
+      let currentQuestion = null;
+      let options = [];
+      let readingQuestion = false;
+      let numBlocks = 3;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+
+        if (line.startsWith('BLOCKS:')) {
+          const blocksValue = parseInt(line.split(':')[1].trim());
+          if (!isNaN(blocksValue) && blocksValue > 0 && blocksValue <= 10) {
+            numBlocks = blocksValue;
+            console.log(`Número de blocos definido: ${numBlocks}`);
+          } else {
+            console.warn('Número de blocos inválido. Usando padrão: 3 blocos.');
+            showAlert('Número de blocos inválido no arquivo. Usando 3 blocos como padrão.');
+          }
+          continue;
+        }
+
+        if (line.startsWith('EF') && line.includes('-')) {
+          if (currentQuestion && options.length === 4) {
+            currentQuestion.options = options;
+            questions.push(currentQuestion);
+          }
+          const [code, ...desc] = line.split(' - ');
+          currentQuestion = {
+            code: code.trim(),
+            description: desc.join(' - ').trim(),
+            text: '',
+            options: []
+          };
+          options = [];
+          readingQuestion = false;
+        } else if (currentQuestion && !currentQuestion.text && line.match(/^\d+[\.-]/)) {
+          currentQuestion.text = line.substring(line.indexOf('-') + 1).trim();
+          readingQuestion = true;
+        } else if (readingQuestion && line === '#') {
+          continue;
+        } else if (readingQuestion && options.length < 4 && line) {
+          options.push({
+            text: line.replace('(resposta)', '').trim(),
+            correct: line.includes('(resposta)')
+          });
+        }
+      }
+
+      if (currentQuestion && options.length === 4) {
+        currentQuestion.options = options;
+        questions.push(currentQuestion);
+      }
+
+      console.log(`Parsing concluído: ${questions.length} questões encontradas`);
+      return { questions, numBlocks };
+    }
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function startQuiz() {
+      console.log('Iniciando quiz com', quizData.length, 'questões e', numBlocks, 'blocos');
+      if (!quizData.length) {
+        showAlert('Nenhuma questão carregada. Verifique o arquivo .txt.');
+        return;
+      }
+
+      quizData = JSON.parse(JSON.stringify(originalQuizData));
+      const blockSize = Math.ceil(quizData.length / numBlocks);
+      currentBlocks = [];
+      for (let i = 0; i < numBlocks; i++) {
+        const start = i * blockSize;
+        const end = Math.min(start + blockSize, quizData.length);
+        if (start < quizData.length) {
+          currentBlocks.push(shuffleArray([...quizData.slice(start, end)]));
+          console.log(`Bloco ${i + 1}: ${currentBlocks[i].length} questões`);
+        }
+      }
+
+      correctAnswers = currentBlocks.map(block => 
+        block.map(q => q.options.findIndex(opt => opt.correct))
+      );
+
+      showAnswers = false;
+      currentBlockIndex = 0;
+      submittedBlocks = Array(numBlocks).fill(false);
+      blockScores = Array(numBlocks).fill(0);
+      bnccStats = Array(numBlocks).fill().map(() => ({}));
+      renderQuiz();
+      renderTabs();
+      document.getElementById('restartQuizBtn').disabled = false;
+      document.getElementById('exportFullPdf').disabled = true;
+      document.getElementById('blockNavigation').style.display = 'flex';
+      updateBlockCounter();
+      document.getElementById('progress').textContent = 
+        `Total de perguntas: ${quizData.length} (${numBlocks} blocos de ~${blockSize} cada)`;
+    }
+
+    function renderTabs() {
+      console.log('Renderizando guias de blocos');
+      const tabsContainer = document.getElementById('blockTabs');
+      tabsContainer.innerHTML = '';
+      currentBlocks.forEach((_, index) => {
+        const tab = document.createElement('div');
+        tab.className = `tab ${index === currentBlockIndex ? 'active' : ''}`;
+        tab.textContent = `Bloco ${index + 1}`;
+        tab.addEventListener('click', () => {
+          showBlock(index);
+        });
+        tabsContainer.appendChild(tab);
+      });
+    }
+
+    function renderQuiz() {
+      console.log('Renderizando quiz, bloco ativo:', currentBlockIndex + 1);
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = '';
+
+      currentBlocks.forEach((block, index) => {
+        const blockDiv = document.createElement('div');
+        blockDiv.className = `question-block ${index === currentBlockIndex ? 'active' : ''}`;
+        blockDiv.id = `block-${index}`;
+
+        blockDiv.innerHTML = `
+          <div class="block-header">
+            <span class="block-title">Bloco ${index + 1}</span>
+            <div class="block-nav">
+              ${index === currentBlockIndex && !submittedBlocks[index] ? '<button class="check-block"><i class="fas fa-check-circle"></i> Conferir Respostas</button>' : ''}
+              <button class="restart-block"><i class="fas fa-redo"></i> Limpar Bloco</button>
+              ${submittedBlocks[index] ? `<button class="export-block" ${!jsPDFLoaded ? 'disabled' : ''}><i class="fas fa-file-pdf"></i> Exportar Bloco</button>` : ''}
+            </div>
+          </div>
+          <div id="block-questions-${index}"></div>
+        `;
+
+        const questionsContainer = blockDiv.querySelector(`#block-questions-${index}`);
+
+        block.forEach((q, qIndex) => {
+          const questionDiv = document.createElement('div');
+          questionDiv.className = 'question';
+
+          questionDiv.innerHTML = `
+            <div class="bncc-info">
+              <strong>${q.code}</strong><br>
+              ${q.description}
+            </div>
+            <h3>${qIndex + 1}- ${q.text}</h3>
+            <div class="options" id="q-${index}-${qIndex}"></div>
+          `;
+
+          const optionsContainer = questionDiv.querySelector(`#q-${index}-${qIndex}`);
+
+          q.options.forEach((opt, optIndex) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option';
+
+            if (showAnswers && submittedBlocks[index]) {
+              if (opt.correct) {
+                optionDiv.classList.add('correct-answer');
+              } else if (document.querySelector(`#q-${index}-${qIndex}-${optIndex}:checked`) && !opt.correct) {
+                optionDiv.classList.add('incorrect-answer');
+              }
+            }
+
+            optionDiv.innerHTML = `
+              <input type="radio" name="q-${index}-${qIndex}" id="q-${index}-${qIndex}-${optIndex}" 
+                     value="${optIndex}" ${showAnswers && submittedBlocks[index] && opt.correct ? 'checked' : ''}>
+              <label for="q-${index}-${qIndex}-${optIndex}">${opt.text}</label>
+            `;
+
+            optionsContainer.appendChild(optionDiv);
+          });
+
+          questionsContainer.appendChild(questionDiv);
+        });
+
+        const checkBtn = blockDiv.querySelector('.check-block');
+        if (checkBtn) {
+          checkBtn.disabled = !areAllQuestionsAnswered(index);
+          checkBtn.addEventListener('click', () => checkAnswers(index));
+        }
+
+        blockDiv.querySelector('.restart-block').addEventListener('click', () => {
+          restartBlock(index);
+        });
+
+        const exportBtn = blockDiv.querySelector('.export-block');
+        if (exportBtn) {
+          exportBtn.addEventListener('click', () => {
+            if (!jsPDFLoaded) {
+              showAlert('Funcionalidade de PDF desabilitada. Verifique a conexão com a internet.');
+              return;
+            }
+            showPdfModal(index, 'block');
+          });
+        }
+
+        container.appendChild(blockDiv);
+      });
+
+      updateBlockButtons();
+      renderTabs();
+    }
+
+    function areAllQuestionsAnswered(blockIndex) {
+      const block = currentBlocks[blockIndex];
+      if (!block) return false;
+      const questions = document.querySelectorAll(`#block-${blockIndex} .question`);
+      return Array.from(questions).every((q, qIndex) => 
+        document.querySelector(`input[name="q-${blockIndex}-${qIndex}"]:checked`)
+      );
+    }
+
+    function updateBlockButtons() {
+      currentBlocks.forEach((_, index) => {
+        const blockDiv = document.getElementById(`block-${index}`);
+        const checkBtn = blockDiv.querySelector('.check-block');
+        if (checkBtn) {
+          checkBtn.disabled = !areAllQuestionsAnswered(index);
+        }
+      });
+    }
+
+    function updateBlockCounter() {
+      document.getElementById('blockCounter').textContent = 
+        `Bloco ${currentBlockIndex + 1}/${numBlocks}`;
+      document.getElementById('prevBlock').disabled = currentBlockIndex === 0;
+      document.getElementById('nextBlock').disabled = currentBlockIndex === numBlocks - 1;
+      renderTabs();
+    }
+
+    function showBlock(index) {
+      if (index < 0 || index >= numBlocks) return;
+      currentBlockIndex = index;
+      document.querySelectorAll('.question-block').forEach((block, i) => {
+        block.classList.toggle('active', i === index);
+      });
+      updateBlockCounter();
+      renderQuiz();
+    }
+
+    function restartBlock(blockIndex) {
+      console.log(`Reiniciando bloco ${blockIndex + 1}`);
+      const radioButtons = document.querySelectorAll(
+        `#block-${blockIndex} input[type="radio"]`
+      );
+      radioButtons.forEach(radio => {
+        radio.checked = false;
+      });
+      submittedBlocks[blockIndex] = false;
+      blockScores[blockIndex] = 0;
+      bnccStats[blockIndex] = {};
+      showAnswers = false;
+      renderQuiz();
+      updateExportButton();
+    }
+
+    function checkAnswers(blockIndex) {
+      console.log(`Verificando respostas do bloco ${blockIndex + 1}`);
+      const block = currentBlocks[blockIndex];
+      if (!block) {
+        showAlert('Bloco inválido ou não inicializado.');
+        return;
+      }
+      const questions = document.querySelectorAll(`#block-${blockIndex} .question`);
+      let allAnswered = true;
+
+      questions.forEach((q, qIndex) => {
+        const selected = document.querySelector(
+          `input[name="q-${blockIndex}-${qIndex}"]:checked`
+        );
+        if (!selected) {
+          allAnswered = false;
+        }
+      });
+
+      if (!allAnswered) {
+        showAlert('Por favor, responda todas as questões do bloco antes de verificar!');
+        return;
+      }
+
+      showAnswers = true;
+      let correctCount = 0;
+      const blockBnccStats = {};
+
+      block.forEach((q, qIndex) => {
+        const selected = document.querySelector(
+          `input[name="q-${blockIndex}-${qIndex}"]:checked`
+        );
+        const bncc = q.code;
+        if (!blockBnccStats[bncc]) {
+          blockBnccStats[bncc] = { correct: 0, incorrect: 0 };
+        }
+        if (selected && parseInt(selected.value) === correctAnswers[blockIndex][qIndex]) {
+          correctCount++;
+          blockBnccStats[bncc].correct++;
+        } else if (selected) {
+          blockBnccStats[bncc].incorrect++;
+        }
+      });
+
+      blockScores[blockIndex] = correctCount;
+      submittedBlocks[blockIndex] = true;
+      bnccStats[blockIndex] = blockBnccStats;
+
+      const totalQuestions = quizData.length;
+      const totalCorrect = blockScores.reduce((sum, score) => sum + (score || 0), 0);
+      const percent = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(0) : 0;
+
+      const summaryText = `
+        Bloco ${blockIndex + 1}: ${correctCount}/${block.length} (${((correctCount / block.length) * 100).toFixed(0)}%)<br>
+        Total Geral: ${totalCorrect}/${totalQuestions} (${percent}%)
+      `;
+
+      let bnccSummary = '<h3>Habilidades BNCC:</h3>';
+      Object.keys(blockBnccStats).forEach(bncc => {
+        const stats = blockBnccStats[bncc];
+        const desc = quizData.find(q => q.code === bncc)?.description || 'Descrição não encontrada';
+        bnccSummary += `<p>${bncc} - ${desc}: ${stats.correct} acertos, ${stats.incorrect} erros</p>`;
+      });
+
+      document.getElementById('summaryText').innerHTML = summaryText;
+      document.getElementById('bnccSummary').innerHTML = bnccSummary;
+      document.getElementById('summaryModal').style.display = 'flex';
+      renderQuiz();
+      updateExportButton();
+      console.log(`Bloco ${blockIndex + 1} verificado: ${correctCount}/${block.length} corretas`);
+    }
+
+    function updateExportButton() {
+      const enabled = submittedBlocks.some(b => b);
+      document.getElementById('exportFullPdf').disabled = !enabled || !jsPDFLoaded;
+      console.log(`Botão Exportar Resultado ${enabled && jsPDFLoaded ? 'habilitado' : 'desabilitado'}`);
+    }
+
+    function showAlert(message) {
+      console.log('Alerta exibido:', message);
+      document.getElementById('alertMessage').textContent = message;
+      document.getElementById('alertModal').style.display = 'flex';
+    }
+
+    function showPdfModal(blockIndex, type) {
+      console.log(`Abrindo modal PDF para ${type === 'full' ? 'resultado completo' : `bloco ${blockIndex + 1}`}`);
+      if (!jsPDFLoaded) {
+        showAlert('Funcionalidade de PDF desabilitada. Verifique a conexão com a internet.');
+        return;
+      }
+      document.getElementById('pdfFilename').value = type === 'full' ? 'quiz_bncc.pdf' : `resultado_bloco${blockIndex + 1}.pdf`;
+      document.getElementById('pdfModal').dataset.type = type;
+      document.getElementById('pdfModal').dataset.block = blockIndex !== null ? blockIndex : '';
+      document.getElementById('pdfModal').style.display = 'flex';
+    }
+
+    function showLoadingPdf(show) {
+      document.getElementById('loadingPdf').style.display = show ? 'flex' : 'none';
+    }
+
+    function downloadPdf(doc, filename) {
+      console.log(`Tentando iniciar download do PDF: ${filename}`);
+      showLoadingPdf(true);
+      
+      try {
+        const blob = doc.output('blob');
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 100);
+        console.log(`PDF gerado: ${filename}`);
+        showAlert(`PDF gerado com sucesso! Verifique sua pasta de downloads (${filename}).`);
+      } catch (error) {
+        console.error(`Erro ao gerar PDF: ${error.message}`);
+        showAlert(`Erro ao gerar PDF: ${error.message}. Tente novamente ou use outro navegador.`);
+      } finally {
+        showLoadingPdf(false);
+      }
+    }
+
+    function generateBlockPdf(blockIndex, filename) {
+      console.log(`Gerando PDF para bloco ${blockIndex + 1}: ${filename}`);
+      if (!jsPDFLoaded) {
+        showAlert('Funcionalidade de PDF desabilitada. Verifique a conexão com a internet.');
+        return;
+      }
+      try {
+        if (!currentBlocks[blockIndex]) {
+          throw new Error(`Bloco ${blockIndex + 1} não encontrado.`);
+        }
+        
+        const doc = new jsPDF();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        let y = 20;
+        const pageWidth = doc.internal.pageSize.width;
+        const margin = 20;
+        const maxWidth = pageWidth - margin * 2;
+
+        y = addWrappedText(doc, `Resumo do Bloco ${blockIndex + 1}`, margin, y, maxWidth, 10);
+        y += 5;
+
+        const block = currentBlocks[blockIndex];
+        const score = blockScores[blockIndex] || 0;
+        const percent = block.length > 0 ? ((score / block.length) * 100).toFixed(0) : 0;
+        y = addWrappedText(doc, `Pontuação: ${score}/${block.length} (${percent}%)`, margin, y, maxWidth, 10);
+        y += 10;
+
+        y = addWrappedText(doc, 'Habilidades BNCC:', margin, y, maxWidth, 10);
+        y += 5;
+        
+        const bnccKeys = Object.keys(bnccStats[blockIndex] || {});
+        if (bnccKeys.length === 0) {
+          y = addWrappedText(doc, 'Nenhuma habilidade avaliada neste bloco.', margin + 5, y, maxWidth, 7);
+        } else {
+          bnccKeys.forEach(bncc => {
+            const stats = bnccStats[blockIndex][bncc];
+            const desc = quizData.find(q => q.code === bncc)?.description || 'Descrição não encontrada';
+            const text = `${bncc} - ${desc}: ${stats.correct} acertos, ${stats.incorrect} erros`;
+            y = addWrappedText(doc, text, margin + 5, y, maxWidth - 5, 7);
+          });
+        }
+
+        const safeFilename = sanitizeFilename(filename);
+        downloadPdf(doc, safeFilename);
+      } catch (error) {
+        console.error(`Erro ao gerar PDF do bloco ${blockIndex + 1}:`, error);
+        showAlert(`Erro ao gerar PDF do bloco: ${error.message}. Verifique o console.`);
+        showLoadingPdf(false);
+      }
+    }
+
+    function getConsolidatedBnccStats() {
+      console.log('Calculando resumo consolidado de habilidades BNCC');
+      const consolidated = {};
+      bnccStats.forEach((blockStats, blockIndex) => {
+        if (!blockStats) return;
+        Object.keys(blockStats).forEach(bncc => {
+          if (!consolidated[bncc]) {
+            const desc = quizData.find(q => q.code === bncc)?.description || 'Descrição não encontrada';
+            consolidated[bncc] = { correct: 0, incorrect: 0, description: desc };
+          }
+          consolidated[bncc].correct += blockStats[bncc].correct || 0;
+          consolidated[bncc].incorrect += blockStats[bncc].incorrect || 0;
+        });
+      });
+      console.log('Resumo consolidado:', consolidated);
+      return consolidated;
+    }
+
+    function generateFullPdf(filename) {
+      console.log(`Iniciando geração do PDF completo: ${filename}`);
+      if (!jsPDFLoaded) {
+        showAlert('Funcionalidade de PDF desabilitada. Verifique a conexão com a internet.');
+        return;
+      }
+      showLoadingPdf(true);
+      
+      try {
+        if (!quizData || !Array.isArray(quizData) || quizData.length === 0) {
+          throw new Error('Nenhuma questão carregada (quizData inválido).');
+        }
+        if (!currentBlocks || !Array.isArray(currentBlocks) || currentBlocks.length === 0) {
+          throw new Error('Blocos do quiz não inicializados (currentBlocks inválido).');
+        }
+        if (!bnccStats || !Array.isArray(bnccStats) || bnccStats.length === 0) {
+          throw new Error('Estatísticas BNCC não inicializadas (bnccStats inválido).');
+        }
+        if (!submittedBlocks.some(b => b)) {
+          throw new Error('Nenhum bloco foi completado.');
+        }
+
+        const doc = new jsPDF();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        let y = 20;
+        const pageWidth = doc.internal.pageSize.width;
+        const margin = 20;
+        const maxWidth = pageWidth - margin * 2;
+
+        y = addWrappedText(doc, 'Resumo do Quiz BNCC Interdisciplinar', margin, y, maxWidth, 10);
+        y += 5;
+
+        const totalQuestions = quizData.length;
+        const totalCorrect = blockScores.reduce((sum, score) => sum + (score || 0), 0);
+        const percent = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(0) : 0;
+        y = addWrappedText(doc, `Total Geral: ${totalCorrect}/${totalQuestions} (${percent}%)`, margin, y, maxWidth, 10);
+        y += 10;
+
+        y = addWrappedText(doc, 'Resumo por Bloco:', margin, y, maxWidth, 10);
+        y += 5;
+        
+        currentBlocks.forEach((block, blockIndex) => {
+          y = addWrappedText(doc, `Bloco ${blockIndex + 1}`, margin + 5, y, maxWidth, 7);
+          
+          const score = blockScores[blockIndex] || 0;
+          const blockPercent = block.length > 0 ? ((score / block.length) * 100).toFixed(0) : 0;
+          y = addWrappedText(doc, `Pontuação: ${score}/${block.length} (${blockPercent}%)`, margin + 10, y, maxWidth, 7);
+          
+          const bnccKeys = Object.keys(bnccStats[blockIndex] || {});
+          if (bnccKeys.length > 0) {
+            y = addWrappedText(doc, 'Habilidades BNCC:', margin + 10, y, maxWidth, 7);
+            bnccKeys.forEach(bncc => {
+              const stats = bnccStats[blockIndex][bncc];
+              const desc = quizData.find(q => q.code === bncc)?.description || 'Descrição não encontrada';
+              const text = `${bncc} - ${desc}: ${stats.correct} acertos, ${stats.incorrect} erros`;
+              y = addWrappedText(doc, text, margin + 15, y, maxWidth - 15, 7);
+            });
+          } else {
+            y = addWrappedText(doc, 'Não completado', margin + 10, y, maxWidth, 7);
+          }
+          y += 5;
+        });
+
+        y += 10;
+        y = addWrappedText(doc, 'Resumo Consolidado de Habilidades BNCC:', margin, y, maxWidth, 10);
+        y += 5;
+        
+        const consolidatedBncc = getConsolidatedBnccStats();
+        const bnccKeys = Object.keys(consolidatedBncc);
+        if (bnccKeys.length === 0) {
+          y = addWrappedText(doc, 'Nenhuma habilidade avaliada.', margin + 5, y, maxWidth, 7);
+        } else {
+          bnccKeys.forEach(bncc => {
+            const stats = consolidatedBncc[bncc];
+            const text = `${bncc} - ${stats.description}: ${stats.correct} acertos, ${stats.incorrect} erros`;
+            y = addWrappedText(doc, text, margin + 5, y, maxWidth - 5, 7);
+          });
+        }
+
+        const safeFilename = sanitizeFilename(filename);
+        downloadPdf(doc, safeFilename);
+      } catch (error) {
+        console.error('Erro ao gerar PDF completo:', error);
+        showAlert(`Erro ao gerar PDF completo: ${error.message}. Verifique o console.`);
+        showLoadingPdf(false);
+      }
+    }
+
+    document.getElementById('restartQuizBtn').addEventListener('click', () => {
+      console.log('Reiniciando quiz');
+      startQuiz();
+    });
+    document.getElementById('prevBlock').addEventListener('click', () => {
+      showBlock(currentBlockIndex - 1);
+    });
+    document.getElementById('nextBlock').addEventListener('click', () => {
+      showBlock(currentBlockIndex + 1);
+    });
+    document.getElementById('exportFullPdf').addEventListener('click', () => {
+      console.log('Botão Exportar Resultado clicado');
+      if (!jsPDFLoaded) {
+        showAlert('Funcionalidade de PDF desabilitada. Verifique a conexão com a internet.');
+        return;
+      }
+      if (!submittedBlocks.some(b => b)) {
+        showAlert('Por favor, complete pelo menos um bloco antes de exportar!');
+        return;
+      }
+      showPdfModal(null, 'full');
+    });
+    document.getElementById('generateBlockPdf').addEventListener('click', () => {
+      showPdfModal(currentBlockIndex, 'block');
+      document.getElementById('summaryModal').style.display = 'none';
+    });
+    document.getElementById('closeSummary').addEventListener('click', () => {
+      document.getElementById('summaryModal').style.display = 'none';
+    });
+    document.getElementById('confirmPdf').addEventListener('click', () => {
+      const filename = document.getElementById('pdfFilename').value;
+      const type = document.getElementById('pdfModal').dataset.type;
+      const blockIndex = parseInt(document.getElementById('pdfModal').dataset.block);
+      console.log(`Confirmando geração de PDF: tipo=${type}, bloco=${blockIndex}, nome=${filename}`);
+      if (type === 'full') {
+        generateFullPdf(filename);
+      } else {
+        generateBlockPdf(blockIndex, filename);
+      }
+      document.getElementById('pdfModal').style.display = 'none';
+    });
+    document.getElementById('cancelPdf').addEventListener('click', () => {
+      document.getElementById('pdfModal').style.display = 'none';
+    });
+    document.getElementById('closeAlert').addEventListener('click', () => {
+      document.getElementById('alertModal').style.display = 'none';
+    });
+
+    document.getElementById('quizContainer').addEventListener('change', () => {
+      updateBlockButtons();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadQuiz();
+    });
+  </script>
+</body>
+</html>
