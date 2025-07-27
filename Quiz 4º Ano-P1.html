@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
+    /* Estilos Gerais */
     * {
       margin: 0;
       padding: 0;
@@ -32,6 +33,7 @@
       font-weight: 700;
     }
 
+    /* Controles Superiores */
     .controls {
       display: flex;
       justify-content: center;
@@ -69,6 +71,7 @@
       box-shadow: none;
     }
 
+    /* Input de Arquivo */
     #fileInputContainer {
       display: flex;
       justify-content: center;
@@ -101,6 +104,7 @@
       display: none; /* Escondido, mas acionado pelo label */
     }
 
+    /* Barra de Progresso/Status */
     #progress {
       text-align: center;
       margin: 20px auto;
@@ -114,6 +118,7 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
+    /* Abas de Blocos */
     #blockTabs {
       display: flex;
       justify-content: center;
@@ -146,6 +151,7 @@
       transform: scale(1.05);
     }
 
+    /* Contêiner do Quiz */
     #quizContainer {
       max-width: 1000px;
       margin: 0 auto;
@@ -170,6 +176,8 @@
       margin-bottom: 25px;
       padding-bottom: 15px;
       border-bottom: 3px solid #ffca28;
+      flex-wrap: wrap; /* Para responsividade */
+      gap: 10px; /* Espaçamento entre itens no header */
     }
 
     .block-title {
@@ -181,8 +189,10 @@
     .block-nav {
       display: flex;
       gap: 15px;
+      flex-wrap: wrap; /* Para responsividade */
     }
 
+    /* Questão Individual */
     .question {
       margin-bottom: 35px;
       background: #e6f3fa;
@@ -230,12 +240,20 @@
       font-weight: 400;
     }
 
+    /* Estilo para opção marcada corretamente (apenas para o círculo do radio, não para o fundo) */
     .option input[type="radio"]:checked + label {
-      background: #4caf50;
+      background: #4caf50; /* Cor de fundo para a opção marcada */
       color: white;
       border-color: #43a047;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
       transform: scale(1.02);
+    }
+
+    /* Estilo para opções desabilitadas */
+    .option input[type="radio"]:disabled + label {
+        cursor: not-allowed;
+        opacity: 0.7;
+        background-color: #f0f0f0; /* Cor de fundo para desabilitado */
     }
 
     .option label:hover {
@@ -244,18 +262,14 @@
       transform: scale(1.02);
     }
 
-    .correct-answer {
-      background: #c8e6c9 !important;
-      border-color: #4caf50 !important;
-      color: #2e7d32 !important;
+    /* Estilo para respostas incorretas (aplicado diretamente ao label) */
+    .option label.incorrect-answer {
+      background: #ffcdd2 !important; /* Fundo vermelho claro */
+      border-color: #e57373 !important; /* Borda vermelha */
+      color: #c62828 !important; /* Texto vermelho escuro */
     }
 
-    .incorrect-answer {
-      background: #ffcdd2 !important;
-      border-color: #e57373 !important;
-      color: #c62828 !important;
-    }
-
+    /* Navegação entre Blocos */
     .navigation {
       display: flex;
       justify-content: center;
@@ -276,6 +290,7 @@
       font-size: 1.2em;
     }
 
+    /* Modais (Pop-ups) */
     .modal {
       display: none;
       position: fixed;
@@ -322,6 +337,7 @@
       margin: 15px 10px;
     }
 
+    /* Telas de Carregamento */
     #loadingQuiz, #loadingPdf {
       display: none;
       position: fixed;
@@ -349,6 +365,7 @@
       margin-bottom: 25px;
     }
 
+    /* Animações */
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -548,9 +565,8 @@
     let originalQuizData = [];
     let currentBlocks = [];
     let correctAnswers = [];
-    let showAnswers = false;
     let currentBlockIndex = 0;
-    let submittedBlocks = [];
+    let submittedBlocks = []; // Mantém o estado de submissão do bloco
     let blockScores = [];
     let bnccStats = [];
     let numBlocks = 3;
@@ -672,7 +688,8 @@
             code: code.trim(),
             description: desc.join(' - ').trim(),
             text: '',
-            options: []
+            options: [],
+            userSelectedOptionIndex: undefined // Adiciona propriedade para armazenar a resposta do usuário
           };
           options = [];
           readingQuestion = false;
@@ -684,7 +701,8 @@
         } else if (readingQuestion && options.length < 4 && line) {
           options.push({
             text: line.replace('(resposta)', '').trim(),
-            correct: line.includes('(resposta)')
+            correct: line.includes('(resposta)'),
+            wasIncorrectlySelected: false // Adiciona propriedade para marcar se foi incorreta
           });
         }
       }
@@ -714,25 +732,27 @@
         return;
       }
 
-      quizData = JSON.parse(JSON.stringify(originalQuizData));
+      // Reinicia quizData a partir de originalQuizData para garantir um estado limpo
+      quizData = JSON.parse(JSON.stringify(originalQuizData)); 
       const blockSize = Math.ceil(quizData.length / numBlocks);
       currentBlocks = [];
       for (let i = 0; i < numBlocks; i++) {
         const start = i * blockSize;
         const end = Math.min(start + blockSize, quizData.length);
         if (start < quizData.length) {
+          // Shuffle as questões dentro de cada bloco
           currentBlocks.push(shuffleArray([...quizData.slice(start, end)]));
           console.log(`Bloco ${i + 1}: ${currentBlocks[i].length} questões`);
         }
       }
 
+      // correctAnswers ainda é útil para a lógica de pontuação, mas não para a exibição direta
       correctAnswers = currentBlocks.map(block => 
         block.map(q => q.options.findIndex(opt => opt.correct))
       );
 
-      showAnswers = false;
       currentBlockIndex = 0;
-      submittedBlocks = Array(numBlocks).fill(false);
+      submittedBlocks = Array(numBlocks).fill(false); // Reinicia o estado de submissão de cada bloco
       blockScores = Array(numBlocks).fill(0);
       bnccStats = Array(numBlocks).fill().map(() => ({}));
       renderQuiz();
@@ -770,11 +790,12 @@
         blockDiv.className = `question-block ${index === currentBlockIndex ? 'active' : ''}`;
         blockDiv.id = `block-${index}`;
 
+        // Botão "Conferir Respostas" só aparece se o bloco não foi submetido
         blockDiv.innerHTML = `
           <div class="block-header">
             <span class="block-title">Bloco ${index + 1}</span>
             <div class="block-nav">
-              ${index === currentBlockIndex && !submittedBlocks[index] ? '<button class="check-block"><i class="fas fa-check-circle"></i> Conferir Respostas</button>' : ''}
+              ${!submittedBlocks[index] ? '<button class="check-block"><i class="fas fa-check-circle"></i> Conferir Respostas</button>' : ''}
               <button class="restart-block"><i class="fas fa-redo"></i> Limpar Bloco</button>
               ${submittedBlocks[index] ? `<button class="export-block" ${!jsPDFLoaded ? 'disabled' : ''}><i class="fas fa-file-pdf"></i> Exportar Bloco</button>` : ''}
             </div>
@@ -803,19 +824,29 @@
             const optionDiv = document.createElement('div');
             optionDiv.className = 'option';
 
-            if (showAnswers && submittedBlocks[index]) {
-              if (opt.correct) {
-                optionDiv.classList.add('correct-answer');
-              } else if (document.querySelector(`#q-${index}-${qIndex}-${optIndex}:checked`) && !opt.correct) {
+            // Determina se esta opção foi selecionada pelo usuário
+            const isSelectedByUser = (q.userSelectedOptionIndex === optIndex);
+
+            // Aplica a classe 'incorrect-answer' se o bloco foi submetido E esta opção foi
+            // selecionada pelo usuário E ela é incorreta.
+            if (submittedBlocks[index] && isSelectedByUser && !opt.correct) {
                 optionDiv.classList.add('incorrect-answer');
-              }
             }
 
             optionDiv.innerHTML = `
               <input type="radio" name="q-${index}-${qIndex}" id="q-${index}-${qIndex}-${optIndex}" 
-                     value="${optIndex}" ${showAnswers && submittedBlocks[index] && opt.correct ? 'checked' : ''}>
+                     value="${optIndex}" 
+                     ${submittedBlocks[index] ? 'disabled' : ''} 
+                     ${isSelectedByUser ? 'checked' : ''}>
               <label for="q-${index}-${qIndex}-${optIndex}">${opt.text}</label>
             `;
+            
+            // Adiciona a classe de incorreta diretamente ao label se a opção foi marcada incorretamente
+            const labelElement = optionDiv.querySelector('label');
+            if (submittedBlocks[index] && isSelectedByUser && !opt.correct) {
+                labelElement.classList.add('incorrect-answer');
+            }
+
 
             optionsContainer.appendChild(optionDiv);
           });
@@ -865,7 +896,8 @@
         const blockDiv = document.getElementById(`block-${index}`);
         const checkBtn = blockDiv.querySelector('.check-block');
         if (checkBtn) {
-          checkBtn.disabled = !areAllQuestionsAnswered(index);
+          // O botão de conferir só é habilitado se todas as questões forem respondidas E o bloco não foi submetido
+          checkBtn.disabled = !areAllQuestionsAnswered(index) || submittedBlocks[index];
         }
       });
     }
@@ -885,22 +917,24 @@
         block.classList.toggle('active', i === index);
       });
       updateBlockCounter();
-      renderQuiz();
+      renderQuiz(); // Renderiza o quiz novamente para aplicar os estados corretos (desabilitado/marcado)
     }
 
     function restartBlock(blockIndex) {
       console.log(`Reiniciando bloco ${blockIndex + 1}`);
-      const radioButtons = document.querySelectorAll(
-        `#block-${blockIndex} input[type="radio"]`
-      );
-      radioButtons.forEach(radio => {
-        radio.checked = false;
+      const block = currentBlocks[blockIndex]; // Obtém os dados do bloco
+
+      block.forEach(questionData => {
+        questionData.userSelectedOptionIndex = undefined; // Limpa a seleção do usuário
+        questionData.options.forEach(opt => {
+          opt.wasIncorrectlySelected = false; // Limpa a flag de incorreta
+        });
       });
+
       submittedBlocks[blockIndex] = false;
       blockScores[blockIndex] = 0;
       bnccStats[blockIndex] = {};
-      showAnswers = false;
-      renderQuiz();
+      renderQuiz(); // Re-renderiza o bloco para garantir que os botões de conferir apareçam
       updateExportButton();
     }
 
@@ -911,15 +945,40 @@
         showAlert('Bloco inválido ou não inicializado.');
         return;
       }
-      const questions = document.querySelectorAll(`#block-${blockIndex} .question`);
+      
       let allAnswered = true;
+      let correctCount = 0;
+      const blockBnccStats = {};
 
-      questions.forEach((q, qIndex) => {
-        const selected = document.querySelector(
+      block.forEach((questionData, qIndex) => { // Itera sobre os dados da questão
+        const selectedInput = document.querySelector(
           `input[name="q-${blockIndex}-${qIndex}"]:checked`
         );
-        if (!selected) {
+
+        if (!selectedInput) {
           allAnswered = false;
+          return; // Pula esta questão se não foi respondida
+        }
+
+        const selectedOptionIndex = parseInt(selectedInput.value);
+        
+        // Armazena o índice da opção selecionada pelo usuário nos dados da questão
+        questionData.userSelectedOptionIndex = selectedOptionIndex;
+
+        const bncc = questionData.code;
+        if (!blockBnccStats[bncc]) {
+          blockBnccStats[bncc] = { correct: 0, incorrect: 0 };
+        }
+
+        const isCorrect = questionData.options[selectedOptionIndex].correct;
+
+        if (isCorrect) {
+            correctCount++;
+            blockBnccStats[bncc].correct++;
+        } else {
+            // Marca a opção específica como incorretamente selecionada nos dados
+            questionData.options[selectedOptionIndex].wasIncorrectlySelected = true;
+            blockBnccStats[bncc].incorrect++;
         }
       });
 
@@ -928,28 +987,8 @@
         return;
       }
 
-      showAnswers = true;
-      let correctCount = 0;
-      const blockBnccStats = {};
-
-      block.forEach((q, qIndex) => {
-        const selected = document.querySelector(
-          `input[name="q-${blockIndex}-${qIndex}"]:checked`
-        );
-        const bncc = q.code;
-        if (!blockBnccStats[bncc]) {
-          blockBnccStats[bncc] = { correct: 0, incorrect: 0 };
-        }
-        if (selected && parseInt(selected.value) === correctAnswers[blockIndex][qIndex]) {
-          correctCount++;
-          blockBnccStats[bncc].correct++;
-        } else if (selected) {
-          blockBnccStats[bncc].incorrect++;
-        }
-      });
-
       blockScores[blockIndex] = correctCount;
-      submittedBlocks[blockIndex] = true;
+      submittedBlocks[blockIndex] = true; // Marca o bloco como submetido
       bnccStats[blockIndex] = blockBnccStats;
 
       const totalQuestions = quizData.length;
@@ -957,8 +996,8 @@
       const percent = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(0) : 0;
 
       const summaryText = `
-        Bloco ${blockIndex + 1}: ${correctCount}/${block.length} (${((correctCount / block.length) * 100).toFixed(0)}%)<br>
-        Total Geral: ${totalCorrect}/${totalQuestions} (${percent}%)
+        Bloco ${blockIndex + 1}: ${correctCount}/${block.length} acertos (${((correctCount / block.length) * 100).toFixed(0)}%)<br>
+        Total Geral: ${totalCorrect}/${totalQuestions} acertos (${percent}%)
       `;
 
       let bnccSummary = '<h3>Habilidades BNCC:</h3>';
@@ -971,13 +1010,13 @@
       document.getElementById('summaryText').innerHTML = summaryText;
       document.getElementById('bnccSummary').innerHTML = bnccSummary;
       document.getElementById('summaryModal').style.display = 'flex';
-      renderQuiz();
+      renderQuiz(); // Re-renderiza para atualizar o estado visual dos botões e opções
       updateExportButton();
       console.log(`Bloco ${blockIndex + 1} verificado: ${correctCount}/${block.length} corretas`);
     }
 
     function updateExportButton() {
-      const enabled = submittedBlocks.some(b => b);
+      const enabled = submittedBlocks.some(b => b); // Habilita se pelo menos um bloco foi submetido
       document.getElementById('exportFullPdf').disabled = !enabled || !jsPDFLoaded;
       console.log(`Botão Exportar Resultado ${enabled && jsPDFLoaded ? 'habilitado' : 'desabilitado'}`);
     }
@@ -1189,6 +1228,7 @@
       }
     }
 
+    // Listeners de Eventos
     document.getElementById('restartQuizBtn').addEventListener('click', () => {
       console.log('Reiniciando quiz');
       startQuiz();
@@ -1237,10 +1277,12 @@
       document.getElementById('alertModal').style.display = 'none';
     });
 
+    // Event listener para o contêiner do quiz para detectar mudanças e atualizar botões
     document.getElementById('quizContainer').addEventListener('change', () => {
       updateBlockButtons();
     });
 
+    // Carrega o quiz ao carregar a janela
     window.addEventListener('DOMContentLoaded', () => {
       loadQuiz();
     });
