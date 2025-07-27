@@ -1,0 +1,162 @@
+BLOCKS: 2
+Quiz de Matemática 4º ano
+3.
+EF04MA04 - Resolver problemas de multiplicação
+1-No mural de uma escola, uma professora colou os trabalhos dos alunos formando 3 fileiras com 8 trabalhos em cada fileira. Quantos trabalhos a professora colou, ao todo, nesse mural?
+#
+11
+21
+24 (resposta)
+38
+
+EF04MA01 - Ler, escrever e identificar valor posicional de números naturais
+2-Observe o número "365". Qual é o valor posicional do algarismo 6 nesse número?
+#
+6
+60 (resposta)
+365
+600
+
+EF04MA03 - Resolver problemas de adição e subtração
+3-Um clube de atletismo possui 238 medalhas. Durante um ano de competições, os atletas conquistaram mais 112 medalhas para o clube. Com quantas medalhas o clube ficou no total?
+#
+126
+238
+340
+350 (resposta)
+
+EF04MA01 - Ler, escrever e identificar valor posicional de números naturais - Ler, escrever e identificar valor posicional de números naturais
+4-Observe a escrita por extenso de um número. "Trezentos e sessenta e cinco". Qual é esse número?
+#
+365 (resposta)
+375
+563
+30065
+
+EF04MA04 - Resolver problemas de multiplicação
+5-Amanda distribuiu 3 lembrancinhas para cada um dos 50 convidados de sua festa de aniversário. Quantas lembrancinhas Amanda distribuiu ao todo entre seus convidados?
+#
+50
+53
+150 (resposta)
+153
+
+EF04MA12 - Reconhecer e compor valores monetários e números por extenso
+6-Joana foi a uma loja de brinquedos e gastou noventa e quatro reais. Quantos reais Joana gastou nessa loja?
+#
+R$ 4,00
+R$ 90,00
+R$ 94,00 (resposta)
+R$ 904,00
+
+EF04MA20 - Converter unidades de medida (comprimento)
+7-A cama de Rafael tem 2 m de comprimento. Qual é o comprimento, em centímetros, da cama de Rafael?
+#
+2
+200 (resposta)
+20
+2000
+
+EF04MA05 - Resolver problemas de divisão
+8-Ronaldo distribuiu 18 moedas igualmente em dois potes. Quantas moedas ele colocou em cada pote?
+#
+2
+6
+9 (resposta)
+18
+
+EF04MA04 - Resolver problemas de multiplicação
+9-Um hotel tem 5 quartos, com 3 camas em cada quarto. Quantas camas tem, no total, nesse hotel?
+#
+8
+10
+15 (resposta)
+20
+
+EF04MA03 - Resolver problemas de adição e subtração
+10-Marcos percorreu 15 quilômetros de uma corrida cujo trajeto total é de 45 quilômetros. Quantos quilômetros ele ainda precisaria percorrer para completar essa corrida?
+#
+15
+30 (resposta)
+31
+45
+
+EF04MA10 - Ordenar números e completar sequências numéricas
+11-Observe os números escritos a seguir: 7, 49, 90, 35, 16, 28. Qual é a ordem crescente desses números?
+#
+90 – 49 – 35 – 28 – 16 – 7
+90 – 35 – 16 – 7 – 28 – 49
+7 – 16 – 28 – 35 – 49 – 90 (resposta)
+7 – 49 – 90 – 35 – 16 – 28
+
+EF04MA22 -Calcular intervalos de tempo e conversões (horas, dias, semanas)
+12-Jorge treinou durante 1 ano para um campeonato. Durante quantos meses Jorge treinou para esse campeonato?
+#
+1
+6
+10
+12 (resposta)
+
+EF04MA12 - Reconhecer e compor valores monetários e números por extenso
+13-Laura comprou um vestido que custou R$ 98,00. Quantos reais custou esse vestido de Laura?
+#
+Noventa
+Noventa e oito (resposta)
+Oitenta
+Oitenta e nove
+
+EF04MA12 - Reconhecer e compor valores monetários e números por extenso
+14-Carlos trocou as seguintes moedas por notas de mesmo valor: 6 moedas de R$ 1,00; 6 moedas de R$ 0,50; 3 moedas de R$ 0,25 2 moedas de R$ 0,10 e 1 moeda de R$ 0,05. Quais notas Carlos recebeu nessa troca?
+#
+R$ 5,00 + R$ 2,00
+R$ 5,00 + R$ 2,00 + R$ 2,00
+R$ 5,00 + R$ 5,00 (resposta)
+R$ 10,00 + R$ 2,00
+
+EF04MA22 -Calcular intervalos de tempo e conversões (horas, dias, semanas)
+15-A Escola Thereza Gabriel Zoccal começa suas aulas do 2º turno todos os dias às 13h e termina às 17h. Quantos minutos os alunos ficam na escola?
+#
+400
+240 (resposta)
+40
+30
+
+EF04MA10 - Ordenar números e completar sequências numéricas
+16-Observe a sequência numérica a seguir: 22,[],26,28,30,[],34. Quais números estão faltando?
+#
+21 e 31
+23 e 33
+24 e 32 (resposta)
+25 e 35
+
+EF04MA03 - Resolver problemas de adição e subtração
+17-Pedro tinha 127 bolinhas de gude e perdeu 29. A quantidade de bolinhas que Pedro ficou é:
+#
+88
+98 (resposta)
+108
+156
+
+EF04MA04 - Resolver problemas de multiplicação
+18-Em uma garagem, estão estacionados carros em 3 fileiras. Em cada fileira, há 8 carros. Quantos carros há nessa garagem?
+#
+12
+16
+24 (resposta)
+32
+
+EF04MA05 - Resolver problemas de divisão
+19-Tenho 36 lápis e vou dividi-los para 4 crianças, sendo que cada uma delas receberão a mesma quantidade. Quantos lápis cada criança receberá?
+#
+6
+8
+9 (resposta)
+12
+
+EF04MA03 - Resolver problemas de adição e subtração
+20-Num jogo de basquete a equipe de Vitória fez 78 pontos, a equipe de Rayane fez 56. Quantos pontos a equipe de Rayane fez a menos que a de Vitória?
+#
+32
+23
+22 (resposta)
+19
