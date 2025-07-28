@@ -1,0 +1,31 @@
+{
+    "animais": {
+        "keywords": ["animal", "mamífero", "inseto", "ave", "réptil", "peixe", "anfíbio"],
+        "words": [
+            { "word": "GIRAFA", "hint": "Animal com um pescoço muito longo." },
+            { "word": "ELEFANTE", "hint": "O maior animal terrestre, com uma tromba." },
+            { "word": "TARTARUGA", "hint": "Leva sua casa nas costas." },
+            { "word": "LEAO", "hint": "Conhecido como o 'Rei da Selva'." },
+            { "word": "TIGRE", "hint": "Um grande felino listrado da Ásia." },
+            { "word": "GOLFINHO", "hint": "Um mamífero muito inteligente que vive no mar." }
+        ]
+    },
+    "frutas": {
+        "keywords": ["fruta", "fruto", "comestível", "doce", "semente", "árvore"],
+        "words": [
+            { "word": "BANANA", "hint": "Amarela, comprida e favorita dos macacos." },
+            { "word": "MORANGO", "hint": "Pequena, vermelha e com sementes do lado de fora." },
+            { "word": "ABACAXI", "hint": "Tem uma coroa e sua casca é espinhosa." },
+            { "word": "MELANCIA", "hint": "Grande, verde por fora e vermelha por dentro." }
+        ]
+    },
+    "objetos": {
+        "keywords": ["objeto", "utensílio", "ferramenta", "instrumento", "artefato", "coisa"],
+        "words": [
+            { "word": "CADEIRA", "hint": "Usado para sentar, geralmente tem quatro pernas." },
+            { "word": "TESOURA", "hint": "Serve para cortar papel, tecido e outras coisas." },
+            { "word": "COMPUTADOR", "hint": "Máquina usada para trabalhar, estudar e jogar." },
+            { "word": "TELEFONE", "hint": "Usamos para conversar com pessoas que estão longe." }
+        ]
+    }
+}
