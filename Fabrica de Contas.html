@@ -21,8 +21,30 @@
             display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px;
         }
 
-        .screen { display: none; width: 100%; max-width: 500px; padding: 30px; background-color: var(--panel-bg); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
-        .screen.active { display: block; }
+        /* CSS CORRIGIDO */
+        .screen { 
+            display: none; /* ESTA É A CORREÇÃO CRÍTICA */
+            width: 100%; max-width: 500px; 
+            background-color: var(--panel-bg); border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative;
+            flex-direction: column;
+            max-height: 95vh;
+        }
+        .screen.active { 
+            display: flex; /* APENAS A TELA ATIVA É MOSTRADA */
+        }
+        
+        .screen-header {
+            padding: 30px 30px 0 30px;
+            flex-shrink: 0;
+        }
+
+        .screen-content {
+            padding: 0 30px 30px 30px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
         h1 { color: var(--primary-color); margin-bottom: 10px; }
         h2 { color: var(--secondary-color); margin-top: 0; font-weight: 400; }
 
@@ -37,21 +59,17 @@
         .level-btn.level-4 { background-color: var(--danger-color); }
         .level-btn.level-5 { background-color: #6f42c1; }
 
-        /* CSS ALTERADO E MELHORADO */
         #game-info { display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; margin-bottom: 20px; flex-wrap: wrap; }
-        #game-stats { display: flex; align-items: center; gap: 20px; } /* NOVO - Contêiner para as estatísticas */
-        #placar { display: flex; gap: 20px; }
+        #game-stats { display: flex; align-items: center; gap: 15px; }
+        #placar { display: flex; gap: 15px; }
         #score-display, #error-display, #question-counter { font-weight: 700; }
         #score-display { color: var(--primary-color); }
         #error-display { color: var(--danger-color); }
         #question-counter { color: var(--secondary-color); }
 
-        #back-to-menu-btn {
-            background: none; border: none; font-size: 1.1em; color: var(--secondary-color);
-            cursor: pointer; font-weight: 600; padding: 5px;
-        }
+        #back-to-menu-btn { background: none; border: none; font-size: 1.1em; color: var(--secondary-color); cursor: pointer; font-weight: 600; padding: 5px; }
 
-        #problem-display { font-size: 3em; font-weight: 700; margin-bottom: 25px; height: 70px; display: flex; align-items: center; justify-content: center;}
+        #problem-display { font-size: 3em; font-weight: 700; margin: 20px 0 25px 0; min-height: 70px; display: flex; align-items: center; justify-content: center;}
 
         #answer-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .option-btn { font-size: 1.8em; padding: 20px; margin: 0; background-color: var(--secondary-color); }
@@ -70,41 +88,42 @@
         .action-btn { background-color: var(--primary-color); }
         .secondary-action-btn { background-color: var(--secondary-color); }
 
-        #pause-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; padding: 20px;
-        }
+        #pause-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.9); border-radius: 15px; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; padding: 20px; }
     </style>
 </head>
 <body>
 
     <div id="level-selection-screen" class="screen active">
-        <h1>Fábrica de Contas</h1>
-        <h2>Selecione o seu nível para começar!</h2>
-        <button class="btn level-btn level-1" data-level="1">1º Ano</button>
-        <button class="btn level-btn level-2" data-level="2">2º Ano</button>
-        <button class="btn level-btn level-3" data-level="3">3º Ano</button>
-        <button class="btn level-btn level-4" data-level="4">4º Ano</button>
-        <button class="btn level-btn level-5" data-level="5">5º Ano</button>
+        <div class="screen-header">
+            <h1>Fábrica de Contas</h1>
+            <h2>Selecione o seu nível para começar!</h2>
+        </div>
+        <div class="screen-content">
+            <button class="btn level-btn level-1" data-level="1">1º Ano</button>
+            <button class="btn level-btn level-2" data-level="2">2º Ano</button>
+            <button class="btn level-btn level-3" data-level="3">3º Ano</button>
+            <button class="btn level-btn level-4" data-level="4">4º Ano</button>
+            <button class="btn level-btn level-5" data-level="5">5º Ano</button>
+        </div>
     </div>
 
     <div id="game-screen" class="screen">
-        <!-- HTML ALTERADO E MELHORADO -->
-        <div id="game-info">
-            <button id="back-to-menu-btn">← Sair</button>
-            <div id="game-stats">
-                <div id="placar">
-                    <div id="score-display">Acertos: 0</div>
-                    <div id="error-display">Erros: 0</div>
+        <div class="screen-header">
+            <div id="game-info">
+                <button id="back-to-menu-btn">← Sair</button>
+                <div id="game-stats">
+                    <div id="placar">
+                        <div id="score-display">Acertos: 0</div>
+                        <div id="error-display">Erros: 0</div>
+                    </div>
+                    <div id="question-counter">Questão: 1/40</div>
                 </div>
-                <div id="question-counter">Questão: 1/40</div>
             </div>
         </div>
-        <div id="problem-display"></div>
-        <div id="answer-options"></div>
+        <div class="screen-content">
+            <div id="problem-display"></div>
+            <div id="answer-options"></div>
+        </div>
         <div id="pause-overlay">
             <h2>Jogo Pausado</h2>
             <p>O jogo pausa quando o mouse sai da tela.</p>
@@ -113,17 +132,21 @@
     </div>
 
     <div id="end-screen" class="screen">
-        <h1 id="end-title">Fim da Rodada!</h1>
-        <ul id="end-summary"></ul>
-        <div id="end-percentage"></div>
-        <p id="end-message"></p>
-        <button class="btn action-btn" id="play-again-btn">Tentar Novamente</button>
-        <button class="btn secondary-action-btn" id="choose-level-btn">Escolher Outro Nível</button>
+        <div class="screen-header">
+            <h1 id="end-title">Fim da Rodada!</h1>
+        </div>
+        <div class="screen-content">
+            <ul id="end-summary"></ul>
+            <div id="end-percentage"></div>
+            <p id="end-message"></p>
+            <button class="btn action-btn" id="play-again-btn">Tentar Novamente</button>
+            <button class="btn secondary-action-btn" id="choose-level-btn">Escolher Outro Nível</button>
+        </div>
     </div>
 
     <script>
-    // O JavaScript não precisa de nenhuma alteração para esta correção visual.
-    // O código da interação anterior continua 100% funcional e correto.
+    // O JavaScript da interação anterior está correto e não precisa de alterações.
+    // A correção foi 100% no CSS.
     document.addEventListener('DOMContentLoaded', () => {
         const screens = { levelSelection: document.getElementById('level-selection-screen'), game: document.getElementById('game-screen'), end: document.getElementById('end-screen') };
         const levelButtons = document.querySelectorAll('.level-btn');
