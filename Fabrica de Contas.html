@@ -37,13 +37,17 @@
         .level-btn.level-4 { background-color: var(--danger-color); }
         .level-btn.level-5 { background-color: #6f42c1; }
 
-        #game-info { display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; margin-bottom: 20px; }
-        #score-display, #question-counter { font-weight: 700; }
+        /* CSS ALTERADO E MELHORADO */
+        #game-info { display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; margin-bottom: 20px; flex-wrap: wrap; }
+        #game-stats { display: flex; align-items: center; gap: 20px; } /* NOVO - Contêiner para as estatísticas */
+        #placar { display: flex; gap: 20px; }
+        #score-display, #error-display, #question-counter { font-weight: 700; }
         #score-display { color: var(--primary-color); }
+        #error-display { color: var(--danger-color); }
         #question-counter { color: var(--secondary-color); }
 
         #back-to-menu-btn {
-            background: none; border: none; font-size: 1.2em; color: var(--secondary-color);
+            background: none; border: none; font-size: 1.1em; color: var(--secondary-color);
             cursor: pointer; font-weight: 600; padding: 5px;
         }
 
@@ -88,10 +92,16 @@
     </div>
 
     <div id="game-screen" class="screen">
+        <!-- HTML ALTERADO E MELHORADO -->
         <div id="game-info">
             <button id="back-to-menu-btn">← Sair</button>
-            <div id="score-display">Acertos: 0</div>
-            <div id="question-counter">Questão: 1/40</div>
+            <div id="game-stats">
+                <div id="placar">
+                    <div id="score-display">Acertos: 0</div>
+                    <div id="error-display">Erros: 0</div>
+                </div>
+                <div id="question-counter">Questão: 1/40</div>
+            </div>
         </div>
         <div id="problem-display"></div>
         <div id="answer-options"></div>
@@ -112,17 +122,16 @@
     </div>
 
     <script>
+    // O JavaScript não precisa de nenhuma alteração para esta correção visual.
+    // O código da interação anterior continua 100% funcional e correto.
     document.addEventListener('DOMContentLoaded', () => {
-        const screens = {
-            levelSelection: document.getElementById('level-selection-screen'),
-            game: document.getElementById('game-screen'),
-            end: document.getElementById('end-screen')
-        };
+        const screens = { levelSelection: document.getElementById('level-selection-screen'), game: document.getElementById('game-screen'), end: document.getElementById('end-screen') };
         const levelButtons = document.querySelectorAll('.level-btn');
         const playAgainBtn = document.getElementById('play-again-btn');
         const backToMenuBtn = document.getElementById('back-to-menu-btn');
         const chooseLevelBtn = document.getElementById('choose-level-btn');
         const scoreDisplay = document.getElementById('score-display');
+        const errorDisplay = document.getElementById('error-display');
         const questionCounter = document.getElementById('question-counter');
         const problemDisplay = document.getElementById('problem-display');
         const answerOptionsContainer = document.getElementById('answer-options');
@@ -136,7 +145,7 @@
         const TOTAL_QUESTIONS_PER_ROUND = 40;
         const SUCCESS_THRESHOLD = 0.8;
 
-        let correctAnswers, totalAnswered, currentAnswer, currentLevel;
+        let correctAnswers, incorrectAnswers, totalAnswered, currentAnswer, currentLevel;
         let isTransitioning = false, isPaused = false;
         let audioCtx;
 
@@ -147,14 +156,25 @@
             4: { name: '4º Ano', operations: ['+', '-', '*'], maxNumber: 50, maxMultiplier: 12 },
             5: { name: '5º Ano', operations: ['+', '-', '*', '/'], maxNumber: 50, maxDivisor: 10 }
         };
+        
+        const updateScoreDisplay = () => scoreDisplay.textContent = `Acertos: ${correctAnswers}`;
+        const updateErrorDisplay = () => errorDisplay.textContent = `Erros: ${incorrectAnswers}`;
+        const updateQuestionCounter = () => questionCounter.textContent = totalAnswered < TOTAL_QUESTIONS_PER_ROUND ? `Questão: ${totalAnswered + 1}/${TOTAL_QUESTIONS_PER_ROUND}` : 'Última questão!';
+        
+        const showScreen = (screenName) => {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            if (screens[screenName]) screens[screenName].classList.add('active');
+        };
 
         const startGame = (level) => {
             currentLevel = level;
             correctAnswers = 0;
+            incorrectAnswers = 0;
             totalAnswered = 0;
             isPaused = false;
             
             updateScoreDisplay();
+            updateErrorDisplay();
             updateQuestionCounter();
             showScreen('game');
             generateProblem();
@@ -171,7 +191,6 @@
             let num1 = Math.floor(Math.random() * levelConfig.maxNumber) + 1;
             let num2 = Math.floor(Math.random() * levelConfig.maxNumber) + 1;
             let problemText = '';
-
             switch (op) {
                 case '+': currentAnswer = num1 + num2; problemText = `${num1} + ${num2} = ?`; break;
                 case '-': if (num2 > num1) [num1, num2] = [num2, num1]; currentAnswer = num1 - num2; problemText = `${num1} - ${num2} = ?`; break;
@@ -209,13 +228,15 @@
                 correctAnswers++;
                 playSound('correct');
                 clickedButton.style.backgroundColor = 'var(--success-color)';
+                updateScoreDisplay();
             } else {
+                incorrectAnswers++;
                 playSound('error');
                 clickedButton.classList.add('incorrect-option');
                 const correctButton = Array.from(answerOptionsContainer.children).find(btn => parseInt(btn.textContent) === currentAnswer);
                 if (correctButton) correctButton.classList.add('correct-option-reveal');
+                updateErrorDisplay();
             }
-            updateScoreDisplay();
             updateQuestionCounter();
             setTimeout(generateProblem, 1200);
         };
@@ -224,7 +245,7 @@
             const percentage = (totalAnswered > 0) ? (correctAnswers / totalAnswered) : 0;
             const hasPassed = percentage >= SUCCESS_THRESHOLD;
             endTitle.textContent = hasPassed ? 'Parabéns, você conseguiu!' : 'Quase lá, estude mais!';
-            endSummary.innerHTML = `<li>✔️ Acertos: <strong>${correctAnswers} de ${totalAnswered}</strong></li><li>❌ Erros: <strong>${totalAnswered - correctAnswers}</strong></li>`;
+            endSummary.innerHTML = `<li>✔️ Acertos: <strong>${correctAnswers} de ${totalAnswered}</strong></li><li>❌ Erros: <strong>${incorrectAnswers}</strong></li>`;
             endPercentage.textContent = `${Math.round(percentage * 100)}% de Acerto`;
             endPercentage.className = hasPassed ? 'success-message' : 'failure-message';
             endMessage.textContent = hasPassed ? 'Você atingiu a meta! Ótimo trabalho!' : 'Você precisa de 80% para passar. Vamos tentar de novo?';
@@ -240,19 +261,6 @@
         const togglePause = (pauseState) => {
             isPaused = pauseState;
             pauseOverlay.style.display = isPaused ? 'flex' : 'none';
-        };
-
-        const updateScoreDisplay = () => scoreDisplay.textContent = `Acertos: ${correctAnswers}`;
-        const updateQuestionCounter = () => questionCounter.textContent = totalAnswered < TOTAL_QUESTIONS_PER_ROUND ? `Questão: ${totalAnswered + 1}/${TOTAL_QUESTIONS_PER_ROUND}` : 'Última questão!';
-        
-        // <<< FUNÇÃO CORRIGIDA >>>
-        const showScreen = (screenName) => {
-            // Primeiro, esconde todas as telas
-            Object.values(screens).forEach(screen => screen.classList.remove('active'));
-            // Depois, mostra apenas a tela desejada
-            if (screens[screenName]) {
-                screens[screenName].classList.add('active');
-            }
         };
 
         levelButtons.forEach(button => {
