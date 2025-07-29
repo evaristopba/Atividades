@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Desafio Matemático - Fábrica de Contas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f8ff; --primary-color: #007bff; --secondary-color: #6c757d;
+            --success-color: #28a745; --danger-color: #dc3545; --panel-bg: #ffffff;
+            --warning-color: #ffc107; --info-color: #17a2b8;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+
+        body {
+            font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: #333;
+            display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px;
+        }
+
+        .screen { display: none; width: 100%; max-width: 500px; padding: 30px; background-color: var(--panel-bg); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
+        .screen.active { display: block; }
+        h1 { color: var(--primary-color); margin-bottom: 10px; }
+        h2 { color: var(--secondary-color); margin-top: 0; font-weight: 400; }
+
+        .btn { display: block; width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1.2em; font-weight: 600; color: white; border: none; border-radius: 12px; border-bottom: 4px solid rgba(0,0,0,0.2); cursor: pointer; transition: all 0.1s ease-in-out; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(1px); border-bottom-width: 2px; }
+        .btn:disabled { cursor: not-allowed; filter: grayscale(50%); }
+        
+        .level-btn.level-1 { background-color: var(--success-color); }
+        .level-btn.level-2 { background-color: var(--info-color); }
+        .level-btn.level-3 { background-color: var(--warning-color); }
+        .level-btn.level-4 { background-color: var(--danger-color); }
+        .level-btn.level-5 { background-color: #6f42c1; }
+
+        #game-info { display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; margin-bottom: 20px; }
+        #score-display, #question-counter { font-weight: 700; }
+        #score-display { color: var(--primary-color); }
+        #question-counter { color: var(--secondary-color); }
+
+        #back-to-menu-btn {
+            background: none; border: none; font-size: 1.2em; color: var(--secondary-color);
+            cursor: pointer; font-weight: 600; padding: 5px;
+        }
+
+        #problem-display { font-size: 3em; font-weight: 700; margin-bottom: 25px; height: 70px; display: flex; align-items: center; justify-content: center;}
+
+        #answer-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-btn { font-size: 1.8em; padding: 20px; margin: 0; background-color: var(--secondary-color); }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        .incorrect-option { animation: shake 0.3s ease; background-color: var(--danger-color) !important; }
+        .correct-option-reveal { background-color: var(--success-color) !important; }
+
+        #end-summary { list-style: none; padding: 0; margin: 20px 0; font-size: 1.2em; text-align: left; display: inline-block; }
+        #end-summary li { margin-bottom: 10px; }
+        #end-percentage { font-size: 2.5em; font-weight: 700; margin: 20px 0; }
+        #end-message { font-size: 1.2em; font-weight: 600; }
+        .success-message { color: var(--success-color); }
+        .failure-message { color: var(--danger-color); }
+        
+        .action-btn { background-color: var(--primary-color); }
+        .secondary-action-btn { background-color: var(--secondary-color); }
+
+        #pause-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="level-selection-screen" class="screen active">
+        <h1>Fábrica de Contas</h1>
+        <h2>Selecione o seu nível para começar!</h2>
+        <button class="btn level-btn level-1" data-level="1">1º Ano</button>
+        <button class="btn level-btn level-2" data-level="2">2º Ano</button>
+        <button class="btn level-btn level-3" data-level="3">3º Ano</button>
+        <button class="btn level-btn level-4" data-level="4">4º Ano</button>
+        <button class="btn level-btn level-5" data-level="5">5º Ano</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="game-info">
+            <button id="back-to-menu-btn">← Sair</button>
+            <div id="score-display">Acertos: 0</div>
+            <div id="question-counter">Questão: 1/40</div>
+        </div>
+        <div id="problem-display"></div>
+        <div id="answer-options"></div>
+        <div id="pause-overlay">
+            <h2>Jogo Pausado</h2>
+            <p>O jogo pausa quando o mouse sai da tela.</p>
+            <button class="btn action-btn" id="resume-btn">Retomar Jogo</button>
+        </div>
+    </div>
+
+    <div id="end-screen" class="screen">
+        <h1 id="end-title">Fim da Rodada!</h1>
+        <ul id="end-summary"></ul>
+        <div id="end-percentage"></div>
+        <p id="end-message"></p>
+        <button class="btn action-btn" id="play-again-btn">Tentar Novamente</button>
+        <button class="btn secondary-action-btn" id="choose-level-btn">Escolher Outro Nível</button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const screens = {
+            levelSelection: document.getElementById('level-selection-screen'),
+            game: document.getElementById('game-screen'),
+            end: document.getElementById('end-screen')
+        };
+        const levelButtons = document.querySelectorAll('.level-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        const chooseLevelBtn = document.getElementById('choose-level-btn');
+        const scoreDisplay = document.getElementById('score-display');
+        const questionCounter = document.getElementById('question-counter');
+        const problemDisplay = document.getElementById('problem-display');
+        const answerOptionsContainer = document.getElementById('answer-options');
+        const endTitle = document.getElementById('end-title');
+        const endSummary = document.getElementById('end-summary');
+        const endPercentage = document.getElementById('end-percentage');
+        const endMessage = document.getElementById('end-message');
+        const pauseOverlay = document.getElementById('pause-overlay');
+        const resumeBtn = document.getElementById('resume-btn');
+        
+        const TOTAL_QUESTIONS_PER_ROUND = 40;
+        const SUCCESS_THRESHOLD = 0.8;
+
+        let correctAnswers, totalAnswered, currentAnswer, currentLevel;
+        let isTransitioning = false, isPaused = false;
+        let audioCtx;
+
+        const levels = {
+            1: { name: '1º Ano', operations: ['+'], maxNumber: 10 },
+            2: { name: '2º Ano', operations: ['+', '-'], maxNumber: 20 },
+            3: { name: '3º Ano', operations: ['+', '-', '*'], maxNumber: 15, maxMultiplier: 10 },
+            4: { name: '4º Ano', operations: ['+', '-', '*'], maxNumber: 50, maxMultiplier: 12 },
+            5: { name: '5º Ano', operations: ['+', '-', '*', '/'], maxNumber: 50, maxDivisor: 10 }
+        };
+
+        const startGame = (level) => {
+            currentLevel = level;
+            correctAnswers = 0;
+            totalAnswered = 0;
+            isPaused = false;
+            
+            updateScoreDisplay();
+            updateQuestionCounter();
+            showScreen('game');
+            generateProblem();
+        };
+
+        const generateProblem = () => {
+            if (totalAnswered >= TOTAL_QUESTIONS_PER_ROUND) {
+                endGame();
+                return;
+            }
+            isTransitioning = false;
+            const levelConfig = levels[currentLevel];
+            const op = levelConfig.operations[Math.floor(Math.random() * levelConfig.operations.length)];
+            let num1 = Math.floor(Math.random() * levelConfig.maxNumber) + 1;
+            let num2 = Math.floor(Math.random() * levelConfig.maxNumber) + 1;
+            let problemText = '';
+
+            switch (op) {
+                case '+': currentAnswer = num1 + num2; problemText = `${num1} + ${num2} = ?`; break;
+                case '-': if (num2 > num1) [num1, num2] = [num2, num1]; currentAnswer = num1 - num2; problemText = `${num1} - ${num2} = ?`; break;
+                case '*': num2 = Math.floor(Math.random() * (levelConfig.maxMultiplier || 10)) + 2; currentAnswer = num1 * num2; problemText = `${num1} × ${num2} = ?`; break;
+                case '/': const divisor = Math.floor(Math.random() * (levelConfig.maxDivisor || 10)) + 2; currentAnswer = Math.floor(Math.random() * 10) + 2; problemText = `${divisor * currentAnswer} ÷ ${divisor} = ?`; break;
+            }
+            problemDisplay.textContent = problemText;
+            generateOptions();
+        };
+
+        const generateOptions = () => {
+            const options = new Set([currentAnswer]);
+            while (options.size < 4) {
+                const deviation = Math.floor(Math.random() * 5) + 1;
+                const wrongAnswer = currentAnswer + (deviation * (Math.random() < 0.5 ? 1 : -1));
+                if (wrongAnswer >= 0 && wrongAnswer !== currentAnswer) options.add(wrongAnswer);
+            }
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            answerOptionsContainer.innerHTML = '';
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'btn option-btn';
+                button.textContent = option;
+                button.onclick = () => checkAnswer(option, button);
+                answerOptionsContainer.appendChild(button);
+            });
+        };
+
+        const checkAnswer = (userAnswer, clickedButton) => {
+            if (isTransitioning || isPaused) return;
+            isTransitioning = true;
+            totalAnswered++;
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            if (userAnswer === currentAnswer) {
+                correctAnswers++;
+                playSound('correct');
+                clickedButton.style.backgroundColor = 'var(--success-color)';
+            } else {
+                playSound('error');
+                clickedButton.classList.add('incorrect-option');
+                const correctButton = Array.from(answerOptionsContainer.children).find(btn => parseInt(btn.textContent) === currentAnswer);
+                if (correctButton) correctButton.classList.add('correct-option-reveal');
+            }
+            updateScoreDisplay();
+            updateQuestionCounter();
+            setTimeout(generateProblem, 1200);
+        };
+
+        const endGame = () => {
+            const percentage = (totalAnswered > 0) ? (correctAnswers / totalAnswered) : 0;
+            const hasPassed = percentage >= SUCCESS_THRESHOLD;
+            endTitle.textContent = hasPassed ? 'Parabéns, você conseguiu!' : 'Quase lá, estude mais!';
+            endSummary.innerHTML = `<li>✔️ Acertos: <strong>${correctAnswers} de ${totalAnswered}</strong></li><li>❌ Erros: <strong>${totalAnswered - correctAnswers}</strong></li>`;
+            endPercentage.textContent = `${Math.round(percentage * 100)}% de Acerto`;
+            endPercentage.className = hasPassed ? 'success-message' : 'failure-message';
+            endMessage.textContent = hasPassed ? 'Você atingiu a meta! Ótimo trabalho!' : 'Você precisa de 80% para passar. Vamos tentar de novo?';
+            playAgainBtn.textContent = hasPassed ? 'Jogar Outra Vez' : 'Tentar Novamente';
+            showScreen('end');
+        };
+
+        const returnToMenu = () => {
+            if (isPaused) togglePause(false);
+            showScreen('levelSelection');
+        };
+        
+        const togglePause = (pauseState) => {
+            isPaused = pauseState;
+            pauseOverlay.style.display = isPaused ? 'flex' : 'none';
+        };
+
+        const updateScoreDisplay = () => scoreDisplay.textContent = `Acertos: ${correctAnswers}`;
+        const updateQuestionCounter = () => questionCounter.textContent = totalAnswered < TOTAL_QUESTIONS_PER_ROUND ? `Questão: ${totalAnswered + 1}/${TOTAL_QUESTIONS_PER_ROUND}` : 'Última questão!';
+        
+        // <<< FUNÇÃO CORRIGIDA >>>
+        const showScreen = (screenName) => {
+            // Primeiro, esconde todas as telas
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            // Depois, mostra apenas a tela desejada
+            if (screens[screenName]) {
+                screens[screenName].classList.add('active');
+            }
+        };
+
+        levelButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                startGame(button.dataset.level);
+            });
+        });
+
+        playAgainBtn.addEventListener('click', () => startGame(currentLevel));
+        backToMenuBtn.addEventListener('click', returnToMenu);
+        chooseLevelBtn.addEventListener('click', returnToMenu);
+        resumeBtn.addEventListener('click', () => togglePause(false));
+
+        document.documentElement.addEventListener('mouseleave', () => {
+            if (screens.game.classList.contains('active') && !isTransitioning) {
+                togglePause(true);
+            }
+        });
+
+        function playSound(soundType) {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator(), gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            if (soundType === 'correct') { oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); } else { oscillator.frequency.setValueAtTime(164.81, audioCtx.currentTime); oscillator.type = 'sawtooth'; }
+            oscillator.start(audioCtx.currentTime); oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+    });
+    </script>
+</body>
+</html>
