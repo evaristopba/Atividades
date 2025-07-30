@@ -12,33 +12,15 @@
             --danger: #dc3545; --border-color: #e0e0e0; --incorrect-bg: #f8d7da;
             --light-text: #6c7a89; --correct-bg: #d9edf7;
         }
-        
         * { box-sizing: border-box; font-family: 'Open Sans', sans-serif; }
-        
-        body {
-            background-color: #f7f9fc; margin: 0; padding: 15px;
-            color: var(--dark); line-height: 1.6; display: flex;
-            justify-content: center; align-items: flex-start; min-height: 100vh;
-        }
-        
+        body { background-color: #f7f9fc; margin: 0; padding: 15px; color: var(--dark); line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
         .tabuada-container { max-width: 850px; width: 100%; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12); overflow: hidden; }
-        
-        header { 
-            background-color: var(--primary); color: white; padding: 20px;
-            text-align: center; border-bottom: 4px solid var(--accent);
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-        }
+        header { background-color: var(--primary); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .header-title { flex-grow: 1; }
         header h1 { font-family: 'Poppins', sans-serif; margin: 0; font-size: 2.0em; letter-spacing: 0.8px; }
         header p { font-size: 1em; margin: 5px 0 0 0; opacity: 0.9; }
-        .report-button {
-            background-color: var(--accent); color: var(--dark); border: none;
-            padding: 8px 16px; border-radius: 25px; cursor: pointer;
-            font-size: 0.9em; font-weight: 600; transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
+        .report-button { background-color: var(--accent); color: var(--dark); border: none; padding: 8px 16px; border-radius: 25px; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
         .report-button:hover { transform: translateY(-2px); }
-        
         .tab-navigation { display: flex; flex-wrap: wrap; background-color: var(--secondary); border-bottom: 3px solid var(--accent); justify-content: center; padding: 5px; }
         .tab-button { flex-grow: 1; flex-basis: auto; min-width: 65px; padding: 10px 0; text-align: center; color: white; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border-bottom: 3px solid transparent; margin: 2px; border-radius: 6px; }
         .tab-button.active { background-color: var(--primary); border-bottom-color: var(--accent); }
@@ -47,25 +29,12 @@
         .tabuada-block { display: none; }
         .tabuada-block.active { display: block; animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .tabuada-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); flex-wrap: wrap; gap: 15px; }
         .tabuada-header h2 { font-family: 'Poppins', sans-serif; color: var(--primary); margin: 0; font-size: 1.7em; }
-        
-        /* CSS CORRIGIDO E RESTAURADO */
-        .tabuada-header .score-area {
-            font-size: 0.9em; font-weight: 600; color: var(--light-text);
-            display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
-        }
-        .tabuada-header .score-area span {
-            color: var(--dark); font-weight: bold;
-        }
-        .tabuada-header .score-area > div {
-            margin-bottom: 4px;
-        }
-        .tabuada-header .score-area > div:last-child {
-            margin-bottom: 0;
-        }
-
+        .tabuada-header .score-area { font-size: 0.9em; font-weight: 600; color: var(--light-text); display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .tabuada-header .score-area span { color: var(--dark); font-weight: bold; }
+        .tabuada-header .score-area > div { margin-bottom: 4px; }
+        .tabuada-header .score-area > div:last-child { margin-bottom: 0; }
         .tabuada-header button { background-color: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.3s ease; }
         .bncc-info { font-size: 0.8em; color: var(--light-text); margin-top: 10px; flex-basis: 100%; text-align: center; }
         .main-practice-area { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
@@ -92,7 +61,6 @@
         .modal-actions button { padding: 12px 30px; border: none; border-radius: 25px; cursor: pointer; font-size: 1.05em; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
         #redo-tabuada-button { background-color: var(--danger); color: white; }
         #continue-tabuada-button, #reset-all-tabuadas-button { background-color: var(--primary); color: white; }
-        
         @media (max-width: 480px) { body { padding: 10px; } header h1 { font-size: 1.6em; } .problems-grid { grid-template-columns: repeat(2, 1fr); } .draggable-numbers-pool { grid-template-columns: repeat(5, 1fr); } .report-button { position: static; margin-top: 10px; } header { padding-bottom: 10px;} }
     </style>
 </head>
@@ -109,8 +77,6 @@
         <div class="tab-content-area" id="tabContentArea"></div>
         <footer><p>© 2024 Tabuada Inteligente. Todos os direitos reservados.</p></footer>
     </div>
-
-    <!-- Modais e Script permanecem os mesmos -->
     <div id="completion-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeCompletionModal()">×</span>
@@ -135,38 +101,94 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const tabuadaData = {}, tabuadaScores = {}, tabuadaErrors = {};
+        const tabuadaData = {};
+        const tabuadaScores = {};
+        const tabuadaErrors = {};
         let currentTabuadaNum = 1;
         const MAX_ALLOWED_ERRORS = 4;
 
+        // Gera os dados da tabuada
         for (let i = 1; i <= 10; i++) {
             tabuadaData[i] = {
-                problems: Array.from({ length: 10 }, (_, j) => ({ problem: `${i * (j + 1)} ÷ ${i}`, answer: j + 1, id: `div-problem-${i}-${j + 1}`, solved: false, userAnswer: null })),
-                bncc: { code: `EF03MA08`, description: `Resolver e elaborar problemas de divisão de um número natural por outro (até 10 000 por 10), com os significados de repartição equitativa e medida, por meio de estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.` }
+                problems: [],
+                bncc: { 
+                    code: `EF03MA08`, 
+                    description: `Resolver e elaborar problemas de divisão de um número natural por outro (até 10 000 por 10), com os significados de repartição equitativa e medida, por meio de estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.`
+                }
             };
+            for (let j = 1; j <= 10; j++) {
+                tabuadaData[i].problems.push({
+                    problem: `${i * j} ÷ ${i}`,
+                    answer: j,
+                    id: `div-problem-${i}-${j}`,
+                    solved: false,
+                    userAnswer: null
+                });
+            }
             tabuadaScores[i] = 0;
             tabuadaErrors[i] = 0;
         }
 
-        const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
-        const generateDraggableNumbersPool = () => Array.from({ length: 10 }, (_, i) => `<div class="draggable-number" draggable="true" id="drag-div-${i + 1}">${i + 1}</div>`).join('');
-        const calculateOverallScore = () => Object.values(tabuadaScores).reduce((a, b) => a + b, 0);
-        const calculateOverallErrors = () => Object.values(tabuadaErrors).reduce((a, b) => a + b, 0);
+        // Função para embaralhar arrays
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
-        function renderTabNavigation() {
-            const nav = document.getElementById('tabNavigation');
-            nav.innerHTML = Array.from({ length: 10 }, (_, i) => `<div class="tab-button" data-tabuada-num="${i + 1}"><span>Div. por ${i + 1}</span></div>`).join('');
-            nav.addEventListener('click', (e) => {
-                const button = e.target.closest('.tab-button');
-                if (button) showTabuada(parseInt(button.dataset.tabuadaNum));
-            });
+        // Gera o HTML para os números arrastáveis
+        function generateDraggableNumbersPool() {
+            let numbersHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                numbersHTML += `<div class="draggable-number" draggable="true" id="drag-div-${i}">${i}</div>`;
+            }
+            return numbersHTML;
         }
         
-        // FUNÇÃO ATUALIZADA
+        // Funções para atualizar os placares de forma cirúrgica
+        function updateScoreDisplay(tabuadaNum) {
+            const scoreEl = document.getElementById(`score-div-${tabuadaNum}`);
+            if (scoreEl) scoreEl.textContent = tabuadaScores[tabuadaNum];
+            
+            const totalScoreEl = document.querySelector('.score-area span[data-total-score]');
+            if (totalScoreEl) totalScoreEl.textContent = Object.values(tabuadaScores).reduce((a, b) => a + b, 0);
+        }
+
+        function updateErrorDisplay(tabuadaNum) {
+            const errorEl = document.getElementById(`errors-div-${tabuadaNum}`);
+            if (errorEl) errorEl.textContent = tabuadaErrors[tabuadaNum];
+
+            const totalErrorEl = document.querySelector('.score-area span[data-total-errors]');
+            if (totalErrorEl) totalErrorEl.textContent = Object.values(tabuadaErrors).reduce((a, b) => a + b, 0);
+        }
+
+        // Renderiza a barra de navegação das tabuadas
+        function renderTabNavigation() {
+            const nav = document.getElementById('tabNavigation');
+            let navHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                navHTML += `<div class="tab-button" data-tabuada-num="${i}"><span>Div. por ${i}</span></div>`;
+            }
+            nav.innerHTML = navHTML;
+            nav.addEventListener('click', (e) => {
+                const button = e.target.closest('.tab-button');
+                if (button) {
+                    window.showTabuada(parseInt(button.dataset.tabuadaNum));
+                }
+            });
+        }
+
+        // Renderiza o conteúdo principal de uma tabuada específica
         function renderTabuadaContent(tabuadaNum) {
             const problems = shuffleArray([...tabuadaData[tabuadaNum].problems]);
             const bncc = tabuadaData[tabuadaNum].bncc;
-            const problemGridHTML = problems.map(item => `<div class="problem-item" data-problem-id="${item.id}"><span>${item.problem} =</span><div class="drop-zone" data-correct-answer="${item.answer}"></div></div>`).join('');
+            const problemGridHTML = problems.map(item => `
+                <div class="problem-item" data-problem-id="${item.id}">
+                    <span>${item.problem} =</span>
+                    <div class="drop-zone" data-correct-answer="${item.answer}"></div>
+                </div>`).join('');
             
             return `
                 <div class="tabuada-header">
@@ -177,8 +199,8 @@
                     <div class="score-area">
                         <div>Pontuação: <span id="score-div-${tabuadaNum}">${tabuadaScores[tabuadaNum]}</span>/10</div>
                         <div>Erros: <span id="errors-div-${tabuadaNum}">${tabuadaErrors[tabuadaNum]}</span></div>
-                        <div>Total Geral Acertos: <span>${calculateOverallScore()}</span>/100</div>
-                        <div>Total Geral Erros: <span>${calculateOverallErrors()}</span></div>
+                        <div>Total Geral Acertos: <span data-total-score>${Object.values(tabuadaScores).reduce((a, b) => a + b, 0)}</span>/100</div>
+                        <div>Total Geral Erros: <span data-total-errors>${Object.values(tabuadaErrors).reduce((a, b) => a + b, 0)}</span></div>
                     </div>
                     <button onclick="resetTabuada(${tabuadaNum})">Resetar</button>
                 </div>
@@ -188,7 +210,8 @@
                 </div>`;
         }
 
-        window.showTabuada = (tabuadaNum) => {
+        // Exibe uma tabuada na tela
+        window.showTabuada = function(tabuadaNum) {
             currentTabuadaNum = tabuadaNum;
             const contentArea = document.getElementById('tabContentArea');
             contentArea.innerHTML = `<div class="tabuada-block active" id="tabuada-block-div-${tabuadaNum}">${renderTabuadaContent(tabuadaNum)}</div>`;
@@ -206,6 +229,7 @@
             updateDroppedStates(tabuadaNum);
         }
 
+        // Lógica de arrastar e soltar
         function drop(event) {
             event.preventDefault();
             const dropZone = event.target;
@@ -221,18 +245,23 @@
                 dropZone.textContent = droppedValue;
                 dropZone.classList.add('correct');
                 if (problem && !problem.solved) {
-                    problem.solved = true; problem.userAnswer = droppedValue;
+                    problem.solved = true;
+                    problem.userAnswer = droppedValue;
                     tabuadaScores[currentTabuadaNum]++;
+                    updateScoreDisplay(currentTabuadaNum);
                 }
-                if (tabuadaScores[currentTabuadaNum] === 10) showCompletionMessage(currentTabuadaNum);
+                if (tabuadaScores[currentTabuadaNum] === 10) {
+                    showCompletionMessage(currentTabuadaNum);
+                }
             } else {
                 dropZone.classList.add('incorrect');
                 tabuadaErrors[currentTabuadaNum]++;
+                updateErrorDisplay(currentTabuadaNum);
                 setTimeout(() => dropZone.classList.remove('incorrect'), 700);
             }
-            showTabuada(currentTabuadaNum); // Atualiza a tela inteira para refletir os totais gerais
         }
         
+        // Atualiza os campos já respondidos ao recarregar a tabuada
         function updateDroppedStates(tabuadaNum) {
             tabuadaData[tabuadaNum].problems.forEach(problem => {
                 if (problem.solved) {
@@ -245,25 +274,39 @@
             });
         }
 
-        window.resetTabuada = (tabuadaNum) => {
+        // Reseta uma tabuada específica
+        window.resetTabuada = function(tabuadaNum) {
             if (!confirm(`Tem certeza que deseja reiniciar a divisão por ${tabuadaNum}?`)) return;
-            tabuadaScores[tabuadaNum] = 0; tabuadaErrors[tabuadaNum] = 0;
+            tabuadaScores[tabuadaNum] = 0;
+            tabuadaErrors[tabuadaNum] = 0;
             tabuadaData[tabuadaNum].problems.forEach(p => { p.solved = false; p.userAnswer = null; });
             showTabuada(tabuadaNum);
         }
         
+        // Exibe o modal de conclusão
         function showCompletionMessage(tabuadaNum) {
-            const modal = document.getElementById('completion-modal'), title = document.getElementById('completion-message-title'), text = document.getElementById('completion-message-text'), redo = document.getElementById('redo-tabuada-button'), cont = document.getElementById('continue-tabuada-button');
+            const modal = document.getElementById('completion-modal');
+            const title = document.getElementById('completion-message-title');
+            const text = document.getElementById('completion-message-text');
+            const redoBtn = document.getElementById('redo-tabuada-button');
+            const continueBtn = document.getElementById('continue-tabuada-button');
             const errors = tabuadaErrors[tabuadaNum];
-            redo.style.display = errors > MAX_ALLOWED_ERRORS ? 'block' : 'none';
-            cont.textContent = tabuadaNum === 10 ? 'Ver Relatório Final' : 'Próxima Tabuada';
-            let mTitle = '', mText = `Você completou a Divisão por ${tabuadaNum}!`;
-            if (errors > MAX_ALLOWED_ERRORS) { mTitle = 'Atenção!'; mText += `<br>Você teve ${errors} erros. É recomendado refazê-la!`; } 
-            else if (errors === 0) { mTitle = 'Magnífico! 🎉'; mText += `<br>NENHUM erro! Impecável!`; } 
-            else { mTitle = 'Excelente! ✨'; mText += `<br>Você teve apenas ${errors} erro(s). Quase perfeito!`; }
-            title.innerHTML = mTitle; text.innerHTML = mText; modal.classList.add('is-active');
+            
+            redoBtn.style.display = errors > MAX_ALLOWED_ERRORS ? 'block' : 'none';
+            continueBtn.textContent = tabuadaNum === 10 ? 'Ver Relatório Final' : 'Próxima Tabuada';
+            
+            let messageTitle = '';
+            let messageText = `Você completou a Divisão por ${tabuadaNum}!`;
+            if (errors > MAX_ALLOWED_ERRORS) { messageTitle = 'Atenção!'; messageText += `<br>Você teve ${errors} erros. É recomendado refazê-la!`; } 
+            else if (errors === 0) { messageTitle = 'Magnífico! 🎉'; mText += `<br>NENHUM erro! Impecável!`; } 
+            else { messageTitle = 'Excelente! ✨'; messageText += `<br>Você teve apenas ${errors} erro(s). Quase perfeito!`; }
+            
+            title.innerHTML = messageTitle;
+            text.innerHTML = messageText;
+            modal.classList.add('is-active');
         }
 
+        // Funções dos modais
         window.closeCompletionModal = () => document.getElementById('completion-modal').classList.remove('is-active');
         window.handleRedoClick = () => { closeCompletionModal(); resetTabuada(currentTabuadaNum); }
         window.handleContinueClick = () => {
@@ -272,25 +315,35 @@
             else { showTabuada(currentTabuadaNum + 1); }
         }
 
-        window.showOverallSummaryModal = () => { populateOverallSummary(); document.getElementById('overall-summary-modal').classList.add('is-active'); }
+        window.showOverallSummaryModal = () => {
+            populateOverallSummary();
+            document.getElementById('overall-summary-modal').classList.add('is-active');
+        }
         window.closeOverallSummaryModal = () => document.getElementById('overall-summary-modal').classList.remove('is-active');
         
         function populateOverallSummary() {
             const content = document.getElementById('overall-summary-content');
-            let listHTML = Array.from({ length: 10 }, (_, i) => `<li>Divisão por ${i + 1}: Acertos: ${tabuadaScores[i + 1]}/10, Erros: ${tabuadaErrors[i + 1]}</li>`).join('');
-            if (content) content.innerHTML = `<div class="overall-summary-content" id="overall-summary-content"><h4>Desempenho por Divisão:</h4><ul>${listHTML}</ul><div class="summary-overall-totals">Total Geral de Acertos: ${calculateOverallScore()}/100 <br> Total Geral de Erros: ${calculateOverallErrors()}</div></div>`;
+            let listHTML = '';
+            for(let i = 1; i <= 10; i++) {
+                listHTML += `<li>Divisão por ${i}: Acertos: ${tabuadaScores[i]}/10, Erros: ${tabuadaErrors[i]}</li>`;
+            }
+            if (content) {
+                content.innerHTML = `<h4>Desempenho por Divisão:</h4><ul>${listHTML}</ul><div class="summary-overall-totals">Total Geral de Acertos: ${Object.values(tabuadaScores).reduce((a, b) => a + b, 0)}/100 <br> Total Geral de Erros: ${Object.values(tabuadaErrors).reduce((a, b) => a + b, 0)}</div>`;
+            }
         }
 
         window.resetAllTabuadas = () => {
             if (!confirm('Tem certeza que deseja reiniciar TODAS as divisões?')) return;
             closeOverallSummaryModal();
             for (let i = 1; i <= 10; i++) {
-                tabuadaScores[i] = 0; tabuadaErrors[i] = 0;
+                tabuadaScores[i] = 0;
+                tabuadaErrors[i] = 0;
                 tabuadaData[i].problems.forEach(p => { p.solved = false; p.userAnswer = null; });
             }
             showTabuada(1);
         }
         
+        // Inicia o jogo
         renderTabNavigation();
         showTabuada(1);
     });
