@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca Educativo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0077b6; --secondary-color: #00b4d8; --success-color: #2a9d8f;
+            --danger-color: #e76f51; --light-bg: #edf6f9; --super-category-color: #8338ec;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 100vh; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            color: #333; text-align: center; padding: 20px; margin: 0;
+        }
+        #main-wrapper { width: 100%; max-width: 700px; }
+        #title-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+        h1 { color: var(--primary-color); margin: 0; font-size: 2.5em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary-color); }
+        #show-help-btn { font-size: 1.5em; font-weight: bold; color: var(--primary-color); background-color: white; border: 2px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.2s ease; }
+        #show-help-btn:hover { transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        #api-status { padding: 6px 12px; font-size: 0.8em; margin-bottom: 10px; border-radius: 20px; font-weight: 600; color: white; transition: all 0.5s ease; opacity: 0; max-height: 0; overflow: hidden; }
+        #api-status.visible { opacity: 1; max-height: 50px; }
+        .game-panel { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; }
+        #category-selection { display: none; flex-direction: column; gap: 15px; max-height: 60vh; overflow-y: auto; }
+        .category-btn, .modal-btn { font-size: 1.3em; font-weight: 600; padding: 15px 20px; border-radius: 12px; border: none; border-bottom: 4px solid rgba(0,0,0,0.2); color: white; cursor: pointer; transition: all 0.1s ease-in-out; }
+        .category-btn:hover, .modal-btn:hover { transform: translateY(-2px); }
+        .category-btn:active, .modal-btn:active { transform: translateY(1px); border-bottom-width: 2px; }
+        .category-btn { background-color: var(--success-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-btn { background-color: var(--primary-color); }
+        .category-btn .info { font-size: 0.8em; font-weight: 400; opacity: 0.9; }
+        .super-category-btn { background-color: var(--super-category-color); }
+        #game-wrapper { display: none; width: 100%; }
+        #game-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #game-info { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        #score-display { font-size: 1.3em; font-weight: 600; color: var(--primary-color); }
+        #timer-display { font-size: 1.6em; font-weight: 700; color: var(--danger-color); }
+        #drawing-container svg { width: 160px; height: 190px; }
+        .flower-part { stroke: #228b22; stroke-width: 5; stroke-linecap: round; fill: none; transition: opacity 0.5s; }
+        .petal { fill: #ff69b4; stroke: #db7093; }
+        .center-circle { fill: #ffd700; stroke: #daa520; }
+        .hidden { opacity: 0; }
+        #hint-display { font-size: 1.1em; margin: 0; color: #555; background-color: var(--light-bg); padding: 8px 15px; border-radius: 8px; border: 1px dashed var(--secondary-color); width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+        #word-display { font-size: 2.2em; letter-spacing: 10px; margin: 10px 0; height: auto; }
+        #word-display span { display: inline-block; border-bottom: 4px solid #333; width: 40px; text-align: center; }
+        #keyboard-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(48px, 1fr)); gap: 8px; width: 100%; margin-top: 20px; }
+        #keyboard-container button { font-size: 1.3em; font-weight: 600; padding: 12px 8px; border-radius: 8px; border: 1px solid #ccc; border-bottom-width: 4px; background-color: #fff; cursor: pointer; transition: all 0.1s ease-in-out; }
+        #keyboard-container button:hover:not(:disabled) { background-color: #f0f0f0; transform: translateY(-2px); }
+        #keyboard-container button:active:not(:disabled) { transform: translateY(1px); border-bottom-width: 2px; }
+        #keyboard-container button:disabled { background-color: #d3d3d3; color: #888; cursor: not-allowed; border-color: #a0a0a0; }
+        #keyboard-container button.correct-guess { background-color: #90ee90; border-color: #5a9c5a; }
+        #keyboard-container button.wrong-guess { background-color: #ffcccb; border-color: #c98b8a; }
+        .modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease-in-out; z-index: 1000; pointer-events: none; }
+        .modal-container.visible { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; padding: 30px 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); text-align: center; max-width: 90%; width: 500px; transform: scale(0.8); transition: transform 0.3s ease-in-out; }
+        .modal-container.visible .modal-content { transform: scale(1); }
+        .modal-content ul { text-align: left; list-style-position: inside; padding-left: 0; }
+        .modal-content li { margin-bottom: 10px; font-size: 1.1em; }
+        #scoreboard-details span { font-weight: 700; }
+        .score-good { color: var(--success-color); }
+        .score-bad { color: var(--danger-color); }
+        @media (max-width: 600px) { h1 { font-size: 1.8em; } #word-display { font-size: 1.5em; letter-spacing: 6px; } #word-display span { width: 28px; } #keyboard-container { gap: 5px; grid-template-columns: repeat(auto-fit, minmax(38px, 1fr)); } }
+    </style>
+</head>
+<body>
+    <div id="main-wrapper">
+        <div id="title-wrapper"><h1 id="main-title">Jogo da Forca Educativo</h1><button id="show-help-btn">?</button></div>
+        <p id="api-status"></p>
+        <div id="category-selection" class="game-panel"><h2>Carregando categorias...</h2></div>
+        <div id="game-wrapper">
+            <div id="game-container" class="game-panel">
+                <div id="game-info">
+                    <p id="score-display">Pontuação: 0</p>
+                    <p id="timer-display"></p>
+                </div>
+                <div id="drawing-container">
+                    <svg viewBox="0 0 100 120"><line class="flower-part" x1="50" y1="110" x2="50" y2="40" /><path class="flower-part" d="M50 80 Q 65 70 70 50" /><path class="flower-part" d="M50 90 Q 35 80 30 60" /><path id="petal-6" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(0, 50, 40)"/><path id="petal-5" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(60, 50, 40)"/><path id="petal-4" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(120, 50, 40)"/><path id="petal-3" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(180, 50, 40)"/><path id="petal-2" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(240, 50, 40)"/><path id="petal-1" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(300, 50, 40)"/><circle class="flower-part center-circle" cx="50" cy="40" r="10" /></svg>
+                </div>
+                <div id="hint-display">Dica vai aqui...</div>
+                <div id="word-display"></div>
+            </div>
+            <div id="keyboard-container"></div>
+        </div>
+    </div>
+    <div id="scoreboard-modal" class="modal-container">
+        <div class="modal-content">
+            <h2 id="scoreboard-title">Fim de Jogo!</h2>
+            <div id="scoreboard-details"></div>
+            <p><strong>Pontuação Final: <span id="final-score"></span></strong></p>
+            <button class="modal-btn" id="play-again-btn">Jogar Novamente</button>
+            <button class="modal-btn" id="back-to-menu-btn" style="background-color: var(--secondary-color);">Voltar ao Menu</button>
+        </div>
+    </div>
+    <div id="instructions-modal" class="modal-container">
+        <div class="modal-content">
+            <h2>Como Jogar</h2>
+            <ul>
+                <li>O objetivo é adivinhar o máximo de palavras de uma categoria no tempo determinado.</li>
+                <li>Cada letra certa vale <strong>+10 pontos</strong>.</li>
+                <li>Cada letra errada custa <strong>-5 pontos</strong> e uma pétala da flor.</li>
+                <li>Acertar uma palavra inteira dá um bônus de <strong>+50 pontos</strong>!</li>
+                <li>Pular uma palavra (6 erros) te custa <strong>-20 pontos</strong>.</li>
+            </ul>
+            <button class="modal-btn" id="close-help-btn">Entendi, vamos jogar!</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const categorySelection = document.getElementById('category-selection');
+        const gameWrapper = document.getElementById('game-wrapper');
+        const keyboardContainer = document.getElementById('keyboard-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const wordDisplay = document.getElementById('word-display');
+        const hintDisplay = document.getElementById('hint-display');
+        const mainTitle = document.getElementById('main-title');
+        const apiStatusElement = document.getElementById('api-status');
+        const instructionsModal = document.getElementById('instructions-modal');
+        const scoreboardModal = document.getElementById('scoreboard-modal');
+        const scoreboardTitle = document.getElementById('scoreboard-title');
+        const scoreboardDetails = document.getElementById('scoreboard-details');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        const showHelpBtn = document.getElementById('show-help-btn');
+        const closeHelpBtn = document.getElementById('close-help-btn');
+        const MAX_WRONG_GUESSES = 6;
+        const BASE_GAME_DURATION = 90;
+        const SUPER_CATEGORY_DISCOUNT_FACTOR = 0.6;
+        let wordCategories = {};
+        let selectedCategory, selectedWord, gameTimer;
+        let correctLetters = [], wrongGuesses = 0, score = 0, timeLeft = 0, wordsSolved = 0, totalPointsEarned = 0, totalPointsLost = 0;
+        let isFirstRun = true, audioCtx, isTransitioning = false;
+        let wordsForCurrentRound = [];
+        const capitalize = (s) => (s && typeof s === 'string') ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+        const showPanel = (panelName) => {
+            categorySelection.style.display = panelName === 'category' ? 'flex' : 'none';
+            gameWrapper.style.display = panelName === 'game' ? 'block' : 'none';
+        };
+
+        const startRound = (category) => {
+            selectedCategory = category;
+            mainTitle.textContent = `Forca: ${capitalize(category)}`;
+            score = 0; wordsSolved = 0; totalPointsEarned = 0; totalPointsLost = 0;
+            timeLeft = wordCategories[category].time;
+            wordsForCurrentRound = [...wordCategories[category].originalWords].sort(() => Math.random() - 0.5);
+            showPanel('game');
+            startTimer();
+            nextWord();
+        };
+
+        const nextWord = async () => {
+            isTransitioning = true;
+            let wordData = null;
+            const useApi = false; // Desabilitado para focar na lógica do baralho
+            if (useApi) {
+                // Lógica da API aqui
+            } else {
+                wordData = wordsForCurrentRound.pop();
+            }
+            if (!wordData) {
+                const message = (timeLeft > 0) ? "Parabéns, você zerou a categoria!" : "O tempo acabou!";
+                endRound(message);
+                return;
+            }
+            selectedWord = wordData.word;
+            correctLetters = [];
+            wrongGuesses = 0;
+            updateUIForNewWord(wordData.hint);
+            isTransitioning = false;
+        };
+
+        const handleGuess = (letter) => {
+            if (isTransitioning || !selectedWord) return;
+            const button = findKeyButton(letter);
+            if (!button || button.disabled) return;
+            button.disabled = true;
+            if (selectedWord.includes(letter)) {
+                const points = 10 * (selectedWord.split(letter).length - 1);
+                score += points; totalPointsEarned += points;
+                correctLetters.push(letter);
+                button.classList.add('correct-guess');
+            } else {
+                score -= 5; totalPointsLost += 5;
+                wrongGuesses++;
+                button.classList.add('wrong-guess');
+            }
+            updateScoreDisplay();
+            updateDrawing();
+            displayWord();
+            checkWordStatus();
+        };
+
+        const checkWordStatus = () => {
+            const wordGuessed = selectedWord.split('').every(letter => correctLetters.includes(letter));
+            if (wordGuessed) {
+                isTransitioning = true;
+                score += 50; totalPointsEarned += 50;
+                wordsSolved++;
+                updateScoreDisplay();
+                setTimeout(nextWord, 1200);
+            } else if (wrongGuesses >= MAX_WRONG_GUESSES) {
+                isTransitioning = true;
+                score -= 20; totalPointsLost += 20;
+                updateScoreDisplay();
+                displayWordFull(selectedWord);
+                setTimeout(nextWord, 1800);
+            }
+        };
+
+        const endRound = (message) => {
+            clearInterval(gameTimer);
+            showPanel('none');
+            scoreboardTitle.textContent = "Fim de Jogo!";
+            scoreboardDetails.innerHTML = `
+                <li>Palavras Acertadas: <span>${wordsSolved}</span></li>
+                <li>Pontos Ganhos: <span class="score-good">+${totalPointsEarned}</span></li>
+                <li>Pontos Perdidos: <span class="score-bad">-${totalPointsLost}</span></li>
+            `;
+            finalScoreDisplay.textContent = score;
+            showModal(scoreboardModal);
+        };
+        
+        const startTimer = () => { if (gameTimer) clearInterval(gameTimer); updateTimerDisplay(); gameTimer = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) endRound("O tempo acabou!"); }, 1000); };
+        const updateTimerDisplay = () => timerDisplay.textContent = formatTime(timeLeft);
+        const updateScoreDisplay = () => scoreDisplay.textContent = `Pontuação: ${score}`;
+        const updateUIForNewWord = (hint) => { hintDisplay.textContent = `Dica: ${hint}`; displayWord(); generateKeyboard(); updateDrawing(); };
+        const displayWord = () => { if (!selectedWord) return; wordDisplay.innerHTML = selectedWord.split("").map(letter => `<span>${correctLetters.includes(letter) ? letter : ' '}</span>`).join(""); };
+        const displayWordFull = (word) => { wordDisplay.innerHTML = word.split("").map(letter => `<span style="color: var(--danger-color);">${letter}</span>`).join(""); };
+        const generateKeyboard = () => { keyboardContainer.innerHTML = ""; "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => { const button = document.createElement("button"); button.textContent = letter; button.addEventListener("click", () => handleGuess(letter)); keyboardContainer.appendChild(button); }); };
+        const updateDrawing = () => { for (let i = 1; i <= MAX_WRONG_GUESSES; i++) { document.getElementById(`petal-${i}`).classList.toggle("hidden", i > wrongGuesses); } };
+        const findKeyButton = (letter) => Array.from(keyboardContainer.getElementsByTagName("button")).find(btn => btn.textContent === letter) || null;
+        const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        const showModal = (modalElement) => modalElement.classList.add('visible');
+        const hideModal = (modalElement) => modalElement.classList.remove('visible');
+
+        async function init() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/evaristopba/Atividades/main/palavras.json');
+                if (!response.ok) throw new Error('Falha ao carregar o banco de palavras do GitHub.');
+                wordCategories = await response.json();
+                const regCatCount = Object.keys(wordCategories).length;
+                for (const catKey in wordCategories) {
+                    wordCategories[catKey].time = BASE_GAME_DURATION;
+                    wordCategories[catKey].originalWords = [...wordCategories[catKey].words];
+                }
+                if (regCatCount > 1) {
+                    const allWords = Object.values(wordCategories).flatMap(cat => cat.originalWords || []);
+                    const superTime = Math.round((regCatCount * BASE_GAME_DURATION * SUPER_CATEGORY_DISCOUNT_FACTOR) / 10) * 10;
+                    wordCategories['Super Categoria'] = { words: allWords, keywords: [], time: superTime, originalWords: [...allWords] };
+                }
+                categorySelection.innerHTML = '<h2>Escolha um Modo de Jogo</h2>';
+                Object.keys(wordCategories).forEach(categoryKey => {
+                    const button = document.createElement('button');
+                    const data = wordCategories[categoryKey];
+                    button.className = 'category-btn';
+                    button.innerHTML = `<span>${capitalize(categoryKey)}</span><span class="info">${data.words.length} palavras / ${formatTime(data.time)}</span>`;
+                    if (categoryKey === 'Super Categoria') button.classList.add('super-category-btn');
+                    button.addEventListener('click', () => { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); startRound(categoryKey); });
+                    categorySelection.appendChild(button);
+                });
+                if (isFirstRun) showModal(instructionsModal);
+                else showPanel('category');
+            } catch (error) {
+                console.error('Erro fatal:', error);
+                categorySelection.innerHTML = `<h2>Erro ao carregar o jogo.</h2><p>${error.message}</p>`;
+                showPanel('category');
+            }
+            closeHelpBtn.addEventListener('click', () => { hideModal(instructionsModal); if (isFirstRun) { showPanel('category'); isFirstRun = false; } });
+            showHelpBtn.addEventListener('click', () => showModal(instructionsModal));
+            playAgainBtn.addEventListener('click', () => { hideModal(scoreboardModal); startRound(selectedCategory); });
+            backToMenuBtn.addEventListener('click', () => { hideModal(scoreboardModal); showPanel('category'); mainTitle.textContent = 'Jogo da Forca Educativo'; });
+            document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
+        }
+        init();
+    });
+    </script>
+</body>
+</html>
