@@ -37,9 +37,12 @@
         .tabuada-header .score-area > div:last-child { margin-bottom: 0; }
         .tabuada-header button { background-color: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.3s ease; }
         .bncc-info { font-size: 0.8em; color: var(--light-text); margin-top: 10px; flex-basis: 100%; text-align: center; }
-        .main-practice-area { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-        .problems-grid { flex: 2 1 450px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-        .draggable-numbers-pool { flex: 1 1 200px; background-color: var(--light); border: 1px solid var(--primary); border-radius: 10px; padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr)); gap: 8px; }
+        
+        /* CSS ALTERADO */
+        .main-practice-area { display: flex; flex-direction: column; gap: 20px; }
+        .problems-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+        .draggable-numbers-pool { background-color: var(--light); border: 1px solid var(--primary); border-radius: 10px; padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr)); gap: 8px; }
+
         .problem-item { background-color: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; font-weight: 600; color: var(--dark); }
         .problem-item span { margin-right: 8px; }
         .drop-zone { width: 55px; height: 32px; border: 2px dashed var(--primary); border-radius: 6px; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; font-size: 1em; color: var(--light-text); transition: all 0.2s ease; }
@@ -98,38 +101,21 @@
             </div>
         </div>
     </div>
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const tabuadaData = {}, tabuadaScores = {}, tabuadaErrors = {};
         let currentTabuadaNum = 1;
         const MAX_ALLOWED_ERRORS = 4;
-
         for (let i = 1; i <= 10; i++) {
             tabuadaData[i] = {
-                problems: Array.from({ length: 10 }, (_, j) => ({
-                    problem: `${i} x ${j + 1}`,
-                    answer: i * (j + 1),
-                    id: `mul-problem-${i}-${j + 1}`,
-                    solved: false,
-                    userAnswer: null
-                })),
-                bncc: { 
-                    code: `EF03MA07`, 
-                    description: `Resolver e elaborar problemas de multiplicação (por 2, 3, 4, 5 e 10) com os significados de adição de parcelas iguais e elementos em uma disposição retangular, utilizando diferentes estratégias de cálculo e registros.`
-                }
+                problems: Array.from({ length: 10 }, (_, j) => ({ problem: `${i} x ${j + 1}`, answer: i * (j + 1), id: `mul-problem-${i}-${j + 1}`, solved: false, userAnswer: null })),
+                bncc: { code: `EF03MA07`, description: `Resolver e elaborar problemas de multiplicação (por 2, 3, 4, 5 e 10) com os significados de adição de parcelas iguais e elementos em uma disposição retangular, utilizando diferentes estratégias de cálculo e registros.` }
             };
             tabuadaScores[i] = 0;
             tabuadaErrors[i] = 0;
         }
-
         const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
-        function generateDraggableNumbersPool() {
-            const numbers = new Set();
-            for (let i = 1; i <= 10; i++) { for (let j = 1; j <= 10; j++) { numbers.add(i * j); } }
-            return Array.from(numbers).sort((a,b) => a - b).map(num => `<div class="draggable-number" draggable="true" id="drag-mul-${num}">${num}</div>`).join('');
-        }
-        
+        function generateDraggableNumbersPool() { const numbers = new Set(); for (let i = 1; i <= 10; i++) { for (let j = 1; j <= 10; j++) { numbers.add(i * j); } } return Array.from(numbers).sort((a,b) => a - b).map(num => `<div class="draggable-number" draggable="true" id="drag-mul-${num}">${num}</div>`).join(''); }
         function updateScoreDisplay(tabuadaNum) {
             const scoreEl = document.getElementById(`score-mul-${tabuadaNum}`);
             if (scoreEl) scoreEl.textContent = tabuadaScores[tabuadaNum];
@@ -142,41 +128,18 @@
             const totalErrorEl = document.querySelector('.score-area span[data-total-errors]');
             if (totalErrorEl) totalErrorEl.textContent = Object.values(tabuadaErrors).reduce((a, b) => a + b, 0);
         }
-
         function renderTabNavigation() {
             const nav = document.getElementById('tabNavigation');
             nav.innerHTML = Array.from({ length: 10 }, (_, i) => `<div class="tab-button" data-tabuada-num="${i + 1}"><span>Tab. do ${i + 1}</span></div>`).join('');
-            nav.addEventListener('click', (e) => {
-                const button = e.target.closest('.tab-button');
-                if (button) showTabuada(parseInt(button.dataset.tabuadaNum));
-            });
+            nav.addEventListener('click', (e) => { const button = e.target.closest('.tab-button'); if (button) showTabuada(parseInt(button.dataset.tabuadaNum)); });
         }
-        
         function renderTabuadaContent(tabuadaNum) {
             const problems = shuffleArray([...tabuadaData[tabuadaNum].problems]);
             const bncc = tabuadaData[tabuadaNum].bncc;
             const problemGridHTML = problems.map(item => `<div class="problem-item" data-problem-id="${item.id}"><span>${item.problem} =</span><div class="drop-zone" data-correct-answer="${item.answer}"></div></div>`).join('');
-            return `
-                <div class="tabuada-header">
-                    <div>
-                        <h2>Tabuada do ${tabuadaNum}</h2>
-                        <div class="bncc-info"><strong>BNCC:</strong> (${bncc.code}) ${bncc.description}</div>
-                    </div>
-                    <div class="score-area">
-                        <div>Pontuação: <span id="score-mul-${tabuadaNum}">${tabuadaScores[tabuadaNum]}</span>/10</div>
-                        <div>Erros: <span id="errors-mul-${tabuadaNum}">${tabuadaErrors[tabuadaNum]}</span></div>
-                        <div>Total Geral Acertos: <span data-total-score>${Object.values(tabuadaScores).reduce((a, b) => a + b, 0)}</span>/100</div>
-                        <div>Total Geral Erros: <span data-total-errors>${Object.values(tabuadaErrors).reduce((a, b) => a + b, 0)}</span></div>
-                    </div>
-                    <button onclick="resetTabuada(${tabuadaNum})">Resetar</button>
-                </div>
-                <div class="main-practice-area">
-                    <div class="problems-grid">${problemGridHTML}</div>
-                    <div class="draggable-numbers-pool">${generateDraggableNumbersPool()}</div>
-                </div>`;
+            return `<div class="tabuada-header"><div><h2>Tabuada do ${tabuadaNum}</h2><div class="bncc-info"><strong>BNCC:</strong> (${bncc.code}) ${bncc.description}</div></div><div class="score-area"><div>Pontuação: <span id="score-mul-${tabuadaNum}">${tabuadaScores[tabuadaNum]}</span>/10</div><div>Erros: <span id="errors-mul-${tabuadaNum}">${tabuadaErrors[tabuadaNum]}</span></div><div>Total Geral Acertos: <span data-total-score>${Object.values(tabuadaScores).reduce((a, b) => a + b, 0)}</span>/100</div><div>Total Geral Erros: <span data-total-errors>${Object.values(tabuadaErrors).reduce((a, b) => a + b, 0)}</span></div></div><button onclick="resetTabuada(${tabuadaNum})">Resetar</button></div><div class="main-practice-area"><div class="problems-grid">${problemGridHTML}</div><div class="draggable-numbers-pool">${generateDraggableNumbersPool()}</div></div>`;
         }
-
-        window.showTabuada = function(tabuadaNum) {
+        window.showTabuada = (tabuadaNum) => {
             currentTabuadaNum = tabuadaNum;
             const contentArea = document.getElementById('tabContentArea');
             contentArea.innerHTML = `<div class="tabuada-block active" id="tabuada-block-mul-${tabuadaNum}">${renderTabuadaContent(tabuadaNum)}</div>`;
@@ -191,7 +154,6 @@
             });
             updateDroppedStates(tabuadaNum);
         }
-
         function drop(event) {
             event.preventDefault();
             const dropZone = event.target;
@@ -217,7 +179,6 @@
                 setTimeout(() => dropZone.classList.remove('incorrect'), 700);
             }
         }
-        
         function updateDroppedStates(tabuadaNum) {
             tabuadaData[tabuadaNum].problems.forEach(problem => {
                 if (problem.solved) {
@@ -226,15 +187,13 @@
                 }
             });
         }
-
-        window.resetTabuada = function(tabuadaNum) {
+        window.resetTabuada = (tabuadaNum) => {
             if (!confirm(`Tem certeza que deseja reiniciar a tabuada do ${tabuadaNum}?`)) return;
             tabuadaScores[tabuadaNum] = 0;
             tabuadaErrors[tabuadaNum] = 0;
             tabuadaData[tabuadaNum].problems.forEach(p => { p.solved = false; p.userAnswer = null; });
             showTabuada(tabuadaNum);
         }
-        
         function showCompletionMessage(tabuadaNum) {
             const modal = document.getElementById('completion-modal'), title = document.getElementById('completion-message-title'), text = document.getElementById('completion-message-text'), redo = document.getElementById('redo-tabuada-button'), cont = document.getElementById('continue-tabuada-button');
             const errors = tabuadaErrors[tabuadaNum];
@@ -246,7 +205,6 @@
             else { mTitle = 'Excelente! ✨'; mText += `<br>Você teve apenas ${errors} erro(s). Quase perfeito!`; }
             title.innerHTML = mTitle; text.innerHTML = mText; modal.classList.add('is-active');
         }
-
         window.closeCompletionModal = () => document.getElementById('completion-modal').classList.remove('is-active');
         window.handleRedoClick = () => { closeCompletionModal(); resetTabuada(currentTabuadaNum); }
         window.handleContinueClick = () => {
@@ -254,27 +212,10 @@
             if (currentTabuadaNum === 10) { showOverallSummaryModal(); } 
             else { showTabuada(currentTabuadaNum + 1); }
         }
-
         window.showOverallSummaryModal = () => { populateOverallSummary(); document.getElementById('overall-summary-modal').classList.add('is-active'); }
         window.closeOverallSummaryModal = () => document.getElementById('overall-summary-modal').classList.remove('is-active');
-        
-        function populateOverallSummary() {
-            const content = document.getElementById('overall-summary-content');
-            let listHTML = Array.from({ length: 10 }, (_, i) => `<li>Tabuada do ${i + 1}: Acertos: ${tabuadaScores[i + 1]}/10, Erros: ${tabuadaErrors[i + 1]}</li>`).join('');
-            if (content) content.innerHTML = `<div class="overall-summary-content" id="overall-summary-content"><h4>Desempenho por Tabuada:</h4><ul>${listHTML}</ul><div class="summary-overall-totals">Total Geral de Acertos: ${Object.values(tabuadaScores).reduce((a, b) => a + b, 0)}/100 <br> Total Geral de Erros: ${Object.values(tabuadaErrors).reduce((a, b) => a + b, 0)}</div></div>`;
-        }
-
-        window.resetAllTabuadas = () => {
-            if (!confirm('Tem certeza que deseja reiniciar TODAS as tabuadas?')) return;
-            closeOverallSummaryModal();
-            for (let i = 1; i <= 10; i++) {
-                tabuadaScores[i] = 0;
-                tabuadaErrors[i] = 0;
-                tabuadaData[i].problems.forEach(p => { p.solved = false; p.userAnswer = null; });
-            }
-            showTabuada(1);
-        }
-        
+        function populateOverallSummary() { const content = document.getElementById('overall-summary-content'); let listHTML = Array.from({ length: 10 }, (_, i) => `<li>Tabuada do ${i + 1}: Acertos: ${tabuadaScores[i + 1]}/10, Erros: ${tabuadaErrors[i + 1]}</li>`).join(''); if (content) content.innerHTML = `<div class="overall-summary-content" id="overall-summary-content"><h4>Desempenho por Tabuada:</h4><ul>${listHTML}</ul><div class="summary-overall-totals">Total Geral de Acertos: ${Object.values(tabuadaScores).reduce((a, b) => a + b, 0)}/100 <br> Total Geral de Erros: ${Object.values(tabuadaErrors).reduce((a, b) => a + b, 0)}</div></div>`; }
+        window.resetAllTabuadas = () => { if (!confirm('Tem certeza que deseja reiniciar TODAS as tabuadas?')) return; closeOverallSummaryModal(); for (let i = 1; i <= 10; i++) { tabuadaScores[i] = 0; tabuadaErrors[i] = 0; tabuadaData[i].problems.forEach(p => { p.solved = false; p.userAnswer = null; }); } showTabuada(1); }
         renderTabNavigation();
         showTabuada(1);
     });
