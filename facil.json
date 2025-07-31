@@ -1,4 +1,6 @@
-[
+{
+  "quantidade": 10
+  "palavras": [
   "BOLO",
   "BOLA",
   "CAMA",
@@ -15,3 +17,4 @@
   "XALE",
   "ZEBRA"
 ]
+}
