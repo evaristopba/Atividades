@@ -5,46 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caça-Palavras: O Desafio</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: flex-start; padding: 20px; background-color: #eef1f5; gap: 40px; }
-        #start-screen { text-align: center; background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #difficulty-buttons button { margin: 10px; padding: 15px 30px; font-size: 18px; cursor: pointer; border-radius: 8px; border: 2px solid transparent; color: white; transition: transform 0.2s, box-shadow 0.2s; }
+        /* ESTILOS BASE (Seus estilos, com pequenas organizações) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding: 20px; background-color: #eef1f5; gap: 40px;
+        }
+
+        /* --- TELA INICIAL --- */
+        #start-screen {
+            text-align: center; background-color: #fff; padding: 40px;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #difficulty-buttons button {
+            margin: 10px; padding: 15px 30px; font-size: 18px; cursor: pointer;
+            border-radius: 8px; border: 2px solid transparent; color: white;
+            font-weight: bold; transition: transform 0.2s, box-shadow 0.2s;
+        }
         #difficulty-buttons button:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         #btn-easy { background-color: #28a745; }
         #btn-medium { background-color: #ffc107; color: #333; }
         #btn-hard { background-color: #dc3545; }
-        #btn-how-to-play { background-color: #6c757d; border: none; margin-top: 20px; }
-        .modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.6); opacity: 1; transition: opacity 0.3s ease-in-out; }
+
+        /* Estilo moderno para o botão "Como Jogar" */
+        #btn-how-to-play {
+            background-color: transparent; border: 2px solid #6c757d; color: #6c757d;
+            padding: 12px 28px; margin-top: 25px; font-weight: bold; font-size: 16px;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
+        }
+        #btn-how-to-play:hover {
+            background-color: #6c757d; color: white; transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* --- MODAL --- */
+        .modal-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;
+            display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.6);
+            opacity: 1; transition: opacity 0.3s ease-in-out;
+        }
         .modal-container.hidden { opacity: 0; pointer-events: none; }
-        .modal-content { background-color: #fff; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+        .modal-content {
+            background-color: #fff; padding: 30px; border-radius: 10px; width: 90%;
+            max-width: 500px; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
         .modal-content h2 { margin-top: 0; text-align: center; }
         .modal-content ul { padding-left: 20px; }
         .modal-content li { margin-bottom: 10px; line-height: 1.5; }
-        .modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; border: none; background: none; }
+        .modal-close-btn {
+            position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold;
+            color: #aaa; cursor: pointer; border: none; background: none;
+        }
         .modal-close-btn:hover { color: #333; }
-        #modal-understand-btn { position: static; display: block; margin: 20px auto 0; background-color: #007bff; color: white; padding: 10px 25px; font-size: 16px; border-radius: 5px; border: none; cursor: pointer; }
+        #modal-understand-btn {
+            position: static; display: block; margin: 20px auto 0; background-color: #007bff;
+            color: white; padding: 10px 25px; font-size: 16px; border-radius: 5px;
+            border: none; cursor: pointer;
+        }
         #modal-understand-btn:hover { background-color: #0056b3; }
+
+        /* --- ÁREA DO JOGO --- */
         #game-area { display: flex; gap: 40px; align-items: flex-start; }
         #game-container { display: flex; flex-direction: column; align-items: center; }
         #grid-container { border: 3px solid #333; position: relative; }
         table { border-collapse: collapse; }
-        td { width: 35px; height: 35px; text-align: center; vertical-align: middle; font-size: 18px; font-weight: bold; border: 1px solid #ccc; cursor: pointer; user-select: none; background-color: #fff; color: #444; transition: background-color 0.2s; }
+        td {
+            width: 35px; height: 35px; text-align: center; vertical-align: middle;
+            font-size: 18px; font-weight: bold; border: 1px solid #ccc;
+            cursor: pointer; user-select: none; background-color: #fff; color: #444;
+            transition: background-color 0.2s;
+        }
         td.selected { background-color: #a7d8ff; }
         td.correct { background-color: #a7ffb8; color: #000; }
         td.reveal { background-color: #fff3cd; border: 1px solid #ffc107; color: #000; }
-        #grid-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); color: white; font-size: 2.5em; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-radius: 0; }
+        #grid-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); color: white; font-size: 2.5em;
+            font-weight: bold; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; border-radius: 0; padding: 10px;
+        }
+        
+        /* --- PAINEL LATERAL --- */
         #status-panel { padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 250px; }
         #status-panel h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         #status-info { font-size: 20px; font-weight: bold; margin: 20px 0; text-align: center; }
         #status-info div { margin-bottom: 15px; }
         #status-info span { display: block; font-size: 1.5em; color: #007bff; }
         #word-list { list-style: none; padding: 0; margin: 0; }
-        #word-list li { font-size: 18px; margin-bottom: 8px; color: #555; transition: color 0.3s; }
+        #word-list li { font-size: 18px; margin-bottom: 8px; color: #555; transition: color 0.3s; word-break: break-all; }
         #word-list li.found { text-decoration: line-through; color: #aaa; }
+        
         #message { margin-top: 20px; font-size: 20px; font-weight: bold; color: #d63384; min-height: 30px; text-align: center; }
         #restart-btn { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; width: 100%; border-radius: 5px; border: none; background-color: #6c757d; color: white; }
         .hidden { display: none; }
-        .loader { width: 48px; height: 48px; border: 5px solid #ccc; border-bottom-color: #007bff; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+        
+        .loader {
+            width: 48px; height: 48px; border: 5px solid #ccc;
+            border-bottom-color: #007bff; border-radius: 50%;
+            display: inline-block; animation: rotation 1s linear infinite;
+        }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsividade para Celulares */
+        @media (max-width: 800px) {
+            body { flex-direction: column; align-items: center; gap: 20px; }
+            #game-area { flex-direction: column; align-items: center; width: 100%; gap: 20px; }
+            #status-panel { width: 90%; max-width: 400px; order: -1; }
+            #game-container { width: 100%; }
+            table { width: 95vw; max-width: 500px; }
+            td {
+                width: auto; height: 9.5vw; max-height: 45px;
+                font-size: clamp(10px, 3.5vw, 18px); /* Fonte fluida */
+            }
+            #grid-overlay { font-size: 1.8em; }
+        }
     </style>
 </head>
 <body>
@@ -88,6 +162,7 @@
             <button id="modal-understand-btn">Entendi!</button>
         </div>
     </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const startScreen = document.getElementById('start-screen');
@@ -113,12 +188,13 @@
         };
 
         const difficultySettings = {
-            easy:   { gridSize: 10, time: 300, next: 'medium' },
-            medium: { gridSize: 12, time: 240, next: 'hard' },
-            hard:   { gridSize: 15, time: 180, next: 'end' }
+            // O gridSize foi removido daqui, pois agora é dinâmico!
+            easy:   { time: 300, next: 'medium' },
+            medium: { time: 240, next: 'hard' },
+            hard:   { time: 180, next: 'end' }
         };
 
-        let grid = [], wordsToFind = [], wordsData = [], foundWords = new Set();
+        let grid = [], wordsData = [], foundWords = new Set();
         let isSelecting = false, selectionStartCell = null, currentSelectionCells = [];
         let score = 0, timeLeft = 0, timerInterval = null;
         let currentDifficulty = 'easy', timeBonusForNextLevel = 0;
@@ -126,12 +202,12 @@
         function startGame(difficulty) {
             startScreen.classList.add('hidden');
             gameArea.classList.remove('hidden');
-            score = 0;
-            timeBonusForNextLevel = 0;
+            score = 0; timeBonusForNextLevel = 0;
             updateScoreDisplay();
             loadLevel(difficulty);
         }
 
+        // LÓGICA DE CARREGAMENTO INTELIGENTE E DINÂMICA
         async function loadLevel(difficulty) {
             currentDifficulty = difficulty;
             const settings = difficultySettings[difficulty];
@@ -141,59 +217,58 @@
             clearInterval(timerInterval);
 
             try {
-                const wordData = await fetchWords(wordFiles[difficulty], settings.gridSize);
-                const wordCount = wordData.quantidade || 10;
-                const wordPool = wordData.palavras;
+                // 1. Busca os dados do seu arquivo JSON.
+                const wordDataResponse = await fetchWords(wordFiles[difficulty]);
+                const wordCount = wordDataResponse.quantidade || 10;
+                const wordPool = wordDataResponse.palavras;
 
-                grid = Array.from({ length: settings.gridSize }, () => Array(settings.gridSize).fill(''));
+                // 2. Seleciona as palavras para o nível.
+                const wordsForLevel = [...wordPool].sort(() => 0.5 - Math.random()).slice(0, wordCount);
+                if (wordsForLevel.length === 0) throw new Error("A lista de palavras está vazia.");
+
+                // 3. ACHAR A PALAVRA MAIS LONGA para definir o tamanho da grade.
+                const longestWordLength = Math.max(...wordsForLevel.map(w => w.length));
                 
-                wordsData = [];
-                let placedWords = 0;
-                let shuffledPool = [...wordPool].sort(() => 0.5 - Math.random());
+                // 4. CALCULAR O TAMANHO DINÂMICO DA GRADE.
+                // Mínimo de 10, ou a palavra mais longa + 4 casas de "respiro".
+                const dynamicGridSize = Math.max(10, longestWordLength + 4);
 
-                while (placedWords < wordCount && shuffledPool.length > 0) {
-                    const word = shuffledPool.pop();
+                // 5. Proceder com a criação do jogo usando o tamanho dinâmico.
+                grid = Array.from({ length: dynamicGridSize }, () => Array(dynamicGridSize).fill(''));
+                wordsData = [];
+                for (const word of wordsForLevel) {
                     const wordObj = { word, found: false, coords: [] };
-                    if (placeWord(wordObj, settings.gridSize)) {
+                    if (placeWord(wordObj, dynamicGridSize)) {
                         wordsData.push(wordObj);
-                        placedWords++;
                     }
                 }
                 
-                if (wordsData.length < wordCount) {
-                    console.warn(`Aviso: Foram solicitadas ${wordCount} palavras, mas apenas ${wordsData.length} puderam ser posicionadas.`);
-                    if (wordsData.length === 0) throw new Error("Nenhuma palavra pôde ser posicionada na grade.");
+                if (wordsData.length === 0) {
+                     throw new Error("Nenhuma palavra pôde ser posicionada.");
                 }
 
-                wordsToFind = wordsData.map(w => w.word);
-                
-                fillEmptySpaces(settings.gridSize);
-                renderGrid(settings.gridSize);
+                fillEmptySpaces(dynamicGridSize);
+                renderGrid(dynamicGridSize);
                 renderWordList();
-                
                 timeLeft = settings.time + timeBonusForNextLevel;
                 timeBonusForNextLevel = 0;
                 startTimer();
                 messageDiv.textContent = `Nível: ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
             } catch (error) {
-                gameOver(`Erro ao carregar nível: ${error.message}`);
+                gameOver(`Erro ao carregar: ${error.message}`);
             }
         }
         
-        async function fetchWords(url, maxLength) {
+        async function fetchWords(url) {
             try {
-                const response = await fetch(url);
+                const response = await fetch(`${url}?v=${new Date().getTime()}`);
                 if (!response.ok) throw new Error('Falha ao buscar o arquivo de palavras.');
                 const data = await response.json();
-                if (!data.palavras || !Array.isArray(data.palavras)) {
-                    throw new Error("Formato do arquivo JSON inválido.");
-                }
-                const filteredWords = data.palavras
-                    .map(word => word.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
-                    .filter(word => word.length > 2 && word.length <= maxLength);
+                if (!data.palavras || !Array.isArray(data.palavras)) throw new Error("Formato do JSON inválido.");
+                
                 return {
                     quantidade: data.quantidade,
-                    palavras: filteredWords
+                    palavras: data.palavras.map(word => word.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
                 };
             } catch (error) {
                 console.error("Erro ao buscar palavras, usando lista de emergência:", error);
@@ -211,33 +286,40 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     timerDisplay.textContent = "00:00";
-                    messageDiv.textContent = "Tempo Esgotado! Mostrando respostas...";
+                    messageDiv.textContent = "Tempo Esgotado! Respostas...";
                     revealNotFoundWords();
-                    setTimeout(() => {
-                        gameOver("Fim de Jogo!");
-                    }, 5000);
+                    setTimeout(() => gameOver("Fim de Jogo!"), 5000);
                 }
             }, 1000);
         }
 
         function placeWord(wordObj, gridSize) {
-            const directions = [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }];
-            let attempts = 0;
-            while (attempts < 200) {
-                const dir = directions[Math.floor(Math.random() * directions.length)];
-                const startX = Math.floor(Math.random() * gridSize);
-                const startY = Math.floor(Math.random() * gridSize);
-                if (canPlaceWord(wordObj.word, startX, startY, dir, gridSize)) {
-                    wordObj.coords = [];
-                    for (let i = 0; i < wordObj.word.length; i++) {
-                        const x = startX + i * dir.x;
-                        const y = startY + i * dir.y;
-                        grid[y][x] = wordObj.word[i];
-                        wordObj.coords.push({x, y});
+            const directions = [ { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: -1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: -1 } ];
+            directions.sort(() => Math.random() - 0.5);
+            for (const dir of directions) {
+                const potentialStarts = [];
+                for (let y = 0; y < gridSize; y++) {
+                    for (let x = 0; x < gridSize; x++) {
+                        const endX = x + (wordObj.word.length - 1) * dir.x;
+                        const endY = y + (wordObj.word.length - 1) * dir.y;
+                        if (endX < gridSize && endX >= 0 && endY < gridSize && endY >= 0) {
+                           potentialStarts.push({x, y});
+                        }
                     }
-                    return true;
                 }
-                attempts++;
+                potentialStarts.sort(() => Math.random() - 0.5);
+                for (const start of potentialStarts) {
+                    if (canPlaceWord(wordObj.word, start.x, start.y, dir, gridSize)) {
+                        wordObj.coords = [];
+                        for (let i = 0; i < wordObj.word.length; i++) {
+                            const x = start.x + i * dir.x;
+                            const y = start.y + i * dir.y;
+                            grid[y][x] = wordObj.word[i];
+                            wordObj.coords.push({x, y});
+                        }
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -246,34 +328,28 @@
             for (let i = 0; i < word.length; i++) {
                 const x = startX + i * dir.x;
                 const y = startY + i * dir.y;
-                if (x < 0 || x >= gridSize || y < 0 || y >= gridSize || (grid[y][x] !== '' && grid[y][x] !== word[i])) return false;
+                if (grid[y][x] !== '' && grid[y][x] !== word[i]) return false;
             }
             return true;
         }
-
+        
         function fillEmptySpaces(gridSize) {
             const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             for (let y = 0; y < gridSize; y++) for (let x = 0; x < gridSize; x++) if (grid[y][x] === '') grid[y][x] = alphabet[Math.floor(Math.random() * alphabet.length)];
         }
-
         function renderGrid(gridSize) {
-            gridContainer.innerHTML = '';
-            const table = document.createElement('table');
+            gridContainer.innerHTML = ''; const table = document.createElement('table');
             for (let y = 0; y < gridSize; y++) {
                 const row = document.createElement('tr');
                 for (let x = 0; x < gridSize; x++) {
                     const cell = document.createElement('td');
-                    cell.textContent = grid[y][x];
-                    cell.dataset.x = x;
-                    cell.dataset.y = y;
+                    cell.textContent = grid[y][x]; cell.dataset.x = x; cell.dataset.y = y;
                     row.appendChild(cell);
                 }
                 table.appendChild(row);
             }
-            gridContainer.appendChild(table);
-            addGridListeners();
+            gridContainer.appendChild(table); addGridListeners();
         }
-
         function renderWordList() {
             wordListUl.innerHTML = '';
             wordsData.forEach(({ word, found }) => {
@@ -283,38 +359,31 @@
                 wordListUl.appendChild(li);
             });
         }
-        
         function endSelection() {
             if (!isSelecting) return;
             isSelecting = false;
-            let selectedWord = currentSelectionCells.map(cell => cell.textContent).join('');
-            let selectedWordReversed = selectedWord.split('').reverse().join('');
-            const wordFound = wordsData.find(w => !w.found && (w.word === selectedWord || w.word === selectedWordReversed));
+            const selectionCoordsId = currentSelectionCells.map(cell => `${cell.dataset.x},${cell.dataset.y}`).sort().join(';');
+            const wordFound = wordsData.find(wordObj => {
+                if (wordObj.found) return false;
+                const wordCoordsId = wordObj.coords.map(coord => `${coord.x},${coord.y}`).sort().join(';');
+                return selectionCoordsId === wordCoordsId;
+            });
             if (wordFound) {
-                wordFound.found = true;
-                score += wordFound.word.length * 10;
+                wordFound.found = true; score += wordFound.word.length * 10;
                 updateScoreDisplay();
-                currentSelectionCells.forEach(cell => {
-                    cell.classList.remove('selected');
-                    cell.classList.add('correct');
-                });
-                renderWordList();
-                checkWin();
+                currentSelectionCells.forEach(cell => { cell.classList.remove('selected'); cell.classList.add('correct'); });
+                renderWordList(); checkWin();
             } else {
                  currentSelectionCells.forEach(cell => cell.classList.remove('selected'));
             }
-            selectionStartCell = null;
-            currentSelectionCells = [];
+            selectionStartCell = null; currentSelectionCells = [];
         }
-
         function checkWin() {
             const allFound = wordsData.every(w => w.found);
             if (allFound) {
                 clearInterval(timerInterval);
-                const timeBonusPoints = timeLeft * 5;
-                score += timeBonusPoints;
-                updateScoreDisplay();
-                timeBonusForNextLevel = timeLeft;
+                const timeBonusPoints = timeLeft * 5; score += timeBonusPoints;
+                updateScoreDisplay(); timeBonusForNextLevel = timeLeft;
                 const nextDifficulty = difficultySettings[currentDifficulty].next;
                 if (nextDifficulty !== 'end') {
                     messageDiv.textContent = `Nível completo! +${timeBonusPoints} pontos!`;
@@ -324,7 +393,6 @@
                 }
             }
         }
-
         function revealNotFoundWords() {
             removeGridListeners();
             wordsData.forEach(wordObj => {
@@ -336,86 +404,61 @@
                 }
             });
         }
-
         function gameOver(text) {
-            clearInterval(timerInterval);
-            removeGridListeners();
+            clearInterval(timerInterval); removeGridListeners();
             const overlay = document.createElement('div');
-            overlay.id = 'grid-overlay';
-            overlay.innerHTML = `<div>${text}</div>`;
+            overlay.id = 'grid-overlay'; overlay.innerHTML = `<div>${text}</div>`;
             gridContainer.appendChild(overlay);
         }
-
         function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
+            const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60;
             timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
-        
-        function updateScoreDisplay() {
-            scoreDisplay.textContent = score;
-        }
-
+        function updateScoreDisplay() { scoreDisplay.textContent = score; }
         difficultyButtons.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON' && e.target.id.startsWith('btn-')) {
                 const difficulty = e.target.id.split('-')[1];
                 startGame(difficulty);
             }
         });
-
         restartBtn.addEventListener('click', () => {
             clearInterval(timerInterval);
             gameArea.classList.add('hidden');
             startScreen.classList.remove('hidden');
         });
-        
         function addGridListeners() {
             gridContainer.addEventListener('mousedown', startSelection);
             gridContainer.addEventListener('mouseover', continueSelection);
             document.addEventListener('mouseup', endSelection);
         }
-
         function removeGridListeners() {
             gridContainer.removeEventListener('mousedown', startSelection);
             gridContainer.removeEventListener('mouseover', continueSelection);
             document.removeEventListener('mouseup', endSelection);
         }
-
         function startSelection(e) {
             if (e.target.tagName === 'TD') {
-                isSelecting = true;
-                selectionStartCell = e.target;
+                isSelecting = true; selectionStartCell = e.target;
                 updateSelection(e.target);
             }
         }
         function continueSelection(e) {
-            if (isSelecting && e.target.tagName === 'TD') {
-                updateSelection(e.target);
-            }
+            if (isSelecting && e.target.tagName === 'TD') updateSelection(e.target);
         }
         function updateSelection(endCell) {
             currentSelectionCells.forEach(cell => cell.classList.remove('selected'));
             currentSelectionCells = [];
-            const startX = parseInt(selectionStartCell.dataset.x);
-            const startY = parseInt(selectionStartCell.dataset.y);
-            const endX = parseInt(endCell.dataset.x);
-            const endY = parseInt(endCell.dataset.y);
-            const dx = endX - startX;
-            const dy = endY - startY;
-            const stepX = Math.sign(dx);
-            const stepY = Math.sign(dy);
+            const startX = parseInt(selectionStartCell.dataset.x), startY = parseInt(selectionStartCell.dataset.y);
+            const endX = parseInt(endCell.dataset.x), endY = parseInt(endCell.dataset.y);
+            const dx = endX - startX, dy = endY - startY;
+            const stepX = Math.sign(dx), stepY = Math.sign(dy);
             if (dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy)) {
-                let currentX = startX;
-                let currentY = startY;
+                let currentX = startX, currentY = startY;
                 const steps = Math.max(Math.abs(dx), Math.abs(dy));
                 for (let i = 0; i <= steps; i++) {
                     const cell = document.querySelector(`[data-x='${currentX}'][data-y='${currentY}']`);
-                    if (cell) {
-                        cell.classList.add('selected');
-                        currentSelectionCells.push(cell);
-                    }
-                    currentX += stepX;
-                    currentY += stepY;
+                    if (cell) { cell.classList.add('selected'); currentSelectionCells.push(cell); }
+                    currentX += stepX; currentY += stepY;
                 }
             } else {
                 selectionStartCell.classList.add('selected');
