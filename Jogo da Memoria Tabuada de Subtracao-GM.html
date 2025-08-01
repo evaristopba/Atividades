@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória da Tabuada de Subtração</title>
+    <!-- Font Awesome para ícones (adicionado para futuras melhorias visuais) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts: Poppins e Nunito (adicionado para futuras melhorias visuais) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Nunito:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Globais - Baseados no seu blog educativo */
+        :root {
+            --primary-color: #3498db; /* Azul */
+            --secondary-color: #2ecc71; /* Verde */
+            --accent-color: #f39c12; /* Laranja */
+            --highlight-color: #e74c3c; /* Vermelho para destaque/erros */
+            --text-dark: #333;
+            --text-light: #f4f4f4;
+            --bg-light: #e0f7fa; /* Fundo azul claro */
+            --card-back: #95a5a6; /* Cinza para o verso da carta */
+            --card-front: #3498db; /* Azul para a frente da carta */
+            --card-matched: #2ecc71; /* Verde para cartas combinadas */
+            --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg-light);
+            font-family: 'Comic Sans MS', Arial, sans-serif; /* Mantido o Comic Sans MS conforme o original */
+            color: var(--text-dark);
+        }
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: var(--shadow-light);
+        }
+        #tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(5, 80px);
+            gap: 10px;
+            margin: 20px;
+        }
+        .carta {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: var(--shadow-light);
+        }
+        .carta.virada {
+            transform: rotateY(180deg);
+        }
+        .carta.combinada {
+            transform: rotateY(180deg);
+            cursor: default;
+        }
+        .carta .frente, .carta .verso {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            border-radius: 5px;
+            backface-visibility: hidden;
+        }
+        .carta .frente {
+            background-color: var(--card-front);
+            transform: rotateY(180deg);
+        }
+        .carta.combinada .frente {
+            background-color: var(--card-matched);
+        }
+        .carta .verso {
+            background-color: var(--card-back);
+        }
+        #info {
+            margin: 10px;
+            font-size: 1.4em;
+            color: var(--text-dark);
+            background-color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: 5px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        #instrucoesModal, #gameOverModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #instrucoesContent, #gameOverContent {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: var(--shadow-hover);
+            color: var(--text-dark);
+        }
+        #instrucoesContent h2, #gameOverContent h2 {
+            color: var(--highlight-color);
+            margin-top: 0;
+        }
+        #instrucoesContent p, #gameOverContent p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        #iniciarJogo, #gameOverButton {
+            background-color: var(--secondary-color);
+        }
+        #iniciarJogo:hover, #gameOverButton:hover {
+            background-color: #27ae60;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            #info {
+                font-size: 1.1em;
+            }
+            #tabuleiro {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Ajusta colunas dinamicamente */
+                gap: 8px;
+            }
+            .carta {
+                width: 70px;
+                height: 70px;
+            }
+            .carta .frente, .carta .verso {
+                font-size: 18px;
+            }
+            #instrucoesContent, #gameOverContent {
+                padding: 15px;
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            button {
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+            #info {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
+            #tabuleiro {
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+                gap: 5px;
+            }
+            .carta {
+                width: 60px;
+                height: 60px;
+            }
+            .carta .frente, .carta .verso {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Memória da Tabuada de Subtração</h1>
+    <div>
+        <button id="mostrarInstrucoes">Iniciar Jogo</button>
+        <button id="proximaTabuada" disabled>Próxima Tabuada</button>
+        <button id="reiniciarTabuada">Reiniciar Jogo</button>
+    </div>
+    <div id="info">Tabuada: 1 | Pares Encontrados: 0/10 | Pontuação: 0</div>
+    <div id="tabuleiro"></div>
+    <div id="instrucoesModal">
+        <div id="instrucoesContent">
+            <h2>Jogo da Memória da Tabuada de Subtração</h2>
+            <p><strong>Objetivo:</strong> Combine pares de cartas com expressões de subtração (ex.: 5 - 2) e seus resultados (ex.: 3) para aprender as tabuadas de 1 a 10.</p>
+            <p><strong>Controles:</strong><br>
+               - Clique em uma carta para virá-la.<br>
+               - Combine duas cartas que formem um par correto.</p>
+            <p><strong>Mecânicas:</strong><br>
+               - Cada tabuada tem 10 pares únicos (expressão e resultado).<br>
+               - Acertar um par dá 10 pontos.<br>
+               - Complete 10 pares para avançar à próxima tabuada.<br>
+               - O jogo termina após a tabuada 10.</p>
+            <p><strong>Pontuação:</strong> Ganhe 10 pontos por par encontrado. Tente fazer 100 pontos por tabuada e 1000 pontos no total!</p>
+            <button id="iniciarJogo">Jogar</button>
+        </div>
+    </div>
+    <div id="gameOverModal">
+        <div id="gameOverContent">
+            <h2>Parabéns!</h2>
+            <p id="gameOverMessage">Você terminou todas as tabuadas!</p>
+            <button id="gameOverButton">Ok</button>
+        </div>
+    </div>
+    <script>
+        const tabuleiro = document.getElementById('tabuleiro');
+        const mostrarInstrucoes = document.getElementById('mostrarInstrucoes');
+        const iniciarJogo = document.getElementById('iniciarJogo');
+        const proximaTabuada = document.getElementById('proximaTabuada');
+        const reiniciarTabuada = document.getElementById('reiniciarTabuada');
+        const info = document.getElementById('info');
+        const instrucoesModal = document.getElementById('instrucoesModal');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const gameOverButton = document.getElementById('gameOverButton');
+
+        let currentTabuada = 1;
+        let paresEncontrados = 0;
+        let score = 0;
+        let cartas = [];
+        let cartasViradas = [];
+        let bloqueado = false;
+        const maxTabuada = 10;
+        const totalParesPorTabuada = 10;
+
+        // Verificar se pares estão distantes (mínimo 2 posições na grade 4x5)
+        function paresEstaoDistantes(cartasArray) {
+            const posicoes = cartasArray.map((_, index) => ({
+                x: index % 5,
+                y: Math.floor(index / 5)
+            }));
+
+            for (let i = 0; i < cartasArray.length; i += 2) {
+                const resultadoPar = cartasArray[i].result;
+                const index1 = i;
+                const index2 = cartasArray.findIndex((c, idx) => idx !== i && c.result === resultadoPar);
+
+                if (index2 === -1) continue; 
+
+                const pos1 = posicoes[index1];
+                const pos2 = posicoes[index2];
+
+                const distancia = Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
+                
+                if (distancia <= 1) { 
+                    console.log(`Par ${resultadoPar} está muito próximo: (${pos1.x},${pos1.y}) e (${pos2.x},${pos2.y})`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Gerar cartas para a tabuada atual (adaptado para subtração)
+        function gerarCartas() {
+            cartas = [];
+            // Para a tabuada de subtração 'N', geramos pares como (N+X) - N = X
+            // Onde X varia de 1 a 10, garantindo resultados únicos de 1 a 10.
+            for (let i = 1; i <= totalParesPorTabuada; i++) {
+                const minuendo = currentTabuada + i; 
+                const subtraendo = currentTabuada;   
+                const resultado = i;                 
+
+                cartas.push({ id: `expr_${minuendo}-${subtraendo}`, value: `${minuendo} - ${subtraendo}`, result: resultado });
+                cartas.push({ id: `res_${resultado}`, value: `${resultado}`, result: resultado });
+            }
+
+            let shuffledCartas;
+            let attempts = 0;
+            const maxAttempts = 100; 
+            do {
+                shuffledCartas = [...cartas]; 
+                for (let i = shuffledCartas.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledCartas[i], shuffledCartas[j]] = [shuffledCartas[j], shuffledCartas[i]];
+                }
+                attempts++;
+                if (attempts > maxAttempts) {
+                    console.warn("Máximo de tentativas de embaralhamento atingido. Pares podem estar próximos.");
+                    break;
+                }
+            } while (!paresEstaoDistantes(shuffledCartas));
+            
+            cartas = shuffledCartas; 
+            console.log('Cartas embaralhadas:', cartas.map(c => c.value));
+        }
+
+        // Renderizar tabuleiro
+        function renderizarTabuleiro() {
+            tabuleiro.innerHTML = '';
+            cartas.forEach((carta, index) => {
+                const div = document.createElement('div');
+                div.classList.add('carta');
+                div.dataset.index = index; 
+                div.dataset.result = carta.result;
+                div.innerHTML = `
+                    <div class="frente">${carta.value}</div>
+                    <div class="verso"></div>
+                `;
+                div.addEventListener('click', () => virarCarta(div));
+                tabuleiro.appendChild(div);
+            });
+        }
+
+        // Virar carta
+        function virarCarta(div) {
+            const index = parseInt(div.dataset.index);
+            if (bloqueado || div.classList.contains('virada') || div.classList.contains('combinada')) return;
+            
+            div.classList.add('virada');
+            cartasViradas.push(div);
+            console.log(`Carta virada: ${div.dataset.id} | Valor: ${div.querySelector('.frente').innerText}`);
+            
+            if (cartasViradas.length === 2) {
+                bloqueado = true;
+                // Removido o setTimeout aqui para que a verificação ocorra instantaneamente
+                verificarPar(); 
+            }
+        }
+
+        // Verificar par
+        function verificarPar() {
+            const [carta1Element, carta2Element] = cartasViradas;
+            const carta1Result = parseInt(carta1Element.dataset.result);
+            const carta2Result = parseInt(carta2Element.dataset.result);
+
+            console.log(`Verificando match: ${carta1Element.querySelector('.frente').innerText} (Resultado: ${carta1Result}) vs ${carta2Element.querySelector('.frente').innerText} (Resultado: ${carta2Result})`);
+
+            if (carta1Result === carta2Result) {
+                console.log('Par encontrado!');
+                carta1Element.classList.add('combinada');
+                carta2Element.classList.add('combinada');
+                
+                paresEncontrados++;
+                score += 10;
+                console.log(`Pares: ${paresEncontrados}/${totalParesPorTabuada} | Pontuação: ${score}`);
+                atualizarHUD();
+
+                if (paresEncontrados === totalParesPorTabuada) {
+                    if (currentTabuada < maxTabuada) {
+                        proximaTabuada.disabled = false;
+                    } else {
+                        mostrarGameOver();
+                    }
+                }
+                cartasViradas = [];
+                bloqueado = false;
+            } else {
+                console.log('Não é um par. Virando de volta...');
+                setTimeout(() => {
+                    carta1Element.classList.remove('virada');
+                    carta2Element.classList.remove('virada');
+                    cartasViradas = [];
+                    bloqueado = false;
+                }, 1000);
+            }
+        }
+
+        // Atualizar HUD
+        function atualizarHUD() {
+            info.innerText = `Tabuada: ${currentTabuada} | Pares Encontrados: ${paresEncontrados}/${totalParesPorTabuada} | Pontuação: ${score}`;
+        }
+
+        // Mostrar modal de game over
+        function mostrarGameOver() {
+            gameOverMessage.innerText = `Você terminou todas as tabuadas! Pontuação: ${score}`;
+            gameOverModal.style.display = 'flex';
+        }
+
+        // Iniciar jogo
+        function iniciar() {
+            instrucoesModal.style.display = 'none';
+            console.log('Modal de instruções fechado');
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            proximaTabuada.disabled = true;
+            gameOverModal.style.display = 'none';
+            gerarCartas();
+            renderizarTabuleiro();
+            atualizarHUD();
+            console.log('Jogo iniciado');
+        }
+
+        // Próxima tabuada
+        function avancarTabuada() {
+            if (currentTabuada < maxTabuada) {
+                currentTabuada++;
+                paresEncontrados = 0;
+                cartasViradas = [];
+                bloqueado = false;
+                proximaTabuada.disabled = true;
+                gerarCartas();
+                renderizarTabuleiro();
+                atualizarHUD();
+                console.log(`Avançou para tabuada: ${currentTabuada}`);
+            }
+        }
+
+        // Reiniciar jogo
+        function reiniciar() {
+            console.log('Jogo reiniciado');
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            proximaTabuada.disabled = true;
+            gameOverModal.style.display = 'none';
+            instrucoesModal.style.display = 'flex';
+        }
+
+        // Eventos
+        mostrarInstrucoes.addEventListener('click', () => {
+            instrucoesModal.style.display = 'flex';
+            console.log('Modal de instruções aberto');
+        });
+        iniciarJogo.addEventListener('click', iniciar);
+        proximaTabuada.addEventListener('click', avancarTabuada);
+        reiniciarTabuada.addEventListener('click', reiniciar);
+        gameOverButton.addEventListener('click', reiniciar);
+
+        // Mostrar modal de instruções ao carregar
+        instrucoesModal.style.display = 'flex';
+    </script>
+</body>
+</html>
