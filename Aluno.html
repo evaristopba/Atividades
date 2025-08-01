@@ -72,12 +72,24 @@
             document.getElementById('letter-display').textContent = state.letter;
             const overlay = document.querySelector('#status-overlay');
             const elementsToToggle = document.querySelectorAll('input, #submit-button');
+
             if (state.status === 'JOGANDO') {
                 overlay.style.display = 'none';
                 elementsToToggle.forEach(el => el.disabled = false);
-            } else {
+            } else { // PARADO ou AGUARDANDO
                 overlay.style.display = 'flex';
                 elementsToToggle.forEach(el => el.disabled = true);
+
+                // =======================================================
+                // AQUI ESTÁ A CORREÇÃO!
+                // Se a rodada foi resetada (status 'AGUARDANDO'), limpa os campos.
+                // =======================================================
+                if (state.status === 'AGUARDANDO') {
+                    const textInputs = document.querySelectorAll('input[type="text"]');
+                    textInputs.forEach(input => {
+                        input.value = '';
+                    });
+                }
             }
         }
 
