@@ -5,7 +5,6 @@
     <title>Jogo STOP - Aluno</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* CSS permanece o mesmo */
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
         #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; }
         #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 53, 69, 0.85); color: white; font-size: 6em; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
@@ -13,7 +12,10 @@
         #letter-display { font-size: 8em; font-weight: bold; color: #007BFF; margin: 10px 0 20px 0; }
         input { font-size: 1.1em; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
         input:disabled { background-color: #e9ecef; cursor: not-allowed; }
-        #categories-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; text-align: left; }
+        
+        #categories-container.modo-avancado { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; text-align: left; }
+        #categories-container.modo-simples { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 400px; margin: 0 auto; text-align: left; }
+
         .category-item label { display: block; font-size: 1.2em; font-weight: bold; color: #343a40; margin-bottom: 5px; }
         .category-item input { width: 100%; }
         #nickname-input { width: 50%; margin-bottom: 20px; }
@@ -47,7 +49,11 @@
         const gameContainer = document.getElementById('game-container');
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('sala');
+        const gameMode = urlParams.get('modo') || 'avancado';
         let answersRef;
+
+        const CATEGORIAS_AVANCADO = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
+        const CATEGORIAS_SIMPLES = ["Nome", "Cor", "Animal", "Brinquedo", "Comida"];
 
         if (!roomId) {
             gameContainer.innerHTML = '<h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>';
@@ -61,7 +67,7 @@
                     return;
                 }
                 if (!document.getElementById('letter-display')) {
-                    renderGameStructure(state.displayName);
+                    renderGameStructure(state.displayName, gameMode);
                     setupSubmitListener();
                     setupNicknamePersistence();
                 }
@@ -76,7 +82,7 @@
             const overlay = document.querySelector('#status-overlay');
             const elementsToToggle = document.querySelectorAll('input, #submit-button');
             const isPlaying = state.status === 'JOGANDO';
-            
+
             overlay.style.display = isPlaying ? 'none' : 'flex';
             elementsToToggle.forEach(el => el.disabled = !isPlaying);
 
@@ -88,30 +94,25 @@
             }
         }
 
-        function renderGameStructure(displayName) {
-            const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
+        function renderGameStructure(displayName, mode) {
+            const categorias = mode === 'simples' ? CATEGORIAS_SIMPLES : CATEGORIAS_AVANCADO;
             let categoriesHTML = '';
             categorias.forEach(categoria => {
                 const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
                 categoriesHTML += `<div class="category-item"><label for="${idCategoria}">${categoria}:</label><input type="text" id="${idCategoria}" class="game-input" data-category="${categoria}"></div>`;
             });
             const roomNameForDisplay = displayName || `Sala: ${roomId}`;
-            gameContainer.innerHTML = `<div id="room-id-display">${roomNameForDisplay}</div><div id="letter-display">?</div><hr><label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br><input type="text" id="nickname-input" placeholder="Apelido único"><div id="categories-container">${categoriesHTML}</div><button id="submit-button">ENVIAR RESPOSTAS</button><div id="status-overlay" style="display: none;">STOP!</div>`;
+            const containerClass = mode === 'simples' ? 'modo-simples' : 'modo-avancado';
+            gameContainer.innerHTML = `<div id="room-id-display">${roomNameForDisplay}</div><div id="letter-display">?</div><hr><label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br><input type="text" id="nickname-input" placeholder="Apelido único"><div id="categories-container" class="${containerClass}">${categoriesHTML}</div><button id="submit-button">ENVIAR RESPOSTAS</button><div id="status-overlay" style="display: none;">STOP!</div>`;
         }
 
-        // MODIFICADO: Função inteira dedicada a gerenciar o apelido de forma segura
         function setupNicknamePersistence() {
             const nicknameInput = document.getElementById('nickname-input');
-            // A chave de armazenamento agora é única para cada sala
             const storageKey = `stopGameNickname_${roomId}`;
-
-            // 1. Tenta recuperar um apelido salvo PARA ESTA SALA ESPECÍFICA
             const savedNickname = sessionStorage.getItem(storageKey);
             if (savedNickname) {
                 nicknameInput.value = savedNickname;
             }
-
-            // 2. Salva o apelido na chave específica desta sala
             nicknameInput.addEventListener('input', () => {
                 sessionStorage.setItem(storageKey, nicknameInput.value);
             });
