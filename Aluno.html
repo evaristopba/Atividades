@@ -5,6 +5,7 @@
     <title>Jogo STOP - Aluno</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* CSS permanece o mesmo */
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
         #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; }
         #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 53, 69, 0.85); color: white; font-size: 6em; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
@@ -28,7 +29,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // Lembrete: Cole suas credenciais seguras do Firebase aqui
         // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
         const firebaseConfig = {
                     // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
@@ -54,7 +54,6 @@
         } else {
             const gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
-
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state) {
@@ -64,6 +63,7 @@
                 if (!document.getElementById('letter-display')) {
                     renderGameStructure(state.displayName);
                     setupSubmitListener();
+                    setupNicknamePersistence();
                 }
                 updateGameState(state);
             });
@@ -73,19 +73,16 @@
             const displayName = state.displayName || `Sala: ${roomId}`;
             document.getElementById('room-id-display').textContent = displayName;
             document.getElementById('letter-display').textContent = state.letter;
-
             const overlay = document.querySelector('#status-overlay');
             const elementsToToggle = document.querySelectorAll('input, #submit-button');
-
-            // Passo 1: Habilitar ou Desabilitar tudo com base no status do jogo
             const isPlaying = state.status === 'JOGANDO';
+            
             overlay.style.display = isPlaying ? 'none' : 'flex';
             elementsToToggle.forEach(el => el.disabled = !isPlaying);
 
-            // Passo 2: Limpar os campos APENAS se for uma nova rodada (estado AGUARDANDO)
             if (state.status === 'AGUARDANDO') {
-                const textInputs = document.querySelectorAll('input[type="text"]');
-                textInputs.forEach(input => {
+                const categoryInputs = document.querySelectorAll('.game-input');
+                categoryInputs.forEach(input => {
                     input.value = '';
                 });
             }
@@ -102,14 +99,29 @@
             gameContainer.innerHTML = `<div id="room-id-display">${roomNameForDisplay}</div><div id="letter-display">?</div><hr><label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br><input type="text" id="nickname-input" placeholder="Apelido único"><div id="categories-container">${categoriesHTML}</div><button id="submit-button">ENVIAR RESPOSTAS</button><div id="status-overlay" style="display: none;">STOP!</div>`;
         }
 
+        // MODIFICADO: Função inteira dedicada a gerenciar o apelido de forma segura
+        function setupNicknamePersistence() {
+            const nicknameInput = document.getElementById('nickname-input');
+            // A chave de armazenamento agora é única para cada sala
+            const storageKey = `stopGameNickname_${roomId}`;
+
+            // 1. Tenta recuperar um apelido salvo PARA ESTA SALA ESPECÍFICA
+            const savedNickname = sessionStorage.getItem(storageKey);
+            if (savedNickname) {
+                nicknameInput.value = savedNickname;
+            }
+
+            // 2. Salva o apelido na chave específica desta sala
+            nicknameInput.addEventListener('input', () => {
+                sessionStorage.setItem(storageKey, nicknameInput.value);
+            });
+        }
+
         function setupSubmitListener() {
             const submitButton = document.getElementById('submit-button');
             submitButton.addEventListener('click', () => {
                 const nickname = document.getElementById('nickname-input').value.trim();
-                if (!nickname) {
-                    alert('Por favor, preencha seu apelido antes de enviar!');
-                    return;
-                }
+                if (!nickname) { alert('Por favor, preencha seu apelido antes de enviar!'); return; }
                 const answers = {};
                 const categoryInputs = document.querySelectorAll('.game-input');
                 categoryInputs.forEach(input => {
@@ -118,10 +130,7 @@
                 });
                 answersRef.child(nickname).set(answers)
                     .then(() => { alert('Suas respostas foram enviadas/atualizadas com sucesso!'); })
-                    .catch((error) => {
-                        console.error('Erro ao enviar respostas:', error);
-                        alert('Ocorreu um erro ao enviar suas respostas. Verifique a conexão e tente novamente.');
-                    });
+                    .catch((error) => { console.error('Erro ao enviar respostas:', error); alert('Ocorreu um erro ao enviar suas respostas.'); });
             });
         }
     </script>
