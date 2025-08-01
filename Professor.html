@@ -5,115 +5,52 @@
     <title>Controle do Professor - Jogo STOP Centralizado</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* --- ESTILOS GERAIS --- */
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        /* --- CONTAINER PRINCIPAL (O "CARD") --- */
-        .container {
-            background: white;
-            max-width: 600px;
-            width: 100%;
-            margin: auto;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        /* --- FONTES E TÍTULOS --- */
+        /* O CSS permanece o mesmo da versão visualmente aprimorada */
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
+        .container { background: white; max-width: 600px; width: 100%; margin: auto; padding: 30px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
         h1 { color: #343a40; }
         h2 { color: #495057; }
         h3 { color: #6c757d; font-weight: normal; }
-
-        /* --- ÁREA DE SETUP DA SALA --- */
-        #room-setup input {
-            font-size: 1.1em;
-            padding: 12px;
-            width: 80%;
-            max-width: 350px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-
-        /* --- BOTÕES --- */
-        button {
-            font-size: 1.1em;
-            font-weight: bold;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            cursor: pointer;
-            margin: 5px;
-            transition: opacity 0.2s; /* Efeito suave ao passar o mouse */
-        }
-        button:hover:not(:disabled) {
-            opacity: 0.85;
-        }
-        button:disabled {
-            background-color: #ced4da;
-            cursor: not-allowed;
-        }
-
-        /* Cores específicas dos botões */
+        #room-setup input { font-size: 1.1em; padding: 12px; width: 80%; max-width: 350px; border: 1px solid #ced4da; border-radius: 6px; margin-bottom: 10px; }
+        button { font-size: 1.1em; font-weight: bold; padding: 12px 20px; border: none; border-radius: 6px; color: white; cursor: pointer; margin: 5px; transition: opacity 0.2s; }
+        button:hover:not(:disabled) { opacity: 0.85; }
+        button:disabled { background-color: #ced4da; cursor: not-allowed; }
         #connect-button { background-color: #007bff; }
         #start-button { background-color: #28a745; }
         #stop-button { background-color: #dc3545; }
+        #reset-button { background-color: #6c757d; } /* Novo botão de reset */
         #change-room-button { background-color: #ffc107; color: #212529; }
-
-        /* --- ÁREA DE CONTROLE DO JOGO --- */
         #game-controls { display: none; }
         #game-state { margin: 25px 0; }
         #letter-display { font-size: 5em; font-weight: bold; color: #007bff; }
-
-        /* --- ÁREA DO LINK DO ALUNO --- */
-        #student-link-area {
-            margin-top: 30px;
-            background-color: #e9f5ff;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #b8daff;
-        }
-        #student-link {
-            font-weight: bold;
-            color: #0056b3;
-            word-wrap: break-word; /* Garante que links longos quebrem a linha */
-            font-size: 1.1em;
-        }
+        #student-link-area { margin-top: 30px; background-color: #e9f5ff; padding: 15px; border-radius: 8px; border: 1px solid #b8daff; }
+        #student-link { font-weight: bold; color: #0056b3; word-wrap: break-word; font-size: 1.1em; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
 
-        <!-- Tela Inicial -->
         <div id="room-setup">
             <h3>1. Digite o ID da sua Sala</h3>
-            <input type="text" id="room-id-input" placeholder="ex: escola1-1a-manha">
-            <br>
+            <input type="text" id="room-id-input" placeholder="ex: escola1-1a-manha"><br>
             <button id="connect-button">Conectar à Sala</button>
         </div>
 
-        <!-- Tela de Controle da Sala -->
         <div id="game-controls">
             <hr>
             <h2>Controles da Sala: <span id="current-room-id" style="color: #007bff;"></span></h2>
             <div id="game-state">
                 Status: <span id="status-text">Aguardando...</span> | Letra: <span id="letter-display">?</span>
             </div>
-            <button id="start-button">Nova Rodada</button>
-            <button id="stop-button" disabled>STOP (Para a Sala!)</button>
+            
+            <!-- Os botões de ação agora são controlados pelo JavaScript -->
+            <div id="action-buttons">
+                <button id="start-button" style="display: none;">Começar Rodada</button>
+                <button id="stop-button" style="display: none;">STOP (Para a Sala!)</button>
+                <button id="reset-button" style="display: none;">Preparar Nova Rodada</button>
+            </div>
+            
             <button id="change-room-button">Trocar de Sala</button>
 
             <div id="student-link-area">
@@ -123,7 +60,6 @@
         </div>
     </div>
 
-    <!-- O SCRIPT JAVASCRIPT PERMANECE EXATAMENTE O MESMO -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
@@ -146,16 +82,14 @@
         const gameControlsDiv = document.getElementById('game-controls');
         const roomIdInput = document.getElementById('room-id-input');
         const connectButton = document.getElementById('connect-button');
-        const studentLink = document.getElementById('student-link');
-        const currentRoomIdSpan = document.getElementById('current-room-id');
         const changeRoomButton = document.getElementById('change-room-button');
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        const resetButton = document.getElementById('reset-button');
 
         connectButton.addEventListener('click', () => {
             const roomId = roomIdInput.value.trim().toLowerCase();
-            if (!roomId) {
-                alert("Por favor, insira um ID de sala válido.");
-                return;
-            }
+            if (!roomId) { alert("Por favor, insira um ID de sala válido."); return; }
             connectToRoom(roomId);
         });
 
@@ -168,9 +102,9 @@
             gameStateRef = database.ref('salas/' + roomId);
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
-            currentRoomIdSpan.textContent = roomId;
+            document.getElementById('current-room-id').textContent = roomId;
             const studentUrl = `${window.location.href.replace('Professor.html', 'Aluno.html')}?sala=${roomId}`;
-            studentLink.textContent = studentUrl;
+            document.getElementById('student-link').textContent = studentUrl;
             listenToRoomChanges();
         }
 
@@ -184,36 +118,59 @@
             roomIdInput.value = '';
         }
 
+        // --- LÓGICA PRINCIPAL APRIMORADA ---
         function listenToRoomChanges() {
             const statusText = document.getElementById('status-text');
             const letterDisplay = document.getElementById('letter-display');
-            const startButton = document.getElementById('start-button');
-            const stopButton = document.getElementById('stop-button');
             
             if (gameStateRef) gameStateRef.off();
             
             gameStateRef.on('value', (snapshot) => {
-                const state = snapshot.val();
-                if (state) {
-                    statusText.textContent = state.status;
-                    letterDisplay.textContent = state.letter;
-                    stopButton.disabled = (state.status !== 'JOGANDO');
-                    startButton.disabled = (state.status === 'JOGANDO');
-                } else {
-                    gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
+                let state = snapshot.val();
+                
+                // Se a sala é nova, inicializa ela no estado 'AGUARDANDO'
+                if (!state) {
+                    state = { status: 'AGUARDANDO', letter: '?' };
+                    gameStateRef.set(state);
+                    return; // Sai e espera o Firebase confirmar a escrita
+                }
+
+                // Atualiza a UI com os dados recebidos
+                statusText.textContent = state.status;
+                letterDisplay.textContent = state.letter;
+
+                // Controla qual botão de ação fica visível
+                startButton.style.display = 'none';
+                stopButton.style.display = 'none';
+                resetButton.style.display = 'none';
+
+                if (state.status === 'AGUARDANDO') {
+                    startButton.style.display = 'inline-block';
+                } else if (state.status === 'JOGANDO') {
+                    stopButton.style.display = 'inline-block';
+                } else if (state.status === 'PARADO') {
+                    resetButton.style.display = 'inline-block';
                 }
             });
-
-            startButton.onclick = () => {
-                const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
-                const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
-                gameStateRef.set({ letter: newLetter, status: 'JOGANDO' });
-            };
-
-            stopButton.onclick = () => {
-                gameStateRef.update({ status: 'PARADO' });
-            };
         }
+
+        // --- AÇÕES DOS BOTÕES ---
+        startButton.onclick = () => {
+            const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
+            const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
+            gameStateRef.set({ letter: newLetter, status: 'JOGANDO' });
+        };
+
+        stopButton.onclick = () => {
+            gameStateRef.update({ status: 'PARADO' });
+        };
+
+        resetButton.onclick = () => {
+            // Um pop-up de confirmação para evitar cliques acidentais
+            if (confirm("Isso irá resetar a tela para todos os alunos se prepararem para a próxima rodada. Continuar?")) {
+                gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
+            }
+        };
     </script>
 </body>
 </html>
