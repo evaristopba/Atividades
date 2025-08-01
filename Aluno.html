@@ -69,19 +69,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('sala');
 
-        // =================================================================
-        // MUDANÇA AQUI: Declaramos a variável no escopo principal
-        // =================================================================
         let answersRef;
 
         if (!roomId) {
             gameContainer.innerHTML = '<h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>';
         } else {
             const gameStateRef = database.ref('salas/' + roomId);
-            
-            // =================================================================
-            // MUDANÇA AQUI: Apenas atribuímos o valor, sem redeclarar com "const"
-            // =================================================================
             answersRef = database.ref('salas/' + roomId + '/respostas');
 
             gameStateRef.on('value', (snapshot) => {
@@ -99,17 +92,22 @@
             });
         }
 
+        // =================================================================
+        // FUNÇÃO ATUALIZADA AQUI
+        // =================================================================
         function updateGameState(state) {
             document.getElementById('letter-display').textContent = state.letter;
             const overlay = document.querySelector('#status-overlay');
-            const allInputs = document.querySelectorAll('input');
+            
+            // Seleciona todos os inputs E o botão de envio para habilitar/desabilitar
+            const elementsToToggle = document.querySelectorAll('input, #submit-button');
 
             if (state.status === 'JOGANDO') {
                 overlay.style.display = 'none';
-                allInputs.forEach(input => input.disabled = false);
-            } else {
+                elementsToToggle.forEach(el => el.disabled = false);
+            } else { // PARADO ou AGUARDANDO
                 overlay.style.display = 'flex';
-                allInputs.forEach(input => input.disabled = true);
+                elementsToToggle.forEach(el => el.disabled = true);
             }
         }
 
@@ -160,10 +158,9 @@
                     answers[categoryName] = input.value.trim();
                 });
                 
-                // Agora esta função consegue "enxergar" a variável answersRef
                 answersRef.child(nickname).set(answers)
                     .then(() => {
-                        alert('Suas respostas foram enviadas com sucesso!');
+                        alert('Suas respostas foram enviadas/atualizadas com sucesso!');
                     })
                     .catch((error) => {
                         console.error('Erro ao enviar:', error);
