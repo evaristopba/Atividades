@@ -8,9 +8,7 @@
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
         .container { background: white; max-width: 95%; width: 1200px; margin: auto; padding: 30px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
         h1, h2, h3 { color: #343a40; }
-        
         #room-select { font-size: 1.2em; padding: 12px; width: 80%; max-width: 400px; border: 1px solid #ced4da; border-radius: 6px; margin-bottom: 10px; cursor: pointer; }
-        
         button { font-size: 1.1em; font-weight: bold; padding: 12px 20px; border: none; border-radius: 6px; color: white; cursor: pointer; margin: 5px; transition: opacity 0.2s; }
         button:hover:not(:disabled) { opacity: 0.85; }
         button:disabled { background-color: #ced4da; cursor: not-allowed; }
@@ -19,14 +17,11 @@
         #stop-button { background-color: #dc3545; }
         #reset-button { background-color: #6c757d; }
         #change-room-button { background-color: #ffc107; color: #212529; }
-        
         #game-controls { display: none; }
         #game-state { margin: 25px 0; }
         #letter-display { font-size: 5em; font-weight: bold; color: #007bff; }
-        
         #student-link-area { margin-top: 30px; background-color: #e9f5ff; padding: 15px; border-radius: 8px; border: 1px solid #b8daff; }
         #student-link { font-weight: bold; color: #0056b3; word-wrap: break-word; font-size: 1.1em; }
-        
         #answers-area { margin-top: 30px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-wrap: break-word; }
@@ -36,7 +31,6 @@
 <body>
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
-
         <div id="room-setup">
             <h3>1. Escolha a sua Sala</h3>
             <select id="room-select">
@@ -59,7 +53,6 @@
             </select><br>
             <button id="connect-button">Conectar à Sala</button>
         </div>
-
         <div id="game-controls">
             <hr>
             <h2>Controles da Sala: <span id="current-room-id" style="color: #007bff;"></span></h2>
@@ -76,7 +69,6 @@
                 <h3>2. Compartilhe este link com os alunos:</h3>
                 <p id="student-link">Aguardando conexão...</p>
             </div>
-
             <div id="answers-area">
                 <hr>
                 <h2>Respostas dos Alunos (Tempo Real)</h2>
@@ -87,11 +79,9 @@
             </div>
         </div>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
         const firebaseConfig = {
                     // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
                     apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
@@ -103,14 +93,10 @@
                     appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
                     measurementId: "G-WGRJWRVBEN"
                 };
-        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         let gameStateRef, answersRef;
-
         const CATEGORIAS = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
-
-        // Seletores de elementos do DOM
         const roomSetupDiv = document.getElementById('room-setup');
         const gameControlsDiv = document.getElementById('game-controls');
         const roomSelect = document.getElementById('room-select');
@@ -124,10 +110,7 @@
 
         connectButton.addEventListener('click', () => {
             const roomId = roomSelect.value;
-            if (!roomId) { 
-                alert("Por favor, selecione uma sala da lista.");
-                return;
-            }
+            if (!roomId) { alert("Por favor, selecione uma sala da lista."); return; }
             connectToRoom(roomId);
         });
 
@@ -139,25 +122,18 @@
         function connectToRoom(roomId) {
             gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
+            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            const groupLabel = selectedOption.parentElement.label;
+            const optionText = selectedOption.text;
+            const fullDisplayName = `${groupLabel} - ${optionText}`;
             
+            gameStateRef.update({ displayName: fullDisplayName });
+
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
-
-            // =======================================================
-            // AQUI ESTÁ A MÁGICA: Capturando o nome amigável
-            // =======================================================
-            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
-            const groupLabel = selectedOption.parentElement.label; // Ex: "Escola Capitão"
-            const optionText = selectedOption.text; // Ex: "4º ano A - Manhã"
-            const fullDisplayName = `${groupLabel} - ${optionText}`; // Junta os dois
-            
-            // Usamos o nome amigável para exibição
             document.getElementById('current-room-id').textContent = fullDisplayName;
-            // =======================================================
-            
             const studentUrl = window.location.href.replace(/professor\.html/i, 'Aluno.html') + `?sala=${roomId}`;
             document.getElementById('student-link').textContent = studentUrl;
-            
             renderTableHeader();
             listenToRoomChanges();
             listenToAnswers();
@@ -213,7 +189,7 @@
             gameStateRef.on('value', (snapshot) => {
                 let state = snapshot.val();
                 if (!state || !state.status) {
-                    state = { status: 'AGUARDANDO', letter: '?' };
+                    state = { status: 'AGUARDANDO', letter: '?', displayName: (state && state.displayName) ? state.displayName : '' };
                     gameStateRef.set(state);
                     return;
                 }
@@ -238,7 +214,7 @@
         resetButton.onclick = () => {
             if (confirm("Isso irá apagar as respostas da rodada e preparar uma nova letra. Continuar?")) {
                 if (answersRef) answersRef.remove();
-                gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
+                gameStateRef.update({ status: 'AGUARDANDO', letter: '?' });
             }
         };
     </script>
