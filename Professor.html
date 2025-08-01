@@ -37,7 +37,6 @@
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
 
-        <!-- MUDANÇA PRINCIPAL: Input de texto substituído por este menu dropdown -->
         <div id="room-setup">
             <h3>1. Escolha a sua Sala</h3>
             <select id="room-select">
@@ -143,7 +142,18 @@
             
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
-            document.getElementById('current-room-id').textContent = roomId;
+
+            // =======================================================
+            // AQUI ESTÁ A MÁGICA: Capturando o nome amigável
+            // =======================================================
+            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            const groupLabel = selectedOption.parentElement.label; // Ex: "Escola Capitão"
+            const optionText = selectedOption.text; // Ex: "4º ano A - Manhã"
+            const fullDisplayName = `${groupLabel} - ${optionText}`; // Junta os dois
+            
+            // Usamos o nome amigável para exibição
+            document.getElementById('current-room-id').textContent = fullDisplayName;
+            // =======================================================
             
             const studentUrl = window.location.href.replace(/professor\.html/i, 'Aluno.html') + `?sala=${roomId}`;
             document.getElementById('student-link').textContent = studentUrl;
@@ -174,7 +184,7 @@
         function resetUI() {
             gameControlsDiv.style.display = 'none';
             roomSetupDiv.style.display = 'block';
-            roomSelect.selectedIndex = 0; // Reseta o menu dropdown
+            roomSelect.selectedIndex = 0;
             answersThead.innerHTML = '';
             answersTbody.innerHTML = '';
         }
