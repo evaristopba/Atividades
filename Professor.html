@@ -71,24 +71,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
         // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
-const firebaseConfig = {
-            // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
-            apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
-            authDomain: "meu-super-jogo-stop.firebaseapp.com",
-            databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
-            projectId: "meu-super-jogo-stop",
-            storageBucket: "meu-super-jogo-stop.firebasestorage.app",
-            messagingSenderId: "958593186721",
-            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
-            measurementId: "G-WGRJWRVBEN"
-        };
+        const firebaseConfig = {
+                    // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
+                    apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
+                    authDomain: "meu-super-jogo-stop.firebaseapp.com",
+                    databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
+                    projectId: "meu-super-jogo-stop",
+                    storageBucket: "meu-super-jogo-stop.firebasestorage.app",
+                    messagingSenderId: "958593186721",
+                    appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
+                    measurementId: "G-WGRJWRVBEN"
+                };
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         let gameStateRef, answersRef;
 
-        // --- NOVO: Definir a lista de categorias aqui ---
-        // DEVE SER IDÊNTICA à lista no arquivo aluno.html
         const CATEGORIAS = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
 
         // Seletores de elementos do DOM
@@ -100,8 +98,8 @@ const firebaseConfig = {
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
         const resetButton = document.getElementById('reset-button');
-        const answersThead = document.getElementById('answers-thead'); // Cabeçalho
-        const answersTbody = document.getElementById('answers-tbody'); // Corpo
+        const answersThead = document.getElementById('answers-thead');
+        const answersTbody = document.getElementById('answers-tbody');
 
         connectButton.addEventListener('click', () => {
             const roomId = roomIdInput.value.trim().toLowerCase();
@@ -120,25 +118,26 @@ const firebaseConfig = {
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
             document.getElementById('current-room-id').textContent = roomId;
-            const studentUrl = window.location.href.toLowerCase().replace('professor.html', 'aluno.html') + `?sala=${roomId}`;
+            
+            // ===================================================================
+            // AQUI ESTÁ A CORREÇÃO!
+            // Trocamos a linha antiga por esta, que respeita as maiúsculas.
+            // ===================================================================
+            const studentUrl = window.location.href.replace('Professor.html', 'Aluno.html') + `?sala=${roomId}`;
+            
             document.getElementById('student-link').textContent = studentUrl;
             
-            renderTableHeader(); // CRIA O CABEÇALHO DA TABELA DINAMICAMENTE
+            renderTableHeader();
             listenToRoomChanges();
             listenToAnswers();
         }
 
-        // --- NOVA FUNÇÃO: Renderiza o cabeçalho da tabela dinamicamente ---
         function renderTableHeader() {
-            answersThead.innerHTML = ''; // Limpa o cabeçalho antigo
+            answersThead.innerHTML = '';
             const headerRow = answersThead.insertRow();
-            
-            // Primeira coluna sempre será o apelido
             let th = document.createElement('th');
             th.textContent = 'Apelido';
             headerRow.appendChild(th);
-            
-            // Adiciona uma coluna para cada categoria da lista
             CATEGORIAS.forEach(categoria => {
                 th = document.createElement('th');
                 th.textContent = categoria;
@@ -155,31 +154,20 @@ const firebaseConfig = {
             gameControlsDiv.style.display = 'none';
             roomSetupDiv.style.display = 'block';
             roomIdInput.value = '';
-            answersThead.innerHTML = ''; // Limpa o cabeçalho ao trocar de sala
+            answersThead.innerHTML = '';
             answersTbody.innerHTML = '';
         }
 
-        function listenToRoomChanges() {
-            // Esta função permanece a mesma, controlando botões e status
-            // ... (código sem alterações)
-        }
-
-        // --- ATUALIZADO: Função que ouve e renderiza as respostas ---
         function listenToAnswers() {
             answersRef.on('value', (snapshot) => {
-                answersTbody.innerHTML = ''; // Limpa o corpo da tabela para reconstruí-lo
+                answersTbody.innerHTML = '';
                 const allAnswers = snapshot.val();
                 if (allAnswers) {
                     for (const nickname in allAnswers) {
                         const studentData = allAnswers[nickname];
                         const row = answersTbody.insertRow();
-                        
-                        // Adiciona a célula do apelido
                         row.insertCell().textContent = nickname;
-                        
-                        // Percorre a lista de categorias para criar as células na ordem correta
                         CATEGORIAS.forEach(categoria => {
-                            // Pega a resposta para a categoria atual ou mostra '—' se estiver vazia
                             const answer = studentData[categoria] || '—';
                             row.insertCell().textContent = answer;
                         });
@@ -194,9 +182,6 @@ const firebaseConfig = {
                 gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
             }
         };
-
-        // As outras funções (listenToRoomChanges, startButton.onclick, stopButton.onclick) permanecem exatamente as mesmas
-        // Colei-as abaixo para garantir que o arquivo fique completo.
 
         startButton.onclick = () => {
             const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
@@ -213,7 +198,7 @@ const firebaseConfig = {
             const letterDisplay = document.getElementById('letter-display');
             gameStateRef.on('value', (snapshot) => {
                 let state = snapshot.val();
-                if (!state || !state.status) { // Verifica se state ou state.status é nulo/undefined
+                if (!state || !state.status) {
                     state = { status: 'AGUARDANDO', letter: '?' };
                     gameStateRef.set(state);
                     return;
