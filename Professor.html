@@ -11,17 +11,22 @@
         #game-controls { display: none; /* Escondido até conectar */ }
         #student-link-area { margin-top: 20px; background-color: #e9f5ff; padding: 10px; border-radius: 5px; }
         #student-link { font-weight: bold; color: #0056b3; word-wrap: break-word; }
-        button { cursor: pointer; }
+        button { cursor: pointer; margin: 5px; }
+        #change-room-button { background-color: #ffc107; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
+
+        <!-- Tela Inicial -->
         <div id="room-setup">
             <h3>1. Digite o ID da sua Sala</h3>
             <input type="text" id="room-id-input" placeholder="ex: escola1-1a-manha">
             <button id="connect-button">Conectar à Sala</button>
         </div>
+
+        <!-- Tela de Controle da Sala (inicialmente oculta) -->
         <div id="game-controls">
             <hr>
             <h2>Controles da Sala: <span id="current-room-id" style="color: #007bff;"></span></h2>
@@ -30,6 +35,10 @@
             </div>
             <button id="start-button">Nova Rodada</button>
             <button id="stop-button" disabled>STOP (Para a Sala!)</button>
+            
+            <!-- NOVO BOTÃO ADICIONADO AQUI -->
+            <button id="change-room-button">Trocar de Sala</button>
+
             <div id="student-link-area">
                 <h3>2. Compartilhe este link com os alunos:</h3>
                 <p id="student-link">Aguardando conexão...</p>
@@ -40,7 +49,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // SEU CÓDIGO DE CONFIGURAÇÃO ÚNICO
+        // SEU CÓDIGO DE CONFIGURAÇÃO ÚNICO (NÃO MUDAR)
         const firebaseConfig = {
             apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
             authDomain: "meu-super-jogo-stop.firebaseapp.com",
@@ -51,39 +60,69 @@
             appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
             measurementId: "G-WGRJWRVBEN"
         };
-
-        // O RESTANTE DO CÓDIGO (NÃO PRECISA MUDAR)
+        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        let gameStateRef;
+        let gameStateRef; // Referência será definida dinamicamente
 
+        // Elementos da UI
+        const roomSetupDiv = document.getElementById('room-setup');
+        const gameControlsDiv = document.getElementById('game-controls');
         const roomIdInput = document.getElementById('room-id-input');
         const connectButton = document.getElementById('connect-button');
-        const gameControls = document.getElementById('game-controls');
         const studentLink = document.getElementById('student-link');
         const currentRoomIdSpan = document.getElementById('current-room-id');
+        const changeRoomButton = document.getElementById('change-room-button'); // Novo botão
 
+        // Evento para conectar
         connectButton.addEventListener('click', () => {
             const roomId = roomIdInput.value.trim().toLowerCase();
             if (!roomId) {
                 alert("Por favor, insira um ID de sala válido.");
                 return;
             }
+            connectToRoom(roomId);
+        });
+
+        // Evento para trocar de sala
+        changeRoomButton.addEventListener('click', () => {
+            disconnectFromRoom();
+            resetUI();
+        });
+
+        function connectToRoom(roomId) {
             gameStateRef = database.ref('salas/' + roomId);
-            document.getElementById('room-setup').style.display = 'none';
-            gameControls.style.display = 'block';
+            roomSetupDiv.style.display = 'none';
+            gameControlsDiv.style.display = 'block';
             currentRoomIdSpan.textContent = roomId;
             const studentUrl = `${window.location.href.replace('Professor.html', 'Aluno.html')}?sala=${roomId}`;
             studentLink.textContent = studentUrl;
             listenToRoomChanges();
-        });
+        }
+
+        // NOVO: Função para parar de ouvir a sala antiga
+        function disconnectFromRoom() {
+            if (gameStateRef) {
+                gameStateRef.off(); // Isso remove o 'listener' (o .on('value', ...))
+            }
+        }
+
+        // NOVO: Função para reverter a UI para o estado inicial
+        function resetUI() {
+            gameControlsDiv.style.display = 'none';
+            roomSetupDiv.style.display = 'block';
+            roomIdInput.value = ''; // Limpa o campo de input
+        }
 
         function listenToRoomChanges() {
             const statusText = document.getElementById('status-text');
             const letterDisplay = document.getElementById('letter-display');
             const startButton = document.getElementById('start-button');
             const stopButton = document.getElementById('stop-button');
-            
+
+            // Limpa o listener antigo antes de adicionar um novo, para segurança
+            if (gameStateRef) gameStateRef.off();
+
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (state) {
@@ -96,15 +135,17 @@
                 }
             });
 
-            startButton.addEventListener('click', () => {
+            // A lógica dos botões de start/stop é movida para dentro desta função para garantir que
+            // eles sempre se refiram à `gameStateRef` correta.
+            startButton.onclick = () => {
                 const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
                 const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
                 gameStateRef.set({ letter: newLetter, status: 'JOGANDO' });
-            });
+            };
 
-            stopButton.addEventListener('click', () => {
+            stopButton.onclick = () => {
                 gameStateRef.update({ status: 'PARADO' });
-            });
+            };
         }
     </script>
 </body>
