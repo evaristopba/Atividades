@@ -7,39 +7,38 @@
     <style>
         /* CSS Geral (sem mudanças) */
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
-        #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; /* Aumentamos a largura máxima para acomodar 2 colunas */ }
+        #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; }
         #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 53, 69, 0.85); color: white; font-size: 6em; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
         
         /* Conteúdo do Jogo (sem mudanças) */
         #room-id-display { font-size: 1.5em; font-weight: bold; color: #6c757d; margin-bottom: 10px; }
         #letter-display { font-size: 8em; font-weight: bold; color: #007BFF; margin: 10px 0 20px 0; }
+        input { font-size: 1.1em; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
         input:disabled { background-color: #e9ecef; cursor: not-allowed; }
 
-        /* --- ✨ MELHORIA PRINCIPAL AQUI: LAYOUT EM GRID --- */
-        #categories-container {
-            display: grid; /* Ativa o layout em grid */
-            grid-template-columns: 1fr 1fr; /* Cria duas colunas de largura igual */
-            gap: 15px 30px; /* Define o espaço entre as linhas (15px) e entre as colunas (30px) */
-            text-align: left;
-        }
+        /* Layout em Grid (sem mudanças) */
+        #categories-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; text-align: left; }
+        .category-item label { display: block; font-size: 1.2em; font-weight: bold; color: #343a40; margin-bottom: 5px; }
+        .category-item input { width: 100%; }
 
-        /* --- ✨ AJUSTE NOS ITENS DAS CATEGORIAS --- */
-        .category-item label { /* O estilo que era de #categories-container label agora é do .category-item */
-            display: block;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #343a40;
-            margin-bottom: 5px;
-        }
-
-        .category-item input {
+        /* --- NOVO: Estilos para os novos elementos --- */
+        #nickname-input { width: 50%; margin-bottom: 20px; }
+        #submit-button {
             width: 100%;
-            padding: 12px;
-            font-size: 1.1em;
-            border: 1px solid #ced4da;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: white;
+            background-color: #28a745; /* Verde para confirmar/enviar */
+            border: none;
             border-radius: 6px;
-            box-sizing: border-box;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
+        #submit-button:hover:not(:disabled) { opacity: 0.85; }
+        #submit-button:disabled { background-color: #ced4da; }
+
     </style>
 </head>
 <body>
@@ -47,20 +46,21 @@
         <h1>Aguardando o jogo começar...</h1>
     </div>
 
-    <!-- O SCRIPT JAVASCRIPT TERÁ UMA PEQUENA MUDANÇA -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
+        // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
+        // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
         const firebaseConfig = {
-            apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
-            authDomain: "meu-super-jogo-stop.firebaseapp.com",
-            databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
-            projectId: "meu-super-jogo-stop",
-            storageBucket: "meu-super-jogo-stop.firebasestorage.app",
-            messagingSenderId: "958593186721",
-            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
-            measurementId: "G-WGRJWRVBEN"
-        };
+                    apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
+                    authDomain: "meu-super-jogo-stop.firebaseapp.com",
+                    databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
+                    projectId: "meu-super-jogo-stop",
+                    storageBucket: "meu-super-jogo-stop.firebasestorage.app",
+                    messagingSenderId: "958593186721",
+                    appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
+                    measurementId: "G-WGRJWRVBEN"
+         };
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -73,6 +73,8 @@
             gameContainer.innerHTML = '<h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>';
         } else {
             const gameStateRef = database.ref('salas/' + roomId);
+            // NOVO: Referência para o local onde as respostas serão salvas
+            const answersRef = database.ref('salas/' + roomId + '/respostas');
 
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
@@ -80,50 +82,95 @@
                     gameContainer.innerHTML = `<h1>Aguardando o professor iniciar o jogo na sala "${roomId}"...</h1>`;
                     return;
                 }
-                renderGame(state);
-                const overlay = document.querySelector('#status-overlay');
-                const inputs = document.querySelectorAll('.game-input');
-                if (state.status === 'JOGANDO') {
-                    if (overlay) overlay.style.display = 'none';
-                    inputs.forEach(input => input.disabled = false);
-                } else {
-                    if (overlay) overlay.style.display = 'flex';
-                    inputs.forEach(input => input.disabled = true);
+                
+                // NOVO: Lógica aprimorada. O jogo só é "desenhado" uma vez.
+                // Depois, apenas atualizamos o estado. Isso evita que o que o aluno digitou seja apagado.
+                if (!document.getElementById('letter-display')) {
+                    renderGameStructure();
+                    setupSubmitListener(); // NOVO: Configura o botão de envio
                 }
+
+                // Atualiza a UI com os novos dados do Firebase
+                updateGameState(state);
             });
         }
 
-        function renderGame(state) {
-            if (document.getElementById('letter-display')) {
-                document.getElementById('letter-display').textContent = state.letter;
-                return;
-            }
+        function updateGameState(state) {
+            document.getElementById('letter-display').textContent = state.letter;
+            const overlay = document.querySelector('#status-overlay');
+            const allInputs = document.querySelectorAll('input'); // Todos os inputs, incluindo o apelido
 
-            // A lista de categorias permanece a mesma
+            if (state.status === 'JOGANDO') {
+                overlay.style.display = 'none';
+                allInputs.forEach(input => input.disabled = false);
+            } else { // PARADO ou AGUARDANDO
+                overlay.style.display = 'flex';
+                allInputs.forEach(input => input.disabled = true);
+            }
+        }
+
+        // NOVO: Esta função agora só cria a estrutura base do jogo, uma única vez.
+        function renderGameStructure() {
             const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
             
-            // --- ✨ MUDANÇA AQUI: COMO GERAMOS O HTML ---
-            // Agora, cada categoria é envolvida por um <div class="category-item">
-            // para que o grid consiga organizá-la corretamente.
             let categoriesHTML = '';
             categorias.forEach(categoria => {
+                // Adicionamos um 'data-category' para identificar facilmente o campo no JS
+                const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); // ex: País ou Cidade -> paisoucidade
                 categoriesHTML += `
                     <div class="category-item">
-                        <label>${categoria}:</label>
-                        <input type="text" class="game-input">
+                        <label for="${idCategoria}">${categoria}:</label>
+                        <input type="text" id="${idCategoria}" class="game-input" data-category="${categoria}">
                     </div>
                 `;
             });
 
             gameContainer.innerHTML = `
                 <div id="room-id-display">Sala: ${roomId}</div>
-                <div id="letter-display">${state.letter}</div>
+                <div id="letter-display">?</div>
                 <hr>
-                <div id="categories-container">
-                    ${categoriesHTML}
-                </div>
+                <!-- NOVO: Campo de apelido -->
+                <label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br>
+                <input type="text" id="nickname-input" placeholder="Apelido único">
+                
+                <div id="categories-container">${categoriesHTML}</div>
+                
+                <!-- NOVO: Botão de envio -->
+                <button id="submit-button">ENVIAR RESPOSTAS</button>
+
                 <div id="status-overlay" style="display: none;">STOP!</div>
             `;
+        }
+        
+        // NOVO: Função inteira para lidar com o envio das respostas
+        function setupSubmitListener() {
+            const submitButton = document.getElementById('submit-button');
+            
+            submitButton.addEventListener('click', () => {
+                const nickname = document.getElementById('nickname-input').value.trim();
+                if (!nickname) {
+                    alert('Por favor, preencha seu apelido antes de enviar!');
+                    return;
+                }
+
+                const answers = {};
+                const categoryInputs = document.querySelectorAll('.game-input');
+                
+                categoryInputs.forEach(input => {
+                    const categoryName = input.dataset.category;
+                    answers[categoryName] = input.value.trim();
+                });
+                
+                // Salva o objeto de respostas no Firebase, usando o apelido como chave
+                answersRef.child(nickname).set(answers)
+                    .then(() => {
+                        alert('Suas respostas foram enviadas com sucesso!');
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao enviar:', error);
+                        alert('Ocorreu um erro. Tente novamente.');
+                    });
+            });
         }
     </script>
 </body>
