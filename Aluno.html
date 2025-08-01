@@ -12,10 +12,8 @@
         #letter-display { font-size: 8em; font-weight: bold; color: #007BFF; margin: 10px 0 20px 0; }
         input { font-size: 1.1em; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
         input:disabled { background-color: #e9ecef; cursor: not-allowed; }
-        
         #categories-container.modo-avancado { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; text-align: left; }
         #categories-container.modo-simples { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 400px; margin: 0 auto; text-align: left; }
-
         .category-item label { display: block; font-size: 1.2em; font-weight: bold; color: #343a40; margin-bottom: 5px; }
         .category-item input { width: 100%; }
         #nickname-input { width: 50%; margin-bottom: 20px; }
@@ -26,7 +24,7 @@
 </head>
 <body>
     <div id="game-container">
-        <h1>Aguardando o jogo começar...</h1>
+        <h1>Carregando sala...</h1>
     </div>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -50,6 +48,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('sala');
         const gameMode = urlParams.get('modo') || 'avancado';
+        const friendlyNameFromUrl = urlParams.get('nome');
         let answersRef;
 
         const CATEGORIAS_AVANCADO = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
@@ -58,16 +57,20 @@
         if (!roomId) {
             gameContainer.innerHTML = '<h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>';
         } else {
+            const initialDisplayName = friendlyNameFromUrl ? decodeURIComponent(friendlyNameFromUrl) : `sala "${roomId}"`;
+            gameContainer.innerHTML = `<h1>Aguardando o professor iniciar o jogo na sala:<br><span style="color: #007bff;">${initialDisplayName}</span></h1>`;
+
             const gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
+            
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
-                if (!state) {
-                    gameContainer.innerHTML = `<h1>Aguardando o professor iniciar o jogo na sala "${roomId}"...</h1>`;
-                    return;
-                }
+                if (!state) { return; }
+                
+                const currentDisplayName = state.displayName || initialDisplayName;
+                
                 if (!document.getElementById('letter-display')) {
-                    renderGameStructure(state.displayName, gameMode);
+                    renderGameStructure(currentDisplayName, gameMode);
                     setupSubmitListener();
                     setupNicknamePersistence();
                 }
@@ -76,7 +79,7 @@
         }
 
         function updateGameState(state) {
-            const displayName = state.displayName || `Sala: ${roomId}`;
+            const displayName = state.displayName || friendlyNameFromUrl || `Sala: ${roomId}`;
             document.getElementById('room-id-display').textContent = displayName;
             document.getElementById('letter-display').textContent = state.letter;
             const overlay = document.querySelector('#status-overlay');
@@ -101,7 +104,7 @@
                 const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
                 categoriesHTML += `<div class="category-item"><label for="${idCategoria}">${categoria}:</label><input type="text" id="${idCategoria}" class="game-input" data-category="${categoria}"></div>`;
             });
-            const roomNameForDisplay = displayName || `Sala: ${roomId}`;
+            const roomNameForDisplay = displayName;
             const containerClass = mode === 'simples' ? 'modo-simples' : 'modo-avancado';
             gameContainer.innerHTML = `<div id="room-id-display">${roomNameForDisplay}</div><div id="letter-display">?</div><hr><label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br><input type="text" id="nickname-input" placeholder="Apelido único"><div id="categories-container" class="${containerClass}">${categoriesHTML}</div><button id="submit-button">ENVIAR RESPOSTAS</button><div id="status-overlay" style="display: none;">STOP!</div>`;
         }
