@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <title>Controle do Professor - Jogo STOP Centralizado</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- O CSS permanece exatamente o mesmo, omitido para brevidade -->
     <style>
-        /* O CSS permanece o mesmo da versão visualmente aprimorada */
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
-        .container { background: white; max-width: 600px; width: 100%; margin: auto; padding: 30px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #343a40; }
-        h2 { color: #495057; }
-        h3 { color: #6c757d; font-weight: normal; }
+        .container { background: white; max-width: 800px; /* Aumentei a largura */ width: 100%; margin: auto; padding: 30px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        h1, h2, h3 { color: #343a40; }
         #room-setup input { font-size: 1.1em; padding: 12px; width: 80%; max-width: 350px; border: 1px solid #ced4da; border-radius: 6px; margin-bottom: 10px; }
         button { font-size: 1.1em; font-weight: bold; padding: 12px 20px; border: none; border-radius: 6px; color: white; cursor: pointer; margin: 5px; transition: opacity 0.2s; }
         button:hover:not(:disabled) { opacity: 0.85; }
@@ -18,19 +16,23 @@
         #connect-button { background-color: #007bff; }
         #start-button { background-color: #28a745; }
         #stop-button { background-color: #dc3545; }
-        #reset-button { background-color: #6c757d; } /* Novo botão de reset */
+        #reset-button { background-color: #6c757d; }
         #change-room-button { background-color: #ffc107; color: #212529; }
         #game-controls { display: none; }
         #game-state { margin: 25px 0; }
         #letter-display { font-size: 5em; font-weight: bold; color: #007bff; }
         #student-link-area { margin-top: 30px; background-color: #e9f5ff; padding: 15px; border-radius: 8px; border: 1px solid #b8daff; }
         #student-link { font-weight: bold; color: #0056b3; word-wrap: break-word; font-size: 1.1em; }
+        /* NOVO: Estilos para a tabela de respostas */
+        #answers-area { margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
-
         <div id="room-setup">
             <h3>1. Digite o ID da sua Sala</h3>
             <input type="text" id="room-id-input" placeholder="ex: escola1-1a-manha"><br>
@@ -43,19 +45,34 @@
             <div id="game-state">
                 Status: <span id="status-text">Aguardando...</span> | Letra: <span id="letter-display">?</span>
             </div>
-            
-            <!-- Os botões de ação agora são controlados pelo JavaScript -->
             <div id="action-buttons">
                 <button id="start-button" style="display: none;">Começar Rodada</button>
                 <button id="stop-button" style="display: none;">STOP (Para a Sala!)</button>
                 <button id="reset-button" style="display: none;">Preparar Nova Rodada</button>
             </div>
-            
             <button id="change-room-button">Trocar de Sala</button>
-
             <div id="student-link-area">
                 <h3>2. Compartilhe este link com os alunos:</h3>
                 <p id="student-link">Aguardando conexão...</p>
+            </div>
+
+            <!-- NOVO: Área para exibir as respostas dos alunos -->
+            <div id="answers-area">
+                <hr>
+                <h2>Respostas dos Alunos (Tempo Real)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Apelido</th>
+                            <th>Nome</th>
+                            <th>Objeto</th>
+                            <th>Cor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="answers-tbody">
+                        <!-- As linhas da tabela serão inseridas aqui pelo JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -63,6 +80,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
+        // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
         const firebaseConfig = {
             apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
             authDomain: "meu-super-jogo-stop.firebaseapp.com",
@@ -76,8 +94,9 @@
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        let gameStateRef;
+        let gameStateRef, answersRef; // NOVO: Referência separada para as respostas
 
+        // (O restante dos seletores DOM permanece o mesmo)
         const roomSetupDiv = document.getElementById('room-setup');
         const gameControlsDiv = document.getElementById('game-controls');
         const roomIdInput = document.getElementById('room-id-input');
@@ -86,6 +105,7 @@
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
         const resetButton = document.getElementById('reset-button');
+        const answersTbody = document.getElementById('answers-tbody'); // NOVO
 
         connectButton.addEventListener('click', () => {
             const roomId = roomIdInput.value.trim().toLowerCase();
@@ -99,75 +119,87 @@
         });
 
         function connectToRoom(roomId) {
+            // Referência principal para o estado do jogo (status e letra)
             gameStateRef = database.ref('salas/' + roomId);
+            // NOVO: Referência específica para as respostas dentro da sala
+            answersRef = database.ref('salas/' + roomId + '/respostas');
+
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
             document.getElementById('current-room-id').textContent = roomId;
-            const studentUrl = `${window.location.href.replace('Professor.html', 'Aluno.html')}?sala=${roomId}`;
+            
+            // ATUALIZADO: Usando 'professor.html' para ser mais robusto
+            const studentUrl = window.location.href.toLowerCase().replace('professor.html', 'aluno.html') + `?sala=${roomId}`;
             document.getElementById('student-link').textContent = studentUrl;
+
             listenToRoomChanges();
+            listenToAnswers(); // NOVO: Inicia o "ouvinte" das respostas
         }
 
         function disconnectFromRoom() {
             if (gameStateRef) gameStateRef.off();
+            if (answersRef) answersRef.off(); // NOVO: Desliga também o ouvinte das respostas
         }
 
         function resetUI() {
             gameControlsDiv.style.display = 'none';
             roomSetupDiv.style.display = 'block';
             roomIdInput.value = '';
+            answersTbody.innerHTML = ''; // NOVO: Limpa a tabela ao trocar de sala
         }
 
-        // --- LÓGICA PRINCIPAL APRIMORADA ---
         function listenToRoomChanges() {
+            // (Esta função permanece a mesma, controlando os botões e o status)
             const statusText = document.getElementById('status-text');
             const letterDisplay = document.getElementById('letter-display');
-            
-            if (gameStateRef) gameStateRef.off();
-            
             gameStateRef.on('value', (snapshot) => {
                 let state = snapshot.val();
-                
-                // Se a sala é nova, inicializa ela no estado 'AGUARDANDO'
                 if (!state) {
                     state = { status: 'AGUARDANDO', letter: '?' };
                     gameStateRef.set(state);
-                    return; // Sai e espera o Firebase confirmar a escrita
+                    return;
                 }
-
-                // Atualiza a UI com os dados recebidos
                 statusText.textContent = state.status;
                 letterDisplay.textContent = state.letter;
+                startButton.style.display = state.status === 'AGUARDANDO' ? 'inline-block' : 'none';
+                stopButton.style.display = state.status === 'JOGANDO' ? 'inline-block' : 'none';
+                resetButton.style.display = state.status === 'PARADO' ? 'inline-block' : 'none';
+            });
+        }
 
-                // Controla qual botão de ação fica visível
-                startButton.style.display = 'none';
-                stopButton.style.display = 'none';
-                resetButton.style.display = 'none';
-
-                if (state.status === 'AGUARDANDO') {
-                    startButton.style.display = 'inline-block';
-                } else if (state.status === 'JOGANDO') {
-                    stopButton.style.display = 'inline-block';
-                } else if (state.status === 'PARADO') {
-                    resetButton.style.display = 'inline-block';
+        // NOVO: Função inteira para ouvir e renderizar as respostas
+        function listenToAnswers() {
+            answersRef.on('value', (snapshot) => {
+                answersTbody.innerHTML = ''; // Limpa a tabela para reconstruí-la
+                const allAnswers = snapshot.val();
+                if (allAnswers) {
+                    for (const nickname in allAnswers) {
+                        const studentData = allAnswers[nickname];
+                        const row = answersTbody.insertRow();
+                        row.insertCell().textContent = nickname;
+                        row.insertCell().textContent = studentData.nome || '—';
+                        row.insertCell().textContent = studentData.objeto || '—';
+                        row.insertCell().textContent = studentData.cor || '—';
+                    }
                 }
             });
         }
 
-        // --- AÇÕES DOS BOTÕES ---
+        // (As ações de start e stop permanecem as mesmas)
         startButton.onclick = () => {
             const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
             const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
-            gameStateRef.set({ letter: newLetter, status: 'JOGANDO' });
+            gameStateRef.update({ letter: newLetter, status: 'JOGANDO' });
         };
 
         stopButton.onclick = () => {
             gameStateRef.update({ status: 'PARADO' });
         };
 
+        // MODIFICADO: O reset agora também limpa as respostas no Firebase
         resetButton.onclick = () => {
-            // Um pop-up de confirmação para evitar cliques acidentais
-            if (confirm("Isso irá resetar a tela para todos os alunos se prepararem para a próxima rodada. Continuar?")) {
+            if (confirm("Isso irá apagar as respostas da rodada e preparar uma nova letra. Continuar?")) {
+                if (answersRef) answersRef.remove(); // APAGA AS RESPOSTAS DA SALA
                 gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
             }
         };
