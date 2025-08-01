@@ -5,47 +5,26 @@
     <title>Jogo STOP - Aluno</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* CSS Geral (sem mudanças) */
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
         #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; }
         #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 53, 69, 0.85); color: white; font-size: 6em; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
-        
-        /* Conteúdo do Jogo (sem mudanças) */
         #room-id-display { font-size: 1.5em; font-weight: bold; color: #6c757d; margin-bottom: 10px; }
         #letter-display { font-size: 8em; font-weight: bold; color: #007BFF; margin: 10px 0 20px 0; }
         input { font-size: 1.1em; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
         input:disabled { background-color: #e9ecef; cursor: not-allowed; }
-
-        /* Layout em Grid (sem mudanças) */
         #categories-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; text-align: left; }
         .category-item label { display: block; font-size: 1.2em; font-weight: bold; color: #343a40; margin-bottom: 5px; }
         .category-item input { width: 100%; }
-
-        /* --- NOVO: Estilos para os novos elementos --- */
         #nickname-input { width: 50%; margin-bottom: 20px; }
-        #submit-button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 30px;
-            font-size: 1.3em;
-            font-weight: bold;
-            color: white;
-            background-color: #28a745; /* Verde para confirmar/enviar */
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+        #submit-button { width: 100%; padding: 15px; margin-top: 30px; font-size: 1.3em; font-weight: bold; color: white; background-color: #28a745; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
         #submit-button:hover:not(:disabled) { opacity: 0.85; }
         #submit-button:disabled { background-color: #ced4da; }
-
     </style>
 </head>
 <body>
     <div id="game-container">
         <h1>Aguardando o jogo começar...</h1>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
@@ -61,14 +40,11 @@
                     appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
                     measurementId: "G-WGRJWRVBEN"
                 };
-        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const gameContainer = document.getElementById('game-container');
-
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('sala');
-
         let answersRef;
 
         if (!roomId) {
@@ -76,96 +52,60 @@
         } else {
             const gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
-
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state) {
                     gameContainer.innerHTML = `<h1>Aguardando o professor iniciar o jogo na sala "${roomId}"...</h1>`;
                     return;
                 }
-                
                 if (!document.getElementById('letter-display')) {
-                    renderGameStructure();
+                    renderGameStructure(state.displayName);
                     setupSubmitListener();
                 }
                 updateGameState(state);
             });
         }
 
-        // =================================================================
-        // FUNÇÃO ATUALIZADA AQUI
-        // =================================================================
         function updateGameState(state) {
+            const displayName = state.displayName || `Sala: ${roomId}`;
+            document.getElementById('room-id-display').textContent = displayName;
             document.getElementById('letter-display').textContent = state.letter;
             const overlay = document.querySelector('#status-overlay');
-            
-            // Seleciona todos os inputs E o botão de envio para habilitar/desabilitar
             const elementsToToggle = document.querySelectorAll('input, #submit-button');
-
             if (state.status === 'JOGANDO') {
                 overlay.style.display = 'none';
                 elementsToToggle.forEach(el => el.disabled = false);
-            } else { // PARADO ou AGUARDANDO
+            } else {
                 overlay.style.display = 'flex';
                 elementsToToggle.forEach(el => el.disabled = true);
             }
         }
 
-        function renderGameStructure() {
+        function renderGameStructure(displayName) {
             const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
-            
             let categoriesHTML = '';
             categorias.forEach(categoria => {
                 const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                categoriesHTML += `
-                    <div class="category-item">
-                        <label for="${idCategoria}">${categoria}:</label>
-                        <input type="text" id="${idCategoria}" class="game-input" data-category="${categoria}">
-                    </div>
-                `;
+                categoriesHTML += `<div class="category-item"><label for="${idCategoria}">${categoria}:</label><input type="text" id="${idCategoria}" class="game-input" data-category="${categoria}"></div>`;
             });
-
-            gameContainer.innerHTML = `
-                <div id="room-id-display">Sala: ${roomId}</div>
-                <div id="letter-display">?</div>
-                <hr>
-                <label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br>
-                <input type="text" id="nickname-input" placeholder="Apelido único">
-                
-                <div id="categories-container">${categoriesHTML}</div>
-                
-                <button id="submit-button">ENVIAR RESPOSTAS</button>
-
-                <div id="status-overlay" style="display: none;">STOP!</div>
-            `;
+            const roomNameForDisplay = displayName || `Sala: ${roomId}`;
+            gameContainer.innerHTML = `<div id="room-id-display">${roomNameForDisplay}</div><div id="letter-display">?</div><hr><label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br><input type="text" id="nickname-input" placeholder="Apelido único"><div id="categories-container">${categoriesHTML}</div><button id="submit-button">ENVIAR RESPOSTAS</button><div id="status-overlay" style="display: none;">STOP!</div>`;
         }
-        
+
         function setupSubmitListener() {
             const submitButton = document.getElementById('submit-button');
-            
             submitButton.addEventListener('click', () => {
                 const nickname = document.getElementById('nickname-input').value.trim();
-                if (!nickname) {
-                    alert('Por favor, preencha seu apelido antes de enviar!');
-                    return;
-                }
-
+                if (!nickname) { alert('Por favor, preencha seu apelido antes de enviar!'); return; }
                 const answers = {};
                 const categoryInputs = document.querySelectorAll('.game-input');
-                
                 categoryInputs.forEach(input => {
                     const categoryName = input.dataset.category;
                     answers[categoryName] = input.value.trim();
                 });
-                
                 answersRef.child(nickname).set(answers)
-                    .then(() => {
-                        alert('Suas respostas foram enviadas/atualizadas com sucesso!');
-                    })
-                    .catch((error) => {
-                        console.error('Erro ao enviar:', error);
-                        alert('Ocorreu um erro. Tente novamente.');
-                    });
+                    .then(() => { alert('Suas respostas foram enviadas/atualizadas com sucesso!'); })
+                    .catch((error) => { console.error('Erro ao enviar:', error); alert('Ocorreu um erro. Tente novamente.'); });
             });
         }
     </script>
