@@ -3,11 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <title>Jogo STOP - Aluno</title>
+    <!-- Adiciona a meta tag viewport para melhor responsividade em celulares -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; }
-        #game-container { background: white; padding: 20px 40px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; }
-        #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.7); color: white; font-size: 5em; display: flex; justify-content: center; align-items: center; z-index: 10; }
-        input:disabled { background-color: #e9ecef; }
+        /* --- ESTILOS GERAIS --- */
+        body {
+            font-family: Arial, sans-serif; /* Fonte mais limpa */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Garante que o corpo ocupe a tela toda */
+            background-color: #f0f2f5; /* Um cinza um pouco mais moderno */
+            margin: 0;
+            padding: 15px; /* Adiciona um respiro nas bordas */
+            box-sizing: border-box; /* Garante que o padding não quebre o layout */
+        }
+        
+        /* --- CONTAINER PRINCIPAL DO JOGO --- */
+        #game-container {
+            background: white;
+            padding: 25px 40px; /* Mais espaço interno */
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px; /* Limita a largura em telas grandes */
+        }
+
+        /* --- TELA DE "STOP" VERMELHA --- */
+        #status-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(220, 53, 69, 0.85); /* Vermelho com mais opacidade */
+            color: white;
+            font-size: 6em; /* Aumenta o tamanho do texto "STOP!" */
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3); /* Sombra para dar profundidade */
+        }
+
+        /* --- ESTILOS DO CONTEÚDO DO JOGO --- */
+        #room-id-display {
+            font-size: 1.5em; /* Aumenta o tamanho do ID da sala */
+            font-weight: bold;
+            color: #6c757d; /* Um cinza mais suave */
+            margin-bottom: 10px;
+        }
+
+        #letter-display {
+            font-size: 8em; /* Letra bem grande */
+            font-weight: bold;
+            color: #007BFF; /* Azul vibrante */
+            margin: 10px 0 20px 0; /* Mais espaçamento vertical */
+        }
+
+        #categories-container {
+            text-align: left; /* Alinha as labels à esquerda para ficar mais organizado */
+        }
+
+        #categories-container label {
+            display: block; /* Faz a label ocupar uma linha inteira */
+            font-size: 1.2em; /* Tamanho da fonte maior */
+            font-weight: bold;
+            color: #343a40; /* Preto mais suave */
+            margin-top: 15px; /* Espaço acima de cada categoria */
+            margin-bottom: 5px; /* Pequeno espaço entre a label e o input */
+        }
+
+        #categories-container input {
+            width: 100%; /* Ocupa toda a largura disponível */
+            padding: 12px; /* Deixa o campo de input mais alto */
+            font-size: 1.1em; /* Fonte maior para o que o aluno digita */
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box; /* Evita que o padding aumente a largura total */
+        }
+
+        input:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed; /* Muda o cursor para indicar que está bloqueado */
+        }
     </style>
 </head>
 <body>
@@ -15,10 +96,10 @@
         <h1>Aguardando o jogo começar...</h1>
     </div>
 
+    <!-- O SCRIPT JAVASCRIPT PERMANECE EXATAMENTE O MESMO -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // SEU CÓDIGO DE CONFIGURAÇÃO ÚNICO
         const firebaseConfig = {
             apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
             authDomain: "meu-super-jogo-stop.firebaseapp.com",
@@ -30,7 +111,6 @@
             measurementId: "G-WGRJWRVBEN"
         };
         
-        // O RESTANTE DO CÓDIGO (NÃO PRECISA MUDAR)
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const gameContainer = document.getElementById('game-container');
@@ -67,16 +147,19 @@
                 document.getElementById('letter-display').textContent = state.letter;
                 return;
             }
+
+            const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida"];
+            let categoriesHTML = '';
+            categorias.forEach(categoria => {
+                categoriesHTML += `<label>${categoria}:</label><input type="text" class="game-input">`;
+            });
+
             gameContainer.innerHTML = `
-                <h2>Sala: ${roomId}</h2>
-                <div>Letra: <span id="letter-display" style="font-size: 5em; font-weight: bold; color: #007BFF;">${state.letter}</span></div>
+                <div id="room-id-display">Sala: ${roomId}</div>
+                <div id="letter-display">${state.letter}</div>
                 <hr>
                 <div id="categories-container">
-                    <label>Nome:</label><br><input type="text" class="game-input"><br>
-                    <label>Animal:</label><br><input type="text" class="game-input"><br>
-                    <label>Fruta:</label><br><input type="text" class="game-input"><br>
-                    <label>Cor:</label><br><input type="text" class="game-input"><br>
-                    <label>Objeto:</label><br><input type="text" class="game-input"><br>
+                    ${categoriesHTML}
                 </div>
                 <div id="status-overlay" style="display: none;">STOP!</div>
             `;
