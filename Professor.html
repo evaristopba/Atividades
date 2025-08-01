@@ -73,7 +73,7 @@
             document.getElementById('room-setup').style.display = 'none';
             gameControls.style.display = 'block';
             currentRoomIdSpan.textContent = roomId;
-            const studentUrl = `${window.location.href.replace('Professor.html', 'aluno.html')}?sala=${roomId}`;
+            const studentUrl = `${window.location.href.replace('Professor.html', 'Aluno.html')}?sala=${roomId}`;
             studentLink.textContent = studentUrl;
             listenToRoomChanges();
         });
