@@ -28,6 +28,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
+        // Lembrete: Cole suas credenciais seguras do Firebase aqui
         // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
         const firebaseConfig = {
                     // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
@@ -40,6 +41,7 @@
                     appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
                     measurementId: "G-WGRJWRVBEN"
                 };
+        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const gameContainer = document.getElementById('game-container');
@@ -52,6 +54,7 @@
         } else {
             const gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
+
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state) {
@@ -70,26 +73,21 @@
             const displayName = state.displayName || `Sala: ${roomId}`;
             document.getElementById('room-id-display').textContent = displayName;
             document.getElementById('letter-display').textContent = state.letter;
+
             const overlay = document.querySelector('#status-overlay');
             const elementsToToggle = document.querySelectorAll('input, #submit-button');
 
-            if (state.status === 'JOGANDO') {
-                overlay.style.display = 'none';
-                elementsToToggle.forEach(el => el.disabled = false);
-            } else { // PARADO ou AGUARDANDO
-                overlay.style.display = 'flex';
-                elementsToToggle.forEach(el => el.disabled = true);
+            // Passo 1: Habilitar ou Desabilitar tudo com base no status do jogo
+            const isPlaying = state.status === 'JOGANDO';
+            overlay.style.display = isPlaying ? 'none' : 'flex';
+            elementsToToggle.forEach(el => el.disabled = !isPlaying);
 
-                // =======================================================
-                // AQUI ESTÁ A CORREÇÃO!
-                // Se a rodada foi resetada (status 'AGUARDANDO'), limpa os campos.
-                // =======================================================
-                if (state.status === 'AGUARDANDO') {
-                    const textInputs = document.querySelectorAll('input[type="text"]');
-                    textInputs.forEach(input => {
-                        input.value = '';
-                    });
-                }
+            // Passo 2: Limpar os campos APENAS se for uma nova rodada (estado AGUARDANDO)
+            if (state.status === 'AGUARDANDO') {
+                const textInputs = document.querySelectorAll('input[type="text"]');
+                textInputs.forEach(input => {
+                    input.value = '';
+                });
             }
         }
 
@@ -108,7 +106,10 @@
             const submitButton = document.getElementById('submit-button');
             submitButton.addEventListener('click', () => {
                 const nickname = document.getElementById('nickname-input').value.trim();
-                if (!nickname) { alert('Por favor, preencha seu apelido antes de enviar!'); return; }
+                if (!nickname) {
+                    alert('Por favor, preencha seu apelido antes de enviar!');
+                    return;
+                }
                 const answers = {};
                 const categoryInputs = document.querySelectorAll('.game-input');
                 categoryInputs.forEach(input => {
@@ -117,7 +118,10 @@
                 });
                 answersRef.child(nickname).set(answers)
                     .then(() => { alert('Suas respostas foram enviadas/atualizadas com sucesso!'); })
-                    .catch((error) => { console.error('Erro ao enviar:', error); alert('Ocorreu um erro. Tente novamente.'); });
+                    .catch((error) => {
+                        console.error('Erro ao enviar respostas:', error);
+                        alert('Ocorreu um erro ao enviar suas respostas. Verifique a conexão e tente novamente.');
+                    });
             });
         }
     </script>
