@@ -3,91 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Jogo STOP - Aluno</title>
-    <!-- Adiciona a meta tag viewport para melhor responsividade em celulares -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* --- ESTILOS GERAIS --- */
-        body {
-            font-family: Arial, sans-serif; /* Fonte mais limpa */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh; /* Garante que o corpo ocupe a tela toda */
-            background-color: #f0f2f5; /* Um cinza um pouco mais moderno */
-            margin: 0;
-            padding: 15px; /* Adiciona um respiro nas bordas */
-            box-sizing: border-box; /* Garante que o padding não quebre o layout */
-        }
+        /* CSS Geral (sem mudanças) */
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
+        #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; /* Aumentamos a largura máxima para acomodar 2 colunas */ }
+        #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 53, 69, 0.85); color: white; font-size: 6em; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
         
-        /* --- CONTAINER PRINCIPAL DO JOGO --- */
-        #game-container {
-            background: white;
-            padding: 25px 40px; /* Mais espaço interno */
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 500px; /* Limita a largura em telas grandes */
-        }
+        /* Conteúdo do Jogo (sem mudanças) */
+        #room-id-display { font-size: 1.5em; font-weight: bold; color: #6c757d; margin-bottom: 10px; }
+        #letter-display { font-size: 8em; font-weight: bold; color: #007BFF; margin: 10px 0 20px 0; }
+        input:disabled { background-color: #e9ecef; cursor: not-allowed; }
 
-        /* --- TELA DE "STOP" VERMELHA --- */
-        #status-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(220, 53, 69, 0.85); /* Vermelho com mais opacidade */
-            color: white;
-            font-size: 6em; /* Aumenta o tamanho do texto "STOP!" */
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.3); /* Sombra para dar profundidade */
-        }
-
-        /* --- ESTILOS DO CONTEÚDO DO JOGO --- */
-        #room-id-display {
-            font-size: 1.5em; /* Aumenta o tamanho do ID da sala */
-            font-weight: bold;
-            color: #6c757d; /* Um cinza mais suave */
-            margin-bottom: 10px;
-        }
-
-        #letter-display {
-            font-size: 8em; /* Letra bem grande */
-            font-weight: bold;
-            color: #007BFF; /* Azul vibrante */
-            margin: 10px 0 20px 0; /* Mais espaçamento vertical */
-        }
-
+        /* --- ✨ MELHORIA PRINCIPAL AQUI: LAYOUT EM GRID --- */
         #categories-container {
-            text-align: left; /* Alinha as labels à esquerda para ficar mais organizado */
+            display: grid; /* Ativa o layout em grid */
+            grid-template-columns: 1fr 1fr; /* Cria duas colunas de largura igual */
+            gap: 15px 30px; /* Define o espaço entre as linhas (15px) e entre as colunas (30px) */
+            text-align: left;
         }
 
-        #categories-container label {
-            display: block; /* Faz a label ocupar uma linha inteira */
-            font-size: 1.2em; /* Tamanho da fonte maior */
+        /* --- ✨ AJUSTE NOS ITENS DAS CATEGORIAS --- */
+        .category-item label { /* O estilo que era de #categories-container label agora é do .category-item */
+            display: block;
+            font-size: 1.2em;
             font-weight: bold;
-            color: #343a40; /* Preto mais suave */
-            margin-top: 15px; /* Espaço acima de cada categoria */
-            margin-bottom: 5px; /* Pequeno espaço entre a label e o input */
+            color: #343a40;
+            margin-bottom: 5px;
         }
 
-        #categories-container input {
-            width: 100%; /* Ocupa toda a largura disponível */
-            padding: 12px; /* Deixa o campo de input mais alto */
-            font-size: 1.1em; /* Fonte maior para o que o aluno digita */
+        .category-item input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
             border: 1px solid #ced4da;
             border-radius: 6px;
-            box-sizing: border-box; /* Evita que o padding aumente a largura total */
-        }
-
-        input:disabled {
-            background-color: #e9ecef;
-            cursor: not-allowed; /* Muda o cursor para indicar que está bloqueado */
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -96,7 +47,7 @@
         <h1>Aguardando o jogo começar...</h1>
     </div>
 
-    <!-- O SCRIPT JAVASCRIPT PERMANECE EXATAMENTE O MESMO -->
+    <!-- O SCRIPT JAVASCRIPT TERÁ UMA PEQUENA MUDANÇA -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
@@ -148,10 +99,20 @@
                 return;
             }
 
-            const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida"];
+            // A lista de categorias permanece a mesma
+            const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
+            
+            // --- ✨ MUDANÇA AQUI: COMO GERAMOS O HTML ---
+            // Agora, cada categoria é envolvida por um <div class="category-item">
+            // para que o grid consiga organizá-la corretamente.
             let categoriesHTML = '';
             categorias.forEach(categoria => {
-                categoriesHTML += `<label>${categoria}:</label><input type="text" class="game-input">`;
+                categoriesHTML += `
+                    <div class="category-item">
+                        <label>${categoria}:</label>
+                        <input type="text" class="game-input">
+                    </div>
+                `;
             });
 
             gameContainer.innerHTML = `
