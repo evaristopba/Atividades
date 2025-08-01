@@ -50,8 +50,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
         // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
-        // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
         const firebaseConfig = {
+                    // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
                     apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
                     authDomain: "meu-super-jogo-stop.firebaseapp.com",
                     databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
@@ -60,7 +60,7 @@
                     messagingSenderId: "958593186721",
                     appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
                     measurementId: "G-WGRJWRVBEN"
-         };
+                };
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -69,12 +69,20 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('sala');
 
+        // =================================================================
+        // MUDANÇA AQUI: Declaramos a variável no escopo principal
+        // =================================================================
+        let answersRef;
+
         if (!roomId) {
             gameContainer.innerHTML = '<h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>';
         } else {
             const gameStateRef = database.ref('salas/' + roomId);
-            // NOVO: Referência para o local onde as respostas serão salvas
-            const answersRef = database.ref('salas/' + roomId + '/respostas');
+            
+            // =================================================================
+            // MUDANÇA AQUI: Apenas atribuímos o valor, sem redeclarar com "const"
+            // =================================================================
+            answersRef = database.ref('salas/' + roomId + '/respostas');
 
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
@@ -83,14 +91,10 @@
                     return;
                 }
                 
-                // NOVO: Lógica aprimorada. O jogo só é "desenhado" uma vez.
-                // Depois, apenas atualizamos o estado. Isso evita que o que o aluno digitou seja apagado.
                 if (!document.getElementById('letter-display')) {
                     renderGameStructure();
-                    setupSubmitListener(); // NOVO: Configura o botão de envio
+                    setupSubmitListener();
                 }
-
-                // Atualiza a UI com os novos dados do Firebase
                 updateGameState(state);
             });
         }
@@ -98,25 +102,23 @@
         function updateGameState(state) {
             document.getElementById('letter-display').textContent = state.letter;
             const overlay = document.querySelector('#status-overlay');
-            const allInputs = document.querySelectorAll('input'); // Todos os inputs, incluindo o apelido
+            const allInputs = document.querySelectorAll('input');
 
             if (state.status === 'JOGANDO') {
                 overlay.style.display = 'none';
                 allInputs.forEach(input => input.disabled = false);
-            } else { // PARADO ou AGUARDANDO
+            } else {
                 overlay.style.display = 'flex';
                 allInputs.forEach(input => input.disabled = true);
             }
         }
 
-        // NOVO: Esta função agora só cria a estrutura base do jogo, uma única vez.
         function renderGameStructure() {
             const categorias = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
             
             let categoriesHTML = '';
             categorias.forEach(categoria => {
-                // Adicionamos um 'data-category' para identificar facilmente o campo no JS
-                const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); // ex: País ou Cidade -> paisoucidade
+                const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
                 categoriesHTML += `
                     <div class="category-item">
                         <label for="${idCategoria}">${categoria}:</label>
@@ -129,20 +131,17 @@
                 <div id="room-id-display">Sala: ${roomId}</div>
                 <div id="letter-display">?</div>
                 <hr>
-                <!-- NOVO: Campo de apelido -->
                 <label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br>
                 <input type="text" id="nickname-input" placeholder="Apelido único">
                 
                 <div id="categories-container">${categoriesHTML}</div>
                 
-                <!-- NOVO: Botão de envio -->
                 <button id="submit-button">ENVIAR RESPOSTAS</button>
 
                 <div id="status-overlay" style="display: none;">STOP!</div>
             `;
         }
         
-        // NOVO: Função inteira para lidar com o envio das respostas
         function setupSubmitListener() {
             const submitButton = document.getElementById('submit-button');
             
@@ -161,7 +160,7 @@
                     answers[categoryName] = input.value.trim();
                 });
                 
-                // Salva o objeto de respostas no Firebase, usando o apelido como chave
+                // Agora esta função consegue "enxergar" a variável answersRef
                 answersRef.child(nickname).set(answers)
                     .then(() => {
                         alert('Suas respostas foram enviadas com sucesso!');
