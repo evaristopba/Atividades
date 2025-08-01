@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória da Tabuada de Adição</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #e0f7fa;
+            font-family: 'Comic Sans MS', Arial, sans-serif;
+        }
+        #tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(5, 80px);
+            gap: 10px;
+            margin: 20px;
+        }
+        .carta {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .carta.virada {
+            transform: rotateY(180deg);
+        }
+        .carta.combinada {
+            transform: rotateY(180deg);
+            cursor: default;
+        }
+        .carta .frente, .carta .verso {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            border-radius: 5px;
+            backface-visibility: hidden;
+        }
+        .carta .frente {
+            background-color: #3498db;
+            transform: rotateY(180deg);
+        }
+        .carta.combinada .frente {
+            background-color: #2ecc71;
+        }
+        .carta .verso {
+            background-color: #95a5a6;
+        }
+        #info {
+            margin: 10px;
+            font-size: 1.4em;
+            color: #2c3e50;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #instrucoesModal, #gameOverModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #instrucoesContent, #gameOverContent {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+        }
+        #instrucoesContent h2, #gameOverContent h2 {
+            color: #e74c3c;
+            margin-top: 0;
+        }
+        #instrucoesContent p, #gameOverContent p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        #iniciarJogo, #gameOverButton {
+            background-color: #2ecc71;
+        }
+        #iniciarJogo:hover, #gameOverButton:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button id="mostrarInstrucoes">Iniciar Jogo</button>
+        <button id="proximaTabuada" disabled>Próxima Tabuada</button>
+        <button id="reiniciarTabuada">Reiniciar Tabuada</button>
+    </div>
+    <div id="info">Tabuada: 1 | Pares Encontrados: 0/10 | Pontuação: 0</div>
+    <div id="tabuleiro"></div>
+    <div id="instrucoesModal">
+        <div id="instrucoesContent">
+            <h2>Jogo da Memória da Tabuada</h2>
+            <p><strong>Objetivo:</strong> Combine pares de cartas com expressões de adição (ex.: 2+3) e seus resultados (ex.: 5) para aprender as tabuadas de 1 a 10.</p>
+            <p><strong>Controles:</strong><br>
+               - Clique em uma carta para virá-la.<br>
+               - Combine duas cartas que formem um par correto.</p>
+            <p><strong>Mecânicas:</strong><br>
+               - Cada tabuada tem 10 pares (ex.: 1+1=2 até 1+10=11).<br>
+               - Acertar um par dá 10 pontos.<br>
+               - Complete 10 pares para avançar à próxima tabuada.<br>
+               - O jogo termina após a tabuada 10.</p>
+            <p><strong>Pontuação:</strong> Ganhe 10 pontos por par encontrado. Tente fazer 1000 pontos!</p>
+            <button id="iniciarJogo">Jogar</button>
+        </div>
+    </div>
+    <div id="gameOverModal">
+        <div id="gameOverContent">
+            <h2>Parabéns!</h2>
+            <p id="gameOverMessage">Você terminou todas as tabuadas!</p>
+            <button id="gameOverButton">Ok</button>
+        </div>
+    </div>
+    <script>
+        const tabuleiro = document.getElementById('tabuleiro');
+        const mostrarInstrucoes = document.getElementById('mostrarInstrucoes');
+        const iniciarJogo = document.getElementById('iniciarJogo');
+        const proximaTabuada = document.getElementById('proximaTabuada');
+        const reiniciarTabuada = document.getElementById('reiniciarTabuada');
+        const info = document.getElementById('info');
+        const instrucoesModal = document.getElementById('instrucoesModal');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const gameOverButton = document.getElementById('gameOverButton');
+
+        let currentTabuada = 1;
+        let paresEncontrados = 0;
+        let score = 0;
+        let cartas = [];
+        let cartasViradas = [];
+        let bloqueado = false;
+        const maxTabuada = 10;
+
+        // Gerar cartas para a tabuada atual
+        function gerarCartas() {
+            cartas = [];
+            for (let i = 1; i <= 10; i++) {
+                cartas.push({ id: `expr_${i}`, value: `${currentTabuada}+${i}`, result: currentTabuada + i });
+                cartas.push({ id: `res_${i}`, value: `${currentTabuada + i}`, result: currentTabuada + i });
+            }
+            // Embaralhar
+            for (let i = cartas.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cartas[i], cartas[j]] = [cartas[j], cartas[i]];
+            }
+        }
+
+        // Renderizar tabuleiro
+        function renderizarTabuleiro() {
+            tabuleiro.innerHTML = '';
+            cartas.forEach(carta => {
+                const div = document.createElement('div');
+                div.classList.add('carta');
+                div.dataset.id = carta.id;
+                div.dataset.result = carta.result;
+                div.innerHTML = `
+                    <div class="frente">${carta.value}</div>
+                    <div class="verso"></div>
+                `;
+                div.addEventListener('click', () => virarCarta(div));
+                tabuleiro.appendChild(div);
+            });
+        }
+
+        // Virar carta
+        function virarCarta(div) {
+            if (bloqueado || div.classList.contains('virada') || div.classList.contains('combinada')) return;
+            div.classList.add('virada');
+            cartasViradas.push(div);
+            console.log(`Carta virada: ${div.dataset.id} | Valor: ${div.querySelector('.frente').innerText}`);
+            if (cartasViradas.length === 2) {
+                bloqueado = true;
+                verificarPar();
+            }
+        }
+
+        // Verificar par
+        function verificarPar() {
+            const [carta1, carta2] = cartasViradas;
+            if (carta1.dataset.result === carta2.dataset.result) {
+                carta1.classList.add('combinada');
+                carta2.classList.add('combinada');
+                paresEncontrados++;
+                score += 10;
+                console.log(`Par encontrado! Pares: ${paresEncontrados}/10 | Pontuação: ${score}`);
+                atualizarHUD();
+                if (paresEncontrados === 10) {
+                    proximaTabuada.disabled = currentTabuada >= maxTabuada;
+                    if (currentTabuada >= maxTabuada) {
+                        mostrarGameOver();
+                    }
+                }
+                cartasViradas = [];
+                bloqueado = false;
+            } else {
+                setTimeout(() => {
+                    carta1.classList.remove('virada');
+                    carta2.classList.remove('virada');
+                    cartasViradas = [];
+                    bloqueado = false;
+                    console.log('Par incorreto');
+                }, 1000);
+            }
+        }
+
+        // Atualizar HUD
+        function atualizarHUD() {
+            info.innerText = `Tabuada: ${currentTabuada} | Pares Encontrados: ${paresEncontrados}/10 | Pontuação: ${score}`;
+        }
+
+        // Mostrar modal de game over
+        function mostrarGameOver() {
+            gameOverMessage.innerText = `Você terminou todas as tabuadas! Pontuação: ${score}`;
+            gameOverModal.style.display = 'flex';
+        }
+
+        // Iniciar jogo
+        function iniciar() {
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            proximaTabuada.disabled = true;
+            gameOverModal.style.display = 'none';
+            instrucoesModal.style.display = 'none';
+            gerarCartas();
+            renderizarTabuleiro();
+            atualizarHUD();
+            console.log('Jogo iniciado');
+        }
+
+        // Próxima tabuada
+        function avancarTabuada() {
+            if (currentTabuada < maxTabuada) {
+                currentTabuada++;
+                paresEncontrados = 0;
+                cartasViradas = [];
+                bloqueado = false;
+                proximaTabuada.disabled = true;
+                gerarCartas();
+                renderizarTabuleiro();
+                atualizarHUD();
+                console.log(`Avançou para tabuada: ${currentTabuada}`);
+            }
+        }
+
+        // Reiniciar jogo
+        function reiniciar() {
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            proximaTabuada.disabled = true;
+            gameOverModal.style.display = 'none';
+            instrucoesModal.style.display = 'flex';
+            console.log('Jogo reiniciado');
+        }
+
+        // Eventos
+        mostrarInstrucoes.addEventListener('click', () => {
+            instrucoesModal.style.display = 'flex';
+        });
+        iniciarJogo.addEventListener('click', iniciar);
+        proximaTabuada.addEventListener('click', avancarTabuada);
+        reiniciarTabuada.addEventListener('click', reiniciar);
+        gameOverButton.addEventListener('click', reiniciar);
+
+        // Mostrar modal de instruções ao carregar
+        instrucoesModal.style.display = 'flex';
+    </script>
+</body>
+</html>
