@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
-        /* Aumentei a largura máxima para acomodar todas as colunas */
         .container { background: white; max-width: 95%; width: 1200px; margin: auto; padding: 30px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
         h1, h2, h3 { color: #343a40; }
-        #room-setup input { font-size: 1.1em; padding: 12px; width: 80%; max-width: 350px; border: 1px solid #ced4da; border-radius: 6px; margin-bottom: 10px; }
+        
+        #room-select { font-size: 1.2em; padding: 12px; width: 80%; max-width: 400px; border: 1px solid #ced4da; border-radius: 6px; margin-bottom: 10px; cursor: pointer; }
+        
         button { font-size: 1.1em; font-weight: bold; padding: 12px 20px; border: none; border-radius: 6px; color: white; cursor: pointer; margin: 5px; transition: opacity 0.2s; }
         button:hover:not(:disabled) { opacity: 0.85; }
         button:disabled { background-color: #ced4da; cursor: not-allowed; }
@@ -18,23 +19,45 @@
         #stop-button { background-color: #dc3545; }
         #reset-button { background-color: #6c757d; }
         #change-room-button { background-color: #ffc107; color: #212529; }
+        
         #game-controls { display: none; }
         #game-state { margin: 25px 0; }
         #letter-display { font-size: 5em; font-weight: bold; color: #007bff; }
+        
         #student-link-area { margin-top: 30px; background-color: #e9f5ff; padding: 15px; border-radius: 8px; border: 1px solid #b8daff; }
         #student-link { font-weight: bold; color: #0056b3; word-wrap: break-word; font-size: 1.1em; }
+        
         #answers-area { margin-top: 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; } /* table-layout ajuda na distribuição */
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-wrap: break-word; } /* word-wrap para quebrar texto longo */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-wrap: break-word; }
         th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
+
+        <!-- MUDANÇA PRINCIPAL: Input de texto substituído por este menu dropdown -->
         <div id="room-setup">
-            <h3>1. Digite o ID da sua Sala</h3>
-            <input type="text" id="room-id-input" placeholder="ex: escola1-1a-manha"><br>
+            <h3>1. Escolha a sua Sala</h3>
+            <select id="room-select">
+                <option value="" disabled selected>-- Selecione uma turma --</option>
+                <optgroup label="Escola Capitão">
+                    <option value="4a-cp">4º ano A - Manhã</option>
+                    <option value="4b-cp">4º ano B - Manhã</option>
+                    <option value="4c-cp">4º ano C - Tarde</option>
+                    <option value="5a-cp">5º ano A - Manhã</option>
+                    <option value="5b-cp">5º ano B - Manhã</option>
+                    <option value="5c-cp">5º ano C - Tarde</option>
+                </optgroup>
+                <optgroup label="Escola Thereza">
+                    <option value="4a-th">4º ano A - Manhã</option>
+                    <option value="4b-th">4º ano B - Manhã</option>
+                    <option value="4c-th">4º ano C - Tarde</option>
+                    <option value="5a-th">5º ano A - Manhã</option>
+                    <option value="5b-th">5º ano B - Tarde</option>
+                </optgroup>
+            </select><br>
             <button id="connect-button">Conectar à Sala</button>
         </div>
 
@@ -59,7 +82,6 @@
                 <hr>
                 <h2>Respostas dos Alunos (Tempo Real)</h2>
                 <table>
-                    <!-- O cabeçalho agora será gerado pelo JavaScript -->
                     <thead id="answers-thead"></thead>
                     <tbody id="answers-tbody"></tbody>
                 </table>
@@ -92,7 +114,7 @@
         // Seletores de elementos do DOM
         const roomSetupDiv = document.getElementById('room-setup');
         const gameControlsDiv = document.getElementById('game-controls');
-        const roomIdInput = document.getElementById('room-id-input');
+        const roomSelect = document.getElementById('room-select');
         const connectButton = document.getElementById('connect-button');
         const changeRoomButton = document.getElementById('change-room-button');
         const startButton = document.getElementById('start-button');
@@ -102,8 +124,11 @@
         const answersTbody = document.getElementById('answers-tbody');
 
         connectButton.addEventListener('click', () => {
-            const roomId = roomIdInput.value.trim().toLowerCase();
-            if (!roomId) { alert("Por favor, insira um ID de sala válido."); return; }
+            const roomId = roomSelect.value;
+            if (!roomId) { 
+                alert("Por favor, selecione uma sala da lista.");
+                return;
+            }
             connectToRoom(roomId);
         });
 
@@ -115,16 +140,12 @@
         function connectToRoom(roomId) {
             gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
+            
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
             document.getElementById('current-room-id').textContent = roomId;
             
-            // ===================================================================
-            // AQUI ESTÁ A CORREÇÃO!
-            // Trocamos a linha antiga por esta, que respeita as maiúsculas.
-            // ===================================================================
-            // LINHA FINAL E MAIS ROBUSTA
-            const studentUrl = window.location.href.replace(/professor\.html/i, 'Aluno.html') + `?sala=${roomId}`;            
+            const studentUrl = window.location.href.replace(/professor\.html/i, 'Aluno.html') + `?sala=${roomId}`;
             document.getElementById('student-link').textContent = studentUrl;
             
             renderTableHeader();
@@ -153,7 +174,7 @@
         function resetUI() {
             gameControlsDiv.style.display = 'none';
             roomSetupDiv.style.display = 'block';
-            roomIdInput.value = '';
+            roomSelect.selectedIndex = 0; // Reseta o menu dropdown
             answersThead.innerHTML = '';
             answersTbody.innerHTML = '';
         }
@@ -176,23 +197,6 @@
             });
         }
 
-        resetButton.onclick = () => {
-            if (confirm("Isso irá apagar as respostas da rodada e preparar uma nova letra. Continuar?")) {
-                if (answersRef) answersRef.remove();
-                gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
-            }
-        };
-
-        startButton.onclick = () => {
-            const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
-            const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
-            gameStateRef.update({ letter: newLetter, status: 'JOGANDO' });
-        };
-
-        stopButton.onclick = () => {
-            gameStateRef.update({ status: 'PARADO' });
-        };
-
         function listenToRoomChanges() {
             const statusText = document.getElementById('status-text');
             const letterDisplay = document.getElementById('letter-display');
@@ -210,6 +214,23 @@
                 resetButton.style.display = state.status === 'PARADO' ? 'inline-block' : 'none';
             });
         }
+
+        startButton.onclick = () => {
+            const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
+            const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
+            gameStateRef.update({ letter: newLetter, status: 'JOGANDO' });
+        };
+
+        stopButton.onclick = () => {
+            gameStateRef.update({ status: 'PARADO' });
+        };
+
+        resetButton.onclick = () => {
+            if (confirm("Isso irá apagar as respostas da rodada e preparar uma nova letra. Continuar?")) {
+                if (answersRef) answersRef.remove();
+                gameStateRef.set({ status: 'AGUARDANDO', letter: '?' });
+            }
+        };
     </script>
 </body>
 </html>
