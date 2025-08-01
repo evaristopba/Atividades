@@ -123,8 +123,8 @@
             // AQUI ESTÁ A CORREÇÃO!
             // Trocamos a linha antiga por esta, que respeita as maiúsculas.
             // ===================================================================
-            const studentUrl = window.location.href.replace('Professor.html', 'Aluno.html') + `?sala=${roomId}`;
-            
+            // LINHA FINAL E MAIS ROBUSTA
+            const studentUrl = window.location.href.replace(/professor\.html/i, 'Aluno.html') + `?sala=${roomId}`;            
             document.getElementById('student-link').textContent = studentUrl;
             
             renderTableHeader();
