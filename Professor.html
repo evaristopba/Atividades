@@ -3,16 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <title>Controle do Professor - Jogo STOP Centralizado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 20px; }
-        .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
-        #room-setup input { padding: 10px; font-size: 1.1em; width: 300px; }
-        #room-setup button { padding: 10px 15px; font-size: 1.1em; }
-        #game-controls { display: none; /* Escondido até conectar */ }
-        #student-link-area { margin-top: 20px; background-color: #e9f5ff; padding: 10px; border-radius: 5px; }
-        #student-link { font-weight: bold; color: #0056b3; word-wrap: break-word; }
-        button { cursor: pointer; margin: 5px; }
-        #change-room-button { background-color: #ffc107; }
+        /* --- ESTILOS GERAIS --- */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        /* --- CONTAINER PRINCIPAL (O "CARD") --- */
+        .container {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            margin: auto;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        /* --- FONTES E TÍTULOS --- */
+        h1 { color: #343a40; }
+        h2 { color: #495057; }
+        h3 { color: #6c757d; font-weight: normal; }
+
+        /* --- ÁREA DE SETUP DA SALA --- */
+        #room-setup input {
+            font-size: 1.1em;
+            padding: 12px;
+            width: 80%;
+            max-width: 350px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        /* --- BOTÕES --- */
+        button {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: opacity 0.2s; /* Efeito suave ao passar o mouse */
+        }
+        button:hover:not(:disabled) {
+            opacity: 0.85;
+        }
+        button:disabled {
+            background-color: #ced4da;
+            cursor: not-allowed;
+        }
+
+        /* Cores específicas dos botões */
+        #connect-button { background-color: #007bff; }
+        #start-button { background-color: #28a745; }
+        #stop-button { background-color: #dc3545; }
+        #change-room-button { background-color: #ffc107; color: #212529; }
+
+        /* --- ÁREA DE CONTROLE DO JOGO --- */
+        #game-controls { display: none; }
+        #game-state { margin: 25px 0; }
+        #letter-display { font-size: 5em; font-weight: bold; color: #007bff; }
+
+        /* --- ÁREA DO LINK DO ALUNO --- */
+        #student-link-area {
+            margin-top: 30px;
+            background-color: #e9f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #b8daff;
+        }
+        #student-link {
+            font-weight: bold;
+            color: #0056b3;
+            word-wrap: break-word; /* Garante que links longos quebrem a linha */
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -23,20 +101,19 @@
         <div id="room-setup">
             <h3>1. Digite o ID da sua Sala</h3>
             <input type="text" id="room-id-input" placeholder="ex: escola1-1a-manha">
+            <br>
             <button id="connect-button">Conectar à Sala</button>
         </div>
 
-        <!-- Tela de Controle da Sala (inicialmente oculta) -->
+        <!-- Tela de Controle da Sala -->
         <div id="game-controls">
             <hr>
             <h2>Controles da Sala: <span id="current-room-id" style="color: #007bff;"></span></h2>
             <div id="game-state">
-                Status: <span id="status-text">Aguardando...</span> | Letra: <span id="letter-display" style="font-size: 2em; font-weight: bold;">?</span>
+                Status: <span id="status-text">Aguardando...</span> | Letra: <span id="letter-display">?</span>
             </div>
             <button id="start-button">Nova Rodada</button>
             <button id="stop-button" disabled>STOP (Para a Sala!)</button>
-            
-            <!-- NOVO BOTÃO ADICIONADO AQUI -->
             <button id="change-room-button">Trocar de Sala</button>
 
             <div id="student-link-area">
@@ -46,10 +123,10 @@
         </div>
     </div>
 
+    <!-- O SCRIPT JAVASCRIPT PERMANECE EXATAMENTE O MESMO -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // SEU CÓDIGO DE CONFIGURAÇÃO ÚNICO (NÃO MUDAR)
         const firebaseConfig = {
             apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
             authDomain: "meu-super-jogo-stop.firebaseapp.com",
@@ -63,18 +140,16 @@
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        let gameStateRef; // Referência será definida dinamicamente
+        let gameStateRef;
 
-        // Elementos da UI
         const roomSetupDiv = document.getElementById('room-setup');
         const gameControlsDiv = document.getElementById('game-controls');
         const roomIdInput = document.getElementById('room-id-input');
         const connectButton = document.getElementById('connect-button');
         const studentLink = document.getElementById('student-link');
         const currentRoomIdSpan = document.getElementById('current-room-id');
-        const changeRoomButton = document.getElementById('change-room-button'); // Novo botão
+        const changeRoomButton = document.getElementById('change-room-button');
 
-        // Evento para conectar
         connectButton.addEventListener('click', () => {
             const roomId = roomIdInput.value.trim().toLowerCase();
             if (!roomId) {
@@ -84,7 +159,6 @@
             connectToRoom(roomId);
         });
 
-        // Evento para trocar de sala
         changeRoomButton.addEventListener('click', () => {
             disconnectFromRoom();
             resetUI();
@@ -100,18 +174,14 @@
             listenToRoomChanges();
         }
 
-        // NOVO: Função para parar de ouvir a sala antiga
         function disconnectFromRoom() {
-            if (gameStateRef) {
-                gameStateRef.off(); // Isso remove o 'listener' (o .on('value', ...))
-            }
+            if (gameStateRef) gameStateRef.off();
         }
 
-        // NOVO: Função para reverter a UI para o estado inicial
         function resetUI() {
             gameControlsDiv.style.display = 'none';
             roomSetupDiv.style.display = 'block';
-            roomIdInput.value = ''; // Limpa o campo de input
+            roomIdInput.value = '';
         }
 
         function listenToRoomChanges() {
@@ -119,10 +189,9 @@
             const letterDisplay = document.getElementById('letter-display');
             const startButton = document.getElementById('start-button');
             const stopButton = document.getElementById('stop-button');
-
-            // Limpa o listener antigo antes de adicionar um novo, para segurança
+            
             if (gameStateRef) gameStateRef.off();
-
+            
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (state) {
@@ -135,8 +204,6 @@
                 }
             });
 
-            // A lógica dos botões de start/stop é movida para dentro desta função para garantir que
-            // eles sempre se refiram à `gameStateRef` correta.
             startButton.onclick = () => {
                 const VALID_LETTERS = "ABCDEFGHJLMNOPQRSTUVZ";
                 const newLetter = VALID_LETTERS[Math.floor(Math.random() * VALID_LETTERS.length)];
