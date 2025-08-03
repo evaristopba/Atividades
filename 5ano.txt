@@ -1,12 +1,14 @@
 Atividades para os alunos do 5º ano das Escolas Thereza Gabriel Zoccal e Capitão Neves
 5º Ano
 #
-Dias 23, 24, 25 e 26 de junho de 2025.
 
+#
+Dias 23, 24, 25 e 26 de junho de 2025.
+https://evaristopba.github.io/Atividades/Fabrica%20de%20Contas.html
 Fabrica de Contas (Todas as séries)
-Jogo da Forca-GM
-Caça Palavras-GM
+https://evaristopba.github.io/Atividades/Tabuada%20Interativa%20Arrastar%20e%20Soltar-Multiplicacao.html
 Tabuada Interativa 01-Arrastar e Soltar (Multiplicação)
+https://evaristopba.github.io/Atividades/Tabuada%20Interativa%20Arrastar%20e%20Soltar-Divisao.html
 Tabuada Interativa 02-Arrastar e Soltar (Divisão)
 #
 Dias 16, 17, e 18 de junho de 2025.
