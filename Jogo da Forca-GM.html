@@ -8,10 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Todos os seus estilos, que já estão ótimos, permanecem aqui. */
-        :root { --primary-color: #0077b6; --secondary-color: #00b4d8; --success-color: #2a9d8f; --danger-color: #e76f51; --light-bg: #edf6f9; --super-category-color: #8338ec; }
+        :root {
+            --primary-color: #0077b6; --secondary-color: #00b4d8; --success-color: #2a9d8f;
+            --danger-color: #e76f51; --light-bg: #edf6f9; --super-category-color: #8338ec;
+        }
         * { box-sizing: border-box; }
-        body { font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%); color: #333; text-align: center; padding: 20px; margin: 0; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 100vh; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            color: #333; text-align: center; padding: 20px; margin: 0;
+        }
         #main-wrapper { width: 100%; max-width: 700px; }
         #title-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
         h1 { color: var(--primary-color); margin: 0; font-size: 2.5em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
@@ -32,9 +39,16 @@
         .super-category-btn { background-color: var(--super-category-color); }
         #game-wrapper { display: none; width: 100%; }
         #game-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        #game-info { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
-        #score-display, #progress-display { font-size: 1.3em; font-weight: 600; color: var(--primary-color); }
-        #progress-display { color: var(--success-color); }
+        #game-info { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        #score-display { font-size: 1.3em; font-weight: 600; color: var(--primary-color); }
+        
+        /* MODIFICADO: Estilo dedicado para o Progresso */
+        #progress-display {
+            font-size: 1.2em; font-weight: 600; color: var(--success-color);
+            background-color: #f0fff4; padding: 8px 15px; border-radius: 8px;
+            border: 1px solid var(--success-color); width: 100%; margin: 0;
+        }
+
         #timer-display { font-size: 1.6em; font-weight: 700; color: var(--danger-color); }
         #drawing-container svg { width: 160px; height: 190px; }
         .flower-part { stroke: #228b22; stroke-width: 5; stroke-linecap: round; fill: none; transition: opacity 0.5s; }
@@ -68,17 +82,15 @@
         <div id="title-wrapper"><h1 id="main-title">Jogo da Forca Educativo</h1><button id="show-help-btn">?</button></div>
         <p id="api-status"></p>
         <div id="category-selection" class="game-panel"><h2>Carregando...</h2></div>
-        
-        <!-- NOVO: Input de arquivo oculto -->
         <input type="file" id="local-file-input" style="display: none;" accept=".json,application/json">
-
         <div id="game-wrapper">
             <div id="game-container" class="game-panel">
                 <div id="game-info">
                     <p id="score-display">Pontuação: 0</p>
-                    <p id="progress-display">Progresso: 0 / 0</p>
                     <p id="timer-display"></p>
                 </div>
+                <!-- MODIFICADO: O progresso agora tem sua própria linha -->
+                <p id="progress-display">Progresso: 0 / 0</p>
                 <div id="drawing-container">
                     <svg viewBox="0 0 100 120"><line class="flower-part" x1="50" y1="110" x2="50" y2="40" /><path class="flower-part" d="M50 80 Q 65 70 70 50" /><path class="flower-part" d="M50 90 Q 35 80 30 60" /><path id="petal-6" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(0, 50, 40)"/><path id="petal-5" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(60, 50, 40)"/><path id="petal-4" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(120, 50, 40)"/><path id="petal-3" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(180, 50, 40)"/><path id="petal-2" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(240, 50, 40)"/><path id="petal-1" class="flower-part petal hidden" d="M50 40 Q 30 35 30 15 A 20 20 0 0 1 50 0 A 20 20 0 0 1 70 15 Q 70 35 50 40" transform="rotate(300, 50, 40)"/><circle class="flower-part center-circle" cx="50" cy="40" r="10" /></svg>
                 </div>
@@ -106,6 +118,7 @@
                 <li>Cada letra errada custa <strong>-5 pontos</strong> e uma pétala da flor.</li>
                 <li>Acertar uma palavra inteira dá um bônus de <strong>+50 pontos</strong>!</li>
                 <li>Pular uma palavra (6 erros) te custa <strong>-20 pontos</strong>.</li>
+                <li>O tempo que sobrar ao final de uma categoria vira bônus para a próxima!</li>
             </ul>
             <button class="modal-btn" id="close-help-btn">Entendi, vamos jogar!</button>
         </div>
@@ -133,7 +146,7 @@
         const showHelpBtn = document.getElementById('show-help-btn');
         const closeHelpBtn = document.getElementById('close-help-btn');
         const progressDisplay = document.getElementById('progress-display');
-        const localFileInput = document.getElementById('local-file-input'); // NOVO
+        const localFileInput = document.getElementById('local-file-input');
 
         // --- CONSTANTES E VARIÁVEIS DE ESTADO ---
         const MAX_WRONG_GUESSES = 6;
@@ -146,6 +159,7 @@
         let totalWordsInCategory = 0;
         let isFirstRun = true, audioCtx, isTransitioning = false;
         let wordsForCurrentRound = [];
+        let timeBonus = 0;
 
         // --- FUNÇÕES PRINCIPAIS ---
         const startRound = (category) => {
@@ -153,7 +167,8 @@
             mainTitle.textContent = `Forca: ${capitalize(category)}`;
             score = 0; wordsSolved = 0; totalPointsEarned = 0; totalPointsLost = 0;
             totalWordsInCategory = wordCategories[category].originalWords.length;
-            timeLeft = wordCategories[category].time;
+            timeLeft = wordCategories[category].time + timeBonus;
+            timeBonus = 0;
             wordsForCurrentRound = [...wordCategories[category].originalWords].sort(() => Math.random() - 0.5);
             showPanel('game');
             updateProgressDisplay();
@@ -217,10 +232,15 @@
 
         const endRound = (message) => {
             clearInterval(gameTimer);
+            if (timeLeft > 0) {
+                timeBonus = timeLeft;
+            }
             showPanel('none');
             scoreboardTitle.textContent = message;
+            let bonusMessage = timeBonus > 0 ? `<li>Bônus de Tempo: <span class="score-good">+${timeBonus} segundos</span> para a próxima rodada!</li>` : '';
             scoreboardDetails.innerHTML = `
                 <li>Palavras Acertadas: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
+                ${bonusMessage}
                 <li>Pontos Ganhos: <span class="score-good">+${totalPointsEarned}</span></li>
                 <li>Pontos Perdidos: <span class="score-bad">-${totalPointsLost}</span></li>
             `;
@@ -234,7 +254,7 @@
             categorySelection.style.display = panelName === 'category' ? 'flex' : 'none';
             gameWrapper.style.display = panelName === 'game' ? 'block' : 'none';
         };
-        const startTimer = () => { if (gameTimer) clearInterval(gameTimer); updateTimerDisplay(); gameTimer = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) endRound("O tempo acabou!"); }, 1000); };
+        const startTimer = () => { if (gameTimer) clearInterval(gameTimer); updateTimerDisplay(); gameTimer = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) { timeLeft = 0; endRound("O tempo acabou!"); } }, 1000); };
         const updateTimerDisplay = () => timerDisplay.textContent = formatTime(timeLeft);
         const updateScoreDisplay = () => scoreDisplay.textContent = `Pontuação: ${score}`;
         const updateUIForNewWord = (hint) => { hintDisplay.textContent = `Dica: ${hint}`; displayWord(); generateKeyboard(); updateDrawing(); };
@@ -248,7 +268,6 @@
         const hideModal = (modalElement) => modalElement.classList.remove('visible');
         const updateProgressDisplay = () => { progressDisplay.textContent = `Progresso: ${wordsSolved} / ${totalWordsInCategory}`; };
 
-        // NOVO: Função para processar os dados carregados (seja da API ou local)
         function processLoadedCategories(data) {
             wordCategories = data;
             const regCatCount = Object.keys(wordCategories).length;
@@ -271,19 +290,15 @@
                 button.addEventListener('click', () => { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); startRound(categoryKey); });
                 categorySelection.appendChild(button);
             });
-
-            // NOVO: Adiciona o botão de carregar local permanentemente
             const localLoadBtn = document.createElement('button');
             localLoadBtn.className = 'local-load-btn';
             localLoadBtn.textContent = 'Carregar Arquivo Local';
             localLoadBtn.onclick = () => localFileInput.click();
             categorySelection.appendChild(localLoadBtn);
-
             if (isFirstRun) showModal(instructionsModal);
             else showPanel('category');
         }
 
-        // NOVO: Lógica de leitura de arquivo local
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -304,10 +319,9 @@
                 const response = await fetch('https://raw.githubusercontent.com/evaristopba/Atividades/main/palavras.json' + `?v=${new Date().getTime()}`);
                 if (!response.ok) throw new Error('Falha ao carregar o banco de palavras do GitHub.');
                 const data = await response.json();
-                processLoadedCategories(data); // Processa os dados da API
+                processLoadedCategories(data);
             } catch (error) {
                 console.error('Erro:', error);
-                // MODIFICADO: Mensagem de erro amigável
                 categorySelection.innerHTML = `<h2>Erro ao carregar o jogo online.</h2><p>${error.message}</p><p>Você pode tentar carregar um arquivo local.</p>`;
                 const localLoadBtn = document.createElement('button');
                 localLoadBtn.className = 'local-load-btn';
@@ -319,8 +333,8 @@
             closeHelpBtn.addEventListener('click', () => { hideModal(instructionsModal); if (isFirstRun) { showPanel('category'); isFirstRun = false; } });
             showHelpBtn.addEventListener('click', () => showModal(instructionsModal));
             playAgainBtn.addEventListener('click', () => { hideModal(scoreboardModal); startRound(selectedCategory); });
-            backToMenuBtn.addEventListener('click', () => { hideModal(scoreboardModal); showPanel('category'); mainTitle.textContent = 'Jogo da Forca Educativo'; });
-            localFileInput.addEventListener('change', handleFileSelect); // NOVO
+            backToMenuBtn.addEventListener('click', () => { hideModal(scoreboardModal); showPanel('category'); mainTitle.textContent = 'Jogo da Forca Educativo'; timeBonus = 0; });
+            localFileInput.addEventListener('change', handleFileSelect);
             document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
         }
         init();
