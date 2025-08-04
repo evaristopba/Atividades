@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape Swarm - Níveis</title>
+    <style>
+        /* Seus estilos CSS permanecem os mesmos */
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f0f0f0; font-family: Arial, sans-serif; }
+        canvas { border: 2px solid #333; background-color: #fff; }
+        #info { margin-top: 10px; font-size: 1.2em; text-align: center; }
+        #restart { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 5px; }
+        #restart:hover { background-color: #2980b9; }
+        #modal { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 1000; }
+        #modal-content { background-color: #fff; padding: 20px; border-radius: 10px; max-width: 500px; text-align: center; }
+        #modal-content h2 { margin-top: 0; color: #e74c3c; }
+        #modal-content p { margin: 10px 0; line-height: 1.5; }
+        .difficulty-button { padding: 10px 20px; margin: 5px; font-size: 1em; cursor: pointer; border: none; border-radius: 5px; color: white; }
+        #easy { background-color: #2ecc71; }
+        #easy:hover { background-color: #27ae60; }
+        #normal { background-color: #3498db; }
+        #normal:hover { background-color: #2980b9; }
+        #hard { background-color: #e74c3c; }
+        #hard:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+    <div id="modal">
+        <div id="modal-content">
+            <h2>Escape Swarm</h2>
+            <p><strong>Objetivo:</strong> Sobreviva 30 segundos por nível enquanto foge de inimigos. Tente alcançar o nível 10 ou mais!</p>
+            <p><strong>Controles:</strong><br>
+               - <strong>Setas:</strong> Mova o jogador (quadrado azul).<br>
+               - <strong>Espaço:</strong> Ative power-ups (verde para velocidade, amarelo para escudo).</p>
+            <p><strong>Mecânicas:</strong><br>
+               - <strong>Inimigos (vermelhos):</strong> Perseguem você e causam dano.<br>
+               - <strong>Armadilhas (roxas):</strong> Causam dano e desaparecem.<br>
+               - <strong>Power-ups:</strong> Velocidade (move 2x mais rápido) ou Escudo (protege).<br>
+               - <strong>Vida:</strong> Começa com 100. Game over se chegar a 0.<br>
+               - <strong>Níveis:</strong> 30s cada. Dificuldade aumenta por nível.</p>
+            <p><strong>Pontuação:</strong> Pontos por nível completado + 1 por segundo sobrevivido.</p>
+            <p><strong>Escolha a Dificuldade:</strong></p>
+            <button id="easy" class="difficulty-button">Fácil</button>
+            <button id="normal" class="difficulty-button">Normal</button>
+            <button id="hard" class="difficulty-button">Difícil</button>
+        </div>
+    </div>
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div id="info">Nível: 1 | Tempo Restante: 30s | Vida: 100 | Movimentos: 0 | Pontuação: 0 | Power-up: Nenhum</div>
+    <button id="restart">Reiniciar Jogo</button>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const info = document.getElementById('info');
+        const restartButton = document.getElementById('restart');
+        const modal = document.getElementById('modal');
+        const easyButton = document.getElementById('easy');
+        const normalButton = document.getElementById('normal');
+        const hardButton = document.getElementById('hard');
+
+        const GRID_SIZE = 30;
+        const CELL_SIZE = canvas.width / GRID_SIZE;
+        const LEVEL_TIME = 30;
+        const map = [];
+        let player, enemies, traps, powerUps;
+        let moves, time, level, levelTime, score;
+        let gameOver = false;
+        let lastTime, lastEnemyMove, lastTrapSpawn, lastPowerUpSpawn;
+        let difficulty = 'normal';
+
+        const difficultySettings = {
+            easy: { baseEnemies: 1, maxEnemies: 3, baseTraps: 0, maxTraps: 5, trapDamage: 5, enemyDamage: 10, powerUpInterval: 3000, maxPowerUpInterval: 5000, powerUpDuration: 8000, healthPerLevel: 30, enemySpeed: 1500, maxEnemySpeed: 1000, scorePerLevel: 50 },
+            normal: { baseEnemies: 2, maxEnemies: 5, baseTraps: 3, maxTraps: 12, trapDamage: 10, enemyDamage: 20, powerUpInterval: 5000, maxPowerUpInterval: 15000, powerUpDuration: 5000, healthPerLevel: 20, enemySpeed: 1000, maxEnemySpeed: 500, scorePerLevel: 100 },
+            hard: { baseEnemies: 3, maxEnemies: 7, baseTraps: 5, maxTraps: 15, trapDamage: 15, enemyDamage: 30, powerUpInterval: 8000, maxPowerUpInterval: 20000, powerUpDuration: 3000, healthPerLevel: 10, enemySpeed: 800, maxEnemySpeed: 300, scorePerLevel: 150 }
+        };
+
+        function hasOpenPaths(x, y) {
+            const visited = new Set();
+            const queue = [{ x, y }];
+            visited.add(`${x},${y}`);
+            let openCells = 0;
+            while (queue.length > 0 && openCells < 8) {
+                const { x, y } = queue.shift();
+                const neighbors = [{ x: x + 1, y }, { x: x - 1, y }, { x, y: y + 1 }, { x, y: y - 1 }];
+                for (let neighbor of neighbors) {
+                    const key = `${neighbor.x},${neighbor.y}`;
+                    if (neighbor.x >= 0 && neighbor.x < GRID_SIZE && neighbor.y >= 0 && neighbor.y < GRID_SIZE && map[neighbor.y][neighbor.x] === 0 && !visited.has(key)) {
+                        queue.push(neighbor);
+                        visited.add(key);
+                        openCells++;
+                    }
+                }
+            }
+            return openCells >= 8;
+        }
+
+        function initializeMap() {
+            do {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    map[y] = [];
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        map[y][x] = (x >= 0 && x <= 2 && y >= 0 && y <= 2) ? 0 : (Math.random() < 0.2 ? 1 : 0);
+                    }
+                }
+                map[0].fill(1); map[GRID_SIZE - 1].fill(1);
+                for (let y = 0; y < GRID_SIZE; y++) { map[y][0] = 1; map[y][GRID_SIZE - 1] = 1; }
+                map[player.y][player.x] = 0;
+                enemies.forEach(enemy => map[enemy.y][enemy.x] = 0);
+            } while (!hasOpenPaths(player.x, player.y));
+            spawnTraps(difficultySettings[difficulty].baseTraps + Math.min(level, difficultySettings[difficulty].maxTraps - difficultySettings[difficulty].baseTraps));
+            spawnPowerUps(3);
+        }
+
+        function initializeEnemies() {
+            enemies = [];
+            const enemyCount = Math.min(difficultySettings[difficulty].baseEnemies + level - 1, difficultySettings[difficulty].maxEnemies);
+            const positions = [{ x: GRID_SIZE - 2, y: GRID_SIZE - 2 }, { x: GRID_SIZE - 2, y: 1 }, { x: 1, y: GRID_SIZE - 2 }, { x: GRID_SIZE / 2, y: GRID_SIZE / 2 }, { x: GRID_SIZE - 5, y: 5 }, { x: GRID_SIZE - 3, y: 3 }, { x: 3, y: GRID_SIZE - 3 }];
+            for (let i = 0; i < enemyCount; i++) {
+                let x, y;
+                do { x = positions[i].x; y = positions[i].y; } while (x === player.x && y === player.y);
+                enemies.push({ x, y });
+            }
+        }
+
+        function spawnTraps(count) {
+            traps = [];
+            for (let i = 0; i < count; i++) {
+                let x, y;
+                do { x = Math.floor(Math.random() * GRID_SIZE); y = Math.floor(Math.random() * GRID_SIZE); } while (map[y][x] !== 0 || (x === player.x && y === player.y) || (x >= 0 && x <= 2 && y >= 0 && y <= 2) || enemies.some(enemy => enemy.x === x && enemy.y === y));
+                traps.push({ x, y });
+            }
+        }
+
+        function spawnPowerUps(count) {
+            powerUps = [];
+            for (let i = 0; i < count; i++) {
+                let x, y;
+                do { x = Math.floor(Math.random() * GRID_SIZE); y = Math.floor(Math.random() * GRID_SIZE); } while (map[y][x] !== 0 || (x === player.x && y === player.y) || (x >= 0 && x <= 2 && y >= 0 && y <= 2) || enemies.some(enemy => enemy.x === x && enemy.y === y));
+                powerUps.push({ x, y, type: Math.random() < 0.5 ? 'speed' : 'shield' });
+            }
+        }
+
+        function aStar(start, goal) {
+            const openSet = [{ x: start.x, y: start.y, g: 0, h: heuristic(start, goal), f: 0, parent: null }];
+            const closedSet = new Set();
+            while (openSet.length > 0) {
+                openSet.sort((a, b) => a.f - b.f);
+                const current = openSet.shift();
+                const key = `${current.x},${current.y}`;
+                if (current.x === goal.x && current.y === goal.y) {
+                    const path = []; let temp = current;
+                    while (temp) { path.push({ x: temp.x, y: temp.y }); temp = temp.parent; }
+                    return path.reverse();
+                }
+                closedSet.add(key);
+                const neighbors = [{ x: current.x + 1, y: current.y }, { x: current.x - 1, y: current.y }, { x: current.x, y: current.y + 1 }, { x: current.x, y: current.y - 1 }];
+                for (let neighbor of neighbors) {
+                    if (neighbor.x < 0 || neighbor.x >= GRID_SIZE || neighbor.y < 0 || neighbor.y >= GRID_SIZE || map[neighbor.y][neighbor.x] === 1) continue;
+                    const nKey = `${neighbor.x},${neighbor.y}`;
+                    if (closedSet.has(nKey)) continue;
+                    let g = current.g + 1;
+                    if (traps.some(trap => trap.x === neighbor.x && trap.y === neighbor.y)) g += 5;
+                    const h = heuristic(neighbor, goal);
+                    const f = g + h;
+                    const existing = openSet.find(n => n.x === neighbor.x && n.y === neighbor.y);
+                    if (!existing || f < existing.f) {
+                        if (existing) openSet.splice(openSet.indexOf(existing), 1);
+                        openSet.push({ x: neighbor.x, y: neighbor.y, g, h, f, parent: current });
+                    }
+                }
+            }
+            return [];
+        }
+
+        function heuristic(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < GRID_SIZE; y++) { for (let x = 0; x < GRID_SIZE; x++) { ctx.fillStyle = map[y][x] === 1 ? '#333' : '#fff'; ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE); } }
+            traps.forEach(trap => { ctx.fillStyle = '#8e44ad'; ctx.fillRect(trap.x * CELL_SIZE + 2, trap.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4); });
+            powerUps.forEach(powerUp => { ctx.fillStyle = powerUp.type === 'speed' ? '#2ecc71' : '#f1c40f'; ctx.fillRect(powerUp.x * CELL_SIZE + 2, powerUp.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4); });
+            ctx.fillStyle = player.shield > 0 ? '#3498db88' : '#3498db';
+            ctx.fillRect(player.x * CELL_SIZE + 2, player.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+            enemies.forEach(enemy => { ctx.fillStyle = '#e74c3c'; ctx.fillRect(enemy.x * CELL_SIZE + 2, enemy.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4); });
+            if (!gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'; ctx.fillRect(0, 0, canvas.width, 30);
+                ctx.fillStyle = '#f1c40f'; ctx.font = '20px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(`Nível ${level}: Sobreviva ${LEVEL_TIME - Math.floor(levelTime)}s!`, canvas.width / 2, 20);
+            }
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff'; ctx.font = '30px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(`Game Over! Nível: ${level} | Pontuação: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2);
+            }
+            const powerUpStatus = player.speed > 1 ? 'Velocidade' : player.shield > 0 ? 'Escudo' : 'Nenhum';
+            info.textContent = `Nível: ${level} | Tempo Restante: ${LEVEL_TIME - Math.floor(levelTime)}s | Vida: ${player.health} | Movimentos: ${Math.floor(moves)} | Pontuação: ${Math.floor(score)} | Power-up: ${powerUpStatus} | Dificuldade: ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
+        }
+
+        function update(deltaTime) {
+            if (gameOver || modal.style.display !== 'none') return;
+            time += deltaTime / 1000;
+            levelTime += deltaTime / 1000;
+            lastEnemyMove += deltaTime;
+            lastTrapSpawn += deltaTime;
+            lastPowerUpSpawn += deltaTime;
+
+            const enemySpeed = Math.max(difficultySettings[difficulty].maxEnemySpeed, difficultySettings[difficulty].enemySpeed - level * 100);
+
+            if (lastEnemyMove >= enemySpeed) {
+                enemies.forEach((enemy, index) => {
+                    const path = aStar(enemy, player);
+                    if (path.length > 1) { const step = path[Math.min(Math.floor(player.speed), path.length - 1)]; enemy.x = step.x; enemy.y = step.y; }
+                });
+                lastEnemyMove = 0;
+            }
+
+            enemies.forEach(enemy => { if (player.x === enemy.x && player.y === enemy.y && player.shield <= 0) { player.health -= difficultySettings[difficulty].enemyDamage; } });
+            traps = traps.filter(trap => { if (player.x === trap.x && player.y === trap.y && player.shield <= 0) { player.health -= difficultySettings[difficulty].trapDamage; return false; } return true; });
+            powerUps = powerUps.filter(powerUp => { if (player.x === powerUp.x && player.y === powerUp.y) { if (powerUp.type === 'speed') { player.speed = 2; setTimeout(() => player.speed = 1, difficultySettings[difficulty].powerUpDuration); } else if (powerUp.type === 'shield') { player.shield = difficultySettings[difficulty].powerUpDuration / 1000; } return false; } return true; });
+
+            if (lastTrapSpawn >= 10000) { spawnTraps(1); lastTrapSpawn = 0; }
+            if (lastPowerUpSpawn >= (difficultySettings[difficulty].powerUpInterval + level * 1000)) { spawnPowerUps(1); lastPowerUpSpawn = 0; }
+            if (player.shield > 0) { player.shield -= deltaTime / 1000; }
+            score = level * difficultySettings[difficulty].scorePerLevel + Math.floor(time);
+
+            if (levelTime >= LEVEL_TIME) {
+                level++; score += difficultySettings[difficulty].scorePerLevel; levelTime = 0;
+                player.health = Math.min(100, player.health + difficultySettings[difficulty].healthPerLevel);
+                initializeEnemies(); initializeMap();
+            }
+
+            if (player.health <= 0) { gameOver = true; }
+        }
+
+        // MODIFICADO: Função de controle movida para uma função nomeada
+        function handleKeyDown(e) {
+            // Apenas previne o comportamento padrão para as teclas do jogo
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                e.preventDefault();
+            } else {
+                return; // Ignora outras teclas
+            }
+            
+            if (gameOver || modal.style.display !== 'none') return;
+            let newX = player.x, newY = player.y;
+            if (e.key === 'ArrowUp') newY--;
+            if (e.key === 'ArrowDown') newY++;
+            if (e.key === 'ArrowLeft') newX--;
+            if (e.key === 'ArrowRight') newX++;
+            
+            if (e.key === ' ') {
+                const powerUpToActivate = powerUps.find(p => p.x === player.x && p.y === player.y);
+                if(powerUpToActivate){
+                     if (powerUpToActivate.type === 'speed') {
+                        player.speed = 2;
+                        setTimeout(() => player.speed = 1, difficultySettings[difficulty].powerUpDuration);
+                    } else if (powerUpToActivate.type === 'shield') {
+                        player.shield = difficultySettings[difficulty].powerUpDuration / 1000;
+                    }
+                    powerUps = powerUps.filter(p => p !== powerUpToActivate);
+                }
+            }
+
+            if (newX >= 0 && newX < GRID_SIZE && newY >= 0 && newY < GRID_SIZE && map[newY][newX] === 0) {
+                player.x = newX;
+                player.y = newY;
+                moves += 1 / player.speed;
+            }
+        }
+
+        function startGameWithDifficulty(selectedDifficulty) {
+            difficulty = selectedDifficulty;
+            modal.style.display = 'none';
+            player = { x: 1, y: 1, health: 100, speed: 1, shield: 0 };
+            level = 1; levelTime = 0; score = 0; moves = 0; time = 0;
+            gameOver = false;
+            lastEnemyMove = 0; lastTrapSpawn = 0; lastPowerUpSpawn = 0;
+            
+            initializeEnemies();
+            initializeMap();
+            
+            // NOVO: Adiciona o ouvinte de teclado AQUI
+            document.addEventListener('keydown', handleKeyDown);
+            
+            lastTime = performance.now(); // Inicia o contador de tempo
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // MODIFICADO: Função para parar o jogo e limpar os ouvintes
+        function stopGame() {
+            gameOver = true; // Define gameOver para parar o loop de update
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+
+        easyButton.addEventListener('click', () => startGameWithDifficulty('easy'));
+        normalButton.addEventListener('click', () => startGameWithDifficulty('normal'));
+        hardButton.addEventListener('click', () => startGameWithDifficulty('hard'));
+        
+        restartButton.addEventListener('click', () => {
+            stopGame(); // NOVO: Chama a função para parar e limpar
+            modal.style.display = 'flex';
+        });
+
+        function gameLoop(currentTime) {
+            if (gameOver) return; // Para o loop se o jogo acabou
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            update(deltaTime);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
