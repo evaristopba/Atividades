@@ -8,10 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Todos os seus estilos CSS, que já estão perfeitos, permanecem aqui. */
-        :root { --primary-color: #0077b6; --secondary-color: #00b4d8; --success-color: #2a9d8f; --danger-color: #e76f51; --light-bg: #edf6f9; --super-category-color: #8338ec; }
+        :root {
+            --primary-color: #0077b6; --secondary-color: #00b4d8; --success-color: #2a9d8f;
+            --danger-color: #e76f51; --light-bg: #edf6f9; --super-category-color: #8338ec;
+        }
         * { box-sizing: border-box; }
-        body { font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%); color: #333; text-align: center; padding: 20px; margin: 0; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 100vh; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            color: #333; text-align: center; padding: 20px; margin: 0;
+        }
         #main-wrapper { width: 100%; max-width: 700px; }
         #title-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
         h1 { color: var(--primary-color); margin: 0; font-size: 2.5em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
@@ -42,7 +49,19 @@
         .center-circle { fill: #ffd700; stroke: #daa520; }
         .hidden { opacity: 0; }
         #hint-display { font-size: 1.1em; margin: 0; color: #555; background-color: var(--light-bg); padding: 8px 15px; border-radius: 8px; border: 1px dashed var(--secondary-color); width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; }
-        #word-display { font-size: 2.2em; letter-spacing: 10px; margin: 10px 0; height: auto; }
+        
+        /* MODIFICADO: Adicionado 'gap' para o espaçamento */
+        #word-display {
+            font-size: 2.2em;
+            letter-spacing: 10px;
+            margin: 10px 0;
+            height: auto;
+            display: flex; /* Garante que o display é flex */
+            justify-content: center; /* Centraliza as letras */
+            flex-wrap: wrap; /* Permite quebrar linha em palavras longas */
+            gap: 10px; /* AQUI ESTÁ A MUDANÇA: Cria o espaço entre as letras */
+        }
+        
         #word-display span { display: inline-block; border-bottom: 4px solid #333; width: 40px; text-align: center; }
         #keyboard-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(48px, 1fr)); gap: 8px; width: 100%; margin-top: 20px; }
         #keyboard-container button { font-size: 1.3em; font-weight: 600; padding: 12px 8px; border-radius: 8px; border: 1px solid #ccc; border-bottom-width: 4px; background-color: #fff; cursor: pointer; transition: all 0.1s ease-in-out; }
@@ -134,7 +153,7 @@
         const scoreboardTitle = document.getElementById('scoreboard-title');
         const scoreboardDetails = document.getElementById('scoreboard-details');
         const finalScoreDisplay = document.getElementById('final-score');
-        const continueBtn = document.getElementById('continue-btn'); // CORREÇÃO: Referência correta
+        const continueBtn = document.getElementById('continue-btn');
         const backToMenuBtn = document.getElementById('back-to-menu-btn');
         const showHelpBtn = document.getElementById('show-help-btn');
         const closeHelpBtn = document.getElementById('close-help-btn');
@@ -144,8 +163,6 @@
         const generalScoreTotal = document.getElementById('general-score-total');
         const generalScoreList = document.getElementById('general-score-list');
         const closeGeneralScoreBtn = document.getElementById('close-general-score-btn');
-
-        // --- CONSTANTES E VARIÁVEIS DE ESTADO ---
         const MAX_WRONG_GUESSES = 6;
         const BASE_GAME_DURATION = 90;
         const SUPER_CATEGORY_DISCOUNT_FACTOR = 0.6;
@@ -159,7 +176,6 @@
         let timeBonus = 0;
         let sessionStats = {};
 
-        // --- FUNÇÕES PRINCIPAIS ---
         const startRound = (category) => {
             selectedCategory = category;
             mainTitle.textContent = `Forca: ${capitalize(category)}`;
@@ -233,7 +249,6 @@
             if (timeLeft > 0) { timeBonus = timeLeft; }
             sessionStats[selectedCategory] = { solved: wordsSolved, total: totalWordsInCategory };
             showPanel('none');
-            
             if (categoryCompleted) {
                 scoreboardTitle.textContent = "Parabéns, você zerou a categoria!";
                 continueBtn.textContent = "Próxima Categoria";
@@ -243,7 +258,6 @@
                 continueBtn.textContent = "Tentar Categoria Novamente";
                 continueBtn.onclick = () => { hideModal(scoreboardModal); startRound(selectedCategory); };
             }
-
             let bonusMessage = timeBonus > 0 ? `<li>Bônus de Tempo: <span class="score-good">+${timeBonus} segundos</span> para a próxima rodada!</li>` : '';
             scoreboardDetails.innerHTML = `
                 <li>Palavras Acertadas (rodada): <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
@@ -255,7 +269,6 @@
             showModal(scoreboardModal);
         };
         
-        // --- FUNÇÕES DE UI E UTILITÁRIAS ---
         const capitalize = (s) => (s && typeof s === 'string') ? s.charAt(0).toUpperCase() + s.slice(1) : '';
         const showPanel = (panelName) => {
             categorySelection.style.display = panelName === 'category' ? 'flex' : 'none';
@@ -363,9 +376,6 @@
             closeHelpBtn.addEventListener('click', () => { hideModal(instructionsModal); if (isFirstRun) { showPanel('category'); isFirstRun = false; } });
             showHelpBtn.addEventListener('click', () => showModal(instructionsModal));
             
-            // CORREÇÃO: O botão play-again-btn foi renomeado para continue-btn e sua lógica agora é dinâmica dentro de endRound
-            // Nenhum listener é necessário aqui para ele.
-
             backToMenuBtn.addEventListener('click', () => { 
                 if (confirm('Tem certeza que deseja voltar ao menu? Todo o seu progresso (pontuação e bônus) será perdido.')) {
                     hideModal(scoreboardModal); 
