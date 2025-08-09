@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quebra-cabeça: Conferência Tecnológica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#f6f8fb; --card:#ffffff; --primary:#2b6ef6; --accent:#ff7a59; --ok:#2ecc71; --bad:#ff5252; --muted:#6b7280; --glass: rgba(43,110,246,0.08); font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+        * { box-sizing: border-box; }
+        body { margin:0; background:var(--bg); color:#0f172a; padding:24px; display:flex; flex-direction:column; gap:20px; min-height:100vh; align-items: center; }
+        #layout-container { display: flex; gap: 20px; width: 100%; max-width: 1600px; align-items: flex-start; }
+        .game-container { background: var(--card); border-radius: 12px; padding: 25px; box-shadow: 0 6px 20px rgba(12, 18, 34, 0.06); flex: 3; }
+        .clues-section { background: var(--card); border-radius: 12px; padding: 25px; box-shadow: 0 6px 20px rgba(12, 18, 34, 0.06); flex: 2; position: sticky; top: 20px; max-height: 90vh; overflow-y: auto; }
+        h1, h2, h3 { margin-top: 0; }
+        h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); text-align: center; }
+        h2 { font-size: 1.25rem; }
+        h3 { color: var(--primary); }
+        .hint { font-size: 0.92rem; color: var(--muted); margin-top: 6px; text-align: center; }
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .controls, .meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        button { background: var(--primary); color: white; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        button.ghost { background: transparent; color: var(--primary); border: 1px solid rgba(43, 110, 246, 0.12); }
+        .timer { background: linear-gradient(90deg, var(--glass), transparent); padding: 8px 12px; border-radius: 10px; font-weight: 700; color: var(--primary); }
+        .score { font-weight: 700; color: var(--muted); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        th, td { border: 1px solid #e6eef8; text-align: left; vertical-align: middle; }
+        th { background-color: var(--glass); font-weight: 700; color: var(--primary); padding: 12px; }
+        td { height: 52px; padding: 0; }
+        select { width: 100%; height: 100%; padding: 10px; border-radius: 0; border: 2px solid transparent; background: white; font-size: 0.95rem; transition: all 0.2s; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(43, 110, 246, 0.2); }
+        .field-correct { background-color: rgba(46,204,113,0.08) !important; border-color: var(--ok) !important; }
+        .field-wrong { background-color: rgba(255,82,82,0.08) !important; border-color: var(--bad) !important; }
+        .clue { padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(12, 18, 34, 0.04); background: #fbfdff; }
+        .clue.ok { border-color: rgba(46, 204, 113, 0.15); background: linear-gradient(90deg, rgba(46, 204, 113, 0.05), transparent); }
+        .clue.bad { border-color: rgba(255, 82, 82, 0.12); background: linear-gradient(90deg, rgba(255, 82, 82, 0.04), transparent); }
+        .clue small { display: block; color: var(--muted); margin-top: 6px; font-weight: 500; }
+        footer { width: 100%; max-width: 1600px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.9rem; color: var(--muted); padding: 0 10px; }
+        footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        footer a:hover { text-decoration: underline; }
+        @media (max-width: 1200px) { #layout-container { flex-direction: column; align-items: center; width: 100%; max-width: 800px; } .clues-section { position: static; max-height: none; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quebra-cabeça: Conferência Tecnológica</h1>
+        <div class="hint small">Selecione para cada cadeira (1 → 5) o Nome, Startup, Linguagem, Palestra e Hotel. As pistas são avaliadas em tempo real.</div>
+    </header>
+    <div id="layout-container">
+        <div class="game-container">
+            <div class="controls-bar">
+                <div class="controls">
+                    <button id="checkAll">Verificar Agora</button>
+                    <button id="resetBtn" class="ghost">Reiniciar</button>
+                </div>
+                <div class="meta">
+                    <div class="timer" id="timer">Tempo: 00:00</div>
+                    <div class="score" id="status">Pistas satisfeitas: 0 / 19</div>
+                </div>
+            </div>
+            <table id="game-board">
+                <thead><tr id="header-row"></tr></thead>
+                <tbody id="game-body"></tbody>
+            </table>
+        </div>
+        <aside class="clues-section">
+            <h3 style="margin-bottom:12px">Pistas (avaliadas em tempo real)</h3>
+            <div id="cluesList"></div>
+        </aside>
+    </div>
+    <footer>
+        <div class="small">Inspirado nos desafios de lógica do <a href="https://rachacuca.com.br" target="_blank" rel="noopener noreferrer">Racha Cuca</a>.</div>
+        <div class="small">Quando todas as 19 pistas estiverem verdes e todos os campos preenchidos, o tempo será congelado.</div>
+    </footer>
+
+    <script>
+        // --- DADOS DO JOGO (Validados e Consistentes) ---
+        const SOLUTION = {
+          '1': { 'Nome': 'Gabriel', 'Startup': 'CiberSeg', 'Linguagem': 'C#', 'Palestra': 'IoT', 'Hotel': 'Plaza Executivo' },
+          '2': { 'Nome': 'Lucas',  'Startup': 'AgroConecta', 'Linguagem': 'Ruby', 'Palestra': 'Data Science', 'Hotel': 'Hotel Vista' },
+          '3': { 'Nome': 'Rafael', 'Startup': 'FinSol', 'Linguagem': 'Python', 'Palestra': 'Blockchain', 'Hotel': 'Hotel Flores' },
+          '4': { 'Nome': 'Pedro',  'Startup': 'SaúdeDigital', 'Linguagem': 'Java', 'Palestra': 'Cloud Computing', 'Hotel': 'Hotel Central' },
+          '5': { 'Nome': 'Mateus', 'Startup': 'InovaTech', 'Linguagem': 'JavaScript', 'Palestra': 'Inteligência Artificial', 'Hotel': 'Hotel Mar' }
+        };
+        const CATEGORIES = {
+            'Nome': ['Gabriel','Lucas','Rafael','Mateus','Pedro'],
+            'Startup': ['InovaTech','SaúdeDigital','FinSol','CiberSeg','AgroConecta'],
+            'Linguagem': ['Java','Ruby','JavaScript','Python','C#'],
+            'Palestra': ['IoT','Blockchain','Inteligência Artificial','Cloud Computing','Data Science'],
+            'Hotel': ['Plaza Executivo','Hotel Central','Hotel Vista','Hotel Flores','Hotel Mar']
+        };
+        const CLUES = [
+          { id:1,  text:'1. Rafael está na terceira cadeira, bem no meio.', check: ()=> getValue(3,'Nome') === 'Rafael' },
+          { id:2,  text:'2. O fundador da InovaTech está na extrema direita.', check: ()=> findChairBy('Startup','InovaTech') === 5 },
+          { id:3,  text:'3. Gabriel está na primeira cadeira.', check: ()=> getValue(1,'Nome') === 'Gabriel' },
+          { id:4,  text:'4. Mateus é o fundador da InovaTech.', check: ()=> findBy('Nome','Mateus','Startup') === 'InovaTech' },
+          { id:5,  text:'5. Pedro é o fundador da SaúdeDigital.', check: ()=> findBy('Nome','Pedro','Startup') === 'SaúdeDigital' },
+          { id:6,  text:'6. O desenvolvedor que programa em Java está na cadeira 4.', check: ()=> getValue(4,'Linguagem') === 'Java' },
+          { id:7,  text:'7. O desenvolvedor que programa em Ruby está na cadeira 2.', check: ()=> getValue(2,'Linguagem') === 'Ruby' },
+          { id:8,  text:'8. Quem vai à palestra de IoT é o fundador da CiberSeg.', check: ()=> findBy('Palestra','IoT','Startup') === 'CiberSeg' },
+          { id:9,  text:'9. O desenvolvedor que programa em JavaScript está na cadeira 5.', check: ()=> getValue(5,'Linguagem') === 'JavaScript' },
+          { id:10, text:'10. Quem vai à palestra de Blockchain é o fundador da FinSol.', check: ()=> findBy('Palestra','Blockchain','Startup') === 'FinSol' },
+          { id:11, text:'11. O dev da SaúdeDigital está à esquerda de quem vai à palestra de Inteligência Artificial.', check: ()=>{ const a = findChairBy('Startup','SaúdeDigital'); const b = findChairBy('Palestra','Inteligência Artificial'); return (a && b) ? (a < b) : false; }},
+          { id:12, text:'12. O fundador da AgroConecta está imediatamente à direita de Gabriel.', check: ()=>{ const gab = findChairBy('Nome','Gabriel'); const agro = findChairBy('Startup','AgroConecta'); return (gab && agro) ? agro === gab + 1 : false; }},
+          { id:13, text:'13. Quem programa em Python está ao lado do fundador da SaúdeDigital.', check: ()=>{ const pChair = findChairBy('Startup','SaúdeDigital'); const pyChair = findChairBy('Linguagem','Python'); return (pChair && pyChair) ? Math.abs(pChair - pyChair) === 1 : false; }},
+          { id:14, text:'14. O desenvolvedor hospedado no Plaza Executivo está na cadeira 1.', check: ()=> getValue(1,'Hotel') === 'Plaza Executivo' },
+          { id:15, text:'15. O fundador da FinSol programa em Python.', check: ()=> findBy('Startup','FinSol','Linguagem') === 'Python' },
+          { id:16, text:'16. O desenvolvedor hospedado no Hotel Central programa em Java.', check: ()=> findBy('Hotel','Hotel Central','Linguagem') === 'Java' },
+          { id:17, text:'17. O desenvolvedor hospedado no Hotel Central vai à palestra de Cloud Computing.', check: ()=> findBy('Hotel','Hotel Central','Palestra') === 'Cloud Computing' },
+          { id:18, text:'18. O fundador da AgroConecta está hospedado no Hotel Vista.', check: ()=> findBy('Startup','AgroConecta','Hotel') === 'Hotel Vista' },
+          { id:19, text:'19. O fundador da FinSol está hospedado no Hotel Flores.', check: ()=> findBy('Startup','FinSol','Hotel') === 'Hotel Flores' },
+        ];
+        
+        let state = {1:{},2:{},3:{},4:{},5:{}};
+        for(let i=1;i<=5;i++) state[i] = {Nome:'',Startup:'',Linguagem:'',Palestra:'',Hotel:''};
+        let timerInterval = null; 
+        let seconds = 0; 
+        let gameStarted = false;
+        let gameCompleted = false;
+
+        function formatTime(s){ const mm = String(Math.floor(s/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0'); return mm + ':' + ss; }
+        
+        function startTimer(){ 
+            if(gameStarted || gameCompleted) return; 
+            gameStarted = true; 
+            timerInterval = setInterval(()=>{ 
+                seconds++; 
+                document.getElementById('timer').textContent = 'Tempo: ' + formatTime(seconds); 
+            },1000); 
+        }
+        
+        function stopTimer(){ 
+            if(timerInterval){ 
+                clearInterval(timerInterval); 
+                timerInterval = null; 
+            } 
+            gameCompleted = true;
+        }
+        
+        const headerRow = document.getElementById('header-row');
+        headerRow.innerHTML = '<th>Característica</th>';
+        for(let i=1; i<=5; i++) headerRow.innerHTML += '<th>Dev #' + i + '</th>';
+        
+        const gameBody = document.getElementById('game-body');
+        const categoryKeys = Object.keys(CATEGORIES);
+        
+        categoryKeys.forEach(cat => {
+            const row = document.createElement('tr');
+            row.innerHTML = '<th>' + cat + '</th>';
+            for(let i=1; i<=5; i++){
+                const td = document.createElement('td');
+                const sel = makeSelect(CATEGORIES[cat], cat, i);
+                td.appendChild(sel);
+                row.appendChild(td);
+            }
+            gameBody.appendChild(row);
+        });
+
+        const cluesListDiv = document.getElementById('cluesList');
+        CLUES.forEach(c=>{ const d = document.createElement('div'); d.className = 'clue'; d.id = 'clue-'+c.id; d.innerHTML = '<div style="font-weight:600">' + c.text + '</div><small id="clue-' + c.id + '-info"></small>'; cluesListDiv.appendChild(d); });
+        
+        function makeSelect(options,category,chair){ 
+            const sel = document.createElement('select'); 
+            sel.dataset.category = category; 
+            sel.dataset.chair = chair; 
+            const allOptions = ['--', ...options]; 
+            allOptions.forEach(val=>{ 
+                const opt = document.createElement('option'); 
+                opt.value = val === '--' ? '' : val; 
+                opt.textContent = val; 
+                sel.appendChild(opt); 
+            }); 
+            sel.addEventListener('change', onSelectChange); 
+            return sel; 
+        }
+        
+        function getValue(chair,category){ 
+            const sel = document.querySelector('select[data-chair="' + chair + '"][data-category="' + category + '"]'); 
+            return sel ? sel.value : ''; 
+        }
+        
+        function findChairBy(category,value){ 
+            if(!value) return null; 
+            for(let i=1;i<=5;i++){ 
+                if(getValue(i,category) === value) return i; 
+            } 
+            return null; 
+        }
+        
+        function findBy(findCategory, findValue, returnCategory){ 
+            if(!findValue) return ''; 
+            const chair = findChairBy(findCategory, findValue); 
+            if(!chair) return ''; 
+            return getValue(chair, returnCategory); 
+        }
+        
+        function onSelectChange(e){ 
+            const sel = e.target; 
+            const category = sel.dataset.category; 
+            const chair = parseInt(sel.dataset.chair,10); 
+            
+            // Inicia cronômetro na primeira seleção de qualquer dropdown
+            if(!gameStarted && !gameCompleted && sel.value) {
+                startTimer();
+            }
+            
+            state[chair][category] = sel.value; 
+            updateDisablesForCategory(category); 
+            updateFieldStyles(); 
+            evaluateClues(); 
+        }
+        
+        function updateDisablesForCategory(category){ 
+            const selects = Array.from(document.querySelectorAll('select[data-category="' + category + '"]')); 
+            const chosen = selects.map(s=>s.value).filter(v=>v); 
+            selects.forEach(s=>{ Array.from(s.options).forEach(opt=> opt.disabled = false); }); 
+            selects.forEach(s=>{ 
+                const ownVal = s.value; 
+                Array.from(s.options).forEach(opt=>{ 
+                    if(opt.value && opt.value !== ownVal && chosen.includes(opt.value)){ 
+                        opt.disabled = true; 
+                    } 
+                }); 
+            }); 
+        }
+        
+        function updateFieldStyles(){ 
+            document.querySelectorAll('select').forEach(sel=>{ 
+                const chair = parseInt(sel.dataset.chair,10); 
+                const cat = sel.dataset.category; 
+                const val = sel.value; 
+                const cell = sel.parentElement; 
+                cell.classList.remove('field-correct','field-wrong'); 
+                if(!val) return; 
+                const sol = SOLUTION[chair] && SOLUTION[chair][cat]; 
+                if(sol && val === sol){ 
+                    cell.classList.add('field-correct'); 
+                } else { 
+                    cell.classList.add('field-wrong'); 
+                } 
+            }); 
+        }
+        
+        function evaluateClues(){ 
+            let okCount = 0; 
+            CLUES.forEach(c=>{ 
+                const el = document.getElementById('clue-'+c.id); 
+                const info = document.getElementById('clue-' + c.id + '-info'); 
+                try{ 
+                    const satisfied = Boolean(c.check()); 
+                    el.classList.remove('ok','bad'); 
+                    if(satisfied){ 
+                        el.classList.add('ok'); 
+                        info.textContent = 'Satisfeita'; 
+                        okCount++; 
+                    } else { 
+                        el.classList.add('bad'); 
+                        info.textContent = 'Ainda não satisfeita'; 
+                    } 
+                }catch(err){ 
+                    el.classList.add('bad'); 
+                    info.textContent = 'Ainda não satisfeita'; 
+                } 
+            }); 
+            
+            document.getElementById('status').textContent = 'Pistas satisfeitas: ' + okCount + ' / ' + CLUES.length; 
+            
+            // Para o cronômetro apenas quando todas as pistas estão corretas E todos os dropdowns estão preenchidos
+            const allFilled = Array.from(document.querySelectorAll('select')).every(sel => sel.value !== '');
+            const allOk = okCount === CLUES.length;
+            if(allOk && allFilled && gameStarted && !gameCompleted){ 
+                stopTimer(); 
+                document.getElementById('status').textContent = "Parabéns, você conseguiu!";
+            } 
+            
+            return okCount; 
+        }
+        
+        document.getElementById('checkAll').addEventListener('click', ()=>{ 
+            const ok = evaluateClues(); 
+            const allFilled = Array.from(document.querySelectorAll('select')).every(sel => sel.value !== '');
+            if(ok === CLUES.length && allFilled){ 
+                if(!gameCompleted) stopTimer(); 
+                alert('Todas as pistas estão satisfeitas e todos os campos preenchidos! Tempo final: ' + formatTime(seconds)); 
+            } else { 
+                const missingFields = Array.from(document.querySelectorAll('select')).filter(sel => sel.value === '').length;
+                let message = 'Ainda faltam ' + (CLUES.length - ok) + ' pistas';
+                if(missingFields > 0) {
+                    message += ' e ' + missingFields + ' campo(s) não preenchido(s)';
+                }
+                message += '. Continue!';
+                alert(message); 
+            } 
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', ()=>{ 
+            if(!confirm('Deseja reiniciar o quebra-cabeça?')) return; 
+            
+            // Reset do jogo completo
+            document.querySelectorAll('select').forEach(s=>{ 
+                s.value = ''; 
+                s.parentElement.classList.remove('field-correct','field-wrong'); 
+                Array.from(s.options).forEach(opt=>opt.disabled = false); 
+            }); 
+            
+            for(let i=1;i<=5;i++) state[i] = {Nome:'',Startup:'',Linguagem:'',Palestra:'',Hotel:''}; 
+            
+            // Reset do cronômetro
+            if(timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            seconds = 0; 
+            gameStarted = false;
+            gameCompleted = false;
+            document.getElementById('timer').textContent = 'Tempo: 00:00'; 
+            document.getElementById('status').textContent = 'Pistas satisfeitas: 0 / ' + CLUES.length; 
+            evaluateClues(); 
+        });
+        
+        // Inicialização
+        categoryKeys.forEach(cat=> updateDisablesForCategory(cat));
+        evaluateClues();
+    </script>
+</body>
+</html>
