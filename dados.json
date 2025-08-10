@@ -1,0 +1,12 @@
+[
+    { "regiao": "Norte", "estado": "Amazonas", "prato": "Tacacá", "bioma": "Amazônia", "economia": "Extrativismo Vegetal" },
+    { "regiao": "Norte", "estado": "Pará", "prato": "Pato no Tucupi", "bioma": "Amazônia", "economia": "Extrativismo Mineral" },
+    { "regiao": "Nordeste", "estado": "Bahia", "prato": "Acarajé", "bioma": "Mata Atlântica", "economia": "Turismo" },
+    { "regiao": "Nordeste", "estado": "Ceará", "prato": "Baião de Dois", "bioma": "Caatinga", "economia": "Energia Eólica" },
+    { "regiao": "Centro-Oeste", "estado": "Goiás", "prato": "Arroz com Pequi", "bioma": "Cerrado", "economia": "Agronegócio" },
+    { "regiao": "Centro-Oeste", "estado": "Mato Grosso do Sul", "prato": "Sopa Paraguaia", "bioma": "Pantanal", "economia": "Pecuária" },
+    { "regiao": "Sudeste", "estado": "Minas Gerais", "prato": "Pão de Queijo", "bioma": "Cerrado", "economia": "Mineração" },
+    { "regiao": "Sudeste", "estado": "São Paulo", "prato": "Virado à Paulista", "bioma": "Mata Atlântica", "economia": "Indústria" },
+    { "regiao": "Sul", "estado": "Rio Grande do Sul", "prato": "Churrasco", "bioma": "Pampa", "economia": "Agroindústria" },
+    { "regiao": "Sul", "estado": "Paraná", "prato": "Barreado", "bioma": "Mata Atlântica", "economia": "Energia Hidrelétrica" }
+]
