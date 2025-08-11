@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio de Lógica: As Regiões do Brasil</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-wrap: wrap; gap: 30px; padding: 20px; background-color: #f4f7f9; }
+        .game-container { flex: 3; min-width: 600px; }
+        .pistas-container { flex: 2; min-width: 300px; background-color: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid #dfe6e9; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #b2bec3; background-color: #fff; transition: background-color 0.3s, border-color 0.3s; }
+        button { background-color: #d63031; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-right: 10px; margin-top: 15px; }
+        button:hover { background-color: #b01e1f; }
+        h1, h3 { color: #2d3436; }
+        h3 { border-bottom: 2px solid #0984e3; padding-bottom: 5px; margin-top: 0;}
+        .pistas-container ul { list-style: none; padding-left: 0; margin: 0; }
+        .pistas-container li { margin-bottom: 12px; line-height: 1.5; padding: 8px; border-radius: 4px; transition: all 0.4s ease; border-left: 5px solid #dfe6e9;}
+        .pista-satisfeita { color: #555; border-left-color: #27ae60; background-color: #f0fff4; text-decoration: line-through; }
+        .pista-satisfeita::before { content: '✓ '; color: #27ae60; font-weight: bold;}
+        .select-correct { background-color: #c8e6c9 !important; border-color: #2e7d32 !important; }
+        .select-incorrect { background-color: #ffcdd2 !important; border-color: #c62828 !important; }
+        .timer { font-size: 2em; font-weight: bold; color: #e74c3c; text-align: center; margin: 10px 0 20px 0; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; padding: 20px 40px; border-radius: 10px; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: left; }
+        .modal-content h2 { color: #2c3e50; text-align: center; }
+        .modal-content h4 { color: #3498db; margin-top: 20px; }
+        .modal-content p { line-height: 1.6; }
+        .modal-close-btn { display: block; margin: 20px auto 0; padding: 10px 30px; font-size: 16px; font-weight: bold; cursor: pointer; background-color: #27ae60; color: white; border: none; border-radius: 5px; }
+        .modal-close-btn:hover { background-color: #229954; }
+    </style>
+</head>
+<body>
+
+    <div id="intro-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Bem-vindo ao Desafio das Regiões Brasileiras!</h2>
+            <p>Sua missão é usar as pistas para preencher o mapa do Brasil. Este guia rápido lhe dará o conhecimento básico para começar. Boa sorte!</p>
+            <h4>🌳 Região Norte</h4><p>A maior região do país, dominada pela Floresta Amazônica. Sua economia é forte no extrativismo e sua culinária usa ingredientes únicos como no Tacacá.</p>
+            <h4>☀️ Região Nordeste</h4><p>O berço cultural do Brasil, com um vasto litoral que impulsiona o Turismo. É famosa por pratos de sabor forte como o Acarajé e pela Caatinga no sertão.</p>
+            <h4>🌱 Região Centro-Oeste</h4><p>O coração do Agronegócio brasileiro, com o bioma Cerrado e a planície do Pantanal. A culinária reflete a terra, como no Arroz com Pequi.</p>
+            <h4>🏭 Região Sudeste</h4><p>A potência econômica e industrial, e a mais populosa. Abriga metrópoles como São Paulo e tesouros da Mata Atlântica.</p>
+            <h4>❄️ Região Sul</h4><p>De clima mais frio e forte influência europeia, tem a Agroindústria como destaque e o Pampa como bioma característico.</p>
+            <button id="close-modal-btn" class="modal-close-btn">Começar o Desafio!</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>Desafio de Lógica: As Regiões do Brasil</h1>
+        <div id="timer" class="timer">00:00</div>
+        <table id="game-table">
+            <thead id="game-head"></thead>
+            <tbody id="game-body"></tbody>
+        </table>
+        <br>
+        <button id="reiniciar-btn">Novo Desafio</button>
+    </div>
+
+    <div class="pistas-container">
+        <h3 id="pistas-title">Pistas da Rodada:</h3>
+        <div id="pistas-list"></div>
+    </div>
+
+    <script>
+        const bancoDeDados = [
+            { regiao: "Norte", estado: "Acre", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)" }, { regiao: "Norte", estado: "Amapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)" }, { regiao: "Norte", estado: "Amazonas", prato: "Tacacá", bioma: "Amazônia", economia: "Indústria (Zona Franca)" }, { regiao: "Norte", estado: "Pará", prato: "Pato no Tucupi", bioma: "Amazônia", economia: "Mineração (ferro)" }, { regiao: "Norte", estado: "Rondônia", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte" }, { regiao: "Norte", estado: "Roraima", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)" }, { regiao: "Norte", estado: "Tocantins", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio" },
+            { regiao: "Nordeste", estado: "Alagoas", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo" }, { regiao: "Nordeste", estado: "Bahia", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica" }, { regiao: "Nordeste", estado: "Ceará", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica" }, { regiao: "Nordeste", estado: "Maranhão", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio" }, { regiao: "Nordeste", estado: "Paraíba", prato: "Carne de Sol com Macaxeira", bioma: "Caatinga", economia: "Indústria de Calçados" }, { regiao: "Nordeste", estado: "Pernambuco", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico" }, { regiao: "Nordeste", estado: "Piauí", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura" }, { regiao: "Nordeste", estado: "Rio Grande do Norte", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho" }, { regiao: "Nordeste", estado: "Sergipe", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo" },
+            { regiao: "Centro-Oeste", estado: "Goiás", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio" }, { regiao: "Centro-Oeste", estado: "Mato Grosso", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja" }, { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária" }, { regiao: "Centro-Oeste", estado: "Distrito Federal", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público" },
+            { regiao: "Sudeste", estado: "Espírito Santo", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)" }, { regiao: "Sudeste", estado: "Minas Gerais", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração" }, { regiao: "Sudeste", estado: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás" }, { regiao: "Sudeste", estado: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria" },
+            { regiao: "Sul", estado: "Paraná", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica" }, { regiao: "Sul", estado: "Rio Grande do Sul", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria" }, { regiao: "Sul", estado: "Santa Catarina", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil" }
+        ];
+
+        let gabaritoDaRodada = [], todasAsOpcoes = {}, mapaDePistas = new Map();
+        const regioes = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"];
+        const categorias = ["estado", "prato", "bioma", "economia"];
+        let timerInterval, startTime, isFirstSelection = true;
+
+        function iniciarJogo() {
+            resetTimer();
+            gerarGabarito();
+            gerarPistas();
+            montarInterface();
+            atualizarStatusDoJogo();
+        }
+
+        function setupIntroModal() {
+            const modal = document.getElementById('intro-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            if (!sessionStorage.getItem('introShown')) {
+                modal.style.display = 'flex';
+            }
+            closeModalBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                sessionStorage.setItem('introShown', 'true');
+            });
+        }
+
+        function startTimer() { if (isFirstSelection) { startTime = Date.now(); timerInterval = setInterval(updateTimer, 1000); isFirstSelection = false; } }
+        function stopTimer() { clearInterval(timerInterval); }
+        function resetTimer() { stopTimer(); document.getElementById('timer').textContent = "00:00"; isFirstSelection = true; }
+        function updateTimer() {
+            const elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000).toString().padStart(2, '0');
+            const seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+        }
+
+        function gerarGabarito() {
+            gabaritoDaRodada = [];
+            regioes.forEach(regiaoNome => {
+                const pacotesPossiveis = bancoDeDados.filter(p => p.regiao === regiaoNome);
+                gabaritoDaRodada.push(pacotesPossiveis[Math.floor(Math.random() * pacotesPossiveis.length)]);
+            });
+            console.log("Gabarito Secreto Desta Rodada:", gabaritoDaRodada);
+        }
+
+        function gerarPistas() {
+            mapaDePistas.clear();
+            const s = gabaritoDaRodada, idx = { Norte: 0, Nordeste: 1, CentroOeste: 2, Sudeste: 3, Sul: 4 };
+            mapaDePistas.set(`Na coluna da região Sul, o bioma é o ${s[idx.Sul].bioma}.`, (grid) => grid[idx.Sul].bioma === s[idx.Sul].bioma);
+            mapaDePistas.set(`O estado que tem como bioma o ${s[idx.Sul].bioma} é o ${s[idx.Sul].estado}.`, (grid) => grid[idx.Sul].estado === s[idx.Sul].estado);
+            mapaDePistas.set(`A economia principal no estado de ${s[idx.Sul].estado} é a ${s[idx.Sul].economia}.`, (grid) => grid[idx.Sul].economia === s[idx.Sul].economia);
+            mapaDePistas.set(`A coluna à esquerda da região Sul é a Sudeste. Nela, o estado é ${s[idx.Sudeste].estado}.`, (grid) => grid[idx.Sudeste].estado === s[idx.Sudeste].estado);
+            mapaDePistas.set(`O prato servido no estado de ${s[idx.Sudeste].estado} é o ${s[idx.Sudeste].prato}.`, (grid) => grid[idx.Sudeste].prato === s[idx.Sudeste].prato);
+            mapaDePistas.set(`A economia na região do prato ${s[idx.Sudeste].prato} é a ${s[idx.Sudeste].economia}.`, (grid) => grid[idx.Sudeste].economia === s[idx.Sudeste].economia);
+            mapaDePistas.set(`Na coluna da região Norte, o estado é ${s[idx.Norte].estado}.`, (grid) => grid[idx.Norte].estado === s[idx.Norte].estado);
+            mapaDePistas.set(`O bioma do estado do ${s[idx.Norte].estado} é a ${s[idx.Norte].bioma}.`, (grid) => grid[idx.Norte].bioma === s[idx.Norte].bioma);
+            mapaDePistas.set(`A economia na região do bioma ${s[idx.Norte].bioma} é o ${s[idx.Norte].economia}.`, (grid) => grid[idx.Norte].economia === s[idx.Norte].economia);
+            mapaDePistas.set(`A coluna à direita da região Norte é a Nordeste. Nela, a economia é o ${s[idx.Nordeste].economia}.`, (grid) => grid[idx.Nordeste].economia === s[idx.Nordeste].economia);
+            mapaDePistas.set(`O estado correspondente à economia de ${s[idx.Nordeste].economia} é a ${s[idx.Nordeste].estado}.`, (grid) => grid[idx.Nordeste].estado === s[idx.Nordeste].estado);
+            mapaDePistas.set(`O prato típico do estado da ${s[idx.Nordeste].estado} é o ${s[idx.Nordeste].prato}.`, (grid) => grid[idx.Nordeste].prato === s[idx.Nordeste].prato);
+            mapaDePistas.set(`O bioma na região do ${s[idx.Nordeste].prato} é a ${s[idx.Nordeste].bioma}.`, (grid) => grid[idx.Nordeste].bioma === s[idx.Nordeste].bioma);
+            mapaDePistas.set(`Na coluna do Centro-Oeste, o bioma é o ${s[idx.CentroOeste].bioma}.`, (grid) => grid[idx.CentroOeste].bioma === s[idx.CentroOeste].bioma);
+            mapaDePistas.set(`O estado que tem como bioma o ${s[idx.CentroOeste].bioma} é ${s[idx.CentroOeste].estado}.`, (grid) => grid[idx.CentroOeste].estado === s[idx.CentroOeste].estado);
+            mapaDePistas.set(`O prato que falta na coluna Sul é o ${s[idx.Sul].prato}.`, (grid) => grid[idx.Sul].prato === s[idx.Sul].prato);
+            mapaDePistas.set(`O bioma que falta na coluna Sudeste é a ${s[idx.Sudeste].bioma}.`, (grid) => grid[idx.Sudeste].bioma === s[idx.Sudeste].bioma);
+            mapaDePistas.set(`O prato que falta na coluna do Centro-Oeste é o ${s[idx.CentroOeste].prato}.`, (grid) => grid[idx.CentroOeste].prato === s[idx.CentroOeste].prato);
+            mapaDePistas.set(`A economia que falta na coluna do Centro-Oeste é o ${s[idx.CentroOeste].economia}.`, (grid) => grid[idx.CentroOeste].economia === s[idx.CentroOeste].economia);
+            mapaDePistas.set(`O prato que falta na coluna Norte é o ${s[idx.Norte].prato}.`, (grid) => grid[idx.Norte].prato === s[idx.Norte].prato);
+
+            const containerDePistas = document.getElementById('pistas-list'), lista = document.createElement('ul');
+            const pistasEmbaralhadas = Array.from(mapaDePistas.keys()).sort(() => Math.random() - 0.5);
+            pistasEmbaralhadas.forEach(pista => { const item = document.createElement('li'); item.textContent = pista; item.dataset.pista = pista; lista.appendChild(item); });
+            containerDePistas.innerHTML = ''; containerDePistas.appendChild(lista);
+        }
+
+        function montarInterface() {
+             todasAsOpcoes = {
+                estado: [...new Set(bancoDeDados.map(p => p.estado))].sort(), prato: [...new Set(bancoDeDados.map(p => p.prato))].sort(),
+                bioma: [...new Set(bancoDeDados.map(p => p.bioma))].sort(), economia: [...new Set(bancoDeDados.map(p => p.economia))].sort()
+            };
+            const tableHead = document.getElementById('game-head'), tableBody = document.getElementById('game-body');
+            tableHead.innerHTML = `<tr><th>Categoria</th><th>${regioes.join('</th><th>')}</th></tr>`;
+            tableBody.innerHTML = '';
+            categorias.forEach(cat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<th>${cat.charAt(0).toUpperCase() + cat.slice(1)}</th>`;
+                regioes.forEach((reg, index) => {
+                    const cell = document.createElement('td'), select = document.createElement('select');
+                    select.dataset.categoria = cat; select.dataset.coluna = index;
+                    select.innerHTML = `<option value="">Selecione</option>`;
+                    todasAsOpcoes[cat].forEach(opcao => select.innerHTML += `<option value="${opcao}">${opcao}</option>`);
+                    select.addEventListener('change', () => { startTimer(); atualizarStatusDoJogo(); });
+                    cell.appendChild(select); row.appendChild(cell);
+                });
+                tableBody.appendChild(row);
+            });
+        }
+
+        function atualizarStatusDoJogo() {
+            const gridAtual = regioes.map((reg, index) => {
+                const coluna = {};
+                categorias.forEach(cat => { coluna[cat] = document.querySelector(`select[data-coluna='${index}'][data-categoria='${cat}']`).value; });
+                return coluna;
+            });
+
+            mapaDePistas.forEach((funcaoDeVerificacao, textoDaPista) => {
+                const elPista = document.querySelector(`li[data-pista="${textoDaPista}"]`);
+                if (funcaoDeVerificacao(gridAtual)) { elPista.classList.add('pista-satisfeita'); } 
+                else { elPista.classList.remove('pista-satisfeita'); }
+            });
+
+            let acertos = 0;
+            document.querySelectorAll('select').forEach(select => {
+                const coluna = parseInt(select.dataset.coluna), categoria = select.dataset.categoria;
+                const respostaCorreta = gabaritoDaRodada[coluna][categoria];
+                const respostaUsuario = select.value;
+                
+                select.classList.remove('select-correct', 'select-incorrect');
+                if (respostaUsuario === respostaCorreta) { select.classList.add('select-correct'); acertos++; } 
+                else if (respostaUsuario !== "") { select.classList.add('select-incorrect'); }
+            });
+
+            if (acertos === 20) {
+                stopTimer();
+                setTimeout(() => alert(`Parabéns! Você desvendou o mapa do Brasil em ${document.getElementById('timer').textContent}!`), 200);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            iniciarJogo();
+            setupIntroModal(); // CHAMADO DEPOIS que a interface é construída
+            document.getElementById('reiniciar-btn').addEventListener('click', iniciarJogo);
+        });
+
+    </script>
+</body>
+</html>
