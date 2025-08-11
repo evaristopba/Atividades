@@ -9,8 +9,8 @@
         .game-container { flex: 3; min-width: 600px; }
         .pistas-container { flex: 2; min-width: 300px; background-color: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        th, td { border: 1px solid #dfe6e9; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        th, td { border: 1px solid #dfe6e9; padding: 12px; text-align: left; vertical-align: middle; }
+        th { background-color: #f2f2f2; font-weight: bold; }
         select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #b2bec3; background-color: #fff; transition: background-color 0.3s, border-color 0.3s; }
         button { background-color: #d63031; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-right: 10px; margin-top: 15px; }
         button:hover { background-color: #b01e1f; }
@@ -23,17 +23,19 @@
         .select-correct { background-color: #c8e6c9 !important; border-color: #2e7d32 !important; }
         .select-incorrect { background-color: #ffcdd2 !important; border-color: #c62828 !important; }
         .timer { font-size: 2em; font-weight: bold; color: #e74c3c; text-align: center; margin: 10px 0 20px 0; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: white; padding: 20px 40px; border-radius: 10px; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: left; }
-        .modal-content h2 { color: #2c3e50; text-align: center; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; padding: 20px 40px; border-radius: 10px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center; }
+        .modal-content h2 { color: #2c3e50; }
         .modal-content h4 { color: #3498db; margin-top: 20px; }
-        .modal-content p { line-height: 1.6; }
         .modal-close-btn { display: block; margin: 20px auto 0; padding: 10px 30px; font-size: 16px; font-weight: bold; cursor: pointer; background-color: #27ae60; color: white; border: none; border-radius: 5px; }
         .modal-close-btn:hover { background-color: #229954; }
+        #results-gallery { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        .gallery-item { width: 18%; min-width: 150px; background-color: #f9f9f9; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .gallery-item img { width: 100%; height: 120px; object-fit: cover; border-bottom: 1px solid #eee;}
+        .gallery-item figcaption { padding: 10px; font-weight: bold; color: #333; }
     </style>
 </head>
 <body>
-
     <div id="intro-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Bem-vindo ao Desafio das Regiões Brasileiras!</h2>
@@ -44,6 +46,15 @@
             <h4>🏭 Região Sudeste</h4><p>A potência econômica e industrial, e a mais populosa. Abriga metrópoles como São Paulo e tesouros da Mata Atlântica.</p>
             <h4>❄️ Região Sul</h4><p>De clima mais frio e forte influência europeia, tem a Agroindústria como destaque e o Pampa como bioma característico.</p>
             <button id="close-modal-btn" class="modal-close-btn">Começar o Desafio!</button>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="results-title">Parabéns! Você desvendou o mapa!</h2>
+            <p id="results-time"></p>
+            <div id="results-gallery"></div>
+            <button id="close-results-btn" class="modal-close-btn">Jogar Novamente</button>
         </div>
     </div>
 
@@ -65,11 +76,11 @@
 
     <script>
         const bancoDeDados = [
-            { regiao: "Norte", estado: "Acre", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)" }, { regiao: "Norte", estado: "Amapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)" }, { regiao: "Norte", estado: "Amazonas", prato: "Tacacá", bioma: "Amazônia", economia: "Indústria (Zona Franca)" }, { regiao: "Norte", estado: "Pará", prato: "Pato no Tucupi", bioma: "Amazônia", economia: "Mineração (ferro)" }, { regiao: "Norte", estado: "Rondônia", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte" }, { regiao: "Norte", estado: "Roraima", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)" }, { regiao: "Norte", estado: "Tocantins", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio" },
-            { regiao: "Nordeste", estado: "Alagoas", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo" }, { regiao: "Nordeste", estado: "Bahia", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica" }, { regiao: "Nordeste", estado: "Ceará", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica" }, { regiao: "Nordeste", estado: "Maranhão", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio" }, { regiao: "Nordeste", estado: "Paraíba", prato: "Carne de Sol com Macaxeira", bioma: "Caatinga", economia: "Indústria de Calçados" }, { regiao: "Nordeste", estado: "Pernambuco", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico" }, { regiao: "Nordeste", estado: "Piauí", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura" }, { regiao: "Nordeste", estado: "Rio Grande do Norte", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho" }, { regiao: "Nordeste", estado: "Sergipe", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo" },
-            { regiao: "Centro-Oeste", estado: "Goiás", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio" }, { regiao: "Centro-Oeste", estado: "Mato Grosso", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja" }, { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária" }, { regiao: "Centro-Oeste", estado: "Distrito Federal", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público" },
-            { regiao: "Sudeste", estado: "Espírito Santo", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)" }, { regiao: "Sudeste", estado: "Minas Gerais", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração" }, { regiao: "Sudeste", estado: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás" }, { regiao: "Sudeste", estado: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria" },
-            { regiao: "Sul", estado: "Paraná", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica" }, { regiao: "Sul", estado: "Rio Grande do Sul", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria" }, { regiao: "Sul", estado: "Santa Catarina", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil" }
+            { regiao: "Norte", estado: "Acre", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)", imagem: "https://i.imgur.com/2b3j2C2.jpeg" }, { regiao: "Norte", estado: "Amapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)", imagem: "https://i.imgur.com/u7vlh3i.jpeg" }, { regiao: "Norte", estado: "Amazonas", prato: "Pirarucu de Casaca", bioma: "Amazônia", economia: "Polo Industrial de Manaus", imagem: "https://i.imgur.com/sV5aC4O.jpeg" }, { regiao: "Norte", estado: "Pará", prato: "Tacacá", bioma: "Amazônia", economia: "Mineração (ferro)", imagem: "https://i.imgur.com/hOYj2p1.jpeg" }, { regiao: "Norte", estado: "Rondônia", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte", imagem: "https://i.imgur.com/qU3aY0h.jpeg" }, { regiao: "Norte", estado: "Roraima", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)", imagem: "https://i.imgur.com/Y1m2bHA.jpeg" }, { regiao: "Norte", estado: "Tocantins", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.imgur.com/V2d0d0c.jpeg" },
+            { regiao: "Nordeste", estado: "Alagoas", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo", imagem: "https://i.imgur.com/Q283v4a.jpeg" }, { regiao: "Nordeste", estado: "Bahia", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica", imagem: "https://i.imgur.com/ZzTa1gs.jpeg" }, { regiao: "Nordeste", estado: "Ceará", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica", imagem: "https://i.imgur.com/C53p1Ze.jpeg" }, { regiao: "Nordeste", estado: "Maranhão", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio", imagem: "https://i.imgur.com/NfOPG6A.jpeg" }, { regiao: "Nordeste", estado: "Paraíba", prato: "Rubacão", bioma: "Caatinga", economia: "Indústria de Calçados", imagem: "https://i.imgur.com/n14aQ8n.jpeg" }, { regiao: "Nordeste", estado: "Pernambuco", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico", imagem: "https://i.imgur.com/v0Qik08.jpeg" }, { regiao: "Nordeste", estado: "Piauí", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura", imagem: "https://i.imgur.com/39A0j6i.jpeg" }, { regiao: "Nordeste", estado: "Rio Grande do Norte", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho", imagem: "https://i.imgur.com/UfG5a7E.jpeg" }, { regiao: "Nordeste", estado: "Sergipe", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo", imagem: "https://i.imgur.com/lM3YQ4O.jpeg" },
+            { regiao: "Centro-Oeste", estado: "Goiás", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.imgur.com/Cq4b4s4.jpeg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja", imagem: "https://i.imgur.com/kS5x0g8.jpeg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária", imagem: "https://i.imgur.com/83pAF68.jpeg" }, { regiao: "Centro-Oeste", estado: "Distrito Federal", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público", imagem: "https://i.imgur.com/k7j4I5S.jpeg" },
+            { regiao: "Sudeste", estado: "Espírito Santo", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)", imagem: "https://i.imgur.com/4E19g5p.jpeg" }, { regiao: "Sudeste", estado: "Minas Gerais", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração", imagem: "https://i.imgur.com/2fVEvAg.jpeg" }, { regiao: "Sudeste", estado: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás", imagem: "https://i.imgur.com/Z1hBf5H.jpeg" }, { regiao: "Sudeste", estado: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria", imagem: "https://i.imgur.com/2sZZRER.jpeg" },
+            { regiao: "Sul", estado: "Paraná", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica", imagem: "https://i.imgur.com/L7gyjdb.jpeg" }, { regiao: "Sul", estado: "Rio Grande do Sul", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria", imagem: "https://i.imgur.com/FwWk5VF.jpeg" }, { regiao: "Sul", estado: "Santa Catarina", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil", imagem: "https://i.imgur.com/qHwQzP7.jpeg" }
         ];
 
         let gabaritoDaRodada = [], todasAsOpcoes = {}, mapaDePistas = new Map();
@@ -86,24 +97,16 @@
         }
 
         function setupIntroModal() {
-            const modal = document.getElementById('intro-modal');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            if (!sessionStorage.getItem('introShown')) {
-                modal.style.display = 'flex';
-            }
-            closeModalBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-                sessionStorage.setItem('introShown', 'true');
-            });
+            const modal = document.getElementById('intro-modal'), closeModalBtn = document.getElementById('close-modal-btn');
+            if (!sessionStorage.getItem('introShown')) modal.style.display = 'flex';
+            closeModalBtn.addEventListener('click', () => { modal.style.display = 'none'; sessionStorage.setItem('introShown', 'true'); });
         }
 
         function startTimer() { if (isFirstSelection) { startTime = Date.now(); timerInterval = setInterval(updateTimer, 1000); isFirstSelection = false; } }
         function stopTimer() { clearInterval(timerInterval); }
         function resetTimer() { stopTimer(); document.getElementById('timer').textContent = "00:00"; isFirstSelection = true; }
         function updateTimer() {
-            const elapsed = Date.now() - startTime;
-            const minutes = Math.floor(elapsed / 60000).toString().padStart(2, '0');
-            const seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+            const elapsed = Date.now() - startTime, minutes = Math.floor(elapsed / 60000).toString().padStart(2, '0'), seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
             document.getElementById('timer').textContent = `${minutes}:${seconds}`;
         }
 
@@ -169,17 +172,28 @@
             });
         }
 
+        function mostrarResultados() {
+            const modal = document.getElementById('results-modal'), gallery = document.getElementById('results-gallery'), timeElement = document.getElementById('results-time');
+            gallery.innerHTML = ''; timeElement.textContent = `Seu tempo foi de ${document.getElementById('timer').textContent}.`;
+            gabaritoDaRodada.forEach(item => { gallery.innerHTML += `<figure class="gallery-item"><img src="${item.imagem}" alt="${item.prato}"><figcaption>${item.prato} (${item.estado})</figcaption></figure>`; });
+            modal.style.display = 'flex';
+        }
+
         function atualizarStatusDoJogo() {
             const gridAtual = regioes.map((reg, index) => {
                 const coluna = {};
                 categorias.forEach(cat => { coluna[cat] = document.querySelector(`select[data-coluna='${index}'][data-categoria='${cat}']`).value; });
                 return coluna;
             });
-
+            
+            // --- CORREÇÃO: LÓGICA DE VERIFICAÇÃO INDIVIDUAL DAS PISTAS RESTAURADA ---
             mapaDePistas.forEach((funcaoDeVerificacao, textoDaPista) => {
                 const elPista = document.querySelector(`li[data-pista="${textoDaPista}"]`);
-                if (funcaoDeVerificacao(gridAtual)) { elPista.classList.add('pista-satisfeita'); } 
-                else { elPista.classList.remove('pista-satisfeita'); }
+                if (funcaoDeVerificacao(gridAtual)) {
+                    elPista.classList.add('pista-satisfeita');
+                } else {
+                    elPista.classList.remove('pista-satisfeita');
+                }
             });
 
             let acertos = 0;
@@ -187,7 +201,6 @@
                 const coluna = parseInt(select.dataset.coluna), categoria = select.dataset.categoria;
                 const respostaCorreta = gabaritoDaRodada[coluna][categoria];
                 const respostaUsuario = select.value;
-                
                 select.classList.remove('select-correct', 'select-incorrect');
                 if (respostaUsuario === respostaCorreta) { select.classList.add('select-correct'); acertos++; } 
                 else if (respostaUsuario !== "") { select.classList.add('select-incorrect'); }
@@ -195,16 +208,19 @@
 
             if (acertos === 20) {
                 stopTimer();
-                setTimeout(() => alert(`Parabéns! Você desvendou o mapa do Brasil em ${document.getElementById('timer').textContent}!`), 200);
+                setTimeout(mostrarResultados, 200);
             }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
             iniciarJogo();
-            setupIntroModal(); // CHAMADO DEPOIS que a interface é construída
+            setupIntroModal();
             document.getElementById('reiniciar-btn').addEventListener('click', iniciarJogo);
+            document.getElementById('close-results-btn').addEventListener('click', () => {
+                document.getElementById('results-modal').style.display = 'none';
+                iniciarJogo();
+            });
         });
-
     </script>
 </body>
 </html>
