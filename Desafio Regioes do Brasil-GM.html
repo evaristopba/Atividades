@@ -33,6 +33,24 @@
         .gallery-item { width: 18%; min-width: 150px; background-color: #f9f9f9; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .gallery-item img { width: 100%; height: 120px; object-fit: cover; border-bottom: 1px solid #eee;}
         .gallery-item figcaption { padding: 10px; font-weight: bold; color: #333; }
+
+        /* --- ADICIONADO: Regras de Responsividade --- */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column; /* Empilha os contêineres verticalmente */
+                padding: 10px;
+                gap: 20px;
+            }
+            .game-container, .pistas-container {
+                min-width: 100%; /* Permite que ocupem a largura total */
+                flex-basis: auto;
+                box-sizing: border-box; /* Garante que o padding não estoure o layout */
+            }
+            .gallery-item {
+                width: 45%; /* Mostra 2 imagens por linha na galeria em telas menores */
+            }
+            h1 { font-size: 1.5em; }
+        }
     </style>
 </head>
 <body>
@@ -76,33 +94,11 @@
 
     <script>
         const bancoDeDados = [
-            { regiao: "Norte", estado: "Acre", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)", imagem: "https://i.postimg.cc/t1HWcXG0/Baixaria-AC.jpg" },
-            { regiao: "Norte", estado: "Amapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)", imagem: "https://i.postimg.cc/7fdgg3BZ/Tucunar-na-Brasa-AP.jpg" },
-            { regiao: "Norte", estado: "Amazonas", prato: "Pirarucu de Casaca", bioma: "Amazônia", economia: "Polo Industrial de Manaus", imagem: "https://i.postimg.cc/HJ4XDfTr/Pirarucu-de-Casaca-AM.jpg" },
-            { regiao: "Norte", estado: "Pará", prato: "Tacacá", bioma: "Amazônia", economia: "Mineração (ferro)", imagem: "https://i.postimg.cc/3kG29k6C/Tacaca-PA.jpg" },
-            { regiao: "Norte", estado: "Rondônia", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte", imagem: "https://i.postimg.cc/G9MPpwGY/Caldeirada-de-Tambaqui-RO.jpg" },
-            { regiao: "Norte", estado: "Roraima", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)", imagem: "https://i.postimg.cc/dLL2kHjf/Pacoca-de-Carne-de-Sol-RR.jpg" },
-            { regiao: "Norte", estado: "Tocantins", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/RqCQ9V64/Chambari-TO.jpg" },
-            { regiao: "Nordeste", estado: "Alagoas", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo", imagem: "https://i.postimg.cc/MMq0nz90/Sururu-de-Capote-AL.jpg" },
-            { regiao: "Nordeste", estado: "Bahia", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica", imagem: "https://i.postimg.cc/XBvwgQSp/Acaraje-BA.jpg" },
-            { regiao: "Nordeste", estado: "Ceará", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica", imagem: "https://i.postimg.cc/McybZnmK/Baiao-de-Dois-CE.jpg" },
-            { regiao: "Nordeste", estado: "Maranhão", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio", imagem: "https://i.postimg.cc/gXsVR17C/Arroz-de-Cuxa-MA.jpg" },
-            { regiao: "Nordeste", estado: "Paraíba", prato: "Rubacão", bioma: "Caatinga", economia: "Indústria de Calçados", imagem: "https://i.postimg.cc/BjPByY8F/Rubacao-PB.jpg" },
-            { regiao: "Nordeste", estado: "Pernambuco", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico", imagem: "https://i.postimg.cc/QHyqfGMs/Bolo-de-Rolo-PE.jpg" },
-            { regiao: "Nordeste", estado: "Piauí", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura", imagem: "https://i.postimg.cc/hfjr8Pcp/Maria-Isabel-PI.jpg" },
-            { regiao: "Nordeste", estado: "Rio Grande do Norte", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho", imagem: "https://i.postimg.cc/2LjxKCvj/Ginga-com-Tapioca-RN.jpg" },
-            { regiao: "Nordeste", estado: "Sergipe", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo", imagem: "https://i.postimg.cc/QVSmWWGF/Caranguejada-SE.jpg" },
-            { regiao: "Centro-Oeste", estado: "Goiás", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/NKZpjqhb/Arroz-com-Pequi-GO.jpg" },
-            { regiao: "Centro-Oeste", estado: "Mato Grosso", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja", imagem: "https://i.postimg.cc/phJZCmm1/Mojica-de-Pintado-MT.jpg" },
-            { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária", imagem: "https://i.postimg.cc/V5z46WTy/Sopa-Paraguaia-MS.jpg" },
-            { regiao: "Centro-Oeste", estado: "Distrito Federal", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público", imagem: "https://i.postimg.cc/LhSQPpJb/Galinhada-com-Pequi-DF.jpg" },
-            { regiao: "Sudeste", estado: "Espírito Santo", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)", imagem: "https://i.postimg.cc/62XcCrpv/Moqueca-Capixaba-ES.jpg" },
-            { regiao: "Sudeste", estado: "Minas Gerais", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração", imagem: "https://i.postimg.cc/yJ9nJQsK/Pao-de-queijo-MG.jpg" },
-            { regiao: "Sudeste", estado: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás", imagem: "https://i.postimg.cc/CRRc0M2z/Feijoada-RJ.jpg" },
-            { regiao: "Sudeste", estado: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria", imagem: "https://i.postimg.cc/tYSB8n2K/Virado-a-Paulista-SP.jpg" },
-            { regiao: "Sul", estado: "Paraná", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica", imagem: "https://i.postimg.cc/vcHPPtL7/Barreado-PR.jpg" },
-            { regiao: "Sul", estado: "Rio Grande do Sul", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria", imagem: "https://i.postimg.cc/DmcjdMsy/Churrasco-RS.jpg" },
-            { regiao: "Sul", estado: "Santa Catarina", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil", imagem: "https://i.postimg.cc/sG3nCYFr/Sequencia-de-Camarao-SC.jpg" }
+            { regiao: "Norte", estado: "Acre", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)", imagem: "https://i.postimg.cc/t1HWcXG0/Baixaria-AC.jpg" }, { regiao: "Norte", estado: "Amapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)", imagem: "https://i.postimg.cc/7fdgg3BZ/Tucunar-na-Brasa-AP.jpg" }, { regiao: "Norte", estado: "Amazonas", prato: "Pirarucu de Casaca", bioma: "Amazônia", economia: "Polo Industrial de Manaus", imagem: "https://i.postimg.cc/HJ4XDfTr/Pirarucu-de-Casaca-AM.jpg" }, { regiao: "Norte", estado: "Pará", prato: "Tacacá", bioma: "Amazônia", economia: "Mineração (ferro)", imagem: "https://i.postimg.cc/3kG29k6C/Tacaca-PA.jpg" }, { regiao: "Norte", estado: "Rondônia", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte", imagem: "https://i.postimg.cc/G9MPpwGY/Caldeirada-de-Tambaqui-RO.jpg" }, { regiao: "Norte", estado: "Roraima", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)", imagem: "https://i.postimg.cc/dLL2kHjf/Pacoca-de-Carne-de-Sol-RR.jpg" }, { regiao: "Norte", estado: "Tocantins", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/RqCQ9V64/Chambari-TO.jpg" },
+            { regiao: "Nordeste", estado: "Alagoas", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo", imagem: "https://i.postimg.cc/MMq0nz90/Sururu-de-Capote-AL.jpg" }, { regiao: "Nordeste", estado: "Bahia", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica", imagem: "https://i.postimg.cc/XBvwgQSp/Acaraje-BA.jpg" }, { regiao: "Nordeste", estado: "Ceará", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica", imagem: "https://i.postimg.cc/McybZnmK/Baiao-de-Dois-CE.jpg" }, { regiao: "Nordeste", estado: "Maranhão", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio", imagem: "https://i.postimg.cc/gXsVR17C/Arroz-de-Cuxa-MA.jpg" }, { regiao: "Nordeste", estado: "Paraíba", prato: "Rubacão", bioma: "Caatinga", economia: "Indústria de Calçados", imagem: "https://i.postimg.cc/BjPByY8F/Rubacao-PB.jpg" }, { regiao: "Nordeste", estado: "Pernambuco", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico", imagem: "https://i.postimg.cc/QHyqfGMs/Bolo-de-Rolo-PE.jpg" }, { regiao: "Nordeste", estado: "Piauí", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura", imagem: "https://i.postimg.cc/hfjr8Pcp/Maria-Isabel-PI.jpg" }, { regiao: "Nordeste", estado: "Rio Grande do Norte", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho", imagem: "https://i.postimg.cc/2LjxKCvj/Ginga-com-Tapioca-RN.jpg" }, { regiao: "Nordeste", estado: "Sergipe", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo", imagem: "https://i.postimg.cc/QVSmWWGF/Caranguejada-SE.jpg" },
+            { regiao: "Centro-Oeste", estado: "Goiás", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/NKZpjqhb/Arroz-com-Pequi-GO.jpg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja", imagem: "https://i.postimg.cc/phJZCmm1/Mojica-de-Pintado-MT.jpg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária", imagem: "https://i.postimg.cc/V5z46WTy/Sopa-Paraguaia-MS.jpg" }, { regiao: "Centro-Oeste", estado: "Distrito Federal", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público", imagem: "https://i.postimg.cc/431WDMF6/Galinhada-DF.jpg" },
+            { regiao: "Sudeste", estado: "Espírito Santo", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)", imagem: "https://i.postimg.cc/62XcCrpv/Moqueca-Capixaba-ES.jpg" }, { regiao: "Sudeste", estado: "Minas Gerais", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração", imagem: "https://i.postimg.cc/yJ9nJQsK/Pao-de-queijo-MG.jpg" }, { regiao: "Sudeste", estado: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás", imagem: "https://i.postimg.cc/CRRc0M2z/Feijoada-RJ.jpg" }, { regiao: "Sudeste", estado: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria", imagem: "https://i.postimg.cc/tYSB8n2K/Virado-a-Paulista-SP.jpg" },
+            { regiao: "Sul", estado: "Paraná", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica", imagem: "https://i.postimg.cc/vcHPPtL7/Barreado-PR.jpg" }, { regiao: "Sul", estado: "Rio Grande do Sul", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria", imagem: "https://i.postimg.cc/DmcjdMsy/Churrasco-RS.jpg" }, { regiao: "Sul", estado: "Santa Catarina", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil", imagem: "https://i.postimg.cc/sG3nCYFr/Sequencia-de-Camarao-SC.jpg" }
         ];
 
         let gabaritoDaRodada = [], todasAsOpcoes = {}, mapaDePistas = new Map();
