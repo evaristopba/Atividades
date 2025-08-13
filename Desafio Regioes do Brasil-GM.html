@@ -34,26 +34,12 @@
         .gallery-item { width: 18%; min-width: 150px; background-color: #f9f9f9; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .prato-titulo { padding: 8px; margin: 0; font-size: 0.9em; font-weight: bold; color: #333; background-color: #f7f7f7; border-bottom: 1px solid #eee; }
         .gallery-item img { width: 100%; height: 120px; object-fit: cover; }
-        .gallery-item figcaption { padding: 10px; font-size: 0.85em; color: #555; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: auto; }
+        .gallery-item figcaption { padding: 10px; font-size: 0.85em; color: #555; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: auto; flex-wrap: wrap; }
         .bandeira-estado { height: 20px; width: auto; border: 1px solid #ccc; }
-        
-        footer {
-            width: 100%;
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #dfe6e9;
-            font-size: 0.8em;
-            color: #666;
-        }
-        footer a {
-            color: #0984e3;
-            text-decoration: none;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-
+        .caption-text { width: 100%; text-align: center; line-height: 1.2; }
+        footer { width: 100%; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #dfe6e9; font-size: 0.8em; color: #666; }
+        footer a { color: #0984e3; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
         @media (max-width: 900px) {
             body { flex-direction: column; padding: 10px; gap: 20px; }
             .game-container, .pistas-container { min-width: 100%; flex-basis: auto; box-sizing: border-box; }
@@ -110,16 +96,16 @@
 
     <script>
         const bancoDeDados = [
-            { regiao: "Norte", estado: "Acre", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)", imagem: "https://i.postimg.cc/t1HWcXG0/Baixaria-AC.jpg", bandeira: "https://i.postimg.cc/cgm9FkQV/bandeira-estado-acre-reta.jpg" }, { regiao: "Norte", estado: "Amapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)", imagem: "https://i.postimg.cc/7fdgg3BZ/Tucunar-na-Brasa-AP.jpg", bandeira: "https://i.postimg.cc/kRgjzNsD/bandeira-estado-amapa-reta.jpg" }, { regiao: "Norte", estado: "Amazonas", prato: "Pirarucu de Casaca", bioma: "Amazônia", economia: "Polo Industrial de Manaus", imagem: "https://i.postimg.cc/HJ4XDfTr/Pirarucu-de-Casaca-AM.jpg", bandeira: "https://i.postimg.cc/PNXFChHh/bandeira-estado-amazonas-reta.jpg" }, { regiao: "Norte", estado: "Pará", prato: "Tacacá", bioma: "Amazônia", economia: "Mineração (ferro)", imagem: "https://i.postimg.cc/3kG29k6C/Tacaca-PA.jpg", bandeira: "https://i.postimg.cc/s1HK1hK9/bandeira-estado-para-reta.jpg" }, { regiao: "Norte", estado: "Rondônia", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte", imagem: "https://i.postimg.cc/G9MPpwGY/Caldeirada-de-Tambaqui-RO.jpg", bandeira: "https://i.postimg.cc/vx4r50X7/bandeira-estado-rondonia-reta.jpg" }, { regiao: "Norte", estado: "Roraima", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)", imagem: "https://i.postimg.cc/dLL2kHjf/Pacoca-de-Carne-de-Sol-RR.jpg", bandeira: "https://i.postimg.cc/WhJm3fdT/bandeira-estado-roraima-reta.jpg" }, { regiao: "Norte", estado: "Tocantins", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/RqCQ9V64/Chambari-TO.jpg", bandeira: "https://i.postimg.cc/wtFLPCGc/bandeira-estado-tocantins-reta.jpg" },
-            { regiao: "Nordeste", estado: "Alagoas", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo", imagem: "https://i.postimg.cc/MMq0nz90/Sururu-de-Capote-AL.jpg", bandeira: "https://i.postimg.cc/FdmCgXJy/bandeira-estado-alagoas-reta.jpg" }, { regiao: "Nordeste", estado: "Bahia", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica", imagem: "https://i.postimg.cc/XBvwgQSp/Acaraje-BA.jpg", bandeira: "https://i.postimg.cc/ThtNmS2b/bandeira-estado-bahia-reta.jpg" }, { regiao: "Nordeste", estado: "Ceará", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica", imagem: "https://i.postimg.cc/McybZnmK/Baiao-de-Dois-CE.jpg", bandeira: "https://i.postimg.cc/Tph7c9h4/bandeira-estado-ceara-reta.jpg" }, { regiao: "Nordeste", estado: "Maranhão", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio", imagem: "https://i.postimg.cc/gXsVR17C/Arroz-de-Cuxa-MA.jpg", bandeira: "https://i.postimg.cc/QBg0MYnH/bandeira-estado-maranhao-reta.jpg" }, { regiao: "Nordeste", estado: "Paraíba", prato: "Rubacão", bioma: "Caatinga", economia: "Indústria de Calçados", imagem: "https://i.postimg.cc/BjPByY8F/Rubacao-PB.jpg", bandeira: "https://i.postimg.cc/MXpdWD0p/bandeira-estado-paraiba-reta.jpg" }, { regiao: "Nordeste", estado: "Pernambuco", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico", imagem: "https://i.postimg.cc/QHyqfGMs/Bolo-de-Rolo-PE.jpg", bandeira: "https://i.postimg.cc/1fLHr1k8/bandeira-estado-pernambuco-reta.jpg" }, { regiao: "Nordeste", estado: "Piauí", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura", imagem: "https://i.postimg.cc/hfjr8Pcp/Maria-Isabel-PI.jpg", bandeira: "https://i.postimg.cc/SnCGZt4D/bandeira-estado-piaui-reta.jpg" }, { regiao: "Nordeste", estado: "Rio Grande do Norte", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho", imagem: "https://i.postimg.cc/2LjxKCvj/Ginga-com-Tapioca-RN.jpg", bandeira: "https://i.postimg.cc/8FGmxBPD/bandeira-estado-rio-grande-do-norte-reta.jpg" }, { regiao: "Nordeste", estado: "Sergipe", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo", imagem: "https://i.postimg.cc/QVSmWWGF/Caranguejada-SE.jpg", bandeira: "https://i.postimg.cc/Mcz196dp/bandeira-estado-sergipe-reta.jpg" },
-            { regiao: "Centro-Oeste", estado: "Goiás", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/NKZpjqhb/Arroz-com-Pequi-GO.jpg", bandeira: "https://i.postimg.cc/CZpcSp73/bandeira-estado-goias-reta.jpg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja", imagem: "https://i.postimg.cc/phJZCmm1/Mojica-de-Pintado-MT.jpg", bandeira: "https://i.postimg.cc/Pp2yWpHH/bandeira-estado-mato-grosso-reta.jpg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária", imagem: "https://i.postimg.cc/V5z46WTy/Sopa-Paraguaia-MS.jpg", bandeira: "https://i.postimg.cc/dkqnZRzn/bandeira-estado-mato-grosso-do-sul-reta.jpg" }, { regiao: "Centro-Oeste", estado: "Distrito Federal", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público", imagem: "https://i.postimg.cc/431WDMF6/Galinhada-DF.jpg", bandeira: "https://i.postimg.cc/d7GSyVDQ/bandeira-distrito-federal-reta.jpg" },
-            { regiao: "Sudeste", estado: "Espírito Santo", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)", imagem: "https://i.postimg.cc/62XcCrpv/Moqueca-Capixaba-ES.jpg", bandeira: "https://i.postimg.cc/sv8nHhhD/bandeira-estado-espirito-santo-reta.jpg" }, { regiao: "Sudeste", estado: "Minas Gerais", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração", imagem: "https://i.postimg.cc/yJ9nJQsK/Pao-de-queijo-MG.jpg", bandeira: "https://i.postimg.cc/D40gBvfX/bandeira-estado-minas-gerais-reta.jpg" }, { regiao: "Sudeste", estado: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás", imagem: "https://i.postimg.cc/CRRc0M2z/Feijoada-RJ.jpg", bandeira: "https://i.postimg.cc/7Gs1CF1Y/bandeira-estado-rio-de-janeiro-reta.jpg" }, { regiao: "Sudeste", estado: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria", imagem: "https://i.postimg.cc/tYSB8n2K/Virado-a-Paulista-SP.jpg", bandeira: "https://i.postimg.cc/wMKw7xY6/bandeira-estado-sao-paulo-reta.jpg" }, 
-            { regiao: "Sul", estado: "Paraná", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica", imagem: "https://i.postimg.cc/vcHPPtL7/Barreado-PR.jpg", bandeira: "https://i.postimg.cc/dL76CVxM/bandeira-estado-parana-reta.jpg" }, { regiao: "Sul", estado: "Rio Grande do Sul", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria", imagem: "https://i.postimg.cc/DmcjdMsy/Churrasco-RS.jpg", bandeira: "https://i.postimg.cc/mz2NgLH5/bandeira-estado-rio-grande-do-sul-reta.jpg" }, { regiao: "Sul", estado: "Santa Catarina", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil", imagem: "https://i.postimg.cc/sG3nCYFr/Sequencia-de-Camarao-SC.jpg", bandeira: "https://i.postimg.cc/21Q4dbdt/bandeira-estado-santa-catarina-reta.jpg" }
+            { regiao: "Norte", estado: "Acre", uf: "AC", capital: "Rio Branco", prato: "Baixaria", bioma: "Amazônia", economia: "Extrativismo (castanha, borracha)", imagem: "https://i.postimg.cc/t1HWcXG0/Baixaria-AC.jpg", bandeira: "https://i.postimg.cc/cgm9FkQV/bandeira-estado-acre-reta.jpg" }, { regiao: "Norte", estado: "Amapá", uf: "AP", capital: "Macapá", prato: "Tucunaré na chapa", bioma: "Amazônia", economia: "Extrativismo Mineral (manganês)", imagem: "https://i.postimg.cc/7fdgg3BZ/Tucunar-na-Brasa-AP.jpg", bandeira: "https://i.postimg.cc/kRgjzNsD/bandeira-estado-amapa-reta.jpg" }, { regiao: "Norte", estado: "Amazonas", uf: "AM", capital: "Manaus", prato: "Pirarucu de Casaca", bioma: "Amazônia", economia: "Polo Industrial de Manaus", imagem: "https://i.postimg.cc/HJ4XDfTr/Pirarucu-de-Casaca-AM.jpg", bandeira: "https://i.postimg.cc/PNXFChHh/bandeira-estado-amazonas-reta.jpg" }, { regiao: "Norte", estado: "Pará", uf: "PA", capital: "Belém", prato: "Tacacá", bioma: "Amazônia", economia: "Mineração (ferro)", imagem: "https://i.postimg.cc/3kG29k6C/Tacaca-PA.jpg", bandeira: "https://i.postimg.cc/s1HK1hK9/bandeira-estado-para-reta.jpg" }, { regiao: "Norte", estado: "Rondônia", uf: "RO", capital: "Porto Velho", prato: "Caldeirada de Tambaqui", bioma: "Amazônia", economia: "Pecuária de Corte", imagem: "https://i.postimg.cc/G9MPpwGY/Caldeirada-de-Tambaqui-RO.jpg", bandeira: "https://i.postimg.cc/vx4r50X7/bandeira-estado-rondonia-reta.jpg" }, { regiao: "Norte", estado: "Roraima", uf: "RR", capital: "Boa Vista", prato: "Paçoca de Carne de Sol", bioma: "Amazônia", economia: "Agricultura (soja)", imagem: "https://i.postimg.cc/dLL2kHjf/Pacoca-de-Carne-de-Sol-RR.jpg", bandeira: "https://i.postimg.cc/WhJm3fdT/bandeira-estado-roraima-reta.jpg" }, { regiao: "Norte", estado: "Tocantins", uf: "TO", capital: "Palmas", prato: "Chambari", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/RqCQ9V64/Chambari-TO.jpg", bandeira: "https://i.postimg.cc/wtFLPCGc/bandeira-estado-tocantins-reta.jpg" },
+            { regiao: "Nordeste", estado: "Alagoas", uf: "AL", capital: "Maceió", prato: "Sururu de Capote", bioma: "Mata Atlântica", economia: "Turismo", imagem: "https://i.postimg.cc/MMq0nz90/Sururu-de-Capote-AL.jpg", bandeira: "https://i.postimg.cc/FdmCgXJy/bandeira-estado-alagoas-reta.jpg" }, { regiao: "Nordeste", estado: "Bahia", uf: "BA", capital: "Salvador", prato: "Acarajé", bioma: "Mata Atlântica", economia: "Petroquímica", imagem: "https://i.postimg.cc/XBvwgQSp/Acaraje-BA.jpg", bandeira: "https://i.postimg.cc/ThtNmS2b/bandeira-estado-bahia-reta.jpg" }, { regiao: "Nordeste", estado: "Ceará", uf: "CE", capital: "Fortaleza", prato: "Baião de Dois", bioma: "Caatinga", economia: "Energia Eólica", imagem: "https://i.postimg.cc/McybZnmK/Baiao-de-Dois-CE.jpg", bandeira: "https://i.postimg.cc/Tph7c9h4/bandeira-estado-ceara-reta.jpg" }, { regiao: "Nordeste", estado: "Maranhão", uf: "MA", capital: "São Luís", prato: "Arroz de Cuxá", bioma: "Amazônia", economia: "Produção de Alumínio", imagem: "https://i.postimg.cc/gXsVR17C/Arroz-de-Cuxa-MA.jpg", bandeira: "https://i.postimg.cc/QBg0MYnH/bandeira-estado-maranhao-reta.jpg" }, { regiao: "Nordeste", estado: "Paraíba", uf: "PB", capital: "João Pessoa", prato: "Rubacão", bioma: "Caatinga", economia: "Indústria de Calçados", imagem: "https://i.postimg.cc/BjPByY8F/Rubacao-PB.jpg", bandeira: "https://i.postimg.cc/MXpdWD0p/bandeira-estado-paraiba-reta.jpg" }, { regiao: "Nordeste", estado: "Pernambuco", uf: "PE", capital: "Recife", prato: "Bolo de Rolo", bioma: "Mata Atlântica", economia: "Polo Médico", imagem: "https://i.postimg.cc/QHyqfGMs/Bolo-de-Rolo-PE.jpg", bandeira: "https://i.postimg.cc/1fLHr1k8/bandeira-estado-pernambuco-reta.jpg" }, { regiao: "Nordeste", estado: "Piauí", uf: "PI", capital: "Teresina", prato: "Maria Isabel", bioma: "Caatinga", economia: "Apicultura", imagem: "https://i.postimg.cc/hfjr8Pcp/Maria-Isabel-PI.jpg", bandeira: "https://i.postimg.cc/SnCGZt4D/bandeira-estado-piaui-reta.jpg" }, { regiao: "Nordeste", estado: "Rio Grande do Norte", uf: "RN", capital: "Natal", prato: "Ginga com Tapioca", bioma: "Caatinga", economia: "Produção de Sal Marinho", imagem: "https://i.postimg.cc/2LjxKCvj/Ginga-com-Tapioca-RN.jpg", bandeira: "https://i.postimg.cc/8FGmxBPD/bandeira-estado-rio-grande-do-norte-reta.jpg" }, { regiao: "Nordeste", estado: "Sergipe", uf: "SE", capital: "Aracaju", prato: "Caranguejada", bioma: "Mata Atlântica", economia: "Extração de Petróleo", imagem: "https://i.postimg.cc/QVSmWWGF/Caranguejada-SE.jpg", bandeira: "https://i.postimg.cc/Mcz196dp/bandeira-estado-sergipe-reta.jpg" },
+            { regiao: "Centro-Oeste", estado: "Goiás", uf: "GO", capital: "Goiânia", prato: "Arroz com Pequi", bioma: "Cerrado", economia: "Agronegócio", imagem: "https://i.postimg.cc/NKZpjqhb/Arroz-com-Pequi-GO.jpg", bandeira: "https://i.postimg.cc/CZpcSp73/bandeira-estado-goias-reta.jpg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso", uf: "MT", capital: "Cuiabá", prato: "Mojica de Pintado", bioma: "Cerrado", economia: "Produção de Soja", imagem: "https://i.postimg.cc/phJZCmm1/Mojica-de-Pintado-MT.jpg", bandeira: "https://i.postimg.cc/Pp2yWpHH/bandeira-estado-mato-grosso-reta.jpg" }, { regiao: "Centro-Oeste", estado: "Mato Grosso do Sul", uf: "MS", capital: "Campo Grande", prato: "Sopa Paraguaia", bioma: "Pantanal", economia: "Pecuária", imagem: "https://i.postimg.cc/V5z46WTy/Sopa-Paraguaia-MS.jpg", bandeira: "https://i.postimg.cc/dkqnZRzn/bandeira-estado-mato-grosso-do-sul-reta.jpg" }, { regiao: "Centro-Oeste", estado: "Distrito Federal", uf: "DF", capital: "Brasília", prato: "Galinhada", bioma: "Cerrado", economia: "Serviço Público", imagem: "https://i.postimg.cc/431WDMF6/Galinhada-DF.jpg", bandeira: "https://i.postimg.cc/d7GSyVDQ/bandeira-distrito-federal-reta.jpg" },
+            { regiao: "Sudeste", estado: "Espírito Santo", uf: "ES", capital: "Vitória", prato: "Moqueca Capixaba", bioma: "Mata Atlântica", economia: "Comércio Exterior (Portos)", imagem: "https://i.postimg.cc/62XcCrpv/Moqueca-Capixaba-ES.jpg", bandeira: "https://i.postimg.cc/sv8nHhhD/bandeira-estado-espirito-santo-reta.jpg" }, { regiao: "Sudeste", estado: "Minas Gerais", uf: "MG", capital: "Belo Horizonte", prato: "Pão de Queijo", bioma: "Cerrado", economia: "Mineração", imagem: "https://i.postimg.cc/yJ9nJQsK/Pao-de-queijo-MG.jpg", bandeira: "https://i.postimg.cc/D40gBvfX/bandeira-estado-minas-gerais-reta.jpg" }, { regiao: "Sudeste", estado: "Rio de Janeiro", uf: "RJ", capital: "Rio de Janeiro", prato: "Feijoada", bioma: "Mata Atlântica", economia: "Petróleo e Gás", imagem: "https://i.postimg.cc/CRRc0M2z/Feijoada-RJ.jpg", bandeira: "https://i.postimg.cc/7Gs1CF1Y/bandeira-estado-rio-de-janeiro-reta.jpg" }, { regiao: "Sudeste", estado: "São Paulo", uf: "SP", capital: "São Paulo", prato: "Virado à Paulista", bioma: "Mata Atlântica", economia: "Indústria", imagem: "https://i.postimg.cc/tYSB8n2K/Virado-a-Paulista-SP.jpg", bandeira: "https://i.postimg.cc/5yb94QDK/bandeira-estado-sao-paulo-reta.jpg" }, 
+            { regiao: "Sul", estado: "Paraná", uf: "PR", capital: "Curitiba", prato: "Barreado", bioma: "Mata Atlântica", economia: "Energia Hidrelétrica", imagem: "https://i.postimg.cc/vcHPPtL7/Barreado-PR.jpg", bandeira: "https://i.postimg.cc/dL76CVxM/bandeira-estado-parana-reta.jpg" }, { regiao: "Sul", estado: "Rio Grande do Sul", uf: "RS", capital: "Porto Alegre", prato: "Churrasco", bioma: "Pampa", economia: "Agroindústria", imagem: "https://i.postimg.cc/DmcjdMsy/Churrasco-RS.jpg", bandeira: "https://i.postimg.cc/mz2NgLH5/bandeira-estado-rio-grande-do-sul-reta.jpg" }, { regiao: "Sul", estado: "Santa Catarina", uf: "SC", capital: "Florianópolis", prato: "Sequência de Camarão", bioma: "Mata Atlântica", economia: "Indústria Têxtil", imagem: "https://i.postimg.cc/sG3nCYFr/Sequencia-de-Camarao-SC.jpg", bandeira: "https://i.postimg.cc/21Q4dbdt/bandeira-estado-santa-catarina-reta.jpg" }
         ];
 
         let gabaritoDaRodada = [], todasAsOpcoes = {}, mapaDePistas = new Map();
         const regioes = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"];
-        const categorias = ["estado", "prato", "bioma", "economia"];
+        const categorias = ["estado", "capital", "prato", "bioma", "economia"];
         let timerInterval, startTime, isFirstSelection = true;
 
         function iniciarJogo() {
@@ -131,15 +117,9 @@
         }
 
         function setupIntroModal() {
-            const modal = document.getElementById('intro-modal');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            if (!sessionStorage.getItem('introShown')) {
-                modal.style.display = 'flex';
-            }
-            closeModalBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-                sessionStorage.setItem('introShown', 'true');
-            });
+            const modal = document.getElementById('intro-modal'), closeModalBtn = document.getElementById('close-modal-btn');
+            if (!sessionStorage.getItem('introShown')) modal.style.display = 'flex';
+            closeModalBtn.addEventListener('click', () => { modal.style.display = 'none'; sessionStorage.setItem('introShown', 'true'); });
         }
 
         function startTimer() { if (isFirstSelection) { startTime = Date.now(); timerInterval = setInterval(updateTimer, 1000); isFirstSelection = false; } }
@@ -158,41 +138,46 @@
             });
             console.log("Gabarito Secreto Desta Rodada:", gabaritoDaRodada);
         }
-
+        
         function gerarPistas() {
             mapaDePistas.clear();
-            const s = gabaritoDaRodada, idx = { Norte: 0, Nordeste: 1, CentroOeste: 2, Sudeste: 3, Sul: 4 };
-            mapaDePistas.set(`Na coluna da região Sul, o bioma é o ${s[idx.Sul].bioma}.`, (grid) => grid[idx.Sul].bioma === s[idx.Sul].bioma);
-            mapaDePistas.set(`O estado que tem como bioma o ${s[idx.Sul].bioma} é o ${s[idx.Sul].estado}.`, (grid) => grid[idx.Sul].estado === s[idx.Sul].estado);
-            mapaDePistas.set(`A economia principal no estado de ${s[idx.Sul].estado} é a ${s[idx.Sul].economia}.`, (grid) => grid[idx.Sul].economia === s[idx.Sul].economia);
-            mapaDePistas.set(`A coluna à esquerda da região Sul é a Sudeste. Nela, o estado é ${s[idx.Sudeste].estado}.`, (grid) => grid[idx.Sudeste].estado === s[idx.Sudeste].estado);
-            mapaDePistas.set(`O prato servido no estado de ${s[idx.Sudeste].estado} é o ${s[idx.Sudeste].prato}.`, (grid) => grid[idx.Sudeste].prato === s[idx.Sudeste].prato);
-            mapaDePistas.set(`A economia na região do prato ${s[idx.Sudeste].prato} é a ${s[idx.Sudeste].economia}.`, (grid) => grid[idx.Sudeste].economia === s[idx.Sudeste].economia);
-            mapaDePistas.set(`Na coluna da região Norte, o estado é ${s[idx.Norte].estado}.`, (grid) => grid[idx.Norte].estado === s[idx.Norte].estado);
-            mapaDePistas.set(`O bioma do estado do ${s[idx.Norte].estado} é a ${s[idx.Norte].bioma}.`, (grid) => grid[idx.Norte].bioma === s[idx.Norte].bioma);
-            mapaDePistas.set(`A economia na região do bioma ${s[idx.Norte].bioma} é o ${s[idx.Norte].economia}.`, (grid) => grid[idx.Norte].economia === s[idx.Norte].economia);
-            mapaDePistas.set(`A coluna à direita da região Norte é a Nordeste. Nela, a economia é o ${s[idx.Nordeste].economia}.`, (grid) => grid[idx.Nordeste].economia === s[idx.Nordeste].economia);
-            mapaDePistas.set(`O estado correspondente à economia de ${s[idx.Nordeste].economia} é a ${s[idx.Nordeste].estado}.`, (grid) => grid[idx.Nordeste].estado === s[idx.Nordeste].estado);
-            mapaDePistas.set(`O prato típico do estado da ${s[idx.Nordeste].estado} é o ${s[idx.Nordeste].prato}.`, (grid) => grid[idx.Nordeste].prato === s[idx.Nordeste].prato);
-            mapaDePistas.set(`O bioma na região do ${s[idx.Nordeste].prato} é a ${s[idx.Nordeste].bioma}.`, (grid) => grid[idx.Nordeste].bioma === s[idx.Nordeste].bioma);
-            mapaDePistas.set(`Na coluna do Centro-Oeste, o bioma é o ${s[idx.CentroOeste].bioma}.`, (grid) => grid[idx.CentroOeste].bioma === s[idx.CentroOeste].bioma);
-            mapaDePistas.set(`O estado que tem como bioma o ${s[idx.CentroOeste].bioma} é ${s[idx.CentroOeste].estado}.`, (grid) => grid[idx.CentroOeste].estado === s[idx.CentroOeste].estado);
-            mapaDePistas.set(`O prato que falta na coluna Sul é o ${s[idx.Sul].prato}.`, (grid) => grid[idx.Sul].prato === s[idx.Sul].prato);
-            mapaDePistas.set(`O bioma que falta na coluna Sudeste é a ${s[idx.Sudeste].bioma}.`, (grid) => grid[idx.Sudeste].bioma === s[idx.Sudeste].bioma);
-            mapaDePistas.set(`O prato que falta na coluna do Centro-Oeste é o ${s[idx.CentroOeste].prato}.`, (grid) => grid[idx.CentroOeste].prato === s[idx.CentroOeste].prato);
-            mapaDePistas.set(`A economia que falta na coluna do Centro-Oeste é o ${s[idx.CentroOeste].economia}.`, (grid) => grid[idx.CentroOeste].economia === s[idx.CentroOeste].economia);
-            mapaDePistas.set(`O prato que falta na coluna Norte é o ${s[idx.Norte].prato}.`, (grid) => grid[idx.Norte].prato === s[idx.Norte].prato);
+            const s = gabaritoDaRodada;
+            const pistasGeradas = [];
+
+            // Gera uma cadeia de 5 pistas interligadas para cada uma das 5 regiões
+            for (let i = 0; i < 5; i++) {
+                const grupo = [
+                    { texto: `Na coluna da região ${regioes[i]}, o estado é ${s[i].estado}.`,
+                      checar: (grid) => grid[i].estado === s[i].estado },
+                    { texto: `A capital do estado de ${s[i].estado} é ${s[i].capital}.`,
+                      checar: (grid) => grid[i].estado === s[i].estado && grid[i].capital === s[i].capital },
+                    { texto: `O prato típico servido em ${s[i].capital} é o ${s[i].prato}.`,
+                      checar: (grid) => grid[i].capital === s[i].capital && grid[i].prato === s[i].prato },
+                    { texto: `O bioma correspondente ao estado de ${s[i].estado} é o ${s[i].bioma}.`,
+                      checar: (grid) => grid[i].estado === s[i].estado && grid[i].bioma === s[i].bioma },
+                    { texto: `A principal atividade econômica na região do prato ${s[i].prato} é a ${s[i].economia}.`,
+                      checar: (grid) => grid[i].prato === s[i].prato && grid[i].economia === s[i].economia }
+                ];
+                pistasGeradas.push(...grupo);
+            }
+            
+            // Embaralha a lista completa de 25 pistas
+            pistasGeradas.sort(() => Math.random() - 0.5);
+
+            pistasGeradas.forEach(pista => {
+                mapaDePistas.set(pista.texto, pista.checar);
+            });
 
             const containerDePistas = document.getElementById('pistas-list'), lista = document.createElement('ul');
-            const pistasEmbaralhadas = Array.from(mapaDePistas.keys()).sort(() => Math.random() - 0.5);
-            pistasEmbaralhadas.forEach(pista => { const item = document.createElement('li'); item.textContent = pista; item.dataset.pista = pista; lista.appendChild(item); });
+            pistasGeradas.forEach(pista => { const item = document.createElement('li'); item.textContent = pista.texto; item.dataset.pista = pista.texto; lista.appendChild(item); });
             containerDePistas.innerHTML = ''; containerDePistas.appendChild(lista);
         }
 
         function montarInterface() {
              todasAsOpcoes = {
-                estado: [...new Set(bancoDeDados.map(p => p.estado))].sort(), prato: [...new Set(bancoDeDados.map(p => p.prato))].sort(),
-                bioma: [...new Set(bancoDeDados.map(p => p.bioma))].sort(), economia: [...new Set(bancoDeDados.map(p => p.economia))].sort()
+                estado: [...new Set(bancoDeDados.map(p => p.estado))].sort(), capital: [...new Set(bancoDeDados.map(p => p.capital))].sort(),
+                prato: [...new Set(bancoDeDados.map(p => p.prato))].sort(), bioma: [...new Set(bancoDeDados.map(p => p.bioma))].sort(), 
+                economia: [...new Set(bancoDeDados.map(p => p.economia))].sort()
             };
             const tableHead = document.getElementById('game-head'), tableBody = document.getElementById('game-body');
             tableHead.innerHTML = `<tr><th>Categoria</th><th>${regioes.join('</th><th>')}</th></tr>`;
@@ -216,16 +201,7 @@
             const modal = document.getElementById('results-modal'), gallery = document.getElementById('results-gallery'), timeElement = document.getElementById('results-time');
             gallery.innerHTML = ''; timeElement.textContent = `Seu tempo foi de ${document.getElementById('timer').textContent}.`;
             gabaritoDaRodada.forEach(item => { 
-                gallery.innerHTML += `
-                    <figure class="gallery-item">
-                        <h4 class="prato-titulo">${item.prato}</h4>
-                        <img src="${item.imagem}" alt="${item.prato}">
-                        <figcaption>
-                            <img src="${item.bandeira}" alt="Bandeira de ${item.estado}" class="bandeira-estado">
-                            <span>${item.estado}</span>
-                        </figcaption>
-                    </figure>
-                `;
+                gallery.innerHTML += `<figure class="gallery-item"><h4 class="prato-titulo">${item.prato}</h4><img src="${item.imagem}" alt="${item.prato}"><figcaption><img src="${item.bandeira}" alt="Bandeira de ${item.estado}" class="bandeira-estado"><div class="caption-text"><strong>${item.estado} (${item.uf})</strong><br><small>Capital: ${item.capital}</small></div></figcaption></figure>`;
             });
             modal.style.display = 'flex';
         }
@@ -238,8 +214,8 @@
             });
             mapaDePistas.forEach((funcaoDeVerificacao, textoDaPista) => {
                 const elPista = document.querySelector(`li[data-pista="${textoDaPista}"]`);
-                if (funcaoDeVerificacao(gridAtual)) { elPista.classList.add('pista-satisfeita'); } 
-                else { elPista.classList.remove('pista-satisfeita'); }
+                if (elPista && funcaoDeVerificacao(gridAtual)) { elPista.classList.add('pista-satisfeita'); } 
+                else if (elPista) { elPista.classList.remove('pista-satisfeita'); }
             });
             let acertos = 0;
             document.querySelectorAll('select').forEach(select => {
@@ -250,7 +226,7 @@
                 if (respostaUsuario === respostaCorreta) { select.classList.add('select-correct'); acertos++; } 
                 else if (respostaUsuario !== "") { select.classList.add('select-incorrect'); }
             });
-            if (acertos === 20) { stopTimer(); setTimeout(mostrarResultados, 200); }
+            if (acertos === 25) { stopTimer(); setTimeout(mostrarResultados, 200); }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
