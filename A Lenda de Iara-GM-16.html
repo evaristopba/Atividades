@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folclore: A Lenda da Iara</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a2e;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #16223b 2%, transparent 100%),
+                radial-gradient(circle at 75% 75%, #2e1a2a 2%, transparent 100%);
+        }
+        #background-image-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; 
+            background-image: url('https://i.postimg.cc/q7kw5gp2/iara-fundo.webp');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+            opacity: 0.25;
+        }
+        #content-wrapper {
+            position: relative;
+            z-index: 1; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        #legendTextBox {
+            max-height: 50vh; 
+            overflow-y: auto;
+            text-align: left;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            background-image: url('https://i.postimg.cc/q7kw5gp2/iara-fundo.webp');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        #legendTextBox p {
+            margin-bottom: 1rem;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #fde047, #fca5a5, #f9a8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .activity-container.active, .final-screen.active, .intro-screen.active { animation: slideUp 0.6s ease-out forwards; }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+        .fade-out { animation: fadeOut 0.3s ease-out forwards; }
+        @keyframes pulse-correct { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes shake-wrong { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .pulse-animation { animation: pulse-correct 0.6s ease-in-out; }
+        .shake-animation { animation: shake-wrong 0.4s ease-in-out; }
+        .gradient-border {
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            border-image: linear-gradient(to bottom right, #8b5cf6, #ec4899) 1;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content {
+            background-color: #16223b;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        #historyTable th, #historyTable td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #3b3a5a;
+        }
+        #historyTable th {
+            text-align: left;
+            color: #fca5a5;
+        }
+        #historyTable tbody tr:nth-child(even) {
+            background-color: rgba(0,0,0,0.2);
+        }
+
+        /* --- ESTILOS PARA AS BOLHAS SUBINDO --- */
+        #bubble-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -100px; /* Começa fora da tela, embaixo */
+            background-color: rgba(173, 216, 230, 0.2); /* Cor de bolha azulada e sutil */
+            border-radius: 50%;
+            animation: rise linear infinite;
+        }
+        @keyframes rise {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-120vh); /* Sobe até desaparecer acima da tela */
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <!-- CONTAINER PARA AS BOLHAS -->
+    <div id="bubble-container"></div>
+
+    <div id="background-image-container"></div>
+    <canvas id="confetti-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-50"></canvas>
+    
+    <div id="content-wrapper">
+        <header class="text-center mb-8 w-full">
+            <h1 class="text-3xl sm:text-4xl md:text-6xl font-extrabold gradient-text tracking-wider">A Lenda da Iara</h1>
+        </header>
+
+        <main class="w-full max-w-3xl bg-gray-800/50 backdrop-blur-sm p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl gradient-border">
+            
+            <div id="introScreen" class="intro-screen flex flex-col items-center text-center">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Bem-vindo, Aluno! O dia do folclore é comemorado em 22 de agosto</h2>
+                <p class="text-base sm:text-lg text-gray-300 mb-6">Leia o texto abaixo e responda às perguntas na sequência. Está pronto?</p>
+                
+                <div id="legendTextBox">
+                    <p>A Lenda da Iara, também conhecida como Lenda da Mãe d’água, faz parte do folclore brasileiro. Trata-se de uma lenda folclórica de origem indígena, oriunda da região amazônica. Apesar de ser originária dessa região, a Lenda da Iara é conhecida em todo Brasil.</p>
+                    <p>Iara ou Yara, do indígena Iuara, significa “aquela que mora nas águas”. É uma sereia (metade mulher, metade peixe) que vive nas águas amazônicas. Muitas vezes, a figura de Iara é confundida com o orixá africano Iemanjá, a rainha do mar.</p>
+                    <p>Com longos cabelos pretos e olhos castanhos, a sereia Iara emite uma melodia que atrai os homens, os quais ficam rendidos e hipnotizados com seu canto e sua voz doce. Dependendo da região brasileira, a representação da índia pode diferir, por exemplo, na cor dos olhos e dos seus cabelos, que ora são escuros, ora são claros.</p>
+                    <p>Reza a lenda que a Iara era uma corajosa guerreira dona de uma beleza invejável. Por esse motivo, os irmãos sentiam inveja dela e resolvem matá-la. Todavia, no momento do combate, pelo fato de possuir habilidades guerreiras, Iara consegue inverter a situação e acaba matando seus irmãos.</p>
+                    <p>Diante disso, com muito medo da punição de seu pai, o pajé da tribo, Iara resolve fugir, mas seu pai consegue encontrá-la. Como castigo pela morte dos irmãos, ele resolve lançá-la ao rio. Os peixes do rio resolvem salvar a bela jovem transformando-a na sereia Iara. Desde então, Iara habita os rios amazônicos conquistando homens e depois levando-os ao fundo do rio, os quais morrem afogados.</p>
+                    <p>Acredita-se que se o homem consegue escapar dos encantos de Iara ele fica louco, num estado de torpor e somente um pajé poderá curá-lo.</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="startButton" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg text-xl sm:text-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-400 active:scale-95">COMEÇAR</button>
+                    <button id="showHistoryButtonIntro" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg text-xl sm:text-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-400 active:scale-95">Ver Histórico</button>
+                </div>
+            </div>
+
+            <div id="gameScreen" class="activity-container hidden flex-col items-center">
+                <p id="progressIndicator" class="mb-4 text-lg font-bold text-indigo-300"></p>
+                <p id="questionElement" class="text-xl sm:text-2xl font-bold text-center text-white mb-6"></p> 
+                <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xl"></div>
+                <p id="feedback" class="text-xl font-bold mt-6 min-h-[30px]"></p>
+                <p id="score" class="text-xl font-bold mt-2 text-yellow-300">Pontuação: 0</p>
+                <div class="navigation-buttons mt-8 text-center">
+                    <button id="nextButton" class="hidden bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-400 active:scale-95">Próxima Atividade</button>
+                    <button id="restartButton" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-400 active:scale-95">Reiniciar Jogo</button>
+                </div>
+            </div>
+
+            <div id="finalScreen" class="final-screen hidden flex-col items-center text-center">
+                <h2 class="text-4xl sm:text-5xl font-extrabold gradient-text mb-4">Parabéns!</h2>
+                <img id="finalResultImage" class="w-40 h-40 rounded-full border-4 border-yellow-400 shadow-lg shadow-yellow-400/50 my-6" src="" alt="Resultado do Jogo">
+                <p class="text-xl sm:text-2xl">Sua pontuação final foi: <span id="finalScore" class="font-bold text-yellow-300">0</span></p>
+                <p class="text-lg sm:text-xl">Você acertou <span id="correctAnswersCount" class="font-bold text-green-400">0</span> de <span id="totalQuestionsCount" class="font-bold">0</span> questões.</p>
+                <p class="text-xl sm:text-2xl font-bold mt-6" id="congratulationsMessage"></p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                    <button id="playAgainButton" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg text-xl sm:text-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-400 active:scale-95">Jogar Novamente</button>
+                    <button id="showHistoryButtonFinal" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 shadow-lg text-xl sm:text-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-400 active:scale-95">Ver Histórico</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-8 text-gray-500">
+            <p>© 2025 Folclore brasileiro - A Lenda da Iara. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- MODAL DO HISTÓRICO -->
+    <div id="historyModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="closeHistoryModal" class="modal-close-button">×</button>
+            <h2 class="text-3xl font-bold gradient-text mb-6 text-center">Histórico de Partidas</h2>
+            <div class="overflow-x-auto">
+                <table id="historyTable" class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Pontuação</th>
+                            <th>Acertos/Erros</th>
+                            <th>Tempo Gasto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody"></tbody>
+                </table>
+            </div>
+            <p id="noHistoryMessage" class="text-center text-lg mt-4 hidden">Nenhuma partida foi jogada ainda.</p>
+            <div class="mt-8 pt-4 border-t border-gray-700 text-center">
+                <button id="clearHistoryButton" class="bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500 active:scale-95">Limpar Histórico</button>
+                <div id="passwordPromptContainer" class="hidden mt-4 max-w-sm mx-auto">
+                    <p class="mb-2 text-sm">Para confirmar a exclusão, digite a senha de segurança:</p>
+                    <input type="password" id="passwordInput" class="bg-gray-900 border border-gray-600 text-white text-center rounded-lg p-2 w-full mb-2">
+                    <button id="confirmClearButton" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg">Confirmar</button>
+                    <p id="clearFeedback" class="text-red-400 text-sm mt-2 h-4"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script>
+        const activities = [
+            { question: "Quem era o pai de Iara na lenda?", images: [], options: ["Um guerreiro da tribo", "Um pescador do rio", "O pajé da tribo", "Um espírito das águas"], correctAnswer: "O pajé da tribo" },
+            { question: "Por que os irmãos de Iara queriam matá-la?", images: [], options: ["Porque ela desrespeitou o pai", "Porque ela era uma sereia", "Porque sentiam inveja de sua beleza e coragem", "Porque ela matou outros guerreiros"], correctAnswer: "Porque sentiam inveja de sua beleza e coragem" },
+            { question: "O que aconteceu quando os irmãos tentaram matar Iara?", images: [], options: ["Eles a capturaram e entregaram ao pai", "Iara fugiu para o rio", "Iara reagiu e matou os irmãos", "Os peixes a salvaram imediatamente"], correctAnswer: "Iara reagiu e matou os irmãos" },
+            { question: "Qual foi a atitude do pai de Iara após saber da morte dos irmãos?", images: [], options: ["Perdoou a filha", "Mandou que ela deixasse a tribo", "Lançou-a ao rio como castigo", "Fez um ritual para trazê-los de volta"], correctAnswer: "Lançou-a ao rio como castigo" },
+            { question: "O que transformou Iara em sereia, segundo a lenda?", images: [], options: ["A magia do pajé", "A luz da lua cheia", "Os peixes do rio", "Um feitiço da floresta"], correctAnswer: "Os peixes do rio" },
+            { question: "Onde Iara passou a viver depois de sua transformação?", images: [], options: ["No oceano Atlântico", "Nos rios amazônicos", "Em uma caverna encantada", "Em uma aldeia submersa"], correctAnswer: "Nos rios amazônicos" },
+            { question: "O que acontece com os homens encantados por Iara?", images: [], options: ["Ficam ricos e poderosos", "Viram espíritos da floresta", "São levados ao fundo do rio e morrem afogados", "Casam-se com ela e vivem no rio"], correctAnswer: "São levados ao fundo do rio e morrem afogados" },
+            { question: "O que ocorre com o homem que consegue resistir ao encanto da Iara?", images: [], options: ["Ele ganha poderes mágicos", "Fica louco, em estado de torpor", "Torna-se pajé da tribo", "É transformado em peixe"], correctAnswer: "Fica louco, em estado de torpor" },
+            { question: "Segundo a lenda, quem pode curar um homem encantado pela Iara?", images: [], options: ["Um feiticeiro do rio", "Um pajé", "Uma guerreira da tribo", "Nenhum ser humano"], correctAnswer: "Um pajé" },
+            { question: "O que motivava Iara a atrair os homens para o fundo do rio?", images: [], options: ["Ódio pela tribo", "Desejo de vingança contra os irmãos", "Sua natureza encantadora após a transformação", "Ordens do espírito das águas"], correctAnswer: "Sua natureza encantadora após a transformação" },
+            { question: "No trecho: 'Porém, os peixes do rio resolvem salvar a bela jovem…', a palavra Porém poderia ser substituída, sem alterar o sentido, por:", images: [], options: ["Então", "Porque", "Entretanto", "Portanto"], correctAnswer: "Entretanto" },
+            { question: "De acordo com a lenda, os peixes do rio transformaram a bela jovem em:", images: [], options: ["um sapo", "uma sereia", "um peixe", "uma ostra"], correctAnswer: "uma sereia" },
+            { question: "Desde que foi transformada, Iara habita os rios da:", images: [], options: ["Argentina", "Inglaterra", "Alemanha", "Amazônia"], correctAnswer: "Amazônia" },
+            { question: "Qual palavra abaixo substitui a expressão entre colchetes no trecho: '... o homem consegue [escapar]...' sem alterar o sentido original?", images: [], options: ["resistir", "expulsar", "correr", "percorrer"], correctAnswer: "resistir" },
+            { question: "Em que dia é comemorado o dia do folclore?", images: [], options: ["22 de setembro", "22 de julho", "22 de janeiro", "22 de agosto"], correctAnswer: "22 de agosto" }
+        ];
+        
+        // ... (todo o código JS anterior permanece o mesmo até a parte do efeito visual) ...
+
+        let currentActivityIndex = 0, score = 0, correctAnswers = 0;
+        const totalQuestions = activities.length;
+        let startTime;
+        const introScreen = document.getElementById('introScreen');
+        const startButton = document.getElementById('startButton');
+        const gameScreen = document.getElementById('gameScreen');
+        const finalScreen = document.getElementById('finalScreen');
+        const questionElement = document.getElementById('questionElement');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackElement = document.getElementById('feedback');
+        const scoreElement = document.getElementById('score');
+        const nextButton = document.getElementById('nextButton');
+        const restartButton = document.getElementById('restartButton'); 
+        const finalScoreElement = document.getElementById('finalScore');
+        const correctAnswersCountElement = document.getElementById('correctAnswersCount');
+        const totalQuestionsCountElement = document.getElementById('totalQuestionsCount');
+        const congratulationsMessageElement = document.getElementById('congratulationsMessage');
+        const finalResultImage = document.getElementById('finalResultImage');
+        const progressIndicator = document.getElementById('progressIndicator');
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const historyModal = document.getElementById('historyModal');
+        const closeHistoryModal = document.getElementById('closeHistoryModal');
+        const showHistoryButtonIntro = document.getElementById('showHistoryButtonIntro');
+        const showHistoryButtonFinal = document.getElementById('showHistoryButtonFinal');
+        const historyTableBody = document.getElementById('historyTableBody');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const clearHistoryButton = document.getElementById('clearHistoryButton');
+        const passwordPromptContainer = document.getElementById('passwordPromptContainer');
+        const passwordInput = document.getElementById('passwordInput');
+        const confirmClearButton = document.getElementById('confirmClearButton');
+        const clearFeedback = document.getElementById('clearFeedback');
+        function normalizeText(text) { return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+        function resetGameState() { currentActivityIndex = 0; score = 0; correctAnswers = 0; startTime = null; activities.sort(() => Math.random() - 0.5); }
+        function startGame() {
+            resetGameState();
+            startTime = new Date();
+            introScreen.classList.add('fade-out');
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+                introScreen.classList.remove('fade-out');
+                gameScreen.classList.remove('hidden');
+                gameScreen.style.display = 'flex';
+                gameScreen.classList.add('active');
+                loadActivity();
+            }, 300);
+        }
+        function loadActivity() {
+            if (currentActivityIndex < activities.length) {
+                gameScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    gameScreen.classList.remove('fade-out');
+                    const currentActivity = activities[currentActivityIndex];
+                    questionElement.textContent = currentActivity.question; 
+                    optionsContainer.innerHTML = '';
+                    feedbackElement.textContent = '';
+                    feedbackElement.className = 'feedback text-xl font-bold mt-6 min-h-[30px]';
+                    nextButton.style.display = 'none';
+                    currentActivity.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.className = 'option-button flex items-center justify-center min-h-[70px] text-base sm:text-lg bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-md disabled:bg-gray-600 disabled:text-gray-400 disabled:transform-none disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-yellow-300 active:scale-95';
+                        button.textContent = option;
+                        button.addEventListener('click', () => checkAnswer(option, normalizeText(currentActivity.correctAnswer), button));
+                        optionsContainer.appendChild(button);
+                    });
+                    updateProgressIndicator();
+                    scoreElement.textContent = `Pontuação: ${score}`;
+                    gameScreen.classList.remove('active');
+                    void gameScreen.offsetWidth;
+                    gameScreen.classList.add('active');
+                }, 300);
+            } else { showFinalScreen(); }
+        }
+        function checkAnswer(selectedOption, correctAnswer, clickedButton) {
+            const selectedAnswer = normalizeText(selectedOption);
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                const buttonAnswer = normalizeText(button.textContent);
+                if (buttonAnswer === correctAnswer) { button.classList.remove('bg-yellow-400', 'hover:bg-yellow-300'); button.classList.add('bg-green-500', 'text-white', 'pulse-animation');
+                } else if (button === clickedButton) { button.classList.remove('bg-yellow-400', 'hover:bg-yellow-300'); button.classList.add('bg-red-500', 'text-white', 'shake-animation');
+                } else { button.classList.add('opacity-50'); }
+            });
+            if (selectedAnswer === correctAnswer) {
+                feedbackElement.textContent = '✅ Muito bem! Você acertou!';
+                feedbackElement.classList.add('text-green-400');
+                score += 10;
+                correctAnswers++;
+            } else {
+                const correctOptionText = activities[currentActivityIndex].options.find(opt => normalizeText(opt) === correctAnswer); 
+                feedbackElement.textContent = `❌ Que pena! A resposta correta era "${correctOptionText || correctAnswer}".`;
+                feedbackElement.classList.add('text-red-400');
+            }
+            scoreElement.textContent = `Pontuação: ${score}`; 
+            nextButton.style.display = 'inline-block';
+        }
+        function updateProgressIndicator() { progressIndicator.textContent = `Questão ${currentActivityIndex + 1} de ${totalQuestions}`; }
+        function showFinalScreen() {
+            const endTime = new Date();
+            const timeTaken = endTime - startTime;
+            saveGameToHistory(timeTaken);
+            gameScreen.classList.add('fade-out');
+            setTimeout(() => {
+                gameScreen.style.display = 'none';
+                gameScreen.classList.remove('fade-out');
+                finalScreen.classList.remove('hidden');
+                finalScreen.style.display = 'flex';
+                finalScreen.classList.add('active');
+                finalScoreElement.textContent = score;
+                correctAnswersCountElement.textContent = correctAnswers;
+                totalQuestionsCountElement.textContent = totalQuestions;
+                const percentageCorrect = (correctAnswers / totalQuestions) * 100;
+                let message = '', imageUrl = ''; 
+                if (percentageCorrect === 100) { message = "Fantástico! Você é um verdadeiro mestre da leitura!"; imageUrl = 'https://i.postimg.cc/R04rjJGK/Medalha-de-ouro.jpg'; triggerConfetti();
+                } else if (percentageCorrect >= 80) { message = "Excelente! Você leu e entendeu o texto!"; imageUrl = 'https://i.postimg.cc/k5sr9MhZ/Medalha-de-prata.jpg'; triggerConfetti(0.5);
+                } else if (percentageCorrect >= 60) { message = "Bom trabalho! Continue praticando para melhorar!"; imageUrl = 'https://i.postimg.cc/rwSXnNGq/Medalha-de-bronze.jpg';
+                } else { message = "Não desanime! Pratique mais e tente novamente!"; imageUrl = 'https://i.postimg.cc/fLq6t2sf/N-o-Joinha.png'; }
+                congratulationsMessageElement.textContent = message;
+                finalResultImage.src = imageUrl;
+                finalResultImage.alt = 'Resultado final';
+            }, 500);
+        }
+        function triggerConfetti(intensity = 1) {
+            const defaults = { spread: 360, ticks: 50, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['#fde047', '#fca5a5', '#a78bfa', '#ffffff'] };
+            confetti({ ...defaults, particleCount: 50 * intensity, scalar: 1.2 });
+            confetti({ ...defaults, particleCount: 25 * intensity, scalar: 0.75, shapes: ['circle'] });
+        }
+        function formatDuration(ms) { const seconds = Math.floor((ms / 1000) % 60); const minutes = Math.floor((ms / (1000 * 60)) % 60); return `${minutes} min e ${seconds} seg`; }
+        function saveGameToHistory(timeTaken) {
+            const history = JSON.parse(localStorage.getItem('iaraGameHistory')) || [];
+            const newRecord = { date: new Date().toLocaleString('pt-BR'), score: score, correct: correctAnswers, errors: totalQuestions - correctAnswers, time: formatDuration(timeTaken) };
+            history.unshift(newRecord);
+            localStorage.setItem('iaraGameHistory', JSON.stringify(history));
+            checkHistoryButtonVisibility();
+        }
+        function displayHistory() {
+            const history = JSON.parse(localStorage.getItem('iaraGameHistory')) || [];
+            historyTableBody.innerHTML = '';
+            passwordPromptContainer.classList.add('hidden');
+            passwordInput.value = '';
+            clearFeedback.textContent = '';
+            if (history.length === 0) {
+                noHistoryMessage.style.display = 'block';
+                historyTable.style.display = 'none';
+                clearHistoryButton.classList.add('hidden');
+            } else {
+                noHistoryMessage.style.display = 'none';
+                historyTable.style.display = 'table';
+                clearHistoryButton.classList.remove('hidden');
+                history.forEach(record => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${record.date}</td><td>${record.score}</td><td><span class="text-green-400">${record.correct}</span> / <span class="text-red-400">${record.errors}</span></td><td>${record.time}</td>`;
+                    historyTableBody.appendChild(row);
+                });
+            }
+            historyModal.classList.remove('hidden');
+        }
+        function checkHistoryButtonVisibility() {
+            const history = JSON.parse(localStorage.getItem('iaraGameHistory')) || [];
+            showHistoryButtonIntro.classList.toggle('hidden', history.length === 0);
+        }
+        function returnToIntro() {
+            finalScreen.classList.add('fade-out');
+            setTimeout(() => {
+                finalScreen.style.display = 'none';
+                finalScreen.classList.remove('active', 'fade-out');
+                introScreen.classList.remove('hidden');
+                introScreen.style.display = 'flex';
+                introScreen.classList.add('active');
+            }, 300);
+        }
+        function getDynamicPassword() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            return `${day}${month}${year}`;
+        }
+
+        // --- SCRIPT PARA CRIAR AS BOLHAS ---
+        function createBubbles() {
+            const container = document.getElementById('bubble-container');
+            const numberOfBubbles = 25; // Número sutil de bolhas
+
+            for (let i = 0; i < numberOfBubbles; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                container.appendChild(bubble);
+
+                const size = Math.random() * 40 + 10; // Tamanho entre 10px e 50px
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+
+                bubble.style.left = Math.random() * 100 + 'vw';
+                bubble.style.animationDuration = (Math.random() * 10 + 15) + 's'; // Duração lenta entre 15s e 25s
+                bubble.style.animationDelay = Math.random() * 15 + 's'; // Atraso de até 15s
+            }
+        }
+        
+        clearHistoryButton.addEventListener('click', () => {
+            passwordPromptContainer.classList.remove('hidden');
+            passwordInput.focus();
+        });
+        confirmClearButton.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            const correctPassword = getDynamicPassword();
+            if (enteredPassword === correctPassword) {
+                localStorage.removeItem('iaraGameHistory');
+                alert('Histórico limpo com sucesso!');
+                historyModal.classList.add('hidden');
+                checkHistoryButtonVisibility();
+            } else {
+                clearFeedback.textContent = 'Senha incorreta. Tente novamente.';
+                passwordInput.value = '';
+                passwordInput.classList.add('shake-animation');
+                setTimeout(() => passwordInput.classList.remove('shake-animation'), 400);
+            }
+        });
+
+        startButton.addEventListener('click', startGame);
+        nextButton.addEventListener('click', () => { currentActivityIndex++; loadActivity(); });
+        restartButton.addEventListener('click', () => { resetGameState(); gameScreen.style.display = 'flex'; finalScreen.style.display = 'none'; finalScreen.classList.remove('active'); loadActivity(); });
+        showHistoryButtonIntro.addEventListener('click', displayHistory);
+        showHistoryButtonFinal.addEventListener('click', displayHistory);
+        closeHistoryModal.addEventListener('click', () => historyModal.classList.add('hidden'));
+        playAgainButton.addEventListener('click', returnToIntro);
+        document.addEventListener('contextmenu', (e) => { e.preventDefault(); alert("Você é um detetive das formas, não um hacker! 😉 Use apenas o jogo como proposto."); });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            checkHistoryButtonVisibility();
+            createBubbles(); // Chama a função para criar as bolhas
+        });
+        
+    </script>
+</body>
+</html>
