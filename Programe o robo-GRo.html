@@ -576,8 +576,15 @@
             isGameOver = false;
             const urlParams = new URLSearchParams(window.location.search);
             const levelFromUrl = parseInt(urlParams.get('level'));
-            currentLevel = parseInt(localStorage.getItem('savedLevel') || (levelFromUrl >= 1 && levelFromUrl <= 5 ? levelFromUrl : 1));
-            levelEntryScore = parseInt(localStorage.getItem('levelEntryScore') || 0);
+            if (levelFromUrl >= 1 && levelFromUrl <= 5) {
+                currentLevel = levelFromUrl;
+                localStorage.setItem('savedLevel', currentLevel);
+                levelEntryScore = 0;
+                localStorage.setItem('levelEntryScore', 0);
+            } else {
+                currentLevel = parseInt(localStorage.getItem('savedLevel') || 1);
+                levelEntryScore = parseInt(localStorage.getItem('levelEntryScore') || 0);
+            }
             score = levelEntryScore;
             scoreEl.textContent = score;
             createGrid();
@@ -735,9 +742,8 @@
             correctAttempts = 0;
             lives = TOTAL_LIVES;
             isGameOver = false;
-            const urlParams = new URLSearchParams(window.location.search);
-            const levelFromUrl = parseInt(urlParams.get('level'));
-            currentLevel = parseInt(localStorage.getItem('savedLevel') || (levelFromUrl >= 1 && levelFromUrl <= 5 ? levelFromUrl : 1));
+            currentLevel = 1; // Forçar retorno ao Nível 1
+            localStorage.setItem('savedLevel', 1);
             
             scoreEl.textContent = score;
             document.querySelectorAll('.level-btn').forEach(b => {
