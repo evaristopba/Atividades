@@ -43,7 +43,7 @@
             width: 100%;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 0px; /* Ajustado para subir o grid */
+            margin-bottom: 0px;
         }
         
         #theme-selector {
@@ -89,7 +89,7 @@
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            margin-top: 0px; /* Ajustado para subir o grid */
+            margin-top: 0px;
         }
         
         #grid-container {
@@ -277,7 +277,6 @@
         #btn-down { background-color: #e74c3c; }
         #btn-clear { background-color: #95a5a6; font-size: 0.9em; }
         
-        /* Temas */
         body.space { background-color: #1a1a2e; }
         body.space .grid-cell { 
             background-color: #2c3e50; 
@@ -563,6 +562,7 @@
         let currentLevel = 1, score = 0, correctAttempts = 0;
         let isGameOver = false;
         let lives = TOTAL_LIVES;
+        let levelEntryScore = 0;
         
         const levelSettings = {
             1: { bombs: 4, operations: ['+', '-'], range: 10, decoys: 2 },
@@ -577,6 +577,9 @@
             const urlParams = new URLSearchParams(window.location.search);
             const levelFromUrl = parseInt(urlParams.get('level'));
             currentLevel = parseInt(localStorage.getItem('savedLevel') || (levelFromUrl >= 1 && levelFromUrl <= 5 ? levelFromUrl : 1));
+            levelEntryScore = parseInt(localStorage.getItem('levelEntryScore') || 0);
+            score = levelEntryScore;
+            scoreEl.textContent = score;
             createGrid();
             createCommandSlots();
             setupControls();
@@ -655,6 +658,8 @@
                     b.classList.add('active');
                     currentLevel = parseInt(b.dataset.level);
                     localStorage.setItem('savedLevel', currentLevel);
+                    levelEntryScore = score;
+                    localStorage.setItem('levelEntryScore', levelEntryScore);
                     correctAttempts = 0;
                     isGameOver = false;
                     lives = TOTAL_LIVES;
@@ -686,7 +691,11 @@
             });
 
             document.getElementById('instructions-btn').addEventListener('click', showInstructions);
-            document.getElementById('restart-btn').addEventListener('click', resetGame);
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                const confirmReset = window.confirm("Deseja reiniciar o jogo completamente? Isso zerará sua pontuação e retornará ao Nível 1.");
+                if (!confirmReset) return;
+                resetGame();
+            });
             
             document.getElementById('btn-right').addEventListener('click', () => addCommand('➡️'));
             document.getElementById('btn-left').addEventListener('click', () => addCommand('⬅️'));
@@ -721,6 +730,8 @@
 
         function resetGame() {
             score = 0;
+            levelEntryScore = 0;
+            localStorage.setItem('levelEntryScore', 0);
             correctAttempts = 0;
             lives = TOTAL_LIVES;
             isGameOver = false;
@@ -971,6 +982,8 @@
                         document.querySelectorAll('.level-btn').forEach(b => b.disabled = parseInt(b.dataset.level) > currentLevel);
                         document.querySelector('.level-btn.active').classList.remove('active');
                         document.querySelector(`.level-btn[data-level="${currentLevel}"]`).classList.add('active');
+                        levelEntryScore = score;
+                        localStorage.setItem('levelEntryScore', levelEntryScore);
                         victoryMessage.textContent += ` Você avançou para o Nível ${currentLevel}!`;
                         correctAttempts = 0;
                         lives = TOTAL_LIVES;
@@ -1008,8 +1021,10 @@
                     const currentLevelBefore = currentLevel;
                     isGameOver = true;
                     toggleControlButtons(false);
-                    alert(`Fim de Jogo! Você perdeu todas as suas vidas no Nível ${currentLevelBefore}.`);
+                    alert(`Fim de Jogo! Você perdeu todas as suas vidas no Nível ${currentLevelBefore}. Reiniciando o nível...`);
                     setTimeout(() => {
+                        score = levelEntryScore;
+                        scoreEl.textContent = score;
                         lives = TOTAL_LIVES;
                         correctAttempts = 0;
                         isGameOver = false;
