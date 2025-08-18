@@ -554,11 +554,19 @@
 
             while (!challengeIsValid && attempts < 500) {
                 setup = generateStrategicSetup();
+                
+                if (!setup || !setup.commandSequence || setup.commandSequence.length === 0) {
+                    attempts++;
+                    continue;
+                }
+
                 const simulationResult = simulatePath(setup.robotPos, setup.commandSequence, setup.bombPositions);
                 const finalPos = simulationResult.finalPos;
                 const shapeAtFinalPos = SHAPES.find(shape => setup.targetPositions[shape]?.x === finalPos.x && setup.targetPositions[shape]?.y === finalPos.y);
                 
-                if (shapeAtFinalPos && setup.commandSequence.length > 0) {
+                const cmd = setup.commandSequence.length;
+                const settings = levelSettings[currentLevel];
+                if (shapeAtFinalPos && cmd >= settings.minCmd && cmd <= settings.maxCmd) {
                     correctAnswerShape = shapeAtFinalPos;
                     challengeIsValid = true;
                 }
@@ -577,63 +585,170 @@
             renderGame();
             isAnimating = document.getElementById('modal-overlay').style.display !== 'none';
         }
-
+        
+        // ========================================================================
+        // NOVA ESTRUTURA DE GERAÇÃO
+        // ========================================================================
         function generateStrategicSetup() {
             const settings = levelSettings[currentLevel];
-            let availableCoords = [];
-            for (let y = 0; y < GRID_HEIGHT; y++) { for (let x = 0; x < GRID_WIDTH; x++) { availableCoords.push({ x, y }); } }
-            shuffleArray(availableCoords);
-            const getUniqueCoord = () => availableCoords.pop();
+            let allCoords = [];
+            for (let y = 0; y < GRID_HEIGHT; y++) { for (let x = 0; x < GRID_WIDTH; x++) { allCoords.push({ x, y }); } }
+            
+            shuffleArray(allCoords);
+            const getUniqueCoord = () => allCoords.pop();
 
-            const newRobotPos = getUniqueCoord();
-            const newTargetPositions = {};
-            SHAPES.forEach(shape => { newTargetPositions[shape] = getUniqueCoord(); });
-
-            const newBombPositions = [];
-            for (let i = 0; i < settings.bombs; i++) { if (availableCoords.length > 0) { newBombPositions.push(getUniqueCoord()); } }
+            const robotStartPos = getUniqueCoord();
+            const targetPositions = {};
+            SHAPES.forEach(shape => { targetPositions[shape] = getUniqueCoord(); });
 
             const targetsWithDistances = SHAPES.map(shape => {
-                const pos = newTargetPositions[shape];
-                const distance = Math.abs(pos.x - newRobotPos.x) + Math.abs(pos.y - newRobotPos.y);
+                const pos = targetPositions[shape];
+                const distance = Math.abs(pos.x - robotStartPos.x) + Math.abs(pos.y - robotStartPos.y);
                 return { shape, pos, distance };
             }).sort((a, b) => a.distance - b.distance);
 
             const trueTargetInfo = Math.random() < 0.5 ? targetsWithDistances[0] : targetsWithDistances[1];
-            const newCommandSequence = generateSafePath(newRobotPos, trueTargetInfo.pos, newBombPositions, settings.minCmd, settings.maxCmd);
+            const targetEndPos = trueTargetInfo.pos;
 
-            return { robotPos: newRobotPos, targetPositions: newTargetPositions, bombPositions: newBombPositions, commandSequence: newCommandSequence };
+            // A MÁGICA ACONTECE AQUI:
+            // Esta função agora cria o caminho E as bombas ao mesmo tempo.
+            const { path, bombs } = createPathAndBombs(robotStartPos, targetEndPos, settings);
+            
+            if (!path) return null; // Retorna nulo se não conseguiu criar um caminho válido
+
+            return { 
+                robotPos: robotStartPos, 
+                targetPositions: targetPositions, 
+                bombPositions: bombs, 
+                commandSequence: path 
+            };
         }
 
-        function generateSafePath(start, end, bombs, minCmd, maxCmd) {
-            let path = [], current = { ...start }, steps = 0;
-            const maxSteps = Math.floor(Math.random() * (maxCmd - minCmd + 1)) + minCmd;
+        function createPathAndBombs(start, end, settings) {
+            let blockingBombs = [];
+            let path = findDirectPath(start, end, blockingBombs, settings.maxCmd);
+            if (!path) return {}; // Não há caminho possível nem sem bombas
 
-            while (steps < maxSteps) {
-                const safeMoves = getSafeMoves(current, bombs, path);
-                if (safeMoves.length === 0) break;
+            let detours = 0;
+            const maxDetours = 5; // Limite de segurança
 
-                const dx = end.x - current.x, dy = end.y - current.y;
-                let preferredMove = null;
+            // Adiciona desvios forçados por bombas até atingir o tamanho mínimo
+            while (path.length < settings.minCmd && detours < maxDetours) {
+                const pathCoords = getCoordsAlongPath(start, path);
+                let blockIndex = -1;
+                let coordToBlock = null;
 
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0 && safeMoves.includes('right')) preferredMove = 'right';
-                    else if (dx < 0 && safeMoves.includes('left')) preferredMove = 'left';
-                } else {
-                    if (dy > 0 && safeMoves.includes('down')) preferredMove = 'down';
-                    else if (dy < 0 && safeMoves.includes('up')) preferredMove = 'up';
+                // Tenta encontrar um ponto no caminho para bloquear que ainda não seja uma bomba
+                for (let i = 0; i < 10; i++) { // Tenta 10 vezes
+                    let tempIndex = Math.floor(Math.random() * (path.length - 1)) + 1; // Não bloqueia o primeiro passo
+                    let tempCoord = pathCoords[tempIndex];
+                    if (!blockingBombs.some(b => b.x === tempCoord.x && b.y === tempCoord.y)) {
+                        blockIndex = tempIndex;
+                        coordToBlock = tempCoord;
+                        break;
+                    }
                 }
+
+                if (!coordToBlock) break; // Não achou um bom lugar para bloquear
+
+                blockingBombs.push(coordToBlock);
+                let newPath = findDirectPath(start, end, blockingBombs, settings.maxCmd);
+
+                if (newPath && newPath.length > path.length) {
+                    path = newPath;
+                } else {
+                    // Se o novo caminho não for melhor, desfaz a bomba e para.
+                    blockingBombs.pop();
+                    break;
+                }
+                detours++;
+            }
+
+            // Preenche o resto das bombas em lugares que não atrapalham
+            const finalPathCoords = getCoordsAlongPath(start, path);
+            let occupiedCoords = [start, end, ...finalPathCoords, ...blockingBombs];
+            
+            let allGridCoords = [];
+            for (let y = 0; y < GRID_HEIGHT; y++) { for (let x = 0; x < GRID_WIDTH; x++) { allGridCoords.push({x, y}); }}
+
+            let availableBombSpots = allGridCoords.filter(coord => 
+                !occupiedCoords.some(occ => occ.x === coord.x && occ.y === coord.y)
+            );
+            shuffleArray(availableBombSpots);
+
+            let finalBombs = [...blockingBombs];
+            while(finalBombs.length < settings.bombs && availableBombSpots.length > 0) {
+                finalBombs.push(availableBombSpots.pop());
+            }
+
+            return { path, bombs: finalBombs };
+        }
+        
+        function getCoordsAlongPath(start, path) {
+            let coords = [];
+            let current = { ...start };
+            for(const move of path) {
+                 if (move === 'up') current.y--; else if (move === 'down') current.y++;
+                 else if (move === 'left') current.x--; else if (move === 'right') current.x++;
+                 coords.push({...current});
+            }
+            return coords;
+        }
+
+        function findDirectPath(start, end, bombs, maxLength) {
+            let path = [];
+            let current = { ...start };
+            for (let i = 0; i < maxLength * 2 && path.length < maxLength; i++) {
+                if (current.x === end.x && current.y === end.y) break;
                 
-                const move = (preferredMove && Math.random() < 0.8) ? preferredMove : safeMoves[Math.floor(Math.random() * safeMoves.length)];
-                
+                const move = getBestMove(current, end, bombs, path);
+                if (!move) return null; // Caminho bloqueado
+
                 path.push(move);
                 if (move === 'up') current.y--; else if (move === 'down') current.y++;
                 else if (move === 'left') current.x--; else if (move === 'right') current.x++;
-                
-                steps++;
-                if (current.x === end.x && current.y === end.y && steps >= minCmd) break;
             }
             return path;
         }
+        
+        function getBestMove(current, end, bombs, path) {
+            const moves = ['up', 'down', 'left', 'right'];
+            const lastMove = path[path.length - 1];
+            let scoredMoves = [];
+
+            for (const move of moves) {
+                const newPos = { ...current };
+                if (move === 'up') newPos.y--; else if (move === 'down') newPos.y++;
+                else if (move === 'left') newPos.x--; else if (move === 'right') newPos.x++;
+
+                const isOutOfBounds = newPos.x < 0 || newPos.x >= GRID_WIDTH || newPos.y < 0 || newPos.y >= GRID_HEIGHT;
+                const isBomb = bombs.some(b => b.x === newPos.x && b.y === newPos.y);
+                const isReversing = (lastMove === 'up' && move === 'down') || (lastMove === 'down' && move === 'up') ||
+                                    (lastMove === 'left' && move === 'right') || (lastMove === 'right' && move === 'left');
+
+                if (isOutOfBounds || isBomb || isReversing) continue;
+
+                let score = 0;
+                const distBefore = Math.abs(current.x - end.x) + Math.abs(current.y - end.y);
+                const distAfter = Math.abs(newPos.x - end.x) + Math.abs(newPos.y - end.y);
+
+                if (distAfter < distBefore) score += 10;
+                else if (distAfter > distBefore) score -= 10;
+                else score += 1;
+
+                if (move === lastMove) score += 2;
+                
+                scoredMoves.push({ move: move, score: score });
+            }
+
+            if (scoredMoves.length === 0) return null;
+
+            scoredMoves.sort((a, b) => b.score - a.score);
+            const bestScore = scoredMoves[0].score;
+            const bestMoves = scoredMoves.filter(m => m.score === bestScore);
+            return bestMoves[Math.floor(Math.random() * bestMoves.length)].move;
+        }
+        // ========================================================================
 
         function simulatePath(start, sequence, bombs) {
             let currentPos = { ...start };
@@ -651,23 +766,6 @@
         function isSafeMove(current, next, bombs) {
             return next.x >= 0 && next.x < GRID_WIDTH && next.y >= 0 && next.y < GRID_HEIGHT &&
                    !bombs.some(b => b.x === next.x && b.y === next.y);
-        }
-
-        function getSafeMoves(current, bombs, path) {
-            const moves = [];
-            const candidates = [
-                { cmd: 'up', pos: { x: current.x, y: current.y - 1 } }, { cmd: 'down', pos: { x: current.x, y: current.y + 1 } },
-                { cmd: 'left', pos: { x: current.x - 1, y: current.y } }, { cmd: 'right', pos: { x: current.x + 1, y: current.y } }
-            ];
-            candidates.forEach(move => { if (isSafeMove(current, move.pos, bombs) && !isRedundantMove(path, move.cmd)) { moves.push(move.cmd); } });
-            return moves;
-        }
-
-        function isRedundantMove(path, newMove) {
-            const lastMove = path[path.length - 1];
-            if (!lastMove) return false;
-            return (lastMove === 'up' && newMove === 'down') || (lastMove === 'down' && newMove === 'up') ||
-                   (lastMove === 'left' && newMove === 'right') || (lastMove === 'right' && newMove === 'left');
         }
 
         function handleAnswerClick(event) {
