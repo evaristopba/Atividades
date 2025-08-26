@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio do Robô Matemático - Correções Aplicadas</title>
+    <style>
+        :root {
+            --grid-size: 6;
+            --cell-size: 70px;
+            --grid-gap: 4px;
+            --primary-color: #5ab9ea;
+            --secondary-color: #2c3e50;
+            --accent-color: #f1c40f;
+            --correct-color: #d4edda;
+            --wrong-color: #f8d7da;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+        }
+        
+        .top-controls {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 0px;
+        }
+        
+        #theme-selector {
+            padding: 8px;
+            border-radius: 5px;
+            border: 2px solid var(--secondary-color);
+            font-weight: bold;
+        }
+        
+        #level-selector {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .level-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: 3px solid var(--secondary-color);
+            background-color: white;
+            color: var(--secondary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .level-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: #f39c12;
+        }
+        
+        .level-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .game-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            margin-top: 0px;
+        }
+        
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+            grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+            gap: var(--grid-gap);
+            background-color: var(--secondary-color);
+            border: 5px solid var(--secondary-color);
+            padding: var(--grid-gap);
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .grid-cell {
+            background-color: white;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--secondary-color);
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .grid-cell.correct-path {
+            background-color: var(--correct-color);
+            border: 2px solid #28a745;
+        }
+        
+        .grid-cell.wrong-path {
+            background-color: var(--wrong-color);
+            border: 2px solid #dc3545;
+        }
+        
+        body.space .grid-cell.target,
+        body.space .grid-cell.decoy {
+            color: #ffffff !important;
+        }
+        
+        #player {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background-image: url('https://i.postimg.cc/9FMqtjCf/RoboVitoria.jpg');
+            background-size: 90%;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: absolute;
+            transition: all 0.3s ease-in-out;
+            z-index: 10;
+        }
+        
+        .bomb {
+            width: 90%;
+            height: 90%;
+            background-image: url('https://i.postimg.cc/7PsqHZmV/Bomba.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        #ui-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .challenge-box {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 3px solid var(--secondary-color);
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .challenge-box p {
+            margin: 0;
+            font-size: 1.1em;
+        }
+        
+        #math-problem {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 5px 0;
+        }
+        
+        #score, #challenge-progress, #lives-display {
+            font-size: 1.1em;
+            margin-top: 5px;
+            color: var(--secondary-color);
+        }
+        
+        #score span, #challenge-progress span {
+            font-weight: bold;
+        }
+        
+        #lives-container {
+            color: #e74c3c;
+        }
+        
+        #verify-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            border-bottom: 5px solid #0056b3;
+            transition: all 0.2s;
+        }
+        
+        #verify-btn:disabled {
+            background-color: #ccc;
+            border-bottom: 5px solid #aaa;
+            cursor: not-allowed;
+        }
+        
+        #verify-btn:active {
+            border-bottom-width: 2px;
+            transform: translateY(3px);
+        }
+        
+        #command-bar-container {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #command-bar {
+            display: flex;
+            gap: 5px;
+            background-color: var(--secondary-color);
+            padding: 8px;
+            border-radius: 8px;
+            min-height: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .command-slot {
+            width: 35px;
+            height: 35px;
+            background-color: white;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            transition: border 0.2s, transform 0.2s;
+        }
+        
+        .command-slot.active {
+            transform: scale(1.1);
+            border-color: var(--accent-color);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        #command-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .control-btn:disabled {
+            background-color: #ccc !important;
+            cursor: not-allowed;
+        }
+        
+        #btn-right { background-color: #2ecc71; }
+        #btn-left { background-color: #f1c40f; }
+        #btn-up { background-color: #3498db; }
+        #btn-down { background-color: #e74c3c; }
+        #btn-clear { background-color: #95a5a6; font-size: 0.9em; }
+        
+        /* CORREÇÃO DEFINITIVA DO TEMA ESPAÇO */
+        body.space { 
+            background-color: #1a1a2e; 
+        }
+        
+        body.space .grid-cell { 
+            background-color: #2c3e50; 
+            border: 1px solid #444; 
+        }
+        
+        body.space .grid-cell.correct-path {
+            background-color: #155724;
+            border: 2px solid #28a745;
+        }
+        
+        body.space .grid-cell.wrong-path {
+            background-color: #721c24;
+            border: 2px solid #dc3545;
+        }
+        
+        body.space .challenge-box { 
+            background-color: #2c3e50; 
+            color: #ffffff;
+            border-color: #5ab9ea;
+        }
+        
+        body.space .bomb { 
+            background-image: url('https://i.postimg.cc/7PsqHZmV/Bomba.jpg'); 
+        }
+        
+        /* Garantir que o texto seja sempre visível no tema espaço */
+        body.space #score, 
+        body.space #challenge-progress, 
+        body.space #lives-display,
+        body.space .challenge-box p {
+            color: #ffffff !important;
+        }
+        
+        body.forest { background-color: #2a5e2a; }
+        body.forest .grid-cell { background-color: #4a7043; border: 1px solid #6b8e23; }
+        body.forest .challenge-box { background-color: #4a7043; color: white; }
+        body.forest .bomb { background-image: url('https://i.postimg.cc/7PsqHZmV/Bomba.jpg'); }
+
+        body.high-contrast { background-color: #000 !important; color: #fff !important; }
+        body.high-contrast .grid-cell { background-color: #333 !important; color: #fff !important; }
+        body.high-contrast .bomb { filter: brightness(1.5) !important; }
+        body.high-contrast .challenge-box { background-color: #222 !important; border-color: #fff !important; color: #fff !important; }
+        body.high-contrast .level-btn { background-color: #444 !important; color: #fff !important; border-color: #fff !important; }
+        body.high-contrast .level-btn.active { background-color: #ff0 !important; color: #000 !important; }
+        body.high-contrast #verify-btn { background-color: #0056b3 !important; }
+        body.high-contrast .command-slot { background-color: #444 !important; border-color: #fff !important; }
+        body.high-contrast .control-btn { background-color: #555 !important; }
+        
+        #instructions-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #instructions-content {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            max-width: 90%;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        
+        #instructions-content h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #f1c40f;
+        }
+        
+        #instructions-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        #instructions-content button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #f1c40f;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #victory-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2ecc71;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .control-buttons button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            background: white;
+            border: 2px solid var(--secondary-color);
+        }
+
+        #player.exploded {
+            background-image: url('https://i.postimg.cc/7YWJKQZn/RoboExplode.jpg');
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 5px;
+            background-color: rgba(44, 62, 80, 0.7);
+            color: white;
+            text-align: center;
+            font-size: 0.9em;
+            z-index: 100;
+        }
+        
+        footer a {
+            color: #f1c40f;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .top-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            #theme-selector {
+                width: 100%;
+            }
+            #level-selector {
+                justify-content: center;
+            }
+            .game-wrapper {
+                flex-direction: column;
+                gap: 15px;
+            }
+            #ui-panel {
+                width: 100%;
+                max-width: 200px;
+            }
+            .challenge-box {
+                min-width: 150px;
+                padding: 10px;
+            }
+            #math-problem {
+                font-size: 1.5em;
+            }
+            #command-bar {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .command-slot {
+                flex-shrink: 0;
+            }
+            #command-buttons {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .control-btn {
+                flex-shrink: 0;
+                width: 40px;
+                height: 40px;
+                font-size: 1.5em;
+            }
+            #btn-clear {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="top-controls">
+            <select id="theme-selector" aria-label="Seleção de tema visual">
+                <option value="default">Padrão</option>
+                <option value="space">Espaço</option>
+                <option value="forest">Floresta</option>
+            </select>
+            <div id="level-selector" role="tablist" aria-label="Seleção de Nível">
+                <button class="level-btn active" data-level="1" role="tab" aria-selected="true" aria-label="Nível 1">Nível 1</button>
+                <button class="level-btn" data-level="2" role="tab" aria-selected="false" aria-label="Nível 2" disabled>Nível 2</button>
+                <button class="level-btn" data-level="3" role="tab" aria-selected="false" aria-label="Nível 3" disabled>Nível 3</button>
+                <button class="level-btn" data-level="4" role="tab" aria-selected="false" aria-label="Nível 4" disabled>Nível 4</button>
+                <button class="level-btn" data-level="5" role="tab" aria-selected="false" aria-label="Nível 5" disabled>Nível 5</button>
+            </div>
+            <button id="instructions-btn" aria-label="Ver instruções do jogo">Instruções</button>
+            <button id="high-contrast-btn" aria-label="Alternar modo de alto contraste">Alto Contraste</button>
+            <button id="restart-btn" aria-label="Reiniciar o jogo">Reiniciar</button>
+        </div>
+        
+        <div class="game-wrapper">
+            <div id="grid-container" role="grid" aria-label="Tabuleiro do jogo">
+                <div id="player" role="img" aria-label="Robô"></div>
+            </div>
+            
+            <div id="ui-panel">
+                <div class="challenge-box">
+                    <p>Programe o robô para<br>se deslocar para</p>
+                    <div id="math-problem"></div>
+                    <div id="score">
+                        Pontuação: <span id="score-value">0</span>
+                    </div>
+                    <div id="challenge-progress">
+                        Desafio: <span id="current-challenge">1</span> de <span id="total-challenges">20</span>
+                    </div>
+                    <div id="lives-display">
+                        Vidas: <span id="lives-container"></span>
+                    </div>
+                </div>
+                <button id="verify-btn" aria-label="Verificar sequência de comandos">Verificar</button>
+            </div>
+        </div>
+        
+        <div id="command-bar-container">
+            <div id="command-bar"></div>
+            <div id="command-buttons" role="toolbar" aria-label="Botões de comando">
+                <button class="control-btn" id="btn-right" aria-label="Mover para a direita">➡️</button>
+                <button class="control-btn" id="btn-left" aria-label="Mover para a esquerda">⬅️</button>
+                <button class="control-btn" id="btn-up" aria-label="Mover para cima">⬆️</button>
+                <button class="control-btn" id="btn-down" aria-label="Mover para baixo">⬇️</button>
+                <button class="control-btn" id="btn-clear" aria-label="Limpar comandos">Limpar</button>
+            </div>
+        </div>
+        
+        <div id="victory-message"></div>
+        
+        <div id="instructions-overlay">
+            <div id="instructions-content"></div>
+        </div>
+    </div>
+
+    <footer>
+        Inspirado em <a href="https://www.coquinhos.com/programacao-para-criancas/play/" target="_blank">Coquinhos.com</a>
+    </footer>
+
+    <script>
+        // Constantes do jogo
+        const GRID_SIZE = 6;
+        const CELL_SIZE = 70;
+        const GRID_GAP = 4;
+        const MAX_COMMANDS = 16;
+        const minCorrectAttempts = 20;
+        const TOTAL_LIVES = 3;
+        
+        // Elementos do DOM
+        const gridContainer = document.getElementById('grid-container');
+        const player = document.getElementById('player');
+        const mathProblemEl = document.getElementById('math-problem');
+        const commandBar = document.getElementById('command-bar');
+        const scoreEl = document.getElementById('score-value');
+        const victoryMessage = document.getElementById('victory-message');
+        const currentChallengeEl = document.getElementById('current-challenge');
+        const totalChallengesEl = document.getElementById('total-challenges');
+        const instructionsOverlay = document.getElementById('instructions-overlay');
+        const instructionsContent = document.getElementById('instructions-content');
+        const livesContainer = document.getElementById('lives-container');
+        
+        // Estado do jogo
+        let playerPos = { x: 0, y: 0 };
+        let startPos = { x: 0, y: 0 };
+        let targetPos = { x: 0, y: 0 };
+        let bombPositions = [];
+        let decoyPositions = [];
+        let targetNumber = 0;
+        let commandQueue = [];
+        let isMoving = false;
+        let currentLevel = 1;
+        let score = 0;
+        let correctAttempts = 0;
+        let isGameOver = false;
+        let lives = TOTAL_LIVES;
+        let levelEntryScore = 0;
+        let visitedCells = [];
+        
+        // Configurações dos níveis
+        const levelSettings = {
+            1: { bombs: 4, operations: ['+', '-'], range: 10, decoys: 2 },
+            2: { bombs: 6, operations: ['+', '-'], range: 15, decoys: 3 },
+            3: { bombs: 8, operations: ['+', '-', '*'], range: 10, decoys: 4 },
+            4: { bombs: 10, operations: ['+', '-', '*', '/'], range: 10, decoys: 5 },
+            5: { bombs: 12, operations: ['+', '-', '*', '/'], range: 99, decoys: 6 }
+        };
+        
+        // Inicialização do jogo
+        function init() {
+            isGameOver = false;
+            const urlParams = new URLSearchParams(window.location.search);
+            const levelFromUrl = parseInt(urlParams.get('level'));
+            
+            if (levelFromUrl >= 1 && levelFromUrl <= 5) {
+                currentLevel = levelFromUrl;
+                localStorage.setItem('savedLevel', currentLevel);
+                levelEntryScore = 0;
+                localStorage.setItem('levelEntryScore', 0);
+            } else {
+                currentLevel = parseInt(localStorage.getItem('savedLevel') || 1);
+                levelEntryScore = parseInt(localStorage.getItem('levelEntryScore') || 0);
+            }
+            
+            score = levelEntryScore;
+            scoreEl.textContent = score;
+            createGrid();
+            createCommandSlots();
+            setupControls();
+            newChallenge();
+            
+            if (!localStorage.getItem('instructionsShown')) {
+                showInstructions();
+            }
+        }
+        
+        // Função para mostrar instruções
+        function showInstructions() {
+            instructionsContent.innerHTML = `
+                <h2>Desafio do Robô Matemático</h2>
+                <p>Bem-vindo! Programe o robô para alcançar o número correto resolvendo a operação matemática.</p>
+                <ul>
+                    <li><strong>Objetivo:</strong> Resolva a operação mostrada (ex.: 5 + 3) e mova o robô até a célula com o resultado correto.</li>
+                    <li><strong>Controles:</strong>
+                        <ul>
+                            <li>Clique nos botões (➡️ ⬅️ ⬆️ ⬇️) ou use as setas do teclado para adicionar comandos.</li>
+                            <li>Clique em "Limpar" ou pressione "C" para apagar os comandos.</li>
+                            <li>Clique em "Verificar" ou pressione "Enter" para executar los.</li>
+                            <li>Se achar que um nível está sem solução, pressione a tecla 'H' para verificar.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Cuidado:</strong> Evite as bombas e números incorretos no caminho!</li>
+                    <li><strong>Pontuação:</strong> Use menos comandos para ganhar mais pontos!</li>
+                    <li><strong>Níveis:</strong> Avance de nível após ${minCorrectAttempts} acertos corretos em cada um.</li>
+                </ul>
+                <button id="close-instructions">Entendi, vamos jogar!</button>
+            `;
+            
+            instructionsOverlay.style.display = 'flex';
+            document.getElementById('close-instructions').addEventListener('click', () => {
+                instructionsOverlay.style.display = 'none';
+                localStorage.setItem('instructionsShown', 'true');
+            });
+        }
+        
+        // Função para criar a grade
+        function createGrid() {
+            gridContainer.innerHTML = '';
+            
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.id = `cell-${x}-${y}`;
+                    gridContainer.appendChild(cell);
+                }
+            }
+            
+            gridContainer.appendChild(player);
+            updatePlayerPosition();
+        }
+        
+        // Função para criar os slots de comando
+        function createCommandSlots() {
+            commandBar.innerHTML = '';
+            
+            for (let i = 0; i < MAX_COMMANDS; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'command-slot';
+                commandBar.appendChild(slot);
+            }
+        }
+        
+        // Configuração dos controles
+        function setupControls() {
+            // Configuração dos botões de nível
+            document.querySelectorAll('.level-btn').forEach(b => {
+                const level = parseInt(b.dataset.level);
+                b.disabled = level > currentLevel;
+                
+                if (level === currentLevel) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+                
+                b.addEventListener('click', () => {
+                    if (parseInt(b.dataset.level) === currentLevel || b.disabled) return;
+                    
+                    victoryMessage.style.display = 'none';
+                    victoryMessage.style.opacity = '0';
+                    document.querySelector('.level-btn.active').classList.remove('active');
+                    b.classList.add('active');
+                    currentLevel = parseInt(b.dataset.level);
+                    localStorage.setItem('savedLevel', currentLevel);
+                    levelEntryScore = score;
+                    localStorage.setItem('levelEntryScore', levelEntryScore);
+                    correctAttempts = 0;
+                    isGameOver = false;
+                    lives = TOTAL_LIVES;
+                    toggleControlButtons(true);
+                    newChallenge();
+                });
+
+                b.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        b.click();
+                    }
+                });
+            });
+
+            // Seletor de tema
+            document.getElementById('theme-selector').addEventListener('change', (e) => {
+                document.body.classList.remove('default', 'space', 'forest');
+                if (e.target.value !== 'default') {
+                    document.body.classList.add(e.target.value);
+                }
+                updateGridDisplay();
+            });
+
+            // Botão de alto contraste
+            document.getElementById('high-contrast-btn').addEventListener('click', () => {
+                document.body.classList.toggle('high-contrast');
+                const currentTheme = document.getElementById('theme-selector').value;
+                if (currentTheme !== 'default') document.body.classList.add(currentTheme);
+                updateGridDisplay();
+            });
+
+            // Botão de instruções
+            document.getElementById('instructions-btn').addEventListener('click', showInstructions);
+            
+            // Botão de reiniciar
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                const confirmReset = window.confirm("Deseja reiniciar o jogo completamente? Isso zerará sua pontuação e retornará ao Nível 1.");
+                if (!confirmReset) return;
+                resetGame();
+            });
+            
+            // Botões de movimento
+            document.getElementById('btn-right').addEventListener('click', () => addCommand('➡️'));
+            document.getElementById('btn-left').addEventListener('click', () => addCommand('⬅️'));
+            document.getElementById('btn-up').addEventListener('click', () => addCommand('⬆️'));
+            document.getElementById('btn-down').addEventListener('click', () => addCommand('⬇️'));
+            document.getElementById('btn-clear').addEventListener('click', clearCommands);
+            document.getElementById('verify-btn').addEventListener('click', executeCommands);
+            
+            // Controles de teclado
+            document.addEventListener('keydown', (e) => {
+                if (isMoving || isGameOver) return;
+                
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    e.preventDefault();
+                }
+                
+                const keyMap = {
+                    'ArrowRight': '➡️', 
+                    'ArrowLeft': '⬅️', 
+                    'ArrowUp': '⬆️', 
+                    'ArrowDown': '⬇️'
+                };
+                
+                if (keyMap[e.key]) {
+                    addCommand(keyMap[e.key]);
+                } else if (e.key.toLowerCase() === 'c') {
+                    clearCommands();
+                } else if (e.key === 'Enter') {
+                    executeCommands();
+                } else if (e.key.toLowerCase() === 'h') {
+                    const allObstacles = [...bombPositions, ...decoyPositions];
+                    if (isPathPossible(startPos, targetPos, allObstacles)) {
+                        alert("Continue tentando! Confirmamos que existe um caminho possível para o alvo.");
+                    } else {
+                        alert("Você estava certo! Este nível tinha um erro. Gerando um novo desafio para você.");
+                        newChallenge();
+                    }
+                }
+            });
+        }
+
+        // Função para reiniciar o jogo
+        function resetGame() {
+            score = 0;
+            levelEntryScore = 0;
+            localStorage.setItem('levelEntryScore', 0);
+            correctAttempts = 0;
+            lives = TOTAL_LIVES;
+            isGameOver = false;
+            currentLevel = 1;
+            localStorage.setItem('savedLevel', 1);
+            
+            scoreEl.textContent = score;
+            document.querySelectorAll('.level-btn').forEach(b => {
+                const level = parseInt(b.dataset.level);
+                b.disabled = level > currentLevel;
+                b.classList.toggle('active', level === currentLevel);
+            });
+
+            toggleControlButtons(true);
+            victoryMessage.style.display = 'none';
+            newChallenge();
+            document.getElementById('verify-btn').focus();
+        }
+
+        // Função para habilitar/desabilitar controles
+        function toggleControlButtons(enabled) {
+            document.getElementById('verify-btn').disabled = !enabled;
+            document.querySelectorAll('#command-buttons .control-btn').forEach(btn => {
+                btn.disabled = !enabled;
+            });
+            document.getElementById('theme-selector').disabled = !enabled;
+        }
+
+        // Função para gerar problema matemático
+        function generateMathProblem() {
+            const settings = levelSettings[currentLevel];
+            const op = settings.operations[Math.floor(Math.random() * settings.operations.length)];
+            let num1, num2, answer;
+            
+            do {
+                switch (op) {
+                    case '+':
+                        num1 = Math.floor(Math.random() * (settings.range - 1)) + 1;
+                        num2 = Math.floor(Math.random() * (settings.range - num1)) + 1;
+                        answer = num1 + num2;
+                        break;
+                    case '-':
+                        num1 = Math.floor(Math.random() * settings.range) + 2;
+                        num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+                        answer = num1 - num2;
+                        break;
+                    case '*':
+                        num1 = Math.floor(Math.random() * 9) + 2;
+                        num2 = Math.floor(Math.random() * 9) + 2;
+                        answer = num1 * num2;
+                        break;
+                    case '/':
+                        answer = Math.floor(Math.random() * 9) + 2;
+                        num2 = Math.floor(Math.random() * 9) + 2;
+                        if (num2 === 0) continue;
+                        num1 = answer * num2;
+                        if (!Number.isInteger(num1 / num2) || answer < 1) continue;
+                        break;
+                }
+            } while (answer < 1 || answer > GRID_SIZE * GRID_SIZE);
+            
+            return { text: `${num1} ${op} ${num2}`, answer: answer };
+        }
+
+        // Função para verificar se há caminho possível
+        function isPathPossible(start, end, obstacles) {
+            const queue = [start];
+            const visited = new Set([`${start.x},${start.y}`]);
+            
+            while (queue.length > 0) {
+                const current = queue.shift();
+                
+                if (current.x === end.x && current.y === end.y) {
+                    return true;
+                }
+                
+                const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                
+                for (const [dx, dy] of directions) {
+                    const nextX = current.x + dx;
+                    const nextY = current.y + dy;
+                    
+                    if (nextX >= 0 && nextX < GRID_SIZE && 
+                        nextY >= 0 && nextY < GRID_SIZE && 
+                        !visited.has(`${nextX},${nextY}`) && 
+                        !obstacles.some(obs => obs.x === nextX && obs.y === nextY)) {
+                        
+                        visited.add(`${nextX},${nextY}`);
+                        queue.push({ x: nextX, y: nextY });
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        // Função para criar novo desafio
+        function newChallenge() {
+            player.classList.remove('exploded');
+            const problem = generateMathProblem();
+            targetNumber = problem.answer;
+            mathProblemEl.textContent = problem.text;
+            
+            let allObstacles = [];
+            visitedCells = [];
+            
+            do {
+                bombPositions = [];
+                decoyPositions = [];
+                
+                do {
+                    startPos = { 
+                        x: Math.floor(Math.random() * GRID_SIZE), 
+                        y: Math.floor(Math.random() * GRID_SIZE) 
+                    };
+                    targetPos = { 
+                        x: Math.floor(Math.random() * GRID_SIZE), 
+                        y: Math.floor(Math.random() * GRID_SIZE) 
+                    };
+                } while (startPos.x === targetPos.x && startPos.y === targetPos.y);
+
+                const settings = levelSettings[currentLevel];
+                let availableCells = [];
+                
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        if ((x === startPos.x && y === startPos.y) || 
+                            (x === targetPos.x && y === targetPos.y)) {
+                            continue;
+                        }
+                        availableCells.push({x, y});
+                    }
+                }
+                
+                for (let i = 0; i < settings.bombs; i++) {
+                    if (availableCells.length === 0) break;
+                    const randIndex = Math.floor(Math.random() * availableCells.length);
+                    bombPositions.push(availableCells.splice(randIndex, 1)[0]);
+                }
+
+                const usedNumbers = new Set([targetNumber]);
+                
+                for (let i = 0; i < settings.decoys; i++) {
+                    if (availableCells.length === 0) break;
+                    
+                    let value;
+                    do { 
+                        value = targetNumber + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 5) + 1); 
+                    } while (usedNumbers.has(value) || value <= 0);
+                    
+                    const randIndex = Math.floor(Math.random() * availableCells.length);
+                    const pos = availableCells.splice(randIndex, 1)[0];
+                    decoyPositions.push({ ...pos, value });
+                    usedNumbers.add(value);
+                }
+                
+                allObstacles = [...bombPositions, ...decoyPositions];
+            } while (!isPathPossible(startPos, targetPos, allObstacles));
+
+            playerPos = { ...startPos };
+            updatePlayerPosition();
+            updateGridDisplay();
+            clearCommands();
+            updateChallengeProgress();
+            updateLivesDisplay();
+        }
+
+        // Atualizar progresso do desafio
+        function updateChallengeProgress() {
+            currentChallengeEl.textContent = isGameOver ? minCorrectAttempts : correctAttempts + 1;
+            totalChallengesEl.textContent = minCorrectAttempts;
+        }
+        
+        // Atualizar display de vidas
+        function updateLivesDisplay() {
+            livesContainer.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                livesContainer.innerHTML += '❤️';
+            }
+        }
+
+        // Atualizar display da grade
+        function updateGridDisplay() {
+            document.querySelectorAll('.grid-cell').forEach(cell => { 
+                cell.innerHTML = ''; 
+                cell.setAttribute('aria-label', 'Célula vazia');
+                cell.classList.remove('target', 'decoy', 'correct-path', 'wrong-path');
+                
+                const x = parseInt(cell.id.split('-')[1]);
+                const y = parseInt(cell.id.split('-')[2]);
+                
+                // Célula alvo
+                if (x === targetPos.x && y === targetPos.y) {
+                    cell.textContent = targetNumber;
+                    cell.setAttribute('aria-label', `Alvo: número ${targetNumber}`);
+                    cell.classList.add('target');
+                }
+                
+                // Bombas
+                bombPositions.forEach(pos => {
+                    if (pos.x === x && pos.y === y) {
+                        const bombDiv = document.createElement('div');
+                        bombDiv.className = 'bomb';
+                        cell.appendChild(bombDiv);
+                        cell.setAttribute('aria-label', 'Bomba');
+                    }
+                });
+                
+                // Decoys (números incorretos)
+                decoyPositions.forEach(pos => {
+                    if (pos.x === x && pos.y === y) {
+                        cell.textContent = pos.value;
+                        cell.setAttribute('aria-label', `Número incorreto: ${pos.value}`);
+                        cell.classList.add('decoy');
+                    }
+                });
+                
+                // Células visitadas (feedback visual)
+                if (visitedCells.some(cell => cell.x === x && cell.y === y)) {
+                    const visitedCell = visitedCells.find(cell => cell.x === x && cell.y === y);
+                    if (visitedCell.correct) {
+                        cell.classList.add('correct-path');
+                    } else {
+                        cell.classList.add('wrong-path');
+                    }
+                }
+            });
+        }
+        
+        // Atualizar posição do jogador
+        function updatePlayerPosition() {
+            const cellTotalSize = CELL_SIZE + GRID_GAP;
+            player.style.left = `${playerPos.x * cellTotalSize + GRID_GAP}px`;
+            player.style.top = `${playerPos.y * cellTotalSize + GRID_GAP}px`;
+        }
+        
+        // Adicionar comando à fila
+        function addCommand(command) { 
+            if (commandQueue.length < MAX_COMMANDS && !isMoving && !isGameOver) { 
+                commandQueue.push(command); 
+                updateCommandBar();
+                
+                const slot = document.querySelectorAll('.command-slot')[commandQueue.length - 1];
+                slot.classList.add('active');
+                
+                setTimeout(() => slot.classList.remove('active'), 200);
+            } 
+        }
+
+        // Limpar comandos
+        function clearCommands() { 
+            commandQueue = []; 
+            updateCommandBar(); 
+            isMoving = false; 
+        }
+        
+        // Atualizar barra de comandos
+        function updateCommandBar() { 
+            document.querySelectorAll('.command-slot').forEach((slot, i) => {
+                slot.textContent = commandQueue[i] || '';
+            }); 
+        }
+        
+        // Executar comandos
+        function executeCommands() {
+            if (isMoving || commandQueue.length === 0 || isGameOver) return;
+            
+            isMoving = true;
+            playerPos = {...startPos};
+            updatePlayerPosition();
+            
+            let tempPos = { ...startPos };
+            let currentIndex = 0;
+            visitedCells = [];
+            
+            const moveInterval = setInterval(() => {
+                if (currentIndex >= commandQueue.length) {
+                    clearInterval(moveInterval);
+                    checkResult(tempPos);
+                    return;
+                }
+                
+                const command = commandQueue[currentIndex];
+                
+                // Mover na direção do comando
+                if (command === '➡️') tempPos.x++; 
+                else if (command === '⬅️') tempPos.x--; 
+                else if (command === '⬆️') tempPos.y--; 
+                else if (command === '⬇️') tempPos.y++;
+                
+                playerPos = {...tempPos};
+                updatePlayerPosition();
+                currentIndex++;
+                
+                // Registrar célula visitada para feedback visual
+                // CORREÇÃO: A célula só é considerada correta se for o destino final
+                // Não a cada passo do caminho
+                if (tempPos.x !== startPos.x || tempPos.y !== startPos.y) {
+                    const isCorrectPath = false; // Inicialmente todas são incorretas
+                    visitedCells.push({x: tempPos.x, y: tempPos.y, correct: isCorrectPath});
+                    updateGridDisplay();
+                }
+                
+                // Verificar se saiu dos limites
+                if (tempPos.x < 0 || tempPos.x >= GRID_SIZE || tempPos.y < 0 || tempPos.y >= GRID_SIZE) {
+                    clearInterval(moveInterval);
+                    handleError("Ops! O robô bateu na parede!");
+                    return;
+                }
+                
+                // Verificar colisões apenas se o robô se moveu
+                if (tempPos.x !== startPos.x || tempPos.y !== startPos.y) {
+                    const isBomb = bombPositions.some(b => b.x === tempPos.x && b.y === tempPos.y);
+                    const isDecoy = decoyPositions.some(d => d.x === tempPos.x && d.y === tempPos.y);
+
+                    if (isBomb) {
+                        clearInterval(moveInterval); 
+                        handleError("BOOM! Você atingiu uma bomba!");
+                        return; 
+                    }
+                    
+                    if (isDecoy) {
+                        clearInterval(moveInterval); 
+                        handleError("Cuidado! Você passou por um número incorreto!");
+                        return; 
+                    }
+                }
+            }, 400);
+        }
+        
+        // Verificar resultado
+        function checkResult(finalPos) {
+            isMoving = false;
+            
+            // CORREÇÃO: Marcar o caminho final como correto se chegou ao destino
+            if (finalPos.x === targetPos.x && finalPos.y === targetPos.y) {
+                // Marcar todas as células visitadas como corretas
+                visitedCells = visitedCells.map(cell => ({...cell, correct: true}));
+                updateGridDisplay();
+                
+                const levelScore = Math.max(1000 - (commandQueue.length * 50), 100);
+                score += levelScore;
+                scoreEl.textContent = score;
+                
+                victoryMessage.textContent = `Parabéns! +${levelScore} pontos!`;
+                victoryMessage.style.display = 'block';
+                victoryMessage.style.opacity = '1';
+                
+                correctAttempts++;
+                
+                if (correctAttempts >= minCorrectAttempts) {
+                    if (currentLevel < 5) {
+                        currentLevel++;
+                        localStorage.setItem('savedLevel', currentLevel);
+                        
+                        document.querySelectorAll('.level-btn').forEach(b => {
+                            b.disabled = parseInt(b.dataset.level) > currentLevel;
+                        });
+                        
+                        document.querySelector('.level-btn.active').classList.remove('active');
+                        document.querySelector(`.level-btn[data-level="${currentLevel}"]`).classList.add('active');
+                        
+                        levelEntryScore = score;
+                        localStorage.setItem('levelEntryScore', levelEntryScore);
+                        victoryMessage.textContent += ` Você avançou para o Nível ${currentLevel}!`;
+                        correctAttempts = 0;
+                        lives = TOTAL_LIVES;
+                    } else {
+                        victoryMessage.textContent = `Você completou todos os desafios! Pontuação final: ${score}`;
+                        isGameOver = true;
+                        toggleControlButtons(false);
+                    }
+                }
+
+                if (!isGameOver) {
+                    setTimeout(() => {
+                        victoryMessage.style.opacity = '0';
+                        setTimeout(() => {
+                            victoryMessage.style.display = 'none';
+                            newChallenge();
+                        }, 500);
+                    }, 2000);
+                } else {
+                    updateChallengeProgress();
+                }
+            } else {
+                handleError("Ops! Você não chegou ao alvo correto!");
+            }
+        }
+        
+        // Manipular erro
+        function handleError(message) {
+            isMoving = false;
+            lives--;
+            updateLivesDisplay();
+            player.classList.add('exploded');
+            
+            setTimeout(() => {
+                if (lives <= 0) {
+                    const currentLevelBefore = currentLevel;
+                    isGameOver = true;
+                    toggleControlButtons(false);
+                    
+                    alert(`Fim de Jogo! Você perdeu todas as suas vidas no Nível ${currentLevelBefore}. Reiniciando o nível...`);
+                    
+                    setTimeout(() => {
+                        score = levelEntryScore;
+                        scoreEl.textContent = score;
+                        lives = TOTAL_LIVES;
+                        correctAttempts = 0;
+                        isGameOver = false;
+                        toggleControlButtons(true);
+                        newChallenge();
+                    }, 2000);
+                } else {
+                    alert(message);
+                    playerPos = { ...startPos };
+                    updatePlayerPosition();
+                    clearCommands();
+                    player.classList.remove('exploded');
+                }
+            }, 600);
+        }
+        
+        // Inicializar o jogo
+        init();
+    </script>
+</body>
+</html>
