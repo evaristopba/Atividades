@@ -17,6 +17,7 @@
         #connect-button { background-color: #007bff; }
         #start-button { background-color: #28a745; }
         #stop-button { background-color: #dc3545; }
+        #score-button { background-color: #17a2b8; } /* Estilo para o novo botão */
         #reset-button { background-color: #6c757d; }
         #change-room-button { background-color: #ffc107; color: #212529; }
         #game-controls { display: none; }
@@ -28,6 +29,18 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-wrap: break-word; }
         th { background-color: #f2f2f2; }
+        .score-display {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-left: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            white-space: nowrap; /* Impede quebras de linha */
+        }
+        .score-20 { background-color: #d4edda; color: #155724; } /* Verde para 20 pontos */
+        .score-10 { background-color: #fff3cd; color: #856404; } /* Amarelo para 10 pontos */
+        .score-0 { background-color: #f8d7da; color: #721c24; } /* Vermelho para 0 pontos */
+        .score-total { font-weight: bold; background-color: #e2e6ea; } /* Fundo para total */
     </style>
 </head>
 <body>
@@ -84,6 +97,7 @@
             <div id="action-buttons">
                 <button id="start-button" style="display: none;">Começar Rodada</button>
                 <button id="stop-button" style="display: none;">STOP (Para a Sala!)</button>
+                <button id="score-button" style="display: none;">Pontuar Rodada</button>
                 <button id="reset-button" style="display: none;">Preparar Nova Rodada</button>
             </div>
             <button id="change-room-button">Trocar de Sala</button>
@@ -129,9 +143,24 @@
         const changeRoomButton = document.getElementById('change-room-button');
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
+        const scoreButton = document.getElementById('score-button');
         const resetButton = document.getElementById('reset-button');
         const answersThead = document.getElementById('answers-thead');
         const answersTbody = document.getElementById('answers-tbody');
+
+        let currentActiveCategories = [];
+
+        // Função para remover acentos e cedilhas de uma string
+        function normalizeWord(word) {
+            if (typeof word !== 'string') {
+                return '';
+            }
+            return word
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/ç/g, "c")
+                .toLowerCase();
+        }
 
         roomSelect.addEventListener('change', () => {
             const selectedValue = roomSelect.value;
@@ -167,20 +196,20 @@
             const fullDisplayName = `${groupLabel} - ${optionText}`;
             const isSimpleMode = simpleModeCheckbox.checked;
             const gameMode = isSimpleMode ? 'simples' : 'avancado';
+            currentActiveCategories = isSimpleMode ? CATEGORIAS_SIMPLES : CATEGORIAS_AVANCADO;
             gameStateRef.set({ displayName: fullDisplayName, mode: gameMode, status: 'AGUARDANDO', letter: '?' });
             roomSetupDiv.style.display = 'none';
             gameControlsDiv.style.display = 'block';
             document.getElementById('current-room-id').textContent = fullDisplayName;
             const studentUrl = `${window.location.href.replace(/professor\.html/i, 'Aluno.html')}?sala=${roomId}&modo=${gameMode}`;
             document.getElementById('student-link').textContent = studentUrl;
-            renderTableHeader(gameMode);
+            renderTableHeader(currentActiveCategories);
             listenToRoomChanges();
-            listenToAnswers(gameMode);
+            listenToAnswers(currentActiveCategories);
         }
 
-        function renderTableHeader(mode) {
+        function renderTableHeader(categorias, showScores = false) {
             answersThead.innerHTML = '';
-            const categorias = mode === 'simples' ? CATEGORIAS_SIMPLES : CATEGORIAS_AVANCADO;
             const headerRow = answersThead.insertRow();
             let th = document.createElement('th');
             th.textContent = 'Apelido';
@@ -190,6 +219,11 @@
                 th.textContent = categoria;
                 headerRow.appendChild(th);
             });
+            if (showScores) {
+                th = document.createElement('th');
+                th.textContent = 'Total';
+                headerRow.appendChild(th);
+            }
         }
 
         function disconnectFromRoom() {
@@ -204,10 +238,10 @@
             simpleModeCheckbox.checked = false;
             answersThead.innerHTML = '';
             answersTbody.innerHTML = '';
+            currentActiveCategories = [];
         }
 
-        function listenToAnswers(mode) {
-            const categorias = mode === 'simples' ? CATEGORIAS_SIMPLES : CATEGORIAS_AVANCADO;
+        function listenToAnswers(categorias) {
             answersRef.on('value', (snapshot) => {
                 answersTbody.innerHTML = '';
                 const allAnswers = snapshot.val();
@@ -237,6 +271,7 @@
                 letterDisplay.textContent = state.letter;
                 startButton.style.display = state.status === 'AGUARDANDO' ? 'inline-block' : 'none';
                 stopButton.style.display = state.status === 'JOGANDO' ? 'inline-block' : 'none';
+                scoreButton.style.display = state.status === 'PARADO' ? 'inline-block' : 'none';
                 resetButton.style.display = state.status === 'PARADO' ? 'inline-block' : 'none';
             });
         }
@@ -255,8 +290,125 @@
             if (confirm("Isso irá apagar as respostas da rodada e preparar uma nova letra. Continuar?")) {
                 if (answersRef) answersRef.remove();
                 gameStateRef.update({ status: 'AGUARDANDO', letter: '?' });
+                renderTableHeader(currentActiveCategories);
             }
         };
+
+        scoreButton.onclick = () => {
+            scoreRound();
+        };
+
+        async function scoreRound() {
+            console.log("Iniciando pontuação da rodada...");
+
+            const currentGameState = (await gameStateRef.once('value')).val();
+            const currentLetter = currentGameState.letter;
+            const categorias = currentActiveCategories;
+
+            console.log("Letra:", currentLetter);
+            console.log("Categorias:", categorias);
+
+            const allAnswersSnapshot = await answersRef.once('value');
+            const allAnswers = allAnswersSnapshot.val();
+
+            if (!allAnswers) {
+                alert("Nenhum aluno enviou respostas ainda. Não há o que pontuar.");
+                return;
+            }
+
+            const scoredResults = {};
+            const categoryWordCounts = {};
+            categorias.forEach(cat => categoryWordCounts[cat] = {});
+
+            // PRIMEIRA PASSAGEM: Coletar palavras E suas versões NORMALIZADAS para identificar unicidade
+            for (const nickname in allAnswers) {
+                const studentData = allAnswers[nickname];
+                scoredResults[nickname] = { totalPontos: 0, answers: {} };
+
+                for (const categoria of categorias) {
+                    const originalWord = (studentData[categoria] || '').trim();
+                    const normalizedWord = normalizeWord(originalWord);
+
+                    scoredResults[nickname].answers[categoria] = {
+                        palavra: originalWord,
+                        normalized: normalizedWord,
+                        pontuacao: 0,
+                        feedback: []
+                    };
+
+                    if (normalizedWord) {
+                        if (!categoryWordCounts[categoria][normalizedWord]) {
+                            categoryWordCounts[categoria][normalizedWord] = [];
+                        }
+                        categoryWordCounts[categoria][normalizedWord].push(nickname);
+                    }
+                }
+            }
+
+            // SEGUNDA PASSAGEM: Atribuir pontuação
+            for (const nickname in allAnswers) {
+                for (const categoria of categorias) {
+                    const result = scoredResults[nickname].answers[categoria];
+                    const originalWord = result.palavra;
+                    const normalizedWord = result.normalized;
+
+                    if (!originalWord) {
+                        result.feedback.push('não preenchido');
+                        continue;
+                    }
+
+                    const firstCharOriginal = originalWord.charAt(0).toUpperCase();
+                    const firstCharNormalized = normalizeWord(firstCharOriginal);
+                    const currentLetterNormalized = normalizeWord(currentLetter.toUpperCase());
+
+                    if (firstCharNormalized !== currentLetterNormalized) {
+                        result.feedback.push('não inicia com a letra');
+                        result.pontuacao = 0;
+                        continue;
+                    }
+                    result.feedback.push('inicia com a letra');
+
+                    const countForWordInCategory = categoryWordCounts[categoria][normalizedWord].length;
+                    if (countForWordInCategory > 1) {
+                        result.pontuacao = 10;
+                        result.feedback.push('correta', 'repetida');
+                    } else {
+                        result.pontuacao = 20;
+                        result.feedback.push('correta', 'única');
+                    }
+
+                    scoredResults[nickname].totalPontos += result.pontuacao;
+                }
+            }
+
+            console.log("Resultados da pontuação:", scoredResults);
+
+            renderTableHeader(categorias, true);
+            answersTbody.innerHTML = '';
+
+            for (const nickname in scoredResults) {
+                const studentScoreData = scoredResults[nickname];
+                const row = answersTbody.insertRow();
+                row.insertCell().textContent = nickname;
+
+                categorias.forEach(categoria => {
+                    const cell = row.insertCell();
+                    const wordResult = studentScoreData.answers[categoria];
+                    const displayWord = wordResult.palavra || '—';
+
+                    cell.innerHTML = `
+                        ${displayWord}
+                        <span class="score-display score-${wordResult.pontuacao}" title="${wordResult.feedback.join(', ')}">
+                            ${wordResult.pontuacao}
+                        </span>
+                    `;
+                });
+
+                const totalCell = row.insertCell();
+                totalCell.textContent = studentScoreData.totalPontos;
+                totalCell.classList.add('score-total');
+            }
+        }
     </script>
 </body>
 </html>
