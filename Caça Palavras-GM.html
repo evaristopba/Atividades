@@ -107,7 +107,8 @@
     </style>
 </head>
 <body>
-    <div id="start-screen">
+    <!-- TELA INICIAL ESCONDIDA NO INÍCIO -->
+    <div id="start-screen" class="hidden">
         <h1>Caça-Palavras: O Desafio</h1>
         <p>Escolha um nível para começar:</p>
         <div id="difficulty-buttons">
@@ -117,6 +118,7 @@
         </div>
         <button id="btn-how-to-play">Como Jogar?</button>
     </div>
+
     <div id="game-area" class="hidden">
         <div id="game-container">
             <div id="grid-container"></div>
@@ -133,7 +135,9 @@
             <button id="restart-btn">Voltar ao Início</button>
         </div>
     </div>
-    <div id="how-to-play-modal" class="modal-container hidden">
+
+    <!-- MODAL VISÍVEL NO INÍCIO -->
+    <div id="how-to-play-modal" class="modal-container">
         <div class="modal-content">
             <span class="modal-close-btn">×</span>
             <h2>Como Jogar</h2>
@@ -141,10 +145,10 @@
                 <li><strong>Objetivo:</strong> Encontre todas as palavras da lista na grade de letras.</li>
                 <li><strong>Seleção:</strong> Clique e arraste o mouse sobre as letras para formar uma palavra.</li>
                 <li><strong>Pontuação:</strong> Você ganha 10 pontos por letra de cada palavra encontrada.</li>
-                <li><strong>Tempo:</strong> O tempo restante é converted em pontos bônus e acumulado para o próximo nível!</li>
+                <li><strong>Tempo:</strong> O tempo restante é convertido em pontos bônus e acumulado para o próximo nível!</li>
                 <li><strong>Fim de Jogo:</strong> O jogo acaba se o tempo chegar a zero.</li>
             </ul>
-            <button id="modal-understand-btn">Entendi!</button>
+            <button id="modal-understand-btn">Entendi! Vamos Jogar!</button>
         </div>
     </div>
 
@@ -162,9 +166,23 @@
         const modal = document.getElementById('how-to-play-modal');
         const openModalBtn = document.getElementById('btn-how-to-play');
         const closeModalBtns = document.querySelectorAll('.modal-close-btn, #modal-understand-btn');
+        const understandBtn = document.getElementById('modal-understand-btn');
 
-        openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-        closeModalBtns.forEach(btn => btn.addEventListener('click', () => modal.classList.add('hidden')));
+        // Modal aparece automaticamente no início - CORREÇÃO
+        modal.classList.remove('hidden');
+
+        // Botão "Como Jogar?" na tela inicial
+        openModalBtn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+
+        // Fechar modal e mostrar tela inicial
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                startScreen.classList.remove('hidden'); // MOSTRA a tela inicial
+            });
+        });
 
         const wordFiles = {
             easy: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/facil.json',
@@ -184,9 +202,8 @@
         let currentDifficulty = 'easy', timeBonusForNextLevel = 0;
         let totalScore = 0;
         
-        // Guarda os valores que vieram do nível anterior
-        let previousLevelScore = 0;
-        let previousLevelTimeBonus = 0;
+        let originalLevelScore = 0;
+        let originalTimeBonus = 0;
 
         function loadProgress() {
             totalScore = parseInt(localStorage.getItem('totalScore')) || 0;
@@ -202,11 +219,10 @@
             startScreen.classList.add('hidden');
             gameArea.classList.remove('hidden');
             
-            // Zera tudo ao iniciar novo jogo
             totalScore = 0;
             timeBonusForNextLevel = 0;
-            previousLevelScore = 0;
-            previousLevelTimeBonus = 0;
+            originalLevelScore = 0;
+            originalTimeBonus = 0;
             
             saveProgress();
             score = totalScore;
@@ -249,11 +265,11 @@
                 renderGrid(dynamicGridSize);
                 renderWordList();
                 
-                // Guarda os valores do nível anterior ANTES de aplicar bônus
-                previousLevelScore = totalScore;
-                previousLevelTimeBonus = timeBonusForNextLevel;
+                if (originalLevelScore === 0 && originalTimeBonus === 0) {
+                    originalLevelScore = totalScore;
+                    originalTimeBonus = timeBonusForNextLevel;
+                }
                 
-                // Tempo = tempo base do nível + bônus do nível anterior
                 timeLeft = settings.time + timeBonusForNextLevel;
                 
                 saveProgress();
@@ -267,7 +283,7 @@
         
         async function fetchWords(url) {
             try {
-                const response = await fetch(`${url}?v=${new Date().getTime()}`);
+                const response = await fetch(`${url}?t=${new Date().getTime()}`);
                 if (!response.ok) throw new Error('Falha ao buscar o arquivo de palavras.');
                 const data = await response.json();
                 if (!data.palavras || !Array.isArray(data.palavras)) throw new Error("Formato do JSON inválido.");
@@ -418,7 +434,11 @@
                 const nextDifficulty = difficultySettings[currentDifficulty].next;
                 if (nextDifficulty !== 'end') {
                     messageDiv.textContent = `Nível completo! +${timeBonusPoints} pontos!`;
-                    setTimeout(() => { loadLevel(nextDifficulty); }, 3500);
+                    setTimeout(() => { 
+                        originalLevelScore = 0;
+                        originalTimeBonus = 0;
+                        loadLevel(nextDifficulty); 
+                    }, 3500);
                 } else {
                     gameOver("Você zerou o jogo! Parabéns!", false);
                 }
@@ -450,11 +470,9 @@
                 retryButton.textContent = 'Tentar Nível Novamente';
                 retryButton.style.cssText = "padding: 10px 20px; font-size: 0.5em; margin-top: 20px; cursor: pointer; border-radius: 5px; border: none; background-color: #ffc107; color: #333; font-weight: bold;";
                 
-                // CORREÇÃO: Restaura EXATAMENTE os valores do nível anterior
                 retryButton.onclick = () => {
-                    // Restaura a pontuação e tempo que vieram do nível anterior
-                    totalScore = previousLevelScore;
-                    timeBonusForNextLevel = previousLevelTimeBonus;
+                    totalScore = originalLevelScore;
+                    timeBonusForNextLevel = originalTimeBonus;
                     score = totalScore;
                     
                     saveProgress();
