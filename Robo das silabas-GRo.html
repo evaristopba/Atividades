@@ -9,19 +9,19 @@
             --grid-size: 6;
             --cell-size: 70px;
             --grid-gap: 4px;
-            --primary-color: #87CEEB; /* Azul claro pastel */
-            --secondary-color: #4682B4; /* Azul mais escuro, mas suave */
-            --accent-color: #FFD700; /* Amarelo suave */
-            --correct-color: #98FB98; /* Verde claro */
-            --wrong-color: #FFB6C1; /* Rosa claro */
+            --primary-color: #87CEEB;
+            --secondary-color: #4682B4;
+            --accent-color: #FFD700;
+            --correct-color: #98FB98;
+            --wrong-color: #FFB6C1;
         }
         
         body {
             font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
             background-color: var(--primary-color);
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
@@ -52,7 +52,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            background: #F0FFF0; /* Fundo claro */
+            background: #F0FFF0;
             font-size: 1.1em;
             color: var(--secondary-color);
         }
@@ -91,6 +91,7 @@
             flex-wrap: nowrap;
             justify-content: center;
             width: 100%;
+            margin-bottom: 20px;
         }
         
         #grid-container {
@@ -112,7 +113,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.3em; /* Reduzido para caber sílabas longas */
+            font-size: 1.3em;
             font-weight: bold;
             color: var(--secondary-color);
             position: relative;
@@ -121,7 +122,7 @@
         }
         
         .grid-cell.long-syllable {
-            font-size: 1.0em; /* Tamanho ainda menor para sílabas com 4+ letras */
+            font-size: 1.0em;
         }
         
         .grid-cell.correct-path {
@@ -158,7 +159,7 @@
             flex-direction: column; 
             align-items: center; 
             gap: 15px; 
-            min-width: 280px; /* Aumentado de 250px para dar mais espaço */
+            min-width: 280px;
         }
         
         .challenge-box {
@@ -179,7 +180,7 @@
         #first-syllable {
             font-size: 2em; 
             font-weight: bold; 
-            color: #FF69B4; /* Rosa brilhante */
+            color: #FF69B4;
             margin: 10px 0; 
             text-transform: uppercase;
             min-height: 100px;
@@ -201,6 +202,7 @@
             height: 100%;
             object-fit: contain;
             border-radius: 6px;
+            onerror="this.src='https://i.postimg.cc/76P4KvhC/default.png'; console.log('Imagem falhou: ' + this.getAttribute('src'));"
         }
         
         #score, #challenge-progress, #lives-display { 
@@ -214,7 +216,7 @@
         }
         
         #verify-btn {
-            background-color: #32CD32; /* Verde limão */
+            background-color: #32CD32;
             color: #000; 
             border: none; 
             padding: 15px 30px;
@@ -281,46 +283,44 @@
             background-color: #D3D3D3 !important; 
             cursor: not-allowed; 
         }
-        #btn-right { background-color: #32CD32; } /* Verde limão */
-        #btn-left { background-color: #FFD700; } /* Amarelo suave */
-        #btn-up { background-color: #87CEEB; } /* Azul claro */
-        #btn-down { background-color: #FF69B4; } /* Rosa brilhante */
-        #btn-clear { background-color: #D3D3D3; font-size: 1.1em; } /* Cinza claro */
+        #btn-right { background-color: #32CD32; }
+        #btn-left { background-color: #FFD700; }
+        #btn-up { background-color: #87CEEB; }
+        #btn-down { background-color: #FF69B4; }
+        #btn-clear { background-color: #D3D3D3; font-size: 1.1em; }
 
-        /* Estilos para exibição de sílabas */
         .word-display {
-            font-size: 1.3em; /* Reduzido de 1.5em para caber palavras longas com hífens */
+            font-size: 1.3em;
             font-weight: bold;
             color: var(--secondary-color);
             margin: 10px 0;
             text-align: center;
             line-height: 1.4;
-            word-break: break-word; /* Permitir quebra de linha */
+            word-break: break-word;
             overflow-wrap: anywhere;
-            letter-spacing: -0.5px; /* Reduzir espaço entre caracteres */
+            letter-spacing: -0.5px;
         }
         
         .completed-word {
-            font-size: 1.3em; /* Reduzido de 1.5em para caber palavras longas com hífens */
+            font-size: 1.3em;
             font-weight: bold;
             color: var(--secondary-color);
             margin: 10px 0;
             text-align: center;
             line-height: 1.4;
-            word-break: break-word; /* Permitir quebra de linha */
+            word-break: break-word;
             overflow-wrap: anywhere;
-            letter-spacing: -0.5px; /* Reduzir espaço entre caracteres */
+            letter-spacing: -0.5px;
         }
         
         .long-word {
-            font-size: 1.0em; /* Tamanho menor para palavras com 4+ sílabas */
+            font-size: 1.0em;
         }
         
         .missing-syllable {
-            color: #FF69B4; /* Rosa brilhante */
+            color: #FF69B4;
             border-bottom: 3px dashed #FF69B4;
             padding: 0 8px;
-            animation: pulse 1.5s infinite;
         }
         
         .syllable-hint {
@@ -328,7 +328,7 @@
             color: #FF69B4;
             margin: 8px 0;
             font-weight: bold;
-            background-color: #FFFACD; /* Amarelo claro */
+            background-color: #FFFACD;
             padding: 6px 12px;
             border-radius: 8px;
             border: 2px solid #FFD700;
@@ -342,61 +342,156 @@
         }
 
         .target-syllable {
-            color: #FF69B4; /* Rosa brilhante */
+            color: #FF69B4;
             font-weight: bold;
             padding: 2px 6px;
             border-radius: 6px;
-            background-color: #FFFACD; /* Fundo amarelo claro */
+            background-color: #FFFACD;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+        body.space { 
+            background-color: #483D8B; 
+        }
+        body.space .grid-cell { 
+            background-color: #6A5ACD; 
+            border: 1px solid #B0C4DE; 
+            color: #FFF; 
+        }
+        body.space .challenge-box { 
+            background-color: #6A5ACD; 
+            color: #FFF; 
+            border-color: #87CEEB; 
+        }
+        body.space #score, body.space #challenge-progress, body.space #lives-display, body.space .challenge-box p { 
+            color: #FFF !important; 
+        }
+        body.space .grid-cell.correct-path { 
+            background-color: #98FB98; 
+        }
+        body.space .grid-cell.wrong-path { 
+            background-color: #FFB6C1; 
+        }
+        body.space .syllable-hint { 
+            background-color: #7B68EE; 
+            border-color: #87CEEB; 
+            color: #FF69B4 !important; 
+        }
+        body.space .word-display, body.space .completed-word { 
+            color: #FFF !important; 
+        }
+        body.space .word-hint { 
+            color: #B0C4DE !important; 
+        }
+        body.space .missing-syllable { 
+            color: #FF69B4 !important; 
+            border-bottom-color: #FF69B4 !important; 
+        }
+        body.space .target-syllable { 
+            color: #FF69B4 !important; 
+            background-color: #7B68EE !important; 
+        }
+        body.space #word-image { 
+            border-color: #87CEEB; 
         }
 
-        /* Tema Espaço */
-        body.space { background-color: #483D8B; } /* Roxo escuro suave */
-        body.space .grid-cell { background-color: #6A5ACD; border: 1px solid #B0C4DE; color: #FFF; }
-        body.space .challenge-box { background-color: #6A5ACD; color: #FFF; border-color: #87CEEB; }
-        body.space #score, body.space #challenge-progress, body.space #lives-display, body.space .challenge-box p { color: #FFF !important; }
-        body.space .grid-cell.correct-path { background-color: #98FB98; }
-        body.space .grid-cell.wrong-path { background-color: #FFB6C1; }
-        body.space .syllable-hint { background-color: #7B68EE; border-color: #87CEEB; color: #FF69B4 !important; }
-        body.space .word-display, body.space .completed-word { color: #FFF !important; }
-        body.space .word-hint { color: #B0C4DE !important; }
-        body.space .missing-syllable { color: #FF69B4 !important; border-bottom-color: #FF69B4 !important; }
-        body.space .target-syllable { color: #FF69B4 !important; background-color: #7B68EE !important; }
-        body.space #word-image { border-color: #87CEEB; }
+        body.forest { 
+            background-color: #228B22; 
+        }
+        body.forest .grid-cell { 
+            background-color: #3CB371; 
+            border: 1px solid #8FBC8F; 
+            color: #FFF; 
+        }
+        body.forest .challenge-box { 
+            background-color: #3CB371; 
+            color: #FFF; 
+            border-color: #98FB98; 
+        }
+        body.forest #score, body.forest #challenge-progress, body.forest #lives-display, body.forest .challenge-box p { 
+            color: #FFF !important; 
+        }
+        body.forest .syllable-hint { 
+            background-color: #2E8B57; 
+            border-color: #98FB98; 
+            color: #FF69B4 !important; 
+        }
+        body.forest .word-display, body.forest .completed-word { 
+            color: #FFF !important; 
+        }
+        body.forest .word-hint { 
+            color: #F0FFF0 !important; 
+        }
+        body.forest .missing-syllable { 
+            color: #FF69B4 !important; 
+            border-bottom-color: #FF69B4 !important; 
+        }
+        body.forest .target-syllable { 
+            color: #FF69B4 !important; 
+            background-color: #2E8B57 !important; 
+        }
+        body.forest #word-image { 
+            border-color: #98FB98; 
+        }
 
-        /* Tema Floresta */
-        body.forest { background-color: #228B22; } /* Verde floresta */
-        body.forest .grid-cell { background-color: #3CB371; border: 1px solid #8FBC8F; color: #FFF; }
-        body.forest .challenge-box { background-color: #3CB371; color: #FFF; border-color: #98FB98; }
-        body.forest #score, body.forest #challenge-progress, body.forest #lives-display, body.forest .challenge-box p { color: #FFF !important; }
-        body.forest .syllable-hint { background-color: #2E8B57; border-color: #98FB98; color: #FF69B4 !important; }
-        body.forest .word-display, body.forest .completed-word { color: #FFF !important; }
-        body.forest .word-hint { color: #F0FFF0 !important; }
-        body.forest .missing-syllable { color: #FF69B4 !important; border-bottom-color: #FF69B4 !important; }
-        body.forest .target-syllable { color: #FF69B4 !important; background-color: #2E8B57 !important; }
-        body.forest #word-image { border-color: #98FB98; }
-
-        /* Tema Alto Contraste */
-        body.high-contrast { background-color: #000 !important; color: #FFF !important; }
-        body.high-contrast .grid-cell { background-color: #333 !important; color: #FFF !important; }
-        body.high-contrast .challenge-box { background-color: #222 !important; border-color: #FFF !important; color: #FFF !important; }
-        body.high-contrast .level-btn { background-color: #444 !important; color: #FFF !important; border-color: #FFF !important; }
-        body.high-contrast .level-btn.active { background-color: #FFD700 !important; color: #000 !important; }
-        body.high-contrast #verify-btn { background-color: #228B22 !important; }
-        body.high-contrast .command-slot { background-color: #444 !important; border-color: #FFF !important; }
-        body.high-contrast .control-btn { background-color: #555 !important; }
-        body.high-contrast .top-controls button, body.high-contrast #theme-selector { background-color: #333 !important; color: #FFF !important; border-color: #FFF !important; }
-        body.high-contrast .syllable-hint { background-color: #444 !important; border-color: #FFF !important; color: #FFD700 !important; }
-        body.high-contrast .word-display, body.high-contrast .completed-word { color: #FFF !important; }
-        body.high-contrast .word-hint { color: #CCC !important; }
-        body.high-contrast .missing-syllable { color: #FFD700 !important; border-bottom-color: #FFD700 !important; }
-        body.high-contrast .target-syllable { color: #FFD700 !important; background-color: #444 !important; }
-        body.high-contrast #word-image { border-color: #FFF !important; }
+        body.high-contrast { 
+            background-color: #000 !important; 
+            color: #FFF !important; 
+        }
+        body.high-contrast .grid-cell { 
+            background-color: #333 !important; 
+            color: #FFF !important; 
+        }
+        body.high-contrast .challenge-box { 
+            background-color: #222 !important; 
+            border-color: #FFF !important; 
+            color: #FFF !important; 
+        }
+        body.high-contrast .level-btn { 
+            background-color: #444 !important; 
+            color: #FFF !important; 
+            border-color: #FFF !important; 
+        }
+        body.high-contrast .level-btn.active { 
+            background-color: #FFD700 !important; 
+            color: #000 !important; 
+        }
+        body.high-contrast #verify-btn { 
+            background-color: #228B22 !important; 
+        }
+        body.high-contrast .command-slot { 
+            background-color: #444 !important; 
+            border-color: #FFF !important; 
+        }
+        body.high-contrast .control-btn { 
+            background-color: #555 !important; 
+        }
+        body.high-contrast .top-controls button, body.high-contrast #theme-selector { 
+            background-color: #333 !important; 
+            color: #FFF !important; 
+            border-color: #FFF !important; 
+        }
+        body.high-contrast .syllable-hint { 
+            background-color: #444 !important; 
+            border-color: #FFF !important; 
+            color: #FFD700 !important; 
+        }
+        body.high-contrast .word-display, body.high-contrast .completed-word { 
+            color: #FFF !important; 
+        }
+        body.high-contrast .word-hint { 
+            color: #CCC !important; 
+        }
+        body.high-contrast .missing-syllable { 
+            color: #FFD700 !important; 
+            border-bottom-color: #FFD700 !important; 
+        }
+        body.high-contrast .target-syllable { 
+            color: #FFD700 !important; 
+            background-color: #444 !important; 
+        }
+        body.high-contrast #word-image { 
+            border-color: #FFF !important; 
+        }
         
         #player.exploded { 
             background-image: url('https://i.postimg.cc/7YWJKQZn/RoboExplode.jpg'); 
@@ -417,7 +512,6 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        /* Estilos do modal de instruções */
         .modal {
             display: none;
             position: fixed;
@@ -464,6 +558,24 @@
             background-color: #228B22;
         }
 
+        .credits-footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 1.1em;
+            color: var(--secondary-color);
+            margin-top: 20px;
+            width: 100%;
+            max-width: 950px;
+            position: relative;
+        }
+        .credits-footer a {
+            color: #FF69B4;
+            text-decoration: none;
+        }
+        .credits-footer a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .game-wrapper {
                 flex-direction: column;
@@ -481,25 +593,26 @@
             }
             
             .grid-cell {
-                font-size: 1.1em; /* Ajuste para telas menores */
+                font-size: 1.1em;
             }
             
             .grid-cell.long-syllable {
-                font-size: 0.9em; /* Ajuste para sílabas longas em telas menores */
+                font-size: 0.9em;
             }
             
             .word-display, .completed-word {
-                font-size: 1.1em; /* Reduzido de 1.3em para telas menores */
+                font-size: 1.1em;
             }
             
             .long-word {
-                font-size: 0.8em; /* Tamanho menor para palavras longas em telas menores */
+                font-size: 0.8em;
             }
             
             .syllable-hint { font-size: 1.3em; }
             #first-syllable { font-size: 1.7em; min-height: 80px; }
             .modal-content { font-size: 1.2em; max-width: 90%; }
             .modal-content h2 { font-size: 1.8em; }
+            .credits-footer { font-size: 0.9em; padding: 5px; }
             #word-image { max-width: 80px; max-height: 80px; }
         }
     </style>
@@ -548,32 +661,31 @@
                 <button class="control-btn" id="btn-clear">Limpar</button>
             </div>
         </div>
-    </div>
-
-    <!-- Modal de instruções -->
-    <div id="instructions-modal" class="modal">
-        <div class="modal-content">
-            <h2>🤖 Bem-vindo ao Robô das Sílabas! 🎉</h2>
-            <p>Ajude o robô 🤖 a encontrar a sílaba certa para completar a palavra!</p>
-            <p>1. Veja a palavra com uma sílaba faltando (___) e a imagem de dica.</p>
-            <p>2. Use as setas ➡️⬅️⬆️⬇️ para guiar o robô até a sílaba certa.</p>
-            <p>3. Cuidado com as bombas 💣 e sílabas erradas!</p>
-            <p>4. Clique em "Verificar" ou aperte Enter para o robô andar.</p>
-            <p>5. Se achar que não tem caminho, aperte "H" para tentar outra vez!</p>
-            <button id="close-modal">Começar!</button>
+        
+        <div id="instructions-modal" class="modal">
+            <div class="modal-content">
+                <h2>🤖 Bem-vindo ao Robô das Sílabas! 🎉</h2>
+                <p>Ajude o robô 🤖 a encontrar a sílaba certa para completar a palavra!</p>
+                <p>1. Veja a palavra com uma sílaba faltando (___) e a imagem de dica.</p>
+                <p>2. Use as setas ➡️⬅️⬆️⬇️ para guiar o robô até a sílaba certa.</p>
+                <p>3. Cuidado com as bombas 💣 e sílabas erradas!</p>
+                <p>4. Clique em "Verificar" ou aperte Enter para o robô andar.</p>
+                <p>5. Se achar que não tem caminho, aperte "H" para tentar outra vez!</p>
+                <button id="close-modal">Começar!</button>
+            </div>
         </div>
     </div>
 
+    <footer class="credits-footer">
+        <p>Inspirado no jogo <a href="https://www.coquinhos.com/programacao-para-criancas/play/" target="_blank">Programação para Crianças</a> do Coquinhos.</p>
+    </footer>
+
     <script>
-        // =======================================================
-        // 1. CONFIGURAÇÕES E ESTADO DO JOGO
-        // =======================================================
         const GRID_SIZE = 6;
         const MAX_COMMANDS = 16;
         const CHALLENGES_PER_LEVEL = 10;
         const TOTAL_LIVES = 3;
 
-        // Mapeamento de URLs das imagens
         const imageMap = {
             "BA-LA": "https://i.postimg.cc/Z5y5Nhv4/bala.jpg",
             "BE-BÊ": "https://i.postimg.cc/T2C1M0XM/bebe.jpg",
@@ -582,10 +694,18 @@
             "BU-LE": "https://i.postimg.cc/3w5JCb2p/bule.jpg",
             "ES-CO-LA": "https://i.postimg.cc/0Q9khMWy/escola.jpg",
             "GA-TO": "https://i.postimg.cc/QMQN6kqz/gato.jpg",
+            "CA-BO": "https://i.postimg.cc/zvLZbGJW/cabo.jpg",
+            "CO-CA": "https://i.postimg.cc/hvHF9RjY/coca.jpg",
+            "CO-PO": "https://i.postimg.cc/9fpjsk84/copo.jpg",
+            "CU-BO": "https://i.postimg.cc/qRDHv3d4/cubo.jpg",
+            "DA-MA": "https://i.postimg.cc/mDgG4SJm/dama.jpg",
+            "FO-CA": "https://i.postimg.cc/fRYsfyYf/foca.jpg",
+            "LU-VA": "https://i.postimg.cc/7YFDz0JL/luva.jpg",
+            "PI-PA": "https://i.postimg.cc/nLZJRxkb/pipa.jpg",
+            "SO-FÁ": "https://i.postimg.cc/HscdjBxK/sofa.jpg",
             "default": "https://i.postimg.cc/76P4KvhC/default.png"
         };
 
-        // Função para remover acentos
         function removeAccents(str) {
             return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         }
@@ -618,7 +738,7 @@
         let availableWords = {};
         let currentSyllables = [];
         let currentTargetIndex = 0;
-        let unlockedLevels = [1]; // Inicialmente, apenas Nível 1 desbloqueado
+        let unlockedLevels = [1];
 
         const levelSettings = {
             1: { bombs: 4, decoys: 2, syllables: 2 },
@@ -656,10 +776,6 @@
             ]
         };
 
-        // =======================================================
-        // 2. INICIALIZAÇÃO E LÓGICA DO JOGO
-        // =======================================================
-        
         async function init() {
             await loadWords();
             loadGameStateFromURL();
@@ -684,36 +800,36 @@
         
         function loadGameStateFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
-            const levelFromUrl = parseInt(urlParams.get('nivel'));
-            
-            // Carregar níveis desbloqueados do localStorage ou inicializar com [1]
-            unlockedLevels = JSON.parse(localStorage.getItem('unlockedLevels')) || [1];
-            
-            // Validar e processar o parâmetro de URL
-            if (levelFromUrl >= 1 && levelFromUrl <= 5) {
-                // Habilitar níveis de 1 até levelFromUrl
+            const levelFromUrl = parseInt(urlParams.get('level'));
+
+            // Define os níveis desbloqueados com base no parâmetro da URL
+            if (!isNaN(levelFromUrl) && levelFromUrl >= 1 && levelFromUrl <= 5) {
+                // Desbloqueia apenas os níveis de 1 até levelFromUrl
+                unlockedLevels = [];
                 for (let i = 1; i <= levelFromUrl; i++) {
-                    if (!unlockedLevels.includes(i)) {
-                        unlockedLevels.push(i);
-                    }
+                    unlockedLevels.push(i);
                 }
-                // Garantir que unlockedLevels esteja ordenado e único
-                unlockedLevels = [...new Set(unlockedLevels)].sort((a, b) => a - b);
                 currentLevel = levelFromUrl;
             } else {
-                currentLevel = Math.max(...unlockedLevels); // Usar o maior nível desbloqueado
+                // Sem parâmetro ou inválido, inicia no Nível 1, com apenas Nível 1 desbloqueado
+                unlockedLevels = [1];
+                currentLevel = 1;
             }
-            
-            // Salvar níveis desbloqueados no localStorage
-            localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
-            
+
+            // Reseta variáveis para o nível atual
             score = 0;
             levelStartScore = 0;
             correctAttempts = 0;
             lives = TOTAL_LIVES;
-            console.log(`loadGameStateFromURL: currentLevel=${currentLevel}, unlockedLevels=${unlockedLevels}, levelStartScore=${levelStartScore}, score=${score}`);
             availableWords[currentLevel] = [...allWords[currentLevel]];
+
+            // Salva unlockedLevels no localStorage
+            localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
+            console.log(`loadGameStateFromURL: currentLevel=${currentLevel}, unlockedLevels=${unlockedLevels}`);
+
+            // Atualiza UI e inicia novo desafio
             updateUI();
+            newChallenge();
         }
 
         function isPathPossible(start, end, obstacles) {
@@ -743,9 +859,7 @@
 
         function newChallenge() {
             player.classList.remove('exploded');
-            console.log(`newChallenge: currentLevel=${currentLevel}, levelStartScore=${levelStartScore}, score=${score}`);
             let pathIsValid = false;
-            
             do {
                 generateSyllableChallenge();
                 bombPositions = [];
@@ -791,7 +905,6 @@
 
         function generateSyllableChallenge() {
             const levelConf = levelSettings[currentLevel];
-            
             if (availableWords[currentLevel].length === 0) {
                 availableWords[currentLevel] = [...allWords[currentLevel]];
                 console.log("Recarregando palavras do nível", currentLevel);
@@ -820,20 +933,18 @@
             currentTargetIndex = Math.floor(Math.random() * currentSyllables.length);
             targetSyllable = currentSyllables[currentTargetIndex];
             
-            // Configurar imagem da palavra usando o mapeamento
             const imagePath = imageMap[randomWordWithHyphen] || imageMap.default;
-            wordImageEl.innerHTML = `<img src="${imagePath}" alt="${currentWord}" onerror="this.src='${imageMap.default}'">`;
+            wordImageEl.innerHTML = `<img src="${imagePath}" alt="${currentWord}" onerror="this.src='${imageMap.default}'; console.log('Imagem falhou: ' + this.getAttribute('src'));">`;
             
-            console.log(`generateSyllableChallenge: currentWord=${currentWord}, currentSyllables=${currentSyllables.join('-')}, currentTargetIndex=${currentTargetIndex}, imagePath=${imagePath}`);
+            console.log(`generateSyllableChallenge: currentWord=${currentWord}, currentSyllables=${currentSyllables.join('-')}, imagePath=${imagePath}`);
             displayWordWithMissingSyllable(currentSyllables, currentTargetIndex);
         }
 
         function displayWordWithMissingSyllable(syllables, targetIndex) {
-            console.log(`displayWordWithMissingSyllable: syllables=${syllables.join('-')}, targetIndex=${targetIndex}`);
             const wordDisplay = document.createElement('div');
             wordDisplay.className = 'word-display';
             if (syllables.length >= 4) {
-                wordDisplay.classList.add('long-word'); // Aplicar classe para palavras com 4+ sílabas
+                wordDisplay.classList.add('long-word');
             }
             
             let displayHTML = '';
@@ -844,7 +955,7 @@
                     displayHTML += `<span>${syllable}</span>`;
                 }
                 if (index < syllables.length - 1) {
-                    displayHTML += '-'; // Adicionar hífen entre sílabas
+                    displayHTML += '-';
                 }
             });
             
@@ -861,11 +972,10 @@
         }
 
         function displayCompletedWord() {
-            console.log(`displayCompletedWord: currentWord=${currentWord}, currentSyllables=${currentSyllables.join('-')}, currentTargetIndex=${currentTargetIndex}`);
             const wordDisplay = document.createElement('div');
             wordDisplay.className = 'completed-word';
             if (currentSyllables.length >= 4) {
-                wordDisplay.classList.add('long-word'); // Aplicar classe para palavras com 4+ sílabas
+                wordDisplay.classList.add('long-word');
             }
             
             let displayHTML = '';
@@ -876,7 +986,7 @@
                     displayHTML += `<span>${syllable}</span>`;
                 }
                 if (index < currentSyllables.length - 1) {
-                    displayHTML += '-'; // Adicionar hífen entre sílabas
+                    displayHTML += '-';
                 }
             });
             
@@ -890,9 +1000,8 @@
                 wordHint.textContent = `A palavra completa é: ${currentWord}`;
                 firstSyllableEl.appendChild(wordHint);
             }
-            // Forçar atualização do DOM
             requestAnimationFrame(() => {
-                firstSyllableEl.offsetHeight; // Trigger reflow
+                firstSyllableEl.offsetHeight;
             });
         }
 
@@ -930,7 +1039,6 @@
                             correctAttempts = 0;
                             lives = TOTAL_LIVES;
                             levelStartScore = score;
-                            console.log(`checkResult: Avançando para nível ${currentLevel}, unlockedLevels=${unlockedLevels}, levelStartScore=${levelStartScore}, score=${score}`);
                             availableWords[currentLevel] = [...allWords[currentLevel]];
                             alert(`Parabéns! Você passou para o Nível ${currentLevel}!`);
                         }
@@ -957,12 +1065,11 @@
                 
                 displayCompletedWord();
                 if (lives <= 0) {
-                    console.log(`handleError: Vidas esgotadas, restaurando score=${levelStartScore} (levelStartScore), currentLevel=${currentLevel}`);
                     alert(`Fim de Jogo! A palavra era ${currentSyllables.join('-')} (${currentWord}). Vamos tentar de novo!`);
                     lives = TOTAL_LIVES;
                     correctAttempts = 0;
                     score = levelStartScore;
-                    availableWords[currentLevel] = [...allWords[currentLevel]]; // Reiniciar palavras disponíveis ao perder todas as vidas
+                    availableWords[currentLevel] = [...allWords[currentLevel]];
                     updateUI();
                     setTimeout(() => {
                         newChallenge();
@@ -980,10 +1087,6 @@
             }
         }
 
-        // =======================================================
-        // 3. FUNÇÕES DE UI E CONTROLES
-        // =======================================================
-        
         function createGrid() {
             gridContainer.innerHTML = '';
             for (let y = 0; y < GRID_SIZE; y++) {
@@ -1020,7 +1123,6 @@
                         correctAttempts = 0;
                         lives = TOTAL_LIVES;
                         levelStartScore = score;
-                        console.log(`setupControls: Mudando para nível ${currentLevel}, levelStartScore=${levelStartScore}, score=${score}`);
                         availableWords[currentLevel] = [...allWords[currentLevel]];
                         updateUI();
                         newChallenge();
@@ -1094,7 +1196,6 @@
                 button.classList.toggle('active', level === currentLevel);
                 button.disabled = !unlockedLevels.includes(level);
             });
-            console.log(`updateUI: score=${score}, levelStartScore=${levelStartScore}, currentLevel=${currentLevel}, unlockedLevels=${unlockedLevels}`);
         }
 
         function updateGridDisplay() {
@@ -1220,9 +1321,6 @@
             });
         }
 
-        // =======================================================
-        // 4. INICIALIZAÇÃO
-        // =======================================================
         init();
     </script>
 </body>
