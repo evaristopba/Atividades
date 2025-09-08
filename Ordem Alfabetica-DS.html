@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Ordenação Alfabética com Níveis</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 1000px;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .direction-info {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .grid-cell {
+            background-color: #e6f7ff;
+            border: 2px dashed #6a11cb;
+            border-radius: 8px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #6a11cb;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .grid-cell.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #28a745;
+        }
+        
+        .grid-cell.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .grid-cell.fixed {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+            cursor: not-allowed;
+        }
+        
+        .grid-cell.fixed::after {
+            content: "✓";
+            position: absolute;
+            bottom: 2px;
+            right: 5px;
+            font-size: 0.8rem;
+            color: #ffc107;
+        }
+        
+        .grid-cell.removable:hover::after {
+            content: "X";
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            font-size: 0.8rem;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .letters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+            justify-content: center;
+            align-content: flex-start;
+        }
+        
+        .letter {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        
+        .letter:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .letter.dragging {
+            opacity: 0.6;
+            transform: scale(1.1);
+        }
+        
+        .letter.hidden {
+            visibility: hidden;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #check-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        #reset-btn {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            color: white;
+        }
+        
+        #new-game-btn {
+            background: linear-gradient(135deg, #ff9900 0%, #ffcc00 100%);
+            color: white;
+        }
+        
+        #help-btn {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border-radius: 50%;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .direction-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #6a11cb;
+        }
+        
+        .arrow {
+            font-size: 1.5rem;
+            margin: 0 10px;
+        }
+        
+        .row-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #6a11cb;
+        }
+        
+        .level-description {
+            margin-top: 10px;
+            font-style: italic;
+            color: #6a11cb;
+        }
+        
+        .challenge-progress {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #6a11cb;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Modal de instruções */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6a11cb;
+            background: none;
+            border: none;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .close-modal:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .modal-title {
+            color: #2575fc;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .modal-section {
+            margin-bottom: 20px;
+        }
+        
+        .modal-section h3 {
+            color: #6a11cb;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .modal-section p, .modal-section ul {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .modal-section ul {
+            padding-left: 20px;
+        }
+        
+        .modal-section li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .grid-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-info {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de Instruções -->
+    <div class="modal" id="instructions-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal">×</button>
+            <h2 class="modal-title">Instruções do Jogo</h2>
+            
+            <div class="modal-section">
+                <h3>Objetivo</h3>
+                <p>Arraste as letras para organizá-las em ordem alfabética no grid.</p>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Como Jogar</h3>
+                <ul>
+                    <li><strong>Arraste letras</strong> da área direita para as células vazias do grid</li>
+                    <li>A <strong>primeira linha</strong> sempre vai da esquerda para direita (→)</li>
+                    <li>A <strong>segunda linha</strong> pode ter direção alternada (→ ou ←)</li>
+                    <li>Letras com <strong>✓</strong> estão posicionadas corretamente para te guiar</li>
+                    <li><strong>Clique em uma letra posicionada</strong> para removê-la (ela voltará para a área de origem)</li>
+                    <li>Complete <strong>10 desafios</strong> para avançar de nível</li>
+                </ul>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Controles</h3>
+                <ul>
+                    <li><strong>Verificar</strong>: Confere se as letras estão na posição correta</li>
+                    <li><strong>Reiniciar</strong>: Reinicia o desafio atual</li>
+                    <li><strong>Novo Jogo</strong>: Começa um novo jogo do zero</li>
+                    <li><strong>?</strong>: Abre estas instruções</li>
+                </ul>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Sistema de Pontuação</h3>
+                <ul>
+                    <li><strong>+10 pontos</strong> por cada letra correta</li>
+                    <li><strong>-5 pontos</strong> por cada letra incorreta</li>
+                    <li><strong>+100 pontos × nível</strong> ao completar um desafio</li>
+                    <li><strong>+500 pontos</strong> ao completar um nível</li>
+                </ul>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Níveis</h3>
+                <p>Existem 5 níveis de dificuldade. A cada nível, diminui o número de letras fixas que servem como guia.</p>
+            </div>
+            
+            <button id="start-playing-btn" style="margin-top: 20px;">Começar a Jogar!</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Ordenação Alfabética com Níveis</h1>
+        
+        <button id="help-btn">?</button>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">Nível</div>
+                <div class="stat-value" id="level-value">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Pontuação</div>
+                <div class="stat-value" id="score-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Acertos</div>
+                <div class="stat-value" id="correct-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Erros</div>
+                <div class="stat-value" id="errors-value">0</div>
+            </div>
+        </div>
+        
+        <div class="game-info">
+            <div class="direction-info" id="direction-info">
+                Linha 1: → | Linha 2: →
+            </div>
+            
+            <div class="challenge-progress">
+                Desafio: <span id="challenge-current">1</span> de <span id="challenge-total">10</span>
+                <div class="progress-bar">
+                    <div class="progress" id="challenge-progress" style="width: 10%;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="direction-indicator">
+            <div>
+                <div class="row-label">Linha 1</div>
+                <span class="arrow">→</span>
+            </div>
+            <div>
+                <div class="row-label">Linha 2</div>
+                <span class="arrow" id="row2-arrow">→</span>
+            </div>
+        </div>
+        
+        <div class="level-description" id="level-description">
+            Nível 1: 5 letras fixas como guia
+        </div>
+        
+        <div class="game-area">
+            <div class="grid-container" id="grid">
+                <!-- Grid cells will be generated by JavaScript -->
+            </div>
+            
+            <div class="letters-container" id="letters">
+                <!-- Letters will be generated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="check-btn">Verificar</button>
+            <button id="reset-btn">Reiniciar</button>
+            <button id="new-game-btn">Novo Jogo</button>
+        </div>
+        
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gridContainer = document.getElementById('grid');
+            const lettersContainer = document.getElementById('letters');
+            const checkBtn = document.getElementById('check-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const newGameBtn = document.getElementById('new-game-btn');
+            const messageEl = document.getElementById('message');
+            const directionInfo = document.getElementById('direction-info');
+            const row2Arrow = document.getElementById('row2-arrow');
+            const levelDescription = document.getElementById('level-description');
+            const challengeCurrent = document.getElementById('challenge-current');
+            const challengeTotal = document.getElementById('challenge-total');
+            const challengeProgress = document.getElementById('challenge-progress');
+            const helpBtn = document.getElementById('help-btn');
+            const instructionsModal = document.getElementById('instructions-modal');
+            const closeModal = document.getElementById('close-modal');
+            const startPlayingBtn = document.getElementById('start-playing-btn');
+            
+            // Elementos de estatísticas
+            const levelValue = document.getElementById('level-value');
+            const scoreValue = document.getElementById('score-value');
+            const correctValue = document.getElementById('correct-value');
+            const errorsValue = document.getElementById('errors-value');
+            
+            // Alfabeto completo
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            
+            // Direção da segunda linha (true = esquerda para direita, false = direita para esquerda)
+            let secondRowDirection = true;
+            let gridLetters = [];
+            let outsideLetters = [];
+            let fixedPositions = [];
+            
+            // Sistema de níveis e pontuação
+            let level = 1;
+            let score = 0;
+            let correctAnswers = 0;
+            let errorCount = 0;
+            let challengesCompleted = 0;
+            const challengesPerLevel = 10;
+            const totalLevels = 5;
+            
+            // Verificar se é o primeiro acesso
+            const firstTime = localStorage.getItem('firstTime');
+            
+            // Mostrar modal de instruções no primeiro acesso
+            if (firstTime === null) {
+                instructionsModal.style.display = 'flex';
+                localStorage.setItem('firstTime', 'false');
+            }
+            
+            // Inicializar o jogo
+            initGame();
+            
+            // Event listeners para o modal
+            helpBtn.addEventListener('click', () => {
+                instructionsModal.style.display = 'flex';
+            });
+            
+            closeModal.addEventListener('click', () => {
+                instructionsModal.style.display = 'none';
+            });
+            
+            startPlayingBtn.addEventListener('click', () => {
+                instructionsModal.style.display = 'none';
+            });
+            
+            // Fechar modal clicando fora dele
+            window.addEventListener('click', (e) => {
+                if (e.target === instructionsModal) {
+                    instructionsModal.style.display = 'none';
+                }
+            });
+            
+            function initGame() {
+                // Limpar containers
+                gridContainer.innerHTML = '';
+                lettersContainer.innerHTML = '';
+                messageEl.className = 'message';
+                
+                // Atualizar contador de desafios
+                challengeCurrent.textContent = challengesCompleted + 1;
+                challengeTotal.textContent = challengesPerLevel;
+                challengeProgress.style.width = `${((challengesCompleted) / challengesPerLevel) * 100}%`;
+                
+                // Definir direção da segunda linha (alternando)
+                secondRowDirection = Math.random() > 0.5;
+                
+                // Atualizar informação de direção
+                updateDirectionInfo();
+                
+                // Gerar letras do grid com base nas direções
+                gridLetters = generateGridLetters();
+                
+                // Escolher posições fixas (para guiar o jogador) baseado no nível
+                fixedPositions = chooseFixedPositions();
+                
+                // Criar células do grid
+                gridLetters.forEach((letter, index) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.letter = letter;
+                    cell.dataset.index = index;
+                    
+                    // Verificar se é uma posição fixa
+                    if (fixedPositions.includes(index)) {
+                        cell.textContent = letter;
+                        cell.dataset.filled = letter;
+                        cell.classList.add('fixed');
+                    } else {
+                        cell.textContent = '';
+                        // Adicionar evento de clique para remover letras posicionadas
+                        cell.addEventListener('click', removePositionedLetter);
+                        cell.classList.add('removable');
+                    }
+                    
+                    gridContainer.appendChild(cell);
+                });
+                
+                // Gerar letras para arrastar (excluindo as fixas)
+                outsideLetters = generateOutsideLetters();
+                
+                // Criar letras para arrastar
+                outsideLetters.forEach(letter => {
+                    const letterEl = document.createElement('div');
+                    letterEl.className = 'letter';
+                    letterEl.textContent = letter;
+                    letterEl.draggable = true;
+                    letterEl.dataset.letter = letter;
+                    
+                    // Eventos de drag and drop
+                    letterEl.addEventListener('dragstart', dragStart);
+                    letterEl.addEventListener('dragend', dragEnd);
+                    
+                    lettersContainer.appendChild(letterEl);
+                });
+                
+                // Tornar células do grid alvos de drop
+                const gridCells = document.querySelectorAll('.grid-cell');
+                gridCells.forEach(cell => {
+                    if (!cell.classList.contains('fixed')) {
+                        cell.addEventListener('dragover', dragOver);
+                        cell.addEventListener('dragenter', dragEnter);
+                        cell.addEventListener('dragleave', dragLeave);
+                        cell.addEventListener('drop', drop);
+                    }
+                });
+            }
+            
+            function generateGridLetters() {
+                const result = [];
+                
+                // Primeira linha (7 letras) - SEMPRE da esquerda para direita
+                for (let i = 0; i < 7; i++) {
+                    result.push(alphabet[i]);
+                }
+                
+                // Segunda linha (7 letras) - direção variável
+                if (secondRowDirection) {
+                    // Esquerda para direita
+                    for (let i = 7; i < 14; i++) {
+                        result.push(alphabet[i]);
+                    }
+                } else {
+                    // Direita para esquerda
+                    for (let i = 13; i >= 7; i--) {
+                        result.push(alphabet[i]);
+                    }
+                }
+                
+                // Terceira linha (7 letras) - sempre da esquerda para direita
+                for (let i = 14; i < 21; i++) {
+                    result.push(alphabet[i]);
+                }
+                
+                // Quarta linha (5 letras) - sempre da esquerda para direita
+                for (let i = 21; i < 26; i++) {
+                    result.push(alphabet[i]);
+                }
+                
+                return result;
+            }
+            
+            function generateOutsideLetters() {
+                // Todas as letras exceto as que estão em posições fixas
+                const result = [];
+                
+                for (let i = 0; i < gridLetters.length; i++) {
+                    if (!fixedPositions.includes(i)) {
+                        result.push(gridLetters[i]);
+                    }
+                }
+                
+                // Embaralhar as letras
+                return result.sort(() => Math.random() - 0.5);
+            }
+            
+            function chooseFixedPositions() {
+                // Escolher posições fixas para guiar o jogador
+                const positions = [];
+                
+                // Nível 1: 5 letras fixas
+                let fixedCount = 6 - level; // Diminui com o nível
+                if (fixedCount < 1) fixedCount = 1;
+                
+                // No nível 1, não fixar necessariamente a letra A
+                if (level > 1 || Math.random() > 0.5) {
+                    positions.push(0); // Letra A
+                }
+                
+                // Fixar a última posição (Z) a partir do nível 2
+                if (level > 1) {
+                    positions.push(25);
+                }
+                
+                // Fixar posições estratégicas na segunda linha dependendo da direção
+                if (secondRowDirection) {
+                    // Se a segunda linha é esquerda→direita, fixar a primeira letra da linha (H)
+                    if (fixedCount >= 2) positions.push(7);
+                    // E uma letra do meio (K)
+                    if (fixedCount >= 3) positions.push(10);
+                } else {
+                    // Se a segunda linha é direita←esquerda, fixar a primeira letra da linha (N)
+                    if (fixedCount >= 2) positions.push(13);
+                    // E uma letra do meio (K)
+                    if (fixedCount >= 3) positions.push(10);
+                }
+                
+                // Adicionar mais letras fixas se necessário
+                if (fixedCount >= 4) {
+                    // Fixar uma letra no meio da primeira linha (D)
+                    positions.push(3);
+                }
+                
+                if (fixedCount >= 5) {
+                    // Fixar uma letra no meio da terceira linha (R)
+                    positions.push(17);
+                }
+                
+                if (fixedCount >= 6) {
+                    // Fixar uma letra no final da terceira linha (U)
+                    positions.push(20);
+                }
+                
+                return positions;
+            }
+            
+            function removePositionedLetter(e) {
+                const cell = e.target;
+                const letter = cell.dataset.filled;
+                
+                // Só remove se a célula tiver uma letra posicionada e não for fixa
+                if (letter && !cell.classList.contains('fixed')) {
+                    cell.textContent = '';
+                    delete cell.dataset.filled;
+                    
+                    // Mostrar a letra na área de origem
+                    const letterEl = document.querySelector(`.letter[data-letter="${letter}"]`);
+                    if (letterEl) {
+                        letterEl.classList.remove('hidden');
+                    }
+                    
+                    // Remover classes de correção/erro
+                    cell.classList.remove('correct', 'incorrect');
+                }
+            }
+            
+            function updateDirectionInfo() {
+                const directionText = secondRowDirection ? 
+                    "→" : "←";
+                
+                directionInfo.textContent = `Linha 1: → | Linha 2: ${directionText}`;
+                
+                // Atualizar indicador de seta da segunda linha
+                row2Arrow.textContent = secondRowDirection ? "→" : "←";
+                
+                // Atualizar descrição do nível
+                let fixedCount = 6 - level;
+                if (fixedCount < 1) fixedCount = 1;
+                
+                levelDescription.textContent = `Nível ${level}: ${fixedCount} letras fixas como guia`;
+            }
+            
+            function updateStats() {
+                levelValue.textContent = level;
+                scoreValue.textContent = score;
+                correctValue.textContent = correctAnswers;
+                errorsValue.textContent = errorCount;
+            }
+            
+            function completeChallenge() {
+                challengesCompleted++;
+                score += 100 * level; // Bônus por completar desafio
+                updateStats();
+                
+                // Atualizar barra de progresso
+                challengeProgress.style.width = `${(challengesCompleted / challengesPerLevel) * 100}%`;
+                
+                // Verificar se completou o nível
+                if (challengesCompleted >= challengesPerLevel) {
+                    levelUp();
+                } else {
+                    // Mostrar mensagem de desafio completado
+                    messageEl.textContent = `Desafio ${challengesCompleted}/${challengesPerLevel} completado!`;
+                    messageEl.className = 'message success';
+                    
+                    // Iniciar novo desafio após um breve delay
+                    setTimeout(() => {
+                        initGame();
+                    }, 1500);
+                }
+            }
+            
+            function levelUp() {
+                if (level < totalLevels) {
+                    level++;
+                    challengesCompleted = 0;
+                    score += 500; // Bônus por completar nível
+                    updateStats();
+                    
+                    // Mostrar mensagem de novo nível
+                    messageEl.textContent = `Parabéns! Você avançou para o nível ${level}!`;
+                    messageEl.className = 'message success';
+                    
+                    // Iniciar novo nível após um breve delay
+                    setTimeout(() => {
+                        initGame();
+                    }, 2000);
+                } else {
+                    // Jogo completo
+                    messageEl.textContent = `Parabéns! Você completou todos os ${totalLevels} níveis!`;
+                    messageEl.className = 'message success';
+                    
+                    // Reiniciar o jogo após um delay
+                    setTimeout(() => {
+                        level = 1;
+                        score = 0;
+                        correctAnswers = 0;
+                        errorCount = 0;
+                        challengesCompleted = 0;
+                        updateStats();
+                        initGame();
+                    }, 3000);
+                }
+            }
+            
+            // Funções de drag and drop
+            function dragStart(e) {
+                e.dataTransfer.setData('text/plain', e.target.dataset.letter);
+                setTimeout(() => {
+                    e.target.classList.add('dragging');
+                }, 0);
+            }
+            
+            function dragEnd(e) {
+                e.target.classList.remove('dragging');
+            }
+            
+            function dragOver(e) {
+                e.preventDefault();
+            }
+            
+            function dragEnter(e) {
+                e.preventDefault();
+                e.target.classList.add('drag-over');
+            }
+            
+            function dragLeave(e) {
+                e.target.classList.remove('drag-over');
+            }
+            
+            function drop(e) {
+                e.preventDefault();
+                e.target.classList.remove('drag-over');
+                
+                const letter = e.dataTransfer.getData('text/plain');
+                const draggedEl = document.querySelector(`.letter[data-letter="${letter}"]`);
+                
+                // Só permite dropar se a célula estiver vazia e não for fixa
+                if (e.target.textContent === '' && !e.target.classList.contains('fixed')) {
+                    e.target.textContent = letter;
+                    e.target.dataset.filled = letter;
+                    draggedEl.classList.add('hidden');
+                }
+            }
+            
+            // Verificar respostas
+            checkBtn.addEventListener('click', () => {
+                let allCorrect = true;
+                let correctInThisTry = 0;
+                let errorsInThisTry = 0;
+                const gridCells = document.querySelectorAll('.grid-cell');
+                
+                gridCells.forEach((cell) => {
+                    const correctLetter = cell.dataset.letter;
+                    const currentLetter = cell.dataset.filled;
+                    
+                    if (currentLetter === correctLetter) {
+                        cell.classList.add('correct');
+                        cell.classList.remove('incorrect');
+                        correctInThisTry++;
+                    } else if (currentLetter) {
+                        cell.classList.add('incorrect');
+                        cell.classList.remove('correct');
+                        allCorrect = false;
+                        errorsInThisTry++;
+                        
+                        // Devolver a letra incorreta para a área de origem após um breve delay
+                        setTimeout(() => {
+                            const letterEl = document.querySelector(`.letter[data-letter="${currentLetter}"]`);
+                            cell.textContent = '';
+                            delete cell.dataset.filled;
+                            if (letterEl) {
+                                letterEl.classList.remove('hidden');
+                            }
+                            cell.classList.remove('incorrect');
+                        }, 1000);
+                    }
+                });
+                
+                // Atualizar estatísticas
+                correctAnswers += correctInThisTry;
+                errorCount += errorsInThisTry;
+                score += correctInThisTry * 10;
+                
+                // Penalidade por erro
+                if (errorsInThisTry > 0) {
+                    score -= errorsInThisTry * 5;
+                    if (score < 0) score = 0;
+                }
+                
+                updateStats();
+                
+                // Mostrar mensagem
+                if (allCorrect) {
+                    messageEl.textContent = 'Parabéns! Você organizou todas as letras corretamente!';
+                    messageEl.className = 'message success';
+                    
+                    // Avançar para o próximo desafio após um breve delay
+                    setTimeout(completeChallenge, 1500);
+                } else {
+                    messageEl.textContent = `${correctInThisTry} acertos, ${errorsInThisTry} erros. Tente novamente!`;
+                    messageEl.className = 'message error';
+                    
+                    // Esconder a mensagem após 3 segundos
+                    setTimeout(() => {
+                        messageEl.className = 'message';
+                    }, 3000);
+                }
+            });
+            
+            // Reiniciar o jogo (mantém a mesma configuração)
+            resetBtn.addEventListener('click', () => {
+                const gridCells = document.querySelectorAll('.grid-cell');
+                const letterEls = document.querySelectorAll('.letter');
+                
+                gridCells.forEach(cell => {
+                    if (!cell.classList.contains('fixed')) {
+                        cell.textContent = '';
+                        delete cell.dataset.filled;
+                        cell.classList.remove('correct', 'incorrect');
+                    }
+                });
+                
+                letterEls.forEach(letter => {
+                    letter.classList.remove('hidden');
+                });
+                
+                messageEl.className = 'message';
+            });
+            
+            // Novo jogo (gera nova configuração)
+            newGameBtn.addEventListener('click', () => {
+                level = 1;
+                score = 0;
+                correctAnswers = 0;
+                errorCount = 0;
+                challengesCompleted = 0;
+                updateStats();
+                initGame();
+            });
+        });
+    </script>
+</body>
+</html>
