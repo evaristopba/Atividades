@@ -70,17 +70,23 @@
         
         .level-selector {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
         
         .level-btn {
             padding: 10px 20px;
-            margin: 0 5px;
             background-color: #e3f2fd;
             border: 2px solid #2196f3;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
         }
         
         .level-btn.active {
@@ -240,7 +246,6 @@
             display: block;
         }
         
-        /* Modal de instruções */
         .modal {
             display: none;
             position: fixed;
@@ -262,7 +267,7 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px极
             position: relative;
         }
         
@@ -333,24 +338,28 @@
             
             .level-btn {
                 padding: 8px 15px;
-                margin: 0 3px;
                 font-size: 0.9rem;
+                min-width: 90px;
+            }
+            
+            .level-selector {
+                gap: 5px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Modal de instruções -->
     <div class="modal" id="instructions-modal">
         <div class="modal-content">
             <span class="close-modal" id="close-modal">&times;</span>
             <h2 class="modal-title">Como Jogar</h2>
             <p class="modal-text">Complete a sequência numérica em formato de Z arrastando os números da bancada para os espaços vazios.</p>
-            <p class="modal-text">O jogo possui 3 níveis de dificuldade:</p>
+            <p class="modal-text">O jogo possui 4 níveis de dificuldade:</p>
             <ul>
                 <li><strong>Nível 1:</strong> Números de 1 a 20, com 12 números já preenchidos</li>
-                <li><strong>Nível 2:</strong> Números de 1 a 50, dengan 5 números já preenchidos</li>
+                <li><strong>Nível 2:</strong> Números de 1 a 50, com 5 números já preenchidos</li>
                 <li><strong>Nível 3:</strong> Números de 1 a 100, com 3 números já preenchidos</li>
+                <li><strong>Nível 4:</strong> Números de 1 a 200, com 2 números já preenchidos</li>
             </ul>
             <p class="modal-text">Cada nível possui 15 desafios. Complete todos para se tornar um mestre da sequência Z!</p>
             <p class="modal-text">Você ganha pontos por cada desafio concluído. Quanto mais rápido completar, mais pontos ganha!</p>
@@ -376,9 +385,10 @@
         </div>
         
         <div class="level-selector">
-            <button class="level-btn" data-level="1">Nível 1 (1-20)</button>
+            <button class="level-btn active" data-level="1">Nível 1 (1-20)</button>
             <button class="level-btn" data-level="2">Nível 2 (1-50)</button>
             <button class="level-btn" data-level="3">Nível 3 (1-100)</button>
+            <button class="level-btn" data-level="4">Nível 4 (1-200)</button>
         </div>
         
         <div class="game-area">
@@ -420,7 +430,6 @@
             const closeModal = document.getElementById('close-modal');
             const levelComplete = document.getElementById('level-complete');
             
-            // Configuração da grade em Z (6x5, mas com apenas 20 células visíveis)
             const gridCols = 6;
             const gridRows = 5;
             const totalCells = gridCols * gridRows;
@@ -433,25 +442,34 @@
             let draggedNumber = null;
             let fullZSequence = [];
             
-            // Posições que formam o Z (20 posições no total)
+            // POSIÇÕES CORRETAS DO Z (20 posições)
             const zPositions = [
-                0, 1, 2, 3, 4, 5,     // Linha 1: 6 posições
-                11,                    // Linha 2: 1 posição (coluna 6)
-                12, 13, 14, 15, 16, 17, // Linha 3: 6 posições
-                18,                    // Linha 4: 1 posição (coluna 1)
-                24, 25, 26, 27, 28, 29  // Linha 5: 6 posições
+                // Linha 1: 6 posições (esquerda para direita)
+                0, 1, 2, 3, 4, 5,
+                
+                // Linha 2: Apenas coluna 6 (índice 11)
+                11,
+                
+                // Linha 3: 6 posições (direita para esquerda)
+                17, 16, 15, 14, 13, 12,
+                
+                // Linha 4: Apenas coluna 1 (índice 18)
+                18,
+                
+                // Linha 5: 6 posições (esquerda para direita)
+                24, 25, 26, 27, 28, 29
             ];
             
-            // Verificar se há parâmetro de nível na URL
             const urlParams = new URLSearchParams(window.location.search);
             const levelParam = urlParams.get('level');
             
-            // Definir nível inicial com base no parâmetro da URL ou padrão para 1
-            if (levelParam && ['1', '2', '3'].includes(levelParam)) {
+            if (levelParam && ['1', '2', '3', '4'].includes(levelParam)) {
                 currentLevel = levelParam;
+                // Resetar desafio ao carregar com parâmetro de nível
+                currentChallenge = 1;
+                score = 0;
             }
             
-            // Mostrar modal de instruções ao carregar a página (apenas se não veio de parâmetro)
             if (!levelParam) {
                 window.addEventListener('load', function() {
                     setTimeout(function() {
@@ -460,19 +478,16 @@
                 });
             }
             
-            // Fechar modal ao clicar no X
             closeModal.addEventListener('click', function() {
                 instructionsModal.style.display = 'none';
             });
             
-            // Fechar modal ao clicar fora dele
             window.addEventListener('click', function(event) {
                 if (event.target === instructionsModal) {
                     instructionsModal.style.display = 'none';
                 }
             });
             
-            // Abrir modal ao clicar no botão "Como Jogar"
             helpBtn.addEventListener('click', function() {
                 instructionsModal.style.display = 'flex';
             });
@@ -480,20 +495,21 @@
             // Inicializar o jogo
             initGame();
             
-            // Alternar entre níveis
             levelButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     levelButtons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
                     currentLevel = this.dataset.level;
+                    // Resetar desafio e pontuação ao mudar de nível
                     currentChallenge = 1;
+                    score = 0;
                     updateChallengeInfo();
+                    updateScore();
                     updateLevelButtons();
                     initGame();
                 });
             });
             
-            // Atualizar botões de nível para refletir o nível atual
             function updateLevelButtons() {
                 levelButtons.forEach(btn => {
                     if (btn.dataset.level === currentLevel) {
@@ -505,29 +521,27 @@
             }
             
             function initGame() {
-                // Limpar grade e bancada
                 zGrid.innerHTML = '';
                 numbersBank.innerHTML = '';
                 feedback.className = 'feedback';
                 levelComplete.style.display = 'none';
                 
-                // Iniciar temporizador
                 startTime = new Date();
                 
-                // Atualizar informações do nível
                 if (currentLevel === '1') {
                     levelInfo.textContent = 'Nível 1: 12 números preenchidos (1-20)';
                 } else if (currentLevel === '2') {
                     levelInfo.textContent = 'Nível 2: 5 números preenchidos (1-50)';
-                } else {
+                } else if (currentLevel === '3') {
                     levelInfo.textContent = 'Nível 3: 3 números preenchidos (1-100)';
+                } else {
+                    levelInfo.textContent = 'Nível 4: 2 números preenchidos (1-200)';
                 }
                 
                 updateChallengeInfo();
                 updateScore();
                 updateLevelButtons();
                 
-                // Definir a sequência correta para o padrão Z com base no nível
                 let numbersToAdd = [];
                 let fixedCount = 0;
                 let min, max;
@@ -540,29 +554,29 @@
                     min = 1;
                     max = 50;
                     fixedCount = 5;
-                } else {
+                } else if (currentLevel === '3') {
                     min = 1;
                     max = 100;
                     fixedCount = 3;
+                } else {
+                    min = 1;
+                    max = 200;
+                    fixedCount = 2;
                 }
                 
-                // Gerar 20 números sequenciais para este nível
+                // Gerar nova sequência sempre
                 numbersToAdd = generateSequentialNumbers(20, min, max);
-                fullZSequence = [...numbersToAdd]; // Guardar a sequência completa
+                fullZSequence = [...numbersToAdd];
                 
-                // Criar sequência em Z (apenas nas 20 posições do Z)
                 correctSequence = createZSequence(numbersToAdd, fixedCount);
                 
-                // Criar a grade em formato de Z (6x5, mas com apenas 20 células visíveis)
                 for (let i = 0; i < totalCells; i++) {
                     const cell = document.createElement('div');
                     
                     if (zPositions.includes(i)) {
-                        // Esta é uma posição do Z
                         cell.className = 'cell';
                         cell.dataset.index = i;
                         
-                        // Encontrar qual número deveria estar nesta posição
                         const zIndex = zPositions.indexOf(i);
                         cell.dataset.expected = fullZSequence[zIndex];
                         
@@ -572,41 +586,19 @@
                         } else {
                             cell.classList.add('empty');
                             cell.addEventListener('click', handleCellClick);
+                            cell.addEventListener('dragover', handleDragOver);
+                            cell.addEventListener('drop', handleDrop);
                         }
-                        
-                        // Permitir arrastar e soltar
-                        cell.addEventListener('dragover', function(e) {
-                            e.preventDefault();
-                        });
-                        
-                        cell.addEventListener('drop', function(e) {
-                            e.preventDefault();
-                            const number = e.dataTransfer.getData('text/plain');
-                            
-                            // Verificar se o alvo é uma célula vazia
-                            if (this.classList.contains('empty')) {
-                                this.textContent = number;
-                                this.classList.remove('empty');
-                                
-                                // Remover o número da bancada
-                                draggedNumber.remove();
-                            }
-                        });
                     } else {
-                        // Esta não é uma posição do Z - célula invisível
                         cell.className = 'cell hidden';
                     }
                     
                     zGrid.appendChild(cell);
                 }
                 
-                // Criar a bancada de números para arrastar (apenas os que estão faltando)
                 const missingNumbers = findMissingNumbers(fullZSequence, correctSequence);
-                
-                // Embaralhar os números para aumentar o desafio
                 shuffleArray(missingNumbers);
                 
-                // Organizar os números em uma grade para melhor visualização
                 numbersBank.style.display = 'grid';
                 numbersBank.style.gridTemplateColumns = 'repeat(4, 1fr)';
                 numbersBank.style.gap = '10px';
@@ -623,7 +615,44 @@
                 });
             }
             
-            // Função para embaralhar array (Fisher-Yates algorithm)
+            function handleDragStart(e) {
+                draggedNumber = this;
+                this.style.opacity = '0.5';
+                e.dataTransfer.setData('text/plain', this.textContent);
+            }
+            
+            function handleDragEnd() {
+                this.style.opacity = '1';
+                draggedNumber = null;
+            }
+            
+            function handleDragOver(e) {
+                e.preventDefault();
+            }
+            
+            function handleDrop(e) {
+                e.preventDefault();
+                const number = e.dataTransfer.getData('text/plain');
+                
+                if (this.classList.contains('empty')) {
+                    this.textContent = number;
+                    this.classList.remove('empty');
+                    
+                    if (draggedNumber) {
+                        draggedNumber.remove();
+                    }
+                }
+            }
+            
+            function handleCellClick(e) {
+                if (this.textContent !== '' && !this.classList.contains('fixed')) {
+                    returnToBank(this.textContent);
+                    this.textContent = '';
+                    this.classList.add('empty');
+                    this.classList.remove('correct', 'incorrect');
+                }
+            }
+            
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -642,56 +671,54 @@
             
             function calculatePoints() {
                 const endTime = new Date();
-                const timeTaken = (endTime - startTime) / 1000; // Tempo em segundos
-                
-                // Base points for completing a challenge
+                const timeTaken = (endTime - startTime) / 1000;
                 let points = 100;
                 
-                // Bonus for level difficulty
                 if (currentLevel === '2') points += 50;
                 if (currentLevel === '3') points += 100;
+                if (currentLevel === '4') points += 200;
                 
-                // Bonus for speed (more points for faster completion)
-                const timeBonus = Math.max(0, 300 - timeTaken); // Max 300 bonus points
+                const timeBonus = Math.max(0, 300 - timeTaken);
                 points += timeBonus;
                 
                 return Math.round(points);
             }
             
-            // Gerar números sequenciais
             function generateSequentialNumbers(count, min, max) {
                 const numbers = [];
-                // Garantir que temos números sequenciais sem repetir
-                const start = Math.floor(Math.random() * (max - count + 1)) + 1;
-                for (let i = start; i < start + count && i <= max; i++) {
-                    numbers.push(i);
-                }
-                return numbers;
-            }
-            
-            // Criar sequência em formato Z (apenas nas 20 posições do Z)
-            function createZSequence(numbers, fixedCount) {
-                const sequence = Array(totalCells).fill(0);
+                const maxStart = max - count + 1;
+                const start = Math.floor(Math.random() * (maxStart - min + 1)) + min;
                 
-                // Primeiro, criar uma sequência completa com todos os 20 números
-                const fullSequence = Array(totalCells).fill(0);
-                
-                // Preencher todas as posições do Z com os números em ordem
-                for (let i = 0; i < zPositions.length; i++) {
-                    if (i < numbers.length) {
-                        fullSequence[zPositions[i]] = numbers[i];
+                for (let i = 0; i < count; i++) {
+                    const num = start + i;
+                    if (num <= max) {
+                        numbers.push(num);
+                    } else {
+                        numbers.push(min + (num - max - 1));
                     }
                 }
                 
-                // Agora, selecionar aleatoriamente quais posições manteremos fixas
+                return numbers;
+            }
+            
+            function createZSequence(numbers, fixedCount) {
+                const sequence = Array(totalCells).fill(0);
+                const fullSequence = Array(totalCells).fill(0);
+                
+                let numberIndex = 0;
+                for (let i = 0; i < zPositions.length; i++) {
+                    if (numberIndex < numbers.length) {
+                        fullSequence[zPositions[i]] = numbers[numberIndex];
+                        numberIndex++;
+                    }
+                }
+                
                 const availablePositions = [...zPositions];
                 const positionsToKeep = [];
                 
-                // Sempre manter a primeira e última posição para referência
                 positionsToKeep.push(availablePositions[0]);
                 positionsToKeep.push(availablePositions[availablePositions.length - 1]);
                 
-                // Selecionar aleatoriamente as outras posições para manter
                 while (positionsToKeep.length < fixedCount && availablePositions.length > 0) {
                     const randomIndex = Math.floor(Math.random() * availablePositions.length);
                     const position = availablePositions[randomIndex];
@@ -702,7 +729,6 @@
                     availablePositions.splice(randomIndex, 1);
                 }
                 
-                // Criar a sequência final, mantendo apenas os números nas posições selecionadas
                 const finalSequence = Array(totalCells).fill(0);
                 for (let i = 0; i < positionsToKeep.length; i++) {
                     finalSequence[positionsToKeep[i]] = fullSequence[positionsToKeep[i]];
@@ -711,11 +737,9 @@
                 return finalSequence;
             }
             
-            // Encontrar números que estão faltando na sequência
             function findMissingNumbers(allNumbers, sequence) {
                 const sequenceNumbers = [];
                 
-                // Coletar apenas os números nas posições do Z
                 for (let i = 0; i < sequence.length; i++) {
                     if (zPositions.includes(i) && sequence[i] !== 0) {
                         sequenceNumbers.push(sequence[i]);
@@ -725,28 +749,6 @@
                 return allNumbers.filter(num => !sequenceNumbers.includes(num));
             }
             
-            // Manipuladores de eventos de arrastar e soltar
-            function handleDragStart(e) {
-                draggedNumber = this;
-                this.style.opacity = '0.5';
-                e.dataTransfer.setData('text/plain', this.textContent);
-            }
-            
-            function handleDragEnd() {
-                this.style.opacity = '1';
-            }
-            
-            function handleCellClick(e) {
-                // Se a célula já tem um número, removê-lo
-                if (this.textContent !== '' && !this.classList.contains('fixed')) {
-                    returnToBank(this.textContent);
-                    this.textContent = '';
-                    this.classList.add('empty');
-                    this.classList.remove('correct', 'incorrect');
-                }
-            }
-            
-            // Devolver número à bancada
             function returnToBank(number) {
                 const numberElement = document.createElement('div');
                 numberElement.className = 'number';
@@ -758,7 +760,6 @@
                 numbersBank.appendChild(numberElement);
             }
             
-            // Verificar a resposta
             checkBtn.addEventListener('click', function() {
                 const cells = document.querySelectorAll('.cell:not(.hidden)');
                 let allFilled = true;
@@ -769,7 +770,6 @@
                         allFilled = false;
                         cell.classList.add('incorrect');
                     } else if (!cell.classList.contains('fixed')) {
-                        // Converter para número antes de comparar
                         const expected = parseInt(cell.dataset.expected);
                         const actual = parseInt(cell.textContent);
                         
@@ -796,21 +796,19 @@
                     feedback.classList.remove('error');
                     feedback.classList.add('success');
                     
-                    // Avançar para o próximo desafio
                     setTimeout(() => {
                         if (currentChallenge < totalChallenges) {
                             currentChallenge++;
                             updateChallengeInfo();
                             initGame();
                         } else {
-                            // Todos os desafios deste nível foram completados
                             levelComplete.innerHTML = `
                                 <h2>Nível ${currentLevel} Concluído!</h2>
                                 <p>Você completou todos os ${totalChallenges} desafios do nível ${currentLevel}!</p>
                                 <p>Total de pontos: ${score}</p>
                             `;
                             
-                            if (currentLevel < 3) {
+                            if (currentLevel < 4) {
                                 levelComplete.innerHTML += `
                                     <p>Deseja avançar para o próximo nível?</p>
                                     <button id="next-level-btn" style="margin-top: 15px;">Avançar para o Nível ${parseInt(currentLevel) + 1}</button>
@@ -820,6 +818,7 @@
                                 document.getElementById('next-level-btn').addEventListener('click', function() {
                                     currentLevel = (parseInt(currentLevel) + 1).toString();
                                     currentChallenge = 1;
+                                    score = 0;
                                     levelComplete.style.display = 'none';
                                     initGame();
                                 });
@@ -841,7 +840,6 @@
                         }
                     }, 2000);
                     
-                    // Desabilitar arrastar após vitória
                     const numbers = document.querySelectorAll('.number');
                     numbers.forEach(num => {
                         num.draggable = false;
@@ -855,7 +853,6 @@
                 }
             });
             
-            // Reiniciar o jogo
             resetBtn.addEventListener('click', function() {
                 initGame();
             });
