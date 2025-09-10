@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio do Robô Matemático - Correções Aplicadas</title>
+    <title>Desafio do Robô Matemático - Versão Estável</title>
     <style>
         :root {
             --grid-size: 6;
@@ -841,10 +841,16 @@
 
         // Função para habilitar/desabilitar controles
         function toggleControlButtons(enabled) {
-            document.getElementById('verify-btn').disabled = !enabled;
-            document.querySelectorAll('#command-buttons .control-btn').forEach(btn => {
+            const buttons = [
+                document.getElementById('verify-btn'),
+                ...document.querySelectorAll('#command-buttons .control-btn')
+            ];
+            
+            buttons.forEach(btn => {
                 btn.disabled = !enabled;
+                btn.style.opacity = enabled ? '1' : '0.6';
             });
+            
             document.getElementById('theme-selector').disabled = !enabled;
         }
 
@@ -1083,80 +1089,109 @@
             }); 
         }
         
-        // Executar comandos
+        // Função auxiliar para validar posição
+        function isValidPosition(pos) {
+            return Number.isInteger(pos.x) && Number.isInteger(pos.y) &&
+                   pos.x >= -1 && pos.x <= GRID_SIZE &&
+                   pos.y >= -1 && pos.y <= GRID_SIZE;
+        }
+
+        // Executar comandos - VERSÃO ESTÁVEL
         function executeCommands() {
             if (isMoving || commandQueue.length === 0 || isGameOver) return;
             
+            // Sistema de lock para prevenir execução concorrente
+            if (window.__commandExecutionLock) return;
+            window.__commandExecutionLock = true;
+            
             isMoving = true;
+            toggleControlButtons(false);
+            
+            // Reset para posição inicial
             playerPos = {...startPos};
             updatePlayerPosition();
             
-            let tempPos = { ...startPos };
             let currentIndex = 0;
             visitedCells = [];
-            
-            const moveInterval = setInterval(() => {
-                if (currentIndex >= commandQueue.length) {
-                    clearInterval(moveInterval);
-                    checkResult(tempPos);
+            let movementTimeout = null;
+
+            const executeNextCommand = () => {
+                // Verificação de segurança
+                if (!window.__commandExecutionLock || currentIndex >= commandQueue.length) {
+                    finishExecution();
                     return;
                 }
-                
+
                 const command = commandQueue[currentIndex];
-                
-                // Mover na direção do comando
-                if (command === '➡️') tempPos.x++; 
-                else if (command === '⬅️') tempPos.x--; 
-                else if (command === '⬆️') tempPos.y--; 
-                else if (command === '⬇️') tempPos.y++;
-                
-                playerPos = {...tempPos};
+                const newPos = {...playerPos};
+
+                // Calcula nova posição
+                if (command === '➡️') newPos.x++; 
+                else if (command === '⬅️') newPos.x--; 
+                else if (command === '⬆️') newPos.y--; 
+                else if (command === '⬇️') newPos.y++;
+
+                // Verifica validade da posição
+                if (!isValidPosition(newPos)) {
+                    handleError("Erro de movimento detectado!");
+                    cleanup();
+                    return;
+                }
+
+                // Atualiza posição
+                playerPos = newPos;
                 updatePlayerPosition();
-                currentIndex++;
                 
-                // Registrar célula visitada para feedback visual
-                // CORREÇÃO: A célula só é considerada correta se for o destino final
-                // Não a cada passo do caminho
-                if (tempPos.x !== startPos.x || tempPos.y !== startPos.y) {
-                    const isCorrectPath = false; // Inicialmente todas são incorretas
-                    visitedCells.push({x: tempPos.x, y: tempPos.y, correct: isCorrectPath});
+                // Verifica colisões após renderização
+                const isBomb = bombPositions.some(b => b.x === playerPos.x && b.y === playerPos.y);
+                const isDecoy = decoyPositions.some(d => d.x === playerPos.x && d.y === playerPos.y);
+                const isWall = playerPos.x < 0 || playerPos.x >= GRID_SIZE || 
+                              playerPos.y < 0 || playerPos.y >= GRID_SIZE;
+
+                if (isBomb || isDecoy || isWall) {
+                    const errorMsg = isBomb ? "BOOM! Você atingiu uma bomba!" :
+                                   isDecoy ? "Cuidado! Número incorreto!" :
+                                   "Ops! O robô bateu na parede!";
+                    handleError(errorMsg);
+                    cleanup();
+                    return;
+                }
+
+                // Registra célula visitada
+                if (currentIndex > 0 || (playerPos.x !== startPos.x || playerPos.y !== startPos.y)) {
+                    visitedCells.push({x: playerPos.x, y: playerPos.y, correct: false});
                     updateGridDisplay();
                 }
-                
-                // Verificar se saiu dos limites
-                if (tempPos.x < 0 || tempPos.x >= GRID_SIZE || tempPos.y < 0 || tempPos.y >= GRID_SIZE) {
-                    clearInterval(moveInterval);
-                    handleError("Ops! O robô bateu na parede!");
-                    return;
-                }
-                
-                // Verificar colisões apenas se o robô se moveu
-                if (tempPos.x !== startPos.x || tempPos.y !== startPos.y) {
-                    const isBomb = bombPositions.some(b => b.x === tempPos.x && b.y === tempPos.y);
-                    const isDecoy = decoyPositions.some(d => d.x === tempPos.x && d.y === tempPos.y);
 
-                    if (isBomb) {
-                        clearInterval(moveInterval); 
-                        handleError("BOOM! Você atingiu uma bomba!");
-                        return; 
-                    }
-                    
-                    if (isDecoy) {
-                        clearInterval(moveInterval); 
-                        handleError("Cuidado! Você passou por um número incorreto!");
-                        return; 
-                    }
+                currentIndex++;
+                
+                // Agenda próximo movimento
+                movementTimeout = setTimeout(executeNextCommand, 400);
+            };
+
+            const finishExecution = () => {
+                cleanup();
+                checkResult(playerPos);
+            };
+
+            const cleanup = () => {
+                if (movementTimeout) {
+                    clearTimeout(movementTimeout);
+                    movementTimeout = null;
                 }
-            }, 400);
+                window.__commandExecutionLock = false;
+                isMoving = false;
+                toggleControlButtons(true);
+            };
+
+            // Inicia execução
+            movementTimeout = setTimeout(executeNextCommand, 400);
         }
         
         // Verificar resultado
         function checkResult(finalPos) {
-            isMoving = false;
-            
-            // CORREÇÃO: Marcar o caminho final como correto se chegou ao destino
+            // Marcar o caminho final como correto se chegou ao destino
             if (finalPos.x === targetPos.x && finalPos.y === targetPos.y) {
-                // Marcar todas as células visitadas como corretas
                 visitedCells = visitedCells.map(cell => ({...cell, correct: true}));
                 updateGridDisplay();
                 
@@ -1212,7 +1247,6 @@
         
         // Manipular erro
         function handleError(message) {
-            isMoving = false;
             lives--;
             updateLivesDisplay();
             player.classList.add('exploded');
