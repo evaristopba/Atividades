@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio do Robô Matemático - Versão Estável</title>
+    <title>Desafio do Robô Matemático</title>
     <style>
         :root {
             --grid-size: 6;
@@ -614,6 +614,12 @@
         let levelEntryScore = 0;
         let visitedCells = [];
         
+        // Sistema de detecção de falhas
+        let inconsistencyCount = 0;
+        const MAX_INCONSISTENCIES = 3;
+        let lastVerifiedPosition = { x: 0, y: 0 };
+        let monitoringInterval = null;
+        
         // Configurações dos níveis
         const levelSettings = {
             1: { bombs: 4, operations: ['+', '-'], range: 10, decoys: 2 },
@@ -650,6 +656,133 @@
                 showInstructions();
             }
         }
+        
+        // ==============================================
+        // SISTEMA DE DETECÇÃO E RECUPERAÇÃO DE FALHAS
+        // ==============================================
+        
+        // Função para iniciar monitoramento
+        function startPositionMonitoring() {
+            stopPositionMonitoring();
+            
+            lastVerifiedPosition = { ...playerPos };
+            inconsistencyCount = 0;
+            
+            monitoringInterval = setInterval(() => {
+                monitorPositionConsistency();
+            }, 100);
+        }
+        
+        // Função para parar monitoramento
+        function stopPositionMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+        }
+        
+        // Função principal de monitoramento
+        function monitorPositionConsistency() {
+            if (!isMoving) return;
+            
+            // Calcula posição visual real do robô
+            const computedStyle = window.getComputedStyle(player);
+            const visualX = Math.round((parseFloat(computedStyle.left) - GRID_GAP) / (CELL_SIZE + GRID_GAP));
+            const visualY = Math.round((parseFloat(computedStyle.top) - GRID_GAP) / (CELL_SIZE + GRID_GAP));
+            
+            // Verifica dessincronização
+            if (visualX !== playerPos.x || visualY !== playerPos.y) {
+                inconsistencyCount++;
+                
+                console.warn(`Dessincronização detectada! Tentativa ${inconsistencyCount}`, {
+                    posição_lógica: playerPos,
+                    posição_visual: { x: visualX, y: visualY },
+                    comando_atual: commandQueue[commandQueue.length - 1]
+                });
+                
+                // Se atingir limite crítico, toma ação
+                if (inconsistencyCount >= MAX_INCONSISTENCIES) {
+                    handlePositionFailure();
+                }
+            } else {
+                // Reset do contador se estiver sincronizado
+                inconsistencyCount = 0;
+                lastVerifiedPosition = { ...playerPos };
+            }
+        }
+        
+        // Função para tratar falha de posicionamento
+        function handlePositionFailure() {
+            console.error("FALHA CRÍTICA: Dessincronização persistente detectada!");
+            
+            // Para imediatamente a execução
+            stopPositionMonitoring();
+            if (window.__commandExecutionLock) {
+                window.__commandExecutionLock = false;
+            }
+            isMoving = false;
+            
+            // Recuperação do estado
+            playerPos = { ...lastVerifiedPosition };
+            updatePlayerPosition();
+            
+            // Feedback visual para o usuário
+            showRecoveryMessage();
+            
+            // Reabilita controles
+            toggleControlButtons(true);
+            
+            // Log para análise posterior
+            logPositionFailure();
+        }
+        
+        // Mensagem de recuperação para o usuário
+        function showRecoveryMessage() {
+            const recoveryMsg = document.createElement('div');
+            recoveryMsg.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ff4444;
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                z-index: 1000;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            recoveryMsg.textContent = "⚠️ Problema técnico detectado. Movimento reiniciado.";
+            recoveryMsg.id = 'recovery-message';
+            
+            document.body.appendChild(recoveryMsg);
+            
+            // Remove após 5 segundos
+            setTimeout(() => {
+                const msg = document.getElementById('recovery-message');
+                if (msg) msg.remove();
+            }, 5000);
+        }
+        
+        // Log para análise de falhas
+        function logPositionFailure() {
+            const logEntry = {
+                timestamp: new Date().toISOString(),
+                playerPos: { ...playerPos },
+                startPos: { ...startPos },
+                targetPos: { ...targetPos },
+                commandQueue: [...commandQueue],
+                inconsistencyCount: inconsistencyCount,
+                userAgent: navigator.userAgent,
+                windowSize: { width: window.innerWidth, height: window.innerHeight }
+            };
+            
+            console.error("LOG DE FALHA:", logEntry);
+        }
+        
+        // ==============================================
+        // FUNÇÕES PRINCIPAIS DO JOGO
+        // ==============================================
         
         // Função para mostrar instruções
         function showInstructions() {
@@ -1099,15 +1232,15 @@
         // Executar comandos - VERSÃO ESTÁVEL
         function executeCommands() {
             if (isMoving || commandQueue.length === 0 || isGameOver) return;
-            
-            // Sistema de lock para prevenir execução concorrente
             if (window.__commandExecutionLock) return;
-            window.__commandExecutionLock = true;
             
+            window.__commandExecutionLock = true;
             isMoving = true;
             toggleControlButtons(false);
             
-            // Reset para posição inicial
+            // INICIAR MONITORAMENTO
+            startPositionMonitoring();
+            
             playerPos = {...startPos};
             updatePlayerPosition();
             
@@ -1116,7 +1249,6 @@
             let movementTimeout = null;
 
             const executeNextCommand = () => {
-                // Verificação de segurança
                 if (!window.__commandExecutionLock || currentIndex >= commandQueue.length) {
                     finishExecution();
                     return;
@@ -1125,24 +1257,23 @@
                 const command = commandQueue[currentIndex];
                 const newPos = {...playerPos};
 
-                // Calcula nova posição
                 if (command === '➡️') newPos.x++; 
                 else if (command === '⬅️') newPos.x--; 
                 else if (command === '⬆️') newPos.y--; 
                 else if (command === '⬇️') newPos.y++;
 
-                // Verifica validade da posição
                 if (!isValidPosition(newPos)) {
-                    handleError("Erro de movimento detectado!");
+                    handleError("Erro de movimento!");
                     cleanup();
                     return;
                 }
 
-                // Atualiza posição
                 playerPos = newPos;
                 updatePlayerPosition();
                 
-                // Verifica colisões após renderização
+                // ATUALIZA ÚLTIMA POSIÇÃO VÁLIDA
+                lastVerifiedPosition = { ...playerPos };
+                
                 const isBomb = bombPositions.some(b => b.x === playerPos.x && b.y === playerPos.y);
                 const isDecoy = decoyPositions.some(d => d.x === playerPos.x && d.y === playerPos.y);
                 const isWall = playerPos.x < 0 || playerPos.x >= GRID_SIZE || 
@@ -1157,24 +1288,26 @@
                     return;
                 }
 
-                // Registra célula visitada
                 if (currentIndex > 0 || (playerPos.x !== startPos.x || playerPos.y !== startPos.y)) {
                     visitedCells.push({x: playerPos.x, y: playerPos.y, correct: false});
                     updateGridDisplay();
                 }
 
                 currentIndex++;
-                
-                // Agenda próximo movimento
                 movementTimeout = setTimeout(executeNextCommand, 400);
             };
 
             const finishExecution = () => {
+                // PARAR MONITORAMENTO AO FINALIZAR
+                stopPositionMonitoring();
                 cleanup();
                 checkResult(playerPos);
             };
 
             const cleanup = () => {
+                // GARANTIR que o monitoramento para
+                stopPositionMonitoring();
+                
                 if (movementTimeout) {
                     clearTimeout(movementTimeout);
                     movementTimeout = null;
@@ -1184,7 +1317,6 @@
                 toggleControlButtons(true);
             };
 
-            // Inicia execução
             movementTimeout = setTimeout(executeNextCommand, 400);
         }
         
@@ -1247,6 +1379,9 @@
         
         // Manipular erro
         function handleError(message) {
+            // PARAR MONITORAMENTO EM ERRO
+            stopPositionMonitoring();
+            
             lives--;
             updateLivesDisplay();
             player.classList.add('exploded');
