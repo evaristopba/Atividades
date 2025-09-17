@@ -418,8 +418,8 @@
             let correctSequence = [];
             let draggedNumber = null;
             let fullZSequence = [];
-            let unlockedLevels = new Set(['1']); // Inicializa apenas com nível 1 desbloqueado
-            let urlSelectedLevel = null; // Armazena o nível selecionado via URL
+            let unlockedLevels = new Set(['1']);
+            let urlSelectedLevel = null;
             
             const zPositions = [
                 0, 1, 2, 3, 4, 5,
@@ -434,19 +434,17 @@
             
             if (levelParam && ['1', '2', '3', '4'].includes(levelParam)) {
                 currentLevel = levelParam;
-                urlSelectedLevel = levelParam; // Armazena o nível da URL
+                urlSelectedLevel = levelParam;
             }
             
             function updateLevelButtonsState() {
                 levelButtons.forEach(btn => {
-                    // Remove 'locked' para o nível selecionado via URL ou desbloqueado
                     if (unlockedLevels.has(btn.dataset.level) || btn.dataset.level === urlSelectedLevel) {
                         btn.classList.remove('locked');
                     } else {
                         btn.classList.add('locked');
                     }
                     
-                    // Aplica 'active' ao nível atual
                     if (btn.dataset.level === currentLevel) {
                         btn.classList.add('active');
                     } else {
@@ -485,13 +483,23 @@
                     
                     const targetLevel = this.dataset.level;
                     if (targetLevel !== currentLevel) {
-                        const confirmChange = confirm(`Deseja trocar para o Nível ${targetLevel}?`);
+                        let confirmMessage = `Deseja trocar para o Nível ${targetLevel}?`;
+                        let isPreviousLevel = parseInt(targetLevel) < parseInt(currentLevel);
+                        if (isPreviousLevel && score > 0) {
+                            confirmMessage = `Voltar para o Nível ${targetLevel} resultará em uma penalidade de 50 pontos. Deseja continuar?`;
+                        }
+                        
+                        const confirmChange = confirm(confirmMessage);
                         if (confirmChange) {
+                            if (isPreviousLevel && score > 0) {
+                                score = Math.max(0, score - 50);
+                                updateScore();
+                            }
                             levelButtons.forEach(btn => btn.classList.remove('active'));
                             this.classList.add('active');
                             currentLevel = targetLevel;
                             currentChallenge = 1;
-                            urlSelectedLevel = null; // Reseta URL ao mudar via botão
+                            urlSelectedLevel = null;
                             updateChallengeInfo();
                             updateLevelButtonsState();
                             initGame();
@@ -783,7 +791,7 @@
                                     console.log('Avançando para o Nível', nextLevel);
                                     currentLevel = nextLevel.toString();
                                     currentChallenge = 1;
-                                    urlSelectedLevel = null; // Reseta URL ao avançar
+                                    urlSelectedLevel = null;
                                     levelComplete.style.display = 'none';
                                     updateLevelButtonsState();
                                     initGame();
@@ -800,7 +808,7 @@
                                     currentChallenge = 1;
                                     score = 0;
                                     unlockedLevels = new Set(['1']);
-                                    urlSelectedLevel = null; // Reseta URL ao reiniciar
+                                    urlSelectedLevel = null;
                                     levelComplete.style.display = 'none';
                                     updateLevelButtonsState();
                                     initGame();
