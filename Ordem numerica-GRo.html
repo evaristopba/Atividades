@@ -418,7 +418,8 @@
             let correctSequence = [];
             let draggedNumber = null;
             let fullZSequence = [];
-            let unlockedLevels = new Set(['1']);
+            let unlockedLevels = new Set(['1']); // Inicializa apenas com nível 1 desbloqueado
+            let urlSelectedLevel = null; // Armazena o nível selecionado via URL
             
             const zPositions = [
                 0, 1, 2, 3, 4, 5,
@@ -433,17 +434,19 @@
             
             if (levelParam && ['1', '2', '3', '4'].includes(levelParam)) {
                 currentLevel = levelParam;
-                unlockedLevels = new Set([currentLevel]);
+                urlSelectedLevel = levelParam; // Armazena o nível da URL
             }
             
             function updateLevelButtonsState() {
                 levelButtons.forEach(btn => {
-                    if (unlockedLevels.has(btn.dataset.level)) {
+                    // Remove 'locked' para o nível selecionado via URL ou desbloqueado
+                    if (unlockedLevels.has(btn.dataset.level) || btn.dataset.level === urlSelectedLevel) {
                         btn.classList.remove('locked');
                     } else {
                         btn.classList.add('locked');
                     }
                     
+                    // Aplica 'active' ao nível atual
                     if (btn.dataset.level === currentLevel) {
                         btn.classList.add('active');
                     } else {
@@ -488,6 +491,7 @@
                             this.classList.add('active');
                             currentLevel = targetLevel;
                             currentChallenge = 1;
+                            urlSelectedLevel = null; // Reseta URL ao mudar via botão
                             updateChallengeInfo();
                             updateLevelButtonsState();
                             initGame();
@@ -779,6 +783,7 @@
                                     console.log('Avançando para o Nível', nextLevel);
                                     currentLevel = nextLevel.toString();
                                     currentChallenge = 1;
+                                    urlSelectedLevel = null; // Reseta URL ao avançar
                                     levelComplete.style.display = 'none';
                                     updateLevelButtonsState();
                                     initGame();
@@ -794,6 +799,8 @@
                                     currentLevel = '1';
                                     currentChallenge = 1;
                                     score = 0;
+                                    unlockedLevels = new Set(['1']);
+                                    urlSelectedLevel = null; // Reseta URL ao reiniciar
                                     levelComplete.style.display = 'none';
                                     updateLevelButtonsState();
                                     initGame();
