@@ -788,11 +788,12 @@
             
             // Direção das linhas
             let secondRowDirection = true;
-            let thirdRowDirection = true; // true = para baixo, false = para cima
-            let fourthRowDirection = true; // true = para baixo, false = para cima
+            let thirdRowDirection = true;
+            let fourthRowDirection = true;
             let gridLetters = [];
             let outsideLetters = [];
             let fixedPositions = [];
+            let currentSequenceStart = 0;
             
             // Sistema de níveis e pontuação
             let level = 1;
@@ -802,6 +803,9 @@
             let challengesCompleted = 0;
             const challengesPerLevel = 8;
             const totalLevels = 5;
+            
+            // Variável para controlar se o jogador completou o desafio atual
+            let currentChallengeCompleted = false;
             
             // Personagens para feedback
             const spaceCharacters = ['👽', '🚀', '🛸', '👾', '🤖', '⭐', '🌌', '🪐'];
@@ -887,6 +891,20 @@
             }
             
             function initGame() {
+                // Só gerar nova sequência se o desafio anterior foi completado
+                if (currentChallengeCompleted || challengesCompleted === 0) {
+                    // Escolher um ponto de partida aleatório para a sequência
+                    currentSequenceStart = Math.floor(Math.random() * (alphabet.length - 25));
+                    
+                    // Definir direções aleatórias
+                    secondRowDirection = Math.random() > 0.5;
+                    thirdRowDirection = Math.random() > 0.5;
+                    fourthRowDirection = Math.random() > 0.5;
+                }
+                
+                // Resetar o estado do desafio atual
+                currentChallengeCompleted = false;
+                
                 gridContainer.innerHTML = '';
                 lettersContainer.innerHTML = '';
                 messageEl.className = 'message';
@@ -897,11 +915,6 @@
                 challengeTotal.textContent = challengesPerLevel;
                 challengeProgress.style.width = `${((challengesCompleted) / challengesPerLevel) * 100}%`;
                 
-                // Definir direções aleatórias
-                secondRowDirection = Math.random() > 0.5;
-                thirdRowDirection = Math.random() > 0.5;
-                fourthRowDirection = Math.random() > 0.5;
-                
                 // Atualizar setas indicadoras
                 arrowRow3.textContent = thirdRowDirection ? '↓' : '↑';
                 arrowRow4.textContent = fourthRowDirection ? '↓' : '↑';
@@ -909,7 +922,7 @@
                 updateMissionBrief();
                 
                 gridLetters = generateGridLetters();
-                fixedPositions = chooseFixedPositions();
+                fixedPositions = chooseRandomFixedPositions(); // Agora posições aleatórias!
                 
                 gridLetters.forEach((letter, index) => {
                     const cell = document.createElement('div');
@@ -959,41 +972,48 @@
             function generateGridLetters() {
                 const result = [];
                 
-                // Primeira linha (sempre da esquerda para a direita)
-                for (let i = 0; i < 7; i++) {
-                    result.push(alphabet[i]);
+                // Criar sequência personalizada começando de um ponto aleatório
+                const customAlphabet = [];
+                for (let i = 0; i < 26; i++) {
+                    const index = (currentSequenceStart + i) % alphabet.length;
+                    customAlphabet.push(alphabet[index]);
                 }
                 
-                // Segunda linha (direção aleatória)
+                // Primeira linha (sempre da esquerda para a direita) - 7 letras
+                for (let i = 0; i < 7; i++) {
+                    result.push(customAlphabet[i]);
+                }
+                
+                // Segunda linha (direção aleatória) - 7 letras
                 if (secondRowDirection) {
                     for (let i = 7; i < 14; i++) {
-                        result.push(alphabet[i]);
+                        result.push(customAlphabet[i]);
                     }
                 } else {
                     for (let i = 13; i >= 7; i--) {
-                        result.push(alphabet[i]);
+                        result.push(customAlphabet[i]);
                     }
                 }
                 
-                // Terceira linha (direção baseada na seta)
+                // Terceira linha (direção baseada na seta) - 7 letras
                 if (thirdRowDirection) {
                     for (let i = 14; i < 21; i++) {
-                        result.push(alphabet[i]);
+                        result.push(customAlphabet[i]);
                     }
                 } else {
                     for (let i = 20; i >= 14; i--) {
-                        result.push(alphabet[i]);
+                        result.push(customAlphabet[i]);
                     }
                 }
                 
-                // Quarta linha (direção baseada na seta)
+                // Quarta linha (direção baseada na seta) - 5 letras
                 if (fourthRowDirection) {
                     for (let i = 21; i < 26; i++) {
-                        result.push(alphabet[i]);
+                        result.push(customAlphabet[i]);
                     }
                 } else {
                     for (let i = 25; i >= 21; i--) {
-                        result.push(alphabet[i]);
+                        result.push(customAlphabet[i]);
                     }
                 }
                 
@@ -1012,30 +1032,22 @@
                 return result.sort(() => Math.random() - 0.5);
             }
             
-            function chooseFixedPositions() {
+            function chooseRandomFixedPositions() {
                 const positions = [];
                 let fixedCount = 6 - level;
                 if (fixedCount < 1) fixedCount = 1;
+                if (fixedCount > 10) fixedCount = 10; // Limite máximo
                 
-                if (level > 1 || Math.random() > 0.5) {
-                    positions.push(0);
+                // Criar array com todas as posições possíveis (0-25)
+                const allPositions = Array.from({length: 26}, (_, i) => i);
+                
+                // Embaralhar as posições aleatoriamente
+                const shuffledPositions = [...allPositions].sort(() => Math.random() - 0.5);
+                
+                // Selecionar as primeiras 'fixedCount' posições embaralhadas
+                for (let i = 0; i < fixedCount; i++) {
+                    positions.push(shuffledPositions[i]);
                 }
-                
-                if (level > 1) {
-                    positions.push(25);
-                }
-                
-                if (secondRowDirection) {
-                    if (fixedCount >= 2) positions.push(7);
-                    if (fixedCount >= 3) positions.push(10);
-                } else {
-                    if (fixedCount >= 2) positions.push(13);
-                    if (fixedCount >= 3) positions.push(10);
-                }
-                
-                if (fixedCount >= 4) positions.push(3);
-                if (fixedCount >= 5) positions.push(17);
-                if (fixedCount >= 6) positions.push(20);
                 
                 return positions;
             }
@@ -1061,7 +1073,12 @@
                 const directionText2 = secondRowDirection ? "→" : "←";
                 const directionText3 = thirdRowDirection ? "↓" : "↑";
                 const directionText4 = fourthRowDirection ? "↓" : "↑";
-                missionBrief.textContent = `🚀 Missão Nível ${level}: Organize as letras (Linha 2: ${directionText2}, Linha 3: ${directionText3}, Linha 4: ${directionText4}) para estabilizar o portal!`;
+                
+                // Mostrar a sequência atual no briefing da missão
+                const startLetter = alphabet[currentSequenceStart];
+                const endLetter = alphabet[(currentSequenceStart + 25) % alphabet.length];
+                
+                missionBrief.textContent = `🚀 Missão Nível ${level}: Sequência ${startLetter}-${endLetter} (Linha 2: ${directionText2}, Linha 3: ${directionText3}, Linha 4: ${directionText4})`;
             }
             
             function updateStats() {
@@ -1072,6 +1089,9 @@
             }
             
             function completeChallenge() {
+                // Marcar que o desafio atual foi completado
+                currentChallengeCompleted = true;
+                
                 challengesCompleted++;
                 score = Math.min(100, score + 10 * level);
                 updateStats();
@@ -1121,6 +1141,33 @@
                 }
             }
             
+            // Função para reiniciar o desafio atual
+            function resetCurrentChallenge() {
+                const gridCells = document.querySelectorAll('.grid-cell');
+                const letterEls = document.querySelectorAll('.letter');
+                
+                // Limpar apenas as células não fixas
+                gridCells.forEach(cell => {
+                    if (!cell.classList.contains('fixed')) {
+                        cell.textContent = '';
+                        delete cell.dataset.filled;
+                        cell.classList.remove('correct', 'incorrect');
+                    }
+                });
+                
+                // Mostrar todas as letras novamente
+                letterEls.forEach(letter => {
+                    letter.classList.remove('hidden');
+                });
+                
+                messageEl.textContent = '🔄 Sistema reiniciado! Tente novamente.';
+                messageEl.className = 'message success';
+                
+                setTimeout(() => {
+                    messageEl.className = 'message';
+                }, 2000);
+            }
+            
             // Funções de drag and drop
             function dragStart(e) {
                 e.dataTransfer.setData('text/plain', e.target.dataset.letter);
@@ -1166,6 +1213,24 @@
                 let correctInThisTry = 0;
                 let errorsInThisTry = 0;
                 const gridCells = document.querySelectorAll('.grid-cell');
+                
+                // Verificar se todas as células estão preenchidas
+                let allCellsFilled = true;
+                gridCells.forEach(cell => {
+                    if (!cell.dataset.filled && !cell.classList.contains('fixed')) {
+                        allCellsFilled = false;
+                    }
+                });
+                
+                if (!allCellsFilled) {
+                    messageEl.textContent = '📡 Complete todas as células antes de verificar!';
+                    messageEl.className = 'message error';
+                    
+                    setTimeout(() => {
+                        messageEl.className = 'message';
+                    }, 3000);
+                    return;
+                }
                 
                 gridCells.forEach((cell) => {
                     const correctLetter = cell.dataset.letter;
@@ -1214,31 +1279,17 @@
                 }
             });
             
-            resetBtn.addEventListener('click', () => {
-                const gridCells = document.querySelectorAll('.grid-cell');
-                const letterEls = document.querySelectorAll('.letter');
-                
-                gridCells.forEach(cell => {
-                    if (!cell.classList.contains('fixed')) {
-                        cell.textContent = '';
-                        delete cell.dataset.filled;
-                        cell.classList.remove('correct', 'incorrect');
-                    }
-                });
-                
-                letterEls.forEach(letter => {
-                    letter.classList.remove('hidden');
-                });
-                
-                messageEl.className = 'message';
-            });
+            // Botão Reiniciar Sistema - Agora funcional
+            resetBtn.addEventListener('click', resetCurrentChallenge);
             
+            // Botão Nova Missão
             newGameBtn.addEventListener('click', () => {
                 level = 1;
                 score = 100;
                 correctAnswers = 0;
                 errorCount = 0;
                 challengesCompleted = 0;
+                currentChallengeCompleted = true; // Forçar nova sequência
                 updateStats();
                 initGame();
             });
