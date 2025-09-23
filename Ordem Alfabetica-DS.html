@@ -3,211 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABC Divertido - Jogo de Letras para Crianças</title>
+    <title>Corrida Espacial do Alfabeto</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            font-family: 'Orbitron', 'Arial', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            color: #333;
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
         
         .container {
-            background-color: rgba(255, 255, 255, 0.95);
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0 50px rgba(0, 150, 255, 0.5);
             width: 100%;
             max-width: 1000px;
             padding: 25px;
             text-align: center;
             position: relative;
-            border: 8px solid #ffbd69;
-            animation: bounceIn 1s;
+            border: 3px solid #00ccff;
+            animation: glow 2s infinite alternate;
+            backdrop-filter: blur(10px);
         }
         
-        @keyframes bounceIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            60% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes glow {
+            from { box-shadow: 0 0 30px rgba(0, 150, 255, 0.5); }
+            to { box-shadow: 0 0 50px rgba(0, 200, 255, 0.8); }
         }
         
         .header {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             position: relative;
         }
         
         h1 {
-            color: #ff5e78;
+            color: #00ccff;
             margin-bottom: 15px;
-            font-size: 2.8rem;
-            text-shadow: 3px 3px 0 #ffbd69;
-            background: linear-gradient(135deg, #ff5e78 0%, #ff9a9e 100%);
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ccff, 0 0 30px #0066ff;
+            background: linear-gradient(135deg, #00ccff 0%, #0066ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             padding: 10px;
-            display: inline-block;
         }
         
         .title-icon {
-            font-size: 2.5rem;
-            margin: 0 15px;
-            color: #ffbd69;
-            animation: bounce 2s infinite;
+            font-size: 3rem;
+            margin: 0 20px;
+            color: #00ccff;
+            animation: float 3s infinite;
+            text-shadow: 0 0 15px #00ccff;
         }
         
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
         }
         
         .stats-container {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
             gap: 15px;
         }
         
         .stat-box {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
             color: white;
             padding: 15px;
             border-radius: 15px;
             min-width: 150px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border: 3px solid #ffbd69;
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+            border: 2px solid #00ccff;
             position: relative;
             overflow: hidden;
         }
         
-        .stat-box::after {
+        .stat-box::before {
             content: "";
             position: absolute;
-            top: -10px;
-            right: -10px;
-            font-size: 1.2rem;
-            background: #ff5e78;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
         .stat-label {
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin-bottom: 5px;
-            color: #fff;
-            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+            color: #ccf2ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .stat-value {
             font-size: 2.2rem;
             font-weight: bold;
-            color: #fff;
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+            color: white;
+            text-shadow: 0 0 10px #00ccff;
         }
         
-        .game-info {
+        .mission-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 10px;
-            background-color: #fff9c4;
-            padding: 12px;
+            gap: 15px;
+            background: rgba(0, 100, 255, 0.2);
+            padding: 15px;
             border-radius: 15px;
-            border: 3px dashed #ffbd69;
+            border: 2px dashed #00ccff;
         }
         
-        .direction-info {
-            background-color: #fffd8c;
-            color: #ff5e78;
-            padding: 10px 15px;
+        .mission-brief {
+            background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
+            color: white;
+            padding: 12px 20px;
             border-radius: 12px;
             font-weight: bold;
             flex-grow: 1;
             font-size: 1.1rem;
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
         }
         
         .game-area {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .planet-container {
+            flex: 2;
+            min-width: 300px;
+            background: radial-gradient(circle at center, #1a1a4a 0%, #0c0c24 100%);
+            padding: 20px;
+            border-radius: 20px;
+            border: 3px solid #00ccff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .planet-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%2300ccff" opacity="0.5"/></svg>');
+            animation: planetRotate 20s infinite linear;
+        }
+        
+        @keyframes planetRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
         .grid-container {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-            flex: 2;
-            min-width: 300px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="none" stroke="%23ffbd69" stroke-width="1" stroke-dasharray="5,5" /></svg>');
-            padding: 15px;
-            border-radius: 15px;
-            border: 3px solid #ffbd69;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
         }
         
         .grid-cell {
-            background-color: #e6f7ff;
-            border: 3px dashed #6a11cb;
-            border-radius: 12px;
-            height: 65px;
+            background: rgba(0, 50, 100, 0.6);
+            border: 2px solid #0066ff;
+            border-radius: 10px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: #6a11cb;
+            color: #00ccff;
             transition: all 0.3s ease;
             position: relative;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 0 10px #00ccff;
         }
         
         .grid-cell:hover {
             transform: scale(1.05);
+            box-shadow: 0 0 15px #00ccff;
+            border-color: #00ccff;
         }
         
         .grid-cell.correct {
-            background-color: #d4edda;
-            border-color: #28a745;
-            color: #28a745;
+            background: rgba(0, 255, 100, 0.3);
+            border-color: #00ff88;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
             animation: pulse 0.5s;
-        }
-        
-        .grid-cell.incorrect {
-            background-color: #f8d7da;
-            border-color: #dc3545;
-            color: #dc3545;
-            animation: shake 0.5s;
         }
         
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
+        }
+        
+        .grid-cell.incorrect {
+            background: rgba(255, 0, 100, 0.3);
+            border-color: #ff0066;
+            color: #ff0066;
+            text-shadow: 0 0 10px #ff0066;
+            animation: shake 0.5s;
         }
         
         @keyframes shake {
@@ -217,89 +268,86 @@
         }
         
         .grid-cell.fixed {
-            background-color: #fff3cd;
-            border-color: #ffc107;
-            color: #856404;
+            background: rgba(255, 200, 0, 0.3);
+            border-color: #ffcc00;
+            color: #ffcc00;
             cursor: not-allowed;
         }
         
         .grid-cell.fixed::after {
-            content: "✓";
+            content: "🛡️";
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            font-size: 1rem;
-            color: #ffc107;
-            background: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.8rem;
         }
         
         .grid-cell.removable:hover::after {
-            content: "X";
+            content: "🚀";
             position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 1rem;
-            color: #dc3545;
-            font-weight: bold;
-            background: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            top: 2px;
+            right: 2px;
+            font-size: 0.8rem;
+        }
+        
+        .spaceship-container {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #2d2d5a 0%, #1a1a3a 100%);
+            padding: 20px;
+            border-radius: 20px;
+            border: 3px solid #ffcc00;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .spaceship-container::before {
+            content: "🚀";
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 4rem;
+            opacity: 0.3;
+            transform: rotate(45deg);
         }
         
         .letters-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            flex: 1;
-            min-width: 200px;
+            gap: 10px;
             justify-content: center;
             align-content: flex-start;
-            background: rgba(255, 189, 105, 0.2);
-            padding: 15px;
-            border-radius: 15px;
-            border: 3px dashed #ff5e78;
+            position: relative;
+            z-index: 2;
         }
         
         .letter {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
             color: white;
-            width: 65px;
-            height: 65px;
-            border-radius: 12px;
+            width: 55px;
+            height: 55px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             cursor: grab;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
-            user-select: none;
-            border: 3px solid white;
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
+            transition: all 0.3s ease;
+            border: 2px solid #00ccff;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
         .letter:hover {
-            transform: translateY(-5px) rotate(5deg);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 0 25px #00ccff;
         }
         
         .letter.dragging {
-            opacity: 0.8;
             transform: scale(1.2) rotate(10deg);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 30px #ffcc00;
+            border-color: #ffcc00;
         }
         
         .letter.hidden {
@@ -310,7 +358,7 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-            margin-top: 20px;
+            margin-top: 25px;
         }
         
         button {
@@ -321,53 +369,26 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
             position: relative;
             overflow: hidden;
-        }
-        
-        button::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: 0.5s;
-        }
-        
-        button:hover::before {
-            left: 100%;
+            background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         button:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px #00ccff;
         }
         
         button:active {
-            transform: translateY(0) scale(1);
-        }
-        
-        #check-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-        
-        #reset-btn {
-            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
-            color: white;
-        }
-        
-        #new-game-btn {
-            background: linear-gradient(135deg, #ff9900 0%, #ffcc00 100%);
-            color: white;
+            transform: translateY(0);
         }
         
         #help-btn {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
+            background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
             position: absolute;
             top: 20px;
             right: 20px;
@@ -379,7 +400,6 @@
             justify-content: center;
             font-size: 1.5rem;
             border-radius: 50%;
-            z-index: 10;
         }
         
         .message {
@@ -390,6 +410,8 @@
             font-weight: bold;
             display: none;
             animation: popIn 0.5s;
+            background: rgba(0, 200, 255, 0.2);
+            border: 2px solid #00ccff;
         }
         
         @keyframes popIn {
@@ -399,80 +421,54 @@
         }
         
         .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 3px solid #c3e6cb;
             display: block;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
         }
         
         .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 3px solid #f5c6cb;
             display: block;
+            color: #ff0066;
+            text-shadow: 0 0 10px #ff0066;
         }
         
-        .direction-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #6a11cb;
-            background: #fff9c4;
+        .mission-progress {
+            background: rgba(0, 100, 255, 0.3);
             padding: 10px;
-            border-radius: 12px;
-            border: 2px solid #ffbd69;
-        }
-        
-        .arrow {
-            font-size: 2rem;
-            margin: 0 15px;
-            color: #ff5e78;
-        }
-        
-        .row-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #ff5e78;
-            font-size: 1.1rem;
-        }
-        
-        .level-description {
-            margin-top: 10px;
-            font-style: italic;
-            color: #ff5e78;
-            font-size: 1.2rem;
-            background: #fff9c4;
-            padding: 10px;
-            border-radius: 12px;
-            border: 2px dashed #ffbd69;
-        }
-        
-        .challenge-progress {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #ff5e78;
-            background: white;
-            padding: 10px;
-            border-radius: 12px;
-            border: 2px solid #ffbd69;
+            border-radius: 10px;
         }
         
         .progress-bar {
             width: 100%;
-            height: 15px;
-            background-color: #e9ecef;
-            border-radius: 10px;
+            height: 12px;
+            background: rgba(0, 50, 100, 0.5);
+            border-radius: 6px;
             margin-top: 8px;
             overflow: hidden;
-            border: 2px solid #ffbd69;
+            border: 1px solid #00ccff;
         }
         
         .progress {
             height: 100%;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-            border-radius: 8px;
+            background: linear-gradient(135deg, #00ccff 0%, #0066ff 100%);
+            border-radius: 6px;
             transition: width 0.5s ease;
+            box-shadow: 0 0 10px #00ccff;
+        }
+        
+        .alien-character {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            filter: drop-shadow(0 0 10px #00ccff);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         .celebration {
@@ -490,39 +486,117 @@
             position: absolute;
             width: 15px;
             height: 15px;
-            background: #ff5e78;
+            background: #00ccff;
             opacity: 0.8;
         }
         
         .confetti:nth-child(2n) {
-            background: #ffbd69;
+            background: #ffcc00;
         }
         
         .confetti:nth-child(3n) {
-            background: #6a11cb;
+            background: #ff0066;
         }
         
         .confetti:nth-child(4n) {
-            background: #28a745;
+            background: #00ff88;
         }
         
         .confetti:nth-child(5n) {
-            background: #2575fc;
+            background: #9966ff;
         }
         
-        .character {
+        /* Novos estilos para as setas e modal de ajuda */
+        .arrow-indicator {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 4rem;
-            animation: bounce 2s infinite;
-            cursor: pointer;
-            z-index: 5;
-            filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.3));
+            font-size: 1.5rem;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00;
+            z-index: 3;
         }
         
-        .character:hover {
-            transform: scale(1.2);
+        .arrow-row-1 {
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .arrow-row-2 {
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .arrow-row-3 {
+            top: 50%;
+            left: -25px;
+            transform: translateY(-50%);
+        }
+        
+        .arrow-row-4 {
+            top: 50%;
+            right: -25px;
+            transform: translateY(-50%);
+        }
+        
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .help-content {
+            background: linear-gradient(135deg, #1a1a4a 0%, #0c0c24 100%);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            border: 3px solid #00ccff;
+            box-shadow: 0 0 50px rgba(0, 150, 255, 0.7);
+            position: relative;
+        }
+        
+        .help-content h2 {
+            color: #00ccff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .help-content ul {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        
+        .help-content li {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .close-help {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff0066;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         @media (max-width: 768px) {
@@ -534,183 +608,174 @@
                 grid-template-columns: repeat(4, 1fr);
             }
             
-            .stats-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .game-info {
-                flex-direction: column;
-            }
-            
             h1 {
                 font-size: 2rem;
             }
             
             .title-icon {
-                font-size: 1.8rem;
+                font-size: 2rem;
             }
             
-            .character {
+            .alien-character {
                 font-size: 3rem;
                 bottom: 10px;
                 right: 10px;
+            }
+            
+            .arrow-indicator {
+                font-size: 1.2rem;
+            }
+            
+            .arrow-row-1 {
+                top: -20px;
+            }
+            
+            .arrow-row-2 {
+                bottom: -20px;
+            }
+            
+            .arrow-row-3 {
+                left: -20px;
+            }
+            
+            .arrow-row-4 {
+                right: -20px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Modal de Instruções -->
-    <div class="modal" id="instructions-modal">
-        <div class="modal-content">
-            <button class="close-modal" id="close-modal">×</button>
-            <h2 class="modal-title">Instruções do Jogo</h2>
+    <div class="stars" id="stars"></div>
+    
+    <!-- Modal de Ajuda -->
+    <div class="help-modal" id="help-modal">
+        <div class="help-content">
+            <button class="close-help" id="close-help">&times;</button>
+            <h2>🚀 Como Jogar</h2>
+            <p>Bem-vindo à Corrida Espacial do Alfabeto! Sua missão é organizar as letras no planeta na ordem correta.</p>
             
-            <div class="modal-section">
-                <h3>Objetivo</h3>
-                <p>Arraste as letras para organizá-las em ordem alfabética no grid.</p>
-            </div>
+            <ul>
+                <li><strong>Objetivo:</strong> Preencha todas as células vazias com as letras na sequência correta do alfabeto.</li>
+                <li><strong>Sequência:</strong> A primeira linha vai da esquerda para a direita (A, B, C...). A segunda linha pode ir da esquerda para a direita ou vice-versa. A terceira e quarta linhas seguem a seta indicadora.</li>
+                <li><strong>Como jogar:</strong> Arraste as letras da nave espacial para as células vazias no planeta.</li>
+                <li><strong>Dica:</strong> As células com escudo 🛡️ já estão corretas e não podem ser alteradas.</li>
+                <li><strong>Verificação:</strong> Clique em "Verificar Transmissão" para ver se sua sequência está correta.</li>
+                <li><strong>Dificuldade:</strong> O jogo fica mais difícil a cada nível, com menos letras fixas.</li>
+            </ul>
             
-            <div class="modal-section">
-                <h3>Como Jogar</h3>
-                <ul>
-                    <li><strong>Arraste letras</strong> da área direita para as células vazias do grid</li>
-                    <li>A <strong>primeira linha</strong> sempre vai da esquerda para direita (→)</li>
-                    <li>A <strong>segunda linha</strong> pode ter direção alternada (→ ou ←)</li>
-                    <li>Letras com <strong>✓</strong> estão posicionadas corretamente para te guiar</li>
-                    <li><strong>Clique em uma letra posicionada</strong> para removê-la (ela voltará para a área de origem)</li>
-                    <li>Complete <strong>10 desafios</strong> para avançar de nível</li>
-                </ul>
-            </div>
-            
-            <div class="modal-section">
-                <h3>Controles</h3>
-                <ul>
-                    <li><strong>Verificar</strong>: Confere se as letras estão na posição correta</li>
-                    <li><strong>Reiniciar</strong>: Reinicia o desafio atual</li>
-                    <li><strong>Novo Jogo</strong>: Começa um novo jogo do zero</li>
-                    <li><strong>?</strong>: Abre estas instruções</li>
-                </ul>
-            </div>
-            
-            <div class="modal-section">
-                <h3>Sistema de Pontuação</h3>
-                <ul>
-                    <li><strong>+10 pontos</strong> por cada letra correta</li>
-                    <li><strong>-5 pontos</strong> por cada letra incorreta</li>
-                    <li><strong>+100 pontos × nível</strong> ao completar um desafio</li>
-                    <li><strong>+500 pontos</strong> ao completar um nível</li>
-                </ul>
-            </div>
-            
-            <div class="modal-section">
-                <h3>Níveis</h3>
-                <p>Existem 5 níveis de dificuldade. A cada nível, diminui o número de letras fixas que servem como guia.</p>
-            </div>
-            
-            <button id="start-playing-btn" style="margin-top: 20px;">Começar a Jogar!</button>
+            <p>Complete todos os sistemas solares para vencer a missão galáctica! 🌌</p>
         </div>
     </div>
-
-    <div class="celebration" id="celebration"></div>
-
+    
     <div class="container">
         <div class="header">
-            <i class="fas fa-pencil-alt title-icon"></i>
-            <h1>ABC Divertido</h1>
-            <i class="fas fa-book title-icon"></i>
+            <div class="title-icon">🚀</div>
+            <h1>Corrida Espacial do Alfabeto</h1>
+            <div class="title-icon">🪐</div>
         </div>
         
         <button id="help-btn">?</button>
         
         <div class="stats-container">
             <div class="stat-box">
-                <div class="stat-label">Nível</div>
+                <div class="stat-label">Nível da Missão</div>
                 <div class="stat-value" id="level-value">1</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Pontuação</div>
-                <div class="stat-value" id="score-value">0</div>
+                <div class="stat-label">Combustível</div>
+                <div class="stat-value" id="score-value">100%</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Acertos</div>
+                <div class="stat-label">Planetas Conquistados</div>
                 <div class="stat-value" id="correct-value">0</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Erros</div>
+                <div class="stat-label">Asteroides Evitados</div>
                 <div class="stat-value" id="errors-value">0</div>
             </div>
         </div>
         
-        <div class="game-info">
-            <div class="direction-info" id="direction-info">
-                Linha 1: → | Linha 2: →
+        <div class="mission-info">
+            <div class="mission-brief" id="mission-brief">
+                🚀 Missão: Organize as letras no planeta para abrir o portal hiperespacial!
             </div>
             
-            <div class="challenge-progress">
-                Desafio: <span id="challenge-current">1</span> de <span id="challenge-total">10</span>
+            <div class="mission-progress">
+                Sistema Solar: <span id="challenge-current">1</span> de <span id="challenge-total">8</span>
                 <div class="progress-bar">
-                    <div class="progress" id="challenge-progress" style="width: 10%;"></div>
+                    <div class="progress" id="challenge-progress" style="width: 12.5%;"></div>
                 </div>
             </div>
         </div>
         
-        <div class="direction-indicator">
-            <div>
-                <div class="row-label">Linha 1</div>
-                <span class="arrow">→</span>
-            </div>
-            <div>
-                <div class="row-label">Linha 2</div>
-                <span class="arrow" id="row2-arrow">→</span>
-            </div>
-        </div>
-        
-        <div class="level-description" id="level-description">
-            Nível 1: 5 letras fixas como guia
-        </div>
-        
         <div class="game-area">
-            <div class="grid-container" id="grid">
-                <!-- Grid cells will be generated by JavaScript -->
+            <div class="planet-container">
+                <!-- Setas indicadoras -->
+                <div class="arrow-indicator arrow-row-1">→</div>
+                <div class="arrow-indicator arrow-row-2">→</div>
+                <div class="arrow-indicator arrow-row-3" id="arrow-row-3">↓</div>
+                <div class="arrow-indicator arrow-row-4" id="arrow-row-4">↓</div>
+                
+                <div class="grid-container" id="grid">
+                    <!-- Grid será gerado pelo JavaScript -->
+                </div>
             </div>
             
-            <div class="letters-container" id="letters">
-                <!-- Letters will be generated by JavaScript -->
+            <div class="spaceship-container">
+                <h3 style="color: #ffcc00; margin-bottom: 15px;">🔧 Banco de Letras da Nave</h3>
+                <div class="letters-container" id="letters">
+                    <!-- Letras serão geradas pelo JavaScript -->
+                </div>
             </div>
         </div>
         
         <div class="controls">
-            <button id="check-btn">Verificar</button>
-            <button id="reset-btn">Reiniciar</button>
-            <button id="new-game-btn">Novo Jogo</button>
+            <button id="check-btn">📡 Verificar Transmissão</button>
+            <button id="reset-btn">🔄 Reiniciar Sistema</button>
+            <button id="new-game-btn">🌌 Nova Missão</button>
         </div>
         
         <div class="message" id="message"></div>
     </div>
 
-    <div class="character" id="character">🐱</div>
+    <div class="alien-character" id="character">👽</div>
+
+    <div class="celebration" id="celebration"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Criar estrelas de fundo
+            function createStars() {
+                const starsContainer = document.getElementById('stars');
+                for (let i = 0; i < 100; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.width = Math.random() * 3 + 'px';
+                    star.style.height = star.style.width;
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.animationDelay = Math.random() * 3 + 's';
+                    starsContainer.appendChild(star);
+                }
+            }
+
             const gridContainer = document.getElementById('grid');
             const lettersContainer = document.getElementById('letters');
             const checkBtn = document.getElementById('check-btn');
             const resetBtn = document.getElementById('reset-btn');
             const newGameBtn = document.getElementById('new-game-btn');
             const messageEl = document.getElementById('message');
-            const directionInfo = document.getElementById('direction-info');
-            const row2Arrow = document.getElementById('row2-arrow');
-            const levelDescription = document.getElementById('level-description');
+            const missionBrief = document.getElementById('mission-brief');
             const challengeCurrent = document.getElementById('challenge-current');
             const challengeTotal = document.getElementById('challenge-total');
             const challengeProgress = document.getElementById('challenge-progress');
-            const helpBtn = document.getElementById('help-btn');
-            const instructionsModal = document.getElementById('instructions-modal');
-            const closeModal = document.getElementById('close-modal');
-            const startPlayingBtn = document.getElementById('start-playing-btn');
             const celebration = document.getElementById('celebration');
             const character = document.getElementById('character');
+            const helpBtn = document.getElementById('help-btn');
+            const helpModal = document.getElementById('help-modal');
+            const closeHelp = document.getElementById('close-help');
+            const arrowRow3 = document.getElementById('arrow-row-3');
+            const arrowRow4 = document.getElementById('arrow-row-4');
             
             // Elementos de estatísticas
             const levelValue = document.getElementById('level-value');
@@ -721,63 +786,59 @@
             // Alfabeto completo
             const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             
-            // Direção da segunda linha (true = esquerda para direita, false = direita para esquerda)
+            // Direção das linhas
             let secondRowDirection = true;
+            let thirdRowDirection = true; // true = para baixo, false = para cima
+            let fourthRowDirection = true; // true = para baixo, false = para cima
             let gridLetters = [];
             let outsideLetters = [];
             let fixedPositions = [];
             
             // Sistema de níveis e pontuação
             let level = 1;
-            let score = 0;
+            let score = 100;
             let correctAnswers = 0;
             let errorCount = 0;
             let challengesCompleted = 0;
-            const challengesPerLevel = 10;
+            const challengesPerLevel = 8;
             const totalLevels = 5;
             
             // Personagens para feedback
-            const characters = ['🐱', '🐶', '🐰', '🐻', '🐼', '🐨', '🦊', '🐯'];
-            const characterMessages = [
-                "Vamos lá, você consegue!",
-                "Isso aí, continue assim!",
-                "Uau, você é demais!",
-                "Que inteligente você!",
-                "Parabéns, você acertou!",
-                "Você é um expert em alfabeto!"
+            const spaceCharacters = ['👽', '🚀', '🛸', '👾', '🤖', '⭐', '🌌', '🪐'];
+            const spaceMessages = [
+                "Combustível máximo! Continue assim!",
+                "Trajetória correta, astronauta!",
+                "Portal hiperespacial estabilizado!",
+                "Navegação alfabética perfeita!",
+                "Sistema solar conquistado!",
+                "Pronto para o próximo planeta!"
             ];
             
-            // Verificar se é o primeiro acesso
-            const firstTime = localStorage.getItem('firstTime');
-            
-            // Mostrar modal de instruções no primeiro acesso
-            if (firstTime === null) {
-                instructionsModal.style.display = 'flex';
-                localStorage.setItem('firstTime', 'false');
-            }
-            
-            // Inicializar o jogo
-            initGame();
-            
-            // Event listeners para o modal
-            helpBtn.addEventListener('click', () => {
-                instructionsModal.style.display = 'flex';
-            });
-            
-            closeModal.addEventListener('click', () => {
-                instructionsModal.style.display = 'none';
-            });
-            
-            startPlayingBtn.addEventListener('click', () => {
-                instructionsModal.style.display = 'none';
-            });
-            
-            // Fechar modal clicando fora dele
-            window.addEventListener('click', (e) => {
-                if (e.target === instructionsModal) {
-                    instructionsModal.style.display = 'none';
+            // Prevenir comportamento da barra de espaço
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
                 }
             });
+            
+            // Configurar modal de ajuda
+            helpBtn.addEventListener('click', () => {
+                helpModal.style.display = 'flex';
+            });
+            
+            closeHelp.addEventListener('click', () => {
+                helpModal.style.display = 'none';
+            });
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    helpModal.style.display = 'none';
+                }
+            });
+            
+            createStars();
+            initGame();
             
             // Clique no personagem para dar feedback
             character.addEventListener('click', () => {
@@ -785,7 +846,7 @@
             });
             
             function showCharacterMessage() {
-                const randomMessage = characterMessages[Math.floor(Math.random() * characterMessages.length)];
+                const randomMessage = spaceMessages[Math.floor(Math.random() * spaceMessages.length)];
                 messageEl.textContent = randomMessage;
                 messageEl.className = 'message success';
                 
@@ -807,11 +868,9 @@
                     
                     celebration.appendChild(confetti);
                     
-                    // Animar o confetti
                     const animationDuration = Math.random() * 3 + 2;
                     confetti.style.animation = `fall ${animationDuration}s linear forwards`;
                     
-                    // Criar keyframes para a animação de queda
                     const style = document.createElement('style');
                     style.textContent = `
                         @keyframes fall {
@@ -828,46 +887,42 @@
             }
             
             function initGame() {
-                // Limpar containers
                 gridContainer.innerHTML = '';
                 lettersContainer.innerHTML = '';
                 messageEl.className = 'message';
                 
-                // Mudar personagem aleatoriamente
-                character.textContent = characters[Math.floor(Math.random() * characters.length)];
+                character.textContent = spaceCharacters[Math.floor(Math.random() * spaceCharacters.length)];
                 
-                // Atualizar contador de desafios
                 challengeCurrent.textContent = challengesCompleted + 1;
                 challengeTotal.textContent = challengesPerLevel;
                 challengeProgress.style.width = `${((challengesCompleted) / challengesPerLevel) * 100}%`;
                 
-                // Definir direção da segunda linha (alternando)
+                // Definir direções aleatórias
                 secondRowDirection = Math.random() > 0.5;
+                thirdRowDirection = Math.random() > 0.5;
+                fourthRowDirection = Math.random() > 0.5;
                 
-                // Atualizar informação de direção
-                updateDirectionInfo();
+                // Atualizar setas indicadoras
+                arrowRow3.textContent = thirdRowDirection ? '↓' : '↑';
+                arrowRow4.textContent = fourthRowDirection ? '↓' : '↑';
                 
-                // Gerar letras do grid com base nas direções
+                updateMissionBrief();
+                
                 gridLetters = generateGridLetters();
-                
-                // Escolher posições fixas (para guiar o jogador) baseado no nível
                 fixedPositions = chooseFixedPositions();
                 
-                // Criar células do grid
                 gridLetters.forEach((letter, index) => {
                     const cell = document.createElement('div');
                     cell.className = 'grid-cell';
                     cell.dataset.letter = letter;
                     cell.dataset.index = index;
                     
-                    // Verificar se é uma posição fixa
                     if (fixedPositions.includes(index)) {
                         cell.textContent = letter;
                         cell.dataset.filled = letter;
                         cell.classList.add('fixed');
                     } else {
                         cell.textContent = '';
-                        // Adicionar evento de clique para remover letras posicionadas
                         cell.addEventListener('click', removePositionedLetter);
                         cell.classList.add('removable');
                     }
@@ -875,10 +930,8 @@
                     gridContainer.appendChild(cell);
                 });
                 
-                // Gerar letras para arrastar (excluindo as fixas)
                 outsideLetters = generateOutsideLetters();
                 
-                // Criar letras para arrastar
                 outsideLetters.forEach(letter => {
                     const letterEl = document.createElement('div');
                     letterEl.className = 'letter';
@@ -886,14 +939,12 @@
                     letterEl.draggable = true;
                     letterEl.dataset.letter = letter;
                     
-                    // Eventos de drag and drop
                     letterEl.addEventListener('dragstart', dragStart);
                     letterEl.addEventListener('dragend', dragEnd);
                     
                     lettersContainer.appendChild(letterEl);
                 });
                 
-                // Tornar células do grid alvos de drop
                 const gridCells = document.querySelectorAll('.grid-cell');
                 gridCells.forEach(cell => {
                     if (!cell.classList.contains('fixed')) {
@@ -908,39 +959,48 @@
             function generateGridLetters() {
                 const result = [];
                 
-                // Primeira linha (7 letras) - SEMPRE da esquerda para direita
+                // Primeira linha (sempre da esquerda para a direita)
                 for (let i = 0; i < 7; i++) {
                     result.push(alphabet[i]);
                 }
                 
-                // Segunda linha (7 letras) - direção variável
+                // Segunda linha (direção aleatória)
                 if (secondRowDirection) {
-                    // Esquerda para direita
                     for (let i = 7; i < 14; i++) {
                         result.push(alphabet[i]);
                     }
                 } else {
-                    // Direita para esquerda
                     for (let i = 13; i >= 7; i--) {
                         result.push(alphabet[i]);
                     }
                 }
                 
-                // Terceira linha (7 letras) - sempre da esquerda para direita
-                for (let i = 14; i < 21; i++) {
-                    result.push(alphabet[i]);
+                // Terceira linha (direção baseada na seta)
+                if (thirdRowDirection) {
+                    for (let i = 14; i < 21; i++) {
+                        result.push(alphabet[i]);
+                    }
+                } else {
+                    for (let i = 20; i >= 14; i--) {
+                        result.push(alphabet[i]);
+                    }
                 }
                 
-                // Quarta linha (5 letras) - sempre da esquerda para direita
-                for (let i = 21; i < 26; i++) {
-                    result.push(alphabet[i]);
+                // Quarta linha (direção baseada na seta)
+                if (fourthRowDirection) {
+                    for (let i = 21; i < 26; i++) {
+                        result.push(alphabet[i]);
+                    }
+                } else {
+                    for (let i = 25; i >= 21; i--) {
+                        result.push(alphabet[i]);
+                    }
                 }
                 
                 return result;
             }
             
             function generateOutsideLetters() {
-                // Todas as letras exceto as que estão em posições fixas
                 const result = [];
                 
                 for (let i = 0; i < gridLetters.length; i++) {
@@ -949,56 +1009,33 @@
                     }
                 }
                 
-                // Embaralhar as letras
                 return result.sort(() => Math.random() - 0.5);
             }
             
             function chooseFixedPositions() {
-                // Escolher posições fixas para guiar o jogador
                 const positions = [];
-                
-                // Nível 1: 5 letras fixas
-                let fixedCount = 6 - level; // Diminui com o nível
+                let fixedCount = 6 - level;
                 if (fixedCount < 1) fixedCount = 1;
                 
-                // No nível 1, não fixar necessariamente a letra A
                 if (level > 1 || Math.random() > 0.5) {
-                    positions.push(0); // Letra A
+                    positions.push(0);
                 }
                 
-                // Fixar a última posição (Z) a partir do nível 2
                 if (level > 1) {
                     positions.push(25);
                 }
                 
-                // Fixar posições estratégicas na segunda linha dependendo da direção
                 if (secondRowDirection) {
-                    // Se a segunda linha é esquerda→direita, fixar a primeira letra da linha (H)
                     if (fixedCount >= 2) positions.push(7);
-                    // E uma letra do meio (K)
                     if (fixedCount >= 3) positions.push(10);
                 } else {
-                    // Se a segunda linha é direita←esquerda, fixar a primeira letra da linha (N)
                     if (fixedCount >= 2) positions.push(13);
-                    // E uma letra do meio (K)
                     if (fixedCount >= 3) positions.push(10);
                 }
                 
-                // Adicionar mais letras fixas se necessário
-                if (fixedCount >= 4) {
-                    // Fixar uma letra no meio da primeira linha (D)
-                    positions.push(3);
-                }
-                
-                if (fixedCount >= 5) {
-                    // Fixar uma letra no meio da terceira linha (R)
-                    positions.push(17);
-                }
-                
-                if (fixedCount >= 6) {
-                    // Fixar uma letra no final da terceira linha (U)
-                    positions.push(20);
-                }
+                if (fixedCount >= 4) positions.push(3);
+                if (fixedCount >= 5) positions.push(17);
+                if (fixedCount >= 6) positions.push(20);
                 
                 return positions;
             }
@@ -1007,62 +1044,46 @@
                 const cell = e.target;
                 const letter = cell.dataset.filled;
                 
-                // Só remove se a célula tiver uma letra posicionada e não for fixa
                 if (letter && !cell.classList.contains('fixed')) {
                     cell.textContent = '';
                     delete cell.dataset.filled;
                     
-                    // Mostrar a letra na área de origem
                     const letterEl = document.querySelector(`.letter[data-letter="${letter}"]`);
                     if (letterEl) {
                         letterEl.classList.remove('hidden');
                     }
                     
-                    // Remover classes de correção/erro
                     cell.classList.remove('correct', 'incorrect');
                 }
             }
             
-            function updateDirectionInfo() {
-                const directionText = secondRowDirection ? 
-                    "→" : "←";
-                
-                directionInfo.textContent = `Linha 1: → | Linha 2: ${directionText}`;
-                
-                // Atualizar indicador de seta da segunda linha
-                row2Arrow.textContent = secondRowDirection ? "→" : "←";
-                
-                // Atualizar descrição do nível
-                let fixedCount = 6 - level;
-                if (fixedCount < 1) fixedCount = 1;
-                
-                levelDescription.textContent = `Nível ${level}: ${fixedCount} letras fixas como guia`;
+            function updateMissionBrief() {
+                const directionText2 = secondRowDirection ? "→" : "←";
+                const directionText3 = thirdRowDirection ? "↓" : "↑";
+                const directionText4 = fourthRowDirection ? "↓" : "↑";
+                missionBrief.textContent = `🚀 Missão Nível ${level}: Organize as letras (Linha 2: ${directionText2}, Linha 3: ${directionText3}, Linha 4: ${directionText4}) para estabilizar o portal!`;
             }
             
             function updateStats() {
                 levelValue.textContent = level;
-                scoreValue.textContent = score;
+                scoreValue.textContent = score + '%';
                 correctValue.textContent = correctAnswers;
                 errorsValue.textContent = errorCount;
             }
             
             function completeChallenge() {
                 challengesCompleted++;
-                score += 100 * level; // Bônus por completar desafio
+                score = Math.min(100, score + 10 * level);
                 updateStats();
                 
-                // Atualizar barra de progresso
                 challengeProgress.style.width = `${(challengesCompleted / challengesPerLevel) * 100}%`;
                 
-                // Verificar se completou o nível
                 if (challengesCompleted >= challengesPerLevel) {
                     levelUp();
                 } else {
-                    // Mostrar mensagem de desafio completado
-                    messageEl.textContent = `Desafio ${challengesCompleted}/${challengesPerLevel} completado!`;
+                    messageEl.textContent = `🌌 Planeta ${challengesCompleted}/${challengesPerLevel} conquistado!`;
                     messageEl.className = 'message success';
                     
-                    // Iniciar novo desafio após um breve delay
                     setTimeout(() => {
                         initGame();
                     }, 1500);
@@ -1073,32 +1094,24 @@
                 if (level < totalLevels) {
                     level++;
                     challengesCompleted = 0;
-                    score += 500; // Bônus por completar nível
+                    score = Math.min(100, score + 20);
                     updateStats();
                     
-                    // Mostrar mensagem de novo nível
-                    messageEl.textContent = `Parabéns! Você avançou para o nível ${level}!`;
+                    messageEl.textContent = `🎉 Missão cumprida! Nível ${level} desbloqueado!`;
                     messageEl.className = 'message success';
-                    
-                    // Criar efeito de confete
                     createConfetti();
                     
-                    // Iniciar novo nível após um breve delay
                     setTimeout(() => {
                         initGame();
                     }, 2000);
                 } else {
-                    // Jogo completo
-                    messageEl.textContent = `Parabéns! Você completou todos os ${totalLevels} níveis!`;
+                    messageEl.textContent = `🏆 Missão galáctica completa! Todos os ${totalLevels} sistemas conquistados!`;
                     messageEl.className = 'message success';
-                    
-                    // Criar efeito de confete
                     createConfetti();
                     
-                    // Reiniciar o jogo após um delay
                     setTimeout(() => {
                         level = 1;
-                        score = 0;
+                        score = 100;
                         correctAnswers = 0;
                         errorCount = 0;
                         challengesCompleted = 0;
@@ -1140,14 +1153,10 @@
                 const letter = e.dataTransfer.getData('text/plain');
                 const draggedEl = document.querySelector(`.letter[data-letter="${letter}"]`);
                 
-                // Só permite dropar se a célula estiver vazia e não for fixa
                 if (e.target.textContent === '' && !e.target.classList.contains('fixed')) {
                     e.target.textContent = letter;
                     e.target.dataset.filled = letter;
                     draggedEl.classList.add('hidden');
-                    
-                    // Efeito sonoro (simulado)
-                    console.log("Play drop sound");
                 }
             }
             
@@ -1172,7 +1181,6 @@
                         allCorrect = false;
                         errorsInThisTry++;
                         
-                        // Devolver a letra incorreta para a área de origem após um breve delay
                         setTimeout(() => {
                             const letterEl = document.querySelector(`.letter[data-letter="${currentLetter}"]`);
                             cell.textContent = '';
@@ -1185,41 +1193,27 @@
                     }
                 });
                 
-                // Atualizar estatísticas
                 correctAnswers += correctInThisTry;
                 errorCount += errorsInThisTry;
-                score += correctInThisTry * 10;
-                
-                // Penalidade por erro
-                if (errorsInThisTry > 0) {
-                    score -= errorsInThisTry * 5;
-                    if (score < 0) score = 0;
-                }
+                score = Math.max(0, Math.min(100, score + correctInThisTry * 2 - errorsInThisTry));
                 
                 updateStats();
                 
-                // Mostrar mensagem
                 if (allCorrect) {
-                    messageEl.textContent = 'Parabéns! Você organizou todas as letras corretamente!';
+                    messageEl.textContent = '🎯 Portal hiperespacial estabilizado! Missão cumprida!';
                     messageEl.className = 'message success';
-                    
-                    // Criar efeito de confete
                     createConfetti();
-                    
-                    // Avançar para o próximo desafio após um breve delay
                     setTimeout(completeChallenge, 1500);
                 } else {
-                    messageEl.textContent = `${correctInThisTry} acertos, ${errorsInThisTry} erros. Tente novamente!`;
+                    messageEl.textContent = `📡 ${correctInThisTry} frequências sintonizadas, ${errorsInThisTry} interferências. Ajuste a transmissão!`;
                     messageEl.className = 'message error';
                     
-                    // Esconder a mensagem após 3 segundos
                     setTimeout(() => {
                         messageEl.className = 'message';
                     }, 3000);
                 }
             });
             
-            // Reiniciar o jogo (mantém a mesma configuração)
             resetBtn.addEventListener('click', () => {
                 const gridCells = document.querySelectorAll('.grid-cell');
                 const letterEls = document.querySelectorAll('.letter');
@@ -1239,10 +1233,9 @@
                 messageEl.className = 'message';
             });
             
-            // Novo jogo (gera nova configuração)
             newGameBtn.addEventListener('click', () => {
                 level = 1;
-                score = 0;
+                score = 100;
                 correctAnswers = 0;
                 errorCount = 0;
                 challengesCompleted = 0;
