@@ -630,13 +630,22 @@
         }
 
         function updateProgressBar() {
-            const progressPercentage = (currentQuestionIndex / questions.length) * 100;
-            progressBarFill.style.width = `${progressPercentage}%`;
-            progressText.textContent = `Questão ${currentQuestionIndex} de ${questions.length}`;
-            if (currentQuestionIndex === 0 && questions.length > 0) { // Para a tela inicial do jogo antes de carregar a primeira questão
-                progressText.textContent = `Questão 1 de ${questions.length}`;
+            let displayedQuestionNum = currentQuestionIndex; // O número da questão que o usuário está respondendo
+            let progressPercentage = 0;
+
+            if (currentQuestionIndex < questions.length) {
+                displayedQuestionNum = currentQuestionIndex + 1; // Para exibir "Questão 1 de X", etc.
+                progressPercentage = (currentQuestionIndex / questions.length) * 100; // Progresso baseado nas perguntas JÁ respondidas (ou indo para a próxima)
+                progressText.textContent = `Questão ${displayedQuestionNum} de ${questions.length}`;
+            } else {
+                // Fim do jogo
+                displayedQuestionNum = questions.length;
+                progressPercentage = 100;
+                progressText.textContent = `Fim do Jogo! ${questions.length} de ${questions.length}`;
             }
+            progressBarFill.style.width = `${progressPercentage}%`;
         }
+
 
         function loadQuestion() {
             feedbackElement.textContent = '';
@@ -687,6 +696,7 @@
             }
             questionsAnswered++;
             nextQuestionBtn.classList.remove('hidden');
+            // A barra de progresso não é atualizada aqui, só no "Próxima Pergunta" ou "Fim do Jogo"
         }
 
         function endGame() {
@@ -703,7 +713,7 @@
             currentQuestionIndex = 0;
             score = 0;
             questionsAnswered = 0;
-            updateProgressBar(); // Resetar a barra de progresso
+            updateProgressBar(); // Atualiza a barra para 0% e texto inicial ao voltar para a tela inicial
             showScreen(startScreen);
         }
 
@@ -742,7 +752,7 @@
 
         nextQuestionBtn.addEventListener('click', () => {
             currentQuestionIndex++;
-            loadQuestion();
+            loadQuestion(); // loadQuestion já chama updateProgressBar
         });
 
         openModalBtn.addEventListener('click', () => {
