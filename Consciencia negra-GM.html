@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dia da Consciência Negra - O Jogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+        :root {
+            --primary-color: #4CAF50; /* Um verde mais vibrante */
+            --primary-dark: #388E3C;
+            --secondary-color: #2196F3; /* Azul para botões de ação secundária */
+            --background-light: #e0f2f1; /* Um tom de verde claro para o fundo */
+            --text-color: #333;
+            --card-background: #ffffff;
+            --border-radius: 12px;
+            --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --correct-bg: #e8f5e9;
+            --correct-border: #4CAF50;
+            --correct-text: #2e7d32;
+            --incorrect-bg: #ffebee;
+            --incorrect-border: #f44336;
+            --incorrect-text: #c62828;
+
+            /* Cores para o progresso */
+            --progress-bar-bg: #e0e0e0;
+            --progress-bar-fill: var(--primary-color);
+        }
+
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-light);
+            margin: 0;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 700px; /* Aumentado para melhor leitura em telas maiores */
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden; /* Para esconder o gradiente de fundo se sair */
+        }
+
+        #app::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            background: linear-gradient(45deg, rgba(76, 175, 80, 0.05), rgba(33, 150, 243, 0.05));
+            z-index: 0;
+            opacity: 0.7;
+            border-radius: var(--border-radius);
+        }
+
+        .screen {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            position: relative;
+            z-index: 1; /* Garante que o conteúdo esteja acima do pseudo-elemento */
+        }
+
+        .hidden {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5em;
+        }
+
+        h2 {
+            font-size: 1.8em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 10px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilo para botões de ação secundária */
+        #open-modal-btn, #history-btn, #back-to-start-btn-history, #clear-history-btn {
+            background-color: var(--secondary-color);
+        }
+
+        #open-modal-btn:hover, #history-btn:hover, #back-to-start-btn-history:hover, #clear-history-btn:hover {
+            background-color: #1976D2; /* Um azul mais escuro */
+        }
+
+        #options-container {
+            margin-top: 25px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-button {
+            display: block; /* Garante que o botão ocupe a largura total do grid */
+            width: 100%;
+            text-align: left;
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            border: 1px solid #ddd;
+            padding: 15px 20px;
+            font-size: 1.05em;
+            font-weight: 400;
+            border-radius: 8px;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+            box-shadow: none; /* Remove a sombra padrão para harmonizar */
+            margin: 0; /* Override margin from general button style */
+        }
+
+        .option-button:hover:not(:disabled) {
+            background-color: #e0e0e0;
+            border-color: #bbb;
+            transform: translateY(-1px);
+        }
+
+        .option-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-button.correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: var(--correct-text);
+            font-weight: 600;
+        }
+
+        .option-button.incorrect {
+            background-color: var(--incorrect-bg);
+            border-color: var(--incorrect-border);
+            color: var(--incorrect-text);
+            font-weight: 600;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        #next-question-btn {
+            margin-top: 30px;
+        }
+
+        /* Estilos do Indicador de Progresso */
+        #progress-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #progress-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+
+        #progress-bar-outline {
+            width: 100%;
+            height: 15px;
+            background-color: var(--progress-bar-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        #progress-bar-fill {
+            height: 100%;
+            width: 0%; /* Começa vazio */
+            background-color: var(--progress-bar-fill);
+            border-radius: 10px;
+            transition: width 0.4s ease-in-out;
+        }
+
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000; /* Alto z-index para garantir que esteja acima de tudo */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(5px); /* Efeito de blur no fundo */
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 800px; /* Aumentado para melhor leitura do texto longo */
+            position: relative;
+            box-shadow: var(--box-shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-button {
+            color: #777;
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--primary-color);
+        }
+
+        #password-input {
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: calc(100% - 22px); /* Ajuste para padding */
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        #password-modal button {
+            margin-top: 15px;
+            width: auto;
+        }
+
+        #password-feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        #history-list {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        #history-list li {
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 0.95em;
+        }
+
+        #history-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            #app {
+                padding: 30px 20px;
+                max-width: 95%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 1em;
+                margin: 8px 4px;
+            }
+
+            .option-button {
+                padding: 12px 15px;
+                font-size: 0.95em;
+            }
+
+            .modal-content {
+                padding: 25px;
+                max-width: 95%;
+            }
+
+            .close-button {
+                font-size: 28px;
+                top: 10px;
+                right: 15px;
+            }
+
+            #options-container {
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            #app {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.3em;
+            }
+
+            button {
+                display: block; /* Empilha botões em telas muito pequenas */
+                width: calc(100% - 16px);
+                margin: 8px auto;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+<div id="start-screen" class="screen active">
+<h1>Dia da Consciência Negra</h1>
+<p>Teste seus conhecimentos e aprenda mais sobre a história e a cultura afro-brasileira!</p>
+<button id="start-game-btn">Iniciar Jogo</button>
+<button id="open-modal-btn">Ler sobre o tema</button>
+<button id="history-btn">Ver Histórico</button>
+</div>
+<div id="game-screen" class="screen hidden">
+        <div id="progress-container">
+            <p id="progress-text">Questão 1 de 22</p>
+            <div id="progress-bar-outline">
+                <div id="progress-bar-fill"></div>
+            </div>
+        </div>
+        <h2 id="question"></h2>
+        <div id="options-container">
+            <!-- Opções serão inseridas aqui pelo JavaScript -->
+        </div>
+        <p id="feedback"></p>
+        <button id="next-question-btn" class="hidden">Próxima Pergunta</button>
+    </div>
+
+    <div id="history-screen" class="screen hidden">
+        <h2>Histórico de Jogadas</h2>
+        <ul id="history-list">
+            <!-- Histórico será inserido aqui pelo JavaScript -->
+        </ul>
+        <button id="clear-history-btn">Limpar Histórico</button>
+        <button id="back-to-start-btn-history">Voltar</button>
+    </div>
+</div>
+
+<!-- Modal para leitura -->
+<div id="info-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Consciência Negra: Valorizando a História e a Cultura no Brasil</h2>
+        <p>O Dia da Consciência Negra é comemorado em 20 de novembro, data que homenageia Zumbi dos Palmares, importante líder do Quilombo dos Palmares. Ele foi uma referência na luta pela liberdade dos negros escravizados e representa o esforço de muitas pessoas para conquistar respeito e igualdade.</p>
+        <p>A consciência negra significa reconhecer o valor da cultura negra, sua história e as contribuições para a formação mundial e, especialmente, do povo brasileiro. A música, a dança, a culinária, a forma de viver e até as palavras usadas no dia a dia têm influência da cultura afro-brasileira. Além disso, muitos negros foram e são exemplos de coragem e liderança ao lutar contra o racismo e criar novos caminhos na sociedade, como os escritores Machado de Assis, Carolina Maria de Jesus e o músico Cartola.</p>
+        <p>No Brasil, os negros ainda enfrentam dificuldades e preconceitos. Por exemplo, dados mostram que crianças negras têm menos acesso a oportunidades, são menos abraçadas e valorizadas na escola, sendo muitas vezes vítimas de violência e de palavras ruins. Os negros são cerca de 56% da população brasileira, mas, infelizmente, são maioria entre as vítimas de violência e têm menos acesso a empregos e estudos.</p>
+        <p>É importante trabalhar a consciência negra durante todo o ano, não apenas em novembro. Podemos aprender sobre a cultura negra criando murais com informações e desenhos, lendo livros de autores negros, ouvindo músicas e participando de atividades culturais como danças e teatros.</p>
+        <p>A Lei 10.639 garante que escolas tragam para os alunos conhecimentos sobre a história da África e do povo negro no Brasil. Isso ajuda a combater o racismo e a mostrar que todos merecem respeito, independentemente da cor da pele. Ensinar sobre reinos africanos, personalidades históricas e valorizar o papel dos negros na sociedade são formas de tornar a escola mais justa e acolhedora.</p>
+        <p>Ensinar a consciência negra é fundamental para criar uma sociedade mais igualitária. Dessa forma, todos aprendem a respeitar as diferenças e a valorizar a riqueza da cultura negra brasileira.</p>
+
+        <h3>Autores negros na literatura brasileira</h3>
+        <p>Autores negros desempenham um papel essencial na literatura brasileira, enriquecendo a cultura nacional com suas histórias, perspectivas e resistência. Entre eles, destacam-se Carolina Maria de Jesus e Machado de Assis, ambos fundamentais para a compreensão da diversidade e da complexidade social do Brasil.</p>
+
+        <h4>Carolina Maria de Jesus</h4>
+        <p>Carolina Maria de Jesus (1914-1977) foi uma das primeiras escritoras negras de destaque no país. Nascida em Minas Gerais, ela teve pouca escolaridade formal e viveu grande parte de sua vida na favela do Canindé, em São Paulo, sustentando-se como catadora de papéis. Sua escrita transformou sua experiência de exclusão social em literatura, visibilizando a dura realidade da pobreza, do racismo e da resistência negra.</p>
+        <p>Seu livro mais famoso, "Quarto de despejo: diário de uma favelada" (1960), teve enorme sucesso nacional e internacional, sendo traduzido para diversos idiomas. Nele, a autora registra em forma de diário a luta cotidiana por sobrevivência, expondo as dificuldades enfrentadas por muitos brasileiros marginalizados. Outras obras importantes são "Casa de alvenaria", "Pedaços da fome", "Provérbios" e, publicadas postumamente, "Diário de Bitita" e "Meu estranho diário". Carolina Maria de Jesus deu voz à periferia e à mulher negra, sendo considerada precursora da literatura periférica no Brasil.</p>
+
+        <h4>Machado de Assis</h4>
+        <p>Machado de Assis (1839-1908), considerado um dos maiores escritores brasileiros de todos os tempos, também era negro e nasceu no Morro do Livramento, no Rio de Janeiro, em uma família pobre. Neto de escravizados, superou inúmeras adversidades sociais e raciais para se tornar o fundador da Academia Brasileira de Letras e um dos nomes mais estudados da literatura mundial.</p>
+        <p>Sua obra abrange romances, contos, crônicas, poemas e peças de teatro, marcando o Realismo no Brasil. Entre suas principais obras estão "Dom Casmurro", "Memórias Póstumas de Brás Cubas", "Quincas Borba" e "Helena". Machado abordou em seus textos temas como desigualdade, hipocrisia social, relações de poder e a vida urbana, com ironia e com genialidade. Sua história de vida é símbolo da superação do racismo estrutural no país, e sua produção intelectual continua inspirando autores de todas as gerações.</p>
+
+        <h3>Importância dos autores negros</h3>
+        <p>Autores como Carolina Maria de Jesus e Machado de Assis abriram caminho para novas vozes negras na literatura brasileira, tornando-se referências fundamentais para o debate sobre identidade, discriminação e inclusão social. Suas obras ampliam o olhar sobre a sociedade brasileira e reforçam a necessidade de valorizar a pluralidade cultural do país.</p>
+    </div>
+</div>
+
+<!-- Modal para limpar histórico (senha) -->
+<div id="password-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-button" id="close-password-modal">&times;</span>
+        <h2>Limpar Histórico</h2>
+        <p>Para limpar o histórico, digite a senha:</p>
+        <input type="password" id="password-input" placeholder="********">
+        <button id="confirm-clear-btn">Confirmar</button>
+        <p id="password-feedback"></p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const historyScreen = document.getElementById('history-screen');
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackElement = document.getElementById('feedback');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const openModalBtn = document.getElementById('open-modal-btn');
+        const historyBtn = document.getElementById('history-btn');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const historyList = document.getElementById('history-list');
+        const backToStartBtnHistory = document.getElementById('back-to-start-btn-history');
+
+        const infoModal = document.getElementById('info-modal');
+        const closeInfoModalBtn = infoModal.querySelector('.close-button');
+
+        const passwordModal = document.getElementById('password-modal');
+        const closePasswordModalBtn = document.getElementById('close-password-modal');
+        const passwordInput = document.getElementById('password-input');
+        const confirmClearBtn = document.getElementById('confirm-clear-btn');
+        const passwordFeedback = document.getElementById('password-feedback');
+
+        // Elementos do progresso
+        const progressText = document.getElementById('progress-text');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questionsAnswered = 0;
+        let gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
+
+        // Perguntas do jogo - ATUALIZADAS COM AS NOVAS QUESTÕES
+        const questions = [
+            {
+                question: "Quando é celebrado o Dia da Consciência Negra no Brasil?",
+                options: ["13 de Maio", "20 de Novembro", "7 de Setembro", "25 de Dezembro"],
+                correctAnswer: "20 de Novembro"
+            },
+            {
+                question: "O Dia da Consciência Negra é comemorado em 20 de novembro para homenagear qual importante líder?",
+                options: ["Princesa Isabel", "Zumbi dos Palmares", "Chico Rei", "Tiradentes"],
+                correctAnswer: "Zumbi dos Palmares"
+            },
+            {
+                question: "Qual o principal objetivo de se trabalhar a Consciência Negra na escola?",
+                options: ["Reconhecer o valor do povo negro e combater o racismo", "Aprender apenas sobre a história da Europa", "Preparar para testes de matemática", "Organizar festas juninas"],
+                correctAnswer: "Reconhecer o valor do povo negro e combater o racismo"
+            },
+            {
+                question: "Qual era o principal objetivo dos quilombos no Brasil Colonial?",
+                options: ["Criar novas cidades", "Esconder ouro", "Servir de refúgio para escravizados", "Plantar café"],
+                correctAnswer: "Servir de refúgio para escravizados"
+            },
+            {
+                question: "Qual lei garante que as escolas ensinem sobre a história da África e do povo negro no Brasil?",
+                options: ["Lei 10.639/03", "Lei do Ventre Livre", "Lei Áurea", "Lei 7.000/10"],
+                correctAnswer: "Lei 10.639/03"
+            },
+            {
+                question: "O que o Dia da Consciência Negra nos convida a refletir?",
+                options: ["Apenas sobre feriados", "Sobre a cultura e história africana e o racismo", "Sobre festas juninas", "Sobre o Natal"],
+                correctAnswer: "Sobre a cultura e história africana e o racismo"
+            },
+            {
+                question: "Qual país na África é considerado um dos berços da humanidade?",
+                options: ["Japão", "Brasil", "Egito", "Canadá"],
+                correctAnswer: "Egito"
+            },
+            {
+                question: "Qual é o nome da lei que aboliu a escravidão no Brasil?",
+                options: ["Lei Áurea", "Lei do Ventre Livre", "Lei dos Sexagenários", "Lei da Terra"],
+                correctAnswer: "Lei Áurea"
+            },
+            {
+                question: "Qual instrumento musical de origem africana é muito popular no Brasil?",
+                options: ["Violino", "Pandeiro", "Flauta", "Piano"],
+                correctAnswer: "Pandeiro"
+            },
+            {
+                question: "A capoeira, uma arte marcial brasileira, tem origem em qual continente?",
+                options: ["Europa", "Ásia", "América do Norte", "África"],
+                correctAnswer: "África"
+            },
+            {
+                question: "Qual princesa assinou a Lei Áurea?",
+                options: ["Princesa Diana", "Princesa Isabel", "Princesa Aurora", "Princesa Leia"],
+                correctAnswer: "Princesa Isabel"
+            },
+            {
+                question: "O que significa a palavra 'quilombo'?",
+                options: ["Cidade grande", "Floresta densa", "Acampamento de fuga", "Terras de plantação"],
+                correctAnswer: "Acampamento de fuga"
+            },
+            {
+                question: "Qual dessas personalidades negras é mencionada como exemplo de coragem e liderança no texto de leitura?",
+                options: ["Machado de Assis", "Alberto Santos Dumont", "Pelé", "Anita Garibaldi"],
+                correctAnswer: "Machado de Assis"
+            },
+            {
+                question: "Um dos grandes legados da cultura africana no Brasil é a nossa:",
+                options: ["Matemática", "Culinária e música", "Astronomia", "Geografia"],
+                correctAnswer: "Culinária e música"
+            },
+            {
+                question: "Qual a cor que historicamente representa a luta e resistência do povo negro?",
+                options: ["Branco", "Amarelo", "Preto", "Azul"],
+                correctAnswer: "Preto"
+            },
+            {
+                question: "O que é 'racismo'?",
+                options: ["Um tipo de esporte", "Um preconceito baseado na raça", "Uma flor", "Um estilo de música"],
+                correctAnswer: "Um preconceito baseado na raça"
+            },
+            {
+                question: "Qual desses ingredientes, de origem africana, é muito usado em pratos da culinária afro-brasileira, como o acarajé?",
+                options: ["Azeite de oliva", "Manteiga", "Azeite de dendê", "Óleo de girassol"],
+                correctAnswer: "Azeite de dendê"
+            },
+            {
+                question: "Qual é o nome de uma famosa dança de origem africana que se tornou símbolo do Brasil?",
+                options: ["Salsa", "Ballet", "Samba", "Tango"],
+                correctAnswer: "Samba"
+            },
+            {
+                question: "Qual dessas atividades pode ser feita na escola para valorizar a cultura negra, de acordo com o texto?",
+                options: ["Produção de cartazes, poemas ou desenhos", "Competições de videogame", "Aulas de matemática avançada", "Viagens para outros países"],
+                correctAnswer: "Produção de cartazes, poemas ou desenhos"
+            },
+            {
+                question: "O que significa a palavra 'Ubuntu', de origem africana?",
+                options: ["Eu sou porque nós somos", "Eu sou o melhor", "Felicidade", "Rapidez"],
+                correctAnswer: "Eu sou porque nós somos"
+            },
+            // Novas perguntas sobre as obras
+            {
+                question: "Qual destas obras foi escrita por Carolina Maria de Jesus?",
+                options: ["Dom Casmurro", "O Cortiço", "Quarto de Despejo", "Vidas Secas"],
+                correctAnswer: "Quarto de Despejo"
+            },
+            {
+                question: "Qual destes livros foi escrito por Machado de Assis?",
+                options: ["A Moreninha", "Memórias Póstumas de Brás Cubas", "O Pequeno Príncipe", "O Menino Maluquinho"],
+                correctAnswer: "Memórias Póstumas de Brás Cubas"
+            }
+        ];
+
+        function showScreen(screenToShow) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.add('hidden');
+                screen.classList.remove('active');
+            });
+            screenToShow.classList.remove('hidden');
+            screenToShow.classList.add('active');
+        }
+
+        function updateProgressBar() {
+            const progressPercentage = (currentQuestionIndex / questions.length) * 100;
+            progressBarFill.style.width = `${progressPercentage}%`;
+            progressText.textContent = `Questão ${currentQuestionIndex} de ${questions.length}`;
+            if (currentQuestionIndex === 0 && questions.length > 0) { // Para a tela inicial do jogo antes de carregar a primeira questão
+                progressText.textContent = `Questão 1 de ${questions.length}`;
+            }
+        }
+
+        function loadQuestion() {
+            feedbackElement.textContent = '';
+            nextQuestionBtn.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                questionElement.textContent = q.question;
+
+                // Embaralha as opções
+                const shuffledOptions = q.options.sort(() => Math.random() - 0.5);
+
+                shuffledOptions.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option-button');
+                    button.addEventListener('click', () => checkAnswer(button, option, q.correctAnswer));
+                    optionsContainer.appendChild(button);
+                });
+                updateProgressBar(); // Atualiza a barra de progresso ao carregar uma nova questão
+            } else {
+                endGame();
+            }
+        }
+
+        function checkAnswer(selectedButton, selectedOption, correctAnswer) {
+            // Desabilita todos os botões após a seleção
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.style.color = 'var(--correct-text)';
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer} 😔`;
+                feedbackElement.style.color = 'var(--incorrect-text)';
+                selectedButton.classList.add('incorrect');
+                // Encontrar e marcar a resposta correta
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.textContent === correctAnswer) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+            questionsAnswered++;
+            nextQuestionBtn.classList.remove('hidden');
+        }
+
+        function endGame() {
+            const result = `Você respondeu ${questionsAnswered} perguntas e acertou ${score} delas!`;
+            alert(`Fim do jogo!\n${result}`);
+
+            // Salvar histórico
+            const date = new Date();
+            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+            gameHistory.push({ date: formattedDate, score: score, totalQuestions: questionsAnswered });
+            localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+
+            // Reiniciar variáveis
+            currentQuestionIndex = 0;
+            score = 0;
+            questionsAnswered = 0;
+            updateProgressBar(); // Resetar a barra de progresso
+            showScreen(startScreen);
+        }
+
+        function displayHistory() {
+            historyList.innerHTML = '';
+            if (gameHistory.length === 0) {
+                historyList.innerHTML = '<li>Nenhum histórico de jogo ainda.</li>';
+            } else {
+                // Ordena o histórico do mais recente para o mais antigo
+                const sortedHistory = [...gameHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+                sortedHistory.forEach(entry => {
+                    const li = document.createElement('li');
+                    li.textContent = `Data: ${entry.date} - Acertos: ${entry.score}/${entry.totalQuestions}`;
+                    historyList.appendChild(li);
+                });
+            }
+        }
+
+        // Função para obter a senha do dia (DIA + MÊS + ANO) - AGORA COM SOMA NUMÉRICA
+        function getTodayPassword() {
+            const today = new Date();
+            const day = today.getDate(); // Dia como número
+            const month = today.getMonth() + 1; // Mês como número (0-indexed, então +1)
+            const year = today.getFullYear(); // Ano como número
+            return String(day + month + year); // Retorna a soma como string
+        }
+
+        // Event Listeners
+        startGameBtn.addEventListener('click', () => {
+            showScreen(gameScreen);
+            currentQuestionIndex = 0; // Resetar o índice da pergunta para um novo jogo
+            score = 0; // Resetar o score
+            questionsAnswered = 0; // Resetar perguntas respondidas
+            loadQuestion();
+        });
+
+        nextQuestionBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        });
+
+        openModalBtn.addEventListener('click', () => {
+            infoModal.classList.add('active');
+        });
+
+        closeInfoModalBtn.addEventListener('click', () => {
+            infoModal.classList.remove('active');
+        });
+
+        historyBtn.addEventListener('click', () => {
+            showScreen(historyScreen);
+            displayHistory();
+        });
+
+        backToStartBtnHistory.addEventListener('click', () => {
+            showScreen(startScreen);
+        });
+
+        clearHistoryBtn.addEventListener('click', () => {
+            passwordModal.classList.add('active');
+            passwordInput.value = ''; // Limpa o campo de senha
+            passwordFeedback.textContent = ''; // Limpa feedback anterior
+        });
+
+        closePasswordModalBtn.addEventListener('click', () => {
+            passwordModal.classList.remove('active');
+        });
+
+        confirmClearBtn.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            const correctPassword = getTodayPassword(); // A senha AGORA É A SOMA NUMÉRICA
+
+            if (enteredPassword === correctPassword) {
+                localStorage.removeItem('gameHistory');
+                gameHistory = [];
+                displayHistory();
+                passwordFeedback.textContent = 'Histórico limpo com sucesso!';
+                passwordFeedback.style.color = 'var(--correct-text)';
+                setTimeout(() => {
+                    passwordModal.classList.remove('active');
+                }, 1500);
+            } else {
+                passwordFeedback.textContent = 'Senha incorreta. Tente novamente.';
+                passwordFeedback.style.color = 'var(--incorrect-text)';
+            }
+        });
+
+        // Fechar modais ao clicar fora deles
+        window.addEventListener('click', (event) => {
+            if (event.target === infoModal) {
+                infoModal.classList.remove('active');
+            }
+            if (event.target === passwordModal) {
+                passwordModal.classList.remove('active');
+            }
+        });
+
+        // Iniciar com a tela inicial
+        showScreen(startScreen);
+        // Inicializa a barra de progresso para a primeira visualização
+        updateProgressBar();
+    });
+</script>
+</body>
+</html>
