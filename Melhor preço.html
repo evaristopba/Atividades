@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Preços por Unidade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #28a745; /* Verde Bootstrap */
+            --primary-dark: #218838;
+            --secondary-color: #007bff; /* Azul Bootstrap */
+            --background-light: #f8f9fa; /* Cinza claro */
+            --text-color: #343a40; /* Preto quase */
+            --card-background: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --danger-color: #dc3545;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-light);
+            margin: 0;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 650px; /* Um pouco mais largo para os inputs */
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+            font-size: 2.2em;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap; /* Permite quebrar em telas menores */
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px; /* Espaçamento entre os elementos */
+            justify-content: center; /* Centraliza os itens */
+        }
+
+        .input-group label {
+            font-weight: 700;
+            margin-right: 10px;
+            white-space: nowrap; /* Evita que a label quebre */
+        }
+
+        .input-group input[type="number"],
+        .input-group select {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1em;
+            flex: 1; /* Permite que inputs e selects cresçam */
+            min-width: 80px; /* Largura mínima para inputs */
+        }
+
+        .input-group select {
+            cursor: pointer;
+            background-color: #e9ecef;
+        }
+
+        .input-group span {
+            font-weight: 700;
+            margin: 0 5px;
+        }
+
+        .section-title {
+            color: var(--secondary-color);
+            font-size: 1.3em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+            display: inline-block; /* Para o border-bottom ficar só no texto */
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin-top: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background-color: var(--background-light);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            text-align: left;
+            font-size: 1.1em;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #result p {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .best-deal {
+            color: var(--success-color);
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        .percentage-info {
+            color: var(--primary-dark); /* Um tom de verde para a porcentagem */
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .error {
+            color: var(--danger-color); /* Vermelho Bootstrap */
+            font-weight: 700;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            #app {
+                padding: 25px 15px;
+                max-width: 95%;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                flex-direction: column; /* Empilha os itens em telas pequenas */
+                align-items: stretch; /* Estica os inputs/selects */
+            }
+
+            .input-group label {
+                margin-right: 0;
+                margin-bottom: 5px;
+                text-align: left;
+            }
+
+            .input-group input[type="number"],
+            .input-group select {
+                width: 100%; /* Ocupa a largura total */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Comparador de Custo-Benefício</h1>
+        <p>Informe os detalhes de duas embalagens para descobrir qual oferece o melhor preço por unidade.</p>
+
+        <h2 class="section-title">Embalagem 1</h2>
+        <div class="input-group">
+            <label for="quantidade1">Quantidade:</label>
+            <input type="number" id="quantidade1" value="500" min="0.01" step="any">
+            <select id="unidade1">
+                <option value="g">gramas (g)</option>
+                <option value="kg">quilogramas (kg)</option>
+                <option value="mg">miligramas (mg)</option>
+                <option value="lb">libras (lb)</option>
+                <option value="oz">onças (oz)</option>
+                <option value="ml">mililitros (ml)</option>
+                <option value="L">litros (L)</option>
+                <option value="gal">galões (gal)</option>
+                <option value="floz">onças fluidas (fl oz)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="preco1">Preço:</label>
+            <span>R$</span>
+            <input type="number" id="preco1" value="10.50" min="0.01" step="any">
+        </div>
+
+        <h2 class="section-title">Embalagem 2</h2>
+        <div class="input-group">
+            <label for="quantidade2">Quantidade:</label>
+            <input type="number" id="quantidade2" value="1000" min="0.01" step="any">
+            <select id="unidade2">
+                <option value="g">gramas (g)</option>
+                <option value="kg" selected>quilogramas (kg)</option>
+                <option value="mg">miligramas (mg)</option>
+                <option value="lb">libras (lb)</option>
+                <option value="oz">onças (oz)</option>
+                <option value="ml">mililitros (ml)</option>
+                <option value="L">litros (L)</option>
+                <option value="gal">galões (gal)</option>
+                <option value="floz">onças fluidas (fl oz)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="preco2">Preço:</label>
+            <span>R$</span>
+            <input type="number" id="preco2" value="18.00" min="0.01" step="any">
+        </div>
+
+        <button id="calcular-btn">Comparar Preços</button>
+
+        <div id="result">
+            <p>Preencha os campos e clique em "Comparar Preços" para ver o resultado.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const quantidade1Input = document.getElementById('quantidade1');
+            const unidade1Select = document.getElementById('unidade1');
+            const preco1Input = document.getElementById('preco1');
+
+            const quantidade2Input = document.getElementById('quantidade2');
+            const unidade2Select = document.getElementById('unidade2');
+            const preco2Input = document.getElementById('preco2');
+
+            const calcularBtn = document.getElementById('calcular-btn');
+            const resultDiv = document.getElementById('result');
+
+            // Fatores de conversão para uma unidade base (ex: grama para peso, mililitro para volume)
+            const conversionFactors = {
+                // Peso para gramas
+                'mg': 0.001, // 1 miligrama = 0.001 grama
+                'g': 1,     // 1 grama = 1 grama
+                'kg': 1000, // 1 quilograma = 1000 gramas
+                'lb': 453.592, // 1 libra = 453.592 gramas
+                'oz': 28.3495, // 1 onça = 28.3495 gramas
+
+                // Volume para mililitros
+                'ml': 1,    // 1 mililitro = 1 mililitro
+                'L': 1000,  // 1 litro = 1000 mililitros
+                'floz': 29.5735, // 1 onça fluida (EUA) = 29.5735 mililitros
+                'gal': 3785.41, // 1 galão (EUA) = 3785.41 mililitros
+            };
+
+            // Função para formatar valores monetários com precisão ajustável
+            function formatPreciseCurrency(value, decimalPlaces = 4) { // Default 4 casas decimais para mais precisão
+                return value.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                    minimumFractionDigits: decimalPlaces,
+                    maximumFractionDigits: decimalPlaces
+                });
+            }
+
+            calcularBtn.addEventListener('click', () => {
+                resultDiv.innerHTML = ''; // Limpa resultados anteriores
+
+                const qtd1 = parseFloat(quantidade1Input.value);
+                const unit1 = unidade1Select.value;
+                const price1 = parseFloat(preco1Input.value);
+
+                const qtd2 = parseFloat(quantidade2Input.value);
+                const unit2 = unidade2Select.value;
+                const price2 = parseFloat(preco2Input.value);
+
+                // Validação básica dos inputs
+                if (isNaN(qtd1) || isNaN(price1) || isNaN(qtd2) || isNaN(price2) ||
+                    qtd1 <= 0 || price1 <= 0 || qtd2 <= 0 || price2 <= 0) {
+                    resultDiv.innerHTML = '<p class="error">Por favor, insira valores numéricos positivos para quantidade e preço.</p>';
+                    return;
+                }
+
+                // Determinar o tipo de unidade (peso ou volume) para garantir comparação justa
+                const isWeight1 = ['g', 'kg', 'mg', 'lb', 'oz'].includes(unit1);
+                const isVolume1 = ['ml', 'L', 'floz', 'gal'].includes(unit1);
+                const isWeight2 = ['g', 'kg', 'mg', 'lb', 'oz'].includes(unit2);
+                const isVolume2 = ['ml', 'L', 'floz', 'gal'].includes(unit2);
+
+                if ((isWeight1 && isVolume2) || (isVolume1 && isWeight2)) {
+                    resultDiv.innerHTML = '<p class="error">Não é possível comparar unidades de peso com unidades de volume diretamente. Por favor, escolha unidades do mesmo tipo.</p>';
+                    return;
+                }
+                
+                if (!isWeight1 && !isVolume1) {
+                     resultDiv.innerHTML = '<p class="error">Unidade inválida para Embalagem 1.</p>';
+                     return;
+                }
+                if (!isWeight2 && !isVolume2) {
+                     resultDiv.innerHTML = '<p class="error">Unidade inválida para Embalagem 2.</p>';
+                     return;
+                }
+
+
+                // Converter tudo para a unidade base (grama ou mililitro)
+                const totalBaseUnit1 = qtd1 * conversionFactors[unit1];
+                const totalBaseUnit2 = qtd2 * conversionFactors[unit2];
+
+                // Calcular preço por unidade base
+                const pricePerBaseUnit1 = price1 / totalBaseUnit1;
+                const pricePerBaseUnit2 = price2 / totalBaseUnit2;
+
+                let baseUnitName = isWeight1 ? 'g' : 'ml'; // Para exibir no resultado
+
+                // Exibir com a nova função de formatação precisa
+                resultDiv.innerHTML += `<p>Embalagem 1: ${formatPreciseCurrency(pricePerBaseUnit1)} por ${baseUnitName}</p>`;
+                resultDiv.innerHTML += `<p>Embalagem 2: ${formatPreciseCurrency(pricePerBaseUnit2)} por ${baseUnitName}</p>`;
+
+                let bestOptionMessage = '';
+                let percentageDifference = 0;
+
+                if (pricePerBaseUnit1 < pricePerBaseUnit2) {
+                    bestOptionMessage = 'A Embalagem 1 oferece o melhor custo-benefício!';
+                    percentageDifference = ((pricePerBaseUnit2 - pricePerBaseUnit1) / pricePerBaseUnit1) * 100;
+                } else if (pricePerBaseUnit2 < pricePerBaseUnit1) {
+                    bestOptionMessage = 'A Embalagem 2 oferece o melhor custo-benefício!';
+                    percentageDifference = ((pricePerBaseUnit1 - pricePerBaseUnit2) / pricePerBaseUnit2) * 100;
+                } else {
+                    bestOptionMessage = 'Ambas as embalagens têm o mesmo custo-benefício.';
+                }
+
+                resultDiv.innerHTML += `<p class="best-deal">${bestOptionMessage}</p>`;
+                if (percentageDifference > 0) {
+                    resultDiv.innerHTML += `<p class="percentage-info">Você economiza ${percentageDifference.toFixed(2)}% escolhendo a melhor opção.</p>`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
