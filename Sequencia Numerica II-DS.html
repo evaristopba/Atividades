@@ -3,385 +3,1662 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventura das Sequências - Fundamental I</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Desafio das Sequências Numéricas - App Educativo</title>
     <style>
+        /* ================= VARIÁVEIS E RESET ================= */
         :root {
-            --primary: #4a6bff; --success: #28a745; --danger: #dc3545; --light: #f8f9fa; --dark: #333; --gold: #ffc107;
-            /* Variáveis que mudam com o tema */
-            --bg-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            --header-color: #4a6bff;
+            --primary-blue: #4a6bff;
+            --secondary-blue: #2575fc;
+            --accent-orange: #ff9a00;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+            --medium-text: #666;
+            --border-radius: 15px;
+            --box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Temas por Nível */
-        body.theme-1 { --bg-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); --header-color: #1b5e20; }
-        body.theme-2 { --bg-gradient: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); --header-color: #0d47a1; }
-        body.theme-3 { --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); --header-color: #311b92; }
-        body.theme-4 { --bg-gradient: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); --header-color: #ff6f00; }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
-            background: var(--bg-gradient);
-            min-height: 100vh; padding: 20px; color: var(--dark);
-            transition: background 0.5s ease;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-text);
+            line-height: 1.6;
         }
 
-        .container {
-            max-width: 1000px; margin: 0 auto; background: rgba(255,255,255,0.95);
-            border-radius: 30px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border: 6px solid white;
+        /* ================= CONTAINERS E LAYOUT ================= */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 5px solid var(--primary-blue);
+            position: relative;
+            overflow: hidden;
         }
 
-        .main-title {
-            text-align: center; color: var(--header-color); margin-bottom: 15px; font-size: 2em;
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--primary-blue), var(--accent-green));
+            z-index: 10;
         }
 
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 10px; margin-bottom: 20px;
+        .game-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+            min-height: 650px;
+            position: relative;
         }
 
-        .stat-box {
-            background: white; padding: 10px; border-radius: 15px;
-            text-align: center; border: 2px solid #ddd; transition: 0.3s;
+        @media (max-width: 1100px) {
+            .game-wrapper {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
         }
 
-        .stat-box.bonus-active {
-            border-color: var(--gold); background-color: #fffde7;
-            animation: pulse-gold 1.5s infinite;
+        /* ================= CABEÇALHO ================= */
+        .game-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, #fff9e6 0%, #fff0cc 100%);
+            border: 4px solid var(--accent-orange);
+            position: relative;
+            overflow: hidden;
         }
 
-        @keyframes pulse-gold {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .game-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ff9a00' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+            z-index: 0;
         }
 
-        .stat-val { font-size: 1.5em; font-weight: bold; color: var(--header-color); display: block; }
-        .stat-lbl { font-size: 0.7em; font-weight: bold; text-transform: uppercase; color: #666; }
-        .bonus-text { font-size: 0.6em; color: #f57c00; font-weight: bold; display: none; }
-        .stat-box.bonus-active .bonus-text { display: block; }
-
-        .level-selector { display: flex; gap: 8px; margin-bottom: 20px; }
-        .level-tab {
-            flex: 1; padding: 10px; border-radius: 20px; border: 3px solid #ddd;
-            background: #fff; cursor: pointer; font-weight: bold; text-align: center; font-size: 0.9em;
-        }
-        .level-tab.active { color: white; border-color: white; transform: scale(1.05); }
-        .tab-1.active { background: #2e7d32; } .tab-2.active { background: #1565c0; }
-        .tab-3.active { background: #4527a0; } .tab-4.active { background: #f57c00; }
-
-        .game-area { display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }
-        @media (max-width: 800px) { .game-area { grid-template-columns: 1fr; } }
-
-        .challenge-box {
-            background: white; border: 2px solid #eee; border-radius: 20px;
-            margin-bottom: 10px; height: 90px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: flex; align-items: center; justify-content: center;
+        .game-header h1 {
+            font-size: 2.8em;
+            color: #cc6600;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
         }
 
-        .sequence { display: flex; gap: 8px; align-items: center; }
-
-        .cell {
-            width: 55px; height: 55px; border: 3px solid #e0e0e0; border-radius: 15px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5em; font-weight: bold; background: #f9f9f9;
+        .game-header .subtitle {
+            font-size: 1.3em;
+            color: #996633;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 1;
         }
 
-        .cell.drop-zone { border: 3px dashed var(--primary); background: #f0f4ff; cursor: pointer; color: transparent; }
-        .cell.drop-zone:empty::after { content: '?'; color: #bbb; }
-        .cell.filled { border-style: solid; border-color: var(--primary); background: #e3f2fd; color: var(--primary); }
-        .cell.correct { background: #c8e6c9 !important; border-color: var(--success) !important; color: #1b5e20 !important; }
-        .cell.incorrect { background: #ffcdd2 !important; border-color: var(--danger) !important; color: #b71c1c !important; }
-
-        .numbers-bank {
-            background: #f5f5f5; border-radius: 20px; padding: 15px; border: 2px solid #ddd;
-            min-height: 480px;
+        .game-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
         }
-        .numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-        .number-item {
-            height: 60px; background: white; border: 3px solid var(--header-color);
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.6em; font-weight: bold; color: var(--header-color); cursor: grab;
-            box-shadow: 0 4px 0 #ddd;
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .number-item:hover { background: #fffde7; }
-        .number-item.used { visibility: hidden; }
 
-        .controls { display: flex; gap: 10px; margin-top: 20px; }
-        .btn {
-            flex: 1; padding: 15px; border-radius: 20px; border: none; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.2em;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+        /* ================= NÍVEIS ================= */
+        .levels-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px 0;
         }
-        .btn-check { background: var(--success); color: white; }
-        .btn-reset { background: #e0e0e0; color: #444; }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .drag-over { background: var(--gold) !important; border-color: orange !important; }
+        @media (max-width: 768px) {
+            .levels-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .level-card.active {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, #e3eeff 0%, #d4e3ff 100%);
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .level-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .level-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--secondary-blue);
+            margin-bottom: 8px;
+        }
+
+        .level-desc {
+            color: var(--medium-text);
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* ================= SEÇÃO DE DESAFIOS ================= */
+        .challenges-panel {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            border: 4px solid var(--primary-blue);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 1.8em;
+            color: var(--secondary-blue);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-blue);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .challenge-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            border: 3px solid #dee2e6;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-orange), #ffd166);
+            border-radius: 3px 0 0 3px;
+        }
+
+        .challenge-card:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 8px 25px rgba(74, 107, 255, 0.15);
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .challenge-number {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--accent-orange);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sequence-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .sequence-number {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3eeff 100%);
+            color: var(--secondary-blue);
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .sequence-number.empty {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #adb5bd;
+            border-style: dashed;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .sequence-number.empty:hover {
+            background: #dee2e6;
+            transform: scale(1.05);
+        }
+
+        .sequence-number.filled {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            border-color: var(--accent-green);
+            color: #155724;
+        }
+
+        .sequence-number.correct {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: var(--accent-green);
+            animation: pulse-success 0.5s ease;
+        }
+
+        .sequence-number.incorrect {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-color: var(--accent-red);
+            animation: shake 0.5s ease;
+        }
+
+        /* ================= SEÇÃO DE NÚMEROS ================= */
+        .numbers-panel {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3eeff 100%);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            border: 4px solid var(--secondary-blue);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .numbers-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .numbers-instruction {
+            color: var(--medium-text);
+            font-size: 1.1em;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            border: 2px dashed var(--primary-blue);
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 25px;
+            background: white;
+            border-radius: var(--border-radius);
+            border: 3px solid #dee2e6;
+            flex: 1;
+            align-content: start;
+        }
+
+        @media (max-width: 1200px) {
+            .numbers-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .numbers-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .number-tile {
+            width: 70px;
+            height: 70px;
+            border: 4px solid var(--primary-blue);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3eeff 100%);
+            color: var(--secondary-blue);
+            cursor: grab;
+            transition: var(--transition);
+            user-select: none;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .number-tile::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+            border-radius: 20px;
+        }
+
+        .number-tile:hover:not(.used):not(.dragging)::before {
+            opacity: 0.1;
+        }
+
+        .number-tile:hover:not(.used):not(.dragging) {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 25px rgba(37, 117, 252, 0.3);
+        }
+
+        .number-tile.dragging {
+            opacity: 0.7;
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .number-tile.used {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #adb5bd;
+            transform: none;
+        }
+
+        /* ================= CONTROLES ================= */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 50px 0 30px;
+            padding-top: 40px;
+            border-top: 3px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: 700;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-width: 220px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .control-button:hover:not(:disabled)::after {
+            width: 400px;
+            height: 400px;
+        }
+
+        .control-button:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .control-button:disabled {
+            background: #adb5bd !important;
+            cursor: not-allowed;
+            transform: none !important;
+            opacity: 0.7;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, var(--accent-green), #20c997);
+            color: white;
+            border: 3px solid #1e7e34;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--secondary-blue), #4a6bff);
+            color: white;
+            border: 3px solid #0056b3;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ffc107, #ffd166);
+            color: #333;
+            border: 3px solid #e0a800;
+        }
+
+        .btn-next:not(:disabled) {
+            animation: pulse-next 1.5s infinite alternate;
+        }
+
+        /* ================= ESTATÍSTICAS ================= */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            border: 3px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--medium-text);
+            font-size: 1em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ================= PROGRESSO ================= */
+        .progress-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            border: 3px solid #dee2e6;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: var(--dark-text);
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            height: 25px;
+            background: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #20c997, #4caf50);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                transparent 100%);
+            animation: shimmer 2.5s infinite;
+        }
+
+        /* ================= FEEDBACK ================= */
+        .feedback-message {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            font-weight: 700;
+            font-size: 1.3em;
+            display: none;
+            animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 4px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feedback-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: inherit;
+            opacity: 0.5;
+        }
+
+        .feedback-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-color: var(--accent-green);
+        }
+
+        .feedback-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-color: var(--accent-red);
+        }
+
+        /* ================= LOADING ================= */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .loading-spinner::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 6px solid transparent;
+            border-top: 6px solid var(--accent-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite reverse;
+        }
+
+        /* ================= ANIMAÇÕES ================= */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-success {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            50% { transform: scale(1.1); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes pulse-next {
+            0% { 
+                transform: translateY(-5px) scale(1);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            }
+            100% { 
+                transform: translateY(-5px) scale(1.05);
+                box-shadow: 0 20px 40px rgba(0, 123, 255, 0.4);
+            }
+        }
+
+        /* ================= UTILITÁRIOS ================= */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            border: 0;
+        }
+
+        .text-center { text-align: center; }
+        .text-bold { font-weight: 700; }
+        .text-muted { color: var(--medium-text); }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .p-20 { padding: 20px; }
     </style>
 </head>
-<body class="theme-1">
+<body>
+    <div class="loading-overlay" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <h2 style="color: var(--secondary-blue); margin-bottom: 15px;">Preparando Jogo Perfeito!</h2>
+        <p style="color: var(--medium-text); max-width: 500px; text-align: center;" id="loadingMessage">
+            Gerando desafios matematicamente corretos...
+        </p>
+    </div>
 
-    <div class="container">
-        <h2 class="main-title" id="theme-title">
-            <i class="fas fa-tree" id="theme-icon"></i> 
-            <span id="level-name">Missão Floresta</span>
-        </h2>
-
-        <div class="stats-grid">
-            <div class="stat-box"><span class="stat-val" id="score">0</span><span class="stat-lbl">Pontos</span></div>
-            <div class="stat-box"><span class="stat-val" id="correct">0</span><span class="stat-lbl">Acertos</span></div>
-            <div class="stat-box"><span class="stat-val" id="errors">0</span><span class="stat-lbl">Erros</span></div>
-            <div class="stat-box" id="combo-box">
-                <span class="stat-val" id="streak">0</span>
-                <span class="stat-lbl">Combo</span>
-                <span class="bonus-text">🔥 2X PONTOS!</span>
+    <div class="main-container" id="gameContainer" style="display: none;">
+        <!-- CABEÇALHO -->
+        <header class="game-header">
+            <h1>🧮 Desafio das Sequências Numéricas</h1>
+            <p class="subtitle">Domine a arte dos padrões numéricos! Cada número resolve apenas UM desafio.</p>
+            
+            <div class="game-meta">
+                <div class="meta-item">
+                    <span>🎮</span>
+                    <span>Nível: <strong id="currentLevel">1</strong></span>
+                </div>
+                <div class="meta-item">
+                    <span>📱</span>
+                    <span>Tela: <strong id="currentScreen">1</strong>/8</span>
+                </div>
+                <div class="meta-item">
+                    <span>🏆</span>
+                    <span>Pontos: <strong id="currentScore">0</strong></span>
+                </div>
             </div>
-            <div class="stat-box"><span class="stat-val"><span id="screen-idx">1</span>/8</span><span class="stat-lbl">Tela</span></div>
-        </div>
+        </header>
 
-        <div class="level-selector">
-            <div class="level-tab tab-1 active" onclick="changeLevel(1)">1º Ano</div>
-            <div class="level-tab tab-2" onclick="changeLevel(2)">2º/3º Ano</div>
-            <div class="level-tab tab-3" onclick="changeLevel(3)">4º Ano</div>
-            <div class="level-tab tab-4" onclick="changeLevel(4)">5º Ano</div>
-        </div>
-
-        <div class="game-area">
-            <div class="challenges-container" id="challenges-list"></div>
-            <div class="numbers-bank">
-                <div id="numbers-grid" class="numbers-grid"></div>
+        <!-- SELEÇÃO DE NÍVEIS -->
+        <section class="levels-container">
+            <div class="level-card active" data-level="1" onclick="switchLevel(1)">
+                <span class="level-icon">🔢</span>
+                <h3 class="level-title">Nível 1</h3>
+                <p class="level-desc">Números 1-50, razões simples</p>
             </div>
+            <div class="level-card" data-level="2" onclick="switchLevel(2)">
+                <span class="level-icon">✏️</span>
+                <h3 class="level-title">Nível 2</h3>
+                <p class="level-desc">Números 1-100, razões médias</p>
+            </div>
+            <div class="level-card" data-level="3" onclick="switchLevel(3)">
+                <span class="level-icon">📚</span>
+                <h3 class="level-title">Nível 3</h3>
+                <p class="level-desc">Números 1-200, razões complexas</p>
+            </div>
+            <div class="level-card" data-level="4" onclick="switchLevel(4)">
+                <span class="level-icon">🏆</span>
+                <h3 class="level-title">Nível 4</h3>
+                <p class="level-desc">Números 1-500, padrões avançados</p>
+            </div>
+        </section>
+
+        <!-- ESTATÍSTICAS -->
+        <section class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="totalScore">0</div>
+                <div class="stat-label">Pontuação Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCorrect">0</div>
+                <div class="stat-label">Acertos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalErrors">0</div>
+                <div class="stat-label">Erros</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="currentStreak">0</div>
+                <div class="stat-label">Sequência Atual</div>
+            </div>
+        </section>
+
+        <!-- PROGRESSO -->
+        <section class="progress-section">
+            <div class="progress-info">
+                <span>📈 Progresso do Nível: <strong id="completedExercises">0</strong>/40 desafios</span>
+                <span>🎯 <strong id="progressPercentage">0</strong>% concluído</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </section>
+
+        <!-- ÁREA PRINCIPAL DO JOGO -->
+        <div class="game-wrapper">
+            <!-- DESAFIOS -->
+            <section class="challenges-panel">
+                <h2 class="panel-title">
+                    <span>🎯</span>
+                    Desafios da Tela
+                </h2>
+                <div class="challenges-grid" id="challengesContainer">
+                    <!-- Desafios serão gerados dinamicamente -->
+                </div>
+            </section>
+
+            <!-- NÚMEROS DISPONÍVEIS -->
+            <section class="numbers-panel">
+                <div class="numbers-header">
+                    <h2 class="panel-title">
+                        <span>✨</span>
+                        Números Disponíveis
+                    </h2>
+                    <p class="numbers-instruction">
+                        Arraste os números para os espaços vazios. Cada número resolve apenas UM desafio!
+                    </p>
+                </div>
+                <div class="numbers-grid" id="numbersContainer">
+                    <!-- Números serão gerados dinamicamente -->
+                </div>
+            </section>
         </div>
 
-        <div class="controls">
-            <button class="btn btn-reset" onclick="resetScreen()"><i class="fas fa-magic"></i> Limpar</button>
-            <button class="btn btn-check" id="btn-verify" onclick="verify()" disabled><i class="fas fa-check-circle"></i> Verificar</button>
+        <!-- FEEDBACK -->
+        <div class="feedback-message" id="feedbackMessage"></div>
+
+        <!-- CONTROLES -->
+        <div class="game-controls">
+            <button class="control-button btn-reset" onclick="resetCurrentScreen()">
+                <span>🔄</span> Reiniciar Tela
+            </button>
+            <button class="control-button btn-check" id="checkButton" onclick="checkAnswers()" disabled>
+                <span>✅</span> Verificar Respostas
+            </button>
+            <button class="control-button btn-next" id="nextButton" onclick="nextScreen()" disabled>
+                <span>▶️</span> Próxima Tela
+            </button>
         </div>
     </div>
 
     <script>
-        const THEMES = {
-            1: { name: "Missão Floresta", icon: "fa-tree", class: "theme-1" },
-            2: { name: "Mergulho Marinho", icon: "fa-fish", class: "theme-2" },
-            3: { name: "Exploração Espacial", icon: "fa-rocket", class: "theme-3" },
-            4: { name: "Busca ao Tesouro", icon: "fa-gem", class: "theme-4" }
+        // ================= CONFIGURAÇÕES AVANÇADAS =================
+        const GameConfig = {
+            levels: {
+                1: {
+                    name: "Iniciante",
+                    maxNumber: 50,
+                    numbersPerScreen: 20,
+                    sequenceLength: 5,
+                    minStep: 1,
+                    maxStep: 5,
+                    pointsPerScreen: 100,
+                    color: "#ffd166",
+                    icon: "🔢"
+                },
+                2: {
+                    name: "Intermediário",
+                    maxNumber: 100,
+                    numbersPerScreen: 25,
+                    sequenceLength: 5,
+                    minStep: 2,
+                    maxStep: 10,
+                    pointsPerScreen: 120,
+                    color: "#a5d6a7",
+                    icon: "✏️"
+                },
+                3: {
+                    name: "Avançado",
+                    maxNumber: 200,
+                    numbersPerScreen: 30,
+                    sequenceLength: 5,
+                    minStep: 3,
+                    maxStep: 15,
+                    pointsPerScreen: 140,
+                    color: "#90caf9",
+                    icon: "📚"
+                },
+                4: {
+                    name: "Especialista",
+                    maxNumber: 500,
+                    numbersPerScreen: 35,
+                    sequenceLength: 5,
+                    minStep: 5,
+                    maxStep: 25,
+                    pointsPerScreen: 160,
+                    color: "#ce93d8",
+                    icon: "🏆"
+                }
+            },
+            screensPerLevel: 8,
+            challengesPerScreen: 4,
+            totalExercises: 40
         };
 
-        const CONFIG = {
-            1: { max: 30, step: [1, 2], pts: 10 },
-            2: { max: 100, step: [2, 5], pts: 20 },
-            3: { max: 400, step: [5, 10], pts: 40 },
-            4: { max: 999, step: [10, 50], pts: 80 }
+        // ================= ESTADO DO JOGO =================
+        const GameState = {
+            currentLevel: 1,
+            currentScreen: 1,
+            score: 0,
+            totalScore: 0,
+            correctAnswers: 0,
+            totalCorrect: 0,
+            errors: 0,
+            currentStreak: 0,
+            maxStreak: 0,
+            completedExercises: 0,
+            currentNumbers: [],
+            currentChallenges: [],
+            selectedNumber: null,
+            filledPositions: 0,
+            isChecking: false,
+            dragElement: null
         };
 
-        let game = {
-            level: 1, score: 0, correct: 0, errors: 0, streak: 0,
-            levelsProgress: {
-                1: { screen: 1, challenges: [], options: [], isDone: false },
-                2: { screen: 1, challenges: [], options: [], isDone: false },
-                3: { screen: 1, challenges: [], options: [], isDone: false },
-                4: { screen: 1, challenges: [], options: [], isDone: false }
-            }
-        };
+        // ================= INICIALIZAÇÃO =================
+        document.addEventListener('DOMContentLoaded', async function() {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'block';
+                initializeGame();
+            }, 1500);
 
-        const saved = localStorage.getItem('sequencia_fundamental_v1');
-        if (saved) game = JSON.parse(saved);
+            setupDragAndDrop();
+        });
 
-        function save() { localStorage.setItem('sequencia_fundamental_v1', JSON.stringify(game)); }
-
-        function applyTheme(l) {
-            const theme = THEMES[l];
-            document.body.className = theme.class;
-            document.getElementById('level-name').textContent = theme.name;
-            document.getElementById('theme-icon').className = `fas ${theme.icon}`;
+        function initializeGame() {
+            GameState.currentLevel = 1;
+            GameState.currentScreen = 1;
+            GameState.completedExercises = 0;
+            updateUI();
+            generateScreen();
         }
 
-        function initLevel(l) {
-            game.level = l;
-            applyTheme(l);
-            updateTabVisuals(l);
-            const progress = game.levelsProgress[l];
-            if (progress.challenges.length === 0) generateNewScreen(l);
-            else render();
+        function switchLevel(level) {
+            GameState.currentLevel = level;
+            GameState.currentScreen = 1;
+            GameState.completedExercises = 0;
+            
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.classList.remove('active');
+                if (parseInt(card.dataset.level) === level) {
+                    card.classList.add('active');
+                }
+            });
+            
+            updateUI();
+            generateScreen();
+            
+            showFeedback(`Nível ${level} selecionado!`, 'success');
         }
 
-        function updateTabVisuals(l) {
-            document.querySelectorAll('.level-tab').forEach((t, idx) => t.classList.toggle('active', (idx + 1) === l));
-        }
-
-        function generateNewScreen(l) {
-            const cfg = CONFIG[l];
-            const progress = game.levelsProgress[l];
-            progress.challenges = [];
-            progress.isDone = false;
-            let solutionNumbers = new Set();
-
-            for (let i = 0; i < 5; i++) {
-                let seq, holeIdx, target;
-                let attempts = 0;
-                do {
-                    const step = Math.floor(Math.random() * (cfg.step[1] - cfg.step[0] + 1)) + cfg.step[0];
-                    const start = Math.floor(Math.random() * (cfg.max - (step * 5))) + 1;
-                    seq = Array.from({length: 5}, (_, idx) => start + (idx * step));
-                    holeIdx = Math.floor(Math.random() * 5);
-                    target = seq[holeIdx];
-                    attempts++;
-                } while (solutionNumbers.has(target) && attempts < 100);
-
-                solutionNumbers.add(target);
-                progress.challenges.push({ id: i, full: seq, hole: holeIdx, target: target, current: null, status: 'empty' });
-            }
-
-            let allOptions = [...solutionNumbers];
-            while(allOptions.length < 12) {
-                let dist = Math.floor(Math.random() * cfg.max) + 1;
-                if(!allOptions.includes(dist)) allOptions.push(dist);
-            }
-            progress.options = allOptions.sort((a,b) => a - b);
-            save();
-            render();
-        }
-
-        function render() {
-            const progress = game.levelsProgress[game.level];
-            document.getElementById('score').textContent = game.score;
-            document.getElementById('correct').textContent = game.correct;
-            document.getElementById('errors').textContent = game.errors;
-            document.getElementById('streak').textContent = game.streak;
-            document.getElementById('screen-idx').textContent = progress.screen;
-
-            const comboBox = document.getElementById('combo-box');
-            if(game.streak >= 3) comboBox.classList.add('bonus-active');
-            else comboBox.classList.remove('bonus-active');
-
-            const list = document.getElementById('challenges-list');
-            list.innerHTML = progress.challenges.map(ch => `
-                <div class="challenge-box">
-                    <div class="sequence">
-                        ${ch.full.map((num, i) => i === ch.hole ? 
-                            `<div class="cell drop-zone ${ch.current ? 'filled' : ''} ${ch.status}" data-id="${ch.id}">${ch.current || ''}</div>` : 
-                            `<div class="cell">${num}</div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            const grid = document.getElementById('numbers-grid');
-            grid.innerHTML = progress.options.map(num => {
-                const isUsed = progress.challenges.some(ch => ch.current == num);
-                return `<div class="number-item ${isUsed ? 'used' : ''}" draggable="${!isUsed}" data-val="${num}">${num}</div>`;
-            }).join('');
-
-            setupEvents();
+        // ================= GERAÇÃO PERFEITA DE DESAFIOS =================
+        function generateScreen() {
+            const config = GameConfig.levels[GameState.currentLevel];
+            GameState.currentNumbers = [];
+            GameState.currentChallenges = [];
+            GameState.filledPositions = 0;
+            GameState.selectedNumber = null;
+            
+            generatePerfectChallenges(config);
+            
+            updateNumbersDisplay();
+            updateChallengesDisplay();
             updateCheckButton();
+            
+            if (GameState.currentScreen > 1) {
+                showFeedback(`Tela ${GameState.currentScreen} carregada!`, 'success');
+            }
         }
 
-        function setupEvents() {
-            document.querySelectorAll('.number-item:not(.used)').forEach(item => {
-                item.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', item.dataset.val));
-            });
-
-            document.querySelectorAll('.drop-zone').forEach(zone => {
-                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-                zone.addEventListener('drop', e => {
-                    e.preventDefault();
-                    zone.classList.remove('drag-over');
-                    const val = e.dataTransfer.getData('text/plain');
-                    if (val) handlePlacement(zone.dataset.id, val);
+        function generatePerfectChallenges(config) {
+            const challenges = [];
+            const requiredNumbersSet = new Set();
+            const allSequences = [];
+            
+            // Primeiro passo: gerar 4 sequências válidas
+            for (let i = 0; i < GameConfig.challengesPerScreen; i++) {
+                let attempts = 0;
+                let sequenceData;
+                let isValid = false;
+                
+                do {
+                    sequenceData = generateValidSequence(config);
+                    attempts++;
+                    
+                    // Verificar se esta sequência não conflita com outras
+                    const allNumbers = sequenceData.sequence;
+                    const hasOverlap = allSequences.some(seq => 
+                        seq.some(num => allNumbers.includes(num))
+                    );
+                    
+                    // Verificar se os números de resposta não colidem
+                    const missingNumbers = sequenceData.correctAnswers;
+                    const hasCollision = missingNumbers.some(num => requiredNumbersSet.has(num));
+                    
+                    isValid = !hasOverlap && !hasCollision && attempts < 100;
+                    
+                } while (!isValid);
+                
+                // Registrar esta sequência
+                allSequences.push(sequenceData.sequence);
+                
+                // Adicionar números necessários
+                sequenceData.correctAnswers.forEach(num => requiredNumbersSet.add(num));
+                
+                // Criar desafio
+                challenges.push({
+                    id: `challenge-${GameState.currentScreen}-${i}`,
+                    sequence: sequenceData.sequence,
+                    hiddenIndices: sequenceData.hiddenIndices,
+                    correctAnswers: sequenceData.correctAnswers,
+                    userAnswers: new Array(sequenceData.correctAnswers.length).fill(null),
+                    isComplete: false,
+                    points: config.pointsPerScreen / GameConfig.challengesPerScreen
                 });
-                zone.addEventListener('click', () => {
-                    const ch = game.levelsProgress[game.level].challenges[zone.dataset.id];
-                    if (ch.current && ch.status !== 'correct' && !game.levelsProgress[game.level].isDone) { 
-                        ch.current = null; ch.status = 'empty'; render(); 
+            }
+            
+            // Passo 2: garantir todos os números necessários estão disponíveis
+            const requiredNumbers = Array.from(requiredNumbersSet);
+            
+            // Passo 3: adicionar números extras (não podem ser das sequências)
+            const neededExtras = config.numbersPerScreen - requiredNumbers.length;
+            const extras = generateSafeExtras(config.maxNumber, neededExtras, allSequences, requiredNumbers);
+            
+            // Passo 4: combinar tudo
+            GameState.currentNumbers = [...requiredNumbers, ...extras]
+                .sort((a, b) => a - b)
+                .slice(0, config.numbersPerScreen);
+            
+            GameState.currentChallenges = challenges;
+            
+            // Verificação final obrigatória
+            if (!verifyAllAnswersAvailable()) {
+                console.log("Regenerando tela por segurança...");
+                generatePerfectChallenges(config);
+            }
+        }
+
+        function generateValidSequence(config) {
+            const length = config.sequenceLength;
+            
+            // Gerar razão única para esta sequência
+            const step = Math.floor(Math.random() * (config.maxStep - config.minStep + 1)) + config.minStep;
+            
+            // Garantir que a sequência inteira cabe no limite
+            const maxStart = config.maxNumber - (step * (length - 1));
+            const start = Math.floor(Math.random() * Math.max(1, maxStart)) + 1;
+            
+            // Gerar sequência completa
+            const sequence = [];
+            for (let i = 0; i < length; i++) {
+                sequence.push(start + (i * step));
+            }
+            
+            // SEMPRE 2 posições escondidas (exatamente como na imagem)
+            const hiddenIndices = [];
+            const possibleIndices = [1, 2, 3];
+            
+            while (hiddenIndices.length < 2) {
+                const idx = possibleIndices[Math.floor(Math.random() * possibleIndices.length)];
+                if (!hiddenIndices.includes(idx)) {
+                    hiddenIndices.push(idx);
+                }
+            }
+            
+            hiddenIndices.sort((a, b) => a - b);
+            
+            // Números que devem ser preenchidos
+            const correctAnswers = hiddenIndices.map(idx => sequence[idx]);
+            
+            return {
+                sequence: sequence,
+                hiddenIndices: hiddenIndices,
+                correctAnswers: correctAnswers,
+                step: step,
+                start: start
+            };
+        }
+
+        function generateSafeExtras(max, count, excludeSequences, excludeNumbers) {
+            const extras = new Set();
+            const excludeSet = new Set(excludeNumbers);
+            
+            // Adicionar todas as sequências ao conjunto de exclusão
+            excludeSequences.forEach(seq => {
+                seq.forEach(num => excludeSet.add(num));
+            });
+            
+            let attempts = 0;
+            while (extras.size < count && attempts < 1000) {
+                const num = Math.floor(Math.random() * max) + 1;
+                if (!excludeSet.has(num) && !extras.has(num)) {
+                    extras.add(num);
+                }
+                attempts++;
+            }
+            
+            // Se não conseguiu gerar extras suficientes, usar números que não são respostas
+            if (extras.size < count) {
+                for (let i = 1; i <= max && extras.size < count; i++) {
+                    if (!excludeSet.has(i)) {
+                        extras.add(i);
                     }
-                });
+                }
+            }
+            
+            return Array.from(extras);
+        }
+
+        function verifyAllAnswersAvailable() {
+            const allRequired = [];
+            GameState.currentChallenges.forEach(challenge => {
+                allRequired.push(...challenge.correctAnswers);
+            });
+            
+            const missing = allRequired.filter(num => !GameState.currentNumbers.includes(num));
+            
+            if (missing.length > 0) {
+                console.error("ERRO: Números faltando:", missing);
+                return false;
+            }
+            
+            // Verificar duplicatas
+            const counts = {};
+            allRequired.forEach(num => {
+                counts[num] = (counts[num] || 0) + 1;
+            });
+            
+            const duplicates = Object.keys(counts).filter(num => counts[num] > 1);
+            if (duplicates.length > 0) {
+                console.error("ERRO: Números duplicados:", duplicates);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // ================= INTERFACE DO USUÁRIO =================
+        function updateUI() {
+            document.getElementById('currentLevel').textContent = GameState.currentLevel;
+            document.getElementById('currentScreen').textContent = `${GameState.currentScreen}/${GameConfig.screensPerLevel}`;
+            document.getElementById('currentScore').textContent = GameState.score;
+            
+            document.getElementById('totalScore').textContent = GameState.totalScore;
+            document.getElementById('totalCorrect').textContent = GameState.totalCorrect;
+            document.getElementById('totalErrors').textContent = GameState.errors;
+            document.getElementById('currentStreak').textContent = GameState.currentStreak;
+            
+            const progress = (GameState.completedExercises / GameConfig.totalExercises) * 100;
+            document.getElementById('completedExercises').textContent = GameState.completedExercises;
+            document.getElementById('progressPercentage').textContent = Math.round(progress);
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        function updateNumbersDisplay() {
+            const container = document.getElementById('numbersContainer');
+            container.innerHTML = '';
+            
+            GameState.currentNumbers.forEach((number, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'number-tile';
+                tile.textContent = number;
+                tile.dataset.number = number;
+                tile.dataset.index = index;
+                
+                const isUsed = GameState.currentChallenges.some(challenge =>
+                    challenge.userAnswers.some(answer => answer === number)
+                );
+                
+                if (isUsed) {
+                    tile.classList.add('used');
+                }
+                
+                tile.setAttribute('draggable', 'true');
+                tile.addEventListener('dragstart', handleDragStart);
+                tile.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(tile);
             });
         }
 
-        function handlePlacement(id, val) {
-            const progress = game.levelsProgress[game.level];
-            if (progress.isDone) return;
-            const num = parseInt(val);
-            progress.challenges.forEach(ch => { if(ch.current === num) { ch.current = null; ch.status = 'empty'; } });
-            progress.challenges[id].current = num;
-            progress.challenges[id].status = 'filled';
-            save();
-            render();
+        function updateChallengesDisplay() {
+            const container = document.getElementById('challengesContainer');
+            container.innerHTML = '';
+            
+            GameState.currentChallenges.forEach((challenge, challengeIndex) => {
+                const card = document.createElement('div');
+                card.className = 'challenge-card';
+                card.dataset.challengeId = challenge.id;
+                
+                // CABEÇALHO SIMPLIFICADO - SEM PONTOS VISÍVEIS
+                const header = document.createElement('div');
+                header.className = 'challenge-header';
+                
+                const number = document.createElement('div');
+                number.className = 'challenge-number';
+                number.innerHTML = `<span>🔢</span> Desafio ${challengeIndex + 1}`;
+                
+                header.appendChild(number);
+                // NÃO ADICIONAR ELEMENTO DE PONTOS
+                
+                card.appendChild(header);
+                
+                // SEQUÊNCIA DE NÚMEROS
+                const seqContainer = document.createElement('div');
+                seqContainer.className = 'sequence-container';
+                
+                challenge.sequence.forEach((num, index) => {
+                    const numElement = document.createElement('div');
+                    
+                    if (challenge.hiddenIndices.includes(index)) {
+                        const hiddenIdx = challenge.hiddenIndices.indexOf(index);
+                        const userAnswer = challenge.userAnswers[hiddenIdx];
+                        numElement.className = userAnswer ? 'sequence-number filled' : 'sequence-number empty';
+                        numElement.textContent = userAnswer || '?';
+                        numElement.dataset.position = `${challengeIndex}-${index}`;
+                        numElement.dataset.challengeIndex = challengeIndex;
+                        numElement.dataset.seqIndex = index;
+                        
+                        if (userAnswer) {
+                            numElement.addEventListener('click', () => removeNumber(challengeIndex, index));
+                        }
+                        
+                        numElement.addEventListener('dragover', handleDragOver);
+                        numElement.addEventListener('drop', handleDrop);
+                        numElement.addEventListener('dragenter', handleDragEnter);
+                        numElement.addEventListener('dragleave', handleDragLeave);
+                    } else {
+                        numElement.className = 'sequence-number';
+                        numElement.textContent = num;
+                    }
+                    
+                    seqContainer.appendChild(numElement);
+                });
+                
+                card.appendChild(seqContainer);
+                container.appendChild(card);
+            });
         }
 
         function updateCheckButton() {
-            const progress = game.levelsProgress[game.level];
-            const allFilled = progress.challenges.every(ch => ch.current !== null);
-            document.getElementById('btn-verify').disabled = !allFilled || progress.isDone;
+            const checkButton = document.getElementById('checkButton');
+            const nextButton = document.getElementById('nextButton');
+            
+            const totalPositions = GameState.currentChallenges.reduce((total, challenge) => 
+                total + challenge.hiddenIndices.length, 0
+            );
+            
+            const filledPositions = GameState.currentChallenges.reduce((total, challenge) => 
+                total + challenge.userAnswers.filter(a => a !== null).length, 0
+            );
+            
+            GameState.filledPositions = filledPositions;
+            
+            checkButton.disabled = filledPositions !== totalPositions;
+            nextButton.disabled = true;
         }
 
-        function verify() {
-            const progress = game.levelsProgress[game.level];
-            let allCorrect = true;
-            let errorsThisTry = 0;
-
-            progress.challenges.forEach(ch => {
-                if(ch.current === ch.target) ch.status = 'correct';
-                else { ch.status = 'incorrect'; allCorrect = false; errorsThisTry++; }
+        // ================= ARRASTAR E SOLTAR =================
+        function setupDragAndDrop() {
+            document.addEventListener('dragover', function(e) {
+                e.preventDefault();
             });
+            
+            document.addEventListener('drop', function(e) {
+                e.preventDefault();
+            });
+        }
 
-            if(allCorrect) {
-                progress.isDone = true;
-                let earnedPoints = CONFIG[game.level].pts;
-                if(game.streak >= 2) earnedPoints *= 2;
+        function handleDragStart(e) {
+            if (e.target.classList.contains('used')) {
+                e.preventDefault();
+                return;
+            }
+            
+            GameState.dragElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', e.target.dataset.number);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            if (GameState.dragElement) {
+                GameState.dragElement.classList.remove('dragging');
+                GameState.dragElement = null;
+            }
+            
+            document.querySelectorAll('.sequence-number.empty').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (e.target.classList.contains('sequence-number') && 
+                e.target.classList.contains('empty') && 
+                !e.target.classList.contains('filled')) {
+                e.target.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+            
+            const number = parseInt(e.dataTransfer.getData('text/plain'));
+            const challengeIndex = parseInt(e.target.dataset.challengeIndex);
+            const seqIndex = parseInt(e.target.dataset.seqIndex);
+            
+            placeNumber(challengeIndex, seqIndex, number);
+        }
+
+        // ================= LÓGICA DO JOGO =================
+        function placeNumber(challengeIndex, seqIndex, number) {
+            const challenge = GameState.currentChallenges[challengeIndex];
+            const hiddenIndex = challenge.hiddenIndices.indexOf(seqIndex);
+            
+            if (hiddenIndex === -1) {
+                showFeedback('Posição inválida!', 'error');
+                return;
+            }
+            
+            if (challenge.userAnswers[hiddenIndex] !== null) {
+                showFeedback('Esta posição já está preenchida!', 'error');
+                return;
+            }
+            
+            if (!GameState.currentNumbers.includes(number)) {
+                showFeedback('Número não disponível nesta tela!', 'error');
+                return;
+            }
+            
+            const isNumberUsed = GameState.currentChallenges.some((c, idx) => 
+                idx !== challengeIndex && 
+                c.userAnswers.some(answer => answer === number)
+            );
+            
+            if (isNumberUsed) {
+                showFeedback('Este número já foi usado em outro desafio!', 'error');
+                return;
+            }
+            
+            challenge.userAnswers[hiddenIndex] = number;
+            
+            updateChallengesDisplay();
+            updateNumbersDisplay();
+            updateCheckButton();
+            
+            const tile = document.querySelector(`[data-position="${challengeIndex}-${seqIndex}"]`);
+            if (tile) {
+                tile.classList.add('filled');
+            }
+            
+            showFeedback(`Número ${number} colocado!`, 'success');
+        }
+
+        function removeNumber(challengeIndex, seqIndex) {
+            const challenge = GameState.currentChallenges[challengeIndex];
+            const hiddenIndex = challenge.hiddenIndices.indexOf(seqIndex);
+            const number = challenge.userAnswers[hiddenIndex];
+            
+            if (number === null) return;
+            
+            challenge.userAnswers[hiddenIndex] = null;
+            
+            updateChallengesDisplay();
+            updateNumbersDisplay();
+            updateCheckButton();
+            
+            showFeedback(`Número ${number} removido!`, 'success');
+        }
+
+        function checkAnswers() {
+            if (GameState.isChecking) return;
+            
+            GameState.isChecking = true;
+            const checkButton = document.getElementById('checkButton');
+            const nextButton = document.getElementById('nextButton');
+            checkButton.disabled = true;
+            
+            let allCorrect = true;
+            let screenScore = 0;
+            
+            GameState.currentChallenges.forEach((challenge, index) => {
+                let challengeCorrect = true;
                 
-                game.score += earnedPoints;
-                game.correct += 5;
-                game.streak++;
-                save();
-
-                setTimeout(() => {
-                    if(progress.screen < 8) {
-                        progress.screen++;
-                        generateNewScreen(game.level);
-                    } else {
-                        handleLevelAdvance();
+                challenge.hiddenIndices.forEach((seqIndex, hiddenIndex) => {
+                    const userAnswer = challenge.userAnswers[hiddenIndex];
+                    const correctAnswer = challenge.correctAnswers[hiddenIndex];
+                    const element = document.querySelector(`[data-position="${index}-${seqIndex}"]`);
+                    
+                    if (element) {
+                        if (userAnswer === correctAnswer) {
+                            element.classList.add('correct');
+                        } else {
+                            element.classList.add('incorrect');
+                            challengeCorrect = false;
+                            allCorrect = false;
+                        }
                     }
-                }, 1200);
+                });
+                
+                if (challengeCorrect) {
+                    screenScore += challenge.points;
+                    GameState.totalCorrect++;
+                    GameState.currentStreak++;
+                    GameState.maxStreak = Math.max(GameState.maxStreak, GameState.currentStreak);
+                } else {
+                    GameState.errors++;
+                    GameState.currentStreak = 0;
+                }
+            });
+            
+            if (allCorrect) {
+                GameState.score += screenScore;
+                GameState.totalScore += screenScore;
+                GameState.completedExercises += GameConfig.challengesPerScreen;
+                
+                showFeedback(`🎉 Perfeito! +${Math.round(screenScore)} pontos!`, 'success');
+                nextButton.disabled = false;
+                
+                createConfetti();
             } else {
-                game.errors += errorsThisTry;
-                game.streak = 0;
-                save();
+                showFeedback('Algumas respostas estão incorretas. Tente novamente!', 'error');
+                setTimeout(() => {
+                    checkButton.disabled = false;
+                    GameState.isChecking = false;
+                }, 2000);
+                return;
             }
-            render();
+            
+            updateUI();
+            GameState.isChecking = false;
+            
+            if (GameState.currentScreen === GameConfig.screensPerLevel) {
+                setTimeout(() => {
+                    if (GameState.currentLevel < 4) {
+                        if (confirm(`🎊 Nível ${GameState.currentLevel} completo! Deseja avançar para o próximo nível?`)) {
+                            switchLevel(GameState.currentLevel + 1);
+                        }
+                    } else {
+                        showFeedback('🏆 PARABÉNS! Você completou todos os níveis!', 'success');
+                    }
+                }, 1000);
+            }
         }
 
-        function handleLevelAdvance() {
-            if(game.level < 4) {
-                alert(`🎯 Missão Cumprida! Você avançou de fase!`);
-                game.level++;
-                initLevel(game.level);
+        function nextScreen() {
+            if (GameState.currentScreen < GameConfig.screensPerLevel) {
+                GameState.currentScreen++;
+                generateScreen();
+                updateUI();
             } else {
-                alert("🏆 INCRÍVEL! Você é um Mestre das Sequências e completou todas as missões!");
+                showFeedback('Você completou todas as telas deste nível!', 'success');
             }
-            save();
         }
 
-        function resetScreen() {
-            const progress = game.levelsProgress[game.level];
-            if (progress.isDone) return;
-            progress.challenges.forEach(ch => { ch.current = null; ch.status = 'empty'; });
-            save();
-            render();
+        function resetCurrentScreen() {
+            if (confirm('Tem certeza que deseja reiniciar esta tela? Todas as respostas serão perdidas.')) {
+                generateScreen();
+                showFeedback('Tela reiniciada!', 'success');
+            }
         }
 
-        function changeLevel(l) {
-            initLevel(l);
+        // ================= FEEDBACK E ANIMAÇÕES =================
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedbackMessage');
+            feedback.textContent = message;
+            feedback.className = `feedback-message feedback-${type}`;
+            feedback.style.display = 'block';
+            
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 3000);
         }
 
-        window.onload = () => initLevel(game.level);
+        function createConfetti() {
+            const colors = ['#4a6bff', '#2575fc', '#ff9a00', '#28a745', '#dc3545'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = '50%';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-20px';
+                confetti.style.zIndex = '9999';
+                confetti.style.pointerEvents = 'none';
+                
+                document.body.appendChild(confetti);
+                
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight}px) rotate(${360 + Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: 1000 + Math.random() * 1000,
+                    easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        // ================= ATALHOS DE TECLADO =================
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    if (e.altKey) {
+                        switchLevel(parseInt(e.key));
+                    }
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (!document.getElementById('checkButton').disabled) {
+                        checkAnswers();
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!document.getElementById('nextButton').disabled) {
+                        nextScreen();
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    if (e.ctrlKey) {
+                        resetCurrentScreen();
+                    }
+                    break;
+            }
+        });
+
+        // ================= FUNÇÃO DE TESTE (para o professor) =================
+        function testGame() {
+            console.log("🧪 TESTANDO INTEGRIDADE DO JOGO...");
+            
+            let errors = 0;
+            const tests = 50;
+            
+            for (let t = 0; t < tests; t++) {
+                generateScreen();
+                
+                // Teste 1: Verificar se todos os números necessários estão disponíveis
+                const allRequired = [];
+                GameState.currentChallenges.forEach(challenge => {
+                    allRequired.push(...challenge.correctAnswers);
+                });
+                
+                const missing = allRequired.filter(num => !GameState.currentNumbers.includes(num));
+                if (missing.length > 0) {
+                    console.error(`❌ Teste ${t+1}: Números faltando:`, missing);
+                    errors++;
+                }
+                
+                // Teste 2: Verificar duplicatas nas respostas
+                const counts = {};
+                allRequired.forEach(num => {
+                    counts[num] = (counts[num] || 0) + 1;
+                });
+                
+                const duplicates = Object.keys(counts).filter(num => counts[num] > 1);
+                if (duplicates.length > 0) {
+                    console.error(`❌ Teste ${t+1}: Números duplicados:`, duplicates);
+                    errors++;
+                }
+                
+                // Teste 3: Verificar se há sempre 2 lacunas por desafio
+                const wrongGaps = GameState.currentChallenges.filter(ch => ch.hiddenIndices.length !== 2);
+                if (wrongGaps.length > 0) {
+                    console.error(`❌ Teste ${t+1}: ${wrongGaps.length} desafios com número errado de lacunas`);
+                    errors++;
+                }
+            }
+            
+            if (errors === 0) {
+                console.log(`✅ TODOS OS ${tests} TESTES APROVADOS! O jogo está PERFEITO!`);
+            } else {
+                console.error(`⚠️ Encontrados ${errors} erros em ${tests} testes`);
+            }
+        }
+
+        // Descomente para testar (e comente antes de usar com alunos):
+        // setTimeout(testGame, 2000);
+
+        // ================= INICIALIZAR JOGO =================
+        window.onload = initializeGame;
     </script>
 </body>
 </html>
