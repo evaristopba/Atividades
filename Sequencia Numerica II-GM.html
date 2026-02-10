@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura das Sequências - Fundamental I</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6bff; --success: #28a745; --danger: #dc3545; --light: #f8f9fa; --dark: #333; --gold: #ffc107;
+            /* Variáveis que mudam com o tema */
+            --bg-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --header-color: #4a6bff;
+        }
+
+        /* Temas por Nível */
+        body.theme-1 { --bg-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); --header-color: #1b5e20; }
+        body.theme-2 { --bg-gradient: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); --header-color: #0d47a1; }
+        body.theme-3 { --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); --header-color: #311b92; }
+        body.theme-4 { --bg-gradient: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); --header-color: #ff6f00; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+        body {
+            font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh; padding: 20px; color: var(--dark);
+            transition: background 0.5s ease;
+        }
+
+        .container {
+            max-width: 1000px; margin: 0 auto; background: rgba(255,255,255,0.95);
+            border-radius: 30px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 6px solid white;
+        }
+
+        .main-title {
+            text-align: center; color: var(--header-color); margin-bottom: 15px; font-size: 2em;
+        }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 10px; margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: white; padding: 10px; border-radius: 15px;
+            text-align: center; border: 2px solid #ddd; transition: 0.3s;
+        }
+
+        .stat-box.bonus-active {
+            border-color: var(--gold); background-color: #fffde7;
+            animation: pulse-gold 1.5s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .stat-val { font-size: 1.5em; font-weight: bold; color: var(--header-color); display: block; }
+        .stat-lbl { font-size: 0.7em; font-weight: bold; text-transform: uppercase; color: #666; }
+        .bonus-text { font-size: 0.6em; color: #f57c00; font-weight: bold; display: none; }
+        .stat-box.bonus-active .bonus-text { display: block; }
+
+        .level-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+        .level-tab {
+            flex: 1; padding: 10px; border-radius: 20px; border: 3px solid #ddd;
+            background: #fff; cursor: pointer; font-weight: bold; text-align: center; font-size: 0.9em;
+        }
+        .level-tab.active { color: white; border-color: white; transform: scale(1.05); }
+        .tab-1.active { background: #2e7d32; } .tab-2.active { background: #1565c0; }
+        .tab-3.active { background: #4527a0; } .tab-4.active { background: #f57c00; }
+
+        .game-area { display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }
+        @media (max-width: 800px) { .game-area { grid-template-columns: 1fr; } }
+
+        .challenge-box {
+            background: white; border: 2px solid #eee; border-radius: 20px;
+            margin-bottom: 10px; height: 90px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sequence { display: flex; gap: 8px; align-items: center; }
+
+        .cell {
+            width: 55px; height: 55px; border: 3px solid #e0e0e0; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em; font-weight: bold; background: #f9f9f9;
+        }
+
+        .cell.drop-zone { border: 3px dashed var(--primary); background: #f0f4ff; cursor: pointer; color: transparent; }
+        .cell.drop-zone:empty::after { content: '?'; color: #bbb; }
+        .cell.filled { border-style: solid; border-color: var(--primary); background: #e3f2fd; color: var(--primary); }
+        .cell.correct { background: #c8e6c9 !important; border-color: var(--success) !important; color: #1b5e20 !important; }
+        .cell.incorrect { background: #ffcdd2 !important; border-color: var(--danger) !important; color: #b71c1c !important; }
+
+        .numbers-bank {
+            background: #f5f5f5; border-radius: 20px; padding: 15px; border: 2px solid #ddd;
+            min-height: 480px;
+        }
+        .numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        .number-item {
+            height: 60px; background: white; border: 3px solid var(--header-color);
+            border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.6em; font-weight: bold; color: var(--header-color); cursor: grab;
+            box-shadow: 0 4px 0 #ddd;
+        }
+        .number-item:hover { background: #fffde7; }
+        .number-item.used { visibility: hidden; }
+
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        .btn {
+            flex: 1; padding: 15px; border-radius: 20px; border: none; font-weight: bold;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.2em;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+        }
+        .btn-check { background: var(--success); color: white; }
+        .btn-reset { background: #e0e0e0; color: #444; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .drag-over { background: var(--gold) !important; border-color: orange !important; }
+    </style>
+</head>
+<body class="theme-1">
+
+    <div class="container">
+        <h2 class="main-title" id="theme-title">
+            <i class="fas fa-tree" id="theme-icon"></i> 
+            <span id="level-name">Missão Floresta</span>
+        </h2>
+
+        <div class="stats-grid">
+            <div class="stat-box"><span class="stat-val" id="score">0</span><span class="stat-lbl">Pontos</span></div>
+            <div class="stat-box"><span class="stat-val" id="correct">0</span><span class="stat-lbl">Acertos</span></div>
+            <div class="stat-box"><span class="stat-val" id="errors">0</span><span class="stat-lbl">Erros</span></div>
+            <div class="stat-box" id="combo-box">
+                <span class="stat-val" id="streak">0</span>
+                <span class="stat-lbl">Combo</span>
+                <span class="bonus-text">🔥 2X PONTOS!</span>
+            </div>
+            <div class="stat-box"><span class="stat-val"><span id="screen-idx">1</span>/8</span><span class="stat-lbl">Tela</span></div>
+        </div>
+
+        <div class="level-selector">
+            <div class="level-tab tab-1 active" onclick="changeLevel(1)">1º Ano</div>
+            <div class="level-tab tab-2" onclick="changeLevel(2)">2º/3º Ano</div>
+            <div class="level-tab tab-3" onclick="changeLevel(3)">4º Ano</div>
+            <div class="level-tab tab-4" onclick="changeLevel(4)">5º Ano</div>
+        </div>
+
+        <div class="game-area">
+            <div class="challenges-container" id="challenges-list"></div>
+            <div class="numbers-bank">
+                <div id="numbers-grid" class="numbers-grid"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-reset" onclick="resetScreen()"><i class="fas fa-magic"></i> Limpar</button>
+            <button class="btn btn-check" id="btn-verify" onclick="verify()" disabled><i class="fas fa-check-circle"></i> Verificar</button>
+        </div>
+    </div>
+
+    <script>
+        const THEMES = {
+            1: { name: "Missão Floresta", icon: "fa-tree", class: "theme-1" },
+            2: { name: "Mergulho Marinho", icon: "fa-fish", class: "theme-2" },
+            3: { name: "Exploração Espacial", icon: "fa-rocket", class: "theme-3" },
+            4: { name: "Busca ao Tesouro", icon: "fa-gem", class: "theme-4" }
+        };
+
+        const CONFIG = {
+            1: { max: 30, step: [1, 2], pts: 10 },
+            2: { max: 100, step: [2, 5], pts: 20 },
+            3: { max: 400, step: [5, 10], pts: 40 },
+            4: { max: 999, step: [10, 50], pts: 80 }
+        };
+
+        let game = {
+            level: 1, score: 0, correct: 0, errors: 0, streak: 0,
+            levelsProgress: {
+                1: { screen: 1, challenges: [], options: [], isDone: false },
+                2: { screen: 1, challenges: [], options: [], isDone: false },
+                3: { screen: 1, challenges: [], options: [], isDone: false },
+                4: { screen: 1, challenges: [], options: [], isDone: false }
+            }
+        };
+
+        const saved = localStorage.getItem('sequencia_fundamental_v1');
+        if (saved) game = JSON.parse(saved);
+
+        function save() { localStorage.setItem('sequencia_fundamental_v1', JSON.stringify(game)); }
+
+        function applyTheme(l) {
+            const theme = THEMES[l];
+            document.body.className = theme.class;
+            document.getElementById('level-name').textContent = theme.name;
+            document.getElementById('theme-icon').className = `fas ${theme.icon}`;
+        }
+
+        function initLevel(l) {
+            game.level = l;
+            applyTheme(l);
+            updateTabVisuals(l);
+            const progress = game.levelsProgress[l];
+            if (progress.challenges.length === 0) generateNewScreen(l);
+            else render();
+        }
+
+        function updateTabVisuals(l) {
+            document.querySelectorAll('.level-tab').forEach((t, idx) => t.classList.toggle('active', (idx + 1) === l));
+        }
+
+        function generateNewScreen(l) {
+            const cfg = CONFIG[l];
+            const progress = game.levelsProgress[l];
+            progress.challenges = [];
+            progress.isDone = false;
+            let solutionNumbers = new Set();
+
+            for (let i = 0; i < 5; i++) {
+                let seq, holeIdx, target;
+                let attempts = 0;
+                do {
+                    const step = Math.floor(Math.random() * (cfg.step[1] - cfg.step[0] + 1)) + cfg.step[0];
+                    const start = Math.floor(Math.random() * (cfg.max - (step * 5))) + 1;
+                    seq = Array.from({length: 5}, (_, idx) => start + (idx * step));
+                    holeIdx = Math.floor(Math.random() * 5);
+                    target = seq[holeIdx];
+                    attempts++;
+                } while (solutionNumbers.has(target) && attempts < 100);
+
+                solutionNumbers.add(target);
+                progress.challenges.push({ id: i, full: seq, hole: holeIdx, target: target, current: null, status: 'empty' });
+            }
+
+            let allOptions = [...solutionNumbers];
+            while(allOptions.length < 12) {
+                let dist = Math.floor(Math.random() * cfg.max) + 1;
+                if(!allOptions.includes(dist)) allOptions.push(dist);
+            }
+            progress.options = allOptions.sort((a,b) => a - b);
+            save();
+            render();
+        }
+
+        function render() {
+            const progress = game.levelsProgress[game.level];
+            document.getElementById('score').textContent = game.score;
+            document.getElementById('correct').textContent = game.correct;
+            document.getElementById('errors').textContent = game.errors;
+            document.getElementById('streak').textContent = game.streak;
+            document.getElementById('screen-idx').textContent = progress.screen;
+
+            const comboBox = document.getElementById('combo-box');
+            if(game.streak >= 3) comboBox.classList.add('bonus-active');
+            else comboBox.classList.remove('bonus-active');
+
+            const list = document.getElementById('challenges-list');
+            list.innerHTML = progress.challenges.map(ch => `
+                <div class="challenge-box">
+                    <div class="sequence">
+                        ${ch.full.map((num, i) => i === ch.hole ? 
+                            `<div class="cell drop-zone ${ch.current ? 'filled' : ''} ${ch.status}" data-id="${ch.id}">${ch.current || ''}</div>` : 
+                            `<div class="cell">${num}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            const grid = document.getElementById('numbers-grid');
+            grid.innerHTML = progress.options.map(num => {
+                const isUsed = progress.challenges.some(ch => ch.current == num);
+                return `<div class="number-item ${isUsed ? 'used' : ''}" draggable="${!isUsed}" data-val="${num}">${num}</div>`;
+            }).join('');
+
+            setupEvents();
+            updateCheckButton();
+        }
+
+        function setupEvents() {
+            document.querySelectorAll('.number-item:not(.used)').forEach(item => {
+                item.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', item.dataset.val));
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const val = e.dataTransfer.getData('text/plain');
+                    if (val) handlePlacement(zone.dataset.id, val);
+                });
+                zone.addEventListener('click', () => {
+                    const ch = game.levelsProgress[game.level].challenges[zone.dataset.id];
+                    if (ch.current && ch.status !== 'correct' && !game.levelsProgress[game.level].isDone) { 
+                        ch.current = null; ch.status = 'empty'; render(); 
+                    }
+                });
+            });
+        }
+
+        function handlePlacement(id, val) {
+            const progress = game.levelsProgress[game.level];
+            if (progress.isDone) return;
+            const num = parseInt(val);
+            progress.challenges.forEach(ch => { if(ch.current === num) { ch.current = null; ch.status = 'empty'; } });
+            progress.challenges[id].current = num;
+            progress.challenges[id].status = 'filled';
+            save();
+            render();
+        }
+
+        function updateCheckButton() {
+            const progress = game.levelsProgress[game.level];
+            const allFilled = progress.challenges.every(ch => ch.current !== null);
+            document.getElementById('btn-verify').disabled = !allFilled || progress.isDone;
+        }
+
+        function verify() {
+            const progress = game.levelsProgress[game.level];
+            let allCorrect = true;
+            let errorsThisTry = 0;
+
+            progress.challenges.forEach(ch => {
+                if(ch.current === ch.target) ch.status = 'correct';
+                else { ch.status = 'incorrect'; allCorrect = false; errorsThisTry++; }
+            });
+
+            if(allCorrect) {
+                progress.isDone = true;
+                let earnedPoints = CONFIG[game.level].pts;
+                if(game.streak >= 2) earnedPoints *= 2;
+                
+                game.score += earnedPoints;
+                game.correct += 5;
+                game.streak++;
+                save();
+
+                setTimeout(() => {
+                    if(progress.screen < 8) {
+                        progress.screen++;
+                        generateNewScreen(game.level);
+                    } else {
+                        handleLevelAdvance();
+                    }
+                }, 1200);
+            } else {
+                game.errors += errorsThisTry;
+                game.streak = 0;
+                save();
+            }
+            render();
+        }
+
+        function handleLevelAdvance() {
+            if(game.level < 4) {
+                alert(`🎯 Missão Cumprida! Você avançou de fase!`);
+                game.level++;
+                initLevel(game.level);
+            } else {
+                alert("🏆 INCRÍVEL! Você é um Mestre das Sequências e completou todas as missões!");
+            }
+            save();
+        }
+
+        function resetScreen() {
+            const progress = game.levelsProgress[game.level];
+            if (progress.isDone) return;
+            progress.challenges.forEach(ch => { ch.current = null; ch.status = 'empty'; });
+            save();
+            render();
+        }
+
+        function changeLevel(l) {
+            initLevel(l);
+        }
+
+        window.onload = () => initLevel(game.level);
+    </script>
+</body>
+</html>
