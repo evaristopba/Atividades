@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -49,6 +49,30 @@
             gap: 15px;
             margin-top: 15px;
             flex-wrap: wrap;
+        }
+
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #4facfe;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .tabs-container {
@@ -109,7 +133,7 @@
             border-radius: 0 15px 15px 15px;
             padding: 25px;
             border: 3px solid;
-            min-height: 550px;
+            min-height: 600px;
             display: none;
         }
 
@@ -194,6 +218,12 @@
             grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             margin-bottom: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .exercises-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         @media (max-width: 900px) {
@@ -296,15 +326,21 @@
             padding: 10px;
         }
 
+        @media (max-width: 1200px) {
+            .numbers-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             .numbers-grid {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(6, 1fr);
             }
         }
 
         @media (max-width: 480px) {
             .numbers-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -437,10 +473,19 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="loading-screen" style="display: none;">
+        <div class="loading-screen">
+            <div class="loader"></div>
+            <h2>Gerando 160 desafios únicos...</h2>
+            <p>Isso pode levar alguns segundos. Por favor, aguarde!</p>
+            <p id="loading-progress">Iniciando...</p>
+        </div>
+    </div>
+
+    <div class="container" id="game-container" style="display: none;">
         <div class="header">
-            <h1>🧮 Desafio das Sequências Numéricas</h1>
-            <p>4 níveis com 20 desafios únicos cada - Cada número resolve apenas UM desafio!</p>
+            <h1>🧮 Desafio das Sequências Numéricas - SUPER VERSÃO! 🚀</h1>
+            <p>4 níveis com 40 desafios únicos cada - Total: 160 desafios! - Cada número resolve apenas UM desafio!</p>
             
             <div class="header-controls">
                 <button class="reset-all-btn" onclick="resetEntireGame()">
@@ -454,16 +499,16 @@
 
         <div class="tabs-container">
             <div class="tab tab-1 active" data-tab="1" onclick="switchTab(1)">
-                <span>🔢</span> Nível 1
+                <span>🔢</span> Nível 1 (40 desafios)
             </div>
             <div class="tab tab-2" data-tab="2" onclick="switchTab(2)">
-                <span>✏️</span> Nível 2
+                <span>✏️</span> Nível 2 (40 desafios)
             </div>
             <div class="tab tab-3" data-tab="3" onclick="switchTab(3)">
-                <span>📚</span> Nível 3
+                <span>📚</span> Nível 3 (40 desafios)
             </div>
             <div class="tab tab-4" data-tab="4" onclick="switchTab(4)">
-                <span>🏆</span> Nível 4
+                <span>🏆</span> Nível 4 (40 desafios)
             </div>
         </div>
 
@@ -483,7 +528,7 @@
                     <div class="stat-label">❌ Erros</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="screen-1">1/4</div>
+                    <div class="stat-value" id="screen-1">1/8</div>
                     <div class="stat-label">📱 Tela</div>
                 </div>
                 <div class="stat">
@@ -493,10 +538,10 @@
             </div>
 
             <div class="screen-info" style="background: linear-gradient(135deg, #fff9c4 0%, #ffef9f 100%); border: 3px solid #ff9a00;">
-                <h2 style="color: #996600;">Nível 1 - Tela <span id="current-screen-1">1</span> de 4</h2>
-                <p style="color: #996600; margin-bottom: 10px;">🔢 Cada número resolve apenas UM desafio nesta tela!</p>
+                <h2 style="color: #996600;">Nível 1 - Tela <span id="current-screen-1">1</span> de 8</h2>
+                <p style="color: #996600; margin-bottom: 10px;">🔢 Cada número resolve apenas UM desafio nesta tela! (40 desafios totais)</p>
                 <div class="progress-container">
-                    <div>Progresso do Nível: <span id="completed-exercises-1">0</span>/20 desafios</div>
+                    <div>Progresso do Nível: <span id="completed-exercises-1">0</span>/40 desafios</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill-1"></div>
                     </div>
@@ -508,7 +553,7 @@
             <div class="numbers-container" style="background: linear-gradient(135deg, #fff9c4 0%, #ffef9f 100%); border-color: #ff9a00;">
                 <h3 style="color: #996600;">✨ Números Únicos para esta Tela ✨</h3>
                 <p style="text-align: center; color: #996600; margin-bottom: 10px; font-size: 0.9em;">
-                    Cada número resolve exatamente UM desafio
+                    Cada número resolve exatamente UM desafio (45 números disponíveis)
                 </p>
                 <div class="numbers-grid" id="numbers-1"></div>
             </div>
@@ -539,7 +584,7 @@
                     <div class="stat-label">❌ Erros</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="screen-2">1/4</div>
+                    <div class="stat-value" id="screen-2">1/8</div>
                     <div class="stat-label">📱 Tela</div>
                 </div>
                 <div class="stat">
@@ -549,10 +594,10 @@
             </div>
 
             <div class="screen-info" style="background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%); border: 3px solid #4caf50;">
-                <h2 style="color: #2e7d32;">Nível 2 - Tela <span id="current-screen-2">1</span> de 4</h2>
-                <p style="color: #2e7d32; margin-bottom: 10px;">✏️ Cada número resolve apenas UM desafio nesta tela!</p>
+                <h2 style="color: #2e7d32;">Nível 2 - Tela <span id="current-screen-2">1</span> de 8</h2>
+                <p style="color: #2e7d32; margin-bottom: 10px;">✏️ Cada número resolve apenas UM desafio nesta tela! (40 desafios totais)</p>
                 <div class="progress-container">
-                    <div>Progresso do Nível: <span id="completed-exercises-2">0</span>/20 desafios</div>
+                    <div>Progresso do Nível: <span id="completed-exercises-2">0</span>/40 desafios</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill-2"></div>
                     </div>
@@ -564,7 +609,7 @@
             <div class="numbers-container" style="background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%); border-color: #4caf50;">
                 <h3 style="color: #2e7d32;">✨ Números Únicos para esta Tela ✨</h3>
                 <p style="text-align: center; color: #2e7d32; margin-bottom: 10px; font-size: 0.9em;">
-                    Cada número resolve exatamente UM desafio
+                    Cada número resolve exatamente UM desafio (50 números disponíveis)
                 </p>
                 <div class="numbers-grid" id="numbers-2"></div>
             </div>
@@ -595,7 +640,7 @@
                     <div class="stat-label">❌ Erros</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="screen-3">1/4</div>
+                    <div class="stat-value" id="screen-3">1/8</div>
                     <div class="stat-label">📱 Tela</div>
                 </div>
                 <div class="stat">
@@ -605,10 +650,10 @@
             </div>
 
             <div class="screen-info" style="background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%); border: 3px solid #2196f3;">
-                <h2 style="color: #1565c0;">Nível 3 - Tela <span id="current-screen-3">1</span> de 4</h2>
-                <p style="color: #1565c0; margin-bottom: 10px;">📚 Cada número resolve apenas UM desafio nesta tela!</p>
+                <h2 style="color: #1565c0;">Nível 3 - Tela <span id="current-screen-3">1</span> de 8</h2>
+                <p style="color: #1565c0; margin-bottom: 10px;">📚 Cada número resolve apenas UM desafio nesta tela! (40 desafios totais)</p>
                 <div class="progress-container">
-                    <div>Progresso do Nível: <span id="completed-exercises-3">0</span>/20 desafios</div>
+                    <div>Progresso do Nível: <span id="completed-exercises-3">0</span>/40 desafios</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill-3"></div>
                     </div>
@@ -620,7 +665,7 @@
             <div class="numbers-container" style="background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%); border-color: #2196f3;">
                 <h3 style="color: #1565c0;">✨ Números Únicos para esta Tela ✨</h3>
                 <p style="text-align: center; color: #1565c0; margin-bottom: 10px; font-size: 0.9em;">
-                    Cada número resolve exatamente UM desafio
+                    Cada número resolve exatamente UM desafio (55 números disponíveis)
                 </p>
                 <div class="numbers-grid" id="numbers-3"></div>
             </div>
@@ -651,7 +696,7 @@
                     <div class="stat-label">❌ Erros</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="screen-4">1/4</div>
+                    <div class="stat-value" id="screen-4">1/8</div>
                     <div class="stat-label">📱 Tela</div>
                 </div>
                 <div class="stat">
@@ -661,10 +706,10 @@
             </div>
 
             <div class="screen-info" style="background: linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%); border: 3px solid #9c27b0;">
-                <h2 style="color: #6a1b9a;">Nível 4 - Tela <span id="current-screen-4">1</span> de 4</h2>
-                <p style="color: #6a1b9a; margin-bottom: 10px;">🏆 Cada número resolve apenas UM desafio nesta tela!</p>
+                <h2 style="color: #6a1b9a;">Nível 4 - Tela <span id="current-screen-4">1</span> de 8</h2>
+                <p style="color: #6a1b9a; margin-bottom: 10px;">🏆 Cada número resolve apenas UM desafio nesta tela! (40 desafios totais)</p>
                 <div class="progress-container">
-                    <div>Progresso do Nível: <span id="completed-exercises-4">0</span>/20 desafios</div>
+                    <div>Progresso do Nível: <span id="completed-exercises-4">0</span>/40 desafios</div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill-4"></div>
                     </div>
@@ -676,7 +721,7 @@
             <div class="numbers-container" style="background: linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%); border-color: #9c27b0;">
                 <h3 style="color: #6a1b9a;">✨ Números Únicos para esta Tela ✨</h3>
                 <p style="text-align: center; color: #6a1b9a; margin-bottom: 10px; font-size: 0.9em;">
-                    Cada número resolve exatamente UM desafio
+                    Cada número resolve exatamente UM desafio (60 números disponíveis)
                 </p>
                 <div class="numbers-grid" id="numbers-4"></div>
             </div>
@@ -695,7 +740,7 @@
     <!-- Completion Screens para cada nível -->
     <div class="container completion-screen" id="completion-screen-1" style="display: none;">
         <h2>🏆 Nível 1 Concluído! 🏆</h2>
-        <p>Você completou todos os 20 desafios do Nível 1!</p>
+        <p>Você completou todos os 40 desafios do Nível 1! Impressionante! 🎯</p>
         <div class="score-display" id="final-score-1">0</div>
         <div style="margin-top: 30px;">
             <button class="reset-btn" onclick="restartLevel(1)" style="font-size: 1.2em; padding: 20px 40px;">
@@ -709,7 +754,7 @@
 
     <div class="container completion-screen" id="completion-screen-2" style="display: none;">
         <h2>🏆 Nível 2 Concluído! 🏆</h2>
-        <p>Você completou todos os 20 desafios do Nível 2!</p>
+        <p>Você completou todos os 40 desafios do Nível 2! Incrível! 🌟</p>
         <div class="score-display" id="final-score-2">0</div>
         <div style="margin-top: 30px;">
             <button class="reset-btn" onclick="restartLevel(2)" style="font-size: 1.2em; padding: 20px 40px;">
@@ -723,7 +768,7 @@
 
     <div class="container completion-screen" id="completion-screen-3" style="display: none;">
         <h2>🏆 Nível 3 Concluído! 🏆</h2>
-        <p>Você completou todos os 20 desafios do Nível 3!</p>
+        <p>Você completou todos os 40 desafios do Nível 3! Você é um gênio! 🧠</p>
         <div class="score-display" id="final-score-3">0</div>
         <div style="margin-top: 30px;">
             <button class="reset-btn" onclick="restartLevel(3)" style="font-size: 1.2em; padding: 20px 40px;">
@@ -736,10 +781,11 @@
     </div>
 
     <div class="container completion-screen" id="completion-screen-4" style="display: none;">
-        <h2>🏆 Nível 4 Concluído! 🏆</h2>
-        <p>Parabéns! Você completou TODOS os 80 desafios do jogo! 🎉</p>
+        <h2>🏆 NÍVEL 4 CONCLUÍDO! 🎉🎉🎉</h2>
+        <p>PARABÉNS! Você completou TODOS os 160 desafios do SUPER JOGO! 🚀</p>
         <div class="score-display" id="final-score-4">0</div>
-        <p style="font-size: 1.2em; margin: 20px 0;">Pontuação Total: <span id="total-score">0</span></p>
+        <p style="font-size: 1.2em; margin: 20px 0;">Pontuação Total: <span id="total-score">0</span> pontos</p>
+        <p style="font-size: 1.1em; color: #666;">Você é um MESTRE das sequências numéricas! 👑</p>
         <div style="margin-top: 30px;">
             <button class="reset-btn" onclick="restartAllLevels()" style="font-size: 1.2em; padding: 20px 40px;">
                 🔄 Jogar Todos Novamente
@@ -752,30 +798,30 @@
 
     <!-- Modal para progresso total -->
     <div class="container completion-screen" id="progress-summary" style="display: none; max-width: 800px;">
-        <h2>📊 Progresso Total do Jogo</h2>
+        <h2>📊 Progresso Total do SUPER JOGO 🚀</h2>
         
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0;">
             <div class="stat" style="background: linear-gradient(135deg, #fff9c4 0%, #ffef9f 100%);">
-                <div class="stat-value" id="total-level-1">0/20</div>
+                <div class="stat-value" id="total-level-1">0/40</div>
                 <div class="stat-label">Nível 1</div>
             </div>
             <div class="stat" style="background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);">
-                <div class="stat-value" id="total-level-2">0/20</div>
+                <div class="stat-value" id="total-level-2">0/40</div>
                 <div class="stat-label">Nível 2</div>
             </div>
             <div class="stat" style="background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);">
-                <div class="stat-value" id="total-level-3">0/20</div>
+                <div class="stat-value" id="total-level-3">0/40</div>
                 <div class="stat-label">Nível 3</div>
             </div>
             <div class="stat" style="background: linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%);">
-                <div class="stat-value" id="total-level-4">0/20</div>
+                <div class="stat-value" id="total-level-4">0/40</div>
                 <div class="stat-label">Nível 4</div>
             </div>
         </div>
         
         <div style="background: #e3f2fd; padding: 20px; border-radius: 15px; margin: 20px 0;">
             <h3>🏆 Pontuação Total: <span id="grand-total-score">0</span> pontos</h3>
-            <p>Desafios completados: <span id="total-completed">0</span>/80</p>
+            <p>Desafios completados: <span id="total-completed">0</span>/160</p>
             <div class="progress-bar" style="margin-top: 10px;">
                 <div class="progress-fill" id="total-progress-fill" style="width: 0%"></div>
             </div>
@@ -792,14 +838,14 @@
     </div>
 
     <script>
-        // Configurações com garantia de números únicos
+        // Configurações OTIMIZADAS
         const levels = {
             1: {
                 name: "Nível 1",
-                totalScreens: 4,
+                totalScreens: 8,
                 exercisesPerScreen: 5,
                 maxNumber: 50,
-                numbersPerScreen: 30,
+                numbersPerScreen: 45,
                 sequenceLength: 5,
                 minStep: 1,
                 maxStep: 3,
@@ -808,10 +854,10 @@
             },
             2: {
                 name: "Nível 2",
-                totalScreens: 4,
+                totalScreens: 8,
                 exercisesPerScreen: 5,
                 maxNumber: 150,
-                numbersPerScreen: 35,
+                numbersPerScreen: 50,
                 sequenceLength: 5,
                 minStep: 2,
                 maxStep: 5,
@@ -820,10 +866,10 @@
             },
             3: {
                 name: "Nível 3",
-                totalScreens: 4,
+                totalScreens: 8,
                 exercisesPerScreen: 5,
                 maxNumber: 300,
-                numbersPerScreen: 40,
+                numbersPerScreen: 55,
                 sequenceLength: 5,
                 minStep: 3,
                 maxStep: 8,
@@ -832,10 +878,10 @@
             },
             4: {
                 name: "Nível 4",
-                totalScreens: 4,
+                totalScreens: 8,
                 exercisesPerScreen: 5,
                 maxNumber: 500,
-                numbersPerScreen: 45,
+                numbersPerScreen: 60,
                 sequenceLength: 5,
                 minStep: 4,
                 maxStep: 12,
@@ -853,124 +899,198 @@
         };
 
         let currentTab = 1;
+        let isInitializing = false;
+        let allLevelsDataCache = null;
 
-        // Inicializar
-        function initAllLevels() {
-            for (let level = 1; level <= 4; level++) {
-                generateLevelScreens(level);
-                loadScreen(level, 0);
+        // Função otimizada para gerar números únicos
+        function generateUniqueNumbers(count, maxNumber, excludeSet = new Set()) {
+            const numbers = new Set();
+            let attempts = 0;
+            const maxAttempts = count * 10;
+            
+            while (numbers.size < count && attempts < maxAttempts) {
+                attempts++;
+                const num = Math.floor(Math.random() * maxNumber) + 1;
+                if (!excludeSet.has(num) && !numbers.has(num)) {
+                    numbers.add(num);
+                }
             }
             
-            // Garantir que apenas o Nível 1 seja visível inicialmente
-            document.getElementById('tab-content-1').style.display = 'block';
-            document.getElementById('tab-content-1').classList.add('active');
-            
-            for (let i = 2; i <= 4; i++) {
-                document.getElementById(`tab-content-${i}`).style.display = 'none';
-                document.getElementById(`tab-content-${i}`).classList.remove('active');
+            if (numbers.size < count) {
+                for (let i = 1; i <= maxNumber && numbers.size < count; i++) {
+                    if (!excludeSet.has(i) && !numbers.has(i)) {
+                        numbers.add(i);
+                    }
+                }
             }
             
-            updateStats(1);
-            updateButtons(1);
+            return Array.from(numbers);
         }
 
-        // Gerar telas com números únicos para cada desafio
-        function generateLevelScreens(level) {
-            const config = levels[level];
-            const screens = [];
-            
-            for (let screenIndex = 0; screenIndex < config.totalScreens; screenIndex++) {
-                const screen = {
-                    exercises: [],
-                    numbers: [],
-                    completed: false,
-                    userAnswers: {},
-                    screenNumber: screenIndex + 1,
-                    numberToExerciseMap: new Map(),
-                    allNumbersUsed: new Set()
-                };
+        // NOVA FUNÇÃO: Gerar todos os 160 desafios de forma consistente
+        function generateConsistentLevels(progressCallback) {
+            return new Promise((resolve) => {
+                const allLevelsData = {};
+                const allUsedNumbers = new Set();
                 
-                // Gerar exercícios com números completamente únicos
-                for (let exIndex = 0; exIndex < config.exercisesPerScreen; exIndex++) {
-                    let sequenceValid = false;
-                    let attempts = 0;
-                    let fullSequence = [];
-                    let step = 0;
-                    let startNum = 0;
-                    let missingPosition = 0;
-                    let missingNumber = 0;
+                // Para cada nível
+                for (let level = 1; level <= 4; level++) {
+                    const config = levels[level];
+                    const screens = [];
                     
-                    while (!sequenceValid && attempts < 50) {
-                        attempts++;
-                        sequenceValid = true;
+                    // Para cada tela no nível
+                    for (let screenIndex = 0; screenIndex < config.totalScreens; screenIndex++) {
+                        progressCallback(`Gerando nível ${level}, tela ${screenIndex + 1} de ${config.totalScreens}...`);
                         
-                        step = Math.floor(Math.random() * (config.maxStep - config.minStep + 1)) + config.minStep;
-                        const maxStart = config.maxNumber - (step * (config.sequenceLength - 1));
-                        startNum = Math.floor(Math.random() * Math.max(1, maxStart)) + 1;
+                        const screen = {
+                            exercises: [],
+                            numbers: [],
+                            completed: false,
+                            userAnswers: {},
+                            screenNumber: screenIndex + 1,
+                            numberToExerciseMap: new Map()
+                        };
                         
-                        fullSequence = [];
-                        for (let i = 0; i < config.sequenceLength; i++) {
-                            fullSequence.push(startNum + (step * i));
-                        }
+                        const screenNumbersUsed = new Set();
                         
-                        for (const num of fullSequence) {
-                            if (screen.allNumbersUsed.has(num)) {
-                                sequenceValid = false;
-                                break;
-                            }
-                        }
-                        
-                        if (sequenceValid) {
-                            if (screenIndex === 0) missingPosition = 2;
-                            else if (screenIndex === 1) missingPosition = Math.random() > 0.5 ? 1 : 3;
-                            else missingPosition = Math.floor(Math.random() * (config.sequenceLength - 1)) + 1;
+                        // Gerar 5 exercícios por tela
+                        for (let exIndex = 0; exIndex < config.exercisesPerScreen; exIndex++) {
+                            let attempts = 0;
+                            let validSequence = false;
+                            let fullSequence = [];
+                            let missingPosition, missingNumber, step;
                             
-                            missingNumber = fullSequence[missingPosition];
+                            while (!validSequence && attempts < 50) {
+                                attempts++;
+                                step = Math.floor(Math.random() * (config.maxStep - config.minStep + 1)) + config.minStep;
+                                const maxStart = config.maxNumber - (step * (config.sequenceLength - 1));
+                                const startNum = Math.floor(Math.random() * Math.max(1, maxStart)) + 1;
+                                
+                                // Gerar sequência completa
+                                fullSequence = [];
+                                for (let i = 0; i < config.sequenceLength; i++) {
+                                    fullSequence.push(startNum + (step * i));
+                                }
+                                
+                                // Verificar se algum número já foi usado globalmente
+                                const hasConflict = fullSequence.some(num => allUsedNumbers.has(num));
+                                
+                                if (!hasConflict) {
+                                    validSequence = true;
+                                    
+                                    // Escolher posição faltante (não o primeiro nem o último nas primeiras telas)
+                                    if (screenIndex < 2) {
+                                        missingPosition = Math.floor(Math.random() * (config.sequenceLength - 2)) + 1;
+                                    } else {
+                                        missingPosition = Math.floor(Math.random() * config.sequenceLength);
+                                    }
+                                    
+                                    missingNumber = fullSequence[missingPosition];
+                                    
+                                    // Verificar se o número faltante não conflita com outros da mesma tela
+                                    if (screenNumbersUsed.has(missingNumber)) {
+                                        validSequence = false;
+                                    }
+                                }
+                            }
+                            
+                            // Fallback: buscar sequência válida se não encontrou aleatoriamente
+                            if (!validSequence) {
+                                for (let start = 1; start <= config.maxNumber; start++) {
+                                    for (let s = config.minStep; s <= config.maxStep; s++) {
+                                        fullSequence = [];
+                                        for (let i = 0; i < config.sequenceLength; i++) {
+                                            fullSequence.push(start + (s * i));
+                                        }
+                                        
+                                        if (fullSequence[config.sequenceLength - 1] > config.maxNumber) continue;
+                                        
+                                        const hasConflict = fullSequence.some(num => allUsedNumbers.has(num));
+                                        if (!hasConflict) {
+                                            step = s;
+                                            missingPosition = screenIndex < 2 ? 
+                                                Math.floor(Math.random() * (config.sequenceLength - 2)) + 1 :
+                                                Math.floor(Math.random() * config.sequenceLength);
+                                            missingNumber = fullSequence[missingPosition];
+                                            
+                                            if (!screenNumbersUsed.has(missingNumber)) {
+                                                validSequence = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (validSequence) break;
+                                }
+                            }
+                            
+                            if (!validSequence) {
+                                console.warn(`Não foi possível gerar sequência única para nível ${level}, tela ${screenIndex}, exercício ${exIndex}`);
+                                // Criar sequência fallback simples
+                                step = config.minStep;
+                                missingPosition = 2;
+                                let startNum = 1;
+                                while (allUsedNumbers.has(startNum) || allUsedNumbers.has(startNum + step * 4)) {
+                                    startNum++;
+                                }
+                                fullSequence = [];
+                                for (let i = 0; i < config.sequenceLength; i++) {
+                                    fullSequence.push(startNum + (step * i));
+                                }
+                                missingNumber = fullSequence[missingPosition];
+                            }
+                            
+                            // Marcar todos os números como usados GLOBALMENTE
+                            fullSequence.forEach(num => allUsedNumbers.add(num));
+                            screenNumbersUsed.add(missingNumber);
+                            
+                            // Criar sequência com lacuna
+                            const sequenceWithGap = [...fullSequence];
+                            sequenceWithGap[missingPosition] = null;
+                            
+                            const exercise = {
+                                id: `l${level}s${screenIndex}e${exIndex}`,
+                                fullSequence: fullSequence,
+                                displayedSequence: sequenceWithGap,
+                                missingPosition: missingPosition,
+                                missingNumber: missingNumber,
+                                step: step,
+                                userAnswer: null,
+                                isCorrect: false
+                            };
+                            
+                            screen.exercises.push(exercise);
+                            screen.userAnswers[exercise.id] = null;
+                            screen.numberToExerciseMap.set(missingNumber, exercise.id);
                         }
+                        
+                        // Coletar números faltantes
+                        const missingNumbers = Array.from(screen.numberToExerciseMap.keys());
+                        
+                        // Gerar números adicionais únicos
+                        const additionalNumbersNeeded = config.numbersPerScreen - config.exercisesPerScreen;
+                        const additionalNumbers = generateUniqueNumbers(
+                            additionalNumbersNeeded, 
+                            config.maxNumber, 
+                            allUsedNumbers
+                        );
+                        
+                        // Marcar números adicionais como usados
+                        additionalNumbers.forEach(num => allUsedNumbers.add(num));
+                        
+                        screen.numbers = [...missingNumbers, ...additionalNumbers];
+                        shuffleArray(screen.numbers);
+                        screens.push(screen);
                     }
                     
-                    for (const num of fullSequence) {
-                        screen.allNumbersUsed.add(num);
-                    }
-                    
-                    const sequenceWithGap = [...fullSequence];
-                    sequenceWithGap[missingPosition] = null;
-                    
-                    const exercise = {
-                        id: `l${level}s${screenIndex}e${exIndex}`,
-                        fullSequence: fullSequence,
-                        displayedSequence: sequenceWithGap,
-                        missingPosition: missingPosition,
-                        missingNumber: missingNumber,
-                        step: step,
-                        userAnswer: null,
-                        isCorrect: false
-                    };
-                    
-                    screen.exercises.push(exercise);
-                    screen.userAnswers[exercise.id] = null;
-                    screen.numberToExerciseMap.set(missingNumber, exercise.id);
+                    allLevelsData[level] = screens;
                 }
                 
-                const missingNumbers = Array.from(screen.numberToExerciseMap.keys());
-                const additionalNumbers = new Set();
-                const totalNumbersNeeded = config.numbersPerScreen - config.exercisesPerScreen;
+                // Verificação de unicidade (para debug)
+                console.log(`Total de números únicos gerados: ${allUsedNumbers.size}`);
+                console.log(`Máximo teórico: ${levels[1].maxNumber + levels[2].maxNumber + levels[3].maxNumber + levels[4].maxNumber}`);
                 
-                while (additionalNumbers.size < totalNumbersNeeded) {
-                    const num = Math.floor(Math.random() * config.maxNumber) + 1;
-                    if (!screen.allNumbersUsed.has(num) && !additionalNumbers.has(num)) {
-                        additionalNumbers.add(num);
-                        screen.allNumbersUsed.add(num);
-                    }
-                }
-                
-                screen.numbers = [...missingNumbers, ...Array.from(additionalNumbers)];
-                shuffleArray(screen.numbers);
-                
-                screens.push(screen);
-            }
-            
-            gameStates[level].screens = screens;
+                resolve(allLevelsData);
+            });
         }
 
         function shuffleArray(array) {
@@ -979,6 +1099,56 @@
                 [array[i], array[j]] = [array[j], array[i]];
             }
             return array;
+        }
+
+        // Inicializar com loader
+        async function initAllLevels() {
+            if (isInitializing) return;
+            
+            isInitializing = true;
+            
+            document.getElementById('loading-screen').style.display = 'block';
+            document.getElementById('game-container').style.display = 'none';
+            
+            try {
+                // USAR a nova função que gera TODOS os níveis de uma vez
+                document.getElementById('loading-progress').textContent = 
+                    "Gerando 160 desafios únicos (isso pode levar alguns segundos)...";
+                
+                const allLevelsData = await generateConsistentLevels((message) => {
+                    document.getElementById('loading-progress').textContent = message;
+                });
+                
+                // Cache para uso posterior
+                allLevelsDataCache = allLevelsData;
+                
+                // Atribuir aos estados
+                for (let level = 1; level <= 4; level++) {
+                    gameStates[level].screens = allLevelsData[level];
+                    loadScreen(level, 0);
+                }
+                
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+                
+                document.getElementById('tab-content-1').style.display = 'block';
+                document.getElementById('tab-content-1').classList.add('active');
+                
+                for (let i = 2; i <= 4; i++) {
+                    document.getElementById(`tab-content-${i}`).style.display = 'none';
+                    document.getElementById(`tab-content-${i}`).classList.remove('active');
+                }
+                
+                updateStats(1);
+                updateButtons(1);
+                
+            } catch (error) {
+                console.error('Erro ao inicializar:', error);
+                document.getElementById('loading-progress').textContent = 
+                    'Erro ao carregar. Recarregue a página.';
+            } finally {
+                isInitializing = false;
+            }
         }
 
         function loadScreen(level, screenIndex) {
@@ -1241,10 +1411,8 @@
         function showLevelCompletion(level) {
             const state = gameStates[level];
             
-            // Esconder o conteúdo normal da aba
             document.getElementById(`tab-content-${level}`).style.display = 'none';
             
-            // Mostrar tela de conclusão
             const completionScreen = document.getElementById(`completion-screen-${level}`);
             completionScreen.style.display = 'block';
             document.getElementById(`final-score-${level}`).textContent = state.score;
@@ -1262,26 +1430,21 @@
         function switchTab(tabNumber) {
             currentTab = tabNumber;
             
-            // Esconder todas as telas de conclusão
             for (let i = 1; i <= 4; i++) {
                 document.getElementById(`completion-screen-${i}`).style.display = 'none';
             }
             
-            // Esconder modal de progresso
             document.getElementById('progress-summary').style.display = 'none';
             
-            // Atualizar aparência das ABAS
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Esconder todo o conteúdo das abas
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
                 content.style.display = 'none';
             });
             
-            // Mostrar apenas a aba selecionada
             document.querySelector(`.tab-${tabNumber}`).classList.add('active');
             
             const state = gameStates[tabNumber];
@@ -1289,10 +1452,8 @@
             const totalExercises = config.exercisesPerScreen * config.totalScreens;
             
             if (state.correctAnswers >= totalExercises) {
-                // Se o nível foi concluído, mostrar tela de conclusão
                 document.getElementById(`completion-screen-${tabNumber}`).style.display = 'block';
             } else {
-                // Se não, mostrar o conteúdo normal do jogo
                 const selectedContent = document.getElementById(`tab-content-${tabNumber}`);
                 selectedContent.classList.add('active');
                 selectedContent.style.display = 'block';
@@ -1341,64 +1502,61 @@
         }
 
         function restartLevel(level) {
-            gameStates[level] = {
-                currentScreen: 0,
-                score: 0,
-                correctAnswers: 0,
-                errorCount: 0,
-                screens: [],
-                draggedNumber: null
-            };
-            
-            generateLevelScreens(level);
-            loadScreen(level, 0);
-            
-            document.getElementById(`completion-screen-${level}`).style.display = 'none';
-            document.getElementById(`tab-content-${level}`).style.display = 'block';
-            
-            const tab = document.querySelector(`.tab-${level}`);
-            tab.innerHTML = `<span>${level === 1 ? '🔢' : level === 2 ? '✏️' : level === 3 ? '📚' : '🏆'}</span> Nível ${level}`;
-            
-            showFeedback(level, `🎮 Nível ${level} reiniciado!`, true);
+            // Para manter a unicidade, precisamos regenerar todos os níveis
+            if (confirm(`⚠️ Reiniciar o Nível ${level}?\n\nPara manter a regra "cada número único", todos os 160 desafios serão regenerados.`)) {
+                resetEntireGameConfirm();
+            }
         }
 
         function resetEntireGame() {
-            if (confirm("⚠️ ATENÇÃO!\n\nVocê está prestes a ZERAR TODO O JOGO.\nIsso irá:\n• Apagar todo o seu progresso\n• Reiniciar todos os níveis\n• Zerar todas as pontuações\n\nTem certeza que deseja continuar?")) {
+            if (confirm("⚠️ ATENÇÃO!\n\nVocê está prestes a ZERAR TODO O SUPER JOGO.\nIsso irá:\n• Apagar todo o seu progresso (160 desafios)\n• Reiniciar todos os 4 níveis\n• Zerar todas as pontuações\n\nTem certeza que deseja continuar?")) {
                 resetEntireGameConfirm();
             }
         }
 
         function resetEntireGameConfirm() {
-            for (let level = 1; level <= 4; level++) {
-                gameStates[level] = {
-                    currentScreen: 0,
-                    score: 0,
-                    correctAnswers: 0,
-                    errorCount: 0,
-                    screens: [],
-                    draggedNumber: null
-                };
-                generateLevelScreens(level);
-                loadScreen(level, 0);
+            document.getElementById('loading-screen').style.display = 'block';
+            document.getElementById('game-container').style.display = 'none';
+            
+            setTimeout(async () => {
+                for (let level = 1; level <= 4; level++) {
+                    gameStates[level] = {
+                        currentScreen: 0,
+                        score: 0,
+                        correctAnswers: 0,
+                        errorCount: 0,
+                        screens: [],
+                        draggedNumber: null
+                    };
+                }
                 
-                const tab = document.querySelector(`.tab-${level}`);
-                tab.innerHTML = `<span>${level === 1 ? '🔢' : level === 2 ? '✏️' : level === 3 ? '📚' : '🏆'}</span> Nível ${level}`;
+                // Regenerar todos os níveis
+                const allLevelsData = await generateConsistentLevels(() => {});
+                allLevelsDataCache = allLevelsData;
                 
-                document.getElementById(`completion-screen-${level}`).style.display = 'none';
-                document.getElementById(`tab-content-${level}`).style.display = 'none';
-            }
-            
-            document.getElementById('progress-summary').style.display = 'none';
-            
-            // Mostrar apenas o Nível 1
-            document.getElementById('tab-content-1').style.display = 'block';
-            document.getElementById('tab-content-1').classList.add('active');
-            
-            // Atualizar tabs
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelector('.tab-1').classList.add('active');
-            
-            showFeedback(1, "🔄 TODO O JOGO reiniciado! Todos os níveis zerados.", true);
+                for (let level = 1; level <= 4; level++) {
+                    gameStates[level].screens = allLevelsData[level];
+                    loadScreen(level, 0);
+                    
+                    const tab = document.querySelector(`.tab-${level}`);
+                    tab.innerHTML = `<span>${level === 1 ? '🔢' : level === 2 ? '✏️' : level === 3 ? '📚' : '🏆'}</span> Nível ${level} (40 desafios)`;
+                    
+                    document.getElementById(`completion-screen-${level}`).style.display = 'none';
+                    document.getElementById(`tab-content-${level}`).style.display = 'none';
+                }
+                
+                document.getElementById('progress-summary').style.display = 'none';
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+                
+                document.getElementById('tab-content-1').style.display = 'block';
+                document.getElementById('tab-content-1').classList.add('active');
+                
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelector('.tab-1').classList.add('active');
+                
+                showFeedback(1, "🔄 TODO O SUPER JOGO reiniciado! 160 desafios únicos aguardam!", true);
+            }, 100);
         }
 
         function restartAllLevels() {
@@ -1408,7 +1566,7 @@
         function showProgressSummary() {
             let totalScore = 0;
             let totalCompleted = 0;
-            const totalExercises = 80;
+            const totalExercises = 160;
             
             for (let level = 1; level <= 4; level++) {
                 const state = gameStates[level];
@@ -1416,7 +1574,7 @@
                 totalCompleted += state.correctAnswers;
                 
                 document.getElementById(`total-level-${level}`).textContent = 
-                    `${state.correctAnswers}/20`;
+                    `${state.correctAnswers}/40`;
             }
             
             document.getElementById('grand-total-score').textContent = totalScore;
@@ -1436,7 +1594,6 @@
         function hideProgressSummary() {
             document.getElementById('progress-summary').style.display = 'none';
             
-            // Restaurar a tab atual
             const state = gameStates[currentTab];
             const config = levels[currentTab];
             const totalExercises = config.exercisesPerScreen * config.totalScreens;
@@ -1530,8 +1687,40 @@
             }
         }
 
+        // Função de debug para verificar unicidade
+        function validateUniqueness() {
+            const allNumbers = new Set();
+            let conflicts = 0;
+            
+            for (let level = 1; level <= 4; level++) {
+                gameStates[level].screens.forEach(screen => {
+                    screen.exercises.forEach(exercise => {
+                        exercise.fullSequence.forEach(num => {
+                            if (allNumbers.has(num)) {
+                                console.warn(`Conflito: número ${num} repetido! Nível ${level}, exercício ${exercise.id}`);
+                                conflicts++;
+                            }
+                            allNumbers.add(num);
+                        });
+                    });
+                });
+            }
+            
+            console.log(`=== VALIDAÇÃO DE UNICIDADE ===`);
+            console.log(`Total números únicos: ${allNumbers.size}`);
+            console.log(`Conflitos encontrados: ${conflicts}`);
+            console.log(`Status: ${conflicts === 0 ? '✅ PERFEITO!' : '❌ PROBLEMAS!'}`);
+            
+            return conflicts === 0;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            initAllLevels();
+            document.getElementById('loading-screen').style.display = 'block';
+            document.getElementById('game-container').style.display = 'none';
+            
+            setTimeout(() => {
+                initAllLevels();
+            }, 100);
             
             document.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -1540,6 +1729,18 @@
             document.addEventListener('drop', (e) => {
                 e.preventDefault();
             });
+            
+            // Adicionar botão de debug (opcional - remova em produção)
+            if (window.location.href.includes('debug')) {
+                const debugBtn = document.createElement('button');
+                debugBtn.textContent = '🔍 Validar Unicidade';
+                debugBtn.style.position = 'fixed';
+                debugBtn.style.bottom = '10px';
+                debugBtn.style.right = '10px';
+                debugBtn.style.zIndex = '1000';
+                debugBtn.onclick = validateUniqueness;
+                document.body.appendChild(debugBtn);
+            }
         });
     </script>
 </body>
