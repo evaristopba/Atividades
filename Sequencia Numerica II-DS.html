@@ -902,6 +902,35 @@
             totalExercises: 40
         };
 
+        // ================= SISTEMA DE CONTROLE DE PONTOS POR TELA =================
+        const ScreenPoints = {
+            records: {},
+            
+            addPoints(level, screen, points) {
+                const key = `${level}-${screen}`;
+                if (!this.records[key]) {
+                    this.records[key] = points;
+                    return true;
+                }
+                return false;
+            },
+            
+            getPoints(level, screen) {
+                const key = `${level}-${screen}`;
+                return this.records[key] || 0;
+            },
+            
+            removePoints(level, screen) {
+                const key = `${level}-${screen}`;
+                delete this.records[key];
+            },
+            
+            hasEarnedPoints(level, screen) {
+                const key = `${level}-${screen}`;
+                return !!this.records[key];
+            }
+        };
+
         // ================= ESTADO DO JOGO =================
         const GameState = {
             currentLevel: 1,
@@ -911,7 +940,6 @@
             totalCorrect: 0,
             errors: 0,
             currentStreak: 0,
-            maxStreak: 0,
             completedExercises: 0,
             completedLevels: new Set(),
             currentNumbers: [],
@@ -954,6 +982,7 @@
             GameState.currentScreen = 1;
             GameState.levelScore = 0;
             GameState.completedExercises = 0;
+            GameState.currentStreak = 0;
             GameState.levelLocked = false;
             updateUI();
             generateScreen();
@@ -981,6 +1010,7 @@
             GameState.completedExercises = (level - 1) * 40;
             GameState.levelScore = 0;
             GameState.levelLocked = false;
+            GameState.currentStreak = 0;
             
             document.querySelectorAll('.level-card').forEach(card => {
                 card.classList.remove('active');
@@ -1052,7 +1082,6 @@
             updateChallengesDisplay();
             updateCheckButton();
             
-            // ✅ GARANTIR QUE NEXT COMEÇA DESABILITADO
             const nextButton = document.getElementById('nextButton');
             if (nextButton) {
                 nextButton.disabled = true;
@@ -1306,8 +1335,6 @@
             
             GameState.filledPositions = filledPositions;
             checkButton.disabled = filledPositions !== totalPositions;
-            
-            // ✅ NÃO HABILITAR NEXT AQUI! NEXT SÓ É HABILITADO EM checkAnswers() QUANDO TUDO CORRETO
         }
 
         // ================= ARRASTAR E SOLTAR =================
@@ -1366,6 +1393,31 @@
             placeNumber(challengeIndex, seqIndex, number);
         }
 
+        // ================= FUNÇÃO DE ATUALIZAR STREAK =================
+        function atualizarStreak() {
+            let acertosConsecutivos = 0;
+            
+            for (let i = 0; i < GameState.currentChallenges.length; i++) {
+                const challenge = GameState.currentChallenges[i];
+                
+                for (let j = 0; j < challenge.hiddenIndices.length; j++) {
+                    const userAnswer = challenge.userAnswers[j];
+                    const correctAnswer = challenge.correctAnswers[j];
+                    
+                    if (userAnswer !== null && userAnswer === correctAnswer) {
+                        acertosConsecutivos++;
+                    } else {
+                        GameState.currentStreak = acertosConsecutivos;
+                        updateUI();
+                        return;
+                    }
+                }
+            }
+            
+            GameState.currentStreak = acertosConsecutivos;
+            updateUI();
+        }
+
         // ================= LÓGICA DO JOGO =================
         function placeNumber(challengeIndex, seqIndex, number) {
             const challenge = GameState.currentChallenges[challengeIndex];
@@ -1397,6 +1449,9 @@
             }
             
             challenge.userAnswers[hiddenIndex] = number;
+            
+            atualizarStreak();
+            
             updateChallengesDisplay();
             updateNumbersDisplay();
             updateCheckButton();
@@ -1415,6 +1470,9 @@
             if (number === null) return;
             
             challenge.userAnswers[hiddenIndex] = null;
+            
+            atualizarStreak();
+            
             updateChallengesDisplay();
             updateNumbersDisplay();
             updateCheckButton();
@@ -1422,7 +1480,7 @@
             showFeedback(`Número ${number} removido!`, 'success');
         }
 
-        // ================= CORREÇÃO CRÍTICA: SÓ HABILITA NEXT QUANDO TUDO CORRETO =================
+        // ================= VERIFICAÇÃO DE RESPOSTAS =================
         function checkAnswers() {
             if (GameState.isChecking) return;
             if (GameState.levelLocked) {
@@ -1434,8 +1492,6 @@
             const checkButton = document.getElementById('checkButton');
             const nextButton = document.getElementById('nextButton');
             checkButton.disabled = true;
-            
-            // ✅ DESABILITAR NEXT ENQUANTO VERIFICA
             nextButton.disabled = true;
             
             let allCorrect = true;
@@ -1463,22 +1519,22 @@
                 if (challengeCorrect) {
                     screenScore += challenge.points;
                     GameState.totalCorrect++;
-                    GameState.currentStreak++;
-                    GameState.maxStreak = Math.max(GameState.maxStreak, GameState.currentStreak);
-                } else {
-                    GameState.errors++;
-                    GameState.currentStreak = 0;
                 }
             });
             
             if (allCorrect) {
-                GameState.levelScore += screenScore;
-                GameState.totalScore += screenScore;
-                GameState.completedExercises += GameConfig.challengesPerScreen;
+                const hasEarned = ScreenPoints.hasEarnedPoints(GameState.currentLevel, GameState.currentScreen);
                 
-                showFeedback(`🎉 Perfeito! +${Math.round(screenScore)} pontos!`, 'success');
+                if (!hasEarned) {
+                    GameState.levelScore += screenScore;
+                    GameState.totalScore += screenScore;
+                    GameState.completedExercises += GameConfig.challengesPerScreen;
+                    ScreenPoints.addPoints(GameState.currentLevel, GameState.currentScreen, screenScore);
+                    showFeedback(`🎉 Perfeito! +${Math.round(screenScore)} pts, +4 acertos!`, 'success');
+                } else {
+                    showFeedback(`🎉 Desafio completo!`, 'success');
+                }
                 
-                // ✅ SÓ HABILITA NEXT SE TODOS OS DESAFIOS ESTÃO CORRETOS!
                 if (!GameState.completedLevels.has(GameState.currentLevel)) {
                     nextButton.disabled = false;
                 }
@@ -1490,10 +1546,8 @@
                     nextButton.disabled = true;
                 }
             } else {
+                GameState.errors++;
                 showFeedback('Algumas respostas estão incorretas. Tente novamente!', 'error');
-                // ✅ GARANTE QUE NEXT FICA DESABILITADO
-                nextButton.disabled = true;
-                
                 setTimeout(() => {
                     checkButton.disabled = false;
                     GameState.isChecking = false;
@@ -1505,9 +1559,43 @@
             GameState.isChecking = false;
         }
 
-        // ================= CORREÇÃO CRÍTICA: NEXT SCREEN COM VERIFICAÇÕES =================
+        // ================= RESET DE TELA - CORREÇÃO DEFINITIVA =================
+        function resetCurrentScreen() {
+            if (confirm('Tem certeza que deseja reiniciar esta tela? Todas as respostas, pontos, acertos e sequência serão perdidos.')) {
+                
+                const screenPoints = ScreenPoints.getPoints(GameState.currentLevel, GameState.currentScreen);
+                const challengesPerScreen = GameConfig.challengesPerScreen;
+                
+                if (screenPoints > 0) {
+                    GameState.levelScore -= screenPoints;
+                    GameState.totalScore -= screenPoints;
+                    GameState.totalCorrect -= challengesPerScreen;
+                    GameState.completedExercises -= challengesPerScreen;
+                    
+                    ScreenPoints.removePoints(GameState.currentLevel, GameState.currentScreen);
+                    
+                    if (GameState.currentScreen === GameConfig.screensPerLevel) {
+                        GameState.levelLocked = false;
+                    }
+                }
+                
+                // ✅ STREAK ZERA AO REINICIAR (SEMPRE!)
+                GameState.currentStreak = 0;
+                
+                generateScreen();
+                
+                const nextButton = document.getElementById('nextButton');
+                if (nextButton) {
+                    nextButton.disabled = true;
+                }
+                
+                showFeedback('🔄 Tela reiniciada! Sequência zerada.', 'success');
+                updateUI();
+            }
+        }
+
+        // ================= PRÓXIMA TELA =================
         function nextScreen() {
-            // ✅ VERIFICAR SE A TELA ATUAL FOI COMPLETADA CORRETAMENTE
             const allFilled = GameState.currentChallenges.every(challenge => 
                 challenge.userAnswers.every(answer => answer !== null)
             );
@@ -1536,25 +1624,12 @@
             }
             
             GameState.currentScreen++;
+            GameState.currentStreak = 0;
+            
             generateScreen();
             updateUI();
             updatePageTitle();
             showFeedback(`Tela ${GameState.currentScreen} carregada!`, 'success');
-        }
-
-        // ================= RESET CORRIGIDO =================
-        function resetCurrentScreen() {
-            if (confirm('Tem certeza que deseja reiniciar esta tela? Todas as respostas serão perdidas.')) {
-                generateScreen();
-                
-                // ✅ GARANTIR QUE NEXT FICA DESABILITADO
-                const nextButton = document.getElementById('nextButton');
-                if (nextButton) {
-                    nextButton.disabled = true;
-                }
-                
-                showFeedback('Tela reiniciada!', 'success');
-            }
         }
 
         // ================= FEEDBACK E ANIMAÇÕES =================
@@ -1595,15 +1670,15 @@
 
         // ================= TESTE DE VERIFICAÇÃO =================
         function testSystem() {
-            console.log("🧪 VERIFICANDO SISTEMA COMPLETO...");
-            console.log("✅ Nível 1 máximo: 800 pts");
-            console.log("✅ Nível 2 máximo: 960 pts"); 
-            console.log("✅ Nível 3 máximo: 1120 pts");
-            console.log("✅ Nível 4 máximo: 1280 pts");
-            console.log("✅ Total máximo: 4160 pts");
-            console.log("✅ Botão NEXT só habilita após TODOS os desafios corretos");
-            console.log("✅ Botão NEXT desabilita ao completar nível");
-            console.log("❌ 1020 pts no Nível 1: IMPOSSÍVEL");
+            console.log("🧪 VERIFICANDO SISTEMA...");
+            console.log("✅ Streak = acertos consecutivos na tela atual");
+            console.log("✅ Streak atualiza a CADA movimento");
+            console.log("✅ Streak: +1 por acerto, 0 ao errar");
+            console.log("✅ Streak: 0 ao reiniciar tela");
+            console.log("✅ Streak: 0 ao avançar tela");
+            console.log("✅ Streak: 0 ao mudar nível");
+            console.log("❌ Streak > Acertos na tela: IMPOSSÍVEL");
+            console.log("❌ Streak manter ao reiniciar: IMPOSSÍVEL");
         }
 
         window.onload = initializeGame;
