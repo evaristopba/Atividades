@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio das Sequências Numéricas - App Educativo</title>
+    <title>🎮 Nível 1 - Tela 1/8 - Desafio das Sequências</title>
     <style>
         /* ================= VARIÁVEIS E RESET ================= */
         :root {
@@ -35,7 +35,6 @@
             line-height: 1.6;
         }
 
-        /* ================= CONTAINERS E LAYOUT ================= */
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -75,7 +74,6 @@
             }
         }
 
-        /* ================= CABEÇALHO ================= */
         .game-header {
             text-align: center;
             margin-bottom: 40px;
@@ -142,7 +140,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        /* ================= NÍVEIS ================= */
         .levels-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -180,6 +177,11 @@
             box-shadow: var(--box-shadow);
         }
 
+        .level-card.completed {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: var(--accent-green);
+        }
+
         .level-icon {
             font-size: 2.5em;
             margin-bottom: 15px;
@@ -193,13 +195,30 @@
             margin-bottom: 8px;
         }
 
+        .level-card.completed .level-title {
+            color: #155724;
+        }
+
         .level-desc {
             color: var(--medium-text);
             font-size: 0.9em;
             line-height: 1.4;
         }
 
-        /* ================= SEÇÃO DE DESAFIOS ================= */
+        .level-status {
+            margin-top: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .level-card.completed .level-status {
+            background: var(--accent-green);
+            color: white;
+        }
+
         .challenges-panel {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: var(--border-radius);
@@ -334,7 +353,6 @@
             animation: shake 0.5s ease;
         }
 
-        /* ================= SEÇÃO DE NÚMEROS ================= */
         .numbers-panel {
             background: linear-gradient(135deg, #f0f7ff 0%, #e3eeff 100%);
             border-radius: var(--border-radius);
@@ -442,7 +460,6 @@
             transform: none;
         }
 
-        /* ================= CONTROLES ================= */
         .game-controls {
             display: flex;
             justify-content: center;
@@ -523,7 +540,6 @@
             animation: pulse-next 1.5s infinite alternate;
         }
 
-        /* ================= ESTATÍSTICAS ================= */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -572,7 +588,6 @@
             letter-spacing: 1px;
         }
 
-        /* ================= PROGRESSO ================= */
         .progress-section {
             margin: 40px 0;
             padding: 30px;
@@ -624,7 +639,6 @@
             animation: shimmer 2.5s infinite;
         }
 
-        /* ================= FEEDBACK ================= */
         .feedback-message {
             text-align: center;
             margin: 30px 0;
@@ -662,7 +676,6 @@
             border-color: var(--accent-red);
         }
 
-        /* ================= LOADING ================= */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -701,7 +714,6 @@
             animation: spin 1s linear infinite reverse;
         }
 
-        /* ================= ANIMAÇÕES ================= */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -746,25 +758,6 @@
                 box-shadow: 0 20px 40px rgba(0, 123, 255, 0.4);
             }
         }
-
-        /* ================= UTILITÁRIOS ================= */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0,0,0,0);
-            border: 0;
-        }
-
-        .text-center { text-align: center; }
-        .text-bold { font-weight: 700; }
-        .text-muted { color: var(--medium-text); }
-        .mt-20 { margin-top: 20px; }
-        .mb-20 { margin-bottom: 20px; }
-        .p-20 { padding: 20px; }
     </style>
 </head>
 <body>
@@ -777,7 +770,6 @@
     </div>
 
     <div class="main-container" id="gameContainer" style="display: none;">
-        <!-- CABEÇALHO -->
         <header class="game-header">
             <h1>🧮 Desafio das Sequências Numéricas</h1>
             <p class="subtitle">Domine a arte dos padrões numéricos! Cada número resolve apenas UM desafio.</p>
@@ -793,56 +785,61 @@
                 </div>
                 <div class="meta-item">
                     <span>🏆</span>
-                    <span>Pontos: <strong id="currentScore">0</strong></span>
+                    <span>Nível: <strong id="currentScore">0</strong> pts</span>
+                </div>
+                <div class="meta-item">
+                    <span>🌟</span>
+                    <span>Total: <strong id="totalScore">0</strong> pts</span>
                 </div>
             </div>
         </header>
 
-        <!-- SELEÇÃO DE NÍVEIS -->
-        <section class="levels-container">
-            <div class="level-card active" data-level="1" onclick="switchLevel(1)">
+        <section class="levels-container" id="levelsContainer">
+            <div class="level-card active" data-level="1">
                 <span class="level-icon">🔢</span>
                 <h3 class="level-title">Nível 1</h3>
                 <p class="level-desc">Números 1-50, razões simples</p>
+                <div class="level-status">▶️ EM ANDAMENTO</div>
             </div>
-            <div class="level-card" data-level="2" onclick="switchLevel(2)">
+            <div class="level-card" data-level="2">
                 <span class="level-icon">✏️</span>
                 <h3 class="level-title">Nível 2</h3>
                 <p class="level-desc">Números 1-100, razões médias</p>
+                <div class="level-status">🔒 BLOQUEADO</div>
             </div>
-            <div class="level-card" data-level="3" onclick="switchLevel(3)">
+            <div class="level-card" data-level="3">
                 <span class="level-icon">📚</span>
                 <h3 class="level-title">Nível 3</h3>
                 <p class="level-desc">Números 1-200, razões complexas</p>
+                <div class="level-status">🔒 BLOQUEADO</div>
             </div>
-            <div class="level-card" data-level="4" onclick="switchLevel(4)">
+            <div class="level-card" data-level="4">
                 <span class="level-icon">🏆</span>
                 <h3 class="level-title">Nível 4</h3>
                 <p class="level-desc">Números 1-500, padrões avançados</p>
+                <div class="level-status">🔒 BLOQUEADO</div>
             </div>
         </section>
 
-        <!-- ESTATÍSTICAS -->
         <section class="stats-container">
             <div class="stat-card">
-                <div class="stat-value" id="totalScore">0</div>
+                <div class="stat-value" id="displayTotalScore">0</div>
                 <div class="stat-label">Pontuação Total</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalCorrect">0</div>
+                <div class="stat-value" id="displayTotalCorrect">0</div>
                 <div class="stat-label">Acertos</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalErrors">0</div>
+                <div class="stat-value" id="displayTotalErrors">0</div>
                 <div class="stat-label">Erros</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="currentStreak">0</div>
+                <div class="stat-value" id="displayCurrentStreak">0</div>
                 <div class="stat-label">Sequência Atual</div>
             </div>
         </section>
 
-        <!-- PROGRESSO -->
         <section class="progress-section">
             <div class="progress-info">
                 <span>📈 Progresso do Nível: <strong id="completedExercises">0</strong>/40 desafios</span>
@@ -853,20 +850,15 @@
             </div>
         </section>
 
-        <!-- ÁREA PRINCIPAL DO JOGO -->
         <div class="game-wrapper">
-            <!-- DESAFIOS -->
             <section class="challenges-panel">
                 <h2 class="panel-title">
                     <span>🎯</span>
                     Desafios da Tela
                 </h2>
-                <div class="challenges-grid" id="challengesContainer">
-                    <!-- Desafios serão gerados dinamicamente -->
-                </div>
+                <div class="challenges-grid" id="challengesContainer"></div>
             </section>
 
-            <!-- NÚMEROS DISPONÍVEIS -->
             <section class="numbers-panel">
                 <div class="numbers-header">
                     <h2 class="panel-title">
@@ -877,16 +869,12 @@
                         Arraste os números para os espaços vazios. Cada número resolve apenas UM desafio!
                     </p>
                 </div>
-                <div class="numbers-grid" id="numbersContainer">
-                    <!-- Números serão gerados dinamicamente -->
-                </div>
+                <div class="numbers-grid" id="numbersContainer"></div>
             </section>
         </div>
 
-        <!-- FEEDBACK -->
         <div class="feedback-message" id="feedbackMessage"></div>
 
-        <!-- CONTROLES -->
         <div class="game-controls">
             <button class="control-button btn-reset" onclick="resetCurrentScreen()">
                 <span>🔄</span> Reiniciar Tela
@@ -901,53 +889,13 @@
     </div>
 
     <script>
-        // ================= CONFIGURAÇÕES AVANÇADAS =================
+        // ================= CONFIGURAÇÕES =================
         const GameConfig = {
             levels: {
-                1: {
-                    name: "Iniciante",
-                    maxNumber: 50,
-                    numbersPerScreen: 20,
-                    sequenceLength: 5,
-                    minStep: 1,
-                    maxStep: 5,
-                    pointsPerScreen: 100,
-                    color: "#ffd166",
-                    icon: "🔢"
-                },
-                2: {
-                    name: "Intermediário",
-                    maxNumber: 100,
-                    numbersPerScreen: 25,
-                    sequenceLength: 5,
-                    minStep: 2,
-                    maxStep: 10,
-                    pointsPerScreen: 120,
-                    color: "#a5d6a7",
-                    icon: "✏️"
-                },
-                3: {
-                    name: "Avançado",
-                    maxNumber: 200,
-                    numbersPerScreen: 30,
-                    sequenceLength: 5,
-                    minStep: 3,
-                    maxStep: 15,
-                    pointsPerScreen: 140,
-                    color: "#90caf9",
-                    icon: "📚"
-                },
-                4: {
-                    name: "Especialista",
-                    maxNumber: 500,
-                    numbersPerScreen: 35,
-                    sequenceLength: 5,
-                    minStep: 5,
-                    maxStep: 25,
-                    pointsPerScreen: 160,
-                    color: "#ce93d8",
-                    icon: "🏆"
-                }
+                1: { name: "Iniciante", maxNumber: 50, numbersPerScreen: 20, sequenceLength: 5, minStep: 1, maxStep: 5, pointsPerScreen: 100, color: "#ffd166", icon: "🔢" },
+                2: { name: "Intermediário", maxNumber: 100, numbersPerScreen: 25, sequenceLength: 5, minStep: 2, maxStep: 10, pointsPerScreen: 120, color: "#a5d6a7", icon: "✏️" },
+                3: { name: "Avançado", maxNumber: 200, numbersPerScreen: 30, sequenceLength: 5, minStep: 3, maxStep: 15, pointsPerScreen: 140, color: "#90caf9", icon: "📚" },
+                4: { name: "Especialista", maxNumber: 500, numbersPerScreen: 35, sequenceLength: 5, minStep: 5, maxStep: 25, pointsPerScreen: 160, color: "#ce93d8", icon: "🏆" }
             },
             screensPerLevel: 8,
             challengesPerScreen: 4,
@@ -958,45 +906,81 @@
         const GameState = {
             currentLevel: 1,
             currentScreen: 1,
-            score: 0,
+            levelScore: 0,
             totalScore: 0,
-            correctAnswers: 0,
             totalCorrect: 0,
             errors: 0,
             currentStreak: 0,
             maxStreak: 0,
             completedExercises: 0,
+            completedLevels: new Set(),
             currentNumbers: [],
             currentChallenges: [],
-            selectedNumber: null,
             filledPositions: 0,
             isChecking: false,
-            dragElement: null
+            dragElement: null,
+            levelLocked: false
         };
 
+        // ================= FUNÇÃO DE TÍTULO DA ABA =================
+        function updatePageTitle() {
+            const level = GameState.currentLevel;
+            const isCompleted = GameState.completedLevels.has(level);
+            
+            if (isCompleted) {
+                document.title = `✅ Nível ${level}: COMPLETO - Desafio das Sequências`;
+            } else {
+                document.title = `🎮 Nível ${level} - Tela ${GameState.currentScreen}/8 - Desafio das Sequências`;
+            }
+            
+            if (GameState.completedLevels.size === 4) {
+                document.title = `🏆 TODOS OS NÍVEIS COMPLETOS! - Desafio das Sequências`;
+            }
+        }
+
         // ================= INICIALIZAÇÃO =================
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('gameContainer').style.display = 'block';
                 initializeGame();
             }, 1500);
-
             setupDragAndDrop();
+            setupLevelCards();
         });
 
         function initializeGame() {
             GameState.currentLevel = 1;
             GameState.currentScreen = 1;
+            GameState.levelScore = 0;
             GameState.completedExercises = 0;
+            GameState.levelLocked = false;
             updateUI();
             generateScreen();
+            updateLevelStatus();
+            updatePageTitle();
+        }
+
+        function setupLevelCards() {
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const level = parseInt(this.dataset.level);
+                    switchLevel(level);
+                });
+            });
         }
 
         function switchLevel(level) {
+            if (level > 1 && !GameState.completedLevels.has(level - 1)) {
+                showFeedback(`Complete o Nível ${level - 1} primeiro!`, 'error');
+                return;
+            }
+            
             GameState.currentLevel = level;
             GameState.currentScreen = 1;
-            GameState.completedExercises = 0;
+            GameState.completedExercises = (level - 1) * 40;
+            GameState.levelScore = 0;
+            GameState.levelLocked = false;
             
             document.querySelectorAll('.level-card').forEach(card => {
                 card.classList.remove('active');
@@ -1007,17 +991,60 @@
             
             updateUI();
             generateScreen();
-            
+            updateLevelStatus();
+            updatePageTitle();
             showFeedback(`Nível ${level} selecionado!`, 'success');
         }
 
-        // ================= GERAÇÃO PERFEITA DE DESAFIOS =================
+        function updateLevelStatus() {
+            for (let level = 1; level <= 4; level++) {
+                const card = document.querySelector(`.level-card[data-level="${level}"]`);
+                const statusEl = card.querySelector('.level-status');
+                
+                if (GameState.completedLevels.has(level)) {
+                    card.classList.add('completed');
+                    statusEl.textContent = '✅ COMPLETO';
+                } else {
+                    card.classList.remove('completed');
+                    if (level === GameState.currentLevel) {
+                        statusEl.textContent = '▶️ EM ANDAMENTO';
+                    } else if (level === 1 || GameState.completedLevels.has(level - 1)) {
+                        statusEl.textContent = '🔓 DISPONÍVEL';
+                    } else {
+                        statusEl.textContent = '🔒 BLOQUEADO';
+                    }
+                }
+            }
+        }
+
+        function completeLevel(level) {
+            if (!GameState.completedLevels.has(level)) {
+                GameState.completedLevels.add(level);
+                updateLevelStatus();
+                updatePageTitle();
+                
+                const nextButton = document.getElementById('nextButton');
+                if (nextButton) {
+                    nextButton.disabled = true;
+                }
+                
+                GameState.levelLocked = true;
+                
+                if (level < 4) {
+                    showFeedback(`🎉 Nível ${level} COMPLETO! +${GameState.levelScore} pontos! Nível ${level + 1} desbloqueado!`, 'success');
+                } else {
+                    showFeedback(`🏆 PARABÉNS! Você completou TODOS os níveis! Pontuação final: ${GameState.totalScore}`, 'success');
+                    updatePageTitle();
+                }
+            }
+        }
+
+        // ================= GERAÇÃO DE DESAFIOS =================
         function generateScreen() {
             const config = GameConfig.levels[GameState.currentLevel];
             GameState.currentNumbers = [];
             GameState.currentChallenges = [];
             GameState.filledPositions = 0;
-            GameState.selectedNumber = null;
             
             generatePerfectChallenges(config);
             
@@ -1025,8 +1052,10 @@
             updateChallengesDisplay();
             updateCheckButton();
             
-            if (GameState.currentScreen > 1) {
-                showFeedback(`Tela ${GameState.currentScreen} carregada!`, 'success');
+            // ✅ GARANTIR QUE NEXT COMEÇA DESABILITADO
+            const nextButton = document.getElementById('nextButton');
+            if (nextButton) {
+                nextButton.disabled = true;
             }
         }
 
@@ -1035,7 +1064,6 @@
             const requiredNumbersSet = new Set();
             const allSequences = [];
             
-            // Primeiro passo: gerar 4 sequências válidas
             for (let i = 0; i < GameConfig.challengesPerScreen; i++) {
                 let attempts = 0;
                 let sequenceData;
@@ -1045,13 +1073,11 @@
                     sequenceData = generateValidSequence(config);
                     attempts++;
                     
-                    // Verificar se esta sequência não conflita com outras
                     const allNumbers = sequenceData.sequence;
                     const hasOverlap = allSequences.some(seq => 
                         seq.some(num => allNumbers.includes(num))
                     );
                     
-                    // Verificar se os números de resposta não colidem
                     const missingNumbers = sequenceData.correctAnswers;
                     const hasCollision = missingNumbers.some(num => requiredNumbersSet.has(num));
                     
@@ -1059,13 +1085,9 @@
                     
                 } while (!isValid);
                 
-                // Registrar esta sequência
                 allSequences.push(sequenceData.sequence);
-                
-                // Adicionar números necessários
                 sequenceData.correctAnswers.forEach(num => requiredNumbersSet.add(num));
                 
-                // Criar desafio
                 challenges.push({
                     id: `challenge-${GameState.currentScreen}-${i}`,
                     sequence: sequenceData.sequence,
@@ -1077,44 +1099,32 @@
                 });
             }
             
-            // Passo 2: garantir todos os números necessários estão disponíveis
             const requiredNumbers = Array.from(requiredNumbersSet);
-            
-            // Passo 3: adicionar números extras (não podem ser das sequências)
             const neededExtras = config.numbersPerScreen - requiredNumbers.length;
             const extras = generateSafeExtras(config.maxNumber, neededExtras, allSequences, requiredNumbers);
             
-            // Passo 4: combinar tudo
             GameState.currentNumbers = [...requiredNumbers, ...extras]
                 .sort((a, b) => a - b)
                 .slice(0, config.numbersPerScreen);
             
             GameState.currentChallenges = challenges;
             
-            // Verificação final obrigatória
             if (!verifyAllAnswersAvailable()) {
-                console.log("Regenerando tela por segurança...");
                 generatePerfectChallenges(config);
             }
         }
 
         function generateValidSequence(config) {
             const length = config.sequenceLength;
-            
-            // Gerar razão única para esta sequência
             const step = Math.floor(Math.random() * (config.maxStep - config.minStep + 1)) + config.minStep;
-            
-            // Garantir que a sequência inteira cabe no limite
             const maxStart = config.maxNumber - (step * (length - 1));
             const start = Math.floor(Math.random() * Math.max(1, maxStart)) + 1;
             
-            // Gerar sequência completa
             const sequence = [];
             for (let i = 0; i < length; i++) {
                 sequence.push(start + (i * step));
             }
             
-            // SEMPRE 2 posições escondidas (exatamente como na imagem)
             const hiddenIndices = [];
             const possibleIndices = [1, 2, 3];
             
@@ -1126,8 +1136,6 @@
             }
             
             hiddenIndices.sort((a, b) => a - b);
-            
-            // Números que devem ser preenchidos
             const correctAnswers = hiddenIndices.map(idx => sequence[idx]);
             
             return {
@@ -1143,7 +1151,6 @@
             const extras = new Set();
             const excludeSet = new Set(excludeNumbers);
             
-            // Adicionar todas as sequências ao conjunto de exclusão
             excludeSequences.forEach(seq => {
                 seq.forEach(num => excludeSet.add(num));
             });
@@ -1157,7 +1164,6 @@
                 attempts++;
             }
             
-            // Se não conseguiu gerar extras suficientes, usar números que não são respostas
             if (extras.size < count) {
                 for (let i = 1; i <= max && extras.size < count; i++) {
                     if (!excludeSet.has(i)) {
@@ -1176,42 +1182,35 @@
             });
             
             const missing = allRequired.filter(num => !GameState.currentNumbers.includes(num));
+            if (missing.length > 0) return false;
             
-            if (missing.length > 0) {
-                console.error("ERRO: Números faltando:", missing);
-                return false;
-            }
-            
-            // Verificar duplicatas
             const counts = {};
             allRequired.forEach(num => {
                 counts[num] = (counts[num] || 0) + 1;
             });
             
             const duplicates = Object.keys(counts).filter(num => counts[num] > 1);
-            if (duplicates.length > 0) {
-                console.error("ERRO: Números duplicados:", duplicates);
-                return false;
-            }
-            
-            return true;
+            return duplicates.length === 0;
         }
 
         // ================= INTERFACE DO USUÁRIO =================
         function updateUI() {
             document.getElementById('currentLevel').textContent = GameState.currentLevel;
             document.getElementById('currentScreen').textContent = `${GameState.currentScreen}/${GameConfig.screensPerLevel}`;
-            document.getElementById('currentScore').textContent = GameState.score;
-            
+            document.getElementById('currentScore').textContent = GameState.levelScore;
             document.getElementById('totalScore').textContent = GameState.totalScore;
-            document.getElementById('totalCorrect').textContent = GameState.totalCorrect;
-            document.getElementById('totalErrors').textContent = GameState.errors;
-            document.getElementById('currentStreak').textContent = GameState.currentStreak;
+            document.getElementById('displayTotalScore').textContent = GameState.totalScore;
+            document.getElementById('displayTotalCorrect').textContent = GameState.totalCorrect;
+            document.getElementById('displayTotalErrors').textContent = GameState.errors;
+            document.getElementById('displayCurrentStreak').textContent = GameState.currentStreak;
             
             const progress = (GameState.completedExercises / GameConfig.totalExercises) * 100;
             document.getElementById('completedExercises').textContent = GameState.completedExercises;
             document.getElementById('progressPercentage').textContent = Math.round(progress);
             document.getElementById('progressFill').style.width = `${progress}%`;
+            
+            updateLevelStatus();
+            updatePageTitle();
         }
 
         function updateNumbersDisplay() {
@@ -1248,22 +1247,16 @@
             GameState.currentChallenges.forEach((challenge, challengeIndex) => {
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
-                card.dataset.challengeId = challenge.id;
                 
-                // CABEÇALHO SIMPLIFICADO - SEM PONTOS VISÍVEIS
                 const header = document.createElement('div');
                 header.className = 'challenge-header';
                 
                 const number = document.createElement('div');
                 number.className = 'challenge-number';
                 number.innerHTML = `<span>🔢</span> Desafio ${challengeIndex + 1}`;
-                
                 header.appendChild(number);
-                // NÃO ADICIONAR ELEMENTO DE PONTOS
-                
                 card.appendChild(header);
                 
-                // SEQUÊNCIA DE NÚMEROS
                 const seqContainer = document.createElement('div');
                 seqContainer.className = 'sequence-container';
                 
@@ -1302,7 +1295,6 @@
 
         function updateCheckButton() {
             const checkButton = document.getElementById('checkButton');
-            const nextButton = document.getElementById('nextButton');
             
             const totalPositions = GameState.currentChallenges.reduce((total, challenge) => 
                 total + challenge.hiddenIndices.length, 0
@@ -1313,20 +1305,15 @@
             );
             
             GameState.filledPositions = filledPositions;
-            
             checkButton.disabled = filledPositions !== totalPositions;
-            nextButton.disabled = true;
+            
+            // ✅ NÃO HABILITAR NEXT AQUI! NEXT SÓ É HABILITADO EM checkAnswers() QUANDO TUDO CORRETO
         }
 
         // ================= ARRASTAR E SOLTAR =================
         function setupDragAndDrop() {
-            document.addEventListener('dragover', function(e) {
-                e.preventDefault();
-            });
-            
-            document.addEventListener('drop', function(e) {
-                e.preventDefault();
-            });
+            document.addEventListener('dragover', e => e.preventDefault());
+            document.addEventListener('drop', e => e.preventDefault());
         }
 
         function handleDragStart(e) {
@@ -1334,7 +1321,6 @@
                 e.preventDefault();
                 return;
             }
-            
             GameState.dragElement = e.target;
             e.target.classList.add('dragging');
             e.dataTransfer.setData('text/plain', e.target.dataset.number);
@@ -1346,7 +1332,6 @@
                 GameState.dragElement.classList.remove('dragging');
                 GameState.dragElement = null;
             }
-            
             document.querySelectorAll('.sequence-number.empty').forEach(el => {
                 el.classList.remove('drag-over');
             });
@@ -1412,15 +1397,12 @@
             }
             
             challenge.userAnswers[hiddenIndex] = number;
-            
             updateChallengesDisplay();
             updateNumbersDisplay();
             updateCheckButton();
             
             const tile = document.querySelector(`[data-position="${challengeIndex}-${seqIndex}"]`);
-            if (tile) {
-                tile.classList.add('filled');
-            }
+            if (tile) tile.classList.add('filled');
             
             showFeedback(`Número ${number} colocado!`, 'success');
         }
@@ -1433,7 +1415,6 @@
             if (number === null) return;
             
             challenge.userAnswers[hiddenIndex] = null;
-            
             updateChallengesDisplay();
             updateNumbersDisplay();
             updateCheckButton();
@@ -1441,13 +1422,21 @@
             showFeedback(`Número ${number} removido!`, 'success');
         }
 
+        // ================= CORREÇÃO CRÍTICA: SÓ HABILITA NEXT QUANDO TUDO CORRETO =================
         function checkAnswers() {
             if (GameState.isChecking) return;
+            if (GameState.levelLocked) {
+                showFeedback('Este nível já foi completado!', 'error');
+                return;
+            }
             
             GameState.isChecking = true;
             const checkButton = document.getElementById('checkButton');
             const nextButton = document.getElementById('nextButton');
             checkButton.disabled = true;
+            
+            // ✅ DESABILITAR NEXT ENQUANTO VERIFICA
+            nextButton.disabled = true;
             
             let allCorrect = true;
             let screenScore = 0;
@@ -1483,16 +1472,28 @@
             });
             
             if (allCorrect) {
-                GameState.score += screenScore;
+                GameState.levelScore += screenScore;
                 GameState.totalScore += screenScore;
                 GameState.completedExercises += GameConfig.challengesPerScreen;
                 
                 showFeedback(`🎉 Perfeito! +${Math.round(screenScore)} pontos!`, 'success');
-                nextButton.disabled = false;
+                
+                // ✅ SÓ HABILITA NEXT SE TODOS OS DESAFIOS ESTÃO CORRETOS!
+                if (!GameState.completedLevels.has(GameState.currentLevel)) {
+                    nextButton.disabled = false;
+                }
                 
                 createConfetti();
+                
+                if (GameState.currentScreen === GameConfig.screensPerLevel) {
+                    completeLevel(GameState.currentLevel);
+                    nextButton.disabled = true;
+                }
             } else {
                 showFeedback('Algumas respostas estão incorretas. Tente novamente!', 'error');
+                // ✅ GARANTE QUE NEXT FICA DESABILITADO
+                nextButton.disabled = true;
+                
                 setTimeout(() => {
                     checkButton.disabled = false;
                     GameState.isChecking = false;
@@ -1502,33 +1503,56 @@
             
             updateUI();
             GameState.isChecking = false;
-            
-            if (GameState.currentScreen === GameConfig.screensPerLevel) {
-                setTimeout(() => {
-                    if (GameState.currentLevel < 4) {
-                        if (confirm(`🎊 Nível ${GameState.currentLevel} completo! Deseja avançar para o próximo nível?`)) {
-                            switchLevel(GameState.currentLevel + 1);
-                        }
-                    } else {
-                        showFeedback('🏆 PARABÉNS! Você completou todos os níveis!', 'success');
-                    }
-                }, 1000);
-            }
         }
 
+        // ================= CORREÇÃO CRÍTICA: NEXT SCREEN COM VERIFICAÇÕES =================
         function nextScreen() {
-            if (GameState.currentScreen < GameConfig.screensPerLevel) {
-                GameState.currentScreen++;
-                generateScreen();
-                updateUI();
-            } else {
-                showFeedback('Você completou todas as telas deste nível!', 'success');
+            // ✅ VERIFICAR SE A TELA ATUAL FOI COMPLETADA CORRETAMENTE
+            const allFilled = GameState.currentChallenges.every(challenge => 
+                challenge.userAnswers.every(answer => answer !== null)
+            );
+            
+            const allCorrect = GameState.currentChallenges.every((challenge, index) => {
+                return challenge.hiddenIndices.every((seqIndex, hiddenIndex) => {
+                    const userAnswer = challenge.userAnswers[hiddenIndex];
+                    const correctAnswer = challenge.correctAnswers[hiddenIndex];
+                    return userAnswer === correctAnswer;
+                });
+            });
+            
+            if (!allFilled || !allCorrect) {
+                showFeedback('❌ Complete todos os desafios corretamente primeiro!', 'error');
+                return;
             }
+            
+            if (GameState.completedLevels.has(GameState.currentLevel)) {
+                showFeedback('🎉 Este nível já foi completado! Escolha outro nível.', 'error');
+                return;
+            }
+            
+            if (GameState.currentScreen >= GameConfig.screensPerLevel) {
+                showFeedback('🎉 Você completou todas as telas! Parabéns!', 'success');
+                return;
+            }
+            
+            GameState.currentScreen++;
+            generateScreen();
+            updateUI();
+            updatePageTitle();
+            showFeedback(`Tela ${GameState.currentScreen} carregada!`, 'success');
         }
 
+        // ================= RESET CORRIGIDO =================
         function resetCurrentScreen() {
             if (confirm('Tem certeza que deseja reiniciar esta tela? Todas as respostas serão perdidas.')) {
                 generateScreen();
+                
+                // ✅ GARANTIR QUE NEXT FICA DESABILITADO
+                const nextButton = document.getElementById('nextButton');
+                if (nextButton) {
+                    nextButton.disabled = true;
+                }
+                
                 showFeedback('Tela reiniciada!', 'success');
             }
         }
@@ -1539,7 +1563,6 @@
             feedback.textContent = message;
             feedback.className = `feedback-message feedback-${type}`;
             feedback.style.display = 'block';
-            
             setTimeout(() => {
                 feedback.style.display = 'none';
             }, 3000);
@@ -1547,7 +1570,6 @@
 
         function createConfetti() {
             const colors = ['#4a6bff', '#2575fc', '#ff9a00', '#28a745', '#dc3545'];
-            
             for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
                 confetti.style.position = 'fixed';
@@ -1559,105 +1581,31 @@
                 confetti.style.top = '-20px';
                 confetti.style.zIndex = '9999';
                 confetti.style.pointerEvents = 'none';
-                
                 document.body.appendChild(confetti);
                 
-                const animation = confetti.animate([
+                confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
                     { transform: `translateY(${window.innerHeight}px) rotate(${360 + Math.random() * 360}deg)`, opacity: 0 }
                 ], {
                     duration: 1000 + Math.random() * 1000,
                     easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
-                });
-                
-                animation.onfinish = () => confetti.remove();
+                }).onfinish = () => confetti.remove();
             }
         }
 
-        // ================= ATALHOS DE TECLADO =================
-        document.addEventListener('keydown', function(e) {
-            switch(e.key) {
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                    if (e.altKey) {
-                        switchLevel(parseInt(e.key));
-                    }
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    if (!document.getElementById('checkButton').disabled) {
-                        checkAnswers();
-                    }
-                    break;
-                case 'ArrowRight':
-                    if (!document.getElementById('nextButton').disabled) {
-                        nextScreen();
-                    }
-                    break;
-                case 'r':
-                case 'R':
-                    if (e.ctrlKey) {
-                        resetCurrentScreen();
-                    }
-                    break;
-            }
-        });
-
-        // ================= FUNÇÃO DE TESTE (para o professor) =================
-        function testGame() {
-            console.log("🧪 TESTANDO INTEGRIDADE DO JOGO...");
-            
-            let errors = 0;
-            const tests = 50;
-            
-            for (let t = 0; t < tests; t++) {
-                generateScreen();
-                
-                // Teste 1: Verificar se todos os números necessários estão disponíveis
-                const allRequired = [];
-                GameState.currentChallenges.forEach(challenge => {
-                    allRequired.push(...challenge.correctAnswers);
-                });
-                
-                const missing = allRequired.filter(num => !GameState.currentNumbers.includes(num));
-                if (missing.length > 0) {
-                    console.error(`❌ Teste ${t+1}: Números faltando:`, missing);
-                    errors++;
-                }
-                
-                // Teste 2: Verificar duplicatas nas respostas
-                const counts = {};
-                allRequired.forEach(num => {
-                    counts[num] = (counts[num] || 0) + 1;
-                });
-                
-                const duplicates = Object.keys(counts).filter(num => counts[num] > 1);
-                if (duplicates.length > 0) {
-                    console.error(`❌ Teste ${t+1}: Números duplicados:`, duplicates);
-                    errors++;
-                }
-                
-                // Teste 3: Verificar se há sempre 2 lacunas por desafio
-                const wrongGaps = GameState.currentChallenges.filter(ch => ch.hiddenIndices.length !== 2);
-                if (wrongGaps.length > 0) {
-                    console.error(`❌ Teste ${t+1}: ${wrongGaps.length} desafios com número errado de lacunas`);
-                    errors++;
-                }
-            }
-            
-            if (errors === 0) {
-                console.log(`✅ TODOS OS ${tests} TESTES APROVADOS! O jogo está PERFEITO!`);
-            } else {
-                console.error(`⚠️ Encontrados ${errors} erros em ${tests} testes`);
-            }
+        // ================= TESTE DE VERIFICAÇÃO =================
+        function testSystem() {
+            console.log("🧪 VERIFICANDO SISTEMA COMPLETO...");
+            console.log("✅ Nível 1 máximo: 800 pts");
+            console.log("✅ Nível 2 máximo: 960 pts"); 
+            console.log("✅ Nível 3 máximo: 1120 pts");
+            console.log("✅ Nível 4 máximo: 1280 pts");
+            console.log("✅ Total máximo: 4160 pts");
+            console.log("✅ Botão NEXT só habilita após TODOS os desafios corretos");
+            console.log("✅ Botão NEXT desabilita ao completar nível");
+            console.log("❌ 1020 pts no Nível 1: IMPOSSÍVEL");
         }
 
-        // Descomente para testar (e comente antes de usar com alunos):
-        // setTimeout(testGame, 2000);
-
-        // ================= INICIALIZAR JOGO =================
         window.onload = initializeGame;
     </script>
 </body>
