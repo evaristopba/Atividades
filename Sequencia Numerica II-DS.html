@@ -536,8 +536,28 @@
             border: 3px solid #e0a800;
         }
 
-        .btn-next:not(:disabled) {
-            animation: pulse-next 1.5s infinite alternate;
+        .btn-save {
+            background: linear-gradient(135deg, #4a6bff, #2575fc);
+            color: white;
+            border: 3px solid #1a4b8c;
+        }
+
+        .btn-load {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: 3px solid #1e7e34;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+            border: 3px solid #0f6674;
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: 3px solid #a71d2a;
         }
 
         .stats-container {
@@ -758,6 +778,101 @@
                 box-shadow: 0 20px 40px rgba(0, 123, 255, 0.4);
             }
         }
+
+        .teacher-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .teacher-login-btn {
+            margin: 10px 0;
+            padding: 15px 30px;
+            background: #ff9a00;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .teacher-login-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 154, 0, 0.3);
+        }
+
+        .teacher-panel {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            border: 3px solid #ff9a00;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .teacher-panel h3 {
+            color: #cc6600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teacher-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .teacher-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .teacher-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .teacher-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -793,6 +908,51 @@
                 </div>
             </div>
         </header>
+
+        <!-- ================= PAINEL DO PROFESSOR COM AUTENTICAÇÃO ================= -->
+        <section class="teacher-section">
+            <button class="teacher-login-btn" onclick="AuthSystem.autenticar()">
+                🔐 Acessar Painel do Professor
+            </button>
+            
+            <div class="teacher-panel" id="teacherPanel" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>
+                        <span>👨‍🏫</span> Painel do Professor
+                    </h3>
+                    <button class="logout-btn" onclick="AuthSystem.logout()">
+                        🔒 Sair
+                    </button>
+                </div>
+                
+                <div class="teacher-buttons">
+                    <button class="teacher-btn" onclick="iniciarNoNivel(1)" style="background: #4a6bff; color: white;">
+                        🟢 Nível 1
+                    </button>
+                    <button class="teacher-btn" onclick="iniciarNoNivel(2)" style="background: #2575fc; color: white;">
+                        🔵 Nível 2
+                    </button>
+                    <button class="teacher-btn" onclick="iniciarNoNivel(3)" style="background: #6610f2; color: white;">
+                        🟣 Nível 3
+                    </button>
+                    <button class="teacher-btn" onclick="iniciarNoNivel(4)" style="background: #e83e8c; color: white;">
+                        🔴 Nível 4
+                    </button>
+                </div>
+                
+                <div class="teacher-actions">
+                    <button class="teacher-btn" onclick="mostrarResumoAluno()" style="background: #28a745; color: white; padding: 10px 20px;">
+                        📊 Ver Resumo do Aluno
+                    </button>
+                    <button class="teacher-btn" onclick="exportarRelatorio()" style="background: #17a2b8; color: white; padding: 10px 20px;">
+                        📥 Exportar Relatório
+                    </button>
+                    <button class="teacher-btn" onclick="resetPontuacaoTotal()" style="background: #dc3545; color: white; padding: 10px 20px;">
+                        🗑️ Reset Total
+                    </button>
+                </div>
+            </div>
+        </section>
 
         <section class="levels-container" id="levelsContainer">
             <div class="level-card active" data-level="1">
@@ -876,6 +1036,18 @@
         <div class="feedback-message" id="feedbackMessage"></div>
 
         <div class="game-controls">
+            <button class="control-button btn-save" onclick="SaveSystem.saveProgress()" title="Salvar progresso manualmente">
+                <span>💾</span> Salvar
+            </button>
+            <button class="control-button btn-load" onclick="carregarProgressoSalvo()" title="Carregar último progresso salvo">
+                <span>📂</span> Carregar
+            </button>
+            <button class="control-button btn-info" onclick="SaveSystem.showSaveInfo()" title="Ver informações do salvamento">
+                <span>ℹ️</span> Info
+            </button>
+            <button class="control-button btn-clear" onclick="SaveSystem.clearProgress()" title="Apagar todo progresso">
+                <span>🗑️</span> Reset
+            </button>
             <button class="control-button btn-reset" onclick="resetCurrentScreen()">
                 <span>🔄</span> Reiniciar Tela
             </button>
@@ -889,6 +1061,119 @@
     </div>
 
     <script>
+        // ================= SISTEMA DE AUTENTICAÇÃO COM MODAL =================
+        const AuthSystem = {
+            professorAutenticado: false,
+            senha: "P2026",
+            
+            autenticar() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                `;
+                
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    text-align: center;
+                    max-width: 400px;
+                    width: 90%;
+                `;
+                
+                card.innerHTML = `
+                    <h3 style="color: #cc6600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                        <span>🔒</span> Acesso do Professor
+                    </h3>
+                    <p style="margin-bottom: 20px; color: #666;">Digite a senha para acessar o painel:</p>
+                    <input type="password" id="senhaProfessor" style="
+                        width: 100%;
+                        padding: 15px;
+                        margin-bottom: 20px;
+                        border: 3px solid #4a6bff;
+                        border-radius: 10px;
+                        font-size: 1.2em;
+                        text-align: center;
+                    " placeholder="••••••">
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="btnConfirmar" style="
+                            padding: 12px 30px;
+                            background: #28a745;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        ">Confirmar</button>
+                        <button id="btnCancelar" style="
+                            padding: 12px 30px;
+                            background: #dc3545;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        ">Cancelar</button>
+                    </div>
+                `;
+                
+                modal.appendChild(card);
+                document.body.appendChild(modal);
+                
+                const input = document.getElementById('senhaProfessor');
+                input.focus();
+                
+                document.getElementById('btnConfirmar').addEventListener('click', () => {
+                    const senhaDigitada = input.value;
+                    document.body.removeChild(modal);
+                    
+                    if (senhaDigitada === this.senha) {
+                        this.professorAutenticado = true;
+                        document.getElementById('teacherPanel').style.display = 'block';
+                        showFeedback('✅ Professor autenticado! Painel liberado.', 'success');
+                    } else {
+                        showFeedback('❌ Senha incorreta!', 'error');
+                    }
+                });
+                
+                document.getElementById('btnCancelar').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                    showFeedback('🔒 Autenticação cancelada.', 'info');
+                });
+                
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('btnConfirmar').click();
+                    }
+                });
+            },
+            
+            logout() {
+                this.professorAutenticado = false;
+                document.getElementById('teacherPanel').style.display = 'none';
+                showFeedback('🔒 Painel do professor bloqueado.', 'success');
+            },
+            
+            verificarAcesso() {
+                if (!this.professorAutenticado) {
+                    showFeedback('🔒 Acesso restrito ao professor!', 'error');
+                    return false;
+                }
+                return true;
+            }
+        };
+
         // ================= CONFIGURAÇÕES =================
         const GameConfig = {
             levels: {
@@ -930,6 +1215,281 @@
                 return !!this.records[key];
             }
         };
+
+        // ================= SISTEMA DE PROGRESSO POR NÍVEL =================
+        const LevelProgress = {
+            records: {},
+            
+            completeLevel(level) {
+                this.records[level] = 40;
+            },
+            
+            addProgress(level, amount) {
+                const current = this.records[level] || 0;
+                this.records[level] = Math.min(current + amount, 40);
+            },
+            
+            removeProgress(level, amount) {
+                const current = this.records[level] || 0;
+                this.records[level] = Math.max(current - amount, 0);
+            },
+            
+            getProgress(level) {
+                return this.records[level] || 0;
+            },
+            
+            isLevelComplete(level) {
+                return (this.records[level] || 0) >= 40;
+            },
+            
+            resetLevel(level) {
+                delete this.records[level];
+            }
+        };
+
+        // ================= SISTEMA DE SALVAMENTO =================
+        const SaveSystem = {
+            
+            saveProgress() {
+                const progress = {
+                    completedLevels: Array.from(GameState.completedLevels),
+                    currentLevel: GameState.currentLevel,
+                    currentScreen: GameState.currentScreen,
+                    levelScore: GameState.levelScore,
+                    totalScore: GameState.totalScore,
+                    totalCorrect: GameState.totalCorrect,
+                    errors: GameState.errors,
+                    currentStreak: GameState.currentStreak,
+                    levelProgress: LevelProgress.records,
+                    screenPoints: ScreenPoints.records,
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('desafioSequencias_progress', JSON.stringify(progress));
+                showFeedback('💾 Progresso salvo!', 'success');
+            },
+            
+            loadProgress() {
+                const saved = localStorage.getItem('desafioSequencias_progress');
+                if (!saved) return false;
+                
+                try {
+                    const progress = JSON.parse(saved);
+                    
+                    GameState.completedLevels = new Set(progress.completedLevels || []);
+                    GameState.currentLevel = progress.currentLevel || 1;
+                    GameState.currentScreen = progress.currentScreen || 1;
+                    GameState.levelScore = progress.levelScore || 0;
+                    GameState.totalScore = progress.totalScore || 0;
+                    GameState.totalCorrect = progress.totalCorrect || 0;
+                    GameState.errors = progress.errors || 0;
+                    GameState.currentStreak = progress.currentStreak || 0;
+                    
+                    if (progress.levelProgress) {
+                        LevelProgress.records = progress.levelProgress;
+                    }
+                    
+                    GameState.completedExercises = LevelProgress.getProgress(GameState.currentLevel);
+                    
+                    if (progress.screenPoints) {
+                        ScreenPoints.records = progress.screenPoints;
+                    }
+                    
+                    return true;
+                    
+                } catch (e) {
+                    console.error('Erro ao carregar salvamento:', e);
+                    return false;
+                }
+            },
+            
+            clearProgress() {
+                if (confirm('Tem certeza que deseja apagar TODO o progresso salvo?')) {
+                    localStorage.removeItem('desafioSequencias_progress');
+                    initializeGame();
+                    showFeedback('🔄 Progresso resetado!', 'success');
+                }
+            },
+            
+            hasSavedProgress() {
+                return localStorage.getItem('desafioSequencias_progress') !== null;
+            },
+            
+            showSaveInfo() {
+                const saved = localStorage.getItem('desafioSequencias_progress');
+                if (!saved) {
+                    alert('Nenhum progresso salvo encontrado.');
+                    return;
+                }
+                
+                const progress = JSON.parse(saved);
+                const data = new Date(progress.timestamp);
+                
+                alert(
+                    `📁 PROGRESSO SALVO:\n\n` +
+                    `📅 Data: ${data.toLocaleDateString()} ${data.toLocaleTimeString()}\n` +
+                    `🎮 Nível atual: ${progress.currentLevel}\n` +
+                    `📱 Tela: ${progress.currentScreen}/8\n` +
+                    `🏆 Pontos: ${progress.totalScore}\n` +
+                    `✅ Níveis completos: ${progress.completedLevels?.length || 0}/4`
+                );
+            }
+        };
+
+        // ================= FUNÇÃO DE RESET TOTAL =================
+        function resetPontuacaoTotal() {
+            if (!AuthSystem.verificarAcesso()) return;
+            
+            if (confirm('⚠️ TEM CERTEZA? Isso vai apagar TODO o progresso do aluno!')) {
+                
+                localStorage.removeItem('desafioSequencias_progress');
+                
+                GameState.completedLevels = new Set();
+                GameState.levelScore = 0;
+                GameState.totalScore = 0;
+                GameState.totalCorrect = 0;
+                GameState.errors = 0;
+                GameState.currentStreak = 0;
+                GameState.completedExercises = 0;
+                GameState.currentLevel = 1;
+                GameState.currentScreen = 1;
+                GameState.levelLocked = false;
+                
+                LevelProgress.records = {};
+                ScreenPoints.records = {};
+                
+                generateScreen();
+                updateUI();
+                updateLevelStatus();
+                updatePageTitle();
+                
+                showFeedback('✅ Toda pontuação foi resetada!', 'success');
+                
+                if (AuthSystem.professorAutenticado) {
+                    document.getElementById('teacherPanel').style.display = 'block';
+                }
+            }
+        }
+
+        // ================= FUNÇÃO CORRIGIDA - INICIAR EM NÍVEL ESPECÍFICO =================
+        function iniciarNoNivel(nivel) {
+            if (!AuthSystem.verificarAcesso()) return;
+            
+            if (nivel < 1 || nivel > 4) {
+                showFeedback('❌ Nível inválido! Escolha entre 1 e 4.', 'error');
+                return;
+            }
+            
+            for (let i = 1; i < nivel; i++) {
+                if (!GameState.completedLevels.has(i)) {
+                    GameState.completedLevels.add(i);
+                    LevelProgress.completeLevel(i);
+                }
+            }
+            
+            GameState.completedExercises = 0;
+            LevelProgress.records[nivel] = 0;
+            
+            GameState.currentLevel = nivel;
+            GameState.currentScreen = 1;
+            GameState.levelScore = 0;
+            GameState.levelLocked = false;
+            GameState.currentStreak = 0;
+            
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.classList.remove('active');
+                if (parseInt(card.dataset.level) === nivel) {
+                    card.classList.add('active');
+                }
+            });
+            
+            updateLevelStatus();
+            updatePageTitle();
+            generateScreen();
+            updateUI();
+            
+            SaveSystem.saveProgress();
+            
+            showFeedback(`🎮 Jogo iniciado no Nível ${nivel}! Progresso: 0/40 desafios`, 'success');
+        }
+
+        function mostrarResumoAluno() {
+            if (!AuthSystem.verificarAcesso()) return;
+            
+            const niveisCompletos = Array.from(GameState.completedLevels).sort().join(', ') || 'nenhum';
+            
+            alert(
+                `📋 RESUMO DO ALUNO\n\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n` +
+                `🎮 Nível atual: ${GameState.currentLevel}\n` +
+                `📱 Tela atual: ${GameState.currentScreen}/8\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n` +
+                `🏆 Pontuação do nível: ${GameState.levelScore}\n` +
+                `🌟 Pontuação total: ${GameState.totalScore}\n` +
+                `✅ Acertos: ${GameState.totalCorrect}\n` +
+                `❌ Erros: ${GameState.errors}\n` +
+                `📈 Sequência atual: ${GameState.currentStreak}\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n` +
+                `🏁 Níveis completos: ${niveisCompletos}\n` +
+                `📊 Progresso: ${LevelProgress.getProgress(GameState.currentLevel)}/40 desafios\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n` +
+                `💾 Último salvamento: ${localStorage.getItem('desafioSequencias_progress') ? 
+                    new Date(JSON.parse(localStorage.getItem('desafioSequencias_progress')).timestamp).toLocaleString() : 
+                    'Nunca salvo'}`
+            );
+        }
+
+        function exportarRelatorio() {
+            if (!AuthSystem.verificarAcesso()) return;
+            
+            const relatorio = {
+                aluno: {
+                    nivelAtual: GameState.currentLevel,
+                    telaAtual: GameState.currentScreen,
+                    pontuacaoNivel: GameState.levelScore,
+                    pontuacaoTotal: GameState.totalScore,
+                    acertos: GameState.totalCorrect,
+                    erros: GameState.errors,
+                    streak: GameState.currentStreak,
+                    progresso: LevelProgress.getProgress(GameState.currentLevel),
+                    niveisCompletos: Array.from(GameState.completedLevels)
+                },
+                configuracoes: {
+                    nivel1Max: 800,
+                    nivel2Max: 960,
+                    nivel3Max: 1120,
+                    nivel4Max: 1280,
+                    totalMax: 4160
+                },
+                timestamp: new Date().toISOString(),
+                savedProgress: localStorage.getItem('desafioSequencias_progress') ? 
+                    JSON.parse(localStorage.getItem('desafioSequencias_progress')) : null
+            };
+            
+            const dataStr = JSON.stringify(relatorio, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const nomeArquivo = `relatorio_aluno_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri);
+            link.setAttribute('download', nomeArquivo);
+            link.click();
+            
+            showFeedback(`📥 Relatório exportado: ${nomeArquivo}`, 'success');
+        }
+
+        function carregarProgressoSalvo() {
+            if (SaveSystem.loadProgress()) {
+                updateLevelStatus();
+                updatePageTitle();
+                generateScreen();
+                updateUI();
+                showFeedback('📂 Progresso carregado!', 'success');
+            } else {
+                showFeedback('❌ Nenhum progresso salvo encontrado!', 'error');
+            }
+        }
 
         // ================= ESTADO DO JOGO =================
         const GameState = {
@@ -978,12 +1538,27 @@
         });
 
         function initializeGame() {
+            if (SaveSystem.hasSavedProgress()) {
+                if (confirm('📂 Progresso anterior encontrado! Deseja continuar de onde parou?')) {
+                    SaveSystem.loadProgress();
+                    updateLevelStatus();
+                    updatePageTitle();
+                    generateScreen();
+                    updateUI();
+                    showFeedback(`🎮 Bem-vindo de volta! Nível ${GameState.currentLevel}, Tela ${GameState.currentScreen}`, 'success');
+                    return;
+                } else {
+                    SaveSystem.clearProgress();
+                }
+            }
+            
             GameState.currentLevel = 1;
             GameState.currentScreen = 1;
             GameState.levelScore = 0;
             GameState.completedExercises = 0;
             GameState.currentStreak = 0;
             GameState.levelLocked = false;
+            LevelProgress.records = {};
             updateUI();
             generateScreen();
             updateLevelStatus();
@@ -1007,7 +1582,9 @@
             
             GameState.currentLevel = level;
             GameState.currentScreen = 1;
-            GameState.completedExercises = (level - 1) * 40;
+            
+            GameState.completedExercises = LevelProgress.getProgress(level);
+            
             GameState.levelScore = 0;
             GameState.levelLocked = false;
             GameState.currentStreak = 0;
@@ -1023,6 +1600,7 @@
             generateScreen();
             updateLevelStatus();
             updatePageTitle();
+            SaveSystem.saveProgress();
             showFeedback(`Nível ${level} selecionado!`, 'success');
         }
 
@@ -1050,6 +1628,8 @@
         function completeLevel(level) {
             if (!GameState.completedLevels.has(level)) {
                 GameState.completedLevels.add(level);
+                LevelProgress.completeLevel(level);
+                
                 updateLevelStatus();
                 updatePageTitle();
                 
@@ -1059,6 +1639,7 @@
                 }
                 
                 GameState.levelLocked = true;
+                SaveSystem.saveProgress();
                 
                 if (level < 4) {
                     showFeedback(`🎉 Nível ${level} COMPLETO! +${GameState.levelScore} pontos! Nível ${level + 1} desbloqueado!`, 'success');
@@ -1233,8 +1814,8 @@
             document.getElementById('displayTotalErrors').textContent = GameState.errors;
             document.getElementById('displayCurrentStreak').textContent = GameState.currentStreak;
             
-            const progress = (GameState.completedExercises / GameConfig.totalExercises) * 100;
             document.getElementById('completedExercises').textContent = GameState.completedExercises;
+            const progress = (GameState.completedExercises / 40) * 100;
             document.getElementById('progressPercentage').textContent = Math.round(progress);
             document.getElementById('progressFill').style.width = `${progress}%`;
             
@@ -1528,8 +2109,13 @@
                 if (!hasEarned) {
                     GameState.levelScore += screenScore;
                     GameState.totalScore += screenScore;
+                    GameState.totalCorrect += GameConfig.challengesPerScreen;
+                    
                     GameState.completedExercises += GameConfig.challengesPerScreen;
+                    LevelProgress.addProgress(GameState.currentLevel, GameConfig.challengesPerScreen);
+                    
                     ScreenPoints.addPoints(GameState.currentLevel, GameState.currentScreen, screenScore);
+                    SaveSystem.saveProgress();
                     showFeedback(`🎉 Perfeito! +${Math.round(screenScore)} pts, +4 acertos!`, 'success');
                 } else {
                     showFeedback(`🎉 Desafio completo!`, 'success');
@@ -1559,7 +2145,7 @@
             GameState.isChecking = false;
         }
 
-        // ================= RESET DE TELA - CORREÇÃO DEFINITIVA =================
+        // ================= RESET DE TELA =================
         function resetCurrentScreen() {
             if (confirm('Tem certeza que deseja reiniciar esta tela? Todas as respostas, pontos, acertos e sequência serão perdidos.')) {
                 
@@ -1570,7 +2156,9 @@
                     GameState.levelScore -= screenPoints;
                     GameState.totalScore -= screenPoints;
                     GameState.totalCorrect -= challengesPerScreen;
+                    
                     GameState.completedExercises -= challengesPerScreen;
+                    LevelProgress.removeProgress(GameState.currentLevel, challengesPerScreen);
                     
                     ScreenPoints.removePoints(GameState.currentLevel, GameState.currentScreen);
                     
@@ -1579,9 +2167,7 @@
                     }
                 }
                 
-                // ✅ STREAK ZERA AO REINICIAR (SEMPRE!)
                 GameState.currentStreak = 0;
-                
                 generateScreen();
                 
                 const nextButton = document.getElementById('nextButton');
@@ -1589,6 +2175,7 @@
                     nextButton.disabled = true;
                 }
                 
+                SaveSystem.saveProgress();
                 showFeedback('🔄 Tela reiniciada! Sequência zerada.', 'success');
                 updateUI();
             }
@@ -1629,6 +2216,7 @@
             generateScreen();
             updateUI();
             updatePageTitle();
+            SaveSystem.saveProgress();
             showFeedback(`Tela ${GameState.currentScreen} carregada!`, 'success');
         }
 
@@ -1671,14 +2259,13 @@
         // ================= TESTE DE VERIFICAÇÃO =================
         function testSystem() {
             console.log("🧪 VERIFICANDO SISTEMA...");
-            console.log("✅ Streak = acertos consecutivos na tela atual");
-            console.log("✅ Streak atualiza a CADA movimento");
-            console.log("✅ Streak: +1 por acerto, 0 ao errar");
-            console.log("✅ Streak: 0 ao reiniciar tela");
-            console.log("✅ Streak: 0 ao avançar tela");
-            console.log("✅ Streak: 0 ao mudar nível");
-            console.log("❌ Streak > Acertos na tela: IMPOSSÍVEL");
-            console.log("❌ Streak manter ao reiniciar: IMPOSSÍVEL");
+            console.log("✅ Progresso por nível SEPARADO");
+            console.log("✅ Nível 2 inicia com 0/40");
+            console.log("✅ Ao completar tela: 4/40 (nunca 44/40)");
+            console.log("✅ Ao voltar Nível 1: 40/40");
+            console.log("✅ Senha invisível com modal");
+            console.log("✅ Botão Reset Total adicionado");
+            console.log("❌ Progresso acumulado entre níveis: IMPOSSÍVEL");
         }
 
         window.onload = initializeGame;
