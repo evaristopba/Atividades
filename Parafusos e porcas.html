@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Parafusos e Porcas</title>
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 10px;
+  overflow: hidden;
+}
+body{
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  text-align:center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+h1{
+  color: white;
+  margin: 5px 0 15px;
+  font-size: 2.2rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+#topbar{
+  background: rgba(255,255,255,0.95);
+  padding: 15px 25px;
+  border-radius: 60px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  border: 2px solid #f1c40f;
+  flex-shrink: 0;
+}
+#topbar > div {
+  background: #ecf0f1;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  color: #2c3e50;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  font-size: 1rem;
+}
+button, select {
+  padding: 8px 20px;
+  border-radius: 40px;
+  border: none;
+  background: #3498db;
+  font-weight: 700;
+  cursor: pointer;
+  color: white;
+  font-size: 1rem;
+  box-shadow: 0 4px 0 #2980b9, 0 6px 12px rgba(0,0,0,0.2);
+  transition: all 0.1s;
+}
+button:hover, select:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #1f618d, 0 8px 15px rgba(0,0,0,0.2);
+}
+button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #1f618d;
+}
+#board {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 15px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.screw {
+  background: linear-gradient(145deg, #bdc3c7, #95a5a6);
+  border-radius: 25px 25px 12px 12px;
+  padding: 8px 4px 12px;
+  height: 100%;
+  max-height: 220px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  border: 4px solid #7f8c8d;
+  box-shadow: 0 8px 0 #4a5a5a, 0 12px 18px rgba(0,0,0,0.4);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.1s;
+  background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 30%);
+}
+.screw::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 45px;
+  height: 18px;
+  background: linear-gradient(90deg, #7f8c8d, #4a5a5a, #7f8c8d);
+  border-radius: 8px 8px 0 0;
+  border: 2px solid #2c3e50;
+  border-bottom: none;
+  box-shadow: inset 0 5px 5px rgba(0,0,0,0.3);
+}
+.screw.selected {
+  border: 5px solid #f1c40f;
+  box-shadow: 0 0 0 4px #f7dc6f, 0 8px 0 #b7950b;
+}
+.screw.sequencia {
+  border: 4px solid #f39c12;
+  box-shadow: 0 0 15px #f39c12, 0 8px 0 #b7950b;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { border-color: #f39c12; }
+  50% { border-color: #f1c40f; }
+  100% { border-color: #f39c12; }
+}
+.nut {
+  width: 42px;
+  height: 42px;
+  margin: 3px 0;
+  border: 2px solid #2c3e50;
+  box-shadow: 0 4px 0 #1a2632, 0 6px 10px rgba(0,0,0,0.3);
+  transition: 0.05s;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #ecf0f1, #bdc3c7);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+  position: relative;
+}
+.nut::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(145deg, #7f8c8d, #4a5a5a);
+  border-radius: 50%;
+  border: 2px solid #2c3e50;
+}
+.nut::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  background: #f1c40f;
+  border-radius: 50%;
+  z-index: 2;
+  border: 1px solid #b7950b;
+}
+.nut-placeholder {
+  width: 42px;
+  height: 42px;
+  margin: 3px 0;
+  visibility: hidden;
+  flex-shrink: 0;
+}
+.locked {
+  border: 4px solid #27ae60 !important;
+  background: linear-gradient(145deg, #d5f5e3, #a9dfbf) !important;
+  box-shadow: 0 8px 0 #1e8449, 0 12px 18px rgba(0,0,0,0.3) !important;
+}
+.locked::after {
+  content: "✓";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #27ae60;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  border: 2px solid #f1c40f;
+  z-index: 10;
+}
+#progress-bar {
+  width: 150px;
+  height: 12px;
+  background: #ecf0f1;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid #2980b9;
+}
+#progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  width: 0%;
+  transition: width 0.3s;
+}
+#sequencia-info {
+  background: #f39c12;
+  color: #2c3e50;
+  font-weight: bold;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-size: 1rem;
+}
+.feedback {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 15px 35px;
+  border-radius: 50px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  box-shadow: 0 10px 30px black;
+  z-index: 1000;
+  border: 3px solid #f1c40f;
+}
+#instructions, #teacherPanel, #bnccModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: white;
+  padding: 35px;
+  border-radius: 40px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 5px solid #f1c40f;
+  text-align: left;
+}
+.close-btn {
+  float: right;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  border: 2px solid #c0392b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-btn:hover {
+  background: #c0392b;
+}
+.nivel-badge {
+  background: #2c3e50;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 30px;
+  font-weight: bold;
+}
+.teacher-input {
+  padding: 10px;
+  font-size: 1.2rem;
+  border-radius: 30px;
+  border: 2px solid #2c3e50;
+  width: 200px;
+  text-align: center;
+}
+.desafio-info {
+  background: #f1c40f;
+  color: #2c3e50;
+  padding: 5px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.bncc-section {
+  background: #ecf0f1;
+  border-radius: 20px;
+  padding: 15px;
+  margin: 15px 0;
+  border-left: 8px solid #27ae60;
+}
+.bncc-section h3 {
+  color: #27ae60;
+  margin-top: 0;
+}
+.bncc-code {
+  background: #2c3e50;
+  color: white;
+  padding: 3px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: bold;
+  margin: 3px 0;
+}
+</style>
+</head>
+<body>
+
+<h1>🔧 PARAFUSOS E PORCAS 🔩</h1>
+
+<div id="topbar">
+  <div>⭐ <span id="score">0</span></div>
+  <div>🔄 <span id="moves">0</span></div>
+  <div>🔒 <span id="completosRodada">0</span>/<span id="metaRodada">6</span></div>
+  <div class="nivel-badge" id="nivelAtual">Nível 1</div>
+  <div class="desafio-info" id="desafioAtual">Rodada 1/10</div>
+  <div id="sequencia-info">🏆 Sequência: <span id="sequenciaTamanho">0</span></div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <button onclick="desfazer()">↩️ Desfazer</button>
+  <button onclick="mostrarInstrucoes()">📘 Como Jogar</button>
+  <button onclick="mostrarBNCC()">📚 BNCC</button>
+  <button onclick="mostrarPainelProfessor()">👨‍🏫 Professor</button>
+</div>
+
+<div id="board"></div>
+
+<!-- Modal de Instruções -->
+<div id="instructions">
+  <div class="modal-content">
+    <button class="close-btn" onclick="fecharInstrucoes()">✕</button>
+    <h2 style="margin-top:0; color:#2c3e50;">📘 COMO JOGAR</h2>
+    
+    <h3>🎯 Objetivo</h3>
+    <p>Organize todas as porcas coloridas em parafusos, formando pilhas de <strong>4 porcas da mesma cor</strong>.</p>
+    
+    <h3>🎮 Regras</h3>
+    <ul>
+      <li><strong>Clique</strong> em um parafuso para selecionar a porca do <strong>TOPO</strong></li>
+      <li><strong>Clique</strong> em outro parafuso para mover a porca</li>
+      <li>Só pode mover se o destino estiver <strong>vazio</strong> ou com a <strong>mesma cor</strong> no topo</li>
+      <li>Cada parafuso suporta no máximo <strong>4 porcas</strong></li>
+    </ul>
+    
+    <h3>🏆 Bônus de Sequência</h3>
+    <ul>
+      <li><strong>Sequência perfeita:</strong> parafusos completos em ordem crescente (1,2,3...)</li>
+      <li><strong>Sem vazios:</strong> não pode haver parafusos vazios entre eles</li>
+      <li><strong>Pontuação:</strong> +50pts para sequência de 3, +100pts para 4, +200pts para 5+</li>
+      <li>Os parafusos da sequência brilham em laranja!</li>
+    </ul>
+    
+    <h3>📊 Progressão</h3>
+    <ul>
+      <li><strong>Nível 1:</strong> 6 cores | 10 rodadas | meta: 6 parafusos/rodada</li>
+      <li><strong>Nível 2:</strong> 9 cores | 20 rodadas | meta: 9 parafusos/rodada</li>
+      <li><strong>Nível 3:</strong> 12 cores | 35 rodadas | meta: 12 parafusos/rodada</li>
+    </ul>
+    
+    <h3>⭐ Pontuação</h3>
+    <ul>
+      <li>+20 pontos por parafuso completo</li>
+      <li>+50 pontos por rodada completa</li>
+      <li>+100/200/400 pontos por nível completo</li>
+      <li>+ Bônus de sequência!</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Modal BNCC -->
+<div id="bnccModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="fecharBNCC()">✕</button>
+    <h2 style="margin-top:0; color:#2c3e50;">📚 BASE NACIONAL COMUM CURRICULAR</h2>
+    
+    <div class="bncc-section">
+      <h3>🌱 EDUCAÇÃO INFANTIL</h3>
+      <p><strong>Campo de Experiência:</strong> Espaços, tempos, quantidades, relações e transformações</p>
+      <span class="bncc-code">EI03ET01</span> Estabelecer relações de comparação entre objetos<br>
+      <span class="bncc-code">EI03ET05</span> Classificar objetos e figuras de acordo com suas propriedades
+    </div>
+    
+    <div class="bncc-section">
+      <h3>📐 ENSINO FUNDAMENTAL - MATEMÁTICA</h3>
+      <p><strong>Unidade Temática:</strong> Probabilidade e estatística / Grandezas e medidas</p>
+      <span class="bncc-code">EF01MA09</span> Organizar e ordenar objetos familiares<br>
+      <span class="bncc-code">EF02MA18</span> Indicar a direção e sentido em deslocamentos<br>
+      <span class="bncc-code">EF03MA25</span> Identificar regularidades em sequências
+    </div>
+    
+    <div class="bncc-section">
+      <h3>🧠 HABILIDADES DESENVOLVIDAS</h3>
+      <ul>
+        <li><strong>Raciocínio lógico:</strong> planejar movimentos para atingir o objetivo</li>
+        <li><strong>Classificação:</strong> agrupar porcas por cor</li>
+        <li><strong>Sequenciação:</strong> ordem de empilhamento (base ao topo)</li>
+        <li><strong>Resolução de problemas:</strong> encontrar soluções para completar os parafusos</li>
+        <li><strong>Persistência:</strong> completar múltiplas rodadas e níveis</li>
+      </ul>
+    </div>
+    
+    <p style="font-style: italic; color: #27ae60; text-align: center;">"Aprender brincando é a forma mais eficaz de fixar o conhecimento!"</p>
+  </div>
+</div>
+
+<!-- Modal do Professor -->
+<div id="teacherPanel">
+  <div class="modal-content">
+    <button class="close-btn" onclick="fecharPainelProfessor()">✕</button>
+    <h2 style="margin-top:0; color:#2c3e50;">👨‍🏫 PAINEL DO PROFESSOR</h2>
+    <p>Digite a senha para desbloquear níveis:</p>
+    <input type="password" id="senhaInput" class="teacher-input" placeholder="•••••" maxlength="5">
+    <div style="margin: 20px 0; text-align: center;">
+      <button onclick="verificarSenha(1)" style="margin:5px;">🔓 Nível 1</button>
+      <button onclick="verificarSenha(2)" style="margin:5px;">🔓 Nível 2</button>
+      <button onclick="verificarSenha(3)" style="margin:5px;">🔓 Nível 3</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// CORES
+const CORES = [
+  "#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7",
+  "#ec4899", "#14b8a6", "#f97316", "#8b5cf6", "#06b6d4",
+  "#d946ef", "#84cc16", "#f43f5e", "#10b981", "#6366f1"
+];
+
+const CAPACIDADE = 4;
+const SENHA_PROFESSOR = "P2026";
+
+// Configuração dos níveis
+const CONFIG = {
+  1: { cores: 6, totalRodadas: 10, bonus: 100, completa: false },
+  2: { cores: 9, totalRodadas: 20, bonus: 200, completa: false },
+  3: { cores: 12, totalRodadas: 35, bonus: 400, completa: false }
+};
+
+// Estado do jogo
+let nivelAtual = 1;
+let rodadaAtual = 1;
+let parafusos = [];
+let historico = [];
+let movimentos = 0;
+let pontos = 0;
+let selecionado = null;
+let processandoRodada = false;
+let ultimaSequencia = [];
+
+function embaralhar(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function getQtdCores() {
+  return CONFIG[nivelAtual].cores;
+}
+
+function getMetaRodada() {
+  return getQtdCores();
+}
+
+function getTotalRodadas() {
+  return CONFIG[nivelAtual].totalRodadas;
+}
+
+function getBonus() {
+  return CONFIG[nivelAtual].bonus;
+}
+
+function gerarTabuleiro() {
+  let qtdCores = getQtdCores();
+  
+  let pool = [];
+  for (let i = 0; i < qtdCores; i++) {
+    for (let j = 0; j < CAPACIDADE; j++) {
+      pool.push(CORES[i]);
+    }
+  }
+  pool = embaralhar(pool);
+  
+  parafusos = Array(18).fill().map(() => []);
+  
+  for (let i = 0; i < 18; i++) {
+    if (pool.length) parafusos[i].push(pool.pop());
+  }
+  
+  let indices = embaralhar([...Array(18).keys()]);
+  while (pool.length) {
+    for (let idx of indices) {
+      if (!pool.length) break;
+      if (parafusos[idx].length < CAPACIDADE) {
+        parafusos[idx].push(pool.pop());
+      }
+    }
+  }
+  
+  parafusos = parafusos.map(p => embaralhar(p));
+  processandoRodada = false;
+  ultimaSequencia = [];
+}
+
+function contarCompletos() {
+  let count = 0;
+  for (let i = 0; i < 18; i++) {
+    if (estaCompleto(i)) count++;
+  }
+  return count;
+}
+
+function verificarSequencia() {
+  let maiorSequencia = 0;
+  let sequenciaAtual = 0;
+  let indicesSequencia = [];
+  let indicesAtuais = [];
+  
+  for (let i = 0; i < 18; i++) {
+    if (estaCompleto(i)) {
+      sequenciaAtual++;
+      indicesAtuais.push(i);
+      if (sequenciaAtual > maiorSequencia) {
+        maiorSequencia = sequenciaAtual;
+        indicesSequencia = [...indicesAtuais];
+      }
+    } else {
+      sequenciaAtual = 0;
+      indicesAtuais = [];
+    }
+  }
+  
+  ultimaSequencia = indicesSequencia;
+  document.getElementById("sequenciaTamanho").textContent = maiorSequencia;
+  
+  return { tamanho: maiorSequencia, indices: indicesSequencia };
+}
+
+function calcularBonusSequencia(tamanho) {
+  if (tamanho >= 5) return 200;
+  if (tamanho === 4) return 100;
+  if (tamanho === 3) return 50;
+  return 0;
+}
+
+function getBlocoTopo(idx) {
+  if (idx === null || parafusos[idx].length === 0) return 0;
+  
+  let cor = parafusos[idx][parafusos[idx].length - 1];
+  let count = 0;
+  
+  for (let i = parafusos[idx].length - 1; i >= 0; i--) {
+    if (parafusos[idx][i] === cor) {
+      count++;
+    } else {
+      break;
+    }
+  }
+  
+  return count;
+}
+
+function desenhar() {
+  let board = document.getElementById("board");
+  board.innerHTML = "";
+  
+  document.getElementById("moves").textContent = movimentos;
+  document.getElementById("score").textContent = pontos;
+  
+  let completos = contarCompletos();
+  let meta = getMetaRodada();
+  
+  document.getElementById("completosRodada").textContent = completos;
+  document.getElementById("metaRodada").textContent = meta;
+  document.getElementById("progress-fill").style.width = Math.min(100, (completos / meta * 100)) + "%";
+  
+  document.getElementById("nivelAtual").textContent = `Nível ${nivelAtual}`;
+  document.getElementById("desafioAtual").textContent = `Rodada ${rodadaAtual}/${getTotalRodadas()}`;
+  
+  let seq = verificarSequencia();
+  
+  parafusos.forEach((parafuso, idx) => {
+    let div = document.createElement("div");
+    div.className = "screw";
+    if (selecionado === idx) div.classList.add("selected");
+    if (estaCompleto(idx)) div.classList.add("locked");
+    
+    if (seq.indices.includes(idx)) {
+      div.classList.add("sequencia");
+    }
+    
+    div.onclick = () => cliqueParafuso(idx);
+    
+    for (let i = 0; i < parafuso.length; i++) {
+      let nut = document.createElement("div");
+      nut.className = "nut";
+      nut.style.background = `linear-gradient(145deg, ${parafuso[i]}, ${ajustarCor(parafuso[i], -20)})`;
+      div.appendChild(nut);
+    }
+    
+    for (let i = parafuso.length; i < CAPACIDADE; i++) {
+      let placeholder = document.createElement("div");
+      placeholder.className = "nut-placeholder";
+      div.appendChild(placeholder);
+    }
+    
+    board.appendChild(div);
+  });
+}
+
+function ajustarCor(hex, percent) {
+  let r = parseInt(hex.substring(1,3), 16);
+  let g = parseInt(hex.substring(3,5), 16);
+  let b = parseInt(hex.substring(5,7), 16);
+  
+  r = Math.max(0, Math.min(255, r + percent));
+  g = Math.max(0, Math.min(255, g + percent));
+  b = Math.max(0, Math.min(255, b + percent));
+  
+  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
+
+function cliqueParafuso(idx) {
+  if (processandoRodada) return;
+  
+  if (selecionado === null) {
+    if (parafusos[idx].length > 0) {
+      selecionado = idx;
+      desenhar();
+    }
+  } else {
+    mover(selecionado, idx);
+    selecionado = null;
+    desenhar();
+  }
+}
+
+function mover(origem, destino) {
+  if (origem === destino) return;
+  if (parafusos[origem].length === 0) return;
+  
+  let bloco = getBlocoTopo(origem);
+  let espaco = CAPACIDADE - parafusos[destino].length;
+  
+  if (espaco < bloco) {
+    feedback(`❌ Espaço insuficiente! Cabe apenas ${espaco}`);
+    return;
+  }
+  
+  let corOrigem = parafusos[origem][parafusos[origem].length - 1];
+  let topoDestino = parafusos[destino].length > 0 ? parafusos[destino][parafusos[destino].length - 1] : null;
+  
+  if (topoDestino === null || topoDestino === corOrigem) {
+    historico.push(JSON.stringify({
+      parafusos: parafusos.map(p => [...p]),
+      movimentos,
+      pontos,
+      rodadaAtual
+    }));
+    
+    // Mover o bloco inteiro
+    for (let i = 0; i < bloco; i++) {
+      let porca = parafusos[origem].pop();
+      parafusos[destino].push(porca);
+    }
+    
+    movimentos++;
+    
+    // Verificar se algum parafuso foi completado
+    if (estaCompleto(destino)) {
+      pontos += 20;
+      let seq = verificarSequencia();
+      let bonus = calcularBonusSequencia(seq.tamanho);
+      
+      if (bonus > 0) {
+        pontos += bonus;
+        feedback(`🏆 SEQUÊNCIA DE ${seq.tamanho}! +${bonus} pontos`, 3000);
+      } else {
+        feedback(`✅ Parafuso ${destino+1} completo! +20 pontos`);
+      }
+    } else {
+      if (bloco > 1) {
+        feedback(`📦 Movidas ${bloco} porcas`, 1500);
+      }
+    }
+    
+    desenhar();
+    
+    // Verificar se algum parafuso foi completado durante o movimento
+    let completos = contarCompletos();
+    let meta = getMetaRodada();
+    
+    if (completos >= meta && !processandoRodada) {
+      processandoRodada = true;
+      
+      pontos += 50;
+      feedback(`🎯 RODADA ${rodadaAtual} COMPLETA! +50 pontos`, 3000);
+      
+      rodadaAtual++;
+      
+      if (rodadaAtual > getTotalRodadas()) {
+        CONFIG[nivelAtual].completa = true;
+        let bonus = getBonus();
+        pontos += bonus;
+        feedback(`🏆 NÍVEL ${nivelAtual} COMPLETO! +${bonus} pontos!`, 4000);
+        
+        setTimeout(() => {
+          if (nivelAtual < 3) {
+            nivelAtual++;
+            rodadaAtual = 1;
+            movimentos = 0;
+            historico = [];
+            selecionado = null;
+            gerarTabuleiro();
+            desenhar();
+            feedback(`🎉 NÍVEL ${nivelAtual}! Rodada 1/${getTotalRodadas()}`);
+          } else {
+            feedback("🎉 PARABÉNS! VOCÊ VENCEU TODAS AS RODADAS!", 5000);
+          }
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          gerarTabuleiro();
+          desenhar();
+          feedback(`🔄 Rodada ${rodadaAtual}/${getTotalRodadas()}`);
+        }, 1500);
+      }
+    }
+  } else {
+    feedback("❌ Cores diferentes!");
+    selecionado = null;
+  }
+}
+
+function estaCompleto(idx) {
+  let p = parafusos[idx];
+  return p.length === CAPACIDADE && p.every(cor => cor === p[0]);
+}
+
+function desfazer() {
+  if (processandoRodada) {
+    feedback("⏳ Aguarde...");
+    return;
+  }
+  
+  if (historico.length === 0) {
+    feedback("Nada para desfazer");
+    return;
+  }
+  let estado = JSON.parse(historico.pop());
+  parafusos = estado.parafusos.map(p => [...p]);
+  movimentos = estado.movimentos;
+  pontos = estado.pontos;
+  rodadaAtual = estado.rodadaAtual;
+  selecionado = null;
+  desenhar();
+  feedback("↩️ Desfeito");
+}
+
+function verificarSenha(nivel) {
+  let senha = document.getElementById("senhaInput").value;
+  if (senha === SENHA_PROFESSOR) {
+    nivelAtual = nivel;
+    rodadaAtual = 1;
+    movimentos = 0;
+    historico = [];
+    selecionado = null;
+    processandoRodada = false;
+    gerarTabuleiro();
+    desenhar();
+    feedback(`👨‍🏫 Nível ${nivel} desbloqueado!`);
+    fecharPainelProfessor();
+  } else {
+    feedback("❌ Senha incorreta!");
+    document.getElementById("senhaInput").value = "";
+  }
+}
+
+function feedback(msg, tempo = 2000) {
+  let fb = document.querySelector(".feedback");
+  if (fb) fb.remove();
+  fb = document.createElement("div");
+  fb.className = "feedback";
+  fb.textContent = msg;
+  document.body.appendChild(fb);
+  setTimeout(() => fb.remove(), tempo);
+}
+
+function mostrarInstrucoes() {
+  document.getElementById("instructions").style.display = "flex";
+}
+function fecharInstrucoes() {
+  document.getElementById("instructions").style.display = "none";
+}
+
+function mostrarBNCC() {
+  document.getElementById("bnccModal").style.display = "flex";
+}
+function fecharBNCC() {
+  document.getElementById("bnccModal").style.display = "none";
+}
+
+function mostrarPainelProfessor() {
+  document.getElementById("teacherPanel").style.display = "flex";
+  document.getElementById("senhaInput").value = "";
+}
+function fecharPainelProfessor() {
+  document.getElementById("teacherPanel").style.display = "none";
+}
+
+function novoJogo() {
+  nivelAtual = 1;
+  rodadaAtual = 1;
+  CONFIG[1].completa = false;
+  CONFIG[2].completa = false;
+  CONFIG[3].completa = false;
+  movimentos = 0;
+  pontos = 0;
+  historico = [];
+  selecionado = null;
+  processandoRodada = false;
+  gerarTabuleiro();
+  desenhar();
+  feedback(`🌟 Nível 1 - Rodada 1/${getTotalRodadas()}`);
+}
+
+novoJogo();
+
+window.novoJogo = novoJogo;
+window.desfazer = desfazer;
+window.mostrarInstrucoes = mostrarInstrucoes;
+window.fecharInstrucoes = fecharInstrucoes;
+window.mostrarBNCC = mostrarBNCC;
+window.fecharBNCC = fecharBNCC;
+window.mostrarPainelProfessor = mostrarPainelProfessor;
+window.fecharPainelProfessor = fecharPainelProfessor;
+window.verificarSenha = verificarSenha;
+</script>
+</body>
+</html>
