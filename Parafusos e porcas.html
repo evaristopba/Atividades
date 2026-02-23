@@ -287,6 +287,7 @@ button:active {
   border: 2px solid #2c3e50;
   width: 200px;
   text-align: center;
+  margin-bottom: 10px;
 }
 .desafio-info {
   background: #f1c40f;
@@ -315,6 +316,14 @@ button:active {
   display: inline-block;
   font-weight: bold;
   margin: 3px 0;
+}
+.diagnostico-btn {
+  background: #e67e22;
+  margin-top: 15px;
+  width: 100%;
+}
+.diagnostico-btn:hover {
+  background: #d35400;
 }
 </style>
 </head>
@@ -416,18 +425,27 @@ button:active {
   </div>
 </div>
 
-<!-- Modal do Professor -->
+<!-- Modal do Professor (agora com botão Diagnosticar) -->
 <div id="teacherPanel">
   <div class="modal-content">
     <button class="close-btn" onclick="fecharPainelProfessor()">✕</button>
     <h2 style="margin-top:0; color:#2c3e50;">👨‍🏫 PAINEL DO PROFESSOR</h2>
-    <p>Digite a senha para desbloquear níveis:</p>
-    <input type="password" id="senhaInput" class="teacher-input" placeholder="•••••" maxlength="5">
-    <div style="margin: 20px 0; text-align: center;">
-      <button onclick="verificarSenha(1)" style="margin:5px;">🔓 Nível 1</button>
-      <button onclick="verificarSenha(2)" style="margin:5px;">🔓 Nível 2</button>
-      <button onclick="verificarSenha(3)" style="margin:5px;">🔓 Nível 3</button>
+    
+    <p>🔓 <strong>Desbloquear níveis:</strong></p>
+    <input type="password" id="senhaInput" class="teacher-input" placeholder="Digite a senha" maxlength="5">
+    <div style="margin: 15px 0; text-align: center;">
+      <button onclick="verificarSenha(1)" style="margin:3px;">🔓 Nível 1</button>
+      <button onclick="verificarSenha(2)" style="margin:3px;">🔓 Nível 2</button>
+      <button onclick="verificarSenha(3)" style="margin:3px;">🔓 Nível 3</button>
     </div>
+    
+    <hr style="margin: 20px 0; border: 1px solid #ecf0f1;">
+    
+    <p>🔍 <strong>Ferramentas de diagnóstico:</strong></p>
+    <button onclick="diagnosticar()" class="diagnostico-btn">📊 Diagnosticar distribuição de cores</button>
+    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 10px;">
+      Mostra a contagem de cada cor no tabuleiro atual
+    </p>
   </div>
 </div>
 
@@ -484,23 +502,85 @@ function getBonus() {
   return CONFIG[nivelAtual].bonus;
 }
 
+// FUNÇÃO DE DIAGNÓSTICO - agora dentro do painel do professor
+function diagnosticar() {
+  let qtdCores = getQtdCores();
+  let contagem = {};
+  
+  // Inicializa contagem
+  for (let i = 0; i < qtdCores; i++) {
+    contagem[CORES[i]] = 0;
+  }
+  
+  // Conta porcas
+  for (let i = 0; i < 18; i++) {
+    for (let j = 0; j < parafusos[i].length; j++) {
+      let cor = parafusos[i][j];
+      if (contagem[cor] !== undefined) {
+        contagem[cor]++;
+      }
+    }
+  }
+  
+  // Prepara mensagem
+  let msg = "📊 DIAGNÓSTICO:\n";
+  for (let i = 0; i < qtdCores; i++) {
+    let cor = CORES[i];
+    let nome = getNomeCor(cor);
+    msg += `${nome}: ${contagem[cor] || 0} porcas\n`;
+  }
+  msg += `\nTotal: ${Object.values(contagem).reduce((a,b) => a + b, 0)} porcas`;
+  msg += `\nEsperado: ${qtdCores * 4} porcas`;
+  
+  alert(msg);
+}
+
+function getNomeCor(hex) {
+  const nomes = {
+    "#ef4444": "Vermelho",
+    "#3b82f6": "Azul",
+    "#22c55e": "Verde",
+    "#f59e0b": "Laranja",
+    "#a855f7": "Roxo",
+    "#ec4899": "Rosa",
+    "#14b8a6": "Turquesa",
+    "#f97316": "Laranja escuro",
+    "#8b5cf6": "Violeta",
+    "#06b6d4": "Ciano",
+    "#d946ef": "Magenta",
+    "#84cc16": "Lima",
+    "#f43f5e": "Rosê",
+    "#10b981": "Esmeralda",
+    "#6366f1": "Índigo"
+  };
+  return nomes[hex] || hex;
+}
+
 function gerarTabuleiro() {
   let qtdCores = getQtdCores();
   
+  // Cria pool com 4 de cada cor (GARANTIDO!)
   let pool = [];
   for (let i = 0; i < qtdCores; i++) {
     for (let j = 0; j < CAPACIDADE; j++) {
       pool.push(CORES[i]);
     }
   }
+  
+  // Verificação de segurança
+  console.log(`Pool criado com ${pool.length} porcas (${qtdCores} cores x 4)`);
+  
   pool = embaralhar(pool);
   
+  // Inicializar parafusos vazios
   parafusos = Array(18).fill().map(() => []);
   
+  // Distribuir: cada parafuso recebe pelo menos 1
   for (let i = 0; i < 18; i++) {
     if (pool.length) parafusos[i].push(pool.pop());
   }
   
+  // Distribuir o restante
   let indices = embaralhar([...Array(18).keys()]);
   while (pool.length) {
     for (let idx of indices) {
@@ -511,7 +591,13 @@ function gerarTabuleiro() {
     }
   }
   
+  // Embaralhar cada pilha internamente
   parafusos = parafusos.map(p => embaralhar(p));
+  
+  // Verificação final
+  let totalPorcas = parafusos.reduce((acc, p) => acc + p.length, 0);
+  console.log(`Tabuleiro gerado com ${totalPorcas} porcas`);
+  
   processandoRodada = false;
   ultimaSequencia = [];
 }
@@ -849,6 +935,7 @@ window.fecharBNCC = fecharBNCC;
 window.mostrarPainelProfessor = mostrarPainelProfessor;
 window.fecharPainelProfessor = fecharPainelProfessor;
 window.verificarSenha = verificarSenha;
+window.diagnosticar = diagnosticar;
 </script>
 </body>
 </html>
