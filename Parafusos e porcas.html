@@ -556,6 +556,24 @@ const CORES = [
   "#d946ef", "#84cc16", "#f43f5e", "#10b981", "#6366f1"
 ];
 
+const NOMES_CORES = {
+  "#ef4444": "Vermelho",
+  "#3b82f6": "Azul",
+  "#22c55e": "Verde",
+  "#f59e0b": "Laranja",
+  "#a855f7": "Roxo",
+  "#ec4899": "Rosa",
+  "#14b8a6": "Turquesa",
+  "#f97316": "Laranja escuro",
+  "#8b5cf6": "Violeta",
+  "#06b6d4": "Ciano",
+  "#d946ef": "Magenta",
+  "#84cc16": "Lima",
+  "#f43f5e": "Rosê",
+  "#10b981": "Esmeralda",
+  "#6366f1": "Índigo"
+};
+
 const CAPACIDADE = 4;
 const SENHA_PROFESSOR = "P2026";
 
@@ -625,34 +643,13 @@ function diagnosticar() {
   let msg = "📊 DIAGNÓSTICO:\n";
   for (let i = 0; i < qtdCores; i++) {
     let cor = CORES[i];
-    let nome = getNomeCor(cor);
+    let nome = NOMES_CORES[cor];
     msg += `${nome}: ${contagem[cor] || 0} porcas\n`;
   }
   msg += `\nTotal: ${Object.values(contagem).reduce((a, b) => a + b, 0)} porcas`;
   msg += `\nEsperado: ${qtdCores * 4} porcas`;
   
   alert(msg);
-}
-
-function getNomeCor(hex) {
-  const nomes = {
-    "#ef4444": "Vermelho",
-    "#3b82f6": "Azul",
-    "#22c55e": "Verde",
-    "#f59e0b": "Laranja",
-    "#a855f7": "Roxo",
-    "#ec4899": "Rosa",
-    "#14b8a6": "Turquesa",
-    "#f97316": "Laranja escuro",
-    "#8b5cf6": "Violeta",
-    "#06b6d4": "Ciano",
-    "#d946ef": "Magenta",
-    "#84cc16": "Lima",
-    "#f43f5e": "Rosê",
-    "#10b981": "Esmeralda",
-    "#6366f1": "Índigo"
-  };
-  return nomes[hex] || hex;
 }
 
 function gerarTabuleiro() {
@@ -794,6 +791,7 @@ function desenhar() {
       let nut = document.createElement("div");
       nut.className = "nut";
       nut.style.background = `linear-gradient(145deg, ${parafuso[i]}, ${ajustarCor(parafuso[i], -20)})`;
+      nut.title = NOMES_CORES[parafuso[i]]; // Tooltip com o nome da cor
       div.appendChild(nut);
     }
     
