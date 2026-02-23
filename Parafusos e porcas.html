@@ -35,49 +35,123 @@ h1 {
 
 #topbar {
   background: rgba(255, 255, 255, 0.95);
-  padding: 8px 12px;
+  padding: 10px 15px;
   border-radius: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 10px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   border: 2px solid #f1c40f;
   flex-shrink: 0;
-  min-height: 48px;
+  min-height: 50px;
 }
 
 .info-item, .nivel-badge, .desafio-info, #sequencia-info {
   background: #ecf0f1;
-  padding: 3px 8px;
+  padding: 5px 12px;
   border-radius: 30px;
   font-weight: 700;
   color: #2c3e50;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  line-height: 1.2;
+  gap: 4px;
+  line-height: 1.3;
+  position: relative;
+}
+
+/* Tooltips para elementos da topbar */
+.info-item[title]:hover::after, 
+.nivel-badge[title]:hover::after, 
+.desafio-info[title]:hover::after, 
+#sequencia-info[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: normal;
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 1px solid #f1c40f;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.info-item[title]:hover::before,
+.nivel-badge[title]:hover::before,
+.desafio-info[title]:hover::before,
+#sequencia-info[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #2c3e50 transparent transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 button, select {
-  padding: 3px 8px;
+  padding: 5px 12px;
   border-radius: 30px;
   border: none;
   background: #3498db;
   font-weight: 700;
   cursor: pointer;
   color: white;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   box-shadow: 0 2px 0 #2980b9, 0 3px 6px rgba(0, 0, 0, 0.2);
   transition: all 0.1s;
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.3;
+  position: relative;
+}
+
+/* Tooltips para botões */
+button[title]:hover::after, select[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: normal;
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 1px solid #f1c40f;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+button[title]:hover::before, select[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #2c3e50 transparent transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 button:hover, select:hover {
@@ -227,7 +301,7 @@ button:active {
 }
 
 #progress-bar {
-  width: 100px;
+  width: 120px;
   height: 8px;
   background: #ecf0f1;
   border-radius: 20px;
@@ -357,17 +431,17 @@ button:active {
 <h1>🔧 PARAFUSOS E PORCAS 🔩</h1>
 
 <div id="topbar">
-  <div class="info-item">⭐ <span id="score">0</span></div>
-  <div class="info-item">🔄 <span id="moves">0</span></div>
-  <div class="info-item">🔒 <span id="completosRodada">0</span>/<span id="metaRodada">6</span></div>
-  <div class="nivel-badge" id="nivelAtual">N1</div>
-  <div class="desafio-info" id="desafioAtual">R1/10</div>
-  <div id="sequencia-info">🏆 <span id="sequenciaTamanho">0</span></div>
-  <div id="progress-bar"><div id="progress-fill"></div></div>
-  <button onclick="desfazer()">↩️ Desfazer</button>
-  <button onclick="mostrarInstrucoes()">📘 Como Jogar</button>
-  <button onclick="mostrarBNCC()">📚 BNCC</button>
-  <button onclick="mostrarPainelProfessor()">👨‍🏫 Professor</button>
+  <div class="info-item" title="Pontuação total">⭐ <span id="score">0</span></div>
+  <div class="info-item" title="Número de movimentos realizados">🔄 <span id="moves">0</span></div>
+  <div class="info-item" title="Parafusos completos na rodada atual">🔒 <span id="completosRodada">0</span>/<span id="metaRodada">6</span></div>
+  <div class="nivel-badge" id="nivelAtual" title="Nível atual">Nível 1</div>
+  <div class="desafio-info" id="desafioAtual" title="Rodada atual / Total de rodadas">Rodada 1/10</div>
+  <div id="sequencia-info" title="Maior sequência de parafusos completos consecutivos">🏆 Sequência: <span id="sequenciaTamanho">0</span></div>
+  <div id="progress-bar" title="Progresso da rodada atual"><div id="progress-fill"></div></div>
+  <button onclick="desfazer()" title="Desfazer o último movimento">↩️ Desfazer</button>
+  <button onclick="mostrarInstrucoes()" title="Ver instruções do jogo">📘 Como Jogar</button>
+  <button onclick="mostrarBNCC()" title="Habilidades da BNCC desenvolvidas">📚 BNCC</button>
+  <button onclick="mostrarPainelProfessor()" title="Painel do professor (desbloquear níveis, diagnóstico)">👨‍🏫 Professor</button>
 </div>
 
 <div id="board"></div>
@@ -375,7 +449,7 @@ button:active {
 <!-- Modal de Instruções -->
 <div id="instructions">
   <div class="modal-content">
-    <button class="close-btn" onclick="fecharInstrucoes()">✕</button>
+    <button class="close-btn" onclick="fecharInstrucoes()" title="Fechar">✕</button>
     <h2 style="margin-top:0; color:#2c3e50;">📘 COMO JOGAR</h2>
     
     <h3>🎯 Objetivo</h3>
@@ -417,7 +491,7 @@ button:active {
 <!-- Modal BNCC -->
 <div id="bnccModal">
   <div class="modal-content">
-    <button class="close-btn" onclick="fecharBNCC()">✕</button>
+    <button class="close-btn" onclick="fecharBNCC()" title="Fechar">✕</button>
     <h2 style="margin-top:0; color:#2c3e50;">📚 BASE NACIONAL COMUM CURRICULAR</h2>
     
     <div class="bncc-section">
@@ -453,21 +527,21 @@ button:active {
 <!-- Modal do Professor -->
 <div id="teacherPanel">
   <div class="modal-content">
-    <button class="close-btn" onclick="fecharPainelProfessor()">✕</button>
+    <button class="close-btn" onclick="fecharPainelProfessor()" title="Fechar">✕</button>
     <h2 style="margin-top:0; color:#2c3e50;">👨‍🏫 PAINEL DO PROFESSOR</h2>
     
     <p>🔓 <strong>Desbloquear níveis:</strong></p>
     <input type="password" id="senhaInput" class="teacher-input" placeholder="Digite a senha" maxlength="5">
     <div style="margin: 15px 0; text-align: center;">
-      <button onclick="verificarSenha(1)" style="margin:3px;">🔓 Nível 1</button>
-      <button onclick="verificarSenha(2)" style="margin:3px;">🔓 Nível 2</button>
-      <button onclick="verificarSenha(3)" style="margin:3px;">🔓 Nível 3</button>
+      <button onclick="verificarSenha(1)" style="margin:3px;" title="Desbloquear Nível 1 (6 cores)">🔓 Nível 1</button>
+      <button onclick="verificarSenha(2)" style="margin:3px;" title="Desbloquear Nível 2 (9 cores)">🔓 Nível 2</button>
+      <button onclick="verificarSenha(3)" style="margin:3px;" title="Desbloquear Nível 3 (12 cores)">🔓 Nível 3</button>
     </div>
     
     <hr style="margin: 20px 0; border: 1px solid #ecf0f1;">
     
     <p>🔍 <strong>Ferramentas de diagnóstico:</strong></p>
-    <button onclick="diagnosticar()" class="diagnostico-btn">📊 Diagnosticar distribuição de cores</button>
+    <button onclick="diagnosticar()" class="diagnostico-btn" title="Mostra a contagem de cada cor no tabuleiro">📊 Diagnosticar distribuição de cores</button>
     <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 10px;">
       Mostra a contagem de cada cor no tabuleiro atual
     </p>
@@ -699,8 +773,8 @@ function desenhar() {
   document.getElementById("metaRodada").textContent = meta;
   document.getElementById("progress-fill").style.width = Math.min(100, (completos / meta * 100)) + "%";
   
-  document.getElementById("nivelAtual").textContent = `N${nivelAtual}`;
-  document.getElementById("desafioAtual").textContent = `R${rodadaAtual}/${getTotalRodadas()}`;
+  document.getElementById("nivelAtual").textContent = `Nível ${nivelAtual}`;
+  document.getElementById("desafioAtual").textContent = `Rodada ${rodadaAtual}/${getTotalRodadas()}`;
   
   let seq = verificarSequencia();
   
