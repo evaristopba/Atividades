@@ -35,42 +35,43 @@ h1 {
 
 #topbar {
   background: rgba(255, 255, 255, 0.95);
-  padding: 10px 15px;
+  padding: 8px 12px;
   border-radius: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 10px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   border: 2px solid #f1c40f;
   flex-shrink: 0;
-  min-height: 50px;
+  min-height: 48px;
 }
 
 .info-item, .nivel-badge, .desafio-info, #sequencia-info {
   background: #ecf0f1;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 30px;
   font-weight: 700;
   color: #2c3e50;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  line-height: 1.3;
+  gap: 3px;
+  line-height: 1.2;
   position: relative;
 }
 
-/* Tooltips para elementos da topbar */
+/* Tooltips */
 .info-item[title]:hover::after, 
 .nivel-badge[title]:hover::after, 
 .desafio-info[title]:hover::after, 
-#sequencia-info[title]:hover::after {
+#sequencia-info[title]:hover::after,
+button[title]:hover::after {
   content: attr(title);
   position: absolute;
   bottom: 125%;
@@ -78,10 +79,9 @@ h1 {
   transform: translateX(-50%);
   background: #2c3e50;
   color: white;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: normal;
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-size: 0.7rem;
   white-space: nowrap;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   border: 1px solid #f1c40f;
@@ -89,69 +89,20 @@ h1 {
   pointer-events: none;
 }
 
-.info-item[title]:hover::before,
-.nivel-badge[title]:hover::before,
-.desafio-info[title]:hover::before,
-#sequencia-info[title]:hover::before {
-  content: '';
-  position: absolute;
-  bottom: 115%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: #2c3e50 transparent transparent transparent;
-  z-index: 1000;
-  pointer-events: none;
-}
-
 button, select {
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 30px;
   border: none;
   background: #3498db;
   font-weight: 700;
   cursor: pointer;
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   box-shadow: 0 2px 0 #2980b9, 0 3px 6px rgba(0, 0, 0, 0.2);
   transition: all 0.1s;
   white-space: nowrap;
-  line-height: 1.3;
+  line-height: 1.2;
   position: relative;
-}
-
-/* Tooltips para botões */
-button[title]:hover::after, select[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #2c3e50;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: normal;
-  white-space: nowrap;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  border: 1px solid #f1c40f;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-button[title]:hover::before, select[title]:hover::before {
-  content: '';
-  position: absolute;
-  bottom: 115%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: #2c3e50 transparent transparent transparent;
-  z-index: 1000;
-  pointer-events: none;
 }
 
 button:hover, select:hover {
@@ -168,7 +119,7 @@ button:active {
 #board {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  gap: 8px;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
@@ -179,16 +130,16 @@ button:active {
 
 .screw {
   background: linear-gradient(145deg, #bdc3c7, #95a5a6);
-  border-radius: 20px 20px 8px 8px;
-  padding: 5px 2px 8px;
+  border-radius: 18px 18px 6px 6px;
+  padding: 4px 2px 6px;
   height: 100%;
-  max-height: 200px;
+  max-height: 180px;
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
   justify-content: flex-start;
   border: 3px solid #7f8c8d;
-  box-shadow: 0 5px 0 #4a5a5a, 0 8px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 0 #4a5a5a, 0 6px 10px rgba(0, 0, 0, 0.4);
   position: relative;
   cursor: pointer;
   transition: all 0.1s;
@@ -201,23 +152,23 @@ button:active {
   bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 35px;
-  height: 12px;
+  width: 30px;
+  height: 10px;
   background: linear-gradient(90deg, #7f8c8d, #4a5a5a, #7f8c8d);
-  border-radius: 5px 5px 0 0;
+  border-radius: 4px 4px 0 0;
   border: 2px solid #2c3e50;
   border-bottom: none;
-  box-shadow: inset 0 3px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 2px rgba(0, 0, 0, 0.3);
 }
 
 .screw.selected {
   border: 4px solid #f1c40f;
-  box-shadow: 0 0 0 3px #f7dc6f, 0 5px 0 #b7950b;
+  box-shadow: 0 0 0 3px #f7dc6f, 0 4px 0 #b7950b;
 }
 
 .screw.sequencia {
   border: 3px solid #f39c12;
-  box-shadow: 0 0 10px #f39c12, 0 5px 0 #b7950b;
+  box-shadow: 0 0 8px #f39c12, 0 4px 0 #b7950b;
   animation: pulse 1.5s infinite;
 }
 
@@ -228,11 +179,11 @@ button:active {
 }
 
 .nut {
-  width: 35px;
-  height: 35px;
-  margin: 2px 0;
+  width: 32px;
+  height: 32px;
+  margin: 1px 0;
   border: 2px solid #2c3e50;
-  box-shadow: 0 3px 0 #1a2632, 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 0 #1a2632, 0 3px 5px rgba(0, 0, 0, 0.3);
   transition: 0.05s;
   flex-shrink: 0;
   background: linear-gradient(145deg, #ecf0f1, #bdc3c7);
@@ -246,8 +197,8 @@ button:active {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   background: linear-gradient(145deg, #7f8c8d, #4a5a5a);
   border-radius: 50%;
   border: 2px solid #2c3e50;
@@ -259,8 +210,8 @@ button:active {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   background: #f1c40f;
   border-radius: 50%;
   z-index: 2;
@@ -268,9 +219,9 @@ button:active {
 }
 
 .nut-placeholder {
-  width: 35px;
-  height: 35px;
-  margin: 2px 0;
+  width: 32px;
+  height: 32px;
+  margin: 1px 0;
   visibility: hidden;
   flex-shrink: 0;
 }
@@ -278,30 +229,30 @@ button:active {
 .locked {
   border: 3px solid #27ae60 !important;
   background: linear-gradient(145deg, #d5f5e3, #a9dfbf) !important;
-  box-shadow: 0 5px 0 #1e8449, 0 8px 12px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 0 #1e8449, 0 6px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 .locked::after {
   content: "✓";
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -4px;
+  right: -4px;
   background: #27ae60;
   color: white;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 11px;
   border: 2px solid #f1c40f;
   z-index: 10;
 }
 
 #progress-bar {
-  width: 120px;
+  width: 100px;
   height: 8px;
   background: #ecf0f1;
   border-radius: 20px;
@@ -324,11 +275,11 @@ button:active {
   transform: translateX(-50%);
   background: #2c3e50;
   color: white;
-  padding: 10px 25px;
-  border-radius: 40px;
-  font-size: 1rem;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 0.9rem;
   font-weight: bold;
-  box-shadow: 0 8px 20px black;
+  box-shadow: 0 5px 15px black;
   z-index: 1000;
   border: 2px solid #f1c40f;
 }
@@ -349,9 +300,9 @@ button:active {
 
 .modal-content {
   background: white;
-  padding: 25px;
-  border-radius: 30px;
-  max-width: 500px;
+  padding: 20px;
+  border-radius: 25px;
+  max-width: 450px;
   max-height: 80vh;
   overflow-y: auto;
   border: 4px solid #f1c40f;
@@ -363,10 +314,10 @@ button:active {
   background: #e74c3c;
   color: white;
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   border: 2px solid #c0392b;
   display: flex;
@@ -379,18 +330,18 @@ button:active {
 }
 
 .teacher-input {
-  padding: 6px;
+  padding: 5px;
   font-size: 0.9rem;
   border-radius: 30px;
   border: 2px solid #2c3e50;
-  width: 160px;
+  width: 150px;
   text-align: center;
   margin-bottom: 8px;
 }
 
 .diagnostico-btn {
   background: #e67e22;
-  margin-top: 12px;
+  margin-top: 10px;
   width: 100%;
   font-size: 0.85rem;
   padding: 6px;
@@ -417,7 +368,7 @@ button:active {
 .bncc-code {
   background: #2c3e50;
   color: white;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 20px;
   display: inline-block;
   font-weight: bold;
@@ -432,16 +383,17 @@ button:active {
 
 <div id="topbar">
   <div class="info-item" title="Pontuação total">⭐ <span id="score">0</span></div>
-  <div class="info-item" title="Número de movimentos realizados">🔄 <span id="moves">0</span></div>
-  <div class="info-item" title="Parafusos completos na rodada atual">🔒 <span id="completosRodada">0</span>/<span id="metaRodada">6</span></div>
+  <div class="info-item" title="Movimentos realizados">🔄 <span id="moves">0</span></div>
+  <div class="info-item" title="Parafusos completos na rodada">🔒 <span id="completosRodada">0</span>/<span id="metaRodada">6</span></div>
   <div class="nivel-badge" id="nivelAtual" title="Nível atual">Nível 1</div>
-  <div class="desafio-info" id="desafioAtual" title="Rodada atual / Total de rodadas">Rodada 1/10</div>
-  <div id="sequencia-info" title="Maior sequência de parafusos completos consecutivos">🏆 Sequência: <span id="sequenciaTamanho">0</span></div>
-  <div id="progress-bar" title="Progresso da rodada atual"><div id="progress-fill"></div></div>
-  <button onclick="desfazer()" title="Desfazer o último movimento">↩️ Desfazer</button>
-  <button onclick="mostrarInstrucoes()" title="Ver instruções do jogo">📘 Como Jogar</button>
-  <button onclick="mostrarBNCC()" title="Habilidades da BNCC desenvolvidas">📚 BNCC</button>
-  <button onclick="mostrarPainelProfessor()" title="Painel do professor (desbloquear níveis, diagnóstico)">👨‍🏫 Professor</button>
+  <div class="desafio-info" id="desafioAtual" title="Rodada atual">Rodada 1/10</div>
+  <div id="sequencia-info" title="Maior sequência">🏆 <span id="sequenciaTamanho">0</span></div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <button onclick="gerarCodigo()" title="Gerar código para continuar depois">📋 Gerar Código</button>
+  <button onclick="restaurarCodigo()" title="Restaurar progresso com código">🔄 Restaurar</button>
+  <button onclick="desfazer()" title="Desfazer último movimento">↩️ Desfazer</button>
+  <button onclick="mostrarInstrucoes()" title="Ver instruções">📘 Ajuda</button>
+  <button onclick="mostrarPainelProfessor()" title="Painel do professor">👨‍🏫 Professor</button>
 </div>
 
 <div id="board"></div>
@@ -453,38 +405,35 @@ button:active {
     <h2 style="margin-top:0; color:#2c3e50;">📘 COMO JOGAR</h2>
     
     <h3>🎯 Objetivo</h3>
-    <p>Organize todas as porcas coloridas em parafusos, formando pilhas de <strong>4 porcas da mesma cor</strong>.</p>
+    <p>Formar pilhas de <strong>4 porcas da mesma cor</strong> em cada parafuso.</p>
     
     <h3>🎮 Regras</h3>
     <ul>
-      <li><strong>Clique</strong> em um parafuso para selecionar a porca do <strong>TOPO</strong></li>
-      <li><strong>Clique</strong> em outro parafuso para mover a porca</li>
-      <li>Só pode mover se o destino estiver <strong>vazio</strong> ou com a <strong>mesma cor</strong> no topo</li>
-      <li>Cada parafuso suporta no máximo <strong>4 porcas</strong></li>
+      <li>Clique em um parafuso para pegar a porca do <strong>TOPO</strong></li>
+      <li>Clique em outro parafuso para colocar</li>
+      <li>Só pode colocar em parafuso <strong>vazio</strong> ou da <strong>mesma cor</strong></li>
+      <li>Máximo <strong>4 porcas</strong> por parafuso</li>
       <li><strong>🚫 Parafusos completos não podem ser movidos!</strong></li>
+    </ul>
+    
+    <h3>📋 CÓDIGO DE RESTAURAÇÃO</h3>
+    <ul>
+      <li><strong>📌 No final da aula</strong>, clique em "Gerar Código"</li>
+      <li><strong>✏️ Anote o número no caderno</strong> (só números!)</li>
+      <li><strong>🔄 Na próxima aula</strong>, clique em "Restaurar" e digite o número</li>
+      <li>✅ Seu jogo volta exatamente de onde parou!</li>
     </ul>
     
     <h3>🏆 Bônus de Sequência</h3>
     <ul>
-      <li><strong>Sequência perfeita:</strong> parafusos completos em ordem crescente (1,2,3...)</li>
-      <li><strong>Sem vazios:</strong> não pode haver parafusos vazios entre eles</li>
-      <li><strong>Pontuação:</strong> +50pts para sequência de 3, +100pts para 4, +200pts para 5+</li>
-      <li>Os parafusos da sequência brilham em laranja!</li>
+      <li>+50 (3 parafusos seguidos), +100 (4), +200 (5+)</li>
     </ul>
     
     <h3>📊 Progressão</h3>
     <ul>
-      <li><strong>Nível 1:</strong> 6 cores | 10 rodadas | meta: 6 parafusos/rodada</li>
-      <li><strong>Nível 2:</strong> 9 cores | 20 rodadas | meta: 9 parafusos/rodada</li>
-      <li><strong>Nível 3:</strong> 12 cores | 35 rodadas | meta: 12 parafusos/rodada</li>
-    </ul>
-    
-    <h3>⭐ Pontuação</h3>
-    <ul>
-      <li>+20 pontos por parafuso completo</li>
-      <li>+50 pontos por rodada completa</li>
-      <li>+100/200/400 pontos por nível completo</li>
-      <li>+ Bônus de sequência!</li>
+      <li><strong>Nível 1:</strong> 6 cores | 10 rodadas | meta: 6 parafusos</li>
+      <li><strong>Nível 2:</strong> 9 cores | 20 rodadas | meta: 9 parafusos</li>
+      <li><strong>Nível 3:</strong> 12 cores | 35 rodadas | meta: 12 parafusos</li>
     </ul>
   </div>
 </div>
@@ -493,35 +442,19 @@ button:active {
 <div id="bnccModal">
   <div class="modal-content">
     <button class="close-btn" onclick="fecharBNCC()" title="Fechar">✕</button>
-    <h2 style="margin-top:0; color:#2c3e50;">📚 BASE NACIONAL COMUM CURRICULAR</h2>
-    
+    <h2 style="margin-top:0; color:#2c3e50;">📚 BNCC</h2>
     <div class="bncc-section">
       <h3>🌱 EDUCAÇÃO INFANTIL</h3>
-      <p><strong>Campo de Experiência:</strong> Espaços, tempos, quantidades, relações e transformações</p>
-      <span class="bncc-code">EI03ET01</span> Estabelecer relações de comparação entre objetos<br>
-      <span class="bncc-code">EI03ET05</span> Classificar objetos e figuras de acordo com suas propriedades
+      <span class="bncc-code">EI03ET01</span> Comparar objetos<br>
+      <span class="bncc-code">EI03ET05</span> Classificar propriedades
     </div>
-    
     <div class="bncc-section">
-      <h3>📐 ENSINO FUNDAMENTAL - MATEMÁTICA</h3>
-      <p><strong>Unidade Temática:</strong> Probabilidade e estatística / Grandezas e medidas</p>
-      <span class="bncc-code">EF01MA09</span> Organizar e ordenar objetos familiares<br>
-      <span class="bncc-code">EF02MA18</span> Indicar a direção e sentido em deslocamentos<br>
-      <span class="bncc-code">EF03MA25</span> Identificar regularidades em sequências
+      <h3>📐 ENSINO FUNDAMENTAL</h3>
+      <span class="bncc-code">EF01MA09</span> Ordenar objetos<br>
+      <span class="bncc-code">EF02MA18</span> Direção e sentido<br>
+      <span class="bncc-code">EF03MA25</span> Sequências
     </div>
-    
-    <div class="bncc-section">
-      <h3>🧠 HABILIDADES DESENVOLVIDAS</h3>
-      <ul>
-        <li><strong>Raciocínio lógico:</strong> planejar movimentos para atingir o objetivo</li>
-        <li><strong>Classificação:</strong> agrupar porcas por cor</li>
-        <li><strong>Sequenciação:</strong> ordem de empilhamento (base ao topo)</li>
-        <li><strong>Resolução de problemas:</strong> encontrar soluções para completar os parafusos</li>
-        <li><strong>Persistência:</strong> completar múltiplas rodadas e níveis</li>
-      </ul>
-    </div>
-    
-    <p style="font-style: italic; color: #27ae60; text-align: center;">"Aprender brincando é a forma mais eficaz de fixar o conhecimento!"</p>
+    <p style="font-style: italic; color: #27ae60; text-align: center;">"Aprender brincando fixa o conhecimento!"</p>
   </div>
 </div>
 
@@ -532,25 +465,24 @@ button:active {
     <h2 style="margin-top:0; color:#2c3e50;">👨‍🏫 PAINEL DO PROFESSOR</h2>
     
     <p>🔓 <strong>Desbloquear níveis:</strong></p>
-    <input type="password" id="senhaInput" class="teacher-input" placeholder="Digite a senha" maxlength="5">
-    <div style="margin: 15px 0; text-align: center;">
-      <button onclick="verificarSenha(1)" style="margin:3px;" title="Desbloquear Nível 1 (6 cores)">🔓 Nível 1</button>
-      <button onclick="verificarSenha(2)" style="margin:3px;" title="Desbloquear Nível 2 (9 cores)">🔓 Nível 2</button>
-      <button onclick="verificarSenha(3)" style="margin:3px;" title="Desbloquear Nível 3 (12 cores)">🔓 Nível 3</button>
+    <input type="password" id="senhaInput" class="teacher-input" placeholder="Senha" maxlength="5">
+    <div style="margin: 10px 0; text-align: center;">
+      <button onclick="verificarSenha(1)" style="margin:2px;">Nível 1</button>
+      <button onclick="verificarSenha(2)" style="margin:2px;">Nível 2</button>
+      <button onclick="verificarSenha(3)" style="margin:2px;">Nível 3</button>
     </div>
     
-    <hr style="margin: 20px 0; border: 1px solid #ecf0f1;">
-    
-    <p>🔍 <strong>Ferramentas de diagnóstico:</strong></p>
-    <button onclick="diagnosticar()" class="diagnostico-btn" title="Mostra a contagem de cada cor no tabuleiro">📊 Diagnosticar distribuição de cores</button>
-    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 10px;">
-      Mostra a contagem de cada cor no tabuleiro atual
-    </p>
+    <hr>
+    <p>🔍 <strong>Diagnóstico:</strong></p>
+    <button onclick="diagnosticar()" class="diagnostico-btn">📊 Contar cores</button>
+    <p style="font-size:0.8rem; color:#7f8c8d;">Mostra quantas porcas de cada cor</p>
   </div>
 </div>
 
 <script>
-// CORES
+// =====================================================
+// CORES E CONFIGURAÇÕES
+// =====================================================
 const CORES = [
   "#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7",
   "#ec4899", "#14b8a6", "#f97316", "#8b5cf6", "#06b6d4",
@@ -558,34 +490,25 @@ const CORES = [
 ];
 
 const NOMES_CORES = {
-  "#ef4444": "Vermelho",
-  "#3b82f6": "Azul",
-  "#22c55e": "Verde",
-  "#f59e0b": "Laranja",
-  "#a855f7": "Roxo",
-  "#ec4899": "Rosa",
-  "#14b8a6": "Turquesa",
-  "#f97316": "Laranja escuro",
-  "#8b5cf6": "Violeta",
-  "#06b6d4": "Ciano",
-  "#d946ef": "Magenta",
-  "#84cc16": "Lima",
-  "#f43f5e": "Rosê",
-  "#10b981": "Esmeralda",
-  "#6366f1": "Índigo"
+  "#ef4444": "Vermelho", "#3b82f6": "Azul", "#22c55e": "Verde",
+  "#f59e0b": "Laranja", "#a855f7": "Roxo", "#ec4899": "Rosa",
+  "#14b8a6": "Turquesa", "#f97316": "Laranja escuro", "#8b5cf6": "Violeta",
+  "#06b6d4": "Ciano", "#d946ef": "Magenta", "#84cc16": "Lima",
+  "#f43f5e": "Rosê", "#10b981": "Esmeralda", "#6366f1": "Índigo"
 };
 
 const CAPACIDADE = 4;
 const SENHA_PROFESSOR = "P2026";
 
-// Configuração dos níveis
 const CONFIG = {
   1: { cores: 6, totalRodadas: 10, bonus: 100, completa: false },
   2: { cores: 9, totalRodadas: 20, bonus: 200, completa: false },
   3: { cores: 12, totalRodadas: 35, bonus: 400, completa: false }
 };
 
-// Estado do jogo
+// =====================================================
+// ESTADO DO JOGO
+// =====================================================
 let nivelAtual = 1;
 let rodadaAtual = 1;
 let parafusos = [];
@@ -596,6 +519,88 @@ let selecionado = null;
 let processandoRodada = false;
 let ultimaSequencia = [];
 
+// =====================================================
+// FUNÇÕES DO CÓDIGO (SALVAMENTO NO CADERNO)
+// =====================================================
+function gerarCodigo() {
+  // Formato: NNN RR MMM PPPP
+  let nivelStr = nivelAtual.toString().padStart(3, '0');
+  let rodadaStr = rodadaAtual.toString().padStart(2, '0');
+  let movStr = movimentos.toString().padStart(3, '0');
+  let pontosStr = pontos.toString().padStart(4, '0');
+  
+  let codigo = nivelStr + rodadaStr + movStr + pontosStr;
+  let codigoFormatado = `${nivelStr} ${rodadaStr} ${movStr} ${pontosStr}`;
+  
+  let mensagem = `
+╔════════════════════════════════╗
+║   CÓDIGO DE RESTAURAÇÃO       ║
+╠════════════════════════════════╣
+║                                 ║
+║     📝 ${codigoFormatado}     ║
+║                                 ║
+╠════════════════════════════════╣
+║ Nível: ${nivelAtual}  Rodada: ${rodadaAtual}/${getTotalRodadas()}
+║ Pontos: ${pontos}  Movimentos: ${movimentos}
+║ Parafusos: ${contarCompletos()}/18
+║                                 ║
+║ ANOTE NO CADERNO!               ║
+║ Na próxima aula, clique em      ║
+║ "Restaurar" e digite os 12      ║
+║ números em sequência.           ║
+╚════════════════════════════════╝
+  `;
+  
+  alert(mensagem);
+  
+  // Tenta copiar automático
+  try {
+    navigator.clipboard.writeText(codigo);
+    alert("📋 Código copiado! (cole no celular/computador)");
+  } catch (e) {}
+}
+
+function restaurarCodigo() {
+  let codigo = prompt("Digite o código de 12 números:");
+  if (!codigo) return;
+  
+  // Remove espaços, traços, pontos
+  codigo = codigo.replace(/[-\s.]/g, '');
+  
+  if (!/^\d{12}$/.test(codigo)) {
+    feedback("❌ Código deve ter 12 números!");
+    return;
+  }
+  
+  let nivel = parseInt(codigo.substring(0, 3));
+  let rodada = parseInt(codigo.substring(3, 5));
+  let mov = parseInt(codigo.substring(5, 8));
+  let pts = parseInt(codigo.substring(8, 12));
+  
+  if (nivel < 1 || nivel > 3) {
+    feedback("❌ Nível inválido!");
+    return;
+  }
+  
+  let totalRodadas = CONFIG[nivel].totalRodadas;
+  if (rodada < 1 || rodada > totalRodadas) {
+    feedback(`❌ Rodada deve ser entre 1 e ${totalRodadas}!`);
+    return;
+  }
+  
+  nivelAtual = nivel;
+  rodadaAtual = rodada;
+  movimentos = mov;
+  pontos = pts;
+  
+  gerarTabuleiro();
+  desenhar();
+  feedback("✅ Progresso restaurado! Continue jogando.");
+}
+
+// =====================================================
+// FUNÇÕES AUXILIARES
+// =====================================================
 function embaralhar(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -604,80 +609,49 @@ function embaralhar(arr) {
   return arr;
 }
 
-function getQtdCores() {
-  return CONFIG[nivelAtual].cores;
-}
+function getQtdCores() { return CONFIG[nivelAtual].cores; }
+function getMetaRodada() { return getQtdCores(); }
+function getTotalRodadas() { return CONFIG[nivelAtual].totalRodadas; }
+function getBonus() { return CONFIG[nivelAtual].bonus; }
 
-function getMetaRodada() {
-  return getQtdCores();
-}
-
-function getTotalRodadas() {
-  return CONFIG[nivelAtual].totalRodadas;
-}
-
-function getBonus() {
-  return CONFIG[nivelAtual].bonus;
-}
-
-// FUNÇÃO DE DIAGNÓSTICO - agora dentro do painel do professor
 function diagnosticar() {
   let qtdCores = getQtdCores();
   let contagem = {};
+  for (let i = 0; i < qtdCores; i++) contagem[CORES[i]] = 0;
   
-  // Inicializa contagem
-  for (let i = 0; i < qtdCores; i++) {
-    contagem[CORES[i]] = 0;
-  }
-  
-  // Conta porcas
   for (let i = 0; i < 18; i++) {
     for (let j = 0; j < parafusos[i].length; j++) {
       let cor = parafusos[i][j];
-      if (contagem[cor] !== undefined) {
-        contagem[cor]++;
-      }
+      if (contagem[cor] !== undefined) contagem[cor]++;
     }
   }
   
-  // Prepara mensagem
-  let msg = "📊 DIAGNÓSTICO:\n";
+  let msg = "📊 CORES NO TABULEIRO:\n";
   for (let i = 0; i < qtdCores; i++) {
     let cor = CORES[i];
     let nome = NOMES_CORES[cor];
     msg += `${nome}: ${contagem[cor] || 0} porcas\n`;
   }
-  msg += `\nTotal: ${Object.values(contagem).reduce((a, b) => a + b, 0)} porcas`;
-  msg += `\nEsperado: ${qtdCores * 4} porcas`;
-  
   alert(msg);
 }
 
+// =====================================================
+// FUNÇÕES PRINCIPAIS DO JOGO
+// =====================================================
 function gerarTabuleiro() {
   let qtdCores = getQtdCores();
-  
-  // Cria pool com 4 de cada cor (GARANTIDO!)
   let pool = [];
   for (let i = 0; i < qtdCores; i++) {
-    for (let j = 0; j < CAPACIDADE; j++) {
-      pool.push(CORES[i]);
-    }
+    for (let j = 0; j < CAPACIDADE; j++) pool.push(CORES[i]);
   }
   
-  // Verificação de segurança
-  console.log(`Pool criado com ${pool.length} porcas (${qtdCores} cores x 4)`);
-  
   pool = embaralhar(pool);
-  
-  // Inicializar parafusos vazios
   parafusos = Array(18).fill().map(() => []);
   
-  // Distribuir: cada parafuso recebe pelo menos 1
   for (let i = 0; i < 18; i++) {
     if (pool.length) parafusos[i].push(pool.pop());
   }
   
-  // Distribuir o restante
   let indices = embaralhar([...Array(18).keys()]);
   while (pool.length) {
     for (let idx of indices) {
@@ -688,49 +662,32 @@ function gerarTabuleiro() {
     }
   }
   
-  // Embaralhar cada pilha internamente
   parafusos = parafusos.map(p => embaralhar(p));
-  
-  // Verificação final
-  let totalPorcas = parafusos.reduce((acc, p) => acc + p.length, 0);
-  console.log(`Tabuleiro gerado com ${totalPorcas} porcas`);
-  
   processandoRodada = false;
   ultimaSequencia = [];
 }
 
 function contarCompletos() {
   let count = 0;
-  for (let i = 0; i < 18; i++) {
-    if (estaCompleto(i)) count++;
-  }
+  for (let i = 0; i < 18; i++) if (estaCompleto(i)) count++;
   return count;
 }
 
 function verificarSequencia() {
-  let maiorSequencia = 0;
-  let sequenciaAtual = 0;
-  let indicesSequencia = [];
-  let indicesAtuais = [];
-  
+  let maior = 0, atual = 0, indices = [], indicesAtuais = [];
   for (let i = 0; i < 18; i++) {
     if (estaCompleto(i)) {
-      sequenciaAtual++;
+      atual++;
       indicesAtuais.push(i);
-      if (sequenciaAtual > maiorSequencia) {
-        maiorSequencia = sequenciaAtual;
-        indicesSequencia = [...indicesAtuais];
+      if (atual > maior) {
+        maior = atual;
+        indices = [...indicesAtuais];
       }
-    } else {
-      sequenciaAtual = 0;
-      indicesAtuais = [];
-    }
+    } else { atual = 0; indicesAtuais = []; }
   }
-  
-  ultimaSequencia = indicesSequencia;
-  document.getElementById("sequenciaTamanho").textContent = maiorSequencia;
-  
-  return { tamanho: maiorSequencia, indices: indicesSequencia };
+  ultimaSequencia = indices;
+  document.getElementById("sequenciaTamanho").textContent = maior;
+  return { tamanho: maior, indices: indices };
 }
 
 function calcularBonusSequencia(tamanho) {
@@ -741,20 +698,20 @@ function calcularBonusSequencia(tamanho) {
 }
 
 function getBlocoTopo(idx) {
-  if (idx === null || parafusos[idx].length === 0) return 0;
-  
-  let cor = parafusos[idx][parafusos[idx].length - 1];
-  let count = 0;
-  
-  for (let i = parafusos[idx].length - 1; i >= 0; i--) {
-    if (parafusos[idx][i] === cor) {
-      count++;
-    } else {
-      break;
-    }
-  }
-  
+  if (!parafusos[idx]?.length) return 0;
+  let cor = parafusos[idx][parafusos[idx].length - 1], count = 0;
+  for (let i = parafusos[idx].length - 1; i >= 0 && parafusos[idx][i] === cor; i--) count++;
   return count;
+}
+
+function ajustarCor(hex, percent) {
+  let r = parseInt(hex.substring(1, 3), 16);
+  let g = parseInt(hex.substring(3, 5), 16);
+  let b = parseInt(hex.substring(5, 7), 16);
+  r = Math.max(0, Math.min(255, r + percent));
+  g = Math.max(0, Math.min(255, g + percent));
+  b = Math.max(0, Math.min(255, b + percent));
+  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
 }
 
 function desenhar() {
@@ -781,10 +738,7 @@ function desenhar() {
     div.className = "screw";
     if (selecionado === idx) div.classList.add("selected");
     if (estaCompleto(idx)) div.classList.add("locked");
-    
-    if (seq.indices.includes(idx)) {
-      div.classList.add("sequencia");
-    }
+    if (seq.indices.includes(idx)) div.classList.add("sequencia");
     
     div.onclick = () => cliqueParafuso(idx);
     
@@ -797,35 +751,23 @@ function desenhar() {
     }
     
     for (let i = parafuso.length; i < CAPACIDADE; i++) {
-      let placeholder = document.createElement("div");
-      placeholder.className = "nut-placeholder";
-      div.appendChild(placeholder);
+      let p = document.createElement("div");
+      p.className = "nut-placeholder";
+      div.appendChild(p);
     }
     
     board.appendChild(div);
   });
 }
 
-function ajustarCor(hex, percent) {
-  let r = parseInt(hex.substring(1, 3), 16);
-  let g = parseInt(hex.substring(3, 5), 16);
-  let b = parseInt(hex.substring(5, 7), 16);
-  
-  r = Math.max(0, Math.min(255, r + percent));
-  g = Math.max(0, Math.min(255, g + percent));
-  b = Math.max(0, Math.min(255, b + percent));
-  
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+function estaCompleto(idx) {
+  let p = parafusos[idx];
+  return p.length === CAPACIDADE && p.every(c => c === p[0]);
 }
 
 function cliqueParafuso(idx) {
   if (processandoRodada) return;
-  
-  // 🚫 IMPEDIR SELEÇÃO DE PARAFUSO COMPLETO
-  if (estaCompleto(idx)) {
-    feedback("❌ Parafuso já está completo! Não pode mover.");
-    return;
-  }
+  if (estaCompleto(idx)) { feedback("❌ Parafuso completo!"); return; }
   
   if (selecionado === null) {
     if (parafusos[idx].length > 0) {
@@ -840,196 +782,115 @@ function cliqueParafuso(idx) {
 }
 
 function mover(origem, destino) {
-  if (origem === destino) return;
-  if (parafusos[origem].length === 0) return;
+  if (origem === destino || !parafusos[origem].length) return;
   
   let bloco = getBlocoTopo(origem);
   let espaco = CAPACIDADE - parafusos[destino].length;
-  
-  if (espaco < bloco) {
-    feedback(`❌ Espaço insuficiente! Cabe apenas ${espaco}`);
-    return;
-  }
+  if (espaco < bloco) { feedback(`❌ Espaço insuficiente!`); return; }
   
   let corOrigem = parafusos[origem][parafusos[origem].length - 1];
-  let topoDestino = parafusos[destino].length > 0 ? parafusos[destino][parafusos[destino].length - 1] : null;
+  let topoDestino = parafusos[destino].length ? parafusos[destino][parafusos[destino].length - 1] : null;
   
   if (topoDestino === null || topoDestino === corOrigem) {
     historico.push(JSON.stringify({
       parafusos: parafusos.map(p => [...p]),
-      movimentos,
-      pontos,
-      rodadaAtual
+      movimentos, pontos, rodadaAtual
     }));
     
-    // Mover o bloco inteiro
     for (let i = 0; i < bloco; i++) {
-      let porca = parafusos[origem].pop();
-      parafusos[destino].push(porca);
+      parafusos[destino].push(parafusos[origem].pop());
     }
-    
     movimentos++;
     
-    // Verificar se algum parafuso foi completado
     if (estaCompleto(destino)) {
       pontos += 20;
-      let seq = verificarSequencia();
-      let bonus = calcularBonusSequencia(seq.tamanho);
-      
-      if (bonus > 0) {
-        pontos += bonus;
-        feedback(`🏆 SEQUÊNCIA DE ${seq.tamanho}! +${bonus} pontos`, 3000);
-      } else {
-        feedback(`✅ Parafuso ${destino + 1} completo! +20 pontos`);
-      }
-    } else {
-      if (bloco > 1) {
-        feedback(`📦 Movidas ${bloco} porcas`, 1500);
-      }
-    }
+      let bonus = calcularBonusSequencia(verificarSequencia().tamanho);
+      if (bonus) { pontos += bonus; feedback(`🏆 +${bonus} sequência!`, 2000); }
+      else feedback(`✅ +20`, 1000);
+    } else if (bloco > 1) feedback(`📦 ${bloco} porcas`, 1000);
     
     desenhar();
     
-    // Verificar se algum parafuso foi completado durante o movimento
     let completos = contarCompletos();
-    let meta = getMetaRodada();
-    
-    if (completos >= meta && !processandoRodada) {
+    if (completos >= getMetaRodada() && !processandoRodada) {
       processandoRodada = true;
-      
       pontos += 50;
-      feedback(`🎯 RODADA ${rodadaAtual} COMPLETA! +50 pontos`, 3000);
-      
+      feedback(`🎯 Rodada ${rodadaAtual} +50`, 2000);
       rodadaAtual++;
       
       if (rodadaAtual > getTotalRodadas()) {
         CONFIG[nivelAtual].completa = true;
-        let bonus = getBonus();
-        pontos += bonus;
-        feedback(`🏆 NÍVEL ${nivelAtual} COMPLETO! +${bonus} pontos!`, 4000);
-        
+        pontos += getBonus();
+        feedback(`🏆 Nível ${nivelAtual} +${getBonus()}!`, 3000);
         setTimeout(() => {
           if (nivelAtual < 3) {
-            nivelAtual++;
-            rodadaAtual = 1;
-            movimentos = 0;
-            historico = [];
-            selecionado = null;
-            gerarTabuleiro();
-            desenhar();
-            feedback(`🎉 NÍVEL ${nivelAtual}! Rodada 1/${getTotalRodadas()}`);
-          } else {
-            feedback("🎉 PARABÉNS! VOCÊ VENCEU TODAS AS RODADAS!", 5000);
-          }
+            nivelAtual++; rodadaAtual = 1; movimentos = 0; historico = [];
+            selecionado = null; gerarTabuleiro(); desenhar();
+            feedback(`🎉 Nível ${nivelAtual}!`);
+          } else feedback("🏆 VITÓRIA TOTAL!", 4000);
         }, 2000);
       } else {
-        setTimeout(() => {
-          gerarTabuleiro();
-          desenhar();
-          feedback(`🔄 Rodada ${rodadaAtual}/${getTotalRodadas()}`);
-        }, 1500);
+        setTimeout(() => { gerarTabuleiro(); desenhar(); feedback(`🔄 Rodada ${rodadaAtual}/${getTotalRodadas()}`); }, 1500);
       }
     }
-  } else {
-    feedback("❌ Cores diferentes!");
-    selecionado = null;
-  }
-}
-
-function estaCompleto(idx) {
-  let p = parafusos[idx];
-  return p.length === CAPACIDADE && p.every(cor => cor === p[0]);
+  } else { feedback("❌ Cores diferentes!"); selecionado = null; }
 }
 
 function desfazer() {
-  if (processandoRodada) {
-    feedback("⏳ Aguarde...");
-    return;
-  }
-  
-  if (historico.length === 0) {
-    feedback("Nada para desfazer");
-    return;
-  }
-  let estado = JSON.parse(historico.pop());
-  parafusos = estado.parafusos.map(p => [...p]);
-  movimentos = estado.movimentos;
-  pontos = estado.pontos;
-  rodadaAtual = estado.rodadaAtual;
-  selecionado = null;
-  desenhar();
-  feedback("↩️ Desfeito");
+  if (processandoRodada) { feedback("⏳ Aguarde..."); return; }
+  if (!historico.length) { feedback("Nada"); return; }
+  let est = JSON.parse(historico.pop());
+  parafusos = est.parafusos.map(p => [...p]);
+  movimentos = est.movimentos; pontos = est.pontos; rodadaAtual = est.rodadaAtual;
+  selecionado = null; desenhar(); feedback("↩️ Desfeito");
 }
 
 function verificarSenha(nivel) {
-  let senha = document.getElementById("senhaInput").value;
-  if (senha === SENHA_PROFESSOR) {
-    nivelAtual = nivel;
-    rodadaAtual = 1;
-    movimentos = 0;
-    historico = [];
-    selecionado = null;
-    processandoRodada = false;
-    gerarTabuleiro();
-    desenhar();
-    feedback(`👨‍🏫 Nível ${nivel} desbloqueado!`);
-    fecharPainelProfessor();
-  } else {
-    feedback("❌ Senha incorreta!");
-    document.getElementById("senhaInput").value = "";
-  }
+  if (document.getElementById("senhaInput").value === SENHA_PROFESSOR) {
+    nivelAtual = nivel; rodadaAtual = 1; movimentos = 0; historico = [];
+    selecionado = null; processandoRodada = false; gerarTabuleiro(); desenhar();
+    feedback(`👨‍🏫 Nível ${nivel}`); fecharPainelProfessor();
+  } else { feedback("❌ Senha!"); document.getElementById("senhaInput").value = ""; }
 }
 
-function feedback(msg, tempo = 2000) {
+function feedback(msg, t=1500) {
   let fb = document.querySelector(".feedback");
   if (fb) fb.remove();
-  fb = document.createElement("div");
-  fb.className = "feedback";
-  fb.textContent = msg;
-  document.body.appendChild(fb);
-  setTimeout(() => fb.remove(), tempo);
+  fb = document.createElement("div"); fb.className = "feedback"; fb.textContent = msg;
+  document.body.appendChild(fb); setTimeout(() => fb.remove(), t);
 }
 
-function mostrarInstrucoes() {
-  document.getElementById("instructions").style.display = "flex";
-}
-function fecharInstrucoes() {
-  document.getElementById("instructions").style.display = "none";
-}
-
-function mostrarBNCC() {
-  document.getElementById("bnccModal").style.display = "flex";
-}
-function fecharBNCC() {
-  document.getElementById("bnccModal").style.display = "none";
-}
-
-function mostrarPainelProfessor() {
-  document.getElementById("teacherPanel").style.display = "flex";
-  document.getElementById("senhaInput").value = "";
-}
-function fecharPainelProfessor() {
-  document.getElementById("teacherPanel").style.display = "none";
-}
+function mostrarInstrucoes() { document.getElementById("instructions").style.display = "flex"; }
+function fecharInstrucoes() { document.getElementById("instructions").style.display = "none"; }
+function mostrarBNCC() { document.getElementById("bnccModal").style.display = "flex"; }
+function fecharBNCC() { document.getElementById("bnccModal").style.display = "none"; }
+function mostrarPainelProfessor() { document.getElementById("teacherPanel").style.display = "flex"; document.getElementById("senhaInput").value = ""; }
+function fecharPainelProfessor() { document.getElementById("teacherPanel").style.display = "none"; }
 
 function novoJogo() {
-  nivelAtual = 1;
-  rodadaAtual = 1;
-  CONFIG[1].completa = false;
-  CONFIG[2].completa = false;
-  CONFIG[3].completa = false;
-  movimentos = 0;
-  pontos = 0;
-  historico = [];
-  selecionado = null;
-  processandoRodada = false;
-  gerarTabuleiro();
-  desenhar();
-  feedback(`🌟 Nível 1 - Rodada 1/${getTotalRodadas()}`);
+  nivelAtual = 1; rodadaAtual = 1;
+  CONFIG[1].completa = CONFIG[2].completa = CONFIG[3].completa = false;
+  movimentos = 0; pontos = 0; historico = []; selecionado = null; processandoRodada = false;
+  gerarTabuleiro(); desenhar(); feedback(`🌟 Nível 1 - Rodada 1/${getTotalRodadas()}`);
 }
 
+// =====================================================
+// AVISO AO FECHAR
+// =====================================================
+window.addEventListener('beforeunload', function (e) {
+  if (pontos > 0 || movimentos > 0) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+});
+
+// =====================================================
+// INICIALIZAÇÃO
+// =====================================================
 novoJogo();
 
+// Exportar funções
 window.novoJogo = novoJogo;
 window.desfazer = desfazer;
 window.mostrarInstrucoes = mostrarInstrucoes;
@@ -1040,6 +901,8 @@ window.mostrarPainelProfessor = mostrarPainelProfessor;
 window.fecharPainelProfessor = fecharPainelProfessor;
 window.verificarSenha = verificarSenha;
 window.diagnosticar = diagnosticar;
+window.gerarCodigo = gerarCodigo;
+window.restaurarCodigo = restaurarCodigo;
 </script>
 </body>
 </html>
