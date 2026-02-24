@@ -461,6 +461,7 @@ button:active {
       <li><strong>Clique</strong> em outro parafuso para mover a porca</li>
       <li>Só pode mover se o destino estiver <strong>vazio</strong> ou com a <strong>mesma cor</strong> no topo</li>
       <li>Cada parafuso suporta no máximo <strong>4 porcas</strong></li>
+      <li><strong>🚫 Parafusos completos não podem ser movidos!</strong></li>
     </ul>
     
     <h3>🏆 Bônus de Sequência</h3>
@@ -791,7 +792,7 @@ function desenhar() {
       let nut = document.createElement("div");
       nut.className = "nut";
       nut.style.background = `linear-gradient(145deg, ${parafuso[i]}, ${ajustarCor(parafuso[i], -20)})`;
-      nut.title = NOMES_CORES[parafuso[i]]; // Tooltip com o nome da cor
+      nut.title = NOMES_CORES[parafuso[i]];
       div.appendChild(nut);
     }
     
@@ -819,6 +820,12 @@ function ajustarCor(hex, percent) {
 
 function cliqueParafuso(idx) {
   if (processandoRodada) return;
+  
+  // 🚫 IMPEDIR SELEÇÃO DE PARAFUSO COMPLETO
+  if (estaCompleto(idx)) {
+    feedback("❌ Parafuso já está completo! Não pode mover.");
+    return;
+  }
   
   if (selecionado === null) {
     if (parafusos[idx].length > 0) {
