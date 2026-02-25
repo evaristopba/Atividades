@@ -2,16 +2,19 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Parafusos e Porcas - Código 13 dígitos</title>
+<title>Parafusos e Porcas - Versão Completa</title>
 <style>
 /* =====================================================
-   ESTILOS (MANTIDOS IGUAIS)
+   ESTILOS GLOBAIS
    ===================================================== */
+
+/* Remove a seleção de texto e define box-sizing para todos os elementos */
 * {
   box-sizing: border-box;
   user-select: none;
 }
 
+/* Configuração do html e body para ocupar toda a tela sem rolagem */
 html, body {
   height: 100%;
   margin: 0;
@@ -19,6 +22,7 @@ html, body {
   overflow: hidden;
 }
 
+/* Estilo principal do body com gradiente de fundo */
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
@@ -28,6 +32,7 @@ body {
   height: 100vh;
 }
 
+/* Estilo do título principal */
 h1 {
   color: white;
   margin: 5px 0 10px;
@@ -36,6 +41,11 @@ h1 {
   flex-shrink: 0;
 }
 
+/* =====================================================
+   BARRA SUPERIOR (TOPBAR)
+   ===================================================== */
+
+/* Container da topbar com fundo semi-transparente */
 #topbar {
   background: rgba(255, 255, 255, 0.95);
   padding: 8px 12px;
@@ -53,6 +63,7 @@ h1 {
   min-height: 48px;
 }
 
+/* Estilo comum para itens de informação na topbar */
 .info-item, .nivel-badge, .desafio-info, #sequencia-info {
   background: #ecf0f1;
   padding: 4px 10px;
@@ -69,11 +80,11 @@ h1 {
   position: relative;
 }
 
+/* Tooltips para elementos da topbar - aparecem ao passar o mouse */
 .info-item[title]:hover::after, 
 .nivel-badge[title]:hover::after, 
 .desafio-info[title]:hover::after, 
-#sequencia-info[title]:hover::after,
-button[title]:hover::after {
+#sequencia-info[title]:hover::after {
   content: attr(title);
   position: absolute;
   bottom: 125%;
@@ -91,6 +102,28 @@ button[title]:hover::after {
   pointer-events: none;
 }
 
+/* Seta do tooltip */
+.info-item[title]:hover::before,
+.nivel-badge[title]:hover::before,
+.desafio-info[title]:hover::before,
+#sequencia-info[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #2c3e50 transparent transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* =====================================================
+   BOTÕES
+   ===================================================== */
+
+/* Estilo base para botões e selects */
 button, select {
   padding: 4px 10px;
   border-radius: 30px;
@@ -107,17 +140,57 @@ button, select {
   position: relative;
 }
 
+/* Tooltips para botões */
+button[title]:hover::after, select[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 1px solid #f1c40f;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Seta do tooltip para botões */
+button[title]:hover::before, select[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #2c3e50 transparent transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Efeito hover para botões */
 button:hover, select:hover {
   background: #2980b9;
   transform: translateY(-1px);
   box-shadow: 0 3px 0 #1f618d, 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Efeito active (clique) para botões */
 button:active {
   transform: translateY(2px);
   box-shadow: 0 1px 0 #1f618d;
 }
 
+/* =====================================================
+   TABULEIRO (PARAFUSOS)
+   ===================================================== */
+
+/* Grid do tabuleiro com 6 colunas */
 #board {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -130,6 +203,7 @@ button:active {
   overflow: hidden;
 }
 
+/* Estilo de cada parafuso */
 .screw {
   background: linear-gradient(145deg, #bdc3c7, #95a5a6);
   border-radius: 18px 18px 6px 6px;
@@ -148,6 +222,7 @@ button:active {
   background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 30%);
 }
 
+/* Cabeça do parafuso (parte inferior) */
 .screw::after {
   content: "";
   position: absolute;
@@ -163,23 +238,31 @@ button:active {
   box-shadow: inset 0 2px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* Parafuso selecionado (destaque laranja) */
 .screw.selected {
   border: 4px solid #f1c40f;
   box-shadow: 0 0 0 3px #f7dc6f, 0 4px 0 #b7950b;
 }
 
+/* Parafuso que faz parte da sequência (destaque laranja brilhante) */
 .screw.sequencia {
   border: 3px solid #f39c12;
   box-shadow: 0 0 8px #f39c12, 0 4px 0 #b7950b;
   animation: pulse 1.5s infinite;
 }
 
+/* Animação de pulsar para a sequência */
 @keyframes pulse {
   0% { border-color: #f39c12; }
   50% { border-color: #f1c40f; }
   100% { border-color: #f39c12; }
 }
 
+/* =====================================================
+   PORCAS (FORMATO HEXAGONAL)
+   ===================================================== */
+
+/* Estilo base de cada porca */
 .nut {
   width: 32px;
   height: 32px;
@@ -193,6 +276,7 @@ button:active {
   position: relative;
 }
 
+/* Furo central da porca */
 .nut::after {
   content: "";
   position: absolute;
@@ -206,6 +290,7 @@ button:active {
   border: 2px solid #2c3e50;
 }
 
+/* Detalhe dourado no centro (simula metal) */
 .nut::before {
   content: "";
   position: absolute;
@@ -220,6 +305,7 @@ button:active {
   border: 1px solid #b7950b;
 }
 
+/* Placeholder invisível para manter o tamanho dos parafusos */
 .nut-placeholder {
   width: 32px;
   height: 32px;
@@ -228,12 +314,18 @@ button:active {
   flex-shrink: 0;
 }
 
+/* =====================================================
+   PARAFUSOS COMPLETOS (LOCKED)
+   ===================================================== */
+
+/* Estilo para parafuso completo (verde) */
 .locked {
   border: 3px solid #27ae60 !important;
   background: linear-gradient(145deg, #d5f5e3, #a9dfbf) !important;
   box-shadow: 0 4px 0 #1e8449, 0 6px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* Check de confirmação no parafuso completo */
 .locked::after {
   content: "✓";
   position: absolute;
@@ -253,6 +345,11 @@ button:active {
   z-index: 10;
 }
 
+/* =====================================================
+   BARRA DE PROGRESSO
+   ===================================================== */
+
+/* Container da barra de progresso */
 #progress-bar {
   width: 100px;
   height: 8px;
@@ -263,6 +360,7 @@ button:active {
   flex-shrink: 0;
 }
 
+/* Preenchimento da barra de progresso */
 #progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #27ae60, #2ecc71);
@@ -270,6 +368,11 @@ button:active {
   transition: width 0.3s;
 }
 
+/* =====================================================
+   FEEDBACK (MENSAGENS FLUTUANTES)
+   ===================================================== */
+
+/* Mensagens temporárias que aparecem na tela */
 .feedback {
   position: fixed;
   bottom: 20px;
@@ -286,6 +389,11 @@ button:active {
   border: 2px solid #f1c40f;
 }
 
+/* =====================================================
+   MODAIS (INSTRUÇÕES, BNCC, PROFESSOR)
+   ===================================================== */
+
+/* Estilo base para todos os modais (telas sobrepostas) */
 #instructions, #teacherPanel, #bnccModal {
   position: fixed;
   top: 0;
@@ -300,6 +408,7 @@ button:active {
   z-index: 2000;
 }
 
+/* Conteúdo dos modais */
 .modal-content {
   background: white;
   padding: 20px;
@@ -311,6 +420,7 @@ button:active {
   text-align: left;
 }
 
+/* Botão de fechar modal */
 .close-btn {
   float: right;
   background: #e74c3c;
@@ -331,6 +441,7 @@ button:active {
   background: #c0392b;
 }
 
+/* Campo de entrada para senha do professor */
 .teacher-input {
   padding: 5px;
   font-size: 0.9rem;
@@ -341,6 +452,7 @@ button:active {
   margin-bottom: 8px;
 }
 
+/* Botão de diagnóstico no painel do professor */
 .diagnostico-btn {
   background: #e67e22;
   margin-top: 10px;
@@ -353,6 +465,7 @@ button:active {
   background: #d35400;
 }
 
+/* Seções dentro do modal BNCC */
 .bncc-section {
   background: #ecf0f1;
   border-radius: 12px;
@@ -367,6 +480,7 @@ button:active {
   font-size: 1rem;
 }
 
+/* Códigos da BNCC */
 .bncc-code {
   background: #2c3e50;
   color: white;
@@ -383,7 +497,11 @@ button:active {
 
 <h1>🔧 PARAFUSOS E PORCAS 🔩</h1>
 
+<!-- =====================================================
+     BARRA SUPERIOR (TOPBAR) COM TODOS OS BOTÕES E INFOS
+     ===================================================== -->
 <div id="topbar">
+  <!-- Informações do jogo -->
   <div class="info-item" title="Pontuação total">⭐ <span id="score">0</span></div>
   <div class="info-item" title="Número de movimentos realizados">🔄 <span id="moves">0</span></div>
   <div class="info-item" title="Parafusos completos na rodada atual">🔒 <span id="completosRodada">0</span>/<span id="metaRodada">6</span></div>
@@ -391,6 +509,8 @@ button:active {
   <div class="desafio-info" id="desafioAtual" title="Rodada atual / Total de rodadas">Rodada 1/10</div>
   <div id="sequencia-info" title="Maior sequência de parafusos completos consecutivos">🏆 Sequência: <span id="sequenciaTamanho">0</span></div>
   <div id="progress-bar" title="Progresso da rodada atual"><div id="progress-fill"></div></div>
+  
+  <!-- Botões de ação -->
   <button onclick="gerarCodigo()" title="Gerar código numérico (13 dígitos) para continuar depois">📋 Gerar Código</button>
   <button onclick="restaurarCodigo()" title="Restaurar progresso digitando o código (12 ou 13 dígitos)">🔄 Restaurar</button>
   <button onclick="desfazer()" title="Desfazer o último movimento">↩️ Desfazer</button>
@@ -398,9 +518,14 @@ button:active {
   <button onclick="mostrarPainelProfessor()" title="Abrir painel do professor">👨‍🏫 Professor</button>
 </div>
 
+<!-- =====================================================
+     TABULEIRO DO JOGO (SERÁ PREENCHIDO PELO JAVASCRIPT)
+     ===================================================== -->
 <div id="board"></div>
 
-<!-- Modal de Instruções -->
+<!-- =====================================================
+     MODAL DE INSTRUÇÕES
+     ===================================================== -->
 <div id="instructions">
   <div class="modal-content">
     <button class="close-btn" onclick="fecharInstrucoes()" title="Fechar">✕</button>
@@ -434,11 +559,20 @@ button:active {
       <li><strong>5 dígitos:</strong> Pontos (00000 a 99999)</li>
     </ul>
     
-    <h3>🏆 Bônus de Sequência</h3>
+    <h3>🏆 BÔNUS DE SEQUÊNCIA (ACUMULATIVO)</h3>
     <ul>
       <li><strong>Sequência perfeita:</strong> parafusos completos em ordem crescente (1,2,3...)</li>
       <li><strong>Sem vazios:</strong> não pode haver parafusos vazios entre eles</li>
-      <li><strong>Pontuação:</strong> +50pts para sequência de 3, +100pts para 4, +200pts para 5+</li>
+      <li><strong>Pontuação acumulativa:</strong></li>
+      <ul>
+        <li>✅ Sequência de 3 → +50 pontos</li>
+        <li>✅ Sequência de 4 → +100 pontos (total 150)</li>
+        <li>✅ Sequência de 5 → +200 pontos (total 350)</li>
+        <li>✅ Sequência de 6 → +200 pontos (total 550)</li>
+        <li>✅ Quanto maior a sequência, mais pontos você acumula!</li>
+      </ul>
+      <li><strong>🎯 DICA:</strong> Tente sempre aumentar sua maior sequência – a pontuação sobe rápido e é muito gratificante!</li>
+      <li><em>“Aprender brincando é a forma mais eficaz de fixar o conhecimento!”</em></li>
     </ul>
     
     <h3>📊 Progressão</h3>
@@ -450,7 +584,9 @@ button:active {
   </div>
 </div>
 
-<!-- Modal BNCC -->
+<!-- =====================================================
+     MODAL BNCC (BASE NACIONAL COMUM CURRICULAR)
+     ===================================================== -->
 <div id="bnccModal">
   <div class="modal-content">
     <button class="close-btn" onclick="fecharBNCC()" title="Fechar">✕</button>
@@ -486,7 +622,9 @@ button:active {
   </div>
 </div>
 
-<!-- Modal do Professor -->
+<!-- =====================================================
+     MODAL DO PROFESSOR (COM SENHA E DIAGNÓSTICO)
+     ===================================================== -->
 <div id="teacherPanel">
   <div class="modal-content">
     <button class="close-btn" onclick="fecharPainelProfessor()" title="Fechar">✕</button>
@@ -515,23 +653,52 @@ button:active {
 // CONSTANTES E CONFIGURAÇÕES
 // =====================================================
 
+// Array com todas as cores disponíveis no jogo (15 cores no total)
 const CORES = [
-  "#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7",
-  "#ec4899", "#14b8a6", "#f97316", "#8b5cf6", "#06b6d4",
-  "#d946ef", "#84cc16", "#f43f5e", "#10b981", "#6366f1"
+  "#ef4444", // Vermelho
+  "#3b82f6", // Azul
+  "#22c55e", // Verde
+  "#f59e0b", // Laranja
+  "#a855f7", // Roxo
+  "#ec4899", // Rosa
+  "#14b8a6", // Turquesa
+  "#f97316", // Laranja escuro
+  "#8b5cf6", // Violeta
+  "#06b6d4", // Ciano
+  "#d946ef", // Magenta
+  "#84cc16", // Lima
+  "#f43f5e", // Rosê
+  "#10b981", // Esmeralda
+  "#6366f1"  // Índigo
 ];
 
+// Mapeamento de cores hexadecimais para nomes legíveis (usado nos tooltips)
 const NOMES_CORES = {
-  "#ef4444": "Vermelho", "#3b82f6": "Azul", "#22c55e": "Verde",
-  "#f59e0b": "Laranja", "#a855f7": "Roxo", "#ec4899": "Rosa",
-  "#14b8a6": "Turquesa", "#f97316": "Laranja escuro", "#8b5cf6": "Violeta",
-  "#06b6d4": "Ciano", "#d946ef": "Magenta", "#84cc16": "Lima",
-  "#f43f5e": "Rosê", "#10b981": "Esmeralda", "#6366f1": "Índigo"
+  "#ef4444": "Vermelho",
+  "#3b82f6": "Azul",
+  "#22c55e": "Verde",
+  "#f59e0b": "Laranja",
+  "#a855f7": "Roxo",
+  "#ec4899": "Rosa",
+  "#14b8a6": "Turquesa",
+  "#f97316": "Laranja escuro",
+  "#8b5cf6": "Violeta",
+  "#06b6d4": "Ciano",
+  "#d946ef": "Magenta",
+  "#84cc16": "Lima",
+  "#f43f5e": "Rosê",
+  "#10b981": "Esmeralda",
+  "#6366f1": "Índigo"
 };
 
+// Capacidade máxima de porcas por parafuso
 const CAPACIDADE = 4;
+
+// Senha para desbloquear níveis no painel do professor
 const SENHA_PROFESSOR = "P2026";
 
+// Configuração dos níveis do jogo
+// Cada nível define: quantidade de cores, total de rodadas, bônus ao completar
 const CONFIG = {
   1: { cores: 6, totalRodadas: 10, bonus: 100, completa: false },
   2: { cores: 9, totalRodadas: 20, bonus: 200, completa: false },
@@ -541,14 +708,34 @@ const CONFIG = {
 // =====================================================
 // ESTADO GLOBAL DO JOGO
 // =====================================================
+
+// Nível atual (1, 2 ou 3)
 let nivelAtual = 1;
+
+// Rodada atual dentro do nível
 let rodadaAtual = 1;
+
+// Matriz que representa todos os parafusos e suas porcas
+// Cada parafuso é um array de cores, onde o último elemento é o topo
 let parafusos = [];
+
+// Histórico de estados para permitir desfazer movimentos
 let historico = [];
+
+// Contador de movimentos realizados
 let movimentos = 0;
+
+// Pontuação total do jogador
 let pontos = 0;
+
+// Índice do parafuso atualmente selecionado (null = nenhum)
 let selecionado = null;
+
+// Flag que indica se está processando a transição entre rodadas
+// Usado para evitar cliques durante a animação
 let processandoRodada = false;
+
+// Array com os índices dos parafusos que fazem parte da maior sequência atual
 let ultimaSequencia = [];
 
 // =====================================================
@@ -556,23 +743,27 @@ let ultimaSequencia = [];
 // =====================================================
 
 /**
- * Gera um código numérico de 13 dígitos (compatível com versão anterior)
+ * Gera um código numérico de 13 dígitos representando o progresso atual
  * Formato: NNN RR MMM PPPPP (3+2+3+5 = 13 dígitos)
+ * - NNN: Nível (001 a 003)
+ * - RR: Rodada (01 a 35)
+ * - MMM: Movimentos (000 a 999)
+ * - PPPPP: Pontos (00000 a 99999)
  */
 function gerarCodigo() {
-  // Converte cada valor para string com zeros à esquerda
+  // Converte cada valor para string com zeros à esquerda para garantir o número fixo de dígitos
   let nivelStr = nivelAtual.toString().padStart(3, '0');
   let rodadaStr = rodadaAtual.toString().padStart(2, '0');
   let movStr = movimentos.toString().padStart(3, '0');
   let pontosStr = pontos.toString().padStart(5, '0'); // AGORA COM 5 DÍGITOS!
   
-  // Código sem espaços (13 dígitos)
+  // Código sem espaços (13 dígitos concatenados)
   let codigo = nivelStr + rodadaStr + movStr + pontosStr;
   
-  // Versão formatada para facilitar a leitura
+  // Versão formatada com espaços para facilitar a leitura e anotação
   let codigoFormatado = `${nivelStr} ${rodadaStr} ${movStr} ${pontosStr}`;
   
-  // Prepara mensagem para o aluno
+  // Prepara mensagem para o aluno com formato de caixa de texto
   let mensagem = "";
   mensagem += "╔════════════════════════════════╗\n";
   mensagem += "║   CÓDIGO DE RESTAURAÇÃO       ║\n";
@@ -591,48 +782,58 @@ function gerarCodigo() {
   mensagem += "║ também funcionam!                ║\n";
   mensagem += "╚════════════════════════════════╝";
   
+  // Exibe a mensagem para o aluno
   alert(mensagem);
   
-  // Tenta copiar para área de transferência
+  // Tenta copiar o código para a área de transferência automaticamente
+  // Isso ajuda se o aluno estiver em um computador com acesso a um caderno digital
   try {
     navigator.clipboard.writeText(codigo);
     alert("📋 Código copiado para área de transferência!");
-  } catch (e) {}
+  } catch (e) {
+    // Se não conseguir copiar (navegador não permite), apenas ignora
+    // O aluno ainda pode anotar manualmente
+  }
 }
 
 /**
- * Restaura o progresso a partir de um código (12 ou 13 dígitos)
+ * Restaura o progresso do jogo a partir de um código digitado pelo usuário
+ * Aceita tanto códigos antigos de 12 dígitos quanto novos de 13 dígitos
  */
 function restaurarCodigo() {
+  // Solicita que o aluno digite o código
   let codigo = prompt("Digite o código (12 ou 13 números):");
-  if (!codigo) return;
+  if (!codigo) return; // Se cancelar, sai da função
   
-  // Remove espaços, traços, pontos
+  // Remove espaços, traços, pontos que o aluno possa ter adicionado para facilitar a leitura
   codigo = codigo.replace(/[-\s.]/g, '');
   
   // =====================================================
   // COMPATIBILIDADE COM CÓDIGOS ANTIGOS (12 DÍGITOS)
   // =====================================================
   if (codigo.length === 12) {
-    // Formato antigo: NNN RR MMM PPPP
+    // Formato antigo: NNN RR MMM PPPP (3+2+3+4 = 12 dígitos)
     let nivel = parseInt(codigo.substring(0, 3));
     let rodada = parseInt(codigo.substring(3, 5));
     let mov = parseInt(codigo.substring(5, 8));
     let pts = parseInt(codigo.substring(8, 12));
     
-    // Validação
+    // Validação dos valores extraídos
     if (nivel >= 1 && nivel <= 3 && 
         rodada >= 1 && rodada <= CONFIG[nivel].totalRodadas &&
         mov >= 0 && mov <= 999 &&
         pts >= 0 && pts <= 9999) {
       
+      // Restaura o estado do jogo
       nivelAtual = nivel;
       rodadaAtual = rodada;
       movimentos = mov;
       pontos = pts;
       
+      // Gera um novo tabuleiro e redesenha
       gerarTabuleiro();
       desenhar();
+      
       feedback("✅ Código antigo (12 dígitos) restaurado com sucesso!");
       return;
     } else {
@@ -645,19 +846,19 @@ function restaurarCodigo() {
   // FORMATO NOVO (13 DÍGITOS)
   // =====================================================
   if (codigo.length === 13) {
-    // Verifica se tem apenas números
+    // Verifica se o código contém apenas números
     if (!/^\d+$/.test(codigo)) {
       feedback("❌ Código deve conter apenas números!");
       return;
     }
     
-    // Extrai as partes
+    // Extrai as partes do código
     let nivel = parseInt(codigo.substring(0, 3));
     let rodada = parseInt(codigo.substring(3, 5));
     let mov = parseInt(codigo.substring(5, 8));
     let pts = parseInt(codigo.substring(8, 13));
     
-    // Valida os valores
+    // Valida os valores extraídos
     if (nivel < 1 || nivel > 3) {
       feedback("❌ Nível inválido! Deve ser 1, 2 ou 3.");
       return;
@@ -685,20 +886,27 @@ function restaurarCodigo() {
     movimentos = mov;
     pontos = pts;
     
+    // Gera um novo tabuleiro e redesenha
     gerarTabuleiro();
     desenhar();
+    
     feedback("✅ Progresso restaurado com sucesso!");
     return;
   }
   
-  // Se chegou aqui, o código tem tamanho inválido
+  // Se chegou aqui, o código tem tamanho diferente de 12 ou 13 dígitos
   feedback("❌ Código deve ter 12 ou 13 números!");
 }
 
 // =====================================================
-// DEMAIS FUNÇÕES (mantidas da versão anterior)
+// FUNÇÕES AUXILIARES
 // =====================================================
 
+/**
+ * Embaralha um array usando o algoritmo Fisher-Yates
+ * @param {Array} arr - O array a ser embaralhado
+ * @returns {Array} O mesmo array embaralhado (modifica o original)
+ */
 function embaralhar(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -707,23 +915,64 @@ function embaralhar(arr) {
   return arr;
 }
 
-function getQtdCores() { return CONFIG[nivelAtual].cores; }
-function getMetaRodada() { return getQtdCores(); }
-function getTotalRodadas() { return CONFIG[nivelAtual].totalRodadas; }
-function getBonus() { return CONFIG[nivelAtual].bonus; }
+/**
+ * Retorna a quantidade de cores do nível atual
+ * @returns {number} Número de cores (6, 9 ou 12)
+ */
+function getQtdCores() {
+  return CONFIG[nivelAtual].cores;
+}
 
+/**
+ * Retorna a meta de parafusos para a rodada atual
+ * A meta é igual ao número de cores do nível
+ * @returns {number} Quantos parafusos precisam ser completados
+ */
+function getMetaRodada() {
+  return getQtdCores();
+}
+
+/**
+ * Retorna o total de rodadas do nível atual
+ * @returns {number} Total de rodadas (10, 20 ou 35)
+ */
+function getTotalRodadas() {
+  return CONFIG[nivelAtual].totalRodadas;
+}
+
+/**
+ * Retorna o bônus por completar o nível atual
+ * @returns {number} Bônus (100, 200 ou 400)
+ */
+function getBonus() {
+  return CONFIG[nivelAtual].bonus;
+}
+
+/**
+ * Função de diagnóstico para o professor
+ * Mostra um alerta com a contagem de cada cor no tabuleiro atual
+ * Útil para verificar se a distribuição de porcas está correta
+ */
 function diagnosticar() {
   let qtdCores = getQtdCores();
   let contagem = {};
-  for (let i = 0; i < qtdCores; i++) contagem[CORES[i]] = 0;
   
+  // Inicializa contagem para cada cor do nível
+  for (let i = 0; i < qtdCores; i++) {
+    contagem[CORES[i]] = 0;
+  }
+  
+  // Conta as porcas de cada cor em todos os parafusos
   for (let i = 0; i < 18; i++) {
     for (let j = 0; j < parafusos[i].length; j++) {
       let cor = parafusos[i][j];
-      if (contagem[cor] !== undefined) contagem[cor]++;
+      if (contagem[cor] !== undefined) {
+        contagem[cor]++;
+      }
     }
   }
   
+  // Prepara a mensagem com os resultados
   let msg = "📊 DIAGNÓSTICO - CORES NO TABULEIRO:\n\n";
   for (let i = 0; i < qtdCores; i++) {
     let cor = CORES[i];
@@ -731,66 +980,178 @@ function diagnosticar() {
     msg += nome + ": " + (contagem[cor] || 0) + " porcas\n";
   }
   
+  // Calcula o total de porcas
   let total = 0;
-  for (let i = 0; i < qtdCores; i++) total += contagem[CORES[i]] || 0;
+  for (let i = 0; i < qtdCores; i++) {
+    total += contagem[CORES[i]] || 0;
+  }
   
   msg += "\nTotal: " + total + " porcas";
   msg += "\nEsperado: " + (qtdCores * 4) + " porcas";
+  
   alert(msg);
 }
 
+// =====================================================
+// FUNÇÕES PRINCIPAIS DO JOGO
+// =====================================================
+
+/**
+ * Gera um novo tabuleiro com distribuição equilibrada das porcas
+ * Garante que haja exatamente 4 porcas de cada cor do nível atual
+ * Distribui as porcas entre os 18 parafusos
+ */
 function gerarTabuleiro() {
   let qtdCores = getQtdCores();
+  
+  // Cria um pool com 4 porcas de cada cor (garantido!)
   let pool = [];
   for (let i = 0; i < qtdCores; i++) {
-    for (let j = 0; j < CAPACIDADE; j++) pool.push(CORES[i]);
+    for (let j = 0; j < CAPACIDADE; j++) {
+      pool.push(CORES[i]);
+    }
   }
   
+  // Embaralha o pool para distribuição aleatória
   pool = embaralhar(pool);
+  
+  // Inicializa os 18 parafusos como arrays vazios
   parafusos = Array(18).fill().map(() => []);
   
+  // Primeira passagem: cada parafuso recebe pelo menos 1 porca
+  // Isso garante que nenhum parafuso comece vazio
   for (let i = 0; i < 18; i++) {
-    if (pool.length) parafusos[i].push(pool.pop());
+    if (pool.length > 0) {
+      parafusos[i].push(pool.pop());
+    }
   }
   
-  let indices = embaralhar([...Array(18).keys()]);
-  while (pool.length) {
-    for (let idx of indices) {
-      if (!pool.length) break;
-      if (parafusos[idx].length < CAPACIDADE) {
-        parafusos[idx].push(pool.pop());
+  // Segunda passagem: distribui o restante das porcas aleatoriamente
+  // Cria um array com índices embaralhados para distribuição uniforme
+  let indices = [];
+  for (let i = 0; i < 18; i++) {
+    indices.push(i);
+  }
+  indices = embaralhar(indices);
+  
+  // Distribui as porcas restantes
+  while (pool.length > 0) {
+    for (let idx = 0; idx < indices.length; idx++) {
+      if (pool.length === 0) break;
+      if (parafusos[indices[idx]].length < CAPACIDADE) {
+        parafusos[indices[idx]].push(pool.pop());
       }
     }
   }
   
-  parafusos = parafusos.map(p => embaralhar(p));
+  // Embaralha cada pilha individualmente para maior aleatoriedade
+  for (let i = 0; i < 18; i++) {
+    parafusos[i] = embaralhar(parafusos[i]);
+  }
+  
+  // Reinicia flags
   processandoRodada = false;
   ultimaSequencia = [];
 }
 
+/**
+ * Conta quantos parafusos estão completos no tabuleiro
+ * Um parafuso está completo quando tem 4 porcas da mesma cor
+ * @returns {number} Número de parafusos completos
+ */
 function contarCompletos() {
   let count = 0;
-  for (let i = 0; i < 18; i++) if (estaCompleto(i)) count++;
+  for (let i = 0; i < 18; i++) {
+    if (estaCompleto(i)) {
+      count++;
+    }
+  }
   return count;
 }
 
+/**
+ * Verifica a maior sequência de parafusos completos consecutivos
+ * Uma sequência é definida por parafusos completos em índices consecutivos
+ * @returns {Object} Objeto com tamanho da maior sequência e índices dos parafusos
+ */
 function verificarSequencia() {
-  let maior = 0, atual = 0, indices = [], indicesAtuais = [];
+  let maiorSequencia = 0;
+  let sequenciaAtual = 0;
+  let indicesSequencia = [];
+  let indicesAtuais = [];
+  
+  // Percorre todos os parafusos em ordem
   for (let i = 0; i < 18; i++) {
     if (estaCompleto(i)) {
-      atual++;
+      sequenciaAtual++;
       indicesAtuais.push(i);
-      if (atual > maior) {
-        maior = atual;
-        indices = [...indicesAtuais];
+      if (sequenciaAtual > maiorSequencia) {
+        maiorSequencia = sequenciaAtual;
+        indicesSequencia = [];
+        for (let j = 0; j < indicesAtuais.length; j++) {
+          indicesSequencia.push(indicesAtuais[j]);
+        }
       }
-    } else { atual = 0; indicesAtuais = []; }
+    } else {
+      sequenciaAtual = 0;
+      indicesAtuais = [];
+    }
   }
-  ultimaSequencia = indices;
-  document.getElementById("sequenciaTamanho").textContent = maior;
-  return { tamanho: maior, indices: indices };
+  
+  // Atualiza a variável global e o elemento HTML
+  ultimaSequencia = indicesSequencia;
+  document.getElementById("sequenciaTamanho").textContent = maiorSequencia;
+  
+  return {
+    tamanho: maiorSequencia,
+    indices: indicesSequencia
+  };
 }
 
+// =====================================================
+// LÓGICA DE PONTUAÇÃO POR SEQUÊNCIA (PROPOSITAL)
+// =====================================================
+//
+// Esta lógica foi projetada para ser GENEROSA e MOTIVADORA,
+// não para ser matematicamente precisa.
+//
+// 🎯 OBJETIVO PEDAGÓGICO:
+//    Incentivar os alunos a buscarem sequências de parafusos
+//    completos, tornando o jogo mais prazeroso e recompensador.
+//
+// 📊 COMO FUNCIONA (ACUMULATIVO):
+//    Sempre que a MAIOR SEQUÊNCIA de parafusos completos AUMENTA,
+//    o jogador ganha um bônus baseado NOVO tamanho:
+//    
+//    Sequência 3 → +50 pontos
+//    Sequência 4 → +100 pontos (total acumulado 150)
+//    Sequência 5 → +200 pontos (total acumulado 350)
+//    Sequência 6 → +200 pontos (total acumulado 550)
+//    ...
+//
+// 🧠 POR QUE ASSIM?
+//    - Cada novo parafuso na sequência parece "valer mais"
+//    - A pontuação sobe de forma visível e emocionante
+//    - Os alunos sentem que vale a pena tentar fazer sequências
+//    - O engajamento aumenta significativamente
+//
+// ⚠️ DIFERENÇA DO MODELO "MATEMATICAMENTE CORRETO":
+//    No modelo tradicional, o bônus seria aplicado apenas UMA VEZ
+//    por sequência (ex: sequência 5 = 200 pontos, independente de
+//    quanto tempo levou para chegar lá). Isso é menos motivador.
+//
+// ✅ CONCLUSÃO:
+//    Esta lógica é INTENCIONAL e está alinhada com o objetivo
+//    pedagógico do jogo: aprender brincando, com recompensas
+//    generosas que mantêm o interesse dos alunos.
+//
+// =====================================================
+
+/**
+ * Calcula o bônus baseado no tamanho da sequência
+ * @param {number} tamanho - Tamanho da sequência
+ * @returns {number} Bônus em pontos
+ */
 function calcularBonusSequencia(tamanho) {
   if (tamanho >= 5) return 200;
   if (tamanho === 4) return 100;
@@ -798,28 +1159,58 @@ function calcularBonusSequencia(tamanho) {
   return 0;
 }
 
+/**
+ * Retorna quantas porcas iguais estão no topo de um parafuso
+ * Usado para movimento em bloco
+ * @param {number} idx - Índice do parafuso
+ * @returns {number} Quantidade de porcas iguais no topo
+ */
 function getBlocoTopo(idx) {
-  if (idx === null || parafusos[idx].length === 0) return 0;
+  if (idx === null) return 0;
+  if (parafusos[idx].length === 0) return 0;
+  
   let cor = parafusos[idx][parafusos[idx].length - 1];
   let count = 0;
-  for (let i = parafusos[idx].length - 1; i >= 0 && parafusos[idx][i] === cor; i--) count++;
+  
+  // Conta quantas porcas iguais há a partir do topo
+  for (let i = parafusos[idx].length - 1; i >= 0; i--) {
+    if (parafusos[idx][i] === cor) {
+      count++;
+    } else {
+      break;
+    }
+  }
+  
   return count;
 }
 
+/**
+ * Ajusta o brilho de uma cor (para dar efeito 3D nas porcas)
+ * @param {string} hex - Cor em formato hexadecimal (#RRGGBB)
+ * @param {number} percent - Percentual de ajuste (-20 escurece, +20 clareia)
+ * @returns {string} Cor ajustada em formato hexadecimal
+ */
 function ajustarCor(hex, percent) {
   let r = parseInt(hex.substring(1, 3), 16);
   let g = parseInt(hex.substring(3, 5), 16);
   let b = parseInt(hex.substring(5, 7), 16);
+  
   r = Math.max(0, Math.min(255, r + percent));
   g = Math.max(0, Math.min(255, g + percent));
   b = Math.max(0, Math.min(255, b + percent));
+  
   return "#" + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
 }
 
+/**
+ * Desenha o tabuleiro na tela
+ * Reconstrói todos os elementos HTML dos parafusos e porcas
+ */
 function desenhar() {
   let board = document.getElementById("board");
   board.innerHTML = "";
   
+  // Atualiza informações da topbar
   document.getElementById("moves").textContent = movimentos;
   document.getElementById("score").textContent = pontos;
   
@@ -829,6 +1220,7 @@ function desenhar() {
   document.getElementById("completosRodada").textContent = completos;
   document.getElementById("metaRodada").textContent = meta;
   
+  // Calcula e atualiza a barra de progresso
   let progresso = (completos / meta) * 100;
   if (progresso > 100) progresso = 100;
   document.getElementById("progress-fill").style.width = progresso + "%";
@@ -836,29 +1228,49 @@ function desenhar() {
   document.getElementById("nivelAtual").textContent = "Nível " + nivelAtual;
   document.getElementById("desafioAtual").textContent = "Rodada " + rodadaAtual + "/" + getTotalRodadas();
   
+  // Verifica a sequência atual
   let seq = verificarSequencia();
   
+  // Itera sobre todos os parafusos
   for (let idx = 0; idx < 18; idx++) {
     let parafuso = parafusos[idx];
+    
     let div = document.createElement("div");
     div.className = "screw";
     
-    if (selecionado === idx) div.classList.add("selected");
-    if (estaCompleto(idx)) div.classList.add("locked");
-    if (seq.indices.includes(idx)) div.classList.add("sequencia");
+    // Adiciona classe se estiver selecionado
+    if (selecionado === idx) {
+      div.classList.add("selected");
+    }
     
+    // Adiciona classe se estiver completo
+    if (estaCompleto(idx)) {
+      div.classList.add("locked");
+    }
+    
+    // Adiciona classe se fizer parte da sequência
+    if (seq.indices.includes(idx)) {
+      div.classList.add("sequencia");
+    }
+    
+    // Adiciona evento de clique (usando closure para capturar o índice)
     div.onclick = (function(index) {
-      return function() { cliqueParafuso(index); };
+      return function() {
+        cliqueParafuso(index);
+      };
     })(idx);
     
+    // Adiciona as porcas (do fundo para o topo)
     for (let i = 0; i < parafuso.length; i++) {
       let nut = document.createElement("div");
       nut.className = "nut";
+      // Aplica gradiente para efeito 3D
       nut.style.background = "linear-gradient(145deg, " + parafuso[i] + ", " + ajustarCor(parafuso[i], -20) + ")";
-      nut.title = NOMES_CORES[parafuso[i]];
+      nut.title = NOMES_CORES[parafuso[i]]; // Tooltip com o nome da cor
       div.appendChild(nut);
     }
     
+    // Adiciona placeholders invisíveis para manter o tamanho do parafuso
     for (let i = parafuso.length; i < CAPACIDADE; i++) {
       let placeholder = document.createElement("div");
       placeholder.className = "nut-placeholder";
@@ -869,55 +1281,105 @@ function desenhar() {
   }
 }
 
+/**
+ * Verifica se um parafuso está completo
+ * @param {number} idx - Índice do parafuso
+ * @returns {boolean} True se o parafuso tem 4 porcas da mesma cor
+ */
 function estaCompleto(idx) {
   let p = parafusos[idx];
   if (p.length !== CAPACIDADE) return false;
+  
   let primeiraCor = p[0];
-  for (let i = 1; i < p.length; i++) if (p[i] !== primeiraCor) return false;
+  for (let i = 1; i < p.length; i++) {
+    if (p[i] !== primeiraCor) return false;
+  }
+  
   return true;
 }
 
+/**
+ * Processa clique em um parafuso
+ * Se não há parafuso selecionado, seleciona o clicado
+ * Se há parafuso selecionado, tenta mover a(s) porca(s)
+ * @param {number} idx - Índice do parafuso clicado
+ */
 function cliqueParafuso(idx) {
+  // Se estiver processando uma rodada, ignora cliques
   if (processandoRodada) return;
-  if (estaCompleto(idx)) { feedback("❌ Parafuso já está completo!"); return; }
   
+  // Se o parafuso estiver completo, não pode selecionar
+  if (estaCompleto(idx)) {
+    feedback("❌ Parafuso já está completo! Não pode mover.");
+    return;
+  }
+  
+  // Se não há parafuso selecionado
   if (selecionado === null) {
+    // Só pode selecionar se tiver porcas
     if (parafusos[idx].length > 0) {
       selecionado = idx;
       desenhar();
     }
   } else {
+    // Move de selecionado para idx
     mover(selecionado, idx);
     selecionado = null;
     desenhar();
   }
 }
 
+/**
+ * Move porcas de um parafuso de origem para um destino
+ * Implementa movimento em bloco (move todas as porcas iguais do topo)
+ * @param {number} origem - Índice do parafuso de origem
+ * @param {number} destino - Índice do parafuso de destino
+ */
 function mover(origem, destino) {
+  // Não pode mover para o mesmo parafuso
   if (origem === destino) return;
+  
+  // Origem não pode estar vazia
   if (parafusos[origem].length === 0) return;
   
+  // Verifica tamanho do bloco (quantas porcas iguais no topo)
   let bloco = getBlocoTopo(origem);
   let espaco = CAPACIDADE - parafusos[destino].length;
   
+  // Verifica se há espaço suficiente no destino
   if (espaco < bloco) {
     feedback("❌ Espaço insuficiente! Cabe apenas " + espaco);
     return;
   }
   
+  // Verifica se a cor do topo da origem é compatível com o destino
   let corOrigem = parafusos[origem][parafusos[origem].length - 1];
   let topoDestino = null;
-  if (parafusos[destino].length > 0) topoDestino = parafusos[destino][parafusos[destino].length - 1];
+  if (parafusos[destino].length > 0) {
+    topoDestino = parafusos[destino][parafusos[destino].length - 1];
+  }
   
+  // Só pode mover se destino estiver vazio ou tiver a mesma cor
   if (topoDestino === null || topoDestino === corOrigem) {
+    // Salva estado atual no histórico para permitir desfazer
     let estadoParaHistorico = {
-      parafusos: parafusos.map(p => [...p]),
+      parafusos: [],
       movimentos: movimentos,
       pontos: pontos,
       rodadaAtual: rodadaAtual
     };
+    
+    // Faz cópia profunda dos parafusos
+    for (let i = 0; i < 18; i++) {
+      estadoParaHistorico.parafusos.push([]);
+      for (let j = 0; j < parafusos[i].length; j++) {
+        estadoParaHistorico.parafusos[i].push(parafusos[i][j]);
+      }
+    }
+    
     historico.push(JSON.stringify(estadoParaHistorico));
     
+    // Move o bloco inteiro (da origem para o destino)
     for (let i = 0; i < bloco; i++) {
       let porca = parafusos[origem].pop();
       parafusos[destino].push(porca);
@@ -925,37 +1387,50 @@ function mover(origem, destino) {
     
     movimentos++;
     
+    // Verifica se o destino foi completado com este movimento
     if (estaCompleto(destino)) {
       pontos += 20;
+      
+      // Verifica se formou uma sequência
       let seq = verificarSequencia();
       let bonus = calcularBonusSequencia(seq.tamanho);
+      
       if (bonus > 0) {
         pontos += bonus;
         feedback("🏆 SEQUÊNCIA DE " + seq.tamanho + "! +" + bonus + " pontos", 3000);
       } else {
         feedback("✅ Parafuso " + (destino + 1) + " completo! +20 pontos");
       }
-    } else if (bloco > 1) {
-      feedback("📦 Movidas " + bloco + " porcas de uma vez!", 1500);
+    } else {
+      // Se moveu mais de uma porca, informa
+      if (bloco > 1) {
+        feedback("📦 Movidas " + bloco + " porcas de uma vez!", 1500);
+      }
     }
     
     desenhar();
     
+    // Verifica se a rodada foi completada
     let completos = contarCompletos();
     let meta = getMetaRodada();
     
     if (completos >= meta && !processandoRodada) {
       processandoRodada = true;
+      
+      // Bônus por completar a rodada
       pontos += 50;
       feedback("🎯 RODADA " + rodadaAtual + " COMPLETA! +50 pontos", 3000);
+      
       rodadaAtual++;
       
+      // Verifica se completou todas as rodadas do nível
       if (rodadaAtual > getTotalRodadas()) {
         CONFIG[nivelAtual].completa = true;
         let bonus = getBonus();
         pontos += bonus;
         feedback("🏆 NÍVEL " + nivelAtual + " COMPLETO! +" + bonus + " pontos!", 4000);
         
+        // Avança para o próximo nível após 2 segundos
         setTimeout(function() {
           if (nivelAtual < 3) {
             nivelAtual++;
@@ -971,6 +1446,7 @@ function mover(origem, destino) {
           }
         }, 2000);
       } else {
+        // Próxima rodada do mesmo nível após 1.5 segundos
         setTimeout(function() {
           gerarTabuleiro();
           desenhar();
@@ -979,26 +1455,57 @@ function mover(origem, destino) {
       }
     }
   } else {
+    // Cores diferentes
     feedback("❌ Cores diferentes!");
     selecionado = null;
   }
 }
 
+/**
+ * Desfaz o último movimento
+ * Restaura o estado anterior a partir do histórico
+ */
 function desfazer() {
-  if (processandoRodada) { feedback("⏳ Aguarde..."); return; }
-  if (historico.length === 0) { feedback("Nada para desfazer"); return; }
+  if (processandoRodada) {
+    feedback("⏳ Aguarde a transição da rodada...");
+    return;
+  }
+  
+  if (historico.length === 0) {
+    feedback("Nada para desfazer");
+    return;
+  }
+  
+  // Recupera o último estado do histórico
   let estado = JSON.parse(historico.pop());
-  parafusos = estado.parafusos.map(p => [...p]);
+  
+  // Restaura os parafusos
+  parafusos = [];
+  for (let i = 0; i < estado.parafusos.length; i++) {
+    parafusos.push([]);
+    for (let j = 0; j < estado.parafusos[i].length; j++) {
+      parafusos[i].push(estado.parafusos[i][j]);
+    }
+  }
+  
   movimentos = estado.movimentos;
   pontos = estado.pontos;
   rodadaAtual = estado.rodadaAtual;
+  
   selecionado = null;
   desenhar();
+  
   feedback("↩️ Movimento desfeito");
 }
 
+/**
+ * Verifica a senha digitada no painel do professor
+ * Se correta, desbloqueia o nível solicitado
+ * @param {number} nivel - Nível a ser desbloqueado (1, 2 ou 3)
+ */
 function verificarSenha(nivel) {
   let senha = document.getElementById("senhaInput").value;
+  
   if (senha === SENHA_PROFESSOR) {
     nivelAtual = nivel;
     rodadaAtual = 1;
@@ -1006,8 +1513,10 @@ function verificarSenha(nivel) {
     historico = [];
     selecionado = null;
     processandoRodada = false;
+    
     gerarTabuleiro();
     desenhar();
+    
     feedback("👨‍🏫 Nível " + nivel + " desbloqueado!");
     fecharPainelProfessor();
   } else {
@@ -1016,47 +1525,116 @@ function verificarSenha(nivel) {
   }
 }
 
+/**
+ * Exibe uma mensagem flutuante na tela
+ * @param {string} msg - Mensagem a ser exibida
+ * @param {number} tempo - Duração em milissegundos (padrão: 2000)
+ */
 function feedback(msg, tempo) {
   if (tempo === undefined) tempo = 2000;
+  
+  // Remove mensagem anterior se existir
   let fb = document.querySelector(".feedback");
   if (fb) fb.remove();
+  
+  // Cria nova mensagem
   fb = document.createElement("div");
   fb.className = "feedback";
   fb.textContent = msg;
+  
   document.body.appendChild(fb);
-  setTimeout(function() { fb.remove(); }, tempo);
+  
+  // Remove após o tempo especificado
+  setTimeout(function() {
+    fb.remove();
+  }, tempo);
 }
 
-function mostrarInstrucoes() { document.getElementById("instructions").style.display = "flex"; }
-function fecharInstrucoes() { document.getElementById("instructions").style.display = "none"; }
-function mostrarBNCC() { document.getElementById("bnccModal").style.display = "flex"; }
-function fecharBNCC() { document.getElementById("bnccModal").style.display = "none"; }
-function mostrarPainelProfessor() { 
-  document.getElementById("teacherPanel").style.display = "flex"; 
-  document.getElementById("senhaInput").value = ""; 
-}
-function fecharPainelProfessor() { document.getElementById("teacherPanel").style.display = "none"; }
+// =====================================================
+// FUNÇÕES DOS MODAIS
+// =====================================================
 
+/**
+ * Abre o modal de instruções
+ */
+function mostrarInstrucoes() {
+  document.getElementById("instructions").style.display = "flex";
+}
+
+/**
+ * Fecha o modal de instruções
+ */
+function fecharInstrucoes() {
+  document.getElementById("instructions").style.display = "none";
+}
+
+/**
+ * Abre o modal da BNCC
+ */
+function mostrarBNCC() {
+  document.getElementById("bnccModal").style.display = "flex";
+}
+
+/**
+ * Fecha o modal da BNCC
+ */
+function fecharBNCC() {
+  document.getElementById("bnccModal").style.display = "none";
+}
+
+/**
+ * Abre o painel do professor
+ */
+function mostrarPainelProfessor() {
+  document.getElementById("teacherPanel").style.display = "flex";
+  document.getElementById("senhaInput").value = "";
+}
+
+/**
+ * Fecha o painel do professor
+ */
+function fecharPainelProfessor() {
+  document.getElementById("teacherPanel").style.display = "none";
+}
+
+/**
+ * Reinicia o jogo do zero (nível 1, rodada 1)
+ * Pergunta confirmação se houver progresso
+ */
 function novoJogo() {
   if (pontos > 0 || movimentos > 0) {
-    if (!confirm("Tem certeza? Todo progresso atual será perdido!")) return;
+    if (!confirm("Tem certeza? Todo progresso atual será perdido!")) {
+      return;
+    }
   }
+  
   nivelAtual = 1;
   rodadaAtual = 1;
-  CONFIG[1].completa = CONFIG[2].completa = CONFIG[3].completa = false;
+  
+  CONFIG[1].completa = false;
+  CONFIG[2].completa = false;
+  CONFIG[3].completa = false;
+  
   movimentos = 0;
   pontos = 0;
   historico = [];
   selecionado = null;
   processandoRodada = false;
+  
   gerarTabuleiro();
   desenhar();
+  
   feedback("🌟 Nível 1 - Rodada 1/" + getTotalRodadas());
 }
 
 // =====================================================
-// AVISO AO FECHAR
+// AVISO AO FECHAR A PÁGINA
 // =====================================================
+
+/**
+ * Evento disparado quando o usuário tenta fechar ou recarregar a página
+ * Exibe um aviso se houver progresso para evitar perda acidental
+ */
 window.addEventListener('beforeunload', function(event) {
   if (pontos > 0 || movimentos > 0) {
     event.preventDefault();
@@ -1066,11 +1644,13 @@ window.addEventListener('beforeunload', function(event) {
 });
 
 // =====================================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO DO JOGO
 // =====================================================
+
+// Inicia o jogo
 novoJogo();
 
-// Exportar funções
+// Exporta funções para o escopo global (para serem chamadas pelos botões HTML)
 window.novoJogo = novoJogo;
 window.desfazer = desfazer;
 window.mostrarInstrucoes = mostrarInstrucoes;
