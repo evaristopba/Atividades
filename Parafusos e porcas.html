@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Parafusos e Porcas - Versão Completa</title>
+<title>Parafusos e Porcas - Completo</title>
 <style>
 /* =====================================================
    ESTILOS GLOBAIS
@@ -12,6 +12,11 @@
 * {
   box-sizing: border-box;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 /* Configuração do html e body para ocupar toda a tela sem rolagem */
@@ -30,6 +35,31 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+}
+
+/* =====================================================
+   PROTEÇÃO CONTRA CLIQUES ACIDENTAIS
+   ===================================================== */
+
+/* Garante que elementos interativos funcionem */
+.screw, button, select, .close-btn, .info-item, .nivel-badge, .desafio-info, #sequencia-info {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+/* Áreas do jogo mantêm interatividade */
+#board, #topbar, .modal-content {
+  pointer-events: auto;
+}
+
+/* Impede cliques no body de afetarem o app */
+body {
+  pointer-events: none;
+}
+
+/* Libera os filhos do body que são interativos */
+body > * {
+  pointer-events: auto;
 }
 
 /* Estilo do título principal */
@@ -84,7 +114,8 @@ h1 {
 .info-item[title]:hover::after, 
 .nivel-badge[title]:hover::after, 
 .desafio-info[title]:hover::after, 
-#sequencia-info[title]:hover::after {
+#sequencia-info[title]:hover::after,
+button[title]:hover::after {
   content: attr(title);
   position: absolute;
   bottom: 125%;
@@ -106,7 +137,8 @@ h1 {
 .info-item[title]:hover::before,
 .nivel-badge[title]:hover::before,
 .desafio-info[title]:hover::before,
-#sequencia-info[title]:hover::before {
+#sequencia-info[title]:hover::before,
+button[title]:hover::before {
   content: '';
   position: absolute;
   bottom: 115%;
@@ -138,39 +170,6 @@ button, select {
   white-space: nowrap;
   line-height: 1.2;
   position: relative;
-}
-
-/* Tooltips para botões */
-button[title]:hover::after, select[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #2c3e50;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 15px;
-  font-size: 0.7rem;
-  white-space: nowrap;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  border: 1px solid #f1c40f;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-/* Seta do tooltip para botões */
-button[title]:hover::before, select[title]:hover::before {
-  content: '';
-  position: absolute;
-  bottom: 115%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: #2c3e50 transparent transparent transparent;
-  z-index: 1000;
-  pointer-events: none;
 }
 
 /* Efeito hover para botões */
@@ -390,6 +389,116 @@ button:active {
 }
 
 /* =====================================================
+   ESTILOS PARA A COMEMORAÇÃO
+   ===================================================== */
+
+/* Container da comemoração (ocupa toda a tela) */
+#celebracao {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Não atrapalha cliques */
+  z-index: 9999;
+  display: none;
+}
+
+/* Confetes individuais */
+.confete {
+  position: absolute;
+  width: 10px;
+  height: 20px;
+  background: linear-gradient(45deg, #f1c40f, #f39c12);
+  border-radius: 2px;
+  animation: cair 3s linear forwards;
+}
+
+/* Cores variadas para os confetes */
+.confete:nth-child(1) { background: #e74c3c; left: 10%; animation-delay: 0s; }
+.confete:nth-child(2) { background: #3498db; left: 20%; animation-delay: 0.2s; }
+.confete:nth-child(3) { background: #2ecc71; left: 30%; animation-delay: 0.4s; }
+.confete:nth-child(4) { background: #f1c40f; left: 40%; animation-delay: 0.6s; }
+.confete:nth-child(5) { background: #9b59b6; left: 50%; animation-delay: 0.8s; }
+.confete:nth-child(6) { background: #e67e22; left: 60%; animation-delay: 1s; }
+.confete:nth-child(7) { background: #1abc9c; left: 70%; animation-delay: 1.2s; }
+.confete:nth-child(8) { background: #e74c3c; left: 80%; animation-delay: 1.4s; }
+.confete:nth-child(9) { background: #3498db; left: 90%; animation-delay: 1.6s; }
+.confete:nth-child(10) { background: #f1c40f; left: 95%; animation-delay: 1.8s; }
+.confete:nth-child(11) { background: #2ecc71; left: 15%; animation-delay: 2s; }
+.confete:nth-child(12) { background: #9b59b6; left: 25%; animation-delay: 2.2s; }
+.confete:nth-child(13) { background: #e67e22; left: 35%; animation-delay: 2.4s; }
+.confete:nth-child(14) { background: #1abc9c; left: 45%; animation-delay: 2.6s; }
+.confete:nth-child(15) { background: #e74c3c; left: 55%; animation-delay: 2.8s; }
+
+/* Animação de cair */
+@keyframes cair {
+  0% {
+    top: -10%;
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    transform: rotate(360deg);
+    opacity: 0.8;
+  }
+}
+
+/* Mensagem de parabéns */
+#mensagem-parabens {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #f1c40f;
+  font-size: 3rem;
+  font-weight: bold;
+  padding: 20px 40px;
+  border-radius: 60px;
+  border: 4px solid #f1c40f;
+  box-shadow: 0 0 50px rgba(241, 196, 15, 0.5);
+  z-index: 10000;
+  text-align: center;
+  animation: pulsar 0.5s ease-in-out infinite alternate;
+  display: none;
+}
+
+/* Animação de pulsar */
+@keyframes pulsar {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    text-shadow: 0 0 20px #f1c40f;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.1);
+    text-shadow: 0 0 40px #f39c12;
+  }
+}
+
+/* Estrelas brilhantes */
+.estrela {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  animation: brilhar 1s infinite alternate;
+}
+
+@keyframes brilhar {
+  from {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* =====================================================
    MODAIS (INSTRUÇÕES, BNCC, PROFESSOR)
    ===================================================== */
 
@@ -498,7 +607,7 @@ button:active {
 <h1>🔧 PARAFUSOS E PORCAS 🔩</h1>
 
 <!-- =====================================================
-     BARRA SUPERIOR (TOPBAR) COM TODOS OS BOTÕES E INFOS
+     BARRA SUPERIOR (TOPBAR) - COM BOTÃO BNCC
      ===================================================== -->
 <div id="topbar">
   <!-- Informações do jogo -->
@@ -515,13 +624,20 @@ button:active {
   <button onclick="restaurarCodigo()" title="Restaurar progresso digitando o código (12 ou 13 dígitos)">🔄 Restaurar</button>
   <button onclick="desfazer()" title="Desfazer o último movimento">↩️ Desfazer</button>
   <button onclick="mostrarInstrucoes()" title="Ver instruções do jogo">📘 Ajuda</button>
+  <button onclick="mostrarBNCC()" title="Habilidades da BNCC desenvolvidas">📚 BNCC</button>
   <button onclick="mostrarPainelProfessor()" title="Abrir painel do professor">👨‍🏫 Professor</button>
 </div>
 
 <!-- =====================================================
-     TABULEIRO DO JOGO (SERÁ PREENCHIDO PELO JAVASCRIPT)
+     TABULEIRO DO JOGO
      ===================================================== -->
 <div id="board"></div>
+
+<!-- =====================================================
+     ELEMENTOS DE COMEMORAÇÃO
+     ===================================================== -->
+<div id="celebracao"></div>
+<div id="mensagem-parabens"></div>
 
 <!-- =====================================================
      MODAL DE INSTRUÇÕES
@@ -585,7 +701,7 @@ button:active {
 </div>
 
 <!-- =====================================================
-     MODAL BNCC (BASE NACIONAL COMUM CURRICULAR)
+     MODAL BNCC
      ===================================================== -->
 <div id="bnccModal">
   <div class="modal-content">
@@ -623,7 +739,7 @@ button:active {
 </div>
 
 <!-- =====================================================
-     MODAL DO PROFESSOR (COM SENHA E DIAGNÓSTICO)
+     MODAL DO PROFESSOR
      ===================================================== -->
 <div id="teacherPanel">
   <div class="modal-content">
@@ -694,8 +810,8 @@ const NOMES_CORES = {
 // Capacidade máxima de porcas por parafuso
 const CAPACIDADE = 4;
 
-// Senha para desbloquear níveis no painel do professor
-const SENHA_PROFESSOR = "P2026";
+// Senha para desbloquear níveis no painel do professor (ALTERADA PARA X2026)
+const SENHA_PROFESSOR = "X2026";
 
 // Configuração dos níveis do jogo
 // Cada nível define: quantidade de cores, total de rodadas, bônus ao completar
@@ -755,7 +871,7 @@ function gerarCodigo() {
   let nivelStr = nivelAtual.toString().padStart(3, '0');
   let rodadaStr = rodadaAtual.toString().padStart(2, '0');
   let movStr = movimentos.toString().padStart(3, '0');
-  let pontosStr = pontos.toString().padStart(5, '0'); // AGORA COM 5 DÍGITOS!
+  let pontosStr = pontos.toString().padStart(5, '0');
   
   // Código sem espaços (13 dígitos concatenados)
   let codigo = nivelStr + rodadaStr + movStr + pontosStr;
@@ -990,6 +1106,70 @@ function diagnosticar() {
   msg += "\nEsperado: " + (qtdCores * 4) + " porcas";
   
   alert(msg);
+}
+
+// =====================================================
+// FUNÇÕES DE COMEMORAÇÃO
+// =====================================================
+
+/**
+ * Ativa a comemoração visual quando um nível é completado
+ */
+function comemorar() {
+  let celebracao = document.getElementById("celebracao");
+  let mensagem = document.getElementById("mensagem-parabens");
+  
+  // Limpa elementos anteriores
+  celebracao.innerHTML = "";
+  
+  // Define a mensagem baseada no nível
+  let texto = "";
+  if (nivelAtual === 1) texto = "🎉 NÍVEL 1 COMPLETO! 🎉";
+  else if (nivelAtual === 2) texto = "🎉 NÍVEL 2 COMPLETO! 🎉";
+  else texto = "🏆 NÍVEL 3 COMPLETO! 🏆";
+  
+  mensagem.textContent = texto;
+  
+  // Cria 30 confetes
+  for (let i = 0; i < 30; i++) {
+    let confete = document.createElement("div");
+    confete.className = "confete";
+    
+    // Cores aleatórias
+    let cores = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#1abc9c"];
+    confete.style.background = cores[Math.floor(Math.random() * cores.length)];
+    
+    // Posição horizontal aleatória
+    confete.style.left = Math.random() * 100 + "%";
+    
+    // Duração aleatória para efeito mais natural
+    confete.style.animationDuration = (2 + Math.random() * 2) + "s";
+    
+    // Atraso aleatório
+    confete.style.animationDelay = Math.random() * 0.5 + "s";
+    
+    celebracao.appendChild(confete);
+  }
+  
+  // Cria estrelas brilhantes
+  for (let i = 0; i < 20; i++) {
+    let estrela = document.createElement("div");
+    estrela.className = "estrela";
+    estrela.style.left = Math.random() * 100 + "%";
+    estrela.style.top = Math.random() * 100 + "%";
+    estrela.style.animationDelay = Math.random() * 1 + "s";
+    celebracao.appendChild(estrela);
+  }
+  
+  // Mostra os elementos
+  celebracao.style.display = "block";
+  mensagem.style.display = "block";
+  
+  // Esconde após 3 segundos
+  setTimeout(function() {
+    celebracao.style.display = "none";
+    mensagem.style.display = "none";
+  }, 3000);
 }
 
 // =====================================================
@@ -1428,9 +1608,13 @@ function mover(origem, destino) {
         CONFIG[nivelAtual].completa = true;
         let bonus = getBonus();
         pontos += bonus;
-        feedback("🏆 NÍVEL " + nivelAtual + " COMPLETO! +" + bonus + " pontos!", 4000);
         
-        // Avança para o próximo nível após 2 segundos
+        // =====================================================
+        // ATIVA COMEMORAÇÃO
+        // =====================================================
+        comemorar();
+        
+        // Avança para o próximo nível após 3 segundos (tempo da comemoração)
         setTimeout(function() {
           if (nivelAtual < 3) {
             nivelAtual++;
@@ -1444,7 +1628,7 @@ function mover(origem, destino) {
           } else {
             feedback("🎉 PARABÉNS! VOCÊ VENCEU TODAS AS RODADAS!", 5000);
           }
-        }, 2000);
+        }, 3000);
       } else {
         // Próxima rodada do mesmo nível após 1.5 segundos
         setTimeout(function() {
@@ -1628,7 +1812,104 @@ function novoJogo() {
 }
 
 // =====================================================
-// AVISO AO FECHAR A PÁGINA
+// PROTEÇÃO CONTRA FECHAMENTO ACIDENTAL
+// =====================================================
+
+/**
+ * Bloqueia teclas de atalho que poderiam fechar ou recarregar o app
+ */
+document.addEventListener('keydown', function(event) {
+  // Lista de teclas proibidas
+  const teclasProibidas = ['F5', 'F4', 'F3', 'F2', 'F1'];
+  
+  // Previne F5, F4, F3, F2, F1
+  if (teclasProibidas.includes(event.key)) {
+    event.preventDefault();
+    feedback("⚠️ Use os botões do jogo para navegar", 1500);
+    return false;
+  }
+  
+  // Previne Ctrl+R (recarregar)
+  if (event.ctrlKey && (event.key === 'r' || event.key === 'R')) {
+    event.preventDefault();
+    feedback("⚠️ Use os botões do jogo para navegar", 1500);
+    return false;
+  }
+  
+  // Previne Ctrl+W (fechar aba)
+  if (event.ctrlKey && (event.key === 'w' || event.key === 'W')) {
+    event.preventDefault();
+    feedback("⚠️ Para sair, use o botão do navegador", 1500);
+    return false;
+  }
+  
+  // Previne Ctrl+N (nova janela)
+  if (event.ctrlKey && (event.key === 'n' || event.key === 'N')) {
+    event.preventDefault();
+    feedback("⚠️ Use os botões do jogo para navegar", 1500);
+    return false;
+  }
+  
+  // Previne Ctrl+T (nova aba)
+  if (event.ctrlKey && (event.key === 't' || event.key === 'T')) {
+    event.preventDefault();
+    feedback("⚠️ Use os botões do jogo para navegar", 1500);
+    return false;
+  }
+  
+  // Previne Alt+F4 (fechar janela) - funciona apenas em alguns navegadores
+  if (event.altKey && event.key === 'F4') {
+    event.preventDefault();
+    feedback("⚠️ Para sair, use o botão do navegador", 1500);
+    return false;
+  }
+  
+  // Previne Alt+← (voltar) e Alt+→ (avançar)
+  if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+    event.preventDefault();
+    feedback("⚠️ Use os botões do jogo para navegar", 1500);
+    return false;
+  }
+});
+
+/**
+ * Previne clique com botão direito (menu contextual)
+ */
+document.addEventListener('contextmenu', function(event) {
+  event.preventDefault();
+  feedback("⚠️ Menu desabilitado", 1000);
+  return false;
+});
+
+/**
+ * Previne duplo clique que poderia selecionar texto
+ * Permite duplo clique apenas em elementos interativos
+ */
+document.addEventListener('dblclick', function(event) {
+  if (!event.target.closest('.screw') && !event.target.closest('button')) {
+    event.preventDefault();
+    return false;
+  }
+});
+
+/**
+ * Previne arraste de elementos
+ */
+document.addEventListener('dragstart', function(event) {
+  event.preventDefault();
+  return false;
+});
+
+/**
+ * Previne seleção de texto (reforço)
+ */
+document.addEventListener('selectstart', function(event) {
+  event.preventDefault();
+  return false;
+});
+
+// =====================================================
+// AVISO AO FECHAR A PÁGINA (MANTIDO)
 // =====================================================
 
 /**
