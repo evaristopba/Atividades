@@ -2,18 +2,16 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventura das Sequências - Fundamental I</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aventura das Sequências - Sem Rolagem</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4a6bff; --success: #28a745; --danger: #dc3545; --light: #f8f9fa; --dark: #333; --gold: #ffc107;
-            /* Variáveis que mudam com o tema */
+            --primary: #4a6bff; --success: #28a745; --danger: #dc3545; --gold: #ffc107;
             --bg-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             --header-color: #4a6bff;
         }
 
-        /* Temas por Nível */
         body.theme-1 { --bg-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); --header-color: #1b5e20; }
         body.theme-2 { --bg-gradient: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); --header-color: #0d47a1; }
         body.theme-3 { --bg-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); --header-color: #311b92; }
@@ -24,126 +22,136 @@
         body {
             font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
             background: var(--bg-gradient);
-            min-height: 100vh; padding: 20px; color: var(--dark);
-            transition: background 0.5s ease;
+            height: 100vh; width: 100vw;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; /* IMPEDE A ROLAGEM */
+            padding: 10px;
         }
 
         .container {
-            max-width: 1000px; margin: 0 auto; background: rgba(255,255,255,0.95);
-            border-radius: 30px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border: 6px solid white;
+            width: 100%; height: 98vh; max-width: 1200px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px; padding: 15px;
+            display: flex; flex-direction: column;
+            border: 6px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
-        .main-title {
-            text-align: center; color: var(--header-color); margin-bottom: 15px; font-size: 2em;
+        /* Topo: Admin + Título e Stats em uma linha */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; gap: 15px;
         }
 
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 10px; margin-bottom: 20px;
+        .main-title { font-size: 1.5em; color: var(--header-color); flex: 1; }
+
+        .admin-panel { display: flex; gap: 8px; }
+        .btn-admin {
+            border: none; padding: 6px 12px; border-radius: 12px; cursor: pointer;
+            font-weight: bold; font-size: 0.75em; color: white;
         }
+        .btn-new { background: #ff4757; } .btn-key { background: #495057; }
 
-        .stat-box {
-            background: white; padding: 10px; border-radius: 15px;
-            text-align: center; border: 2px solid #ddd; transition: 0.3s;
+        /* Grade de Stats mais compacta */
+        .stats-strip {
+            display: flex; gap: 8px; background: #f8f9fa; 
+            padding: 8px 15px; border-radius: 20px; border: 2px solid #eee;
         }
+        .stat-item { text-align: center; min-width: 60px; }
+        .stat-item b { display: block; font-size: 1.2em; color: var(--header-color); line-height: 1; }
+        .stat-item span { font-size: 0.6em; text-transform: uppercase; color: #888; }
 
-        .stat-box.bonus-active {
-            border-color: var(--gold); background-color: #fffde7;
-            animation: pulse-gold 1.5s infinite;
-        }
-
-        @keyframes pulse-gold {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .stat-val { font-size: 1.5em; font-weight: bold; color: var(--header-color); display: block; }
-        .stat-lbl { font-size: 0.7em; font-weight: bold; text-transform: uppercase; color: #666; }
-        .bonus-text { font-size: 0.6em; color: #f57c00; font-weight: bold; display: none; }
-        .stat-box.bonus-active .bonus-text { display: block; }
-
-        .level-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+        /* Abas de nível menores */
+        .level-selector { display: flex; gap: 6px; margin-bottom: 10px; }
         .level-tab {
-            flex: 1; padding: 10px; border-radius: 20px; border: 3px solid #ddd;
-            background: #fff; cursor: pointer; font-weight: bold; text-align: center; font-size: 0.9em;
+            flex: 1; padding: 8px; border-radius: 15px; border: 3px solid #eee;
+            background: #fff; cursor: pointer; font-weight: bold; font-size: 0.85em;
+            text-align: center; transition: 0.3s;
         }
-        .level-tab.active { color: white; border-color: white; transform: scale(1.05); }
-        .tab-1.active { background: #2e7d32; } .tab-2.active { background: #1565c0; }
-        .tab-3.active { background: #4527a0; } .tab-4.active { background: #f57c00; }
+        .level-tab.active { color: white; border-color: white; transform: scale(1.03); }
+        .tab-1.active { background: #2ecc71; } .tab-2.active { background: #3498db; }
+        .tab-3.active { background: #9b59b6; } .tab-4.active { background: #f39c12; }
 
-        .game-area { display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }
-        @media (max-width: 800px) { .game-area { grid-template-columns: 1fr; } }
+        /* Área do Jogo: Ocupa o resto da tela */
+        .game-area {
+            flex: 1; display: grid; grid-template-columns: 1fr 280px;
+            gap: 15px; min-height: 0; /* Essencial para o flex child não transbordar */
+        }
+
+        .challenges-container {
+            display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
+        }
 
         .challenge-box {
-            background: white; border: 2px solid #eee; border-radius: 20px;
-            margin-bottom: 10px; height: 90px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: flex; align-items: center; justify-content: center;
+            background: white; border: 2px solid #f1f1f1; border-radius: 18px;
+            padding: 10px; display: flex; align-items: center; justify-content: center;
+            flex: 1; /* Faz as caixas crescerem proporcionalmente */
         }
 
-        .sequence { display: flex; gap: 8px; align-items: center; }
+        .sequence { display: flex; gap: 8px; }
 
         .cell {
-            width: 55px; height: 55px; border: 3px solid #e0e0e0; border-radius: 15px;
+            width: 55px; height: 55px; border: 3px solid #e0e0e0; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5em; font-weight: bold; background: #f9f9f9;
+            font-size: 1.6em; font-weight: bold; background: #fdfdfd;
         }
+        @media (max-height: 700px) { .cell { width: 45px; height: 45px; font-size: 1.3em; } }
 
         .cell.drop-zone { border: 3px dashed var(--primary); background: #f0f4ff; cursor: pointer; color: transparent; }
-        .cell.drop-zone:empty::after { content: '?'; color: #bbb; }
+        .cell.drop-zone:empty::after { content: '?'; color: #ccc; }
         .cell.filled { border-style: solid; border-color: var(--primary); background: #e3f2fd; color: var(--primary); }
-        .cell.correct { background: #c8e6c9 !important; border-color: var(--success) !important; color: #1b5e20 !important; }
-        .cell.incorrect { background: #ffcdd2 !important; border-color: var(--danger) !important; color: #b71c1c !important; }
+        .cell.correct { background: #d4edda !important; border-color: var(--success) !important; color: #155724 !important; }
+        .cell.incorrect { background: #f8d7da !important; border-color: var(--danger) !important; color: #721c24 !important; }
 
         .numbers-bank {
-            background: #f5f5f5; border-radius: 20px; padding: 15px; border: 2px solid #ddd;
-            min-height: 480px;
+            background: #f8f9fa; border-radius: 20px; padding: 12px; border: 2px solid #eee;
+            display: flex; flex-direction: column;
         }
-        .numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
         .number-item {
-            height: 60px; background: white; border: 3px solid var(--header-color);
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.6em; font-weight: bold; color: var(--header-color); cursor: grab;
+            height: 55px; background: white; border: 3px solid var(--header-color);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em; font-weight: bold; color: var(--header-color); cursor: grab;
             box-shadow: 0 4px 0 #ddd;
         }
-        .number-item:hover { background: #fffde7; }
         .number-item.used { visibility: hidden; }
 
-        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        /* Rodapé de Controles */
+        .controls { display: flex; gap: 10px; margin-top: 10px; }
         .btn {
-            flex: 1; padding: 15px; border-radius: 20px; border: none; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.2em;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+            flex: 1; padding: 12px; border-radius: 18px; border: none; font-weight: bold;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 1.2em; box-shadow: 0 5px 0 rgba(0,0,0,0.1);
         }
         .btn-check { background: var(--success); color: white; }
-        .btn-reset { background: #e0e0e0; color: #444; }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-reset { background: #edeff1; color: #555; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
 
-        .drag-over { background: var(--gold) !important; border-color: orange !important; }
+        /* Combo flutuante */
+        .bonus-active { animation: pulse-gold 1s infinite; background: var(--gold) !important; }
+        @keyframes pulse-gold { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body class="theme-1">
 
     <div class="container">
-        <h2 class="main-title" id="theme-title">
-            <i class="fas fa-tree" id="theme-icon"></i> 
-            <span id="level-name">Missão Floresta</span>
-        </h2>
+        <header>
+            <h1 class="main-title" id="theme-title">
+                <i class="fas fa-tree" id="theme-icon"></i> <span id="level-name">Missão Floresta</span>
+            </h1>
 
-        <div class="stats-grid">
-            <div class="stat-box"><span class="stat-val" id="score">0</span><span class="stat-lbl">Pontos</span></div>
-            <div class="stat-box"><span class="stat-val" id="correct">0</span><span class="stat-lbl">Acertos</span></div>
-            <div class="stat-box"><span class="stat-val" id="errors">0</span><span class="stat-lbl">Erros</span></div>
-            <div class="stat-box" id="combo-box">
-                <span class="stat-val" id="streak">0</span>
-                <span class="stat-lbl">Combo</span>
-                <span class="bonus-text">🔥 2X PONTOS!</span>
+            <div class="stats-strip">
+                <div class="stat-item"><b id="score">0</b><span>Pontos</span></div>
+                <div class="stat-item"><b id="streak">0</b><span>Combo</span></div>
+                <div class="stat-item"><b><span id="screen-idx">1</span>/8</b><span>Tela</span></div>
             </div>
-            <div class="stat-box"><span class="stat-val"><span id="screen-idx">1</span>/8</span><span class="stat-lbl">Tela</span></div>
-        </div>
+
+            <div class="admin-panel">
+                <button class="btn-admin btn-new" onclick="resetTotal()" title="Começar do Zero">Novo Jogo</button>
+                <button class="btn-admin btn-key" onclick="exportarCodigo()">Salvar Chave</button>
+                <button class="btn-admin btn-key" style="background:#007bff" onclick="importarCodigo()">Usar Chave</button>
+            </div>
+        </header>
 
         <div class="level-selector">
             <div class="level-tab tab-1 active" onclick="changeLevel(1)">1º Ano</div>
@@ -154,14 +162,16 @@
 
         <div class="game-area">
             <div class="challenges-container" id="challenges-list"></div>
+            
             <div class="numbers-bank">
+                <p style="text-align:center; font-size: 0.7em; font-weight: bold; margin-bottom: 8px; color:#888">ARRASTE OS NÚMEROS:</p>
                 <div id="numbers-grid" class="numbers-grid"></div>
             </div>
         </div>
 
         <div class="controls">
-            <button class="btn btn-reset" onclick="resetScreen()"><i class="fas fa-magic"></i> Limpar</button>
-            <button class="btn btn-check" id="btn-verify" onclick="verify()" disabled><i class="fas fa-check-circle"></i> Verificar</button>
+            <button class="btn btn-reset" onclick="resetScreen()"><i class="fas fa-eraser"></i> Limpar</button>
+            <button class="btn btn-check" id="btn-verify" onclick="verify()" disabled><i class="fas fa-check-circle"></i> Verificar Respostas</button>
         </div>
     </div>
 
@@ -180,7 +190,7 @@
             4: { max: 999, step: [10, 50], pts: 80 }
         };
 
-        let game = {
+        const INITIAL_STATE = {
             level: 1, score: 0, correct: 0, errors: 0, streak: 0,
             levelsProgress: {
                 1: { screen: 1, challenges: [], options: [], isDone: false },
@@ -190,10 +200,43 @@
             }
         };
 
-        const saved = localStorage.getItem('sequencia_fundamental_v1');
+        let game = JSON.parse(JSON.stringify(INITIAL_STATE));
+        const saved = localStorage.getItem('sequencia_v4_fix');
         if (saved) game = JSON.parse(saved);
 
-        function save() { localStorage.setItem('sequencia_fundamental_v1', JSON.stringify(game)); }
+        function save() { localStorage.setItem('sequencia_v4_fix', JSON.stringify(game)); }
+
+        function resetTotal() {
+            if(confirm("Recomeçar o jogo do zero?")) {
+                localStorage.removeItem('sequencia_v4_fix');
+                game = JSON.parse(JSON.stringify(INITIAL_STATE));
+                initLevel(1);
+            }
+        }
+
+        function exportarCodigo() {
+            const p = game.levelsProgress;
+            const codigo = `${game.level}-${p[1].screen}-${p[2].screen}-${p[3].screen}-${p[4].screen}-${game.score}-${game.streak}`;
+            alert("SUA CHAVE DA MISSÃO:\n\n" + codigo + "\n\nAnote os números no caderno para continuar outro dia!");
+        }
+
+        function importarCodigo() {
+            const codigo = prompt("Digite os números da sua chave:");
+            if (!codigo) return;
+            try {
+                const pt = codigo.split('-');
+                game.level = parseInt(pt[0]);
+                game.levelsProgress[1].screen = parseInt(pt[1]);
+                game.levelsProgress[2].screen = parseInt(pt[2]);
+                game.levelsProgress[3].screen = parseInt(pt[3]);
+                game.levelsProgress[4].screen = parseInt(pt[4]);
+                game.score = parseInt(pt[5]);
+                game.streak = parseInt(pt[6]);
+                for(let i=1; i<=4; i++) { game.levelsProgress[i].challenges = []; game.levelsProgress[i].isDone = false; }
+                save();
+                initLevel(game.level);
+            } catch (e) { alert("Chave inválida."); }
+        }
 
         function applyTheme(l) {
             const theme = THEMES[l];
@@ -224,15 +267,13 @@
 
             for (let i = 0; i < 5; i++) {
                 let seq, holeIdx, target;
-                let attempts = 0;
                 do {
                     const step = Math.floor(Math.random() * (cfg.step[1] - cfg.step[0] + 1)) + cfg.step[0];
                     const start = Math.floor(Math.random() * (cfg.max - (step * 5))) + 1;
                     seq = Array.from({length: 5}, (_, idx) => start + (idx * step));
                     holeIdx = Math.floor(Math.random() * 5);
                     target = seq[holeIdx];
-                    attempts++;
-                } while (solutionNumbers.has(target) && attempts < 100);
+                } while (solutionNumbers.has(target));
 
                 solutionNumbers.add(target);
                 progress.challenges.push({ id: i, full: seq, hole: holeIdx, target: target, current: null, status: 'empty' });
@@ -251,14 +292,8 @@
         function render() {
             const progress = game.levelsProgress[game.level];
             document.getElementById('score').textContent = game.score;
-            document.getElementById('correct').textContent = game.correct;
-            document.getElementById('errors').textContent = game.errors;
             document.getElementById('streak').textContent = game.streak;
             document.getElementById('screen-idx').textContent = progress.screen;
-
-            const comboBox = document.getElementById('combo-box');
-            if(game.streak >= 3) comboBox.classList.add('bonus-active');
-            else comboBox.classList.remove('bonus-active');
 
             const list = document.getElementById('challenges-list');
             list.innerHTML = progress.challenges.map(ch => `
@@ -325,33 +360,23 @@
         function verify() {
             const progress = game.levelsProgress[game.level];
             let allCorrect = true;
-            let errorsThisTry = 0;
-
             progress.challenges.forEach(ch => {
                 if(ch.current === ch.target) ch.status = 'correct';
-                else { ch.status = 'incorrect'; allCorrect = false; errorsThisTry++; }
+                else { ch.status = 'incorrect'; allCorrect = false; }
             });
 
             if(allCorrect) {
                 progress.isDone = true;
                 let earnedPoints = CONFIG[game.level].pts;
                 if(game.streak >= 2) earnedPoints *= 2;
-                
                 game.score += earnedPoints;
-                game.correct += 5;
                 game.streak++;
                 save();
-
                 setTimeout(() => {
-                    if(progress.screen < 8) {
-                        progress.screen++;
-                        generateNewScreen(game.level);
-                    } else {
-                        handleLevelAdvance();
-                    }
-                }, 1200);
+                    if(progress.screen < 8) { progress.screen++; generateNewScreen(game.level); }
+                    else { handleLevelAdvance(); }
+                }, 1000);
             } else {
-                game.errors += errorsThisTry;
                 game.streak = 0;
                 save();
             }
@@ -359,13 +384,8 @@
         }
 
         function handleLevelAdvance() {
-            if(game.level < 4) {
-                alert(`🎯 Missão Cumprida! Você avançou de fase!`);
-                game.level++;
-                initLevel(game.level);
-            } else {
-                alert("🏆 INCRÍVEL! Você é um Mestre das Sequências e completou todas as missões!");
-            }
+            if(game.level < 4) { alert("🎯 Nível Concluído!"); game.level++; initLevel(game.level); }
+            else { alert("🏆 Você é um Mestre!"); }
             save();
         }
 
@@ -377,9 +397,7 @@
             render();
         }
 
-        function changeLevel(l) {
-            initLevel(l);
-        }
+        function changeLevel(l) { initLevel(l); }
 
         window.onload = () => initLevel(game.level);
     </script>
