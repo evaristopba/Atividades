@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Cálculo Mental</title>
+<style>
+body{
+font-family:Arial;
+background:#f2f5f9;
+margin:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+height:100vh;
+overflow:hidden
+}
+header{
+background:#34495e;
+color:white;
+width:100%;
+text-align:center;
+padding:10px
+}
+#topBar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+width:900px;
+max-width:95%;
+margin-top:8px;
+flex-wrap:wrap
+}
+#phaseMenu{display:flex;gap:8px}
+.phaseBtn{
+padding:6px 14px;
+border:none;
+border-radius:6px;
+background:#dfe6e9;
+cursor:pointer;
+transition:all 0.3s
+}
+.phaseBtn.active{
+background:#2ecc71;
+color:white;
+font-weight:bold;
+cursor:pointer
+}
+.phaseBtn.unlocked{
+background:#3498db;
+color:white;
+opacity:0.8
+}
+.phaseBtn.unlocked:hover{
+opacity:1;
+transform:translateY(-2px)
+}
+.phaseBtn:disabled{
+background:#bdc3c7;
+cursor:not-allowed;
+opacity:0.4
+}
+#score{font-weight:bold}
+#challenge{font-weight:bold}
+
+#progressBar{
+width:900px;
+max-width:95%;
+height:14px;
+background:#ddd;
+border-radius:8px;
+overflow:hidden;
+margin:6px 0
+}
+
+#progressFill{
+height:100%;
+width:0%;
+background:#27ae60;
+transition:width 0.3s ease
+}
+
+#game{
+display:flex;
+gap:20px;
+width:900px;
+max-width:95%;
+flex:1;
+align-items:center
+}
+
+.board{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+flex:1
+}
+
+.card{
+background:white;
+border:2px solid #dcdde1;
+border-radius:10px;
+padding:8px;
+text-align:center;
+transition:transform 0.2s, box-shadow 0.2s
+}
+.card:hover{
+transform:translateY(-2px);
+box-shadow:0 4px 8px rgba(0,0,0,0.1)
+}
+
+.total{
+background:yellow;
+font-weight:bold;
+padding:4px;
+margin-bottom:6px;
+border-radius:4px
+}
+
+.grid{
+display:grid;
+grid-template-columns:50px 50px;
+gap:6px;
+justify-content:center
+}
+
+.grid input{
+width:50px;
+height:50px;
+font-size:20px;
+text-align:center;
+border:2px solid #dfe6e9;
+border-radius:6px;
+transition:all 0.2s
+}
+
+.grid input:focus{
+outline:3px solid #3498db;
+box-shadow:0 0 0 3px rgba(52,152,219,0.3)
+}
+
+.lock{background:#ecf0f1}
+
+.correct{
+background:#2ecc71 !important;
+color:white;
+border-color:#27ae60 !important
+}
+
+.wrong{
+background:#e74c3c !important;
+color:white;
+border-color:#c0392b !important
+}
+
+.active{
+outline:3px solid #3498db;
+transform:scale(1.02)
+}
+
+.keyboard{
+display:grid;
+grid-template-columns:repeat(3,65px);
+gap:8px
+}
+
+.keyboard button{
+height:60px;
+font-size:24px;
+cursor:pointer;
+border:none;
+border-radius:8px;
+background:#ecf0f1;
+transition:transform 0.1s
+}
+.keyboard button:active{
+transform:scale(0.95)
+}
+
+#report{
+position:fixed;
+bottom:6px;
+font-size:14px;
+background:white;
+padding:8px 16px;
+border-radius:20px;
+box-shadow:0 2px 4px rgba(0,0,0,0.1);
+z-index:100
+}
+
+/* Sistema de código - Overlay */
+#codeControls{
+display:flex;
+gap:10px;
+margin:10px 0;
+padding:15px;
+background:white;
+border-radius:8px;
+box-shadow:0 2px 4px rgba(0,0,0,0.1);
+width:900px;
+max-width:95%;
+justify-content:center;
+animation:slideDown 0.5s ease;
+z-index:200
+}
+
+.code-btn{
+padding:12px 30px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:16px;
+color:white;
+transition:all 0.3s;
+box-shadow:0 2px 4px rgba(0,0,0,0.1)
+}
+.code-btn:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2)}
+.code-btn:active{transform:translateY(0)}
+
+#generateCode{
+background:#3498db;
+}
+#generateCode:hover{background:#2980b9}
+
+#restoreCode{
+background:#2ecc71;
+}
+#restoreCode:hover{background:#27ae60}
+
+#openReport{
+background:#9b59b6;
+}
+#openReport:hover{background:#8e44ad}
+
+/* Overlay para código gerado */
+#codeOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+animation:fadeIn 0.3s ease
+}
+
+#codePopup{
+background:white;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+max-width:90%;
+width:500px;
+text-align:center;
+animation:popIn 0.3s ease
+}
+
+@keyframes popIn{
+from{transform:scale(0.8);opacity:0}
+to{transform:scale(1);opacity:1}
+}
+
+#codePopup h3{
+margin:0 0 15px 0;
+color:#2c3e50;
+font-size:24px
+}
+
+#generatedCode{
+background:#f8f9fa;
+padding:20px;
+border:2px dashed #27ae60;
+border-radius:8px;
+font-family:monospace;
+font-size:28px;
+font-weight:bold;
+text-align:center;
+word-break:break-all;
+color:#27ae60;
+letter-spacing:2px;
+margin:20px 0;
+cursor:pointer;
+transition:all 0.2s
+}
+#generatedCode:hover{
+background:#e8f5e9;
+transform:scale(1.02)
+}
+
+.copy-hint{
+font-size:16px;
+color:#7f8c8d;
+margin:10px 0;
+font-style:italic
+}
+
+#closePopup{
+padding:12px 30px;
+background:#95a5a6;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:16px;
+transition:background 0.3s
+}
+#closePopup:hover{background:#7f8c8d}
+
+/* Overlay para input de restauração */
+#inputOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+animation:fadeIn 0.3s ease
+}
+
+#inputPopup{
+background:white;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+max-width:90%;
+width:500px;
+text-align:center;
+animation:popIn 0.3s ease
+}
+
+#inputPopup h3{
+margin:0 0 15px 0;
+color:#2c3e50;
+font-size:24px
+}
+
+#codeInput{
+width:100%;
+padding:15px;
+border:2px solid #3498db;
+border-radius:8px;
+font-family:monospace;
+font-size:20px;
+text-align:center;
+box-sizing:border-box;
+margin:20px 0
+}
+
+#codeInput:focus{
+outline:none;
+box-shadow:0 0 0 3px rgba(52,152,219,0.3)
+}
+
+.input-actions{
+display:flex;
+gap:10px;
+justify-content:center
+}
+
+.action-btn{
+padding:12px 30px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:16px;
+transition:all 0.3s
+}
+
+#confirmRestore{
+background:#2ecc71;
+color:white
+}
+#confirmRestore:hover{background:#27ae60}
+
+#cancelRestore{
+background:#95a5a6;
+color:white
+}
+#cancelRestore:hover{background:#7f8c8d}
+
+/* Overlay do relatório */
+#reportOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+animation:fadeIn 0.3s ease
+}
+
+#reportOverlay .popup{
+background:white;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+max-width:90%;
+width:500px;
+text-align:center;
+animation:popIn 0.3s ease
+}
+
+#reportOverlay h2{
+color:#2c3e50;
+margin-top:0
+}
+
+#reportOverlay hr{
+margin:20px 0;
+border:1px solid #ecf0f1
+}
+
+#closeReport{
+padding:12px 30px;
+background:#3498db;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:16px;
+transition:background 0.3s;
+margin:5px
+}
+#closeReport:hover{background:#2980b9}
+
+#bnccButton{
+padding:12px 30px;
+background:#27ae60;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:16px;
+transition:background 0.3s;
+margin:5px
+}
+#bnccButton:hover{background:#219a52}
+
+/* Overlay da BNCC */
+#bnccOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+animation:fadeIn 0.3s ease
+}
+
+#bnccPopup{
+background:white;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+max-width:90%;
+width:600px;
+text-align:left;
+animation:popIn 0.3s ease;
+max-height:80vh;
+overflow-y:auto
+}
+
+#bnccPopup h2{
+color:#2c3e50;
+text-align:center;
+margin-top:0;
+border-bottom:2px solid #27ae60;
+padding-bottom:10px
+}
+
+#bnccPopup h3{
+color:#27ae60;
+margin:20px 0 10px 0
+}
+
+#bnccPopup ul{
+margin:10px 0;
+padding-left:20px
+}
+
+#bnccPopup li{
+margin:8px 0;
+line-height:1.5
+}
+
+#bnccPopup .destaque{
+background:#e8f5e9;
+padding:15px;
+border-radius:8px;
+border-left:4px solid #27ae60;
+margin:20px 0
+}
+
+#closeBncc{
+padding:12px 30px;
+background:#95a5a6;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:16px;
+transition:background 0.3s;
+display:block;
+margin:20px auto 0
+}
+#closeBncc:hover{background:#7f8c8d}
+
+@keyframes fadeIn{
+from{opacity:0}
+to{opacity:1}
+}
+
+/* Notificações */
+.hint{
+position:fixed;
+top:20px;
+right:20px;
+padding:12px 20px;
+border-radius:8px;
+color:white;
+font-weight:bold;
+z-index:2000;
+animation:slideIn 0.3s ease
+}
+
+@keyframes slideIn{
+from{transform:translateX(100%);opacity:0}
+to{transform:translateX(0);opacity:1}
+}
+
+.hint-success{background:#2ecc71}
+.hint-error{background:#e74c3c}
+.hint-info{background:#3498db}
+
+/* Responsividade */
+@media(max-width:600px){
+.code-btn{padding:10px 20px;font-size:14px}
+#generatedCode{font-size:22px}
+.keyboard{grid-template-columns:repeat(3,50px)}
+.keyboard button{height:50px;font-size:20px}
+#codePopup{padding:20px}
+#codePopup h3{font-size:20px}
+}
+</style>
+</head>
+
+<body>
+
+<header><h2>🧮 Cálculo Mental</h2></header>
+
+<div id="topBar">
+<div id="phaseMenu">
+<button class="phaseBtn active" data-level="0">1–20</button>
+<button class="phaseBtn" data-level="1">1–50</button>
+<button class="phaseBtn" data-level="2">1–100</button>
+<button class="phaseBtn" data-level="3">1–1000</button>
+</div>
+
+<div id="score">Pontuação: 0</div>
+<div id="challenge">Desafio 1 / 20</div>
+</div>
+
+<div id="progressBar"><div id="progressFill"></div></div>
+
+<!-- Controles de código -->
+<div id="codeControls">
+<button class="code-btn" id="generateCode">🔑 GERAR CÓDIGO</button>
+<button class="code-btn" id="restoreCode">🔄 RESTAURAR</button>
+<button class="code-btn" id="openReport">📊 RELATÓRIO</button>
+</div>
+
+<!-- Overlay para mostrar código gerado -->
+<div id="codeOverlay">
+<div id="codePopup">
+<h3>✅ CÓDIGO GERADO</h3>
+<div id="generatedCode"></div>
+<div class="copy-hint">👆 Clique no código para copiar</div>
+<button id="closePopup">FECHAR</button>
+</div>
+</div>
+
+<!-- Overlay para input de restauração -->
+<div id="inputOverlay">
+<div id="inputPopup">
+<h3>📝 DIGITE O CÓDIGO</h3>
+<input type="text" id="codeInput" placeholder="Ex: 1-12-240-30-3-540" autocomplete="off">
+<div class="input-actions">
+<button class="action-btn" id="confirmRestore">RESTAURAR</button>
+<button class="action-btn" id="cancelRestore">CANCELAR</button>
+</div>
+</div>
+</div>
+
+<!-- Overlay do relatório -->
+<div id="reportOverlay">
+<div class="popup">
+<h2>📊 RELATÓRIO</h2>
+<p><b>Fase atual:</b> <span id="rLevel"></span></p>
+<p><b>Desafio:</b> <span id="rChallenge"></span></p>
+<hr>
+<p><b>Pontuação:</b> <span id="rScore"></span></p>
+<p><b>Acertos:</b> <span id="rHits"></span></p>
+<p><b>Erros:</b> <span id="rErrors"></span></p>
+<p><b>Taxa de acerto:</b> <span id="rRate"></span></p>
+<br>
+<div>
+<button id="bnccButton">📚 BNCC</button>
+<button id="closeReport">VOLTAR AO JOGO</button>
+</div>
+</div>
+</div>
+
+<!-- Overlay da BNCC -->
+<div id="bnccOverlay">
+<div id="bnccPopup">
+<h2>📚 BASE NACIONAL COMUM CURRICULAR</h2>
+<p style="text-align:center; color:#7f8c8d; margin-bottom:20px">Habilidades desenvolvidas neste jogo</p>
+
+<h3>🎯 ENSINO FUNDAMENTAL - ANOS INICIAIS</h3>
+
+<div class="destaque">
+<p><strong>🔢 NÚMEROS</strong></p>
+<ul>
+<li><strong>(EF01MA05)</strong> Comparar números naturais de até duas ordens</li>
+<li><strong>(EF02MA04)</strong> Compor e decompor números naturais</li>
+<li><strong>(EF03MA05)</strong> Utilizar diferentes procedimentos de cálculo mental e escrito</li>
+<li><strong>(EF04MA03)</strong> Resolver problemas com números naturais envolvendo adição</li>
+<li><strong>(EF05MA07)</strong> Resolver problemas de adição com números naturais</li>
+</ul>
+</div>
+
+<div class="destaque">
+<p><strong>🧮 OPERAÇÕES</strong></p>
+<ul>
+<li><strong>(EF02MA05)</strong> Construir fatos básicos da adição</li>
+<li><strong>(EF03MA06)</strong> Resolver problemas de adição com significados de juntar e acrescentar</li>
+<li><strong>(EF04MA04)</strong> Utilizar as relações entre adição</li>
+<li><strong>(EF05MA08)</strong> Resolver problemas de adição com números naturais</li>
+</ul>
+</div>
+
+<div class="destaque">
+<p><strong>📊 RACIOCÍNIO LÓGICO</strong></p>
+<ul>
+<li><strong>(EF02MA09)</strong> Construir sequências de números naturais</li>
+<li><strong>(EF03MA10)</strong> Identificar regularidades em sequências</li>
+<li><strong>(EF04MA11)</strong> Analisar e resolver problemas com sistema de numeração</li>
+<li><strong>(EF05MA12)</strong> Resolver problemas que envolvam variação de quantidades</li>
+</ul>
+</div>
+
+<div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-top:20px">
+<p><strong>🎯 OBJETIVOS DE APRENDIZAGEM:</strong></p>
+<p>• Desenvolver o cálculo mental<br>
+• Compreender relações numéricas<br>
+• Aprimorar raciocínio lógico-matemático<br>
+• Resolver problemas de adição<br>
+• Trabalhar com diferentes grandezas numéricas</p>
+</div>
+
+<button id="closeBncc">VOLTAR</button>
+</div>
+</div>
+
+<div id="game">
+<div class="board" id="board"></div>
+<div class="keyboard" id="keyboard"></div>
+</div>
+
+<div id="report">
+✅ Acertos: <span id="hits">0</span> |
+❌ Erros: <span id="errors">0</span>
+</div>
+
+<script>
+/* ---------------- CONFIGURAÇÕES INICIAIS COM PARÂMETRO DA URL ---------------- */
+
+const levels = [
+    {min: 1, max: 20, ano: "1º Ano"},
+    {min: 1, max: 50, ano: "2º Ano"},
+    {min: 1, max: 100, ano: "3º ao 5º Ano"},
+    {min: 1, max: 1000, ano: "Desafio"}
+];
+
+// Função para ler parâmetro da URL
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+// Configura fase inicial baseada no parâmetro 'fase' da URL
+let initialLevel = parseInt(getUrlParameter('fase')) || 0;
+initialLevel = Math.min(initialLevel, 3); // Limita entre 0 e 3
+
+let highestUnlockedLevel = initialLevel;  // Começa com a fase escolhida liberada
+let currentLevel = initialLevel;
+let challenge = 1;
+let score = 0;
+let hits = 0;
+let errors = 0;
+let puzzles = [];
+let solved = new Set();
+let selected = null;
+
+const board = document.getElementById("board");
+const keyboard = document.getElementById("keyboard");
+
+/* ---------------- FUNÇÕES UTILITÁRIAS ---------------- */
+
+function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function showHint(message, type = 'info') {
+    let hint = document.createElement('div');
+    hint.className = `hint hint-${type}`;
+    hint.innerText = message;
+    document.body.appendChild(hint);
+    setTimeout(() => hint.remove(), 2000);
+}
+
+/* ---------------- GERADOR DE PUZZLES ---------------- */
+
+function generatePuzzle(level, used) {
+    let tries = 0;
+    
+    while (tries < 500) {
+        tries++;
+        
+        let total = rand(level.min, level.max);
+        let a = rand(1, total - 3);
+        let b = rand(1, total - a - 2);
+        let c = rand(1, total - a - b - 1);
+        let d = total - (a + b + c);
+        
+        if (d <= 0) continue;
+        
+        let nums = [a, b, c, d];
+        let unique = new Set(nums);
+        if (unique.size < 4) continue;
+        
+        let miss = rand(0, 3);
+        let answer = nums[miss];
+        
+        if (used.has(answer)) continue;
+        used.add(answer);
+        
+        return {
+            total: total,
+            numbers: nums.map((n, i) => i === miss ? null : n),
+            answer: answer
+        };
+    }
+    
+    return {total: 10, numbers: [2, 3, 4, null], answer: 1};
+}
+
+/* ---------------- FUNÇÕES DO JOGO ---------------- */
+
+function newChallenge() {
+    board.innerHTML = "";
+    puzzles = [];
+    solved.clear();
+    
+    let used = new Set();
+    
+    for (let i = 0; i < 6; i++) {
+        let p = generatePuzzle(levels[currentLevel], used);
+        puzzles.push(p);
+        
+        let card = document.createElement("div");
+        card.className = "card";
+        
+        let total = document.createElement("div");
+        total.className = "total";
+        total.innerText = p.total;
+        card.appendChild(total);
+        
+        let grid = document.createElement("div");
+        grid.className = "grid";
+        
+        p.numbers.forEach(n => {
+            let inp = document.createElement("input");
+            
+            if (n !== null) {
+                inp.value = n;
+                inp.readOnly = true;
+                inp.classList.add("lock");
+            } else {
+                inp.placeholder = "?";
+                inp.readOnly = true;
+                inp.onclick = () => selectInput(inp);
+            }
+            
+            inp.dataset.puzzle = i;
+            grid.appendChild(inp);
+        });
+        
+        card.appendChild(grid);
+        board.appendChild(card);
+    }
+    
+    updateUI();
+}
+
+function selectInput(inp) {
+    if (selected) selected.classList.remove("active");
+    selected = inp;
+    inp.classList.add("active");
+}
+
+function confirmAnswers() {
+    puzzles.forEach((p, i) => {
+        if (solved.has(i)) return;
+        
+        let inputs = [...document.querySelectorAll(`input[data-puzzle="${i}"]`)];
+        
+        if (inputs.some(el => el.value === "")) return;
+        
+        // PROTEÇÃO CONTRA NÚMEROS NEGATIVOS
+        let sum = 0;
+        let hasNegative = false;
+        
+        inputs.forEach(el => {
+            let val = parseInt(el.value) || 0;
+            if (val < 0) {
+                hasNegative = true;
+                el.classList.add("wrong");
+            }
+            sum += val;
+        });
+        
+        // Se tiver número negativo, não conta como tentativa
+        if (hasNegative) {
+            showHint('❌ Números negativos não são permitidos!', 'error');
+            return;
+        }
+        
+        inputs.forEach(el => el.classList.remove("wrong"));
+        
+        if (sum === p.total) {
+            hits++;
+            score += 10;
+            
+            inputs.forEach(el => {
+                el.classList.add("correct");
+                el.readOnly = true;
+                el.onclick = null;
+            });
+            
+            solved.add(i);
+            showHint('✅ Correto! +10 pontos', 'success');
+        } else {
+            errors++;
+            inputs.forEach(el => {
+                if (!el.classList.contains("lock"))
+                    el.classList.add("wrong");
+            });
+            showHint('❌ Tente novamente!', 'error');
+        }
+    });
+    
+    if (solved.size === 6) {
+        challenge++;
+        score += 20;
+        showHint('🎉 Fase completa! +20 pontos', 'success');
+        
+        if (challenge > 20) {
+            finishPhase();
+            return;
+        }
+        
+        newChallenge();
+    }
+    
+    updateUI();
+}
+
+function finishPhase() {
+    if (currentLevel < levels.length - 1) {
+        showHint('🎉 Parabéns! Fase concluída!', 'success');
+        
+        // Atualiza a MAIOR fase desbloqueada
+        if (currentLevel + 1 > highestUnlockedLevel) {
+            highestUnlockedLevel = currentLevel + 1;
+        }
+        
+        currentLevel++;
+        challenge = 1;
+        updatePhaseButtons();
+        newChallenge();
+        
+        // Mostra hint da próxima fase
+        showHint(`📚 Próxima fase: ${levels[currentLevel].min}–${levels[currentLevel].max}`, 'info');
+    } else {
+        showHint('🏆 PARABÉNS! Você concluiu TODAS as fases!', 'success');
+        // Mantém todas as fases desbloqueadas
+        highestUnlockedLevel = 3;
+        currentLevel = 3;
+        challenge = 20;
+        updatePhaseButtons();
+        newChallenge();
+    }
+}
+
+/* ---------------- SISTEMA DE CÓDIGO SIMPLIFICADO ---------------- */
+
+function generateSimpleCode() {
+    // Formato: faseAtual-desafio-pontos-acertos-erros-maiorFase-validacao
+    // Exemplo: 2-15-340-45-5-2-540
+    // A MAIOR FASE é incluída para manter a progressão correta
+    
+    const code = [
+        currentLevel,           // Fase atual (0-3)
+        challenge,              // Desafio atual (1-20)
+        score,                  // Pontuação total
+        hits,                   // Acertos
+        errors,                 // Erros
+        highestUnlockedLevel,   // MAIOR fase já desbloqueada
+        // Codifica os puzzles resolvidos em um número (0-63)
+        Array.from(solved).reduce((acc, idx) => acc + Math.pow(2, idx), 0)
+    ].join('-');
+    
+    return code;
+}
+
+function restoreFromSimpleCode(code) {
+    try {
+        const parts = code.split('-').map(Number);
+        
+        // Validação básica
+        if (parts.length !== 7) {
+            showHint('❌ Código inválido!', 'error');
+            return false;
+        }
+        
+        const [faseAtual, desafio, pontos, acertos, erros, maiorFase, solvedBits] = parts;
+        
+        // Valida ranges
+        if (faseAtual < 0 || faseAtual > 3 || 
+            desafio < 1 || desafio > 20 ||
+            maiorFase < 0 || maiorFase > 3 ||
+            maiorFase < faseAtual) {  // MAIOR FASE não pode ser menor que a atual
+            showHint('❌ Código inválido!', 'error');
+            return false;
+        }
+        
+        // Restaura dados básicos
+        currentLevel = faseAtual;
+        challenge = desafio;
+        score = pontos;
+        hits = acertos;
+        errors = erros;
+        
+        // Restaura a MAIOR fase desbloqueada
+        highestUnlockedLevel = maiorFase;
+        
+        // Restaura puzzles resolvidos
+        solved.clear();
+        for (let i = 0; i < 6; i++) {
+            if (solvedBits & Math.pow(2, i)) {
+                solved.add(i);
+            }
+        }
+        
+        // Atualiza interface das fases
+        updatePhaseButtons();
+        
+        // Gera novos puzzles
+        newChallenge();
+        
+        // Marca os puzzles que já estavam resolvidos
+        setTimeout(() => {
+            solved.forEach(index => {
+                let inputs = [...document.querySelectorAll(`input[data-puzzle="${index}"]`)];
+                inputs.forEach(el => {
+                    el.classList.add("correct");
+                    el.readOnly = true;
+                    el.onclick = null;
+                });
+            });
+        }, 100);
+        
+        return true;
+        
+    } catch (error) {
+        showHint('❌ Código inválido!', 'error');
+        console.error('Erro ao restaurar:', error);
+        return false;
+    }
+}
+
+/* ---------------- BOTÕES DE FASE - PROGRESSIVOS ---------------- */
+
+function updatePhaseButtons() {
+    let buttons = document.querySelectorAll(".phaseBtn");
+    
+    buttons.forEach((btn, i) => {
+        // Remove todas as classes
+        btn.classList.remove("active", "unlocked");
+        btn.disabled = false;
+        
+        // Define o texto baseado no índice
+        if (i === 0) btn.innerText = "1–20";
+        if (i === 1) btn.innerText = "1–50";
+        if (i === 2) btn.innerText = "1–100";
+        if (i === 3) btn.innerText = "1–1000";
+        
+        if (i === currentLevel) {
+            // Fase atual - verde
+            btn.classList.add("active");
+        } else if (i < currentLevel) {
+            // Fases anteriores - NÃO PODEM SER ACESSADAS
+            // Isso impede que o aluno "volte" e perca o progresso
+            btn.disabled = true;
+            btn.innerText = "🔒 " + btn.innerText;
+        } else if (i <= highestUnlockedLevel) {
+            // Fases futuras já desbloqueadas - azul
+            btn.classList.add("unlocked");
+        } else {
+            // Fases bloqueadas
+            btn.disabled = true;
+            btn.innerText = "🔒 " + btn.innerText;
+        }
+    });
+}
+
+function setupPhases() {
+    let buttons = document.querySelectorAll(".phaseBtn");
+    
+    buttons.forEach((btn, i) => {
+        btn.onclick = () => {
+            // Só permite clicar se:
+            // 1. Não é fase anterior (já estão disabled)
+            // 2. É fase atual ou futura já desbloqueada
+            if (i <= highestUnlockedLevel && i >= currentLevel) {
+                currentLevel = i;
+                challenge = 1; // Começa do desafio 1 na nova fase
+                updatePhaseButtons();
+                newChallenge();
+                showHint(`📚 Fase ${i+1}: ${levels[i].min}–${levels[i].max}`, 'info');
+            }
+        };
+    });
+    
+    updatePhaseButtons();
+}
+
+/* ---------------- INTERFACE DO CÓDIGO COM OVERLAY ---------------- */
+
+function setupCodeInterface() {
+    const generateBtn = document.getElementById('generateCode');
+    const restoreBtn = document.getElementById('restoreCode');
+    const openReport = document.getElementById('openReport');
+    const closeReport = document.getElementById('closeReport');
+    const reportOverlay = document.getElementById('reportOverlay');
+    const bnccButton = document.getElementById('bnccButton');
+    const bnccOverlay = document.getElementById('bnccOverlay');
+    const closeBncc = document.getElementById('closeBncc');
+    const codeOverlay = document.getElementById('codeOverlay');
+    const inputOverlay = document.getElementById('inputOverlay');
+    const generatedCode = document.getElementById('generatedCode');
+    const closePopup = document.getElementById('closePopup');
+    const codeInput = document.getElementById('codeInput');
+    const confirmRestore = document.getElementById('confirmRestore');
+    const cancelRestore = document.getElementById('cancelRestore');
+    
+    // Gerar código
+    generateBtn.onclick = () => {
+        const code = generateSimpleCode();
+        generatedCode.innerText = code;
+        codeOverlay.style.display = 'flex';
+    };
+    
+    // Fechar popup de código
+    closePopup.onclick = () => {
+        codeOverlay.style.display = 'none';
+    };
+    
+    // Clicar no código para copiar
+    generatedCode.onclick = () => {
+        const code = generatedCode.innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            showHint('📋 Código copiado!', 'success');
+            
+            // Feedback visual
+            generatedCode.style.background = '#d4edda';
+            setTimeout(() => {
+                generatedCode.style.background = '#f8f9fa';
+            }, 200);
+        });
+    };
+    
+    // Abrir overlay de restauração
+    restoreBtn.onclick = () => {
+        codeInput.value = '';
+        inputOverlay.style.display = 'flex';
+        setTimeout(() => codeInput.focus(), 100);
+    };
+    
+    // Confirmar restauração
+    confirmRestore.onclick = () => {
+        if (codeInput.value.trim() === '') {
+            showHint('Digite um código!', 'error');
+            return;
+        }
+        
+        const success = restoreFromSimpleCode(codeInput.value.trim());
+        if (success) {
+            inputOverlay.style.display = 'none';
+            showHint('✅ Progresso restaurado!', 'success');
+        }
+    };
+    
+    // Cancelar restauração
+    cancelRestore.onclick = () => {
+        inputOverlay.style.display = 'none';
+    };
+    
+    // Enter no input
+    codeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            confirmRestore.click();
+        }
+    });
+    
+    // Clicar fora para fechar
+    codeOverlay.addEventListener('click', (e) => {
+        if (e.target === codeOverlay) {
+            codeOverlay.style.display = 'none';
+        }
+    });
+    
+    inputOverlay.addEventListener('click', (e) => {
+        if (e.target === inputOverlay) {
+            inputOverlay.style.display = 'none';
+        }
+    });
+    
+    // Funções do relatório
+    function openReportFunc() {
+        document.getElementById("reportOverlay").style.display = "flex";
+        document.getElementById("rLevel").innerText = levels[currentLevel].min + "–" + levels[currentLevel].max;
+        document.getElementById("rChallenge").innerText = challenge + " / 20";
+        document.getElementById("rScore").innerText = score;
+        document.getElementById("rHits").innerText = hits;
+        document.getElementById("rErrors").innerText = errors;
+        let rate = (hits + errors === 0) ? 0 : Math.round((hits / (hits + errors)) * 100);
+        document.getElementById("rRate").innerText = rate + "%";
+    }
+    
+    function closeReportFunc() {
+        document.getElementById("reportOverlay").style.display = "none";
+    }
+    
+    openReport.onclick = openReportFunc;
+    closeReport.onclick = closeReportFunc;
+    
+    reportOverlay.addEventListener('click', (e) => {
+        if (e.target === reportOverlay) {
+            closeReportFunc();
+        }
+    });
+    
+    // Funções da BNCC
+    bnccButton.onclick = () => {
+        bnccOverlay.style.display = 'flex';
+    };
+    
+    closeBncc.onclick = () => {
+        bnccOverlay.style.display = 'none';
+    };
+    
+    bnccOverlay.addEventListener('click', (e) => {
+        if (e.target === bnccOverlay) {
+            bnccOverlay.style.display = 'none';
+        }
+    });
+}
+
+/* ---------------- TECLADO VIRTUAL ---------------- */
+
+function createKeyboard() {
+    keyboard.innerHTML = '';
+    
+    const keys = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+        ['←', 0, '✓']
+    ];
+    
+    keys.forEach(row => {
+        row.forEach(key => {
+            let btn = document.createElement('button');
+            btn.innerText = key;
+            
+            if (key === '←') {
+                btn.style.background = '#f39c12';
+                btn.onclick = () => {
+                    if (!selected) {
+                        showHint('Selecione um campo primeiro!', 'error');
+                        return;
+                    }
+                    selected.value = selected.value.slice(0, -1);
+                };
+            } else if (key === '✓') {
+                btn.style.background = '#2ecc71';
+                btn.style.color = 'white';
+                btn.onclick = confirmAnswers;
+            } else {
+                btn.onclick = () => {
+                    if (!selected) {
+                        showHint('Selecione um campo primeiro!', 'error');
+                        return;
+                    }
+                    selected.value = (selected.value || '') + key;
+                    selected.classList.remove('wrong');
+                };
+            }
+            
+            keyboard.appendChild(btn);
+        });
+    });
+}
+
+/* ---------------- TECLADO DO PC ---------------- */
+
+window.addEventListener("keydown", e => {
+    if (!selected) return;
+    
+    // Impede digitar sinal de menos
+    if (e.key === '-') {
+        e.preventDefault();
+        showHint('❌ Números negativos não são permitidos!', 'error');
+        return;
+    }
+    
+    if (e.key >= '0' && e.key <= '9') {
+        selected.value = (selected.value || '') + e.key;
+        selected.classList.remove('wrong');
+    }
+    
+    if (e.key === 'Backspace') {
+        selected.value = selected.value.slice(0, -1);
+    }
+    
+    if (e.key === 'Enter') confirmAnswers();
+});
+
+/* ---------------- ATUALIZAÇÃO DA UI ---------------- */
+
+function updateUI() {
+    document.getElementById("score").innerText = "Pontuação: " + score;
+    document.getElementById("challenge").innerText = "Desafio " + challenge + " / 20";
+    document.getElementById("progressFill").style.width = ((challenge - 1) / 20 * 100) + "%";
+    document.getElementById("hits").innerText = hits;
+    document.getElementById("errors").innerText = errors;
+}
+
+/* ---------------- INICIALIZAÇÃO ---------------- */
+
+function init() {
+    createKeyboard();
+    setupPhases();
+    setupCodeInterface();
+    newChallenge();
+    
+    // Mostra hint da fase inicial baseada no parâmetro da URL
+    setTimeout(() => {
+        showHint(`📚 Fase inicial: ${levels[currentLevel].min}–${levels[currentLevel].max} (${levels[currentLevel].ano})`, 'info');
+    }, 500);
+}
+
+// Inicia o jogo quando a página carregar
+window.onload = init;
+</script>
+</body>
+</html>
