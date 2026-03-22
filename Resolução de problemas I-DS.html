@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Matemática 3º Ano - Código Correto (Bug Fix)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 15px 25px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .stats-box {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .stat-card.big {
+            font-size: 20px;
+        }
+
+        .code-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .code-display-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .code-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .code-blocks-container {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 12px 20px;
+            cursor: pointer;
+        }
+
+        .code-blocks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .code-block {
+            background: #1a1f2e;
+            color: #48bb78;
+            font-family: monospace;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 12px;
+            letter-spacing: 2px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .code-hidden {
+            background: #555;
+            color: #aaa;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .code-input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .code-input input {
+            width: 300px;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-family: monospace;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        button {
+            background: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #f5576c;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-success {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-code {
+            background: #9c27b0;
+            color: white;
+        }
+
+        .two-columns {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 20px;
+            padding: 20px;
+            min-height: 0;
+        }
+
+        .questions-column {
+            flex: 2;
+            background: #f8f9fa;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .column-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .problems-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .problem-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.3s;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .problem-card.has-answer {
+            border-color: #ff9800;
+            background: #fff8e7;
+        }
+
+        .problem-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .answer-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            background: #f0f0f0;
+            border: 3px dashed #9c27b0;
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #9c27b0;
+            transition: all 0.2s;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .drop-zone.drag-over {
+            background: #e1bee7;
+            border-color: #6a1b9a;
+        }
+
+        .drop-zone.filled {
+            background: #fff3e0;
+            border-style: solid;
+            border-color: #ff9800;
+            color: #f57c00;
+        }
+
+        .remove-btn {
+            background: #ff5252;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .status-icon {
+            font-size: 20px;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .answers-column {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .answers-bank {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .answers-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .answer-drag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: grab;
+            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            width: 65px;
+            text-align: center;
+        }
+
+        .answer-drag:active {
+            cursor: grabbing;
+        }
+
+        .result-panel {
+            background: #e8f5e9;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .result-panel h4 {
+            margin: 0 0 8px 0;
+            color: #2e7d32;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .result-item {
+            text-align: center;
+        }
+
+        .result-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f5576c;
+        }
+
+        .credits {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .credits a {
+            color: #f5576c;
+            text-decoration: none;
+        }
+
+        .message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            color: #f5576c;
+            margin-top: 0;
+        }
+
+        .modal-results {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .modal-question {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-question.correct {
+            color: #4caf50;
+        }
+
+        .modal-question.wrong {
+            color: #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .help-text {
+            font-size: 11px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .copy-hint {
+            font-size: 10px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .debug-info {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .two-columns {
+                flex-direction: column;
+            }
+            .code-block {
+                font-size: 20px;
+                padding: 6px 12px;
+                min-width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="stats-container">
+            <div class="stats-box">
+                <div class="stat-card big">📝 RESPONDIDAS: <span id="respondidas">0</span>/<span id="total">16</span></div>
+                <div class="stat-card">⭐ ACERTOS: <span id="acertosPreview">0</span></div>
+                <div class="stat-card">❌ ERROS: <span id="errosPreview">0</span></div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button id="newStudentBtn" class="btn-primary">👤 NOVO</button>
+                <button id="reshuffleBtn" class="btn-warning">🃏 EMBARALHAR</button>
+                <button id="verifyBtn" class="btn-success">✅ VERIFICAR</button>
+            </div>
+        </div>
+        
+        <div class="code-section">
+            <div class="code-display-area">
+                <span class="code-label">🔑 SEU CÓDIGO:</span>
+                <div id="codeDisplay" class="code-hidden">[ GERAR ]</div>
+                <button id="generateCodeBtn" class="btn-code">✨ GERAR</button>
+                <button id="copyCodeBtn" class="btn-primary" style="display: none;">📋 Copiar</button>
+            </div>
+            <div class="code-input">
+                <input type="text" id="restoreCode" placeholder="Digite o código (ex: ABC 123 DEF)" maxlength="60" style="text-transform:uppercase">
+                <button id="restoreBtn" class="btn-primary">🔓 RECUPERAR</button>
+                <button id="resetCurrentBtn" class="btn-warning">🗑️ LIMPAR</button>
+            </div>
+        </div>
+        <div class="help-text">💡 Código em blocos de 3 letras/números. Teste: responda 1 pergunta, gere código, limpe, recupere!</div>
+    </div>
+
+    <div class="two-columns">
+        <div class="questions-column">
+            <div class="column-title">
+                📝 PERGUNTAS - Arraste a resposta
+            </div>
+            <div class="problems-grid" id="problemsGrid"></div>
+        </div>
+
+        <div class="answers-column">
+            <div class="column-title">
+                🎯 RESPOSTAS - Arraste para as perguntas
+            </div>
+            <div class="answers-bank">
+                <div class="answers-container" id="answersBank"></div>
+            </div>
+            <div class="result-panel">
+                <h4>📊 SEU PROGRESSO</h4>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <div>✅ Acertos</div>
+                        <div class="result-number" id="previewAcertos">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div>❌ Erros</div>
+                        <div class="result-number" id="previewErros">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div>📝 Feitas</div>
+                        <div class="result-number" id="previewFeitas">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="credits">
+        📚 Inspirado no site 
+        <a href="https://www.professoracarol.org/HOTPOTATOES/situacoes-problema-3ano.htm" target="_blank">
+            professora Carol - Situações Problema 3º ano
+        </a> 
+        • Código que realmente recupera o estado exato!
+    </div>
+</div>
+
+<script>
+    const perguntasOriginais = [
+        { id: 1, texto: "Joana tem 55 reais e vai ganhar 63 reais da sua mãe. Com quantos reais Joana vai ficar?", resposta: 118 },
+        { id: 2, texto: "Uma escola tem 59 meninas e 77 meninos. Quantas crianças há nessa escola?", resposta: 136 },
+        { id: 3, texto: "A caixa de Ricardo há lugar para 96 figuras. Ele já colocou 75 figurinhas. Quantas figurinhas Ricardo ainda pode colocar na caixa?", resposta: 21 },
+        { id: 4, texto: "Gabriela tem 25 anos e Gustavo tem 13. Quantos anos Gabriela tem a mais que Gustavo?", resposta: 12 },
+        { id: 5, texto: "Pedro tinha 46 bolinhas de gude e ganhou 63. Quantas bolinhas de gude Pedro tem agora?", resposta: 109 },
+        { id: 6, texto: "Mário tem uma caixa com 58 lápis e Alice em uma caixa com 24 lápis. Quantos lápis a caixa de Mário tem a mais do que de Alice?", resposta: 34 },
+        { id: 7, texto: "A professora Maria José tem uma classe de 3º ano e nela há 18 meninos e 21 meninas. Qual é o total de estudantes da classe da professora?", resposta: 39 },
+        { id: 8, texto: "Ontem, Mário tinha 28 reais. Hoje ele ganhou 7 reais. Quantos reais Mário tem agora?", resposta: 35 },
+        { id: 9, texto: "Raul tinha 55 chicletes e deu 25 a seu irmão. Com quantos chicletes Raul ficou?", resposta: 30 },
+        { id: 10, texto: "Gabriel tem uma coleção de 54 carrinhos. A coleção de Rodrigo tem 23 carrinhos. Quantos carrinhos a coleção de Gabriel tem a mais que a coleção de Rodrigo?", resposta: 31 },
+        { id: 11, texto: "Eduardo ganhou 23 bombons. Ele já comeu 10. Quantos bombons ele ainda tem?", resposta: 13 },
+        { id: 12, texto: "Camila está colando figurinhas no seu álbum de animais. Ela colocou 12 figurinhas numa folha e 5 figurinhas em outra. Quantas figurinhas ela colou nas duas folhas?", resposta: 17 },
+        { id: 13, texto: "Mariana fez 58 brigadeiros. Ela e suas irmãs já comeram 35. Quantos brigadeiros ainda não foram comidos?", resposta: 23 },
+        { id: 14, texto: "Helena juntou 37 tampinhas de refrigerante para fazer uns brinquedinhos. Ela já usou 14 para fazer um bonequinho. Quantas tampinhas ainda não foram usadas?", resposta: 23 },
+        { id: 15, texto: "Calcule o resultado de 87 - 55.", resposta: 32 },
+        { id: 16, texto: "Calcule o resultado da subtração de 168 - 115.", resposta: 53 }
+    ];
+
+    let seed = 0;
+    let perguntas = [];
+    let respostasAluno = {};
+    let acertos = 0;
+    let erros = 0;
+    let codigoAtual = null;
+    
+    // ========== FUNÇÕES CORRETAS DE CODIFICAÇÃO/DECODIFICAÇÃO ==========
+    
+    // Codifica o estado atual (seed + respostas) para um código base-36
+    function gerarCodigoCompacto() {
+        // Começa com a seed
+        let numero = BigInt(seed);
+        
+        // Adiciona cada resposta (8 bits cada)
+        for (let i = 0; i < perguntas.length; i++) {
+            const valor = respostasAluno[i] !== undefined ? respostasAluno[i] : 0;
+            numero = (numero << 8n) | BigInt(valor);
+        }
+        
+        // Converte para base-36
+        let codigo = numero.toString(36).toUpperCase();
+        return codigo;
+    }
+    
+    // Decodifica o código e retorna seed e respostas
+    function recuperarDoCodigo(codigoStr) {
+        try {
+            // Converte de base-36 para BigInt
+            let numero = 0n;
+            for (let i = 0; i < codigoStr.length; i++) {
+                const char = codigoStr[i];
+                let valor;
+                if (char >= '0' && char <= '9') {
+                    valor = BigInt(char.charCodeAt(0) - 48);
+                } else {
+                    valor = BigInt(char.charCodeAt(0) - 55); // A=10, B=11...
+                }
+                numero = numero * 36n + valor;
+            }
+            
+            // Extrai as 16 respostas (últimos 8 bits de cada)
+            const respostas = {};
+            let temp = numero;
+            
+            for (let i = perguntas.length - 1; i >= 0; i--) {
+                const valor = Number(temp & 0xFFn);
+                if (valor !== 0) {
+                    respostas[i] = valor;
+                }
+                temp = temp >> 8n;
+            }
+            
+            const seedRecuperada = Number(temp);
+            
+            if (seedRecuperada < 0 || seedRecuperada > 999999) return null;
+            
+            return { seed: seedRecuperada, respostas };
+        } catch(e) {
+            console.error("Erro ao decodificar:", e);
+            return null;
+        }
+    }
+    
+    // Teste de consistência
+    function testarConsistencia() {
+        const codigo = gerarCodigoCompacto();
+        const recuperado = recuperarDoCodigo(codigo);
+        
+        if (!recuperado) return false;
+        if (recuperado.seed !== seed) return false;
+        
+        for (let i = 0; i < perguntas.length; i++) {
+            const original = respostasAluno[i] || 0;
+            const restaurada = recuperado.respostas[i] || 0;
+            if (original !== restaurada) return false;
+        }
+        return true;
+    }
+    
+    // ========== FUNÇÕES DE FORMATAÇÃO ==========
+    
+    function formatarEmBlocos(codigo) {
+        const blocos = [];
+        for (let i = 0; i < codigo.length; i += 3) {
+            blocos.push(codigo.substring(i, i + 3));
+        }
+        return blocos;
+    }
+    
+    function mostrarCodigoEmBlocos(codigo) {
+        const blocos = formatarEmBlocos(codigo);
+        const blocksHtml = blocos.map(bloco => `<div class="code-block">${bloco}</div>`).join('');
+        return `<div class="code-blocks-container" onclick="window.copyCodeGlobal()"><div class="code-blocks">${blocksHtml}</div><div class="copy-hint">👆 Clique para copiar tudo</div></div>`;
+    }
+    
+    function limparEspacosCodigo(input) {
+        return input.toUpperCase().replace(/\s/g, '');
+    }
+    
+    // ========== GERADOR DE ORDEM ==========
+    
+    function embaralharComSeed(array, seedValue) {
+        const arr = [...array];
+        let s = seedValue;
+        let rng = function() {
+            s = (s * 9301 + 49297) % 233280;
+            return s / 233280;
+        };
+        
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    function gerarOrdemPorSeed(seedValue) {
+        const indices = [...Array(perguntasOriginais.length).keys()];
+        const ordem = embaralharComSeed(indices, seedValue);
+        return ordem;
+    }
+    
+    function atualizarPerguntasPorSeed() {
+        const ordem = gerarOrdemPorSeed(seed);
+        perguntas = ordem.map(idx => ({
+            ...perguntasOriginais[idx],
+            ordemOriginal: idx
+        }));
+    }
+    
+    // ========== FUNÇÕES DO JOGO ==========
+    
+    function gerarNovaSeed() {
+        seed = Math.floor(Math.random() * 1000000);
+        atualizarPerguntasPorSeed();
+    }
+    
+    function resetRespostas() {
+        respostasAluno = {};
+        atualizarEstatisticas();
+        renderProblems();
+        renderAnswersBank();
+        showMessage("Respostas limpas!", true);
+    }
+    
+    function resetCompleto() {
+        gerarNovaSeed();
+        resetRespostas();
+        codigoAtual = null;
+        document.getElementById('codeDisplay').className = 'code-hidden';
+        document.getElementById('codeDisplay').innerHTML = '[ GERAR ]';
+        document.getElementById('copyCodeBtn').style.display = 'none';
+        showMessage("👋 Novo aluno! Perguntas em ordem aleatória.", true);
+    }
+    
+    function mostrarCodigo() {
+        const codigo = gerarCodigoCompacto();
+        codigoAtual = codigo;
+        
+        const displayElement = document.getElementById('codeDisplay');
+        displayElement.className = '';
+        displayElement.innerHTML = mostrarCodigoEmBlocos(codigo);
+        document.getElementById('copyCodeBtn').style.display = 'inline-block';
+        
+        const teste = testarConsistencia();
+        const respondidas = Object.keys(respostasAluno).length;
+        
+        if (!teste) {
+            showMessage("⚠️ ERRO CRÍTICO: Código inconsistente! Recarregue a página.", false);
+            console.error("Inconsistência detectada!");
+        } else {
+            const blocos = formatarEmBlocos(codigo);
+            showMessage(`✅ Código gerado! ${blocos.length} blocos de 3 caracteres. Anote todos na ordem!`, true);
+        }
+    }
+    
+    window.copyCodeGlobal = function() {
+        if (codigoAtual) {
+            navigator.clipboard.writeText(codigoAtual).then(() => {
+                showMessage("📋 Código copiado! Guarde para continuar.", true);
+            });
+        } else {
+            showMessage("Gere o código primeiro", false);
+        }
+    };
+    
+    function copiarCodigo() {
+        if (codigoAtual) {
+            navigator.clipboard.writeText(codigoAtual).then(() => {
+                showMessage("📋 Código copiado! Guarde para continuar.", true);
+            });
+        } else {
+            showMessage("Gere o código primeiro", false);
+        }
+    }
+    
+    function restaurarPorCodigo() {
+        const codigoComEspacos = document.getElementById('restoreCode').value.trim();
+        const codigo = limparEspacosCodigo(codigoComEspacos);
+        
+        if (!codigo) {
+            showMessage("Digite o código (os blocos que você anotou)", false);
+            return;
+        }
+        
+        if (!/^[0-9A-Z]+$/.test(codigo)) {
+            showMessage("Use apenas letras MAIÚSCULAS e números", false);
+            return;
+        }
+        
+        const dados = recuperarDoCodigo(codigo);
+        if (dados && dados.seed !== undefined && !isNaN(dados.seed)) {
+            // Salvar estado antigo para debug
+            const oldRespostas = {...respostasAluno};
+            
+            seed = dados.seed;
+            atualizarPerguntasPorSeed();
+            respostasAluno = dados.respostas;
+            atualizarEstatisticas();
+            renderProblems();
+            renderAnswersBank();
+            document.getElementById('restoreCode').value = "";
+            
+            const respondidas = Object.keys(respostasAluno).length;
+            
+            // Verificar se a recuperação foi fiel
+            const novoCodigo = gerarCodigoCompacto();
+            if (novoCodigo === codigo) {
+                showMessage(`✅ Recuperado com sucesso! ${respondidas} respostas restauradas.`, true);
+            } else {
+                showMessage(`✅ Recuperado! ${respondidas} respostas restauradas.`, true);
+            }
+        } else {
+            showMessage("❌ Código inválido! Verifique se copiou todos os blocos na ordem correta.", false);
+        }
+    }
+    
+    function atualizarEstatisticas() {
+        let tempAcertos = 0;
+        let tempErros = 0;
+        
+        for (let i = 0; i < perguntas.length; i++) {
+            const respostaDada = respostasAluno[i];
+            if (respostaDada !== undefined) {
+                if (respostaDada === perguntas[i].resposta) {
+                    tempAcertos++;
+                } else {
+                    tempErros++;
+                }
+            }
+        }
+        
+        acertos = tempAcertos;
+        erros = tempErros;
+        
+        const respondidas = Object.keys(respostasAluno).length;
+        
+        document.getElementById('respondidas').textContent = respondidas;
+        document.getElementById('total').textContent = perguntas.length;
+        document.getElementById('acertosPreview').textContent = acertos;
+        document.getElementById('errosPreview').textContent = erros;
+        document.getElementById('previewAcertos').textContent = acertos;
+        document.getElementById('previewErros').textContent = erros;
+        document.getElementById('previewFeitas').textContent = respondidas;
+    }
+    
+    function verificarRespostas() {
+        atualizarEstatisticas();
+        mostrarModalResultado();
+    }
+    
+    function mostrarModalResultado() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        
+        const respondidas = acertos + erros;
+        const percentual = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
+        
+        let questoesHtml = '';
+        perguntas.forEach((p, idx) => {
+            const respostaDada = respostasAluno[idx];
+            const isCorrect = respostaDada !== undefined && respostaDada === p.resposta;
+            const status = respostaDada !== undefined ? (isCorrect ? '✅' : '❌') : '⏳';
+            const statusClass = isCorrect ? 'correct' : (respostaDada !== undefined ? 'wrong' : '');
+            
+            questoesHtml += `
+                <div class="modal-question ${statusClass}">
+                    <strong>${idx + 1}.</strong> ${p.texto}<br>
+                    <small>Sua resposta: ${respostaDada !== undefined ? respostaDada : 'não respondida'} | Correta: ${p.resposta} ${status}</small>
+                </div>
+            `;
+        });
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>📊 RESULTADO</h2>
+                <div class="result-stats" style="margin-bottom: 20px;">
+                    <div class="result-item">
+                        <div>✅ Acertos</div>
+                        <div class="result-number" style="color: #4caf50;">${acertos}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>❌ Erros</div>
+                        <div class="result-number" style="color: #f44336;">${erros}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>📝 Não respondidas</div>
+                        <div class="result-number" style="color: #ff9800;">${16 - respondidas}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>🎯 Aproveitamento</div>
+                        <div class="result-number">${percentual}%</div>
+                    </div>
+                </div>
+                <div class="modal-results">
+                    <h3>Detalhamento:</h3>
+                    ${questoesHtml}
+                </div>
+                <button onclick="this.closest('.modal').remove()" class="btn-primary" style="margin-top: 15px;">Fechar</button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
+    function setAnswer(problemIndex, answerValue) {
+        respostasAluno[problemIndex] = answerValue;
+        atualizarEstatisticas();
+        renderProblems();
+        renderAnswersBank();
+        showMessage(`Resposta ${answerValue} registrada!`, true);
+    }
+    
+    function removeAnswer(problemIndex) {
+        delete respostasAluno[problemIndex];
+        atualizarEstatisticas();
+        renderProblems();
+        renderAnswersBank();
+        showMessage("Resposta removida!", false);
+    }
+    
+    // ========== RENDERIZAÇÃO ==========
+    
+    function renderProblems() {
+        const grid = document.getElementById('problemsGrid');
+        grid.innerHTML = '';
+        
+        perguntas.forEach((problema, idx) => {
+            const hasAnswer = respostasAluno[idx] !== undefined;
+            const answerValue = respostasAluno[idx];
+            
+            const card = document.createElement('div');
+            card.className = `problem-card ${hasAnswer ? 'has-answer' : ''}`;
+            
+            card.innerHTML = `
+                <div class="problem-text"><strong>${idx + 1}.</strong> ${problema.texto}</div>
+                <div class="answer-area">
+                    <div class="drop-zone ${hasAnswer ? 'filled' : ''}" data-index="${idx}" data-has-answer="${hasAnswer}">
+                        ${hasAnswer ? `<span style="font-size: 20px;">${answerValue}</span>` : '⬅️ Arraste aqui'}
+                        ${hasAnswer ? `<button class="remove-btn" data-index="${idx}">✖</button>` : ''}
+                    </div>
+                    <div class="status-icon">
+                        ${hasAnswer ? '📌' : '📝'}
+                    </div>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        });
+        
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const index = parseInt(zone.dataset.index);
+            const hasAnswer = zone.dataset.hasAnswer === 'true';
+            
+            if (!hasAnswer) {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const draggedValue = e.dataTransfer.getData('text/plain');
+                    if (draggedValue) {
+                        const numValue = parseInt(draggedValue);
+                        if (!isNaN(numValue)) {
+                            setAnswer(index, numValue);
+                        }
+                    }
+                });
+            }
+        });
+        
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(btn.dataset.index);
+                removeAnswer(index);
+            });
+        });
+    }
+    
+    function renderAnswersBank() {
+        const respostasCorretas = perguntas.map(p => p.resposta);
+        const distractorsSet = new Set();
+        
+        respostasCorretas.forEach(ans => {
+            for (let i = -5; i <= 5; i++) {
+                if (i !== 0 && ans + i > 0) {
+                    distractorsSet.add(ans + i);
+                }
+            }
+        });
+        
+        const distractors = Array.from(distractorsSet)
+            .filter(d => !respostasCorretas.includes(d))
+            .slice(0, 25);
+        
+        let allNumbers = [...respostasCorretas, ...distractors];
+        for (let i = allNumbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allNumbers[i], allNumbers[j]] = [allNumbers[j], allNumbers[i]];
+        }
+        
+        const bank = document.getElementById('answersBank');
+        bank.innerHTML = '';
+        
+        allNumbers.forEach(num => {
+            const dragItem = document.createElement('div');
+            dragItem.className = 'answer-drag';
+            dragItem.textContent = num;
+            dragItem.setAttribute('draggable', 'true');
+            
+            dragItem.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', num);
+                dragItem.classList.add('dragging');
+            });
+            
+            dragItem.addEventListener('dragend', (e) => {
+                dragItem.classList.remove('dragging');
+            });
+            
+            bank.appendChild(dragItem);
+        });
+    }
+    
+    // ========== UTILIDADES ==========
+    
+    let messageTimeout;
+    function showMessage(text, isSuccess) {
+        const existingMsg = document.querySelector('.message');
+        if (existingMsg) existingMsg.remove();
+        
+        const msg = document.createElement('div');
+        msg.className = 'message';
+        msg.style.background = isSuccess ? '#4caf50' : '#ff9800';
+        msg.textContent = text;
+        document.body.appendChild(msg);
+        
+        if (messageTimeout) clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+            if (msg) msg.remove();
+        }, 4000);
+    }
+    
+    // Inicialização
+    function init() {
+        resetCompleto();
+        
+        document.body.addEventListener('dragover', (e) => e.preventDefault());
+        document.body.addEventListener('drop', (e) => e.preventDefault());
+        
+        document.getElementById('newStudentBtn').addEventListener('click', () => {
+            if (confirm("Criar novo aluno? O progresso atual será perdido.")) {
+                resetCompleto();
+            }
+        });
+        document.getElementById('reshuffleBtn').addEventListener('click', () => {
+            if (confirm("Embaralhar as perguntas? Todas as respostas serão perdidas.")) {
+                gerarNovaSeed();
+                resetRespostas();
+                codigoAtual = null;
+                document.getElementById('codeDisplay').className = 'code-hidden';
+                document.getElementById('codeDisplay').innerHTML = '[ GERAR ]';
+                document.getElementById('copyCodeBtn').style.display = 'none';
+                showMessage("🃏 Nova ordem gerada!", true);
+            }
+        });
+        document.getElementById('verifyBtn').addEventListener('click', verificarRespostas);
+        document.getElementById('generateCodeBtn').addEventListener('click', mostrarCodigo);
+        document.getElementById('copyCodeBtn').addEventListener('click', copiarCodigo);
+        document.getElementById('restoreBtn').addEventListener('click', restaurarPorCodigo);
+        document.getElementById('resetCurrentBtn').addEventListener('click', resetRespostas);
+        
+        document.getElementById('restoreCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') restaurarPorCodigo();
+        });
+    }
+    
+    init();
+</script>
+</body>
+</html>
