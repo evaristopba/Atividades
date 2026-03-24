@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Matemática 3º Ano - Perguntas em Destaque</title>
+    <title>Matemática 3º Ano - Código Ultra Compacto</title>
     <style>
         * {
             box-sizing: border-box;
@@ -64,121 +64,38 @@
             font-size: 20px;
         }
 
-        .code-section {
-            background: rgba(255,255,255,0.95);
-            border-radius: 12px;
-            padding: 12px;
+        .action-buttons {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .code-display-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .code-label {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .code-blocks-container {
-            background: #2d3748;
-            border-radius: 15px;
-            padding: 12px 20px;
-            cursor: pointer;
-        }
-
-        .code-blocks {
-            display: flex;
-            flex-wrap: wrap;
             gap: 12px;
             justify-content: center;
+            padding: 10px 0;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .code-block {
-            background: #1a1f2e;
-            color: #48bb78;
-            font-family: monospace;
-            font-size: 28px;
-            font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 12px;
-            letter-spacing: 2px;
-            text-align: center;
-            min-width: 100px;
-        }
-
-        .code-hidden {
-            background: #555;
-            color: #aaa;
-            font-family: monospace;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 12px 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .code-input {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .code-input input {
-            width: 320px;
-            padding: 12px 15px;
+        .action-btn {
+            padding: 12px 24px;
             font-size: 16px;
-            font-family: monospace;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            text-align: center;
             font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        button {
-            background: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: bold;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.2s;
-            color: #f5576c;
+            border: none;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        }
-
-        .btn-primary {
-            background: #4caf50;
+        .btn-generate {
+            background: #9c27b0;
             color: white;
         }
 
-        .btn-warning {
-            background: #ff9800;
-            color: white;
-        }
-
-        .btn-success {
+        .btn-restore {
             background: #2196f3;
             color: white;
         }
 
-        .btn-code {
-            background: #9c27b0;
-            color: white;
+        .btn-generate:hover, .btn-restore:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .two-columns {
@@ -408,21 +325,7 @@
             text-decoration: none;
         }
 
-        .message {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-weight: bold;
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
-            font-size: 16px;
-        }
-
-        .modal {
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -436,40 +339,163 @@
             animation: fadeIn 0.3s;
         }
 
-        .modal-content {
+        .modal-card {
             background: white;
             border-radius: 30px;
             padding: 30px;
             max-width: 600px;
             width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
             text-align: center;
+            animation: slideUp 0.3s ease-out;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
-        .modal-content h2 {
+        .modal-card h2 {
             color: #f5576c;
             margin-top: 0;
             font-size: 28px;
         }
 
-        .modal-results {
+        .code-blocks-container {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 20px;
             margin: 20px 0;
-            text-align: left;
+            cursor: pointer;
         }
 
-        .modal-question {
+        .code-blocks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .code-block {
+            background: #1a1f2e;
+            color: #48bb78;
+            font-family: monospace;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 16px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 85px;
+        }
+
+        .copy-hint {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        .modal-card input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-family: monospace;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-primary {
+            background: #4caf50;
+            color: white;
+        }
+
+        .modal-btn-cancel {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 2100;
+            animation: slideIn 0.3s ease-out;
+            font-size: 16px;
+        }
+
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .result-modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 650px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .result-modal-content h2 {
+            color: #f5576c;
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .result-stats-modal {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-question {
             padding: 12px;
             border-bottom: 1px solid #eee;
             font-size: 14px;
+            text-align: left;
         }
 
-        .modal-question.correct {
+        .result-question.correct {
             color: #4caf50;
             background: #e8f5e9;
         }
 
-        .modal-question.wrong {
+        .result-question.wrong {
             color: #f44336;
             background: #ffebee;
         }
@@ -490,6 +516,17 @@
             to { opacity: 1; }
         }
 
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         .help-text {
             font-size: 12px;
             color: rgba(255,255,255,0.9);
@@ -497,33 +534,17 @@
             text-align: center;
         }
 
-        .copy-hint {
-            font-size: 11px;
-            color: #aaa;
-            text-align: center;
-            margin-top: 5px;
-        }
-
         @media (max-width: 900px) {
             .two-columns {
                 flex-direction: column;
             }
             .code-block {
-                font-size: 20px;
-                padding: 6px 12px;
-                min-width: 70px;
+                font-size: 18px;
+                padding: 6px 10px;
+                min-width: 65px;
             }
             .problem-text {
                 font-size: 16px;
-            }
-            .drop-zone {
-                font-size: 24px;
-                min-height: 55px;
-            }
-            .answer-drag {
-                font-size: 20px;
-                padding: 10px 16px;
-                width: 70px;
             }
         }
     </style>
@@ -533,7 +554,7 @@
     <div class="header">
         <div class="stats-container">
             <div class="stats-box">
-                <div class="stat-card big">📝 RESPONDIDAS: <span id="respondidas">0</span>/<span id="total">16</span></div>
+                <div class="stat-card big">📝 RESPONDIDAS: <span id="respondidas">0</span>/<span id="total">20</span></div>
                 <div class="stat-card">⭐ ACERTOS: <span id="acertosPreview">0</span></div>
                 <div class="stat-card">❌ ERROS: <span id="errosPreview">0</span></div>
             </div>
@@ -544,20 +565,11 @@
             </div>
         </div>
         
-        <div class="code-section">
-            <div class="code-display-area">
-                <span class="code-label">🔑 SEU CÓDIGO:</span>
-                <div id="codeDisplay" class="code-hidden">[ GERAR ]</div>
-                <button id="generateCodeBtn" class="btn-code">✨ GERAR</button>
-                <button id="copyCodeBtn" class="btn-primary" style="display: none;">📋 Copiar</button>
-            </div>
-            <div class="code-input">
-                <input type="text" id="restoreCode" placeholder="Digite o código (ex: ABC 123 DEF)" maxlength="60" style="text-transform:uppercase">
-                <button id="restoreBtn" class="btn-primary">🔓 RECUPERAR</button>
-                <button id="resetCurrentBtn" class="btn-warning">🗑️ LIMPAR</button>
-            </div>
+        <div class="action-buttons">
+            <button id="generateCodeBtn" class="action-btn btn-generate">✨ GERAR CÓDIGO</button>
+            <button id="restoreCodeBtn" class="action-btn btn-restore">🔓 RECUPERAR CÓDIGO</button>
         </div>
-        <div class="help-text">💡 Código em blocos de 3 letras/números. Teste: responda 1 pergunta, gere código, limpe, recupere!</div>
+        <div class="help-text">💡 Código ULTRA COMPACTO (base-62) - menos caracteres para anotar!</div>
     </div>
 
     <div class="two-columns">
@@ -600,7 +612,7 @@
         <a href="https://www.professoracarol.org/HOTPOTATOES/situacoes-problema-3ano.htm" target="_blank">
             professora Carol - Situações Problema 3º ano
         </a> 
-        • Código em blocos de 3 • Fácil de copiar!
+        • 20 desafios • Código ULTRA COMPACTO (base-62)
     </div>
 </div>
 
@@ -621,7 +633,11 @@
         { id: 13, texto: "Mariana fez 58 brigadeiros. Ela e suas irmãs já comeram 35. Quantos brigadeiros ainda não foram comidos?", resposta: 23 },
         { id: 14, texto: "Helena juntou 37 tampinhas de refrigerante para fazer uns brinquedinhos. Ela já usou 14 para fazer um bonequinho. Quantas tampinhas ainda não foram usadas?", resposta: 23 },
         { id: 15, texto: "Calcule o resultado de 87 - 55.", resposta: 32 },
-        { id: 16, texto: "Calcule o resultado da subtração de 168 - 115.", resposta: 53 }
+        { id: 16, texto: "Calcule o resultado da subtração de 168 - 115.", resposta: 53 },
+        { id: 17, texto: "Foram vendidas 227 caixas de morangos na segunda-feira e 315 na terça-feira. Quantas caixas a mais foram vendidas na terça?", resposta: 88 },
+        { id: 18, texto: "Complete a sequência: 462, 467, ___, 477, 482.", resposta: 472 },
+        { id: 19, texto: "Se um pacote de figurinhas tem 5 figurinhas, quantas figurinhas há em 8 pacotes?", resposta: 40 },
+        { id: 20, texto: "No número 3786, qual é o valor posicional do algarismo 7?", resposta: 700 }
     ];
 
     let seed = 0;
@@ -631,43 +647,66 @@
     let erros = 0;
     let codigoAtual = null;
     
-    // ========== FUNÇÕES CORRETAS DE CODIFICAÇÃO/DECODIFICAÇÃO ==========
+    // ========== BASE-62 (0-9, A-Z, a-z) ==========
+    const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    
+    function toBase62(numero) {
+        if (numero === 0n) return "0";
+        let result = "";
+        let temp = numero;
+        while (temp > 0n) {
+            const remainder = Number(temp % 62n);
+            result = BASE62[remainder] + result;
+            temp = temp / 62n;
+        }
+        return result;
+    }
+    
+    function fromBase62(str) {
+        let result = 0n;
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            let valor;
+            if (char >= '0' && char <= '9') {
+                valor = BigInt(char.charCodeAt(0) - 48);
+            } else if (char >= 'A' && char <= 'Z') {
+                valor = BigInt(char.charCodeAt(0) - 55);
+            } else {
+                valor = BigInt(char.charCodeAt(0) - 61);
+            }
+            result = result * 62n + valor;
+        }
+        return result;
+    }
+    
+    // ========== CODIFICAÇÃO COM 12 BITS POR RESPOSTA ==========
+    const BITS_POR_RESPOSTA = 12;
+    const MASCARA = (1 << BITS_POR_RESPOSTA) - 1; // 4095
     
     function gerarCodigoCompacto() {
         let numero = BigInt(seed);
         
         for (let i = 0; i < perguntas.length; i++) {
             const valor = respostasAluno[i] !== undefined ? respostasAluno[i] : 0;
-            numero = (numero << 8n) | BigInt(valor);
+            numero = (numero << BigInt(BITS_POR_RESPOSTA)) | BigInt(valor);
         }
         
-        let codigo = numero.toString(36).toUpperCase();
-        return codigo;
+        return toBase62(numero);
     }
     
     function recuperarDoCodigo(codigoStr) {
         try {
-            let numero = 0n;
-            for (let i = 0; i < codigoStr.length; i++) {
-                const char = codigoStr[i];
-                let valor;
-                if (char >= '0' && char <= '9') {
-                    valor = BigInt(char.charCodeAt(0) - 48);
-                } else {
-                    valor = BigInt(char.charCodeAt(0) - 55);
-                }
-                numero = numero * 36n + valor;
-            }
+            let numero = fromBase62(codigoStr);
             
             const respostas = {};
             let temp = numero;
             
             for (let i = perguntas.length - 1; i >= 0; i--) {
-                const valor = Number(temp & 0xFFn);
+                const valor = Number(temp & BigInt(MASCARA));
                 if (valor !== 0) {
                     respostas[i] = valor;
                 }
-                temp = temp >> 8n;
+                temp = temp >> BigInt(BITS_POR_RESPOSTA);
             }
             
             const seedRecuperada = Number(temp);
@@ -702,16 +741,6 @@
             blocos.push(codigo.substring(i, i + 3));
         }
         return blocos;
-    }
-    
-    function mostrarCodigoEmBlocos(codigo) {
-        const blocos = formatarEmBlocos(codigo);
-        const blocksHtml = blocos.map(bloco => `<div class="code-block">${bloco}</div>`).join('');
-        return `<div class="code-blocks-container" onclick="window.copyCodeGlobal()"><div class="code-blocks">${blocksHtml}</div><div class="copy-hint">👆 Clique para copiar tudo</div></div>`;
-    }
-    
-    function limparEspacosCodigo(input) {
-        return input.toUpperCase().replace(/\s/g, '');
     }
     
     // ========== GERADOR DE ORDEM ==========
@@ -764,82 +793,186 @@
         gerarNovaSeed();
         resetRespostas();
         codigoAtual = null;
-        document.getElementById('codeDisplay').className = 'code-hidden';
-        document.getElementById('codeDisplay').innerHTML = '[ GERAR ]';
-        document.getElementById('copyCodeBtn').style.display = 'none';
-        showMessage("👋 Novo aluno! Perguntas em ordem aleatória.", true);
+        showMessage("👋 Novo aluno! 20 perguntas em ordem aleatória.", true);
     }
     
-    function mostrarCodigo() {
+    function mostrarModalGerar() {
         const codigo = gerarCodigoCompacto();
         codigoAtual = codigo;
-        
-        const displayElement = document.getElementById('codeDisplay');
-        displayElement.className = '';
-        displayElement.innerHTML = mostrarCodigoEmBlocos(codigo);
-        document.getElementById('copyCodeBtn').style.display = 'inline-block';
-        
-        const teste = testarConsistencia();
+        const blocos = formatarEmBlocos(codigo);
+        const blocksHtml = blocos.map(bloco => `<div class="code-block">${bloco}</div>`).join('');
         const respondidas = Object.keys(respostasAluno).length;
         
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h2>✨ CÓDIGO ULTRA COMPACTO</h2>
+                <p>⚠️ ATENÇÃO: Letras MAIÚSCULAS e MINÚSCULAS importam!</p>
+                <p>Anote estes ${blocos.length} blocos de 3 caracteres:</p>
+                <div class="code-blocks-container" id="modalCodeContainer">
+                    <div class="code-blocks">${blocksHtml}</div>
+                    <div class="copy-hint">👆 Clique para copiar tudo</div>
+                </div>
+                <p style="color: #666; font-size: 14px;">📊 ${respondidas} de 20 perguntas respondidas</p>
+                <p style="color: #ff9800; font-size: 12px;">💡 Código tem ${codigo.length} caracteres (antes seriam ~38 caracteres!)</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" id="modalCopyBtn">📋 COPIAR</button>
+                    <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">FECHAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const codeContainer = document.getElementById('modalCodeContainer');
+        codeContainer.addEventListener('click', () => {
+            navigator.clipboard.writeText(codigo).then(() => {
+                showMessage("📋 Código copiado!", true);
+            });
+        });
+        
+        document.getElementById('modalCopyBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(codigo).then(() => {
+                showMessage("📋 Código copiado! Guarde para continuar.", true);
+                modal.remove();
+            });
+        });
+        
+        document.getElementById('modalCloseBtn').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+        
+        const teste = testarConsistencia();
         if (!teste) {
-            showMessage("⚠️ ERRO CRÍTICO: Código inconsistente! Recarregue a página.", false);
-            console.error("Inconsistência detectada!");
+            showMessage("⚠️ ERRO: Código inconsistente! Recarregue a página.", false);
         } else {
-            const blocos = formatarEmBlocos(codigo);
-            showMessage(`✅ Código gerado! ${blocos.length} blocos de 3 caracteres. Anote todos na ordem!`, true);
+            showMessage(`✅ Código gerado! ${codigo.length} caracteres em ${blocos.length} blocos.`, true);
         }
     }
     
-    window.copyCodeGlobal = function() {
-        if (codigoAtual) {
-            navigator.clipboard.writeText(codigoAtual).then(() => {
-                showMessage("📋 Código copiado! Guarde para continuar.", true);
-            });
-        } else {
-            showMessage("Gere o código primeiro", false);
-        }
-    };
-    
-    function copiarCodigo() {
-        if (codigoAtual) {
-            navigator.clipboard.writeText(codigoAtual).then(() => {
-                showMessage("📋 Código copiado! Guarde para continuar.", true);
-            });
-        } else {
-            showMessage("Gere o código primeiro", false);
-        }
-    }
-    
-    function restaurarPorCodigo() {
-        const codigoComEspacos = document.getElementById('restoreCode').value.trim();
-        const codigo = limparEspacosCodigo(codigoComEspacos);
+    function mostrarModalRestaurar() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h2>🔓 RECUPERAR PROGRESSO</h2>
+                <p>⚠️ Digite o código exatamente como foi gerado (MAIÚSCULAS e MINÚSCULAS)</p>
+                <input type="text" id="restoreCodeInput" placeholder="Ex: AbC 123 dEf" maxlength="60">
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" id="modalRestoreBtn">🔓 RECUPERAR</button>
+                    <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">CANCELAR</button>
+                </div>
+            </div>
+        `;
         
-        if (!codigo) {
-            showMessage("Digite o código (os blocos que você anotou)", false);
-            return;
-        }
+        document.body.appendChild(modal);
         
-        if (!/^[0-9A-Z]+$/.test(codigo)) {
-            showMessage("Use apenas letras MAIÚSCULAS e números", false);
-            return;
-        }
+        const input = document.getElementById('restoreCodeInput');
         
-        const dados = recuperarDoCodigo(codigo);
-        if (dados && dados.seed !== undefined && !isNaN(dados.seed)) {
-            seed = dados.seed;
-            atualizarPerguntasPorSeed();
-            respostasAluno = dados.respostas;
-            atualizarEstatisticas();
-            renderProblems();
-            renderAnswersBank();
-            document.getElementById('restoreCode').value = "";
+        function restaurar() {
+            const codigo = input.value.trim().replace(/\s/g, '');
             
-            const respondidas = Object.keys(respostasAluno).length;
-            showMessage(`✅ Recuperado com sucesso! ${respondidas} respostas restauradas.`, true);
-        } else {
-            showMessage("❌ Código inválido! Verifique se copiou todos os blocos na ordem correta.", false);
+            if (!codigo) {
+                showMessage("Digite o código", false);
+                return;
+            }
+            
+            // Aceita apenas caracteres alfanuméricos (incluindo minúsculas)
+            if (!/^[0-9A-Za-z]+$/.test(codigo)) {
+                showMessage("Use apenas letras e números", false);
+                return;
+            }
+            
+            const dados = recuperarDoCodigo(codigo);
+            if (dados && dados.seed !== undefined && !isNaN(dados.seed)) {
+                seed = dados.seed;
+                atualizarPerguntasPorSeed();
+                respostasAluno = dados.respostas;
+                atualizarEstatisticas();
+                renderProblems();
+                renderAnswersBank();
+                
+                const respondidas = Object.keys(respostasAluno).length;
+                showMessage(`✅ Recuperado! ${respondidas} respostas restauradas.`, true);
+                modal.remove();
+            } else {
+                showMessage("❌ Código inválido! Verifique se copiou exatamente (incluindo letras minúsculas).", false);
+            }
         }
+        
+        document.getElementById('modalRestoreBtn').addEventListener('click', restaurar);
+        document.getElementById('modalCloseBtn').addEventListener('click', () => modal.remove());
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') restaurar();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
+    function mostrarModalResultado() {
+        const respondidas = acertos + erros;
+        const percentual = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
+        
+        let questoesHtml = '';
+        perguntas.forEach((p, idx) => {
+            const respostaDada = respostasAluno[idx];
+            const isCorrect = respostaDada !== undefined && respostaDada === p.resposta;
+            const status = respostaDada !== undefined ? (isCorrect ? '✅' : '❌') : '⏳';
+            const statusClass = isCorrect ? 'correct' : (respostaDada !== undefined ? 'wrong' : '');
+            
+            questoesHtml += `
+                <div class="result-question ${statusClass}">
+                    <strong>${idx + 1}.</strong> ${p.texto}<br>
+                    <small>Sua resposta: ${respostaDada !== undefined ? respostaDada : 'não respondida'} | Correta: ${p.resposta} ${status}</small>
+                </div>
+            `;
+        });
+        
+        const modal = document.createElement('div');
+        modal.className = 'result-modal';
+        modal.innerHTML = `
+            <div class="result-modal-content">
+                <h2>📊 RESULTADO</h2>
+                <div class="result-stats-modal">
+                    <div class="result-item">
+                        <div>✅ Acertos</div>
+                        <div class="result-number" style="color: #4caf50;">${acertos}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>❌ Erros</div>
+                        <div class="result-number" style="color: #f44336;">${erros}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>📝 Não respondidas</div>
+                        <div class="result-number" style="color: #ff9800;">${20 - respondidas}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>🎯 Aproveitamento</div>
+                        <div class="result-number">${percentual}%</div>
+                    </div>
+                </div>
+                <div style="max-height: 450px; overflow-y: auto;">
+                    ${questoesHtml}
+                </div>
+                <div class="modal-buttons" style="margin-top: 20px;">
+                    <button class="modal-btn modal-btn-primary" id="modalResultClose">FECHAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('modalResultClose').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
     }
     
     function atualizarEstatisticas() {
@@ -874,64 +1007,6 @@
     function verificarRespostas() {
         atualizarEstatisticas();
         mostrarModalResultado();
-    }
-    
-    function mostrarModalResultado() {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        
-        const respondidas = acertos + erros;
-        const percentual = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
-        
-        let questoesHtml = '';
-        perguntas.forEach((p, idx) => {
-            const respostaDada = respostasAluno[idx];
-            const isCorrect = respostaDada !== undefined && respostaDada === p.resposta;
-            const status = respostaDada !== undefined ? (isCorrect ? '✅' : '❌') : '⏳';
-            const statusClass = isCorrect ? 'correct' : (respostaDada !== undefined ? 'wrong' : '');
-            
-            questoesHtml += `
-                <div class="modal-question ${statusClass}">
-                    <strong>${idx + 1}.</strong> ${p.texto}<br>
-                    <small>Sua resposta: ${respostaDada !== undefined ? respostaDada : 'não respondida'} | Correta: ${p.resposta} ${status}</small>
-                </div>
-            `;
-        });
-        
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h2>📊 RESULTADO</h2>
-                <div class="result-stats" style="margin-bottom: 20px;">
-                    <div class="result-item">
-                        <div>✅ Acertos</div>
-                        <div class="result-number" style="color: #4caf50;">${acertos}</div>
-                    </div>
-                    <div class="result-item">
-                        <div>❌ Erros</div>
-                        <div class="result-number" style="color: #f44336;">${erros}</div>
-                    </div>
-                    <div class="result-item">
-                        <div>📝 Não respondidas</div>
-                        <div class="result-number" style="color: #ff9800;">${16 - respondidas}</div>
-                    </div>
-                    <div class="result-item">
-                        <div>🎯 Aproveitamento</div>
-                        <div class="result-number">${percentual}%</div>
-                    </div>
-                </div>
-                <div class="modal-results">
-                    <h3>Detalhamento das questões:</h3>
-                    ${questoesHtml}
-                </div>
-                <button onclick="this.closest('.modal').remove()" class="btn-primary" style="margin-top: 15px;">Fechar</button>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.remove();
-        });
     }
     
     function setAnswer(problemIndex, answerValue) {
@@ -1021,7 +1096,7 @@
         const distractorsSet = new Set();
         
         respostasCorretas.forEach(ans => {
-            for (let i = -5; i <= 5; i++) {
+            for (let i = -15; i <= 15; i++) {
                 if (i !== 0 && ans + i > 0) {
                     distractorsSet.add(ans + i);
                 }
@@ -1030,7 +1105,7 @@
         
         const distractors = Array.from(distractorsSet)
             .filter(d => !respostasCorretas.includes(d))
-            .slice(0, 25);
+            .slice(0, 40);
         
         let allNumbers = [...respostasCorretas, ...distractors];
         for (let i = allNumbers.length - 1; i > 0; i--) {
@@ -1060,8 +1135,6 @@
         });
     }
     
-    // ========== UTILIDADES ==========
-    
     let messageTimeout;
     function showMessage(text, isSuccess) {
         const existingMsg = document.querySelector('.message');
@@ -1079,7 +1152,6 @@
         }, 4000);
     }
     
-    // Inicialização
     function init() {
         resetCompleto();
         
@@ -1095,22 +1167,12 @@
             if (confirm("Embaralhar as perguntas? Todas as respostas serão perdidas.")) {
                 gerarNovaSeed();
                 resetRespostas();
-                codigoAtual = null;
-                document.getElementById('codeDisplay').className = 'code-hidden';
-                document.getElementById('codeDisplay').innerHTML = '[ GERAR ]';
-                document.getElementById('copyCodeBtn').style.display = 'none';
                 showMessage("🃏 Nova ordem gerada!", true);
             }
         });
         document.getElementById('verifyBtn').addEventListener('click', verificarRespostas);
-        document.getElementById('generateCodeBtn').addEventListener('click', mostrarCodigo);
-        document.getElementById('copyCodeBtn').addEventListener('click', copiarCodigo);
-        document.getElementById('restoreBtn').addEventListener('click', restaurarPorCodigo);
-        document.getElementById('resetCurrentBtn').addEventListener('click', resetRespostas);
-        
-        document.getElementById('restoreCode').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') restaurarPorCodigo();
-        });
+        document.getElementById('generateCodeBtn').addEventListener('click', mostrarModalGerar);
+        document.getElementById('restoreCodeBtn').addEventListener('click', mostrarModalRestaurar);
     }
     
     init();
