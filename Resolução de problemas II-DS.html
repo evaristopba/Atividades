@@ -71,6 +71,7 @@
             padding: 10px 0;
             background: #f8f9fa;
             border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -93,7 +94,12 @@
             color: white;
         }
 
-        .btn-generate:hover, .btn-restore:hover {
+        .btn-open-file {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-generate:hover, .btn-restore:hover, .btn-open-file:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -408,6 +414,7 @@
             gap: 12px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .modal-btn {
@@ -422,6 +429,11 @@
 
         .modal-btn-primary {
             background: #4caf50;
+            color: white;
+        }
+
+        .modal-btn-save {
+            background: #ff9800;
             color: white;
         }
 
@@ -500,6 +512,11 @@
             background: #ffebee;
         }
 
+        /* Estilo para o input de arquivo escondido */
+        .file-input-hidden {
+            display: none;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -568,8 +585,9 @@
         <div class="action-buttons">
             <button id="generateCodeBtn" class="action-btn btn-generate">✨ GERAR CÓDIGO</button>
             <button id="restoreCodeBtn" class="action-btn btn-restore">🔓 RECUPERAR CÓDIGO</button>
+            <button id="openFileBtn" class="action-btn btn-open-file">📂 ABRIR ARQUIVO</button>
         </div>
-        <div class="help-text">💡 Código ULTRA COMPACTO (base-62) - menos caracteres para anotar!</div>
+        <div class="help-text">💡 Código ULTRA COMPACTO (base-62) - menos caracteres para anotar! | 💾 Salve seu progresso em TXT e recupere depois</div>
     </div>
 
     <div class="two-columns">
@@ -615,6 +633,9 @@
         • 20 desafios • Código ULTRA COMPACTO (base-62)
     </div>
 </div>
+
+<!-- Input de arquivo escondido -->
+<input type="file" id="fileInput" class="file-input-hidden" accept=".txt">
 
 <script>
     const perguntasOriginais = [
@@ -743,6 +764,115 @@
         return blocos;
     }
     
+    // ========== FUNÇÃO PARA SALVAR COMO TXT ==========
+    function salvarCodigoComoTXT() {
+        const codigo = gerarCodigoCompacto();
+        const nomeArquivo = prompt("📁 Nome do arquivo:", "codigo_matematica");
+        
+        if (!nomeArquivo) return;
+        
+        const data = new Date();
+        const dataStr = data.toLocaleString('pt-BR');
+        const respondidas = Object.keys(respostasAluno).length;
+        
+        const conteudo = `=== CÓDIGO DE PROGRESSO - MATEMÁTICA 3º ANO ===
+        
+📅 GERADO EM: ${dataStr}
+📊 PROGRESSO: ${respondidas} de 20 perguntas respondidas
+⭐ ACERTOS: ${acertos} | ❌ ERROS: ${erros}
+
+🔑 CÓDIGO (copie exatamente, incluindo letras maiúsculas e minúsculas):
+${codigo}
+
+⚠️ ATENÇÃO: Letras MAIÚSCULAS e MINÚSCULAS fazem diferença!
+Para recuperar seu progresso, clique em "ABRIR ARQUIVO" e selecione este arquivo.
+
+============================================`;
+        
+        const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        link.href = url;
+        link.download = `${nomeArquivo}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showMessage(`💾 Arquivo "${nomeArquivo}.txt" salvo com sucesso!`, true);
+    }
+    
+    // ========== FUNÇÃO PARA ABRIR ARQUIVO TXT E RECUPERAR ==========
+    function abrirArquivoERecuperar() {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.value = ''; // Limpa para permitir selecionar o mesmo arquivo novamente
+        fileInput.click();
+    }
+    
+    function processarArquivo(file) {
+        if (!file) return;
+        
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const conteudo = e.target.result;
+            
+            // Procura pelo padrão do código no arquivo
+            // O código está na linha após "🔑 CÓDIGO (copie exatamente, incluindo letras maiúsculas e minúsculas):"
+            // ou pode estar em um formato mais simples
+            let codigoEncontrado = null;
+            
+            // Padrão 1: Linha com "🔑 CÓDIGO" e depois uma linha com o código
+            const regex1 = /🔑 CÓDIGO[^\n]*\n([A-Za-z0-9]+)/;
+            const match1 = conteudo.match(regex1);
+            if (match1 && match1[1]) {
+                codigoEncontrado = match1[1].trim();
+            }
+            
+            // Padrão 2: Apenas uma linha com caracteres alfanuméricos (código puro)
+            if (!codigoEncontrado) {
+                const linhas = conteudo.split('\n');
+                for (let linha of linhas) {
+                    const linhaLimpa = linha.trim();
+                    // Se a linha contém apenas letras e números (sem espaços) e tem entre 5 e 40 caracteres
+                    if (/^[A-Za-z0-9]+$/.test(linhaLimpa) && linhaLimpa.length >= 5 && linhaLimpa.length <= 40) {
+                        codigoEncontrado = linhaLimpa;
+                        break;
+                    }
+                }
+            }
+            
+            if (!codigoEncontrado) {
+                showMessage("❌ Não foi possível encontrar o código no arquivo. Verifique se o arquivo está no formato correto.", false);
+                return;
+            }
+            
+            // Recupera o progresso a partir do código
+            const dados = recuperarDoCodigo(codigoEncontrado);
+            if (dados && dados.seed !== undefined && !isNaN(dados.seed)) {
+                seed = dados.seed;
+                atualizarPerguntasPorSeed();
+                respostasAluno = dados.respostas;
+                atualizarEstatisticas();
+                renderProblems();
+                renderAnswersBank();
+                
+                const respondidas = Object.keys(respostasAluno).length;
+                const nomeArquivo = file.name;
+                showMessage(`✅ Arquivo "${nomeArquivo}" carregado! ${respondidas} respostas restauradas.`, true);
+            } else {
+                showMessage("❌ Código inválido no arquivo! Gere um novo código e salve novamente.", false);
+            }
+        };
+        
+        reader.onerror = function() {
+            showMessage("❌ Erro ao ler o arquivo. Tente novamente.", false);
+        };
+        
+        reader.readAsText(file, "UTF-8");
+    }
+    
     // ========== GERADOR DE ORDEM ==========
     
     function embaralharComSeed(array, seedValue) {
@@ -818,6 +948,7 @@
                 <p style="color: #ff9800; font-size: 12px;">💡 Código tem ${codigo.length} caracteres (antes seriam ~38 caracteres!)</p>
                 <div class="modal-buttons">
                     <button class="modal-btn modal-btn-primary" id="modalCopyBtn">📋 COPIAR</button>
+                    <button class="modal-btn modal-btn-save" id="modalSaveBtn">💾 SALVAR COMO TXT</button>
                     <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">FECHAR</button>
                 </div>
             </div>
@@ -837,6 +968,11 @@
                 showMessage("📋 Código copiado! Guarde para continuar.", true);
                 modal.remove();
             });
+        });
+        
+        document.getElementById('modalSaveBtn').addEventListener('click', () => {
+            salvarCodigoComoTXT();
+            modal.remove();
         });
         
         document.getElementById('modalCloseBtn').addEventListener('click', () => {
@@ -862,7 +998,8 @@
             <div class="modal-card">
                 <h2>🔓 RECUPERAR PROGRESSO</h2>
                 <p>⚠️ Digite o código exatamente como foi gerado (MAIÚSCULAS e MINÚSCULAS)</p>
-                <input type="text" id="restoreCodeInput" placeholder="Ex: AbC 123 dEf" maxlength="60">
+                <p>💡 Dica: Você pode usar o botão "📂 ABRIR ARQUIVO" para carregar automaticamente!</p>
+                <input type="text" id="restoreCodeInput" placeholder="Ex: AbC123dEf..." maxlength="60">
                 <div class="modal-buttons">
                     <button class="modal-btn modal-btn-primary" id="modalRestoreBtn">🔓 RECUPERAR</button>
                     <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">CANCELAR</button>
@@ -882,7 +1019,6 @@
                 return;
             }
             
-            // Aceita apenas caracteres alfanuméricos (incluindo minúsculas)
             if (!/^[0-9A-Za-z]+$/.test(codigo)) {
                 showMessage("Use apenas letras e números", false);
                 return;
@@ -1173,6 +1309,16 @@
         document.getElementById('verifyBtn').addEventListener('click', verificarRespostas);
         document.getElementById('generateCodeBtn').addEventListener('click', mostrarModalGerar);
         document.getElementById('restoreCodeBtn').addEventListener('click', mostrarModalRestaurar);
+        document.getElementById('openFileBtn').addEventListener('click', abrirArquivoERecuperar);
+        
+        // Configurar o input de arquivo
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                processarArquivo(e.target.files[0]);
+            }
+            fileInput.value = ''; // Limpa para permitir selecionar o mesmo arquivo novamente
+        });
     }
     
     init();
