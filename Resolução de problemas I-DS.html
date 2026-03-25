@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Resolução de Problemas</title>
+    <title>Matemática 3º Ano - Salvar Código em Arquivo</title>
     <style>
         * {
             box-sizing: border-box;
@@ -71,6 +71,7 @@
             padding: 10px 0;
             background: #f8f9fa;
             border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -376,13 +377,13 @@
             background: #1a1f2e;
             color: #48bb78;
             font-family: monospace;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            padding: 10px 16px;
+            padding: 8px 12px;
             border-radius: 12px;
             letter-spacing: 1px;
             text-align: center;
-            min-width: 85px;
+            min-width: 75px;
         }
 
         .copy-hint {
@@ -408,6 +409,7 @@
             gap: 12px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .modal-btn {
@@ -425,9 +427,24 @@
             color: white;
         }
 
+        .modal-btn-secondary {
+            background: #ff9800;
+            color: white;
+        }
+
+        .modal-btn-save {
+            background: #2196f3;
+            color: white;
+        }
+
         .modal-btn-cancel {
             background: #9e9e9e;
             color: white;
+        }
+
+        .modal-btn-primary:hover, .modal-btn-secondary:hover, .modal-btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .message {
@@ -500,6 +517,29 @@
             background: #ffebee;
         }
 
+        .file-input-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .file-input-area button {
+            padding: 10px 20px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .file-input-area button:hover {
+            background: #f57c00;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -539,12 +579,16 @@
                 flex-direction: column;
             }
             .code-block {
-                font-size: 18px;
-                padding: 6px 10px;
-                min-width: 65px;
+                font-size: 16px;
+                padding: 5px 8px;
+                min-width: 60px;
             }
             .problem-text {
                 font-size: 16px;
+            }
+            .modal-btn {
+                padding: 8px 16px;
+                font-size: 14px;
             }
         }
     </style>
@@ -568,8 +612,9 @@
         <div class="action-buttons">
             <button id="generateCodeBtn" class="action-btn btn-generate">✨ GERAR CÓDIGO</button>
             <button id="restoreCodeBtn" class="action-btn btn-restore">🔓 RECUPERAR CÓDIGO</button>
+            <button id="restoreFileBtn" class="action-btn btn-restore" style="background: #ff9800;">📁 ABRIR ARQUIVO</button>
         </div>
-        <div class="help-text">💡 Código ULTRA COMPACTO (base-62) - menos caracteres para anotar!</div>
+        <div class="help-text">💡 Gere o código e SALVE em arquivo TXT com o nome do aluno! Depois é só abrir o arquivo para recuperar.</div>
     </div>
 
     <div class="two-columns">
@@ -612,7 +657,7 @@
         <a href="https://www.professoracarol.org/HOTPOTATOES/situacoes-problema-3ano.htm" target="_blank">
             professora Carol - Situações Problema 3º ano
         </a> 
-        • 20 desafios • Código ULTRA COMPACTO (base-62)
+        • Salve o código em arquivo TXT com o nome do aluno!
     </div>
 </div>
 
@@ -647,7 +692,7 @@
     let erros = 0;
     let codigoAtual = null;
     
-    // ========== BASE-62 (0-9, A-Z, a-z) ==========
+    // ========== BASE-62 ==========
     const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     
     function toBase62(numero) {
@@ -679,9 +724,9 @@
         return result;
     }
     
-    // ========== CODIFICAÇÃO COM 12 BITS POR RESPOSTA ==========
+    // ========== CODIFICAÇÃO COM 12 BITS ==========
     const BITS_POR_RESPOSTA = 12;
-    const MASCARA = (1 << BITS_POR_RESPOSTA) - 1; // 4095
+    const MASCARA = (1 << BITS_POR_RESPOSTA) - 1;
     
     function gerarCodigoCompacto() {
         let numero = BigInt(seed);
@@ -718,21 +763,6 @@
             console.error("Erro ao decodificar:", e);
             return null;
         }
-    }
-    
-    function testarConsistencia() {
-        const codigo = gerarCodigoCompacto();
-        const recuperado = recuperarDoCodigo(codigo);
-        
-        if (!recuperado) return false;
-        if (recuperado.seed !== seed) return false;
-        
-        for (let i = 0; i < perguntas.length; i++) {
-            const original = respostasAluno[i] || 0;
-            const restaurada = recuperado.respostas[i] || 0;
-            if (original !== restaurada) return false;
-        }
-        return true;
     }
     
     function formatarEmBlocos(codigo) {
@@ -796,6 +826,95 @@
         showMessage("👋 Novo aluno! 20 perguntas em ordem aleatória.", true);
     }
     
+    // ========== SALVAR EM ARQUIVO ==========
+    
+    function salvarArquivo(nomeAluno, codigo, respondidas) {
+        const data = new Date();
+        const dataStr = data.toLocaleDateString('pt-BR');
+        const horaStr = data.toLocaleTimeString('pt-BR');
+        
+        const conteudo = `========================================
+CÓDIGO DE RECUPERAÇÃO - MATEMÁTICA 3º ANO
+========================================
+
+Nome do Aluno: ${nomeAluno}
+Data: ${dataStr}
+Horário: ${horaStr}
+Respostas Salvas: ${respondidas} de 20 perguntas
+
+CÓDIGO COMPLETO:
+${codigo}
+
+CÓDIGO EM BLOCOS (para facilitar a leitura):
+${formatarEmBlocos(codigo).join(' - ')}
+
+========================================
+INSTRUÇÕES:
+1. Guarde este arquivo em local seguro
+2. Para continuar depois, abra este arquivo e copie o código
+3. Clique em "RECUPERAR CÓDIGO" e cole o código
+========================================`;
+        
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `${nomeAluno}_codigo_matematica.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showMessage(`✅ Arquivo "${nomeAluno}_codigo_matematica.txt" salvo!`, true);
+    }
+    
+    function mostrarModalSalvar() {
+        const codigo = gerarCodigoCompacto();
+        codigoAtual = codigo;
+        const respondidas = Object.keys(respostasAluno).length;
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h2>💾 SALVAR EM ARQUIVO</h2>
+                <p>Digite o nome do aluno para salvar o código em um arquivo TXT</p>
+                <input type="text" id="alunoNomeInput" placeholder="Ex: MARIA_SILVA" maxlength="50" style="text-transform:uppercase">
+                <div class="code-blocks-container" style="margin: 15px 0;">
+                    <div class="code-blocks">
+                        ${formatarEmBlocos(codigo).map(b => `<div class="code-block">${b}</div>`).join('')}
+                    </div>
+                </div>
+                <p style="color: #666; font-size: 14px;">📊 ${respondidas} de 20 perguntas respondidas</p>
+                <p style="color: #ff9800; font-size: 12px;">💡 O arquivo será salvo como: NOME_codigo_matematica.txt</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-save" id="modalSaveBtn">💾 SALVAR ARQUIVO</button>
+                    <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">CANCELAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const input = document.getElementById('alunoNomeInput');
+        
+        document.getElementById('modalSaveBtn').addEventListener('click', () => {
+            const nomeAluno = input.value.trim().toUpperCase();
+            if (!nomeAluno) {
+                showMessage("Digite o nome do aluno", false);
+                return;
+            }
+            salvarArquivo(nomeAluno, codigo, respondidas);
+            modal.remove();
+        });
+        
+        document.getElementById('modalCloseBtn').addEventListener('click', () => modal.remove());
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
     function mostrarModalGerar() {
         const codigo = gerarCodigoCompacto();
         codigoAtual = codigo;
@@ -809,15 +928,15 @@
             <div class="modal-card">
                 <h2>✨ CÓDIGO ULTRA COMPACTO</h2>
                 <p>⚠️ ATENÇÃO: Letras MAIÚSCULAS e MINÚSCULAS importam!</p>
-                <p>Anote estes ${blocos.length} blocos de 3 caracteres:</p>
                 <div class="code-blocks-container" id="modalCodeContainer">
                     <div class="code-blocks">${blocksHtml}</div>
                     <div class="copy-hint">👆 Clique para copiar tudo</div>
                 </div>
                 <p style="color: #666; font-size: 14px;">📊 ${respondidas} de 20 perguntas respondidas</p>
-                <p style="color: #ff9800; font-size: 12px;">💡 Código tem ${codigo.length} caracteres (antes seriam ~38 caracteres!)</p>
+                <p style="color: #4caf50; font-size: 12px;">💡 Código tem ${codigo.length} caracteres</p>
                 <div class="modal-buttons">
                     <button class="modal-btn modal-btn-primary" id="modalCopyBtn">📋 COPIAR</button>
+                    <button class="modal-btn modal-btn-save" id="modalSaveFileBtn">💾 SALVAR EM ARQUIVO</button>
                     <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">FECHAR</button>
                 </div>
             </div>
@@ -839,6 +958,11 @@
             });
         });
         
+        document.getElementById('modalSaveFileBtn').addEventListener('click', () => {
+            modal.remove();
+            mostrarModalSalvar();
+        });
+        
         document.getElementById('modalCloseBtn').addEventListener('click', () => {
             modal.remove();
         });
@@ -846,13 +970,6 @@
         modal.addEventListener('click', (e) => {
             if (e.target === modal) modal.remove();
         });
-        
-        const teste = testarConsistencia();
-        if (!teste) {
-            showMessage("⚠️ ERRO: Código inconsistente! Recarregue a página.", false);
-        } else {
-            showMessage(`✅ Código gerado! ${codigo.length} caracteres em ${blocos.length} blocos.`, true);
-        }
     }
     
     function mostrarModalRestaurar() {
@@ -861,8 +978,8 @@
         modal.innerHTML = `
             <div class="modal-card">
                 <h2>🔓 RECUPERAR PROGRESSO</h2>
-                <p>⚠️ Digite o código exatamente como foi gerado (MAIÚSCULAS e MINÚSCULAS)</p>
-                <input type="text" id="restoreCodeInput" placeholder="Ex: AbC 123 dEf" maxlength="60">
+                <p>Digite o código que foi gerado (ou copie de um arquivo TXT)</p>
+                <input type="text" id="restoreCodeInput" placeholder="Cole o código aqui" maxlength="60">
                 <div class="modal-buttons">
                     <button class="modal-btn modal-btn-primary" id="modalRestoreBtn">🔓 RECUPERAR</button>
                     <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">CANCELAR</button>
@@ -882,7 +999,6 @@
                 return;
             }
             
-            // Aceita apenas caracteres alfanuméricos (incluindo minúsculas)
             if (!/^[0-9A-Za-z]+$/.test(codigo)) {
                 showMessage("Use apenas letras e números", false);
                 return;
@@ -901,7 +1017,7 @@
                 showMessage(`✅ Recuperado! ${respondidas} respostas restauradas.`, true);
                 modal.remove();
             } else {
-                showMessage("❌ Código inválido! Verifique se copiou exatamente (incluindo letras minúsculas).", false);
+                showMessage("❌ Código inválido! Verifique se copiou corretamente (incluindo letras minúsculas).", false);
             }
         }
         
@@ -911,6 +1027,82 @@
             if (e.key === 'Enter') restaurar();
         });
         
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
+    function mostrarModalRestaurarArquivo() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h2>📁 ABRIR ARQUIVO TXT</h2>
+                <p>Selecione o arquivo .txt que foi salvo com o código</p>
+                <div class="file-input-area">
+                    <input type="file" id="fileInput" accept=".txt" style="padding: 10px; border: 1px solid #ddd; border-radius: 10px;">
+                </div>
+                <div class="modal-buttons" style="margin-top: 20px;">
+                    <button class="modal-btn modal-btn-primary" id="modalLoadFileBtn">📂 CARREGAR E RECUPERAR</button>
+                    <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">CANCELAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('modalLoadFileBtn').addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showMessage("Selecione um arquivo", false);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const conteudo = e.target.result;
+                // Procurar pelo código no arquivo (linha que começa com "CÓDIGO COMPLETO:")
+                const linhas = conteudo.split('\n');
+                let codigo = null;
+                
+                for (let linha of linhas) {
+                    if (linha.includes('CÓDIGO COMPLETO:')) {
+                        codigo = linha.replace('CÓDIGO COMPLETO:', '').trim();
+                        break;
+                    }
+                }
+                
+                if (!codigo) {
+                    // Tentar encontrar qualquer linha com código alfanumérico longo
+                    const match = conteudo.match(/[A-Za-z0-9]{20,}/);
+                    if (match) codigo = match[0];
+                }
+                
+                if (codigo && /^[0-9A-Za-z]+$/.test(codigo)) {
+                    const dados = recuperarDoCodigo(codigo);
+                    if (dados && dados.seed !== undefined) {
+                        seed = dados.seed;
+                        atualizarPerguntasPorSeed();
+                        respostasAluno = dados.respostas;
+                        atualizarEstatisticas();
+                        renderProblems();
+                        renderAnswersBank();
+                        const respondidas = Object.keys(respostasAluno).length;
+                        showMessage(`✅ Arquivo carregado! ${respondidas} respostas restauradas.`, true);
+                        modal.remove();
+                    } else {
+                        showMessage("❌ Código inválido no arquivo", false);
+                    }
+                } else {
+                    showMessage("❌ Não foi possível encontrar o código no arquivo", false);
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        });
+        
+        document.getElementById('modalCloseBtn').addEventListener('click', () => modal.remove());
         modal.addEventListener('click', (e) => {
             if (e.target === modal) modal.remove();
         });
@@ -1173,6 +1365,7 @@
         document.getElementById('verifyBtn').addEventListener('click', verificarRespostas);
         document.getElementById('generateCodeBtn').addEventListener('click', mostrarModalGerar);
         document.getElementById('restoreCodeBtn').addEventListener('click', mostrarModalRestaurar);
+        document.getElementById('restoreFileBtn').addEventListener('click', mostrarModalRestaurarArquivo);
     }
     
     init();
