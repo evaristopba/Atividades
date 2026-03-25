@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Matemática 3º Ano - Código Ultra Compacto</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 15px 25px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .stats-box {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .stat-card.big {
+            font-size: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            padding: 10px 0;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-generate {
+            background: #9c27b0;
+            color: white;
+        }
+
+        .btn-restore {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-generate:hover, .btn-restore:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .two-columns {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 20px;
+            padding: 20px;
+            min-height: 0;
+        }
+
+        .questions-column {
+            flex: 2;
+            background: #f8f9fa;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .column-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .problems-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .problem-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            transition: all 0.3s;
+            border: 3px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .problem-card.has-answer {
+            border-color: #ff9800;
+            background: #fffef7;
+            box-shadow: 0 4px 12px rgba(255,152,0,0.2);
+        }
+
+        .problem-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            background: #f9f9ff;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border-left: 5px solid #f5576c;
+        }
+
+        .answer-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            background: #f5f5f5;
+            border: 3px dashed #9c27b0;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #9c27b0;
+            transition: all 0.2s;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            background: #e1bee7;
+            border-color: #6a1b9a;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.filled {
+            background: #fff3e0;
+            border-style: solid;
+            border-color: #ff9800;
+            color: #e65100;
+            font-size: 32px;
+        }
+
+        .remove-btn {
+            background: #ff5252;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .remove-btn:hover {
+            transform: scale(1.1);
+            background: #f44336;
+        }
+
+        .status-icon {
+            font-size: 28px;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .answers-column {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .answers-bank {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .answers-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .answer-drag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: grab;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            width: 80px;
+            text-align: center;
+        }
+
+        .answer-drag:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+        }
+
+        .answer-drag:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .result-panel {
+            background: #e8f5e9;
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .result-panel h4 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+            font-size: 18px;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 8px;
+        }
+
+        .result-item {
+            text-align: center;
+        }
+
+        .result-item div:first-child {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .result-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f5576c;
+        }
+
+        .credits {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .credits a {
+            color: #f5576c;
+            text-decoration: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-card h2 {
+            color: #f5576c;
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .code-blocks-container {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        .code-blocks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .code-block {
+            background: #1a1f2e;
+            color: #48bb78;
+            font-family: monospace;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 16px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 85px;
+        }
+
+        .copy-hint {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        .modal-card input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-family: monospace;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-primary {
+            background: #4caf50;
+            color: white;
+        }
+
+        .modal-btn-cancel {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 2100;
+            animation: slideIn 0.3s ease-out;
+            font-size: 16px;
+        }
+
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .result-modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 650px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .result-modal-content h2 {
+            color: #f5576c;
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .result-stats-modal {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-question {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .result-question.correct {
+            color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .result-question.wrong {
+            color: #f44336;
+            background: #ffebee;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .two-columns {
+                flex-direction: column;
+            }
+            .code-block {
+                font-size: 18px;
+                padding: 6px 10px;
+                min-width: 65px;
+            }
+            .problem-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="stats-container">
+            <div class="stats-box">
+                <div class="stat-card big">📝 RESPONDIDAS: <span id="respondidas">0</span>/<span id="total">20</span></div>
+                <div class="stat-card">⭐ ACERTOS: <span id="acertosPreview">0</span></div>
+                <div class="stat-card">❌ ERROS: <span id="errosPreview">0</span></div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button id="newStudentBtn" class="btn-primary">👤 NOVO</button>
+                <button id="reshuffleBtn" class="btn-warning">🃏 EMBARALHAR</button>
+                <button id="verifyBtn" class="btn-success">✅ VERIFICAR</button>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="generateCodeBtn" class="action-btn btn-generate">✨ GERAR CÓDIGO</button>
+            <button id="restoreCodeBtn" class="action-btn btn-restore">🔓 RECUPERAR CÓDIGO</button>
+        </div>
+        <div class="help-text">💡 Código ULTRA COMPACTO (base-62) - menos caracteres para anotar!</div>
+    </div>
+
+    <div class="two-columns">
+        <div class="questions-column">
+            <div class="column-title">
+                📝 PERGUNTAS - Arraste a resposta para a caixa abaixo
+            </div>
+            <div class="problems-grid" id="problemsGrid"></div>
+        </div>
+
+        <div class="answers-column">
+            <div class="column-title">
+                🎯 RESPOSTAS DISPONÍVEIS - Arraste daqui
+            </div>
+            <div class="answers-bank">
+                <div class="answers-container" id="answersBank"></div>
+            </div>
+            <div class="result-panel">
+                <h4>📊 SEU PROGRESSO</h4>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <div>✅ Acertos</div>
+                        <div class="result-number" id="previewAcertos">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div>❌ Erros</div>
+                        <div class="result-number" id="previewErros">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div>📝 Feitas</div>
+                        <div class="result-number" id="previewFeitas">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="credits">
+        📚 Inspirado no site 
+        <a href="https://www.professoracarol.org/HOTPOTATOES/situacoes-problema-3ano.htm" target="_blank">
+            professora Carol - Situações Problema 3º ano
+        </a> 
+        • 20 desafios • Código ULTRA COMPACTO (base-62)
+    </div>
+</div>
+
+<script>
+    const perguntasOriginais = [
+        { id: 1, texto: "Pedrinho escreveu certo número da seguinte forma: 700 + 40 + 5. O número escrito por Pedrinho é:", resposta: 745 },
+        { id: 2, texto: "Gabriel e Marcelo vendem picolés. Gabriel vendeu 23 picolés e Marcelo, 18. Quantos picolés Marcelo precisa vender para igualar a quantidade de picolés vendidos por Gabriel?", resposta: 5 },
+        { id: 3, texto: "Paulo fez a seguinte subtração: 478 – 156. Sabendo que Paulo acertou o resultado, identifique o valor encontrado por ele.", resposta: 322 },
+        { id: 4, texto: "Luisa viajou em suas férias e tirou muitas fotos. Ela organizou todas elas em um álbum com 50 páginas. Sabendo que em cada página cabem 16 fotos e o álbum ficou completamente cheio, quantas fotos ao todo Luísa colocou no álbum?", resposta: 800 },
+        { id: 5, texto: "Falta 1 semana para a festa de aniversário de Roberta. A quantidade de dias que faltam para a festa de Roberta é", resposta: 7 },
+        { id: 6, texto: "A professora apresentou a seguinte decomposição de um número: 700 + 50 + 6. O número apresentado pela professora é:", resposta: 756 },
+        { id: 7, texto: "Arnaldo comprou 5 cadernos iguais. Cada caderno custou 9 reais. Quanto Arnaldo pagou por esses cadernos?", resposta: 45 },
+        { id: 8, texto: "Luciana está lendo um livro que tem 57 páginas. Até agora ela leu 45 páginas. Quantas páginas faltam para Luciana terminar de ler o livro?", resposta: 12 },
+        { id: 9, texto: "Maria distribuiu igualmente 75 livros para cada um de seus 25 alunos. Quantos livros, no total, cada aluno recebeu?", resposta: 3 },
+        { id: 10, texto: "Aninha fez 75 doces para sua festa e Lilian fez 38. Quantos doces Aninha fez a mais do que Lilian?", resposta: 37 },
+        { id: 11, texto: "Alberto distribuiu igualmente 35 reais entre seus 7 netos. Quantos reais cada um de seus netos recebeu?", resposta: 5 },
+        { id: 12, texto: "Para a pescaria, as professoras tiveram que confeccionar 50 peixes, em dois dias. Ao final do primeiro dia, fizeram 32 peixes. Quantos peixes foram feitos no segundo dia?", resposta: 18 },
+        { id: 13, texto: "Raquel colheu 37 alfaces em sua horta. Ela doou 12 alfaces para a escola que fica perto de sua casa. Com quantas alfaces Raquel ficou no total?", resposta: 25 },
+        { id: 14, texto: "No caminhão de brinquedo de Rafael cabem 32 carrinhos. Rafael já guardou 17 carrinhos nesse caminhão. Quantos carrinhos ainda faltam para Rafael guardar nesse caminhão?", resposta: 15 },
+        { id: 15, texto: "No álbum de figurinhas de Manoel podem ser coladas um total de 50 figurinhas. Ele já colou 22 figurinhas nesse álbum. Quantas figurinhas Manoel ainda precisa colar para completar esse álbum?", resposta: 28 },
+        { id: 16, texto: "Marcelo comprou 9 cartelas de bala com 10 balas em cada uma. Quantas balas Marcelo comprou no total?", resposta: 90 },
+        { id: 17, texto: "Na estante de uma sala de aula tem 20 livros de contos e 15 livros de fábulas. Quantos livros tem na estante dessa sala?", resposta: 35 },
+        { id: 18, texto: "Karina ganhou 3 caixas de doces com 6 doces em cada caixa. Quantos doces Karina ganhou no total?", resposta: 18 },
+        { id: 19, texto: "Leonardo tinha 180 gibis de super-heróis. Ele doou para uma escola infantil 35 desses gibis. Com quantos gibis Leonardo ficou?", resposta: 145 },
+        { id: 20, texto: "Cássia comprou 2 embalagens de ovos com 12 ovos em cada embalagem. Quantos ovos Cássia comprou no total?", resposta: 24 }
+    ];
+
+    let seed = 0;
+    let perguntas = [];
+    let respostasAluno = {};
+    let acertos = 0;
+    let erros = 0;
+    let codigoAtual = null;
+    
+    // ========== BASE-62 (0-9, A-Z, a-z) ==========
+    const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    
+    function toBase62(numero) {
+        if (numero === 0n) return "0";
+        let result = "";
+        let temp = numero;
+        while (temp > 0n) {
+            const remainder = Number(temp % 62n);
+            result = BASE62[remainder] + result;
+            temp = temp / 62n;
+        }
+        return result;
+    }
+    
+    function fromBase62(str) {
+        let result = 0n;
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            let valor;
+            if (char >= '0' && char <= '9') {
+                valor = BigInt(char.charCodeAt(0) - 48);
+            } else if (char >= 'A' && char <= 'Z') {
+                valor = BigInt(char.charCodeAt(0) - 55);
+            } else {
+                valor = BigInt(char.charCodeAt(0) - 61);
+            }
+            result = result * 62n + valor;
+        }
+        return result;
+    }
+    
+    // ========== CODIFICAÇÃO COM 12 BITS POR RESPOSTA ==========
+    const BITS_POR_RESPOSTA = 12;
+    const MASCARA = (1 << BITS_POR_RESPOSTA) - 1; // 4095
+    
+    function gerarCodigoCompacto() {
+        let numero = BigInt(seed);
+        
+        for (let i = 0; i < perguntas.length; i++) {
+            const valor = respostasAluno[i] !== undefined ? respostasAluno[i] : 0;
+            numero = (numero << BigInt(BITS_POR_RESPOSTA)) | BigInt(valor);
+        }
+        
+        return toBase62(numero);
+    }
+    
+    function recuperarDoCodigo(codigoStr) {
+        try {
+            let numero = fromBase62(codigoStr);
+            
+            const respostas = {};
+            let temp = numero;
+            
+            for (let i = perguntas.length - 1; i >= 0; i--) {
+                const valor = Number(temp & BigInt(MASCARA));
+                if (valor !== 0) {
+                    respostas[i] = valor;
+                }
+                temp = temp >> BigInt(BITS_POR_RESPOSTA);
+            }
+            
+            const seedRecuperada = Number(temp);
+            
+            if (seedRecuperada < 0 || seedRecuperada > 999999) return null;
+            
+            return { seed: seedRecuperada, respostas };
+        } catch(e) {
+            console.error("Erro ao decodificar:", e);
+            return null;
+        }
+    }
+    
+    function testarConsistencia() {
+        const codigo = gerarCodigoCompacto();
+        const recuperado = recuperarDoCodigo(codigo);
+        
+        if (!recuperado) return false;
+        if (recuperado.seed !== seed) return false;
+        
+        for (let i = 0; i < perguntas.length; i++) {
+            const original = respostasAluno[i] || 0;
+            const restaurada = recuperado.respostas[i] || 0;
+            if (original !== restaurada) return false;
+        }
+        return true;
+    }
+    
+    function formatarEmBlocos(codigo) {
+        const blocos = [];
+        for (let i = 0; i < codigo.length; i += 3) {
+            blocos.push(codigo.substring(i, i + 3));
+        }
+        return blocos;
+    }
+    
+    // ========== GERADOR DE ORDEM ==========
+    
+    function embaralharComSeed(array, seedValue) {
+        const arr = [...array];
+        let s = seedValue;
+        let rng = function() {
+            s = (s * 9301 + 49297) % 233280;
+            return s / 233280;
+        };
+        
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    function gerarOrdemPorSeed(seedValue) {
+        const indices = [...Array(perguntasOriginais.length).keys()];
+        const ordem = embaralharComSeed(indices, seedValue);
+        return ordem;
+    }
+    
+    function atualizarPerguntasPorSeed() {
+        const ordem = gerarOrdemPorSeed(seed);
+        perguntas = ordem.map(idx => ({
+            ...perguntasOriginais[idx],
+            ordemOriginal: idx
+        }));
+    }
+    
+    // ========== FUNÇÕES DO JOGO ==========
+    
+    function gerarNovaSeed() {
+        seed = Math.floor(Math.random() * 1000000);
+        atualizarPerguntasPorSeed();
+    }
+    
+    function resetRespostas() {
+        respostasAluno = {};
+        atualizarEstatisticas();
+        renderProblems();
+        renderAnswersBank();
+        showMessage("Respostas limpas!", true);
+    }
+    
+    function resetCompleto() {
+        gerarNovaSeed();
+        resetRespostas();
+        codigoAtual = null;
+        showMessage("👋 Novo aluno! 20 perguntas em ordem aleatória.", true);
+    }
+    
+    function mostrarModalGerar() {
+        const codigo = gerarCodigoCompacto();
+        codigoAtual = codigo;
+        const blocos = formatarEmBlocos(codigo);
+        const blocksHtml = blocos.map(bloco => `<div class="code-block">${bloco}</div>`).join('');
+        const respondidas = Object.keys(respostasAluno).length;
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h2>✨ CÓDIGO ULTRA COMPACTO</h2>
+                <p>⚠️ ATENÇÃO: Letras MAIÚSCULAS e MINÚSCULAS importam!</p>
+                <p>Anote estes ${blocos.length} blocos de 3 caracteres:</p>
+                <div class="code-blocks-container" id="modalCodeContainer">
+                    <div class="code-blocks">${blocksHtml}</div>
+                    <div class="copy-hint">👆 Clique para copiar tudo</div>
+                </div>
+                <p style="color: #666; font-size: 14px;">📊 ${respondidas} de 20 perguntas respondidas</p>
+                <p style="color: #ff9800; font-size: 12px;">💡 Código tem ${codigo.length} caracteres (antes seriam ~38 caracteres!)</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" id="modalCopyBtn">📋 COPIAR</button>
+                    <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">FECHAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const codeContainer = document.getElementById('modalCodeContainer');
+        codeContainer.addEventListener('click', () => {
+            navigator.clipboard.writeText(codigo).then(() => {
+                showMessage("📋 Código copiado!", true);
+            });
+        });
+        
+        document.getElementById('modalCopyBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(codigo).then(() => {
+                showMessage("📋 Código copiado! Guarde para continuar.", true);
+                modal.remove();
+            });
+        });
+        
+        document.getElementById('modalCloseBtn').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+        
+        const teste = testarConsistencia();
+        if (!teste) {
+            showMessage("⚠️ ERRO: Código inconsistente! Recarregue a página.", false);
+        } else {
+            showMessage(`✅ Código gerado! ${codigo.length} caracteres em ${blocos.length} blocos.`, true);
+        }
+    }
+    
+    function mostrarModalRestaurar() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h2>🔓 RECUPERAR PROGRESSO</h2>
+                <p>⚠️ Digite o código exatamente como foi gerado (MAIÚSCULAS e MINÚSCULAS)</p>
+                <input type="text" id="restoreCodeInput" placeholder="Ex: AbC 123 dEf" maxlength="60">
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" id="modalRestoreBtn">🔓 RECUPERAR</button>
+                    <button class="modal-btn modal-btn-cancel" id="modalCloseBtn">CANCELAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const input = document.getElementById('restoreCodeInput');
+        
+        function restaurar() {
+            const codigo = input.value.trim().replace(/\s/g, '');
+            
+            if (!codigo) {
+                showMessage("Digite o código", false);
+                return;
+            }
+            
+            // Aceita apenas caracteres alfanuméricos (incluindo minúsculas)
+            if (!/^[0-9A-Za-z]+$/.test(codigo)) {
+                showMessage("Use apenas letras e números", false);
+                return;
+            }
+            
+            const dados = recuperarDoCodigo(codigo);
+            if (dados && dados.seed !== undefined && !isNaN(dados.seed)) {
+                seed = dados.seed;
+                atualizarPerguntasPorSeed();
+                respostasAluno = dados.respostas;
+                atualizarEstatisticas();
+                renderProblems();
+                renderAnswersBank();
+                
+                const respondidas = Object.keys(respostasAluno).length;
+                showMessage(`✅ Recuperado! ${respondidas} respostas restauradas.`, true);
+                modal.remove();
+            } else {
+                showMessage("❌ Código inválido! Verifique se copiou exatamente (incluindo letras minúsculas).", false);
+            }
+        }
+        
+        document.getElementById('modalRestoreBtn').addEventListener('click', restaurar);
+        document.getElementById('modalCloseBtn').addEventListener('click', () => modal.remove());
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') restaurar();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
+    function mostrarModalResultado() {
+        const respondidas = acertos + erros;
+        const percentual = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
+        
+        let questoesHtml = '';
+        perguntas.forEach((p, idx) => {
+            const respostaDada = respostasAluno[idx];
+            const isCorrect = respostaDada !== undefined && respostaDada === p.resposta;
+            const status = respostaDada !== undefined ? (isCorrect ? '✅' : '❌') : '⏳';
+            const statusClass = isCorrect ? 'correct' : (respostaDada !== undefined ? 'wrong' : '');
+            
+            questoesHtml += `
+                <div class="result-question ${statusClass}">
+                    <strong>${idx + 1}.</strong> ${p.texto}<br>
+                    <small>Sua resposta: ${respostaDada !== undefined ? respostaDada : 'não respondida'} | Correta: ${p.resposta} ${status}</small>
+                </div>
+            `;
+        });
+        
+        const modal = document.createElement('div');
+        modal.className = 'result-modal';
+        modal.innerHTML = `
+            <div class="result-modal-content">
+                <h2>📊 RESULTADO</h2>
+                <div class="result-stats-modal">
+                    <div class="result-item">
+                        <div>✅ Acertos</div>
+                        <div class="result-number" style="color: #4caf50;">${acertos}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>❌ Erros</div>
+                        <div class="result-number" style="color: #f44336;">${erros}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>📝 Não respondidas</div>
+                        <div class="result-number" style="color: #ff9800;">${20 - respondidas}</div>
+                    </div>
+                    <div class="result-item">
+                        <div>🎯 Aproveitamento</div>
+                        <div class="result-number">${percentual}%</div>
+                    </div>
+                </div>
+                <div style="max-height: 450px; overflow-y: auto;">
+                    ${questoesHtml}
+                </div>
+                <div class="modal-buttons" style="margin-top: 20px;">
+                    <button class="modal-btn modal-btn-primary" id="modalResultClose">FECHAR</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('modalResultClose').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
+    function atualizarEstatisticas() {
+        let tempAcertos = 0;
+        let tempErros = 0;
+        
+        for (let i = 0; i < perguntas.length; i++) {
+            const respostaDada = respostasAluno[i];
+            if (respostaDada !== undefined) {
+                if (respostaDada === perguntas[i].resposta) {
+                    tempAcertos++;
+                } else {
+                    tempErros++;
+                }
+            }
+        }
+        
+        acertos = tempAcertos;
+        erros = tempErros;
+        
+        const respondidas = Object.keys(respostasAluno).length;
+        
+        document.getElementById('respondidas').textContent = respondidas;
+        document.getElementById('total').textContent = perguntas.length;
+        document.getElementById('acertosPreview').textContent = acertos;
+        document.getElementById('errosPreview').textContent = erros;
+        document.getElementById('previewAcertos').textContent = acertos;
+        document.getElementById('previewErros').textContent = erros;
+        document.getElementById('previewFeitas').textContent = respondidas;
+    }
+    
+    function verificarRespostas() {
+        atualizarEstatisticas();
+        mostrarModalResultado();
+    }
+    
+    function setAnswer(problemIndex, answerValue) {
+        respostasAluno[problemIndex] = answerValue;
+        atualizarEstatisticas();
+        renderProblems();
+        renderAnswersBank();
+        showMessage(`Resposta ${answerValue} registrada!`, true);
+    }
+    
+    function removeAnswer(problemIndex) {
+        delete respostasAluno[problemIndex];
+        atualizarEstatisticas();
+        renderProblems();
+        renderAnswersBank();
+        showMessage("Resposta removida!", false);
+    }
+    
+    // ========== RENDERIZAÇÃO ==========
+    
+    function renderProblems() {
+        const grid = document.getElementById('problemsGrid');
+        grid.innerHTML = '';
+        
+        perguntas.forEach((problema, idx) => {
+            const hasAnswer = respostasAluno[idx] !== undefined;
+            const answerValue = respostasAluno[idx];
+            
+            const card = document.createElement('div');
+            card.className = `problem-card ${hasAnswer ? 'has-answer' : ''}`;
+            
+            card.innerHTML = `
+                <div class="problem-text"><strong>${idx + 1}.</strong> ${problema.texto}</div>
+                <div class="answer-area">
+                    <div class="drop-zone ${hasAnswer ? 'filled' : ''}" data-index="${idx}" data-has-answer="${hasAnswer}">
+                        ${hasAnswer ? `<span>${answerValue}</span>` : '⬅️ Arraste a resposta aqui'}
+                        ${hasAnswer ? `<button class="remove-btn" data-index="${idx}">✖</button>` : ''}
+                    </div>
+                    <div class="status-icon">
+                        ${hasAnswer ? '📌' : '📝'}
+                    </div>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        });
+        
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const index = parseInt(zone.dataset.index);
+            const hasAnswer = zone.dataset.hasAnswer === 'true';
+            
+            if (!hasAnswer) {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const draggedValue = e.dataTransfer.getData('text/plain');
+                    if (draggedValue) {
+                        const numValue = parseInt(draggedValue);
+                        if (!isNaN(numValue)) {
+                            setAnswer(index, numValue);
+                        }
+                    }
+                });
+            }
+        });
+        
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(btn.dataset.index);
+                removeAnswer(index);
+            });
+        });
+    }
+    
+    function renderAnswersBank() {
+        const respostasCorretas = perguntas.map(p => p.resposta);
+        const distractorsSet = new Set();
+        
+        respostasCorretas.forEach(ans => {
+            for (let i = -15; i <= 15; i++) {
+                if (i !== 0 && ans + i > 0) {
+                    distractorsSet.add(ans + i);
+                }
+            }
+        });
+        
+        const distractors = Array.from(distractorsSet)
+            .filter(d => !respostasCorretas.includes(d))
+            .slice(0, 40);
+        
+        let allNumbers = [...respostasCorretas, ...distractors];
+        for (let i = allNumbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allNumbers[i], allNumbers[j]] = [allNumbers[j], allNumbers[i]];
+        }
+        
+        const bank = document.getElementById('answersBank');
+        bank.innerHTML = '';
+        
+        allNumbers.forEach(num => {
+            const dragItem = document.createElement('div');
+            dragItem.className = 'answer-drag';
+            dragItem.textContent = num;
+            dragItem.setAttribute('draggable', 'true');
+            
+            dragItem.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', num);
+                dragItem.classList.add('dragging');
+            });
+            
+            dragItem.addEventListener('dragend', (e) => {
+                dragItem.classList.remove('dragging');
+            });
+            
+            bank.appendChild(dragItem);
+        });
+    }
+    
+    let messageTimeout;
+    function showMessage(text, isSuccess) {
+        const existingMsg = document.querySelector('.message');
+        if (existingMsg) existingMsg.remove();
+        
+        const msg = document.createElement('div');
+        msg.className = 'message';
+        msg.style.background = isSuccess ? '#4caf50' : '#ff9800';
+        msg.textContent = text;
+        document.body.appendChild(msg);
+        
+        if (messageTimeout) clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+            if (msg) msg.remove();
+        }, 4000);
+    }
+    
+    function init() {
+        resetCompleto();
+        
+        document.body.addEventListener('dragover', (e) => e.preventDefault());
+        document.body.addEventListener('drop', (e) => e.preventDefault());
+        
+        document.getElementById('newStudentBtn').addEventListener('click', () => {
+            if (confirm("Criar novo aluno? O progresso atual será perdido.")) {
+                resetCompleto();
+            }
+        });
+        document.getElementById('reshuffleBtn').addEventListener('click', () => {
+            if (confirm("Embaralhar as perguntas? Todas as respostas serão perdidas.")) {
+                gerarNovaSeed();
+                resetRespostas();
+                showMessage("🃏 Nova ordem gerada!", true);
+            }
+        });
+        document.getElementById('verifyBtn').addEventListener('click', verificarRespostas);
+        document.getElementById('generateCodeBtn').addEventListener('click', mostrarModalGerar);
+        document.getElementById('restoreCodeBtn').addEventListener('click', mostrarModalRestaurar);
+    }
+    
+    init();
+</script>
+</body>
+</html>
