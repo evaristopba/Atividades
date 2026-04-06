@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>✨ Memory Game | 30 Pares de Números</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Fundo animado com gradiente em movimento */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        html, body {
+            height: 100dvh;
+            overflow: hidden;
+            background: linear-gradient(-45deg, #0a0a2a, #1a1a3e, #0d0d2b, #1a1a4e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            color: #fff;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* Efeito de partículas sutis */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 30%, rgba(255,210,0,0.05) 2px, transparent 2px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B6B);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255,215,0,0.3);
+            letter-spacing: -0.5px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .subtitle { 
+            font-size: clamp(0.7rem, 1.4vw, 0.85rem); 
+            color: rgba(255,255,255,0.7); 
+            margin-top: -5px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Painel de informações - Glassmorphism */
+        .info-panel {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 1000px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .info-box {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 8px 16px;
+            text-align: center;
+            min-width: 90px;
+            flex: 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .info-box:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,210,0,0.5);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .info-box .label { 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+        }
+        
+        .info-box .value { 
+            font-size: clamp(1rem, 2vw, 1.4rem); 
+            font-weight: 800; 
+            color: #FFD700;
+            text-shadow: 0 0 8px rgba(255,215,0,0.4);
+        }
+
+        /* Barra de progresso com glow */
+        .progress-bar-container {
+            width: 100%;
+            max-width: 1000px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00FF88, #FFD700, #FF6B6B);
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+            width: 0%;
+            box-shadow: 0 0 8px rgba(0,255,136,0.6);
+        }
+
+        /* Botões estilizados */
+        .buttons { display: flex; justify-content: center; gap: 12px; }
+        
+        .btn {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a1a2e;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 25px rgba(255,215,0,0.5);
+        }
+        
+        .btn:active { transform: translateY(0); }
+
+        /* GRADE DO JOGO - 10×6 */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 1000px;
+            perspective: 1500px;
+            flex-grow: 1;
+            max-height: 68vh;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        /* CARTA 3D COM EFEITO GLASS */
+        .card {
+            aspect-ratio: 1;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 12px;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .card.flipped { transform: rotateY(180deg); }
+        .card.matched { transform: rotateY(180deg); }
+
+        .card.matched .card-front {
+            background: linear-gradient(135deg, #00FF88, #00BFFF);
+            box-shadow: 0 0 20px rgba(0,255,136,0.6);
+        }
+        
+        .card.matched .card-number { 
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%; 
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-weight: 800;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Verso da carta - gradiente neon */
+        .card-back { 
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        .card-back::after { 
+            content: '?'; 
+            font-size: clamp(0.8rem, 2vw, 1.3rem); 
+            font-weight: 800;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        /* Frente da carta */
+        .card-front {
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B6B);
+            background-size: 200% 200%;
+            transform: rotateY(180deg);
+        }
+        
+        .card-number { 
+            font-size: clamp(0.7rem, 2.5vw, 1.2rem); 
+            color: #1a1a2e; 
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+        }
+
+        /* Animações */
+        @keyframes matchPulse { 
+            0%,100%{transform:rotateY(180deg) scale(1)} 
+            50%{transform:rotateY(180deg) scale(1.08)} 
+        }
+        .card.matched { animation: matchPulse 0.4s ease; }
+
+        @keyframes shake { 
+            0%,100%{transform:rotateY(180deg) translateX(0)} 
+            25%{transform:rotateY(180deg) translateX(-4px)} 
+            75%{transform:rotateY(180deg) translateX(4px)} 
+        }
+        .card.wrong { animation: shake 0.3s ease; }
+
+        /* MODAL ESTILIZADO */
+        .modal-overlay { 
+            display:none; 
+            position:fixed; 
+            top:0; 
+            left:0; 
+            width:100%; 
+            height:100%; 
+            background:rgba(0,0,0,0.85); 
+            backdrop-filter: blur(12px);
+            z-index:100; 
+            align-items:center; 
+            justify-content:center; 
+            padding:15px; 
+        }
+        .modal-overlay.active { display:flex; }
+        
+        .modal { 
+            background: linear-gradient(135deg, rgba(26,26,46,0.95), rgba(48,43,99,0.95));
+            backdrop-filter: blur(20px);
+            border: 2px solid #FFD700;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            max-width: 340px;
+            width: 100%;
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,0,0.3);
+        }
+        
+        @keyframes modalIn { 
+            from{transform:scale(0.8);opacity:0} 
+            to{transform:scale(1);opacity:1} 
+        }
+        
+        .modal h2 { 
+            font-size:1.5rem; 
+            margin-bottom:8px; 
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .modal p { font-size:0.9rem; margin:6px 0; color:rgba(255,255,255,0.8); }
+        .modal .stars { font-size:2rem; margin:10px 0; letter-spacing: 4px; }
+        .modal .btn { margin-top:12px; padding: 10px 28px; }
+
+        /* RESPONSIVO MOBILE */
+        @media (max-width: 768px) {
+            html, body { overflow: auto; height: auto; padding: 12px 8px; }
+            .game-board { grid-template-columns: repeat(5, 1fr); gap: 6px; max-height: none; }
+            .info-panel { gap: 8px; }
+            .info-box { padding: 6px 12px; min-width: 70px; }
+            .btn { padding: 6px 18px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✨ JOGO DA MEMÓRIA ✨</h1>
+    <p class="subtitle">Encontre os 30 pares de números (1 a 30)</p>
+
+    <div class="info-panel">
+        <div class="info-box"><div class="label">🎯 JOGADAS</div><div class="value" id="moves">0</div></div>
+        <div class="info-box"><div class="label">💎 PARES</div><div class="value" id="pairs">0 / 30</div></div>
+        <div class="info-box"><div class="label">⏱️ TEMPO</div><div class="value" id="timer">00:00</div></div>
+    </div>
+
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+    <div class="buttons">
+        <button class="btn" onclick="restartGame()">🔄 REINICIAR</button>
+    </div>
+
+    <div class="game-board" id="gameBoard"></div>
+
+    <div class="modal-overlay" id="winModal">
+        <div class="modal">
+            <h2>🎉 PARABÉNS! 🎉</h2>
+            <div class="stars" id="stars"></div>
+            <p id="winMoves"></p>
+            <p id="winTime"></p>
+            <p id="winRating"></p>
+            <button class="btn" onclick="restartGame()">🎮 JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIÁVEIS GLOBAIS ====================
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let timerInterval = null;
+        let seconds = 0;
+        let gameStarted = false;
+        let locked = false;
+
+        const TOTAL_PAIRS = 30;
+        const MAX_NUMBER = 30;
+
+        // ==================== INICIALIZAÇÃO ====================
+        function initGame() {
+            matchedPairs = 0;
+            moves = 0;
+            seconds = 0;
+            gameStarted = false;
+            locked = false;
+            flippedCards = [];
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            updateUI();
+            updateTimerDisplay();
+            createBoard();
+        }
+
+        // ==================== CRIAÇÃO DO TABULEIRO ====================
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            let numbers = [];
+            for (let i = 1; i <= MAX_NUMBER; i++) {
+                numbers.push(i, i);
+            }
+            
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+            
+            numbers.forEach((num) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.number = num;
+                card.innerHTML = `
+                    <div class="card-face card-back"></div>
+                    <div class="card-face card-front">
+                        <span class="card-number">${num}</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => flipCard(card));
+                board.appendChild(card);
+            });
+        }
+
+        // ==================== LÓGICA DO JOGO ====================
+        function flipCard(card) {
+            if (locked || 
+                card.classList.contains('flipped') || 
+                card.classList.contains('matched') || 
+                flippedCards.length >= 2 ||
+                (flippedCards.length === 1 && flippedCards[0] === card)) {
+                return;
+            }
+            
+            if (!gameStarted) { 
+                gameStarted = true; 
+                startTimer(); 
+            }
+            
+            card.classList.add('flipped');
+            flippedCards.push(card);
+            
+            if (flippedCards.length === 2) { 
+                moves++; 
+                updateUI(); 
+                checkMatch(); 
+            }
+        }
+
+        function checkMatch() {
+            locked = true;
+            const [c1, c2] = flippedCards;
+            
+            if (c1.dataset.number === c2.dataset.number) {
+                c1.classList.add('matched');
+                c2.classList.add('matched');
+                matchedPairs++;
+                flippedCards = [];
+                locked = false;
+                updateUI();
+                
+                if (matchedPairs === TOTAL_PAIRS) {
+                    endGame();
+                }
+            } else {
+                c1.classList.add('wrong');
+                c2.classList.add('wrong');
+                setTimeout(() => {
+                    c1.classList.remove('flipped', 'wrong');
+                    c2.classList.remove('flipped', 'wrong');
+                    flippedCards = [];
+                    locked = false;
+                }, 800);
+            }
+        }
+
+        // ==================== TIMER ====================
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => { 
+                seconds++; 
+                updateTimerDisplay(); 
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${secs}`;
+        }
+
+        // ==================== INTERFACE ====================
+        function updateUI() {
+            document.getElementById('moves').textContent = moves;
+            document.getElementById('pairs').textContent = `${matchedPairs} / ${TOTAL_PAIRS}`;
+            const progressPercent = (matchedPairs / TOTAL_PAIRS) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+        }
+
+        // ==================== FIM DE JOGO ====================
+        function endGame() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            
+            let stars = 1;
+            if (moves <= 45) stars = 3;
+            else if (moves <= 65) stars = 2;
+            
+            const starDisplay = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            document.getElementById('stars').textContent = starDisplay;
+            document.getElementById('winMoves').textContent = `📊 Jogadas: ${moves}`;
+            document.getElementById('winTime').textContent = `⏱️ Tempo: ${minutes}:${secs}`;
+            
+            let ratingText = '';
+            if (stars === 3) ratingText = '🏆 Excelente! Memória afiada! 🧠✨';
+            else if (stars === 2) ratingText = '👍 Muito bom! Quase lá! Continue treinando.';
+            else ratingText = '💪 Ótimo esforço! Tente bater seu recorde!';
+            document.getElementById('winRating').textContent = ratingText;
+            
+            document.getElementById('winModal').classList.add('active');
+        }
+
+        // ==================== REINICIAR ====================
+        function restartGame() {
+            document.getElementById('winModal').classList.remove('active');
+            initGame();
+        }
+
+        // ==================== INICIAR ====================
+        initGame();
+    </script>
+</body>
+</html>
