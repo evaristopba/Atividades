@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>✨ Memory Game | 30 Pares de Números</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            /* IMPEDE qualquer seleção de texto ou arrasto */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
 
-        /* Fundo animado com gradiente em movimento */
+        /* Impede arrastar imagens ou elementos */
+        img, div, span {
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+
         @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -71,6 +87,7 @@
             text-shadow: 0 0 20px rgba(255,215,0,0.3);
             letter-spacing: -0.5px;
             animation: float 3s ease-in-out infinite;
+            pointer-events: none;
         }
 
         .subtitle { 
@@ -79,6 +96,7 @@
             margin-top: -5px;
             font-weight: 500;
             letter-spacing: 0.5px;
+            pointer-events: none;
         }
 
         /* Painel de informações - Glassmorphism */
@@ -211,6 +229,10 @@
             transform-style: preserve-3d;
             transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             border-radius: 12px;
+            /* IMPEDE qualquer arrasto ou seleção na carta */
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: auto;
         }
 
         .card:hover {
@@ -242,6 +264,9 @@
             font-weight: 800;
             border: 1px solid rgba(255,255,255,0.2);
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            /* IMPEDE seleção de texto dentro da carta */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* Verso da carta - gradiente neon */
@@ -271,6 +296,8 @@
             color: #1a1a2e; 
             font-weight: 800;
             text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* Animações */
@@ -426,12 +453,24 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.number = num;
+                // Garante que não há texto visível antes do flip
                 card.innerHTML = `
                     <div class="card-face card-back"></div>
                     <div class="card-face card-front">
                         <span class="card-number">${num}</span>
                     </div>
                 `;
+                
+                // Impede qualquer evento de drag/arrasto na carta
+                card.addEventListener('dragstart', (e) => {
+                    e.preventDefault();
+                    return false;
+                });
+                
+                card.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Impede seleção por arrasto
+                });
+                
                 card.addEventListener('click', () => flipCard(card));
                 board.appendChild(card);
             });
@@ -439,6 +478,7 @@
 
         // ==================== LÓGICA DO JOGO ====================
         function flipCard(card) {
+            // Verificações de segurança
             if (locked || 
                 card.classList.contains('flipped') || 
                 card.classList.contains('matched') || 
@@ -447,14 +487,17 @@
                 return;
             }
             
+            // Iniciar timer no primeiro clique válido
             if (!gameStarted) { 
                 gameStarted = true; 
                 startTimer(); 
             }
             
+            // Virar a carta
             card.classList.add('flipped');
             flippedCards.push(card);
             
+            // Verificar se completou um par
             if (flippedCards.length === 2) { 
                 moves++; 
                 updateUI(); 
@@ -467,6 +510,7 @@
             const [c1, c2] = flippedCards;
             
             if (c1.dataset.number === c2.dataset.number) {
+                // Acerto
                 c1.classList.add('matched');
                 c2.classList.add('matched');
                 matchedPairs++;
@@ -478,6 +522,7 @@
                     endGame();
                 }
             } else {
+                // Erro - mostrar animação e desvirar
                 c1.classList.add('wrong');
                 c2.classList.add('wrong');
                 setTimeout(() => {
