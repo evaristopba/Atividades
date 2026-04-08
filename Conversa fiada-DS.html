@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🎣 Conversa Fiada - Game de Interpretação (13 Perguntas)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0b3b3f 0%, #1a6d6b 100%);
+            font-family: 'Segoe UI', 'Comic Neue', 'Chalkboard SE', 'Poppins', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 248, 225, 0.95);
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.6);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+        }
+
+        .game-header {
+            background: #2c5a2e;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            color: #ffefb9;
+            text-shadow: 2px 2px 0 #1e3a1e;
+            border-bottom: 4px solid #f9b81b;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stats {
+            background: #1e2f1c;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            gap: 20px;
+        }
+
+        .stats span {
+            color: #ffd966;
+            font-size: 1.4rem;
+            margin-left: 6px;
+        }
+
+        .hearts {
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+        }
+
+        .aquario {
+            background: radial-gradient(circle at 30% 20%, #3b9fbf, #1c6d8f);
+            margin: 20px 25px 10px 25px;
+            border-radius: 40px;
+            padding: 15px;
+            border: 3px solid #f7c56e;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 6px 0 #5a3e1a;
+            min-height: 100px;
+        }
+
+        .aquario-title {
+            display: flex;
+            justify-content: space-between;
+            color: #ffefb0;
+            font-weight: bold;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ffdd99;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .peixes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            min-height: 60px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 5px;
+            transition: all 0.3s;
+        }
+
+        .peixe-icon {
+            font-size: 2rem;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            animation: nadar 0.8s ease;
+        }
+
+        @keyframes nadar {
+            0% { transform: translateX(-10px) rotate(-10deg); opacity: 0; }
+            100% { transform: translateX(0) rotate(0); opacity: 1; }
+        }
+
+        .historia-area {
+            background: #fef3d6;
+            margin: 0 25px;
+            padding: 18px;
+            border-radius: 30px;
+            border: 1px solid #e2c28b;
+            box-shadow: inset 0 0 0 2px white, 0 6px 12px rgba(0,0,0,0.1);
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: #2c2b26;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .historia-area h3 {
+            color: #9b6a3c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quiz-area {
+            padding: 20px 25px 25px;
+        }
+
+        .pergunta {
+            background: #ffe5b4;
+            padding: 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #cb9e5c;
+            box-shadow: 0 4px 0 #b47c44;
+        }
+
+        .alternativas {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .alt-btn {
+            background: #e9e2d0;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.1s linear;
+            font-weight: 500;
+            box-shadow: 0 3px 0 #b0a088;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alt-btn:hover:not(:disabled) {
+            background: #ffd966;
+            transform: scale(0.98);
+        }
+
+        .alt-btn.correct-feedback {
+            background: #8bc34a;
+            color: #1e3a1e;
+            box-shadow: 0 2px 0 #4c6a2c;
+        }
+
+        .alt-btn.wrong-feedback {
+            background: #e57373;
+            color: #4a0e0e;
+            text-decoration: line-through;
+        }
+
+        .alt-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .prefix {
+            font-weight: bold;
+            background: #bba16d;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .feedback-msg {
+            background: #2c2b26;
+            color: #fad974;
+            padding: 12px;
+            border-radius: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .next-btn {
+            background: #5f8b3e;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 12px 20px;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.1s;
+            font-family: inherit;
+            box-shadow: 0 4px 0 #2b4620;
+        }
+
+        .next-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #2b4620;
+        }
+
+        .next-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+
+        .final-secret {
+            background: #ffd966;
+            text-align: center;
+            padding: 20px;
+            margin: 10px 25px 25px;
+            border-radius: 50px;
+            animation: pulse 0.6s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .reset-btn {
+            background: #aa6f3c;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            width: auto;
+            display: inline-block;
+            padding: 8px 24px;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 0 #613d1a;
+        }
+
+        .credits-area {
+            background: #2c2b26;
+            color: #c0c0a0;
+            padding: 12px 25px;
+            font-size: 0.7rem;
+            text-align: center;
+            border-top: 2px solid #f9b81b;
+            font-family: monospace;
+        }
+
+        .credits-area a {
+            color: #ffd966;
+            text-decoration: none;
+        }
+
+        .credits-area a:hover {
+            text-decoration: underline;
+        }
+
+        .shuffle-badge {
+            background: #f9b81b;
+            color: #2c5a2e;
+            font-size: 0.7rem;
+            border-radius: 30px;
+            padding: 2px 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 550px) {
+            .pergunta { font-size: 0.95rem; padding: 12px; }
+            .alt-btn { padding: 8px 12px; font-size: 0.85rem; }
+            .stats { font-size: 0.9rem; }
+            .game-header { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameRoot">
+    <div class="game-header">
+        <div class="stats">🎣 PONTOS: <span id="pontosDisplay">0</span></div>
+        <div class="hearts" id="vidasDisplay">❤️❤️❤️</div>
+    </div>
+
+    <div class="aquario">
+        <div class="aquario-title">
+            <span>🐟 AQUÁRIO MÁGICO</span>
+            <span>🐠 <span class="shuffle-badge">🔄 13 PERGUNTAS SORTEADAS</span></span>
+        </div>
+        <div class="peixes-container" id="aquarioPeixes"></div>
+    </div>
+
+    <div class="historia-area" id="historiaTexto">
+        <h3>📖 CONVERSA FIADA</h3>
+        <p>Era uma vez um homem muito velho que, por não ter muito o que fazer, ficava pescando num lago.<br>
+        Era uma vez um menino muito novo que também não tinha muito o que fazer e ficava pescando no mesmo lago.<br>
+        Um dia, os dois se encontraram, lado a lado na pescaria... O menino puxou com força e precisão. O velho usou mais precisão e menos força. Quando apareceram os respectivos peixes, porém, decepção: o peixe do menino era muito velho e o peixe do velho era muito novo!<br>
+        O velho disse para o menino: – Você não pode pescar esse peixe tão velho! Deixe que ele viva o pouco da vida que lhe resta.<br>
+        O menino respondeu: – E o que você vai fazer com este peixe tão novo? Ele é tão pequeno... deixe que ele viva mais um pouco!<br>
+        O velho e o menino olharam um para o outro e, sem perder tempo, jogaram os peixes no lago.<br>
+        Ficaram amigos e agora, quando não têm muito o que fazer, vão até o lago, cumprimentam os peixes e matam o tempo jogando conversa fora.</p>
+    </div>
+
+    <div class="quiz-area" id="quizArea">
+        <div class="pergunta" id="perguntaTexto">Carregando pergunta...</div>
+        <div class="alternativas" id="alternativasContainer"></div>
+        <div class="feedback-msg" id="feedbackMsg"></div>
+        <button class="next-btn" id="proximoBtn">▶ PRÓXIMA PERGUNTA</button>
+        <div style="text-align: center;">
+            <button class="next-btn reset-btn" id="resetBtn">🔄 REINICIAR COM NOVA ORDEM</button>
+        </div>
+    </div>
+
+    <div class="credits-area">
+        📚 Texto: <strong>"CONVERSA FIADA"</strong> de Diléa Frate - obra: <strong>Histórias para Acordar</strong> (Companhia das Letrinhas, 1996)<br>
+        🎮 Game educacional desenvolvido por <strong>Professor(a) Carolina</strong> (adaptação interativa) • Baseado no quiz original do site <a href="https://www.professoracarol.org" target="_blank">professoracarol.org</a><br>
+        💻 Versão gamificada com HTML/CSS/JS • 13 perguntas sorteadas a cada partida • Respeitados os direitos autorais.
+    </div>
+</div>
+
+<script>
+    // ========== BANCO MASTER DE PERGUNTAS (13 NO TOTAL) ==========
+    const bancoPerguntas = [
+        // 0 - ORIGINAL
+        {
+            id: 0,
+            texto: '"O velho disse para o menino: ... O menino respondeu: ..." As duas frases acima, no texto, dão:',
+            alternativas: ["fim à pescaria.", "continuidade ao diálogo.", "motivo para briga.", "início de uma pescaria."],
+            correta: 1,
+            explicacao: "Os dois falam e a história continua. Eles dialogam, não param a pescaria nem brigam."
+        },
+        // 1 - ORIGINAL
+        {
+            id: 1,
+            texto: 'O que quer dizer a expressão "Conversa fiada", que dá nome a este texto?',
+            alternativas: ["Conversa informal, superficial.", "Conversa importante.", "Conversa séria.", "Conversa rápida."],
+            correta: 0,
+            explicacao: "Conversa fiada é aquela sem compromisso, só para matar o tempo, informal e leve."
+        },
+        // 2 - ORIGINAL
+        {
+            id: 2,
+            texto: "O texto trata principalmente de:",
+            alternativas: ["como jogar conversa fora.", "do início de uma amizade.", "do que fazer com os peixes pescados.", "como pescar no lago."],
+            correta: 1,
+            explicacao: "A história mostra o encontro, respeito e no final eles viram amigos. O foco é o início da amizade."
+        },
+        // 3 - ORIGINAL (CORRIGIDA: preocupado com preservação)
+        {
+            id: 3,
+            texto: 'Quando o velho disse: "Você não pode pescar esse peixe tão velho! Deixe que ele viva o pouco de vida que lhe resta", ele estava:',
+            alternativas: ["comparando o peixe a si próprio.", "protestando contra a pescaria.", "preocupado com a preservação dos peixes.", "proibindo o menino de pescar."],
+            correta: 2,
+            explicacao: "O velho demonstra preocupação com a vida do peixe idoso, mostrando consciência ambiental e respeito à natureza."
+        },
+        // 4 - ORIGINAL
+        {
+            id: 4,
+            texto: "O menino e o velho devolveram os peixes ao lago porque:",
+            alternativas: ["os peixes não eram da espécie que eles queriam.", "eles estavam praticando pesca esportiva.", "os peixes eram muito pequenos.", "eles reconheceram que cada peixe merecia viver mais."],
+            correta: 3,
+            explicacao: "O velho quer que o peixe velho viva o que resta. O menino quer que o novo cresça. Ambos respeitam a vida."
+        },
+        // 5 - ORIGINAL
+        {
+            id: 5,
+            texto: 'Na frase: "Quando apareceram os respectivos peixes, porém, decepção: o peixe do menino era muito velho e o peixe do velho era muito novo", qual a função dos dois pontos?',
+            alternativas: ["Fazer uma pausa na frase.", "Finalizar a frase.", "Destacar uma expressão.", "Introduzir uma explicação."],
+            correta: 3,
+            explicacao: "Os dois pontos introduzem a explicação da decepção: qual era a decepção? O peixe trocado."
+        },
+        // 6 - NOVA: Gênero textual
+        {
+            id: 6,
+            texto: 'O texto "Conversa Fiada" pertence a qual gênero textual?',
+            alternativas: ["Notícia de jornal", "Conto / Fábula", "Receita culinária", "Verbete de dicionário"],
+            correta: 1,
+            explicacao: "A expressão 'Era uma vez' e a presença de uma lição sobre amizade e respeito são típicas de contos e fábulas."
+        },
+        // 7 - NOVA: Características dos personagens
+        {
+            id: 7,
+            texto: "O que diferenciava o jeito de puxar a vara do menino e do velho?",
+            alternativas: ["O menino usava mais precisão e o velho mais força", "O menino usava força e o velho precisão", "Ambos usavam a mesma técnica", "Nenhum deles sabia pescar direito"],
+            correta: 1,
+            explicacao: "O texto diz: 'O menino puxou com força e precisão. O velho usou mais precisão e menos força.'"
+        },
+        // 8 - NOVA: Sentimento dos personagens
+        {
+            id: 8,
+            texto: "Qual foi o sentimento dos dois quando viram os peixes que pescaram?",
+            alternativas: ["Alegria", "Indiferença", "Decepção", "Raiva"],
+            correta: 2,
+            explicacao: "O texto usa explicitamente a palavra 'decepção' após os dois tirarem os peixes da água."
+        },
+        // 9 - NOVA: Ironia da situação
+        {
+            id: 9,
+            texto: "O que havia de irônico (inesperado) na pescaria dos dois?",
+            alternativas: ["O menino pegou um peixe velho e o velho pegou um peixe novo", "Os dois pescaram o mesmo peixe", "Nenhum peixe mordeu a isca", "O lago estava vazio"],
+            correta: 0,
+            explicacao: "O esperado seria que o velho pegasse um peixe velho e o menino um novo, mas aconteceu o contrário."
+        },
+        // 10 - NOVA: Motivo da pescaria
+        {
+            id: 10,
+            texto: "Por que o homem e o menino passavam tempo pescando no lago?",
+            alternativas: ["Precisavam de comida", "Não tinham muito o que fazer", "Eram pescadores profissionais", "Queriam ganhar um concurso"],
+            correta: 1,
+            explicacao: "O texto afirma duas vezes que eles 'não tinham muito o que fazer' e pescavam por isso."
+        },
+        // 11 - NOVA: Desfecho da história
+        {
+            id: 11,
+            texto: "O que os dois personagens fazem no final da história quando não têm o que fazer?",
+            alternativas: ["Continuam pescando peixes", "Vão ao lago, cumprimentam os peixes e jogam conversa fora", "Brigam um com o outro", "Abandonam o lago para sempre"],
+            correta: 1,
+            explicacao: "O texto finaliza com: 'vão até o lago, cumprimentam os peixes e matam o tempo jogando conversa fora.'"
+        },
+        // 12 - NOVA: Valores/ensinamento
+        {
+            id: 12,
+            texto: "Qual é o principal ensinamento que podemos tirar dessa história?",
+            alternativas: ["Pescar é um esporte perigoso", "O respeito à vida e a amizade são mais importantes que a pescaria", "Peixes velhos não prestam para comer", "Crianças não devem conversar com estranhos"],
+            correta: 1,
+            explicacao: "A história mostra que eles abriram mão dos peixes por respeito à vida e terminaram como amigos."
+        }
+    ];
+
+    // Função para embaralhar array (Fisher-Yates)
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // ========== VARIÁVEIS DO GAME ==========
+    let perguntasEmOrdem = [];     // ordem sorteada (array de objetos)
+    let currentQuestionIndex = 0;  // índice dentro de perguntasEmOrdem
+    let pontos = 0;
+    let vidas = 3;
+    let answered = false;
+    let questaoBloqueada = false;
+    let gameFinalizado = false;
+    
+    let acertosFeitos = [];  // booleano por pergunta sorteada
+    
+    // Ícones variados para os peixes (baseado no ID original)
+    const peixesPorId = {
+        0: "🐟", 1: "🐠", 2: "🐡", 3: "🐟", 4: "🐠", 5: "🐡",
+        6: "🐙", 7: "🐬", 8: "🐳", 9: "🦑", 10: "🦀", 11: "🐋", 12: "🐚"
+    };
+
+    // Elementos DOM
+    const pontosDisplay = document.getElementById("pontosDisplay");
+    const vidasDisplay = document.getElementById("vidasDisplay");
+    const aquarioPeixes = document.getElementById("aquarioPeixes");
+    const perguntaTexto = document.getElementById("perguntaTexto");
+    const alternativasContainer = document.getElementById("alternativasContainer");
+    const feedbackMsgDiv = document.getElementById("feedbackMsg");
+    const proximoBtn = document.getElementById("proximoBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function atualizarVidasUI() {
+        if (vidas === 3) vidasDisplay.innerHTML = "❤️❤️❤️";
+        else if (vidas === 2) vidasDisplay.innerHTML = "❤️❤️🖤";
+        else if (vidas === 1) vidasDisplay.innerHTML = "❤️🖤🖤";
+        else vidasDisplay.innerHTML = "🖤🖤🖤";
+    }
+
+    function atualizarAquario() {
+        aquarioPeixes.innerHTML = "";
+        for (let i = 0; i < perguntasEmOrdem.length; i++) {
+            if (acertosFeitos[i] === true) {
+                const peixeSpan = document.createElement("span");
+                peixeSpan.className = "peixe-icon";
+                const idOriginal = perguntasEmOrdem[i].id;
+                peixeSpan.textContent = peixesPorId[idOriginal] || "🐟";
+                aquarioPeixes.appendChild(peixeSpan);
+            }
+        }
+        
+        const totalAcertos = acertosFeitos.filter(v => v === true).length;
+        if (totalAcertos === perguntasEmOrdem.length && perguntasEmOrdem.length > 0) {
+            if (!document.getElementById("finalMsg")) {
+                const finalDiv = document.createElement("div");
+                finalDiv.id = "finalMsg";
+                finalDiv.className = "final-secret";
+                finalDiv.innerHTML = "🏆✨ FINAL SECRETO! ✨🏆<br>🐠🐡🐟 O velho e o menino agora pescam amizade! 🎣<br>“A verdadeira pescaria é de conversa fiada e respeito.” 🌊<br>⭐ Você salvou TODOS os 13 peixes! ⭐";
+                document.querySelector(".quiz-area").prepend(finalDiv);
+            }
+        } else {
+            const finalExistente = document.getElementById("finalMsg");
+            if (finalExistente) finalExistente.remove();
+        }
+    }
+
+    function checarGameOver() {
+        if (vidas <= 0 && !gameFinalizado) {
+            gameFinalizado = true;
+            feedbackMsgDiv.innerHTML = "💀 GAME OVER... Você perdeu todas as iscas. Clique em REINICIAR para tentar salvar os peixes com uma nova ordem de perguntas! 💀";
+            proximoBtn.disabled = true;
+            questaoBloqueada = true;
+            return true;
+        }
+        return false;
+    }
+
+    function iniciarNovaPartida() {
+        perguntasEmOrdem = shuffleArray([...bancoPerguntas]);
+        currentQuestionIndex = 0;
+        pontos = 0;
+        vidas = 3;
+        answered = false;
+        questaoBloqueada = false;
+        gameFinalizado = false;
+        acertosFeitos = new Array(perguntasEmOrdem.length).fill(false);
+        
+        pontosDisplay.textContent = "0";
+        atualizarVidasUI();
+        atualizarAquario();
+        
+        const finalExistente = document.getElementById("finalMsg");
+        if (finalExistente) finalExistente.remove();
+        
+        carregarPergunta();
+        feedbackMsgDiv.innerHTML = "🎲 13 PERGUNTAS SORTEADAS! Cada partida é única. Boa sorte! 🐟";
+        proximoBtn.disabled = true;
+    }
+
+    function carregarPergunta() {
+        if (gameFinalizado) return;
+        
+        if (currentQuestionIndex >= perguntasEmOrdem.length) {
+            const totalAcertos = acertosFeitos.filter(v => v === true).length;
+            if (totalAcertos === perguntasEmOrdem.length) {
+                feedbackMsgDiv.innerHTML = "🎉 PARABÉNS! Você salvou TODOS os 13 peixes! 🎉<br>Clique em REINICIAR para uma nova aventura com perguntas embaralhadas.";
+                proximoBtn.disabled = true;
+                gameFinalizado = true;
+            } else {
+                feedbackMsgDiv.innerHTML = "Você respondeu todas as perguntas, mas alguns peixes não foram salvos. Recomece para tentar novamente!";
+                proximoBtn.disabled = true;
+                gameFinalizado = true;
+            }
+            return;
+        }
+
+        answered = false;
+        questaoBloqueada = false;
+        const q = perguntasEmOrdem[currentQuestionIndex];
+        perguntaTexto.textContent = q.texto;
+        
+        alternativasContainer.innerHTML = "";
+        q.alternativas.forEach((alt, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "alt-btn";
+            const prefixo = String.fromCharCode(65+idx);
+            btn.innerHTML = `<span class="prefix">${prefixo}</span> ${alt}`;
+            btn.addEventListener("click", () => responderQuestao(idx, btn));
+            alternativasContainer.appendChild(btn);
+        });
+        
+        feedbackMsgDiv.innerHTML = `🐟 Pergunta ${currentQuestionIndex+1} de ${perguntasEmOrdem.length} (ordem aleatória)`;
+        proximoBtn.disabled = true;
+    }
+
+    function responderQuestao(respostaIndex, botaoClicado) {
+        if (answered || questaoBloqueada || gameFinalizado) return;
+        const q = perguntasEmOrdem[currentQuestionIndex];
+        const isCorrect = (respostaIndex === q.correta);
+        
+        const allBtns = document.querySelectorAll(".alt-btn");
+        allBtns.forEach(btn => btn.disabled = true);
+        
+        if (isCorrect) {
+            let ganhouPontos = 100;
+            pontos += ganhouPontos;
+            pontosDisplay.textContent = pontos;
+            
+            if (!acertosFeitos[currentQuestionIndex]) {
+                acertosFeitos[currentQuestionIndex] = true;
+                atualizarAquario();
+            }
+            
+            feedbackMsgDiv.innerHTML = `✅ CORRETO! +${ganhouPontos} pontos. ${q.explicacao}`;
+            botaoClicado.classList.add("correct-feedback");
+            answered = true;
+            proximoBtn.disabled = false;
+        } else {
+            vidas--;
+            atualizarVidasUI();
+            feedbackMsgDiv.innerHTML = `❌ ERRADO! A resposta correta era: ${q.alternativas[q.correta]}. ${q.explicacao} ❌ Perdeu 1 coração.`;
+            botaoClicado.classList.add("wrong-feedback");
+            const allBtnsArr = document.querySelectorAll(".alt-btn");
+            allBtnsArr[q.correta].classList.add("correct-feedback");
+            
+            answered = true;
+            if (vidas <= 0) {
+                questaoBloqueada = true;
+                checarGameOver();
+                proximoBtn.disabled = true;
+            } else {
+                proximoBtn.disabled = false;
+            }
+        }
+    }
+
+    function avancarPergunta() {
+        if (gameFinalizado) return;
+        if (!answered && vidas > 0) {
+            feedbackMsgDiv.innerHTML = "⚠️ Responda a pergunta atual antes de avançar! ⚠️";
+            return;
+        }
+        if (vidas <= 0) {
+            checarGameOver();
+            return;
+        }
+        currentQuestionIndex++;
+        if (currentQuestionIndex < perguntasEmOrdem.length) {
+            carregarPergunta();
+        } else {
+            const totalAcertos = acertosFeitos.filter(v => v === true).length;
+            if (totalAcertos === perguntasEmOrdem.length) {
+                feedbackMsgDiv.innerHTML = "🏆 MISSÃO COMPLETA! 🏆 Todos os 13 peixes estão no aquário. Você é um verdadeiro amigo do lago!";
+                proximoBtn.disabled = true;
+                gameFinalizado = true;
+                atualizarAquario();
+            } else {
+                feedbackMsgDiv.innerHTML = "Você chegou ao fim, mas ainda faltam alguns peixes. Use o botão REINICIAR para tentar salvar todos!";
+                proximoBtn.disabled = true;
+                gameFinalizado = true;
+            }
+        }
+    }
+
+    function reiniciarJogo() {
+        iniciarNovaPartida();
+    }
+
+    proximoBtn.addEventListener("click", avancarPergunta);
+    resetBtn.addEventListener("click", reiniciarJogo);
+
+    iniciarNovaPartida();
+</script>
+</body>
+</html>
