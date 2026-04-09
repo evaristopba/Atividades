@@ -346,9 +346,10 @@
         </div>
     </div>
 
+    <!-- CRÉDITOS COM LINK AMIGÁVEL "Professora Carol" -->
     <div class="credits-area">
         📚 Texto: <strong>"CONVERSA FIADA"</strong> de Diléa Frate - obra: <strong>Histórias para Acordar</strong> (Companhia das Letrinhas, 1996)<br>
-        🎮 Game educacional desenvolvido por <strong>Professor(a) Carolina</strong> (adaptação interativa) • Baseado no quiz original do site <a href="https://www.professoracarol.org" target="_blank">professoracarol.org</a><br>
+        🎮 Game educacional desenvolvido por <strong>Professor(a) Carolina</strong> (adaptação interativa) • Baseado no quiz original de <a href="https://www.professoracarol.org/CAROL%20HOT%20POTATOES/Interpretacao_Conversa%20Fiada.htm" target="_blank">Professora Carol</a><br>
         💻 Versão gamificada com HTML/CSS/JS • 13 perguntas sorteadas a cada partida • Respeitados os direitos autorais.
     </div>
 </div>
@@ -472,23 +473,20 @@
     }
 
     // ========== VARIÁVEIS DO GAME ==========
-    let perguntasEmOrdem = [];     // ordem sorteada (array de objetos)
-    let currentQuestionIndex = 0;  // índice dentro de perguntasEmOrdem
+    let perguntasEmOrdem = [];
+    let currentQuestionIndex = 0;
     let pontos = 0;
     let vidas = 3;
     let answered = false;
     let questaoBloqueada = false;
     let gameFinalizado = false;
+    let acertosFeitos = [];
     
-    let acertosFeitos = [];  // booleano por pergunta sorteada
-    
-    // Ícones variados para os peixes (baseado no ID original)
     const peixesPorId = {
         0: "🐟", 1: "🐠", 2: "🐡", 3: "🐟", 4: "🐠", 5: "🐡",
         6: "🐙", 7: "🐬", 8: "🐳", 9: "🦑", 10: "🦀", 11: "🐋", 12: "🐚"
     };
 
-    // Elementos DOM
     const pontosDisplay = document.getElementById("pontosDisplay");
     const vidasDisplay = document.getElementById("vidasDisplay");
     const aquarioPeixes = document.getElementById("aquarioPeixes");
