@@ -241,6 +241,7 @@
         .next-btn:disabled {
             opacity: 0.5;
             transform: none;
+            cursor: not-allowed;
         }
 
         .final-secret {
@@ -300,6 +301,17 @@
             font-weight: bold;
             display: inline-block;
             margin-left: 10px;
+        }
+
+        .blocked-message {
+            background: #c0392b;
+            color: #ffefb9;
+            padding: 15px;
+            border-radius: 30px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            border: 2px solid #ffaa88;
         }
 
         @media (max-width: 550px) {
@@ -481,6 +493,7 @@
     let questaoBloqueada = false;
     let gameFinalizado = false;
     let acertosFeitos = [];
+    let jaErrouAlguma = false;  // NOVA VARIÁVEL: marca se já houve algum erro
     
     const peixesPorId = {
         0: "🐟", 1: "🐠", 2: "🐡", 3: "🐟", 4: "🐠", 5: "🐡",
@@ -516,7 +529,8 @@
         }
         
         const totalAcertos = acertosFeitos.filter(v => v === true).length;
-        if (totalAcertos === perguntasEmOrdem.length && perguntasEmOrdem.length > 0) {
+        // Só mostra o final secreto se NÃO tiver errado nenhuma E todas as perguntas foram acertadas
+        if (!jaErrouAlguma && totalAcertos === perguntasEmOrdem.length && perguntasEmOrdem.length > 0 && gameFinalizado) {
             if (!document.getElementById("finalMsg")) {
                 const finalDiv = document.createElement("div");
                 finalDiv.id = "finalMsg";
@@ -549,6 +563,7 @@
         answered = false;
         questaoBloqueada = false;
         gameFinalizado = false;
+        jaErrouAlguma = false;  // Reseta a flag de erro
         acertosFeitos = new Array(perguntasEmOrdem.length).fill(false);
         
         pontosDisplay.textContent = "0";
@@ -559,25 +574,50 @@
         if (finalExistente) finalExistente.remove();
         
         carregarPergunta();
-        feedbackMsgDiv.innerHTML = "🎲 13 PERGUNTAS SORTEADAS! Cada partida é única. Boa sorte! 🐟";
+        feedbackMsgDiv.innerHTML = "🎲 13 PERGUNTAS SORTEADAS! Atenção: para vencer, você precisa acertar TODAS as perguntas. Qualquer erro impede a conclusão! 🐟";
         proximoBtn.disabled = true;
     }
 
     function carregarPergunta() {
         if (gameFinalizado) return;
         
+        // Verifica se já terminou todas as perguntas
         if (currentQuestionIndex >= perguntasEmOrdem.length) {
             const totalAcertos = acertosFeitos.filter(v => v === true).length;
-            if (totalAcertos === perguntasEmOrdem.length) {
-                feedbackMsgDiv.innerHTML = "🎉 PARABÉNS! Você salvou TODOS os 13 peixes! 🎉<br>Clique em REINICIAR para uma nova aventura com perguntas embaralhadas.";
-                proximoBtn.disabled = true;
+            
+            // Se chegou ao fim mas errou alguma pergunta
+            if (jaErrouAlguma || totalAcertos !== perguntasEmOrdem.length) {
+                // Bloqueia o jogo e explica que precisa reiniciar
                 gameFinalizado = true;
+                proximoBtn.disabled = true;
+                questaoBloqueada = true;
+                
+                // Cria uma mensagem de bloqueio bem visível
+                const blockDiv = document.createElement("div");
+                blockDiv.id = "blockMsg";
+                blockDiv.className = "blocked-message";
+                blockDiv.innerHTML = `
+                    ⚠️ <strong>VOCÊ NÃO CONSEGUIU SALVAR TODOS OS PEIXES!</strong> ⚠️<br><br>
+                    🐟 Peixes salvos: ${totalAcertos} de ${perguntasEmOrdem.length}<br><br>
+                    📌 Para vencer o jogo e libertar TODOS os peixes, você precisa acertar TODAS as perguntas.<br>
+                    Como houve pelo menos um erro nesta partida, o jogo não pode ser concluído.<br><br>
+                    🔄 <strong>Clique no botão REINICIAR abaixo e tente novamente!</strong>
+                `;
+                // Remove mensagem anterior se existir
+                const oldBlock = document.getElementById("blockMsg");
+                if (oldBlock) oldBlock.remove();
+                document.querySelector(".quiz-area").insertBefore(blockDiv, document.getElementById("proximoBtn"));
+                
+                feedbackMsgDiv.innerHTML = "❌ Infelizmente você errou alguma pergunta. Para vencer, é preciso acertar todas as 13. Reinicie o jogo e tente novamente!";
+                return;
             } else {
-                feedbackMsgDiv.innerHTML = "Você respondeu todas as perguntas, mas alguns peixes não foram salvos. Recomece para tentar novamente!";
-                proximoBtn.disabled = true;
+                // Acertou todas! Final feliz
                 gameFinalizado = true;
+                proximoBtn.disabled = true;
+                atualizarAquario(); // Isso vai mostrar o final secreto
+                feedbackMsgDiv.innerHTML = "🏆 PARABÉNS! Você acertou TODAS as perguntas e salvou todos os peixes! 🏆";
+                return;
             }
-            return;
         }
 
         answered = false;
@@ -595,7 +635,7 @@
             alternativasContainer.appendChild(btn);
         });
         
-        feedbackMsgDiv.innerHTML = `🐟 Pergunta ${currentQuestionIndex+1} de ${perguntasEmOrdem.length} (ordem aleatória)`;
+        feedbackMsgDiv.innerHTML = `🐟 Pergunta ${currentQuestionIndex+1} de ${perguntasEmOrdem.length} (ordem aleatória) | Para vencer: acerte TODAS as 13!`;
         proximoBtn.disabled = true;
     }
 
@@ -622,9 +662,12 @@
             answered = true;
             proximoBtn.disabled = false;
         } else {
+            // Marca que houve pelo menos um erro
+            jaErrouAlguma = true;
+            
             vidas--;
             atualizarVidasUI();
-            feedbackMsgDiv.innerHTML = `❌ ERRADO! A resposta correta era: ${q.alternativas[q.correta]}. ${q.explicacao} ❌ Perdeu 1 coração.`;
+            feedbackMsgDiv.innerHTML = `❌ ERRADO! A resposta correta era: ${q.alternativas[q.correta]}. ${q.explicacao} ❌ Perdeu 1 coração. ⚠️ AGORA VOCÊ NÃO PODE MAIS VENCER ESTA PARTIDA! ⚠️`;
             botaoClicado.classList.add("wrong-feedback");
             const allBtnsArr = document.querySelectorAll(".alt-btn");
             allBtnsArr[q.correta].classList.add("correct-feedback");
@@ -651,24 +694,13 @@
             return;
         }
         currentQuestionIndex++;
-        if (currentQuestionIndex < perguntasEmOrdem.length) {
-            carregarPergunta();
-        } else {
-            const totalAcertos = acertosFeitos.filter(v => v === true).length;
-            if (totalAcertos === perguntasEmOrdem.length) {
-                feedbackMsgDiv.innerHTML = "🏆 MISSÃO COMPLETA! 🏆 Todos os 13 peixes estão no aquário. Você é um verdadeiro amigo do lago!";
-                proximoBtn.disabled = true;
-                gameFinalizado = true;
-                atualizarAquario();
-            } else {
-                feedbackMsgDiv.innerHTML = "Você chegou ao fim, mas ainda faltam alguns peixes. Use o botão REINICIAR para tentar salvar todos!";
-                proximoBtn.disabled = true;
-                gameFinalizado = true;
-            }
-        }
+        carregarPergunta();
     }
 
     function reiniciarJogo() {
+        // Remove mensagem de bloqueio se existir
+        const blockMsg = document.getElementById("blockMsg");
+        if (blockMsg) blockMsg.remove();
         iniciarNovaPartida();
     }
 
