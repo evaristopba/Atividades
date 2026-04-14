@@ -21,7 +21,6 @@
             padding: 12px;
         }
 
-        /* Container principal - estrutura flex column */
         .game {
             background: #fff5e6;
             border-radius: 24px;
@@ -34,7 +33,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
-        /* CABEÇALHO FIXO */
         .game-header {
             background: #fff5e6;
             padding: 12px 12px 8px 12px;
@@ -68,7 +66,7 @@
             border-radius: 30px;
         }
 
-        .score-area, .counter-area {
+        .score-area, .counter-area, .errors-area {
             background: #fff0d0;
             padding: 3px 10px;
             border-radius: 25px;
@@ -77,13 +75,14 @@
             color: #5a3a22;
         }
 
-        .score-area span, .counter-area span {
+        .score-area span, .counter-area span, .errors-area span {
             font-size: 1rem;
             font-weight: bold;
         }
 
         .score-area span { color: #e67e22; }
         .counter-area span { color: #2c5a0c; }
+        .errors-area span { color: #c0392b; }
 
         .progress-container {
             margin-bottom: 6px;
@@ -113,11 +112,11 @@
             min-height: 18px;
         }
 
-        /* ÁREA ROLÁVEL (apenas as somas) */
         .sums-scroll-area {
             flex: 1;
             overflow-y: auto;
             padding: 8px 12px;
+            outline: none;
         }
 
         .sums-list {
@@ -226,7 +225,6 @@
             transform: scale(0.98);
         }
 
-        /* BANCO DE NÚMEROS - FIXO NO FOOTER */
         .game-footer {
             background: #fff5e6;
             flex-shrink: 0;
@@ -319,13 +317,13 @@
 <body>
 
 <div class="game">
-    <!-- CABEÇALHO FIXO -->
     <div class="game-header">
-        <h1>🦁 Some os animais do safári 🐘</h1>
+        <h1>🦁 Some os animais do safári 🐘 (até 20)</h1>
         <div class="sub">arraste os números para os espaços abaixo</div>
 
         <div class="top-bar">
             <div class="score-area">⭐ <span id="scoreValue">0</span> / <span id="totalFields">12</span></div>
+            <div class="errors-area">❌ Erros: <span id="errorsValue">0</span></div>
             <div class="counter-area">📋 Telas: <span id="screenCounter">0</span></div>
         </div>
 
@@ -337,12 +335,10 @@
         </div>
     </div>
 
-    <!-- ÁREA ROLÁVEL (APENAS AS SOMAS) -->
-    <div class="sums-scroll-area">
+    <div class="sums-scroll-area" tabindex="0" id="scrollArea">
         <div id="sumsList" class="sums-list"></div>
     </div>
 
-    <!-- RODAPÉ FIXO -->
     <div class="game-footer">
         <div class="bank">
             <div class="bank-title">📦 números disponíveis</div>
@@ -397,10 +393,12 @@
     const resetBtn = document.getElementById('resetBtn');
     const scoreSpan = document.getElementById('scoreValue');
     const totalFieldsSpan = document.getElementById('totalFields');
+    const errorsSpan = document.getElementById('errorsValue');
     const progressFill = document.getElementById('progressFill');
     const incentiveMsg = document.getElementById('incentiveMsg');
     const starsDisplay = document.getElementById('starsDisplay');
     const screenCounterSpan = document.getElementById('screenCounter');
+    const scrollArea = document.getElementById('scrollArea');
 
     function getAnimalAleatorio() {
         return ANIMAIS[Math.floor(Math.random() * ANIMAIS.length)];
@@ -453,6 +451,7 @@
     function atualizarPontuacaoUI() {
         scoreSpan.innerText = pontuacao;
         totalFieldsSpan.innerText = totalCampos;
+        errorsSpan.innerText = errosTotais;
         const percent = (pontuacao / totalCampos) * 100;
         progressFill.style.width = `${percent}%`;
         
@@ -634,6 +633,7 @@
             errosTotais++;
             acertosConsecutivos = 0;
             piscarCampo(campoElement, false);
+            atualizarPontuacaoUI();
         }
     }
     
@@ -651,6 +651,7 @@
     
     resetBtn.addEventListener('click', () => resetar());
     resetar();
+    scrollArea.focus();
 </script>
 </body>
 </html>
