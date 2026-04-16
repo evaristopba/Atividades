@@ -348,6 +348,12 @@ body {
 .info-value.vermelho { color: var(--vermelho); }
 .info-value.verde    { color: var(--verde-escuro); }
 
+/* Estilo para o limite de erros */
+.erro-limite {
+  color: #e53935;
+  font-weight: bold;
+}
+
 .btn {
   font-family: 'Nunito', cursive;
   font-weight: 800;
@@ -473,6 +479,7 @@ body {
 }
 .modal-msg-final.sucesso { background: #e8f5e9; color: var(--verde-escuro); border: 2px solid #a5d6a7; }
 .modal-msg-final.falha   { background: #fff3e0; color: #e65100; border: 2px solid #ffe0b2; }
+.modal-msg-final.erro-limite { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
 
 .modal-footer {
   padding: 0 24px 20px;
@@ -576,7 +583,7 @@ body {
     </div>
     <div class="info-box">
       <div class="info-label">❌ Erros</div>
-      <div class="info-value vermelho" id="vErros">—</div>
+      <div class="info-value vermelho" id="vErros">0/3</div>
     </div>
     <div class="info-box">
       <div class="info-label">📊 Restantes</div>
@@ -622,6 +629,9 @@ body {
 <div id="touch-ghost"></div>
 
 <script>
+/* ─── CONFIGURAÇÕES ──────────────────────────────────── */
+const LIMITE_ERROS = 3;  // Limite máximo de erros por fase
+
 /* ─── DADOS ─────────────────────────────────────────── */
 const BALDES_CFG = [
   { nome: "1 a 10",   min: 1,  max: 10  },
@@ -659,16 +669,11 @@ const FASES = [
     { t:"150 ÷ 2",  v:75 }, { t:"25 × 3",    v:75 }
   ]},
   { nome: "Fase 4", itens: [
-    // Balde 1 a 10 (5 itens)
     { t:"1 + 1",    v:2  }, { t:"10 - 3",   v:7  }, { t:"2 × 4",    v:8  },
-    { t:"9 ÷ 3",    v:3  }, { t:"5 + 4",    v:9  },
-    // Balde 11 a 20 (5 itens) - CORRIGIDO: 18÷2 removido, adicionado 18+2
-    { t:"6 + 7",    v:13 }, { t:"20 - 6",   v:14 }, { t:"4 × 4",    v:16 },
-    { t:"18 + 2",   v:20 }, { t:"12 + 5",   v:17 },
-    // Balde 21 a 50 (5 itens)
-    { t:"7 × 4",    v:28 }, { t:"50 - 15",  v:35 }, { t:"9 × 4",    v:36 },
-    { t:"30 + 12",  v:42 }, { t:"100 ÷ 2",  v:50 },
-    // Balde 51 a 100 (5 itens)
+    { t:"9 ÷ 3",    v:3  }, { t:"5 + 4",    v:9  }, { t:"6 + 7",    v:13 },
+    { t:"20 - 6",   v:14 }, { t:"4 × 4",    v:16 }, { t:"18 + 2",   v:20 },
+    { t:"12 + 5",   v:17 }, { t:"7 × 4",    v:28 }, { t:"50 - 15",  v:35 },
+    { t:"9 × 4",    v:36 }, { t:"30 + 12",  v:42 }, { t:"100 ÷ 2",  v:50 },
     { t:"8 × 8",    v:64 }, { t:"100 - 30", v:70 }, { t:"12 × 6",   v:72 },
     { t:"90 + 10",  v:100}, { t:"150 ÷ 2",  v:75 }
   ]}
@@ -678,7 +683,8 @@ const FASES = [
 let faseIdx = 0;
 let disponiveis = [];
 let baldes = [[], [], [], []];
-let totalErros = 0;
+let errosNaFase = 0;      // Contador de erros na fase atual
+let totalErrosGlobal = 0; // Total de erros acumulados (para estatística final)
 
 /* ─── UTILITÁRIOS ────────────────────────────────────── */
 function getBaldeIdx(v) {
@@ -696,6 +702,18 @@ function toast(msg, tipo='') {
   el.className = 'show ' + (tipo ? tipo+'-bg' : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.className = ''; }, 2400);
+}
+
+function atualizarInterfaceErros() {
+  const elErros = document.getElementById('vErros');
+  elErros.textContent = `${errosNaFase}/${LIMITE_ERROS}`;
+  
+  // Se atingiu ou ultrapassou o limite, destaca em vermelho
+  if (errosNaFase >= LIMITE_ERROS) {
+    elErros.classList.add('erro-limite');
+  } else {
+    elErros.classList.remove('erro-limite');
+  }
 }
 
 /* ─── POSICIONAMENTO (grade + jitter) ────────────────── */
@@ -840,7 +858,6 @@ function onDragEnd(e) {
 }
 
 function soltarNoBalde(item, baldeIdx) {
-  // VERIFICAÇÃO CRÍTICA: limite de 5 itens por balde
   if (baldes[baldeIdx].length >= 5) {
     toast(`⚠️ Compartimento ${BALDES_CFG[baldeIdx].nome} já está cheio! (5/5)`, 'amarelo');
     return false;
@@ -915,8 +932,29 @@ function onTouchEnd(e) {
   touchSrc  = null;
 }
 
+/* ─── REINICIAR FASE (por limite de erros) ───────────── */
+function reiniciarFasePorLimite() {
+  const fase = FASES[faseIdx];
+  disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
+  baldes = [[], [], [], []];
+  errosNaFase = 0;
+  atualizarInterfaceErros();
+  document.getElementById('vAcertos').textContent = '—';
+  renderItens();
+  renderBaldes();
+  
+  // Mostra mensagem educativa
+  toast(`⚠️ Você atingiu o limite de ${LIMITE_ERROS} erros! A fase foi reiniciada. Vamos com mais atenção!`, 'verm');
+}
+
 /* ─── VERIFICAR ──────────────────────────────────────── */
 function verificar() {
+  // Verifica se já atingiu o limite (segurança)
+  if (errosNaFase >= LIMITE_ERROS) {
+    reiniciarFasePorLimite();
+    return;
+  }
+  
   if (disponiveis.length > 0) {
     toast(`⚠️ Ainda há ${disponiveis.length} item(ns) para colocar!`, 'amarelo');
     return;
@@ -936,15 +974,31 @@ function verificar() {
       const correto = getBaldeIdx(item.v) === i;
       item._cor = correto ? 'correto' : 'errado';
       if (correto) acertos++;
-      else { erros++; totalErros++; }
+      else { erros++; }
       resultados.push({ item, baldeAtual: i, correto });
     });
   });
 
+  // Se houver erros, incrementa o contador de erros da fase
+  if (erros > 0) {
+    errosNaFase += erros;
+    totalErrosGlobal += erros;
+    atualizarInterfaceErros();
+  }
+
   renderBaldes(true);
   document.getElementById('vAcertos').textContent = acertos;
-  document.getElementById('vErros').textContent   = erros;
+  document.getElementById('vErros').textContent = `${errosNaFase}/${LIMITE_ERROS}`;
 
+  // VERIFICA SE ULTRAPASSOU O LIMITE
+  if (errosNaFase > LIMITE_ERROS) {
+    // Fecha qualquer modal aberto
+    document.getElementById('modal-resultado').classList.remove('ativo');
+    reiniciarFasePorLimite();
+    return;
+  }
+
+  // Monta modal normalmente
   document.getElementById('modal-header-txt').textContent = erros === 0 ? '🎉 Perfeito!' : '📊 Resultado';
   document.getElementById('modal-stats').innerHTML = `
     <div class="stat-pill verde">✅ ${acertos} acertos</div>
@@ -971,16 +1025,17 @@ function verificar() {
   if (erros === 0) {
     if (faseIdx < 3) {
       msgFinal.className = 'modal-msg-final sucesso';
-      msgFinal.textContent = '🚀 Incrível! Preparado para a próxima fase?';
+      msgFinal.textContent = `🚀 Incrível! Você acertou tudo! Preparado para a próxima fase? (Erros nesta fase: ${errosNaFase}/${LIMITE_ERROS})`;
       btnAvancar.style.display = 'inline-flex';
     } else {
       msgFinal.className = 'modal-msg-final sucesso';
-      msgFinal.textContent = `🏆 Você completou todas as fases! Total de erros: ${totalErros}`;
+      msgFinal.textContent = `🏆 Parabéns! Você completou todas as fases! Total de erros acumulados: ${totalErrosGlobal}`;
       btnAvancar.style.display = 'none';
     }
   } else {
+    const restantes = LIMITE_ERROS - errosNaFase;
     msgFinal.className = 'modal-msg-final falha';
-    msgFinal.textContent = '💡 Corrija os itens em vermelho e tente novamente.';
+    msgFinal.textContent = `💡 Você cometeu ${erros} erro(s) nesta verificação. Ainda pode errar ${restantes} vez(es) antes da fase reiniciar. Corrija os itens em vermelho e tente novamente.`;
     btnAvancar.style.display = 'none';
   }
 
@@ -992,21 +1047,24 @@ function carregarFase() {
   const fase = FASES[faseIdx];
   disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
   baldes = [[], [], [], []];
+  errosNaFase = 0;
   document.getElementById('vFase').textContent = `${faseIdx + 1}/4`;
   document.getElementById('vAcertos').textContent = '—';
-  document.getElementById('vErros').textContent   = '—';
+  atualizarInterfaceErros();
   renderItens();
   renderBaldes();
 }
 
-function reiniciarFase() {
+function reiniciarFaseManual() {
   const fase = FASES[faseIdx];
   disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
   baldes = [[], [], [], []];
+  errosNaFase = 0;
   document.getElementById('vAcertos').textContent = '—';
-  document.getElementById('vErros').textContent   = '—';
+  atualizarInterfaceErros();
   renderItens();
   renderBaldes();
+  toast(`🔄 Fase reiniciada! Limite de erros: ${LIMITE_ERROS}`, 'amarelo');
 }
 
 /* ─── EVENTOS ────────────────────────────────────────── */
@@ -1018,7 +1076,7 @@ document.getElementById('confirm-nao').onclick = () => {
 };
 document.getElementById('confirm-sim').onclick = () => {
   document.getElementById('modal-confirm').classList.remove('ativo');
-  reiniciarFase();
+  reiniciarFaseManual();
 };
 
 document.getElementById('btn-verificar').onclick = verificar;
@@ -1030,7 +1088,6 @@ document.getElementById('modal-btn-fechar').onclick = () => {
 document.getElementById('modal-btn-avancar').onclick = () => {
   document.getElementById('modal-resultado').classList.remove('ativo');
   faseIdx++;
-  totalErros = 0;
   carregarFase();
 };
 
