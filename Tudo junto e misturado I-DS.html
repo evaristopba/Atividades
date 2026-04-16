@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tudo junto e misturado - Cálculo mental</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --laranja: #e05a00;
+  --laranja-escuro: #a03a00;
+  --amarelo: #f5c842;
+  --amarelo-claro: #fff9c4;
+  --verde: #4caf50;
+  --verde-escuro: #2e7d32;
+  --vermelho: #e53935;
+  --marrom: #7b3a10;
+  --marrom-escuro: #4a1f05;
+  --creme: #fff8e8;
+  --sombra: rgba(0,0,0,0.18);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'Comic Sans MS', cursive;
+  background: var(--laranja-escuro);
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255,180,0,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,100,0,0.12) 0%, transparent 40%);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px;
+}
+
+#game {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--amarelo);
+  border-radius: 24px;
+  border: 6px solid var(--marrom);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TÍTULO */
+#titulo {
+  background: linear-gradient(135deg, var(--marrom) 0%, #5a2800 100%);
+  color: #fff;
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  letter-spacing: 3px;
+  padding: 14px 20px;
+  text-shadow: 2px 3px 6px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
+}
+#titulo::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--amarelo), transparent);
+}
+
+/* ÁREA DE EXPRESSÕES */
+#expr-area {
+  background: #8B6914;
+  background-image:
+    radial-gradient(circle, rgba(255,200,50,0.18) 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  padding: 16px 20px 20px;
+  border-bottom: 6px solid #5a400a;
+  position: relative;
+}
+
+.expr-subtitulo {
+  color: rgba(255,255,255,0.9);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 12px;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  letter-spacing: 0.5px;
+}
+
+#expr-container {
+  position: relative;
+  height: 320px;
+}
+
+.expr-item {
+  position: absolute;
+  background: linear-gradient(145deg, #fffde7, #fff9c4);
+  border: 2.5px solid #f9a825;
+  border-radius: 14px;
+  padding: 9px 16px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: #4a2800;
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+  box-shadow: 3px 4px 10px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: box-shadow 0.15s, transform 0.15s;
+  z-index: 10;
+  letter-spacing: 0.5px;
+}
+
+.expr-item:hover {
+  box-shadow: 4px 6px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.8);
+  transform: translateY(-2px) rotate(-1deg);
+  z-index: 20;
+}
+
+.expr-item.dragging {
+  opacity: 0.35;
+  cursor: grabbing;
+  transform: scale(0.95);
+  z-index: 5;
+}
+
+/* Fantasma de toque */
+#touch-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  background: linear-gradient(145deg, #fff176, #ffee58);
+  border: 3px solid #f9a825;
+  border-radius: 14px;
+  padding: 9px 16px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: #4a2800;
+  box-shadow: 6px 8px 20px rgba(0,0,0,0.45);
+  transform: rotate(3deg) scale(1.1);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* ÁREA DOS BALDES */
+#baldes-area {
+  background: linear-gradient(180deg, #b8e090 0%, #cde898 100%);
+  padding: 16px 20px;
+  border-top: 4px solid #7ab030;
+}
+
+.baldes-container {
+  display: flex;
+  gap: 10px;
+}
+
+.balde {
+  flex: 1;
+  background: linear-gradient(180deg, #e8f5e9 0%, #dcedc8 100%);
+  border: 3px solid #a5c770;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: visible;
+  position: relative;
+}
+
+.balde::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  border-radius: 16px 16px 0 0;
+}
+
+.balde.drag-over {
+  background: linear-gradient(180deg, #c8f5c8, #a5d6a7);
+  border-color: var(--verde);
+  transform: scale(1.03) translateY(-3px);
+  box-shadow: 0 8px 24px rgba(76,175,80,0.35), 0 0 0 3px #ffeb3b;
+}
+
+/* ========== CORREÇÃO VISUAL: ITENS DENTRO DO BALDE ========== */
+.balde-itens {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-content: flex-start;
+  min-height: 160px;
+  background: rgba(139, 105, 20, 0.15);
+  border-radius: 12px;
+  margin: 8px;
+  border: 1px dashed rgba(100, 70, 20, 0.3);
+}
+
+.balde-item {
+  background: linear-gradient(135deg, #fffde7, #fff3c4);
+  border: 2px solid #e5a010;
+  border-radius: 12px;
+  padding: 6px 8px 6px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: 'Fredoka One', cursive;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.2);
+  color: #4a2800;
+  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.balde-item.correto {
+  background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+  border-color: #2e7d32;
+  color: #1b5e20;
+}
+
+.balde-item.errado {
+  background: linear-gradient(135deg, #ffcdd2, #ef9a9a);
+  border-color: #c62828;
+  color: #8b0000;
+}
+
+.btn-remover {
+  background: #ef5350;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.btn-remover:hover {
+  background: #d32f2f;
+  transform: scale(1.1);
+}
+/* ========== FIM DA CORREÇÃO VISUAL ========== */
+
+/* Seta e haste */
+.seta-haste {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 2px 0;
+}
+.seta {
+  width: 0; height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 30px solid #c01a00;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+}
+.haste {
+  width: 10px;
+  background: linear-gradient(90deg, #d42000, #ff3000, #d42000);
+  height: 44px;
+  box-shadow: 1px 0 3px rgba(0,0,0,0.2);
+}
+
+/* Rótulo do balde com barra de progresso */
+.rotulo {
+  background: linear-gradient(135deg, #f0d030, #f5e060);
+  border: 2px solid #c8a010;
+  border-radius: 0 0 14px 14px;
+  color: var(--marrom-escuro);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 6px 10px 8px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.balde-progresso-wrap {
+  height: 6px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 3px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.balde-progresso-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+  border-radius: 3px;
+  transition: width 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+  width: 0%;
+}
+
+.balde-contador {
+  font-size: 11px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 10px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  font-family: 'Nunito', cursive;
+}
+
+/* BARRA INFERIOR */
+#barra {
+  background: linear-gradient(135deg, #b86020, #8a4010);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 3px solid #6a2800;
+}
+
+.info-box {
+  background: var(--creme);
+  padding: 5px 14px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 80px;
+  border: 2px solid #8a4010;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.info-label {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--marrom);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.info-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #333;
+  line-height: 1.2;
+}
+.info-value.vermelho { color: var(--vermelho); }
+.info-value.verde    { color: var(--verde-escuro); }
+
+.btn {
+  font-family: 'Nunito', cursive;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 2.5px solid;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.3px;
+}
+.btn:hover { transform: scale(1.07) translateY(-2px); }
+.btn:active { transform: scale(0.97); }
+
+.btn-reiniciar {
+  background: #f5c842;
+  border-color: #c8a010;
+  color: var(--marrom-escuro);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.btn-verificar {
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+  border-color: #1b5e20;
+  color: white;
+  box-shadow: 0 4px 12px rgba(46,125,50,0.4);
+}
+.btn-verificar:hover { background: linear-gradient(135deg, #4caf50, #388e3c); }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.ativo { display: flex; }
+
+.modal-box {
+  background: var(--creme);
+  border-radius: 24px;
+  border: 5px solid var(--marrom);
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: modalEntrar 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalEntrar {
+  from { transform: scale(0.7) translateY(40px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--marrom), #5a2800);
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  padding: 16px 24px;
+  border-radius: 18px 18px 0 0;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.modal-corpo {
+  padding: 20px 24px;
+}
+
+.modal-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+.stat-pill {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 16px;
+  font-family: 'Fredoka One', cursive;
+}
+.stat-pill.verde  { background: #e8f5e9; color: var(--verde-escuro); border: 2px solid #a5d6a7; }
+.stat-pill.verm   { background: #ffebee; color: #c62828; border: 2px solid #ffcdd2; }
+
+.resultado-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding-right: 4px;
+}
+
+.resultado-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.resultado-item.ok   { background: #e8f5e9; color: #2e7d32; border: 1.5px solid #a5d6a7; }
+.resultado-item.err  { background: #ffebee; color: #c62828; border: 1.5px solid #ffcdd2; }
+.resultado-item .icone { font-size: 16px; flex-shrink: 0; }
+.resultado-item .detalhe { font-size: 11px; opacity: 0.8; margin-top: 1px; }
+
+.modal-msg-final {
+  text-align: center;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+.modal-msg-final.sucesso { background: #e8f5e9; color: var(--verde-escuro); border: 2px solid #a5d6a7; }
+.modal-msg-final.falha   { background: #fff3e0; color: #e65100; border: 2px solid #ffe0b2; }
+
+.modal-footer {
+  padding: 0 24px 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Modal de confirmação */
+.confirm-box {
+  background: var(--creme);
+  border-radius: 20px;
+  border: 4px solid var(--marrom);
+  max-width: 360px;
+  width: 100%;
+  padding: 28px 28px 24px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  animation: modalEntrar 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.confirm-box h3 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: var(--marrom);
+  margin-bottom: 10px;
+}
+.confirm-box p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.confirm-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #323232;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 4000;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+#toast.verde-bg { background: #2e7d32; }
+#toast.verm-bg  { background: #c62828; }
+#toast.amarelo-bg { background: #f57f17; color: #fff; }
+
+/* Responsivo */
+@media (max-width: 700px) {
+  #titulo { font-size: 22px; padding: 10px; }
+  .baldes-container { gap: 6px; }
+  .rotulo { font-size: 11px; padding: 5px 4px 7px; }
+  .balde-contador { display: none; }
+  .expr-item { font-size: 14px; padding: 7px 11px; }
+  #barra { gap: 6px; }
+  .info-box { min-width: 64px; padding: 4px 8px; }
+  .info-value { font-size: 18px; }
+  .btn { font-size: 12px; padding: 7px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="titulo">🧮 Tudo junto e misturado — Cálculo Mental 🎯</div>
+
+  <div id="expr-area">
+    <div class="expr-subtitulo">📦 Arraste as expressões para os compartimentos corretos</div>
+    <div id="expr-container"></div>
+  </div>
+
+  <div id="baldes-area">
+    <div class="baldes-container" id="baldes-container"></div>
+  </div>
+
+  <div id="barra">
+    <div class="info-box">
+      <div class="info-label">⭐ Fase</div>
+      <div class="info-value" id="vFase">1/4</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">✅ Acertos</div>
+      <div class="info-value verde" id="vAcertos">—</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">❌ Erros</div>
+      <div class="info-value vermelho" id="vErros">—</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">📊 Restantes</div>
+      <div class="info-value" id="vRestantes">20</div>
+    </div>
+    <button class="btn btn-reiniciar" id="btn-reiniciar">🔄 Reiniciar Fase</button>
+    <button class="btn btn-verificar" id="btn-verificar">✅ Verificar</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Modal resultado -->
+<div class="modal-overlay" id="modal-resultado">
+  <div class="modal-box">
+    <div class="modal-header" id="modal-header-txt"></div>
+    <div class="modal-corpo">
+      <div class="modal-stats" id="modal-stats"></div>
+      <div class="resultado-lista" id="modal-lista"></div>
+      <div class="modal-msg-final" id="modal-msg-final"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-reiniciar" id="modal-btn-fechar">Fechar</button>
+      <button class="btn btn-verificar" id="modal-btn-avancar" style="display:none">🚀 Próxima Fase</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmação -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="confirm-box">
+    <h3>🔄 Reiniciar Fase?</h3>
+    <p>Seu progresso atual será perdido.<br>Tem certeza que deseja continuar?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-reiniciar" id="confirm-nao">Cancelar</button>
+      <button class="btn btn-verificar" id="confirm-sim">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fantasma de toque -->
+<div id="touch-ghost"></div>
+
+<script>
+/* ─── DADOS ─────────────────────────────────────────── */
+const BALDES_CFG = [
+  { nome: "1 a 10",   min: 1,  max: 10  },
+  { nome: "11 a 20",  min: 11, max: 20  },
+  { nome: "21 a 50",  min: 21, max: 50  },
+  { nome: "51 a 100", min: 51, max: 100 }
+];
+
+const FASES = [
+  { nome: "Fase 1", itens: [
+    { t:"20 ÷ 10", v:2  }, { t:"100 ÷ 50", v:2  }, { t:"2 + 3",   v:5  },
+    { t:"4 + 5",   v:9  }, { t:"5 × 2",   v:10 }, { t:"11 + 1",  v:12 },
+    { t:"30 ÷ 2",  v:15 }, { t:"4 × 4",   v:16 }, { t:"2 × 8",   v:16 },
+    { t:"60 ÷ 3",  v:20 }, { t:"7 × 3",   v:21 }, { t:"8 × 5",   v:40 },
+    { t:"50 - 1",  v:49 }, { t:"25 + 25", v:50 }, { t:"100 ÷ 2", v:50 },
+    { t:"100 - 49",v:51 }, { t:"12 × 5",  v:60 }, { t:"7 × 9",   v:63 },
+    { t:"9 × 9",   v:81 }, { t:"20 + 70", v:90 }
+  ]},
+  { nome: "Fase 2", itens: [
+    { t:"8 - 2",    v:6  }, { t:"3 × 3",   v:9  }, { t:"18 ÷ 2",  v:9  },
+    { t:"2 × 5",    v:10 }, { t:"20 ÷ 2",  v:10 }, { t:"4 × 3",   v:12 },
+    { t:"8 + 7",    v:15 }, { t:"13 + 4",  v:17 }, { t:"12 + 6",  v:18 },
+    { t:"80 ÷ 4",   v:20 }, { t:"90 ÷ 3",  v:30 }, { t:"15 + 15", v:30 },
+    { t:"7 × 5",    v:35 }, { t:"6 × 6",   v:36 }, { t:"100 - 55",v:45 },
+    { t:"9 × 8",    v:72 }, { t:"8 × 9",   v:72 }, { t:"50 + 25", v:75 },
+    { t:"25 × 3",   v:75 }, { t:"60 + 20", v:80 }
+  ]},
+  { nome: "Fase 3", itens: [
+    { t:"2 × 3",    v:6  }, { t:"12 ÷ 2",   v:6  }, { t:"4 + 2",    v:6  },
+    { t:"3 + 3",    v:6  }, { t:"9 - 3",     v:6  }, { t:"25 - 10",  v:15 },
+    { t:"5 × 3",    v:15 }, { t:"30 ÷ 2",    v:15 }, { t:"12 + 3",   v:15 },
+    { t:"20 - 5",   v:15 }, { t:"8 × 4",     v:32 }, { t:"40 - 8",   v:32 },
+    { t:"16 × 2",   v:32 }, { t:"64 ÷ 2",    v:32 }, { t:"24 + 8",   v:32 },
+    { t:"15 × 5",   v:75 }, { t:"100 - 25",  v:75 }, { t:"50 + 25",  v:75 },
+    { t:"150 ÷ 2",  v:75 }, { t:"25 × 3",    v:75 }
+  ]},
+  { nome: "Fase 4", itens: [
+    // Balde 1 a 10 (5 itens)
+    { t:"1 + 1",    v:2  }, { t:"10 - 3",   v:7  }, { t:"2 × 4",    v:8  },
+    { t:"9 ÷ 3",    v:3  }, { t:"5 + 4",    v:9  },
+    // Balde 11 a 20 (5 itens) - CORRIGIDO: 18÷2 removido, adicionado 18+2
+    { t:"6 + 7",    v:13 }, { t:"20 - 6",   v:14 }, { t:"4 × 4",    v:16 },
+    { t:"18 + 2",   v:20 }, { t:"12 + 5",   v:17 },
+    // Balde 21 a 50 (5 itens)
+    { t:"7 × 4",    v:28 }, { t:"50 - 15",  v:35 }, { t:"9 × 4",    v:36 },
+    { t:"30 + 12",  v:42 }, { t:"100 ÷ 2",  v:50 },
+    // Balde 51 a 100 (5 itens)
+    { t:"8 × 8",    v:64 }, { t:"100 - 30", v:70 }, { t:"12 × 6",   v:72 },
+    { t:"90 + 10",  v:100}, { t:"150 ÷ 2",  v:75 }
+  ]}
+];
+
+/* ─── ESTADO ─────────────────────────────────────────── */
+let faseIdx = 0;
+let disponiveis = [];
+let baldes = [[], [], [], []];
+let totalErros = 0;
+
+/* ─── UTILITÁRIOS ────────────────────────────────────── */
+function getBaldeIdx(v) {
+  if (v >= 1 && v <= 10) return 0;
+  if (v >= 11 && v <= 20) return 1;
+  if (v >= 21 && v <= 50) return 2;
+  if (v >= 51 && v <= 100) return 3;
+  return -1;
+}
+
+let toastTimer = null;
+function toast(msg, tipo='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + (tipo ? tipo+'-bg' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 2400);
+}
+
+/* ─── POSICIONAMENTO (grade + jitter) ────────────────── */
+function posicionar() {
+  const container = document.getElementById('expr-container');
+  const itens = container.querySelectorAll('.expr-item');
+  if (!itens.length) return;
+
+  const W = container.offsetWidth;
+  const H = container.offsetHeight;
+  if (W < 10 || H < 10) { setTimeout(posicionar, 80); return; }
+
+  const PAD = 10;
+  const COLS = Math.min(4, itens.length);
+  const ROWS = Math.ceil(itens.length / COLS);
+  const cellW = (W - PAD * 2) / COLS;
+  const cellH = (H - PAD * 2) / ROWS;
+
+  const medidas = Array.from(itens).map(el => ({
+    el, w: el.offsetWidth || 90, h: el.offsetHeight || 36
+  }));
+
+  const order = [...Array(medidas.length).keys()].sort(() => Math.random() - 0.5);
+
+  order.forEach((origIdx, pos) => {
+    const { el, w, h } = medidas[origIdx];
+    const col = pos % COLS;
+    const row = Math.floor(pos / COLS);
+    const bx = PAD + col * cellW;
+    const by = PAD + row * cellH;
+    const maxJx = Math.max(0, cellW - w - 8);
+    const maxJy = Math.max(0, cellH - h - 8);
+    const x = Math.min(bx + Math.random() * maxJx, W - w - PAD);
+    const y = Math.min(by + Math.random() * maxJy, H - h - PAD);
+    el.style.left = Math.max(PAD, x) + 'px';
+    el.style.top  = Math.max(PAD, y) + 'px';
+  });
+}
+
+/* ─── RENDER ITENS ───────────────────────────────────── */
+function renderItens() {
+  const container = document.getElementById('expr-container');
+  container.innerHTML = '';
+
+  disponiveis.forEach((item) => {
+    const el = document.createElement('div');
+    el.className = 'expr-item';
+    el.textContent = item.t;
+    el.dataset.t = item.t;
+    el.dataset.v = item.v;
+    el.draggable = true;
+    el.addEventListener('dragstart', onDragStart);
+    el.addEventListener('dragend',   onDragEnd);
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    el.addEventListener('touchend',   onTouchEnd,   { passive: false });
+    container.appendChild(el);
+  });
+
+  requestAnimationFrame(() => requestAnimationFrame(posicionar));
+  atualizarRestantes();
+}
+
+/* ─── RENDER BALDES ──────────────────────────────────── */
+function renderBaldes(destacar = false) {
+  baldes.forEach((balde, i) => {
+    const itensEl = document.getElementById(`bitens-${i}`);
+    const rotuloEl = document.getElementById(`brotulo-${i}`);
+    const barraEl = document.getElementById(`bprog-${i}`);
+    if (!itensEl) return;
+
+    itensEl.innerHTML = '';
+    balde.forEach((item, j) => {
+      const div = document.createElement('div');
+      div.className = 'balde-item' + (item._cor ? ' ' + item._cor : '');
+      div.innerHTML = `${item.t} <button class="btn-remover" data-b="${i}" data-j="${j}">✗</button>`;
+      itensEl.appendChild(div);
+    });
+
+    const pct = (balde.length / 5) * 100;
+    if (barraEl) barraEl.style.width = pct + '%';
+    if (rotuloEl) rotuloEl.innerHTML = `📦 ${BALDES_CFG[i].nome} <span class="balde-contador">(${balde.length}/5)</span>`;
+  });
+
+  document.querySelectorAll('.btn-remover').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const b = parseInt(btn.dataset.b);
+      const j = parseInt(btn.dataset.j);
+      const item = baldes[b].splice(j, 1)[0];
+      if (item) {
+        delete item._cor;
+        disponiveis.push(item);
+        renderItens();
+        renderBaldes();
+      }
+    });
+  });
+}
+
+function criarBaldes() {
+  const container = document.getElementById('baldes-container');
+  container.innerHTML = '';
+  BALDES_CFG.forEach((cfg, i) => {
+    const div = document.createElement('div');
+    div.className = 'balde';
+    div.id = `balde-${i}`;
+    div.dataset.idx = i;
+    div.innerHTML = `
+      <div class="balde-itens" id="bitens-${i}"></div>
+      <div class="seta-haste"><div class="seta"></div><div class="haste"></div></div>
+      <div class="rotulo" id="brotulo-${i}">
+        📦 ${cfg.nome} <span class="balde-contador">(0/5)</span>
+        <div class="balde-progresso-wrap"><div class="balde-progresso-bar" id="bprog-${i}"></div></div>
+      </div>`;
+    div.addEventListener('dragover',  e => e.preventDefault());
+    div.addEventListener('dragenter', e => { e.preventDefault(); div.classList.add('drag-over'); });
+    div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+    div.addEventListener('drop',      e => onDrop(e, i));
+    container.appendChild(div);
+  });
+}
+
+function atualizarRestantes() {
+  document.getElementById('vRestantes').textContent = disponiveis.length;
+}
+
+/* ─── DRAG & DROP (mouse) ────────────────────────────── */
+let dragData = null;
+
+function onDragStart(e) {
+  dragData = { t: e.target.dataset.t, v: parseInt(e.target.dataset.v) };
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+}
+
+function onDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.balde').forEach(b => b.classList.remove('drag-over'));
+  dragData = null;
+}
+
+function soltarNoBalde(item, baldeIdx) {
+  // VERIFICAÇÃO CRÍTICA: limite de 5 itens por balde
+  if (baldes[baldeIdx].length >= 5) {
+    toast(`⚠️ Compartimento ${BALDES_CFG[baldeIdx].nome} já está cheio! (5/5)`, 'amarelo');
+    return false;
+  }
+  
+  const idx = disponiveis.findIndex(d => d.t === item.t && d.v === item.v);
+  if (idx === -1) return false;
+  
+  disponiveis.splice(idx, 1);
+  baldes[baldeIdx].push({ t: item.t, v: item.v });
+  renderItens();
+  renderBaldes();
+  return true;
+}
+
+function onDrop(e, baldeIdx) {
+  e.preventDefault();
+  document.getElementById(`balde-${baldeIdx}`).classList.remove('drag-over');
+  let item = dragData;
+  if (!item && e.dataTransfer.getData('text/plain')) {
+    try { item = JSON.parse(e.dataTransfer.getData('text/plain')); } catch(_) {}
+  }
+  if (item) soltarNoBalde(item, baldeIdx);
+}
+
+/* ─── TOUCH ──────────────────────────────────────────── */
+let touchItem = null;
+let touchSrc  = null;
+const ghost   = document.getElementById('touch-ghost');
+
+function onTouchStart(e) {
+  e.preventDefault();
+  const el = e.currentTarget;
+  touchItem = { t: el.dataset.t, v: parseInt(el.dataset.v) };
+  touchSrc  = el;
+  el.classList.add('dragging');
+  ghost.textContent = el.textContent;
+  ghost.style.display = 'block';
+  moverGhost(e.touches[0]);
+}
+
+function moverGhost(touch) {
+  ghost.style.left = (touch.clientX - ghost.offsetWidth / 2) + 'px';
+  ghost.style.top  = (touch.clientY - ghost.offsetHeight / 2 - 20) + 'px';
+}
+
+function onTouchMove(e) {
+  if (!touchItem) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  moverGhost(touch);
+  const els = document.elementsFromPoint(touch.clientX, touch.clientY);
+  document.querySelectorAll('.balde').forEach(b => b.classList.remove('drag-over'));
+  const balde = els.find(el => el.classList && el.classList.contains('balde'));
+  if (balde) balde.classList.add('drag-over');
+}
+
+function onTouchEnd(e) {
+  if (!touchItem) return;
+  e.preventDefault();
+  ghost.style.display = 'none';
+  const touch = e.changedTouches[0];
+  const els = document.elementsFromPoint(touch.clientX, touch.clientY);
+  const baldeEl = els.find(el => el.classList && el.classList.contains('balde'));
+  document.querySelectorAll('.balde').forEach(b => b.classList.remove('drag-over'));
+  if (baldeEl) {
+    soltarNoBalde(touchItem, parseInt(baldeEl.dataset.idx));
+  } else if (touchSrc) {
+    touchSrc.classList.remove('dragging');
+  }
+  touchItem = null;
+  touchSrc  = null;
+}
+
+/* ─── VERIFICAR ──────────────────────────────────────── */
+function verificar() {
+  if (disponiveis.length > 0) {
+    toast(`⚠️ Ainda há ${disponiveis.length} item(ns) para colocar!`, 'amarelo');
+    return;
+  }
+  for (let i = 0; i < 4; i++) {
+    if (baldes[i].length !== 5) {
+      toast(`⚠️ ${BALDES_CFG[i].nome} tem ${baldes[i].length}/5 itens (deveria ter 5)`, 'amarelo');
+      return;
+    }
+  }
+
+  let acertos = 0, erros = 0;
+  const resultados = [];
+
+  baldes.forEach((balde, i) => {
+    balde.forEach(item => {
+      const correto = getBaldeIdx(item.v) === i;
+      item._cor = correto ? 'correto' : 'errado';
+      if (correto) acertos++;
+      else { erros++; totalErros++; }
+      resultados.push({ item, baldeAtual: i, correto });
+    });
+  });
+
+  renderBaldes(true);
+  document.getElementById('vAcertos').textContent = acertos;
+  document.getElementById('vErros').textContent   = erros;
+
+  document.getElementById('modal-header-txt').textContent = erros === 0 ? '🎉 Perfeito!' : '📊 Resultado';
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="stat-pill verde">✅ ${acertos} acertos</div>
+    <div class="stat-pill verm">❌ ${erros} erros</div>`;
+
+  const lista = document.getElementById('modal-lista');
+  lista.innerHTML = '';
+  resultados.forEach(({ item, baldeAtual, correto }) => {
+    const div = document.createElement('div');
+    div.className = 'resultado-item ' + (correto ? 'ok' : 'err');
+    const baldeCorretoNome = BALDES_CFG[getBaldeIdx(item.v)].nome;
+    div.innerHTML = `
+      <span class="icone">${correto ? '✅' : '❌'}</span>
+      <div>
+        <div><strong>${item.t}</strong> = <strong>${item.v}</strong></div>
+        ${!correto ? `<div class="detalhe">Colocado em: ${BALDES_CFG[baldeAtual].nome} → Correto: ${baldeCorretoNome}</div>` : ''}
+      </div>`;
+    lista.appendChild(div);
+  });
+
+  const msgFinal = document.getElementById('modal-msg-final');
+  const btnAvancar = document.getElementById('modal-btn-avancar');
+
+  if (erros === 0) {
+    if (faseIdx < 3) {
+      msgFinal.className = 'modal-msg-final sucesso';
+      msgFinal.textContent = '🚀 Incrível! Preparado para a próxima fase?';
+      btnAvancar.style.display = 'inline-flex';
+    } else {
+      msgFinal.className = 'modal-msg-final sucesso';
+      msgFinal.textContent = `🏆 Você completou todas as fases! Total de erros: ${totalErros}`;
+      btnAvancar.style.display = 'none';
+    }
+  } else {
+    msgFinal.className = 'modal-msg-final falha';
+    msgFinal.textContent = '💡 Corrija os itens em vermelho e tente novamente.';
+    btnAvancar.style.display = 'none';
+  }
+
+  document.getElementById('modal-resultado').classList.add('ativo');
+}
+
+/* ─── CARREGAR FASE ──────────────────────────────────── */
+function carregarFase() {
+  const fase = FASES[faseIdx];
+  disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
+  baldes = [[], [], [], []];
+  document.getElementById('vFase').textContent = `${faseIdx + 1}/4`;
+  document.getElementById('vAcertos').textContent = '—';
+  document.getElementById('vErros').textContent   = '—';
+  renderItens();
+  renderBaldes();
+}
+
+function reiniciarFase() {
+  const fase = FASES[faseIdx];
+  disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
+  baldes = [[], [], [], []];
+  document.getElementById('vAcertos').textContent = '—';
+  document.getElementById('vErros').textContent   = '—';
+  renderItens();
+  renderBaldes();
+}
+
+/* ─── EVENTOS ────────────────────────────────────────── */
+document.getElementById('btn-reiniciar').onclick = () => {
+  document.getElementById('modal-confirm').classList.add('ativo');
+};
+document.getElementById('confirm-nao').onclick = () => {
+  document.getElementById('modal-confirm').classList.remove('ativo');
+};
+document.getElementById('confirm-sim').onclick = () => {
+  document.getElementById('modal-confirm').classList.remove('ativo');
+  reiniciarFase();
+};
+
+document.getElementById('btn-verificar').onclick = verificar;
+
+document.getElementById('modal-btn-fechar').onclick = () => {
+  document.getElementById('modal-resultado').classList.remove('ativo');
+};
+
+document.getElementById('modal-btn-avancar').onclick = () => {
+  document.getElementById('modal-resultado').classList.remove('ativo');
+  faseIdx++;
+  totalErros = 0;
+  carregarFase();
+};
+
+window.addEventListener('resize', () => {
+  if (disponiveis.length > 0) requestAnimationFrame(() => requestAnimationFrame(posicionar));
+});
+
+/* ─── INIT ───────────────────────────────────────────── */
+criarBaldes();
+carregarFase();
+</script>
+</body>
+</html>
