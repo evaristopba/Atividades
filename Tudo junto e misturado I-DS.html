@@ -37,7 +37,7 @@ body {
 
 #game {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   background: var(--amarelo);
   border-radius: 24px;
   border: 6px solid var(--marrom);
@@ -89,33 +89,37 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* ALTURA DA ÁREA DE EXPRESSÕES REDUZIDA */
 #expr-container {
   position: relative;
-  height: 320px;
+  height: 260px;
 }
 
+/* EXPRESSÕES ARRASTÁVEIS - MELHORADAS */
 .expr-item {
   position: absolute;
   background: linear-gradient(145deg, #fffde7, #fff9c4);
-  border: 2.5px solid #f9a825;
-  border-radius: 14px;
-  padding: 9px 16px;
+  border: 3px solid #f9a825;
+  border-radius: 18px;
+  padding: 12px 22px;
   font-family: 'Fredoka One', cursive;
-  font-size: 17px;
+  font-size: 22px;
+  font-weight: bold;
   color: #4a2800;
   cursor: grab;
   user-select: none;
   white-space: nowrap;
-  box-shadow: 3px 4px 10px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow: 4px 5px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
   transition: box-shadow 0.15s, transform 0.15s;
   z-index: 10;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
 }
 
 .expr-item:hover {
-  box-shadow: 4px 6px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow: 5px 7px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.8);
   transform: translateY(-2px) rotate(-1deg);
   z-index: 20;
+  border-color: #e05a00;
 }
 
 .expr-item.dragging {
@@ -133,18 +137,19 @@ body {
   display: none;
   background: linear-gradient(145deg, #fff176, #ffee58);
   border: 3px solid #f9a825;
-  border-radius: 14px;
-  padding: 9px 16px;
+  border-radius: 18px;
+  padding: 12px 22px;
   font-family: 'Fredoka One', cursive;
-  font-size: 17px;
+  font-size: 22px;
+  font-weight: bold;
   color: #4a2800;
-  box-shadow: 6px 8px 20px rgba(0,0,0,0.45);
+  box-shadow: 8px 10px 24px rgba(0,0,0,0.45);
   transform: rotate(3deg) scale(1.1);
   white-space: nowrap;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
 }
 
-/* ÁREA DOS BALDES */
+/* ÁREA DOS BALDES - LARGURA AUMENTADA */
 #baldes-area {
   background: linear-gradient(180deg, #b8e090 0%, #cde898 100%);
   padding: 16px 20px;
@@ -153,11 +158,13 @@ body {
 
 .baldes-container {
   display: flex;
-  gap: 10px;
+  gap: 16px;
+  justify-content: space-between;
 }
 
 .balde {
   flex: 1;
+  min-width: 220px;
   background: linear-gradient(180deg, #e8f5e9 0%, #dcedc8 100%);
   border: 3px solid #a5c770;
   border-radius: 16px;
@@ -185,15 +192,15 @@ body {
   box-shadow: 0 8px 24px rgba(76,175,80,0.35), 0 0 0 3px #ffeb3b;
 }
 
-/* ========== CORREÇÃO VISUAL: ITENS DENTRO DO BALDE ========== */
+/* ITENS DENTRO DO BALDE - MAIS LARGURA */
 .balde-itens {
   flex: 1;
-  padding: 12px;
+  padding: 16px 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-content: flex-start;
-  min-height: 160px;
+  min-height: 170px;
   background: rgba(139, 105, 20, 0.15);
   border-radius: 12px;
   margin: 8px;
@@ -202,18 +209,19 @@ body {
 
 .balde-item {
   background: linear-gradient(135deg, #fffde7, #fff3c4);
-  border: 2px solid #e5a010;
-  border-radius: 12px;
-  padding: 6px 8px 6px 12px;
-  font-size: 13px;
+  border: 2.5px solid #e5a010;
+  border-radius: 14px;
+  padding: 8px 12px 8px 16px;
+  font-size: 18px;
   font-weight: 800;
   font-family: 'Fredoka One', cursive;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 2px 3px 6px rgba(0,0,0,0.2);
+  gap: 10px;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.2);
   color: #4a2800;
   animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
 }
 
 .balde-item.correto {
@@ -232,24 +240,23 @@ body {
   background: #ef5350;
   color: white;
   border: none;
-  border-radius: 20px;
-  width: 22px;
-  height: 22px;
-  font-size: 12px;
+  border-radius: 24px;
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 .btn-remover:hover {
   background: #d32f2f;
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
-/* ========== FIM DA CORREÇÃO VISUAL ========== */
 
 /* Seta e haste */
 .seta-haste {
@@ -348,7 +355,6 @@ body {
 .info-value.vermelho { color: var(--vermelho); }
 .info-value.verde    { color: var(--verde-escuro); }
 
-/* Estilo para o limite de erros */
 .erro-limite {
   color: #e53935;
   font-weight: bold;
@@ -395,6 +401,7 @@ body {
   backdrop-filter: blur(3px);
 }
 .modal-overlay.ativo { display: flex; }
+.modal-overlay.transparente { background: rgba(0,0,0,0.3); backdrop-filter: none; }
 
 .modal-box {
   background: var(--creme);
@@ -497,7 +504,6 @@ body {
   justify-content: center;
 }
 
-/* Modal de confirmação */
 .confirm-box {
   background: var(--creme);
   border-radius: 20px;
@@ -553,17 +559,35 @@ body {
 #toast.verm-bg  { background: #c62828; }
 #toast.amarelo-bg { background: #f57f17; color: #fff; }
 
-/* Responsivo */
+/* Desabilitado para final do jogo */
+.desabilitado {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.desabilitado .expr-item,
+.desabilitado .balde,
+.desabilitado .btn-remover,
+.desabilitado #btn-reiniciar,
+.desabilitado #btn-verificar {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Responsivo - ajuste da altura da área de expressões */
 @media (max-width: 700px) {
   #titulo { font-size: 22px; padding: 10px; }
-  .baldes-container { gap: 6px; }
+  .baldes-container { gap: 8px; }
   .rotulo { font-size: 11px; padding: 5px 4px 7px; }
   .balde-contador { display: none; }
-  .expr-item { font-size: 14px; padding: 7px 11px; }
+  .expr-item { font-size: 18px; padding: 8px 14px; }
+  .balde-item { font-size: 15px; padding: 5px 8px 5px 12px; }
+  .balde { min-width: 160px; }
   #barra { gap: 6px; }
   .info-box { min-width: 64px; padding: 4px 8px; }
   .info-value { font-size: 18px; }
   .btn { font-size: 12px; padding: 7px 12px; }
+  #expr-container { height: 200px; }
 }
 </style>
 </head>
@@ -587,6 +611,10 @@ body {
       <div class="info-value" id="vFase">1/4</div>
     </div>
     <div class="info-box">
+      <div class="info-label">⏱️ Tempo</div>
+      <div class="info-value" id="vTempo">00:00</div>
+    </div>
+    <div class="info-box">
       <div class="info-label">✅ Acertos</div>
       <div class="info-value verde" id="vAcertos">—</div>
     </div>
@@ -603,10 +631,8 @@ body {
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
-<!-- Modal resultado -->
 <div class="modal-overlay" id="modal-resultado">
   <div class="modal-box">
     <div class="modal-header" id="modal-header-txt"></div>
@@ -618,25 +644,18 @@ body {
     <div class="modal-footer">
       <button class="btn btn-reiniciar" id="modal-btn-fechar">Fechar</button>
       <button class="btn btn-verificar" id="modal-btn-avancar" style="display:none">🚀 Próxima Fase</button>
+      <button class="btn btn-verificar" id="modal-btn-reiniciar-total" style="display:none">🔄 Jogar Novamente</button>
     </div>
   </div>
 </div>
 
-<!-- Modal de limite de erros -->
-<div class="modal-overlay" id="modal-limite-erros">
+<div class="modal-overlay transparente" id="modal-limite-erros">
   <div class="modal-box modal-limite">
-    <div class="modal-header vermelho">
-      ⚠️ Limite de Erros Atingido!
-    </div>
+    <div class="modal-header vermelho">⚠️ Limite de Erros Atingido!</div>
     <div class="modal-corpo">
       <div style="text-align: center; font-size: 48px; margin: 16px 0;">😓</div>
-      <div class="modal-msg-final erro-limite" id="modal-limite-msg">
-        Você cometeu muitos erros nesta fase!
-      </div>
-      <p style="text-align: center; margin: 16px 0; color: #555;">
-        Para aprender é importante praticar com calma e atenção.<br>
-        A fase será reiniciada para você tentar novamente.
-      </p>
+      <div class="modal-msg-final erro-limite">Você cometeu muitos erros nesta fase!</div>
+      <p style="text-align: center; margin: 16px 0; color: #555;">A fase será reiniciada para você tentar novamente.</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-verificar" id="modal-limite-fechar">🔁 Fechar e Reiniciar</button>
@@ -644,7 +663,6 @@ body {
   </div>
 </div>
 
-<!-- Modal confirmação -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="confirm-box">
     <h3>🔄 Reiniciar Fase?</h3>
@@ -656,12 +674,11 @@ body {
   </div>
 </div>
 
-<!-- Fantasma de toque -->
 <div id="touch-ghost"></div>
 
 <script>
 /* ─── CONFIGURAÇÕES ──────────────────────────────────── */
-const LIMITE_ERROS = 3;  // Limite máximo de erros por fase
+const LIMITE_ERROS = 3;
 
 /* ─── DADOS ─────────────────────────────────────────── */
 const BALDES_CFG = [
@@ -714,9 +731,53 @@ const FASES = [
 let faseIdx = 0;
 let disponiveis = [];
 let baldes = [[], [], [], []];
-let errosNaFase = 0;      // Contador de erros na fase atual
-let totalErrosGlobal = 0; // Total de erros acumulados (para estatística final)
+let errosNaFase = 0;
+let totalErrosGlobal = 0;
 let reiniciandoPorLimite = false;
+let tempoTotalSegundos = 0;
+let jogoFinalizado = false;
+
+/* ─── CRONÔMETRO ─────────────────────────────────────── */
+let cronometroAtivo = false;
+let cronometroIntervalo = null;
+let tempoSegundos = 0;
+let primeiraMovimentacao = false;
+
+function formatarTempo(segundos) {
+  const mins = Math.floor(segundos / 60);
+  const segs = segundos % 60;
+  return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
+}
+
+function atualizarDisplayTempo() {
+  document.getElementById('vTempo').textContent = formatarTempo(tempoSegundos);
+}
+
+function iniciarCronometro() {
+  if (cronometroAtivo) return;
+  cronometroAtivo = true;
+  cronometroIntervalo = setInterval(() => {
+    if (cronometroAtivo) {
+      tempoSegundos++;
+      atualizarDisplayTempo();
+    }
+  }, 1000);
+}
+
+function pararCronometro() {
+  if (cronometroIntervalo) {
+    clearInterval(cronometroIntervalo);
+    cronometroIntervalo = null;
+  }
+  cronometroAtivo = false;
+}
+
+function resetarCronometro() {
+  pararCronometro();
+  tempoSegundos = 0;
+  primeiraMovimentacao = false;
+  atualizarDisplayTempo();
+}
 
 /* ─── UTILITÁRIOS ────────────────────────────────────── */
 function getBaldeIdx(v) {
@@ -739,7 +800,6 @@ function toast(msg, tipo='') {
 function atualizarInterfaceErros() {
   const elErros = document.getElementById('vErros');
   elErros.textContent = `${errosNaFase}/${LIMITE_ERROS}`;
-  
   if (errosNaFase >= LIMITE_ERROS) {
     elErros.classList.add('erro-limite');
   } else {
@@ -747,33 +807,75 @@ function atualizarInterfaceErros() {
   }
 }
 
+/* ─── FINALIZAR JOGO ─────────────────────────────────── */
+function finalizarJogo() {
+  jogoFinalizado = true;
+  pararCronometro();
+  
+  document.getElementById('game').classList.add('desabilitado');
+  
+  const tempoTotalFormatado = formatarTempo(tempoTotalSegundos);
+  document.getElementById('modal-header-txt').textContent = '🏆 PARABÉNS! 🏆';
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="stat-pill verde">✅ Total de Acertos: 80</div>
+    <div class="stat-pill verm">❌ Total de Erros: ${totalErrosGlobal}</div>
+  `;
+  document.getElementById('modal-lista').innerHTML = '';
+  const msgFinal = document.getElementById('modal-msg-final');
+  msgFinal.className = 'modal-msg-final sucesso';
+  msgFinal.innerHTML = `
+    <div style="font-size: 24px; margin-bottom: 16px;">🎉🎉🎉</div>
+    <div style="font-size: 20px; margin-bottom: 10px;">Você completou todas as fases!</div>
+    <div style="font-size: 28px; color: #2e7d32; margin: 16px 0;">⏱️ Tempo total: ${tempoTotalFormatado}</div>
+    <div>Total de erros: ${totalErrosGlobal}</div>
+  `;
+  
+  const btnAvancar = document.getElementById('modal-btn-avancar');
+  const btnReiniciarTotal = document.getElementById('modal-btn-reiniciar-total');
+  btnAvancar.style.display = 'none';
+  btnReiniciarTotal.style.display = 'inline-flex';
+  
+  document.getElementById('modal-resultado').classList.add('ativo');
+}
+
+/* ─── REINICIAR JOGO COMPLETO ────────────────────────── */
+function reiniciarJogoCompleto() {
+  faseIdx = 0;
+  totalErrosGlobal = 0;
+  tempoTotalSegundos = 0;
+  jogoFinalizado = false;
+  
+  document.getElementById('game').classList.remove('desabilitado');
+  carregarFase();
+  document.getElementById('modal-resultado').classList.remove('ativo');
+  toast(`🔄 Jogo reiniciado! Boa sorte!`, 'verde');
+}
+
 /* ─── REINICIAR FASE (por limite de erros) ───────────── */
 function reiniciarFasePorLimite() {
-  if (reiniciandoPorLimite) return;
+  if (reiniciandoPorLimite || jogoFinalizado) return;
   reiniciandoPorLimite = true;
-  
-  // Fecha qualquer modal aberto
   document.getElementById('modal-resultado').classList.remove('ativo');
-  
-  // Mostra modal de limite de erros
-  const modalLimite = document.getElementById('modal-limite-erros');
-  modalLimite.classList.add('ativo');
+  document.getElementById('modal-limite-erros').classList.add('ativo');
 }
 
 function executarReinicioPorLimite() {
+  if (jogoFinalizado) return;
   const fase = FASES[faseIdx];
   disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
   baldes = [[], [], [], []];
   errosNaFase = 0;
   atualizarInterfaceErros();
   document.getElementById('vAcertos').textContent = '—';
+  resetarCronometro();
   renderItens();
   renderBaldes();
   reiniciandoPorLimite = false;
 }
 
-/* ─── POSICIONAMENTO (grade + jitter) ────────────────── */
+/* ─── POSICIONAMENTO ─────────────────────────────────── */
 function posicionar() {
+  if (jogoFinalizado) return;
   const container = document.getElementById('expr-container');
   const itens = container.querySelectorAll('.expr-item');
   if (!itens.length) return;
@@ -811,6 +913,7 @@ function posicionar() {
 
 /* ─── RENDER ITENS ───────────────────────────────────── */
 function renderItens() {
+  if (jogoFinalizado) return;
   const container = document.getElementById('expr-container');
   container.innerHTML = '';
 
@@ -835,6 +938,7 @@ function renderItens() {
 
 /* ─── RENDER BALDES ──────────────────────────────────── */
 function renderBaldes(destacar = false) {
+  if (jogoFinalizado) return;
   baldes.forEach((balde, i) => {
     const itensEl = document.getElementById(`bitens-${i}`);
     const rotuloEl = document.getElementById(`brotulo-${i}`);
@@ -857,6 +961,7 @@ function renderBaldes(destacar = false) {
   document.querySelectorAll('.btn-remover').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (jogoFinalizado) return;
       const b = parseInt(btn.dataset.b);
       const j = parseInt(btn.dataset.j);
       const item = baldes[b].splice(j, 1)[0];
@@ -894,13 +999,23 @@ function criarBaldes() {
 }
 
 function atualizarRestantes() {
-  document.getElementById('vRestantes').textContent = disponiveis.length;
+  if (!jogoFinalizado) {
+    document.getElementById('vRestantes').textContent = disponiveis.length;
+  }
 }
 
 /* ─── DRAG & DROP (mouse) ────────────────────────────── */
 let dragData = null;
 
 function onDragStart(e) {
+  if (jogoFinalizado) {
+    e.preventDefault();
+    return false;
+  }
+  if (!primeiraMovimentacao) {
+    primeiraMovimentacao = true;
+    iniciarCronometro();
+  }
   dragData = { t: e.target.dataset.t, v: parseInt(e.target.dataset.v) };
   e.target.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
@@ -908,20 +1023,20 @@ function onDragStart(e) {
 }
 
 function onDragEnd(e) {
+  if (jogoFinalizado) return;
   e.target.classList.remove('dragging');
   document.querySelectorAll('.balde').forEach(b => b.classList.remove('drag-over'));
   dragData = null;
 }
 
 function soltarNoBalde(item, baldeIdx) {
+  if (jogoFinalizado) return false;
   if (baldes[baldeIdx].length >= 5) {
     toast(`⚠️ Compartimento ${BALDES_CFG[baldeIdx].nome} já está cheio! (5/5)`, 'amarelo');
     return false;
   }
-  
   const idx = disponiveis.findIndex(d => d.t === item.t && d.v === item.v);
   if (idx === -1) return false;
-  
   disponiveis.splice(idx, 1);
   baldes[baldeIdx].push({ t: item.t, v: item.v });
   renderItens();
@@ -930,6 +1045,7 @@ function soltarNoBalde(item, baldeIdx) {
 }
 
 function onDrop(e, baldeIdx) {
+  if (jogoFinalizado) return;
   e.preventDefault();
   document.getElementById(`balde-${baldeIdx}`).classList.remove('drag-over');
   let item = dragData;
@@ -945,8 +1061,16 @@ let touchSrc  = null;
 const ghost   = document.getElementById('touch-ghost');
 
 function onTouchStart(e) {
+  if (jogoFinalizado) {
+    e.preventDefault();
+    return;
+  }
   e.preventDefault();
   const el = e.currentTarget;
+  if (!primeiraMovimentacao) {
+    primeiraMovimentacao = true;
+    iniciarCronometro();
+  }
   touchItem = { t: el.dataset.t, v: parseInt(el.dataset.v) };
   touchSrc  = el;
   el.classList.add('dragging');
@@ -961,7 +1085,7 @@ function moverGhost(touch) {
 }
 
 function onTouchMove(e) {
-  if (!touchItem) return;
+  if (!touchItem || jogoFinalizado) return;
   e.preventDefault();
   const touch = e.touches[0];
   moverGhost(touch);
@@ -972,7 +1096,7 @@ function onTouchMove(e) {
 }
 
 function onTouchEnd(e) {
-  if (!touchItem) return;
+  if (!touchItem || jogoFinalizado) return;
   e.preventDefault();
   ghost.style.display = 'none';
   const touch = e.changedTouches[0];
@@ -990,8 +1114,9 @@ function onTouchEnd(e) {
 
 /* ─── VERIFICAR ──────────────────────────────────────── */
 function verificar() {
-  if (reiniciandoPorLimite) return;
-  
+  if (reiniciandoPorLimite || jogoFinalizado) return;
+  pararCronometro();
+
   if (disponiveis.length > 0) {
     toast(`⚠️ Ainda há ${disponiveis.length} item(ns) para colocar!`, 'amarelo');
     return;
@@ -1025,63 +1150,71 @@ function verificar() {
   renderBaldes(true);
   document.getElementById('vAcertos').textContent = acertos;
 
-  // VERIFICA SE ULTRAPASSOU O LIMITE
   if (errosNaFase > LIMITE_ERROS) {
     document.getElementById('modal-resultado').classList.remove('ativo');
     reiniciarFasePorLimite();
     return;
   }
 
-  // Monta modal normalmente
-  document.getElementById('modal-header-txt').textContent = erros === 0 ? '🎉 Perfeito!' : '📊 Resultado';
-  document.getElementById('modal-stats').innerHTML = `
-    <div class="stat-pill verde">✅ ${acertos} acertos</div>
-    <div class="stat-pill verm">❌ ${erros} erros</div>`;
-
-  const lista = document.getElementById('modal-lista');
-  lista.innerHTML = '';
-  resultados.forEach(({ item, baldeAtual, correto }) => {
-    const div = document.createElement('div');
-    div.className = 'resultado-item ' + (correto ? 'ok' : 'err');
-    const baldeCorretoNome = BALDES_CFG[getBaldeIdx(item.v)].nome;
-    div.innerHTML = `
-      <span class="icone">${correto ? '✅' : '❌'}</span>
-      <div>
-        <div><strong>${item.t}</strong> = <strong>${item.v}</strong></div>
-        ${!correto ? `<div class="detalhe">Colocado em: ${BALDES_CFG[baldeAtual].nome} → Correto: ${baldeCorretoNome}</div>` : ''}
-      </div>`;
-    lista.appendChild(div);
-  });
-
-  const msgFinal = document.getElementById('modal-msg-final');
-  const btnAvancar = document.getElementById('modal-btn-avancar');
-
+  const tempoGasto = formatarTempo(tempoSegundos);
+  
   if (erros === 0) {
+    tempoTotalSegundos += tempoSegundos;
+    
     if (faseIdx < 3) {
+      document.getElementById('modal-header-txt').textContent = '🎉 Perfeito!';
+      document.getElementById('modal-stats').innerHTML = `
+        <div class="stat-pill verde">✅ ${acertos} acertos</div>
+        <div class="stat-pill verm">❌ ${erros} erros</div>`;
+      document.getElementById('modal-lista').innerHTML = '';
+      const msgFinal = document.getElementById('modal-msg-final');
       msgFinal.className = 'modal-msg-final sucesso';
-      msgFinal.textContent = `🚀 Incrível! Você acertou tudo! Preparado para a próxima fase? (Erros nesta fase: ${errosNaFase}/${LIMITE_ERROS})`;
-      btnAvancar.style.display = 'inline-flex';
+      msgFinal.textContent = `🚀 Incrível! Você acertou tudo em ${tempoGasto}! Preparado para a próxima fase? (Erros nesta fase: ${errosNaFase}/${LIMITE_ERROS})`;
+      document.getElementById('modal-btn-avancar').style.display = 'inline-flex';
+      document.getElementById('modal-btn-reiniciar-total').style.display = 'none';
+      document.getElementById('modal-resultado').classList.add('ativo');
     } else {
-      msgFinal.className = 'modal-msg-final sucesso';
-      msgFinal.textContent = `🏆 Parabéns! Você completou todas as fases! Total de erros acumulados: ${totalErrosGlobal}`;
-      btnAvancar.style.display = 'none';
+      finalizarJogo();
     }
   } else {
+    document.getElementById('modal-header-txt').textContent = '📊 Resultado';
+    document.getElementById('modal-stats').innerHTML = `
+      <div class="stat-pill verde">✅ ${acertos} acertos</div>
+      <div class="stat-pill verm">❌ ${erros} erros</div>`;
+
+    const lista = document.getElementById('modal-lista');
+    lista.innerHTML = '';
+    resultados.forEach(({ item, baldeAtual, correto }) => {
+      const div = document.createElement('div');
+      div.className = 'resultado-item ' + (correto ? 'ok' : 'err');
+      const baldeCorretoNome = BALDES_CFG[getBaldeIdx(item.v)].nome;
+      div.innerHTML = `
+        <span class="icone">${correto ? '✅' : '❌'}</span>
+        <div>
+          <div><strong>${item.t}</strong> = <strong>${item.v}</strong></div>
+          ${!correto ? `<div class="detalhe">Colocado em: ${BALDES_CFG[baldeAtual].nome} → Correto: ${baldeCorretoNome}</div>` : ''}
+        </div>`;
+      lista.appendChild(div);
+    });
+
+    const msgFinal = document.getElementById('modal-msg-final');
     const restantes = LIMITE_ERROS - errosNaFase;
     msgFinal.className = 'modal-msg-final falha';
-    msgFinal.textContent = `💡 Você cometeu ${erros} erro(s) nesta verificação. Ainda pode errar ${restantes} vez(es) antes da fase reiniciar. Corrija os itens em vermelho e tente novamente.`;
-    btnAvancar.style.display = 'none';
+    msgFinal.textContent = `💡 Você cometeu ${erros} erro(s) nesta verificação (tempo: ${tempoGasto}). Ainda pode errar ${restantes} vez(es) antes da fase reiniciar. Corrija os itens em vermelho e tente novamente.`;
+    document.getElementById('modal-btn-avancar').style.display = 'none';
+    document.getElementById('modal-btn-reiniciar-total').style.display = 'none';
+    document.getElementById('modal-resultado').classList.add('ativo');
   }
-
-  document.getElementById('modal-resultado').classList.add('ativo');
 }
 
 /* ─── CARREGAR FASE ──────────────────────────────────── */
 function carregarFase() {
+  if (jogoFinalizado) return;
   const fase = FASES[faseIdx];
   disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
   baldes = [[], [], [], []];
   errosNaFase = 0;
+  resetarCronometro();
   document.getElementById('vFase').textContent = `${faseIdx + 1}/4`;
   document.getElementById('vAcertos').textContent = '—';
   atualizarInterfaceErros();
@@ -1090,10 +1223,12 @@ function carregarFase() {
 }
 
 function reiniciarFaseManual() {
+  if (jogoFinalizado) return;
   const fase = FASES[faseIdx];
   disponiveis = fase.itens.map(i => ({ t: i.t, v: i.v }));
   baldes = [[], [], [], []];
   errosNaFase = 0;
+  resetarCronometro();
   document.getElementById('vAcertos').textContent = '—';
   atualizarInterfaceErros();
   renderItens();
@@ -1103,6 +1238,7 @@ function reiniciarFaseManual() {
 
 /* ─── EVENTOS ────────────────────────────────────────── */
 document.getElementById('btn-reiniciar').onclick = () => {
+  if (jogoFinalizado) return;
   document.getElementById('modal-confirm').classList.add('ativo');
 };
 document.getElementById('confirm-nao').onclick = () => {
@@ -1112,27 +1248,27 @@ document.getElementById('confirm-sim').onclick = () => {
   document.getElementById('modal-confirm').classList.remove('ativo');
   reiniciarFaseManual();
 };
-
-document.getElementById('btn-verificar').onclick = verificar;
-
+document.getElementById('btn-verificar').onclick = () => {
+  if (jogoFinalizado) return;
+  verificar();
+};
 document.getElementById('modal-btn-fechar').onclick = () => {
   document.getElementById('modal-resultado').classList.remove('ativo');
 };
-
 document.getElementById('modal-btn-avancar').onclick = () => {
   document.getElementById('modal-resultado').classList.remove('ativo');
   faseIdx++;
   carregarFase();
 };
-
-// Modal de limite de erros
+document.getElementById('modal-btn-reiniciar-total').onclick = () => {
+  reiniciarJogoCompleto();
+};
 document.getElementById('modal-limite-fechar').onclick = () => {
   document.getElementById('modal-limite-erros').classList.remove('ativo');
   executarReinicioPorLimite();
 };
-
 window.addEventListener('resize', () => {
-  if (disponiveis.length > 0) requestAnimationFrame(() => requestAnimationFrame(posicionar));
+  if (disponiveis.length > 0 && !jogoFinalizado) requestAnimationFrame(() => requestAnimationFrame(posicionar));
 });
 
 /* ─── INIT ───────────────────────────────────────────── */
