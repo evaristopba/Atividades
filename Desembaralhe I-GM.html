@@ -6,62 +6,46 @@
     <style>
         :root { --bo: #e67e22; --dr: #5d1a04; --pu: #7d3cff; --lp: #bb8fce; --ye: #f1c40f; --wh: #fff; --fb: #fcd670; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        
-        #game-container { 
-            width: 100%; max-width: 420px; height: 95vh; background: var(--bo); 
-            border: 4px solid #000; display: flex; flex-direction: column; 
-            position: relative; overflow: hidden; 
-        }
-
-        /* CONFIGURAÇÃO DAS TELAS (OVERLAYS) */
-        .ov { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 100; display: none; /* Inicia tudo escondido */
-            flex-direction: column; padding: 20px; box-sizing: border-box; 
-        }
-        
-        /* TELA INICIAL - Única que inicia visível */
+        #game-container { width: 100%; max-width: 420px; height: 95vh; background: var(--bo); border: 4px solid #000; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .ov { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; }
         #start-screen { background: var(--dr); color: var(--wh); display: flex; }
-        
         #dict-modal { background: #2c3e50; color: var(--wh); z-index: 150; }
         #crash-ov { background: rgba(0,0,0,0.95); justify-content: center; align-items: center; text-align: center; color: var(--wh); }
-
         .dict-content { flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.1); }
         .dict-content::-webkit-scrollbar { width: 8px; }
         .dict-content::-webkit-scrollbar-thumb { background: var(--ye); border-radius: 4px; }
-
         .card { background: rgba(255,255,255,0.1); border-left: 5px solid var(--ye); padding: 10px; margin-bottom: 10px; font-size: 14px; }
         .term { background: var(--wh); color: #333; border-radius: 8px; padding: 8px; margin-bottom: 8px; border-left: 5px solid var(--pu); font-size: 13px; }
         .term b { color: var(--pu); display: block; margin-bottom: 2px; }
-        
         .btn { background: var(--ye); color: var(--dr); border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 10px; cursor: pointer; text-transform: uppercase; flex-shrink: 0; box-shadow: 0 4px #b8950c; }
         .btn-dict { background: var(--pu); color: #wh; padding: 10px; font-size: 14px; margin-bottom: 15px; border:none; border-radius:5px; cursor:pointer; font-weight: bold;}
-        
         header { background: var(--dr); color: var(--ye); text-align: center; padding: 15px; font-size: 24px; font-weight: bold; border-bottom: 3px solid #000; }
         .lives { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 20px; }
         .lost { opacity: 0.2; filter: grayscale(1); }
         .box { background: var(--wh); margin: 10px 20px; padding: 35px 10px; border-radius: 15px; text-align: center; font-size: 32px; font-weight: bold; box-shadow: 0 5px #888; color: #333; }
-        
         .stats { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 5px 0; }
         .circ { width: 80px; height: 80px; background: var(--pu); border-radius: 50%; border: 3px solid #333; color: #wh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .hexa { width: 70px; height: 80px; background: var(--lp); clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); border: 3px solid var(--ye); display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dr); font-size: 20px; }
-        
         .opts { display: flex; flex-direction: column; gap: 8px; padding: 10px 25px; flex-grow: 1; overflow-y: auto; }
-        .opt { background: var(--wh); border: 2px solid #ddd; padding: 14px; border-radius: 18px; font-size: 19px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #999; color: #333; flex-shrink: 0; }
+        .opt { background: var(--wh); border: 2px solid #ddd; padding: 14px; border-radius: 18px; font-size: 19px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #999; color: #333; flex-shrink: 0; transition: background 0.2s; }
         
+        /* Classes de Feedback */
+        .opt.correct { background: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
+        .opt.wrong { background: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
+        .opts.disabled { pointer-events: none; } /* Trava de cliques */
+
         footer { background: var(--dr); display: flex; justify-content: space-between; align-items: center; padding: 8px; border-top: 3px solid #000; }
         .f-box { background: var(--fb); border: 2px solid #000; padding: 4px; text-align: center; min-width: 80px; }
         .f-lab { font-size: 9px; color: #4a148c; font-weight: bold; border-bottom: 1px solid #4a148c; }
         .f-val { font-size: 15px; color: #4a148c; font-weight: bold; font-family: monospace; }
-        
         .cracks { position: absolute; top:0; left:0; width:100%; height:100%; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 L150 150 L100 250 L300 200 L400 350 L500 300 M250 0 L200 150 L350 250 L150 400 L200 500' stroke='white' stroke-width='3' opacity='0.5' fill='none'/%3E%3C/svg%3E") center/cover; pointer-events:none; }
         .shake { animation: sk 0.4s ease-in-out; }
         @keyframes sk { 0%,100%{transform:translateX(0)} 25% {transform:translateX(-10px)} 75% {transform:translateX(10px)} }
+        a { color: var(--ye); text-decoration: none; font-size: 11px; }
     </style>
 </head>
 <body>
 <div id="game-container">
-    <!-- Dicionário -->
     <div id="dict-modal" class="ov">
         <h2 style="color:var(--ye);text-align:center;margin-top:0;">📖 DICIONÁRIO TECH</h2>
         <div class="dict-content">
@@ -74,36 +58,22 @@
             <div class="term"><b>AVATAR:</b> Sua foto ou personagem no mundo digital.</div>
             <div class="term"><b>VÍRUS:</b> Programa perigoso que tenta estragar o sistema.</div>
             <div class="term"><b>HACKER:</b> Alguém que estuda muito como os sistemas funcionam.</div>
-            <div class="term"><b>SENHA:</b> Sua chave secreta para proteger suas coisas.</div>
-            <div class="term"><b>LINK:</b> Um endereço que te leva para outro lugar na rede.</div>
             <div class="term"><b>BACKUP:</b> Uma cópia de segurança para não perder arquivos.</div>
-            <div class="term"><b>PIXELS:</b> Pontinhos minúsculos que formam a imagem na tela.</div>
-            <div class="term"><b>SERVIDOR:</b> Computador que guarda os dados de sites e apps.</div>
-            <div class="term"><b>PROCESSADOR:</b> O cérebro que processa as informações.</div>
-            <div class="term"><b>MEMÓRIA:</b> Lugar onde o computador guarda dados.</div>
-            <div class="term"><b>DECOMPOSIÇÃO:</b> Dividir um problema em partes pequenas.</div>
-            <div class="term"><b>REDE SOCIAL:</b> Onde as pessoas se conectam na internet.</div>
-            <div class="term"><b>PASTA/ARQUIVO:</b> Como organizamos documentos no PC.</div>
-            <div class="term"><b>NUVEM:</b> Guardar arquivos na internet, fora do seu computador.</div>
-            <div class="term"><b>UPLOAD:</b> Enviar arquivos do seu PC para a internet.</div>
-            <div class="term"><b>DOWNLOAD:</b> Baixar arquivos da internet para o seu PC.</div>
-            <div class="term"><b>LOOP:</b> Uma repetição de comandos no código.</div>
-            <div class="term"><b>ABSTRAÇÃO:</b> Focar no que é importante para resolver algo.</div>
+            <div class="term"><b>NUVEM:</b> Guardar arquivos na internet para acessar de qualquer lugar.</div>
         </div>
         <button class="btn" onclick="toggleD(0)">Voltar ao Manual</button>
     </div>
 
-    <!-- Tela Inicial -->
     <div id="start-screen" class="ov">
         <h2 style="color:var(--ye);text-align:center">MISSÃO PROGRAMADOR</h2>
         <button class="btn-dict" onclick="toggleD(1)">📖 Estudar Dicionário Tech</button>
-        <div class="card"><b>🔍 PADRÕES:</b> Encontre a palavra certa nas letras.</div>
-        <div class="card"><b>🧩 DECOMPOSIÇÃO:</b> Analise a palavra por pedaços.</div>
-        <div class="card"><b>❤️ VIDAS:</b> 5 chances. Jogue com atenção!</div>
+        <div class="card"><b>🔍 PADRÕES:</b> Observe as letras e ache a palavra.</div>
+        <div class="card"><b>🧩 DECOMPOSIÇÃO:</b> Leia a palavra em partes menores.</div>
+        <div class="card"><b>❤️ VIDAS:</b> 5 chances. 10 acertos seguidos ganha vida!</div>
+        <div style="text-align:center; margin-top:5px;"><a href="https://crix.com.br/games/game2/182" target="_blank">Inspirado em: crix.com.br</a></div>
         <button class="btn" onclick="start()">Iniciar Sistema</button>
     </div>
 
-    <!-- Tela de Crash -->
     <div id="crash-ov" class="ov"><div class="cracks"></div><h1 style="font-size:32px;text-shadow:2px 2px #000">SYSTEM CRASH</h1><button class="btn" style="background:#e74c3c;color:#fff;box-shadow:0 0 15px #fff" onclick="location.reload()">REBOOT</button></div>
 
     <header>Desembaralhe</header>
@@ -111,62 +81,84 @@
     <div id="game-content" style="display:contents">
         <div class="lives" id="l-bar"><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span></div>
         <div class="box" id="scrambled-word">...</div>
-        <div class="stats">
-            <div class="circ"><span id="points" style="font-size:20px;border-bottom:2px solid #fff;font-weight:bold">0</span><span id="c-idx" style="font-size:18px">1</span></div>
-            <div style="font-size:30px;color:var(--dr)">↔</div>
-            <div class="hexa">100</div>
-        </div>
+        <div class="stats"><div class="circ"><span id="points" style="font-size:20px;border-bottom:2px solid #fff;font-weight:bold">0</span><span id="c-idx" style="font-size:18px">1</span></div><div style="font-size:30px;color:var(--dr)">↔</div><div class="hexa">100</div></div>
         <div class="opts" id="options"></div>
     </div>
 
     <footer>
-        <div onclick="location.reload()" style="cursor:pointer;color:#fff;text-align:center"><div style="background:#839c14;border-radius:50%;width:35px;height:35px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:20px">🏃</div>SAIR</div>
+        <div onclick="location.reload()" style="cursor:pointer;color:#fff;text-align:center">
+            <div style="background:#839c14;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:18px">🏃</div>SAIR
+        </div>
         <div class="f-box"><div class="f-lab">TEMPO</div><div id="timer" class="f-val">00:00</div></div>
         <div class="f-box"><div class="f-lab">ACERTOS</div><div id="hits" class="f-val">0</div></div>
+        <div style="text-align:center"><a href="https://crix.com.br/games/game2/182" target="_blank" style="font-size:9px">INSPIRADO EM:<br>CRIX GAMES</a></div>
         <div class="f-box"><div class="f-lab">VIDAS</div><div id="v-count" class="f-val">5</div></div>
     </footer>
 </div>
 
 <script>
     const db = ["osso","ganso","novembro","isso","lado","engenheiro","fungo","tinta","ponto","mão","bug","dado","rede","robô","loop","código","lógica","binário","padrão","senha","etapas","mouse","algoritmo","sequência","programar","hardware","software","problema","internet","abstração","clicar","salvar","excluir","colar","digitar","teclado","monitor","tablet","cabo","chip","bateria","pasta","arquivo","nuvem","pixels","bit","byte","servidor","wifi","sistema","avatar","emoji","vírus","hacker","perfil","login","drone","sensor","robótica","satélite","ia","zoom","scroll","backup","upload","download","mágica","desafio","solução","ideia"];
-    
     let list=[], idx=0, hits=0, lives=5, streak=0, points=0, time, timer;
     const $ = id => document.getElementById(id);
     const shuffle = a => a.sort(() => Math.random() - 0.5);
-    
-    // Função corrigida para abrir/fechar dicionário
     const toggleD = s => $("dict-modal").style.display = s ? 'flex' : 'none';
-
     const scramble = w => { let s; do { s = shuffle(w.split('')).join(''); } while (s === w && w.length > 1); return s; };
 
-    function start() { 
-        $("start-screen").style.display='none'; 
-        list=shuffle([...db]); 
-        load(); 
-    }
+    function start() { $("start-screen").style.display='none'; list=shuffle([...db]); load(); }
 
     function load() {
         if (idx >= list.length) return finish();
-        const cor = list[idx]; $("scrambled-word").innerText = scramble(cor)+"?"; $("c-idx").innerText = idx+1;
+        $("options").classList.remove('disabled'); // Reativa cliques
+        const cor = list[idx]; 
+        $("scrambled-word").innerText = scramble(cor)+"?"; 
+        $("c-idx").innerText = idx+1;
+        
         let dist = shuffle(db.filter(w=>w!==cor)).slice(0,3);
         let opts = shuffle([cor, ...dist]);
+        
         $("options").innerHTML = '';
         opts.forEach(o => { 
-            const b = document.createElement('button'); b.className='opt'; b.innerText=o; 
-            b.onclick=()=>check(o,cor); $("options").appendChild(b); 
+            const b = document.createElement('button'); 
+            b.className='opt'; 
+            b.innerText=o; 
+            b.onclick=(e)=>check(e.target, cor); 
+            $("options").appendChild(b); 
         });
     }
 
-    function check(s, c) {
-        if (!time) { time=Date.now(); timer=setInterval(()=> { let d=Date.now()-time; $("timer").innerText=new Date(d).toISOString().substr(14,5); },1000); }
-        if (s===c) { 
-            hits++; points+=100; streak++; 
-            if(streak===10 && lives<5) { lives++; streak=0; upL(); } 
-        } else { 
-            lives--; streak=0; upL(); 
-            if(lives<=0) return crash(); 
+    function check(btn, correct) {
+        // Trava os cliques imediatamente para evitar o "heavy click"
+        $("options").classList.add('disabled');
+        
+        if (!time) { 
+            time=Date.now(); 
+            timer=setInterval(()=> { 
+                let d=Date.now()-time; 
+                $("timer").innerText=new Date(d).toISOString().substr(14,5); 
+            },1000); 
         }
-        idx++; load(); $("hits").innerText=hits; $("points").innerText=points;
+
+        const isCorrect = btn.innerText === correct;
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            hits++; points+=100; streak++;
+            if(streak===10 && lives<5) { lives++; streak=0; upL(); }
+        } else {
+            btn.classList.add('wrong');
+            // Opcional: mostrar qual era a correta se quiser ser mais pedagógico
+            lives--; streak=0; upL();
+        }
+
+        $("hits").innerText=hits;
+        $("points").innerText=points;
+
+        // Aguarda 600ms antes de carregar a próxima para o aluno ver o resultado e soltar o dedo
+        setTimeout(() => {
+            if (lives <= 0) return crash();
+            idx++;
+            load();
+        }, 600);
     }
 
     function upL() { 
@@ -176,15 +168,12 @@
 
     function crash() { 
         clearInterval(timer); $("game-container").classList.add('shake'); 
-        setTimeout(()=> { 
-            $("crash-ov").style.display='flex'; 
-            $("game-container").classList.remove('shake'); 
-        }, 500); 
+        setTimeout(()=> { $("crash-ov").style.display='flex'; $("game-container").classList.remove('shake'); }, 500); 
     }
 
     function finish() { 
         clearInterval(timer); 
-        $("game-content").innerHTML=`<div style="text-align:center;padding:50px;color:#fff"><h2>SISTEMA RESTAURADO! 🚀</h2><p>Parabéns, Programador!</p><button class="btn" onclick="location.reload()">JOGAR NOVAMENTE</button></div>`; 
+        $("game-content").innerHTML=`<div style="text-align:center;padding:40px;color:#fff"><h2>SISTEMA RESTAURADO! 🚀</h2><p>Parabéns, Programador!</p><p style="font-size:12px">Inspirado em: <a href="https://crix.com.br/games/game2/182" target="_blank">crix.com.br</a></p><button class="btn" onclick="location.reload()">JOGAR NOVAMENTE</button></div>`; 
     }
 </script>
 </body>
