@@ -79,7 +79,7 @@
             border-radius: 30px;
         }
 
-        .score-area, .counter-area, .errors-area {
+        .score-area, .errors-area {
             background: #fff0d0;
             padding: 3px 10px;
             border-radius: 25px;
@@ -88,13 +88,37 @@
             color: #5a3a22;
         }
 
-        .score-area span, .counter-area span, .errors-area span {
+        /* CONTADOR DE TELAS - VISUAL MELHORADO */
+        .counter-area {
+            background: #ffd966;
+            padding: 3px 12px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #3b2a1a;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .counter-area span {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #2c5a0c;
+        }
+
+        /* Animação quando completa uma tela */
+        .counter-area.bling {
+            background: #ffaa33;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px gold;
+        }
+
+        .score-area span, .errors-area span {
             font-size: 1rem;
             font-weight: bold;
         }
 
         .score-area span { color: #e67e22; }
-        .counter-area span { color: #2c5a0c; }
         .errors-area span { color: #c0392b; }
 
         .errors-bar-container {
@@ -340,6 +364,7 @@
             .num { width: 42px; height: 42px; font-size: 1.1rem; }
             .field-label { font-size: 0.55rem; }
             .plus-sign, .equal-sign { font-size: 1.1rem; }
+            .counter-area { font-size: 0.7rem; padding: 3px 8px; }
         }
     </style>
 </head>
@@ -357,7 +382,7 @@
         <div class="top-bar">
             <div class="score-area">⭐ <span id="scoreValue">0</span> / <span id="totalFields">12</span></div>
             <div class="errors-area">❌ Erros: <span id="errorsValue">0</span> / 4</div>
-            <div class="counter-area">📋 Telas: <span id="screenCounter">0</span></div>
+            <div class="counter-area">🏆 Telas completas: <span id="screenCounter">0</span></div>
         </div>
 
         <div class="errors-bar-container">
@@ -458,6 +483,7 @@
     const starsDisplay = document.getElementById('starsDisplay');
     const screenCounterSpan = document.getElementById('screenCounter');
     const scrollArea = document.getElementById('scrollArea');
+    const counterArea = document.querySelector('.counter-area');
 
     function getAnimalAleatorio() {
         return ANIMAIS[Math.floor(Math.random() * ANIMAIS.length)];
@@ -466,7 +492,6 @@
     function criarGrupoAnimal(animal, quantidade) {
         const container = document.createElement('div');
         container.className = 'animal-icons';
-        // Mostra todas as imagens, sem "xN" (pode quebrar linha, mas é melhor para o aprendizado)
         for (let i = 0; i < quantidade; i++) {
             const img = document.createElement('img');
             img.src = animal.img;
@@ -481,18 +506,12 @@
         return container;
     }
 
-    // ============================================================
-    // FUNÇÃO CORRIGIDA: totais variados (não apenas o limite)
-    // ============================================================
     function gerarSoma() {
         const animal1 = getAnimalAleatorio();
         let animal2 = getAnimalAleatorio();
         while (animal2.nome === animal1.nome) animal2 = getAnimalAleatorio();
         
-        // Sorteia um total ALEATÓRIO entre 2 e MAX_SUM
         const total = Math.floor(Math.random() * (MAX_SUM - 1)) + 2;
-        
-        // Sorteia q1 entre 1 e total-1
         let q1 = Math.floor(Math.random() * (total - 1)) + 1;
         let q2 = total - q1;
         
@@ -535,11 +554,9 @@
     function atualizarBarras() {
         const errorPercent = (errosTotais / MAX_ERRORS_PER_SCREEN) * 100;
         errorsBarFill.style.width = `${Math.min(errorPercent, 100)}%`;
-        
         scoreSpan.innerText = pontuacao;
         totalFieldsSpan.innerText = totalCampos;
         errorsSpan.innerText = errosTotais;
-        
         const percent = (pontuacao / totalCampos) * 100;
         progressFill.style.width = `${percent}%`;
     }
@@ -551,6 +568,12 @@
             mostrarEstrelas();
             telasResolvidas++;
             screenCounterSpan.innerText = telasResolvidas;
+            
+            // Animação no contador de telas
+            counterArea.classList.add('bling');
+            setTimeout(() => {
+                counterArea.classList.remove('bling');
+            }, 300);
         }
     }
 
@@ -592,34 +615,26 @@
         somas.forEach((s, idx) => {
             const card = document.createElement('div');
             card.className = 'sum-card';
-            
             const animalsRow = document.createElement('div');
             animalsRow.className = 'animals-row';
-            
             const box1 = document.createElement('div');
             box1.className = 'animal-box';
             box1.appendChild(criarGrupoAnimal(s.animal1, s.q1));
-            
             const plusSpan = document.createElement('span');
             plusSpan.className = 'plus-sign';
             plusSpan.innerText = '+';
-            
             const box2 = document.createElement('div');
             box2.className = 'animal-box';
             box2.appendChild(criarGrupoAnimal(s.animal2, s.q2));
-            
             const equalSpan = document.createElement('span');
             equalSpan.className = 'equal-sign';
             equalSpan.innerText = '=';
-            
             animalsRow.appendChild(box1);
             animalsRow.appendChild(plusSpan);
             animalsRow.appendChild(box2);
             animalsRow.appendChild(equalSpan);
-            
             const fieldsRow = document.createElement('div');
             fieldsRow.className = 'fields-row';
-            
             const fieldUnder1 = document.createElement('div');
             fieldUnder1.className = 'field-under';
             const label1 = document.createElement('div');
@@ -628,10 +643,8 @@
             const campo1 = criarCampo('q1', idx, s.fill1);
             fieldUnder1.appendChild(label1);
             fieldUnder1.appendChild(campo1);
-            
             const spacer1 = document.createElement('div');
             spacer1.style.width = '15px';
-            
             const fieldUnder2 = document.createElement('div');
             fieldUnder2.className = 'field-under';
             const label2 = document.createElement('div');
@@ -640,10 +653,8 @@
             const campo2 = criarCampo('q2', idx, s.fill2);
             fieldUnder2.appendChild(label2);
             fieldUnder2.appendChild(campo2);
-            
             const spacer2 = document.createElement('div');
             spacer2.style.width = '15px';
-            
             const totalField = document.createElement('div');
             totalField.className = 'field-under';
             const labelTotal = document.createElement('div');
@@ -652,13 +663,11 @@
             const campoTot = criarCampo('total', idx, s.fillTotal);
             totalField.appendChild(labelTotal);
             totalField.appendChild(campoTot);
-            
             fieldsRow.appendChild(fieldUnder1);
             fieldsRow.appendChild(spacer1);
             fieldsRow.appendChild(fieldUnder2);
             fieldsRow.appendChild(spacer2);
             fieldsRow.appendChild(totalField);
-            
             card.appendChild(animalsRow);
             card.appendChild(fieldsRow);
             sumsDiv.appendChild(card);
@@ -711,7 +720,6 @@
         if (campoAtual !== null) return;
         const idxNum = numerosDisponiveis.indexOf(valor);
         if (idxNum === -1) return;
-        
         if (valor === valorCorreto) {
             numerosDisponiveis.splice(idxNum, 1);
             if (tipo === 'q1') soma.fill1 = valor;
@@ -727,7 +735,6 @@
             acertosConsecutivos = 0;
             piscarCampo(campoElement, false);
             atualizarPontuacaoUI();
-            
             if (errosTotais >= MAX_ERRORS_PER_SCREEN) {
                 reiniciarTelaPorErros();
             }
