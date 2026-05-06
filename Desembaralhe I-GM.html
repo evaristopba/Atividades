@@ -1,179 +1,345 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desembaralhe - Pensamento Computacional</title>
+    
     <style>
-        :root { --bo: #e67e22; --dr: #5d1a04; --pu: #7d3cff; --lp: #bb8fce; --ye: #f1c40f; --wh: #fff; --fb: #fcd670; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        #game-container { width: 100%; max-width: 420px; height: 95vh; background: var(--bo); border: 4px solid #000; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .ov { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        #start-screen { background: var(--dr); color: var(--wh); display: flex; }
-        #dict-modal { background: #2c3e50; color: var(--wh); z-index: 150; }
-        #crash-ov { background: rgba(0,0,0,0.95); justify-content: center; align-items: center; text-align: center; color: var(--wh); }
-        .dict-content { flex-grow: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.1); }
-        .dict-content::-webkit-scrollbar { width: 8px; }
-        .dict-content::-webkit-scrollbar-thumb { background: var(--ye); border-radius: 4px; }
-        .card { background: rgba(255,255,255,0.1); border-left: 5px solid var(--ye); padding: 10px; margin-bottom: 10px; font-size: 14px; }
-        .term { background: var(--wh); color: #333; border-radius: 8px; padding: 8px; margin-bottom: 8px; border-left: 5px solid var(--pu); font-size: 13px; }
-        .term b { color: var(--pu); display: block; margin-bottom: 2px; }
-        .btn { background: var(--ye); color: var(--dr); border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 10px; cursor: pointer; text-transform: uppercase; flex-shrink: 0; box-shadow: 0 4px #b8950c; }
-        .btn-dict { background: var(--pu); color: #wh; padding: 10px; font-size: 14px; margin-bottom: 15px; border:none; border-radius:5px; cursor:pointer; font-weight: bold;}
-        header { background: var(--dr); color: var(--ye); text-align: center; padding: 15px; font-size: 24px; font-weight: bold; border-bottom: 3px solid #000; }
-        .lives { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 20px; }
-        .lost { opacity: 0.2; filter: grayscale(1); }
-        .box { background: var(--wh); margin: 10px 20px; padding: 35px 10px; border-radius: 15px; text-align: center; font-size: 32px; font-weight: bold; box-shadow: 0 5px #888; color: #333; }
-        .stats { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 5px 0; }
-        .circ { width: 80px; height: 80px; background: var(--pu); border-radius: 50%; border: 3px solid #333; color: #wh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .hexa { width: 70px; height: 80px; background: var(--lp); clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); border: 3px solid var(--ye); display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dr); font-size: 20px; }
-        .opts { display: flex; flex-direction: column; gap: 8px; padding: 10px 25px; flex-grow: 1; overflow-y: auto; }
-        .opt { background: var(--wh); border: 2px solid #ddd; padding: 14px; border-radius: 18px; font-size: 19px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #999; color: #333; flex-shrink: 0; transition: background 0.2s; }
-        
-        /* Classes de Feedback */
-        .opt.correct { background: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; }
-        .opt.wrong { background: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
-        .opts.disabled { pointer-events: none; } /* Trava de cliques */
+        /* DEFINIÇÃO DE IDENTIDADE VISUAL */
+        :root {
+            --orange-bg: #e67e22;
+            --dark-red: #5d1a04;
+            --purple-main: #7d3cff;
+            --purple-light: #bb8fce;
+            --yellow-accent: #f1c40f;
+            --white: #ffffff;
+            --stats-bg: #fcd670;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+        }
 
-        footer { background: var(--dr); display: flex; justify-content: space-between; align-items: center; padding: 8px; border-top: 3px solid #000; }
-        .f-box { background: var(--fb); border: 2px solid #000; padding: 4px; text-align: center; min-width: 80px; }
-        .f-lab { font-size: 9px; color: #4a148c; font-weight: bold; border-bottom: 1px solid #4a148c; }
-        .f-val { font-size: 15px; color: #4a148c; font-weight: bold; font-family: monospace; }
-        .cracks { position: absolute; top:0; left:0; width:100%; height:100%; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 L150 150 L100 250 L300 200 L400 350 L500 300 M250 0 L200 150 L350 250 L150 400 L200 500' stroke='white' stroke-width='3' opacity='0.5' fill='none'/%3E%3C/svg%3E") center/cover; pointer-events:none; }
-        .shake { animation: sk 0.4s ease-in-out; }
-        @keyframes sk { 0%,100%{transform:translateX(0)} 25% {transform:translateX(-10px)} 75% {transform:translateX(10px)} }
-        a { color: var(--ye); text-decoration: none; font-size: 11px; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* CONTAINER PRINCIPAL */
+        #game-app {
+            width: 100%;
+            max-width: 420px;
+            height: 95vh;
+            background-color: var(--orange-bg);
+            border: 4px solid #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* TELAS DE SOBREPOSIÇÃO (OVERLAYS) */
+        .screen-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #start-screen { background-color: var(--dark-red); color: var(--white); display: flex; }
+        #dictionary-modal { background-color: #2c3e50; color: var(--white); z-index: 150; }
+        #crash-screen { background-color: rgba(0,0,0,0.95); justify-content: center; align-items: center; text-align: center; color: var(--white); }
+
+        /* DICIONÁRIO ASSERTIVO COM SCROLL */
+        .dict-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 15px;
+        }
+        .dict-container::-webkit-scrollbar { width: 8px; }
+        .dict-container::-webkit-scrollbar-thumb { background: var(--yellow-accent); border-radius: 4px; }
+
+        .term-box {
+            background: var(--white);
+            color: #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--purple-main);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .term-box b { color: var(--purple-main); display: block; margin-bottom: 2px; }
+
+        /* BOTÕES E CARDS */
+        .btn-primary {
+            background-color: var(--yellow-accent);
+            color: var(--dark-red);
+            border: none; padding: 18px;
+            font-size: 20px; font-weight: bold;
+            border-radius: 12px; cursor: pointer;
+            box-shadow: 0 5px #b8950c; text-transform: uppercase;
+        }
+        .btn-study {
+            background-color: var(--purple-main);
+            color: white; border: none; padding: 10px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px;
+        }
+        .briefing-card {
+            background: rgba(255,255,255,0.1);
+            border-left: 5px solid var(--yellow-accent);
+            padding: 12px; margin-bottom: 10px; font-size: 14px;
+        }
+
+        /* INTERFACE DO JOGO */
+        header {
+            background-color: var(--dark-red);
+            color: var(--yellow-accent);
+            text-align: center; padding: 15px;
+            font-size: 24px; font-weight: bold; border-bottom: 3px solid #000;
+        }
+        .hearts-row { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 20px; }
+        .heart.off { opacity: 0.2; filter: grayscale(1); }
+
+        .word-display {
+            background-color: var(--white);
+            margin: 10px 20px; padding: 40px 10px;
+            border-radius: 15px; text-align: center;
+            font-size: 32px; font-weight: bold;
+            box-shadow: 0 5px #888; color: #333;
+        }
+
+        .stats-row { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0; }
+        .score-circle {
+            width: 85px; height: 85px; background-color: var(--purple-main);
+            border-radius: 50%; border: 3px solid #333; color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .level-hexa {
+            width: 75px; height: 85px; background-color: var(--purple-light);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            border: 3px solid var(--yellow-accent);
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--dark-red); font-size: 22px;
+        }
+
+        .options-grid { display: flex; flex-direction: column; gap: 10px; padding: 10px 25px; flex-grow: 1; }
+        .option-btn {
+            background-color: var(--white); border: 2px solid #ddd;
+            padding: 16px; border-radius: 20px; font-size: 19px;
+            cursor: pointer; font-weight: bold; box-shadow: 0 4px #999;
+            transition: 0.2s; color: #333;
+        }
+        .option-btn.right { background-color: var(--success-green) !important; color: white !important; }
+        .option-btn.wrong { background-color: var(--error-red) !important; color: white !important; }
+        .options-grid.locked { pointer-events: none; }
+
+        /* FOOTER */
+        footer {
+            background-color: var(--dark-red);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-top: 3px solid #000;
+        }
+        .footer-item {
+            background-color: var(--stats-bg); border: 2px solid #000;
+            padding: 4px; text-align: center; min-width: 85px;
+        }
+        .footer-label { font-size: 9px; color: #4a148c; font-weight: bold; border-bottom: 1px solid #4a148c; }
+        .footer-val { font-size: 16px; color: #4a148c; font-weight: bold; font-family: monospace; }
+
+        /* EFEITOS */
+        .shake-anim { animation: shake-kf 0.5s both; }
+        @keyframes shake-kf { 
+            0%, 100% { transform: translateX(0); } 
+            20%, 60% { transform: translateX(-10px); } 
+            40%, 80% { transform: translateX(10px); } 
+        }
+        .cracks-svg {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 L150 150 L100 250 L300 200 L400 350 L500 300 M250 0 L200 150 L350 250 L150 400 L200 500' stroke='white' stroke-width='3' opacity='0.5' fill='none'/%3E%3C/svg%3E") center/cover;
+            pointer-events: none;
+        }
+        a { color: var(--yellow-accent); text-decoration: none; font-size: 11px; }
     </style>
 </head>
 <body>
-<div id="game-container">
-    <div id="dict-modal" class="ov">
-        <h2 style="color:var(--ye);text-align:center;margin-top:0;">📖 DICIONÁRIO TECH</h2>
-        <div class="dict-content">
-            <div class="term"><b>ALGORITMO:</b> Passos organizados para realizar uma tarefa.</div>
-            <div class="term"><b>BUG:</b> Um erro que faz o programa não funcionar direito.</div>
-            <div class="term"><b>HARDWARE:</b> As partes que podemos tocar (teclado, monitor).</div>
-            <div class="term"><b>SOFTWARE:</b> Programas e jogos (o que não podemos tocar).</div>
-            <div class="term"><b>IA:</b> Computadores que imitam a inteligência humana.</div>
-            <div class="term"><b>BINÁRIO:</b> A língua dos computadores, feita só de 0 e 1.</div>
-            <div class="term"><b>AVATAR:</b> Sua foto ou personagem no mundo digital.</div>
-            <div class="term"><b>VÍRUS:</b> Programa perigoso que tenta estragar o sistema.</div>
-            <div class="term"><b>HACKER:</b> Alguém que estuda muito como os sistemas funcionam.</div>
-            <div class="term"><b>BACKUP:</b> Uma cópia de segurança para não perder arquivos.</div>
-            <div class="term"><b>NUVEM:</b> Guardar arquivos na internet para acessar de qualquer lugar.</div>
+
+<div id="game-app">
+    <!-- DICIONÁRIO ASSERTIVO -->
+    <div id="dictionary-modal" class="screen-overlay">
+        <h2 style="color:var(--yellow-accent); text-align:center; margin-top:0;">📖 DICIONÁRIO TECH</h2>
+        <div class="dict-container">
+            <div class="term-box"><b>ALGORITMO:</b> Uma sequência de passos organizados para realizar uma tarefa.</div>
+            <div class="term-box"><b>BUG:</b> Um erro inesperado que faz o programa não funcionar direito.</div>
+            <div class="term-box"><b>HARDWARE:</b> Todas as peças físicas que você pode tocar (mouse, teclado).</div>
+            <div class="term-box"><b>SOFTWARE:</b> Os programas e aplicativos que fazem o hardware funcionar.</div>
+            <div class="term-box"><b>IA:</b> Tecnologia que permite computadores aprenderem e tomarem decisões.</div>
+            <div class="term-box"><b>BINÁRIO:</b> A linguagem base dos computadores, composta apenas por 0 e 1.</div>
+            <div class="term-box"><b>BACKUP:</b> Cópia de segurança para evitar perda de dados importantes.</div>
+            <div class="term-box"><b>VÍRUS:</b> Programa malicioso criado para danificar sistemas ou roubar dados.</div>
+            <div class="term-box"><b>HACKER:</b> Especialista em tecnologia que entende profundamente os sistemas.</div>
+            <div class="term-box"><b>FIREWALL:</b> Um escudo de segurança que protege o tráfego da sua rede.</div>
+            <div class="term-box"><b>PIXELS:</b> Os menores pontos coloridos que formam uma imagem na tela.</div>
+            <div class="term-box"><b>NAVEGADOR:</b> O aplicativo que você usa para acessar sites na internet.</div>
+            <div class="term-box"><b>ABSTRAÇÃO:</b> Ignorar detalhes desnecessários para focar no problema principal.</div>
+            <div class="term-box"><b>DECOMPOSIÇÃO:</b> Quebrar um problema grande em partes menores e mais fáceis.</div>
+            <div class="term-box"><b>SIMULAÇÃO:</b> Testar um modelo no computador antes de aplicá-lo no mundo real.</div>
         </div>
-        <button class="btn" onclick="toggleD(0)">Voltar ao Manual</button>
+        <button class="btn-primary" onclick="closeDict()">Voltar ao Manual</button>
     </div>
 
-    <div id="start-screen" class="ov">
-        <h2 style="color:var(--ye);text-align:center">MISSÃO PROGRAMADOR</h2>
-        <button class="btn-dict" onclick="toggleD(1)">📖 Estudar Dicionário Tech</button>
-        <div class="card"><b>🔍 PADRÕES:</b> Observe as letras e ache a palavra.</div>
-        <div class="card"><b>🧩 DECOMPOSIÇÃO:</b> Leia a palavra em partes menores.</div>
-        <div class="card"><b>❤️ VIDAS:</b> 5 chances. 10 acertos seguidos ganha vida!</div>
-        <div style="text-align:center; margin-top:5px;"><a href="https://crix.com.br/games/game2/182" target="_blank">Inspirado em: crix.com.br</a></div>
-        <button class="btn" onclick="start()">Iniciar Sistema</button>
+    <!-- MANUAL INICIAL -->
+    <div id="start-screen" class="screen-overlay">
+        <h2 style="color:var(--yellow-accent); text-align:center;">MISSÃO PROGRAMADOR</h2>
+        <button class="btn-study" onclick="openDict()">📖 Estudar Dicionário Tech</button>
+        <div class="briefing-card"><b>🔍 PADRÕES:</b> Encontre a palavra certa nas letras.</div>
+        <div class="briefing-card"><b>🧩 DECOMPOSIÇÃO:</b> Leia a palavra por partes.</div>
+        <div class="briefing-card"><b>❤️ VIDAS:</b> 5 chances. 10 acertos seguidos recuperam vida!</div>
+        <div style="text-align:center; margin-top:5px;">
+            <a href="https://crix.com.br/games/game2/182" target="_blank">Inspirado em: crix.com.br</a>
+        </div>
+        <button class="btn-primary" style="margin-top:auto;" onclick="initGame()">Iniciar Atividade</button>
     </div>
 
-    <div id="crash-ov" class="ov"><div class="cracks"></div><h1 style="font-size:32px;text-shadow:2px 2px #000">SYSTEM CRASH</h1><button class="btn" style="background:#e74c3c;color:#fff;box-shadow:0 0 15px #fff" onclick="location.reload()">REBOOT</button></div>
+    <!-- TELA DE CRASH -->
+    <div id="crash-screen" class="screen-overlay">
+        <div class="cracks-svg"></div>
+        <h1 style="font-size:32px; text-shadow:2px 2px #000">SYSTEM CRASH</h1>
+        <button class="btn-primary" style="background:var(--error-red); color:white;" onclick="location.reload()">REBOOT</button>
+    </div>
 
+    <!-- JOGO ATIVO -->
     <header>Desembaralhe</header>
     
-    <div id="game-content" style="display:contents">
-        <div class="lives" id="l-bar"><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span></div>
-        <div class="box" id="scrambled-word">...</div>
-        <div class="stats"><div class="circ"><span id="points" style="font-size:20px;border-bottom:2px solid #fff;font-weight:bold">0</span><span id="c-idx" style="font-size:18px">1</span></div><div style="font-size:30px;color:var(--dr)">↔</div><div class="hexa">100</div></div>
-        <div class="opts" id="options"></div>
+    <div id="play-area" style="display:contents">
+        <div class="hearts-row" id="hearts-box">
+            <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
+        </div>
+
+        <div class="word-display" id="scrambled-txt">...</div>
+
+        <div class="stats-row">
+            <div class="score-circle">
+                <span id="score-val" style="font-size:22px; border-bottom:2px solid #fff; font-weight:bold">0</span>
+                <span id="idx-val" style="font-size:18px">1</span>
+            </div>
+            <div style="font-size:30px; color:var(--dark-red)">↔</div>
+            <div class="level-hexa">100</div>
+        </div>
+
+        <div class="options-grid" id="options-box"></div>
     </div>
 
     <footer>
-        <div onclick="location.reload()" style="cursor:pointer;color:#fff;text-align:center">
-            <div style="background:#839c14;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:18px">🏃</div>SAIR
+        <div onclick="location.reload()" style="cursor:pointer; color:white; text-align:center">
+            <div style="background:#839c14; border-radius:50%; width:35px; height:35px; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:20px">🏃</div>
+            SAIR
         </div>
-        <div class="f-box"><div class="f-lab">TEMPO</div><div id="timer" class="f-val">00:00</div></div>
-        <div class="f-box"><div class="f-lab">ACERTOS</div><div id="hits" class="f-val">0</div></div>
+        <div class="footer-item"><div class="footer-label">TEMPO</div><div id="timer-txt" class="footer-val">00:00</div></div>
+        <div class="footer-item"><div class="footer-label">ACERTOS</div><div id="hits-txt" class="footer-val">0</div></div>
         <div style="text-align:center"><a href="https://crix.com.br/games/game2/182" target="_blank" style="font-size:9px">INSPIRADO EM:<br>CRIX GAMES</a></div>
-        <div class="f-box"><div class="f-lab">VIDAS</div><div id="v-count" class="f-val">5</div></div>
+        <div class="footer-item"><div class="footer-label">VIDAS</div><div id="lives-txt" class="footer-val">5</div></div>
     </footer>
 </div>
 
 <script>
-    const db = ["osso","ganso","novembro","isso","lado","engenheiro","fungo","tinta","ponto","mão","bug","dado","rede","robô","loop","código","lógica","binário","padrão","senha","etapas","mouse","algoritmo","sequência","programar","hardware","software","problema","internet","abstração","clicar","salvar","excluir","colar","digitar","teclado","monitor","tablet","cabo","chip","bateria","pasta","arquivo","nuvem","pixels","bit","byte","servidor","wifi","sistema","avatar","emoji","vírus","hacker","perfil","login","drone","sensor","robótica","satélite","ia","zoom","scroll","backup","upload","download","mágica","desafio","solução","ideia"];
-    let list=[], idx=0, hits=0, lives=5, streak=0, points=0, time, timer;
-    const $ = id => document.getElementById(id);
-    const shuffle = a => a.sort(() => Math.random() - 0.5);
-    const toggleD = s => $("dict-modal").style.display = s ? 'flex' : 'none';
-    const scramble = w => { let s; do { s = shuffle(w.split('')).join(''); } while (s === w && w.length > 1); return s; };
+    const WORDS_LIST = ["osso","ganso","novembro","isso","lado","engenheiro","fungo","tinta","ponto","mão","bug","dado","rede","robô","loop","código","lógica","binário","padrão","senha","etapas","mouse","algoritmo","sequência","programar","hardware","software","problema","internet","abstração","clicar","salvar","excluir","colar","digitar","teclado","monitor","tablet","cabo","chip","bateria","pasta","arquivo","nuvem","pixels","bit","byte","servidor","wifi","sistema","avatar","emoji","vírus","hacker","perfil","login","drone","sensor","robótica","satélite","ia","zoom","scroll","backup","upload","download","mágica","desafio","solução","ideia","impressora","scanner","câmera","memória","placa","janela","ícone","menu","pesquisar","atualizar","ligar","desligar","imprimir","arrastar","dados","informação","virtual","digital","game","tela","firewall","escudo","cadeado","automação","simulação","avaliação","cursor","bits","conexão","navegador"];
 
-    function start() { $("start-screen").style.display='none'; list=shuffle([...db]); load(); }
+    let gameWords = [], currentIdx = 0, totalScore = 0, hitsCount = 0, lives = 5, streak = 0, startTime = null, timerRef = null;
 
-    function load() {
-        if (idx >= list.length) return finish();
-        $("options").classList.remove('disabled'); // Reativa cliques
-        const cor = list[idx]; 
-        $("scrambled-word").innerText = scramble(cor)+"?"; 
-        $("c-idx").innerText = idx+1;
+    function openDict() { document.getElementById('dictionary-modal').style.display = 'flex'; }
+    function closeDict() { document.getElementById('dictionary-modal').style.display = 'none'; }
+
+    function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+    function scramble(word) {
+        let res; const letters = word.split('');
+        do { res = shuffle([...letters]).join(''); } while (res === word && word.length > 1);
+        return res;
+    }
+
+    function initGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        gameWords = shuffle([...WORDS_LIST]);
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (currentIdx >= gameWords.length) return win();
+        document.getElementById('options-box').classList.remove('locked');
         
-        let dist = shuffle(db.filter(w=>w!==cor)).slice(0,3);
-        let opts = shuffle([cor, ...dist]);
-        
-        $("options").innerHTML = '';
-        opts.forEach(o => { 
-            const b = document.createElement('button'); 
-            b.className='opt'; 
-            b.innerText=o; 
-            b.onclick=(e)=>check(e.target, cor); 
-            $("options").appendChild(b); 
+        const correct = gameWords[currentIdx];
+        document.getElementById('scrambled-txt').innerText = scramble(correct) + "?";
+        document.getElementById('idx-val').innerText = currentIdx + 1;
+
+        let distractors = shuffle(WORDS_LIST.filter(w => w !== correct)).slice(0, 3);
+        let options = shuffle([correct, ...distractors]);
+
+        const box = document.getElementById('options-box');
+        box.innerHTML = '';
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn'; btn.innerText = opt;
+            btn.onclick = (e) => handleChoice(e.target, correct);
+            box.appendChild(btn);
         });
     }
 
-    function check(btn, correct) {
-        // Trava os cliques imediatamente para evitar o "heavy click"
-        $("options").classList.add('disabled');
-        
-        if (!time) { 
-            time=Date.now(); 
-            timer=setInterval(()=> { 
-                let d=Date.now()-time; 
-                $("timer").innerText=new Date(d).toISOString().substr(14,5); 
-            },1000); 
-        }
+    function handleChoice(btn, correct) {
+        document.getElementById('options-box').classList.add('locked');
+        if (!startTime) { startTime = Date.now(); timerRef = setInterval(updateClock, 1000); }
 
-        const isCorrect = btn.innerText === correct;
-
-        if (isCorrect) {
-            btn.classList.add('correct');
-            hits++; points+=100; streak++;
-            if(streak===10 && lives<5) { lives++; streak=0; upL(); }
+        if (btn.innerText === correct) {
+            btn.classList.add('right'); totalScore += 100; hitsCount++; streak++;
+            if (streak === 10 && lives < 5) { lives++; streak = 0; updateLivesUI(); }
         } else {
-            btn.classList.add('wrong');
-            // Opcional: mostrar qual era a correta se quiser ser mais pedagógico
-            lives--; streak=0; upL();
+            btn.classList.add('wrong'); lives--; streak = 0; updateLivesUI();
+            if (lives <= 0) return setTimeout(systemCrash, 400);
         }
 
-        $("hits").innerText=hits;
-        $("points").innerText=points;
+        document.getElementById('score-val').innerText = totalScore;
+        document.getElementById('hits-txt').innerText = hitsCount;
 
-        // Aguarda 600ms antes de carregar a próxima para o aluno ver o resultado e soltar o dedo
-        setTimeout(() => {
-            if (lives <= 0) return crash();
-            idx++;
-            load();
-        }, 600);
+        setTimeout(() => { currentIdx++; renderQuestion(); }, 600);
     }
 
-    function upL() { 
-        document.querySelectorAll('#l-bar span').forEach((h,i)=>h.className=i<lives?'':'lost'); 
-        $("v-count").innerText=lives; 
+    function updateLivesUI() {
+        const hearts = document.querySelectorAll('.heart');
+        hearts.forEach((h, i) => h.className = (i < lives) ? 'heart' : 'heart off');
+        document.getElementById('lives-txt').innerText = lives;
     }
 
-    function crash() { 
-        clearInterval(timer); $("game-container").classList.add('shake'); 
-        setTimeout(()=> { $("crash-ov").style.display='flex'; $("game-container").classList.remove('shake'); }, 500); 
+    function updateClock() {
+        const diff = Date.now() - startTime;
+        const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+        const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        document.getElementById('timer-txt').innerText = `${m}:${s}`;
     }
 
-    function finish() { 
-        clearInterval(timer); 
-        $("game-content").innerHTML=`<div style="text-align:center;padding:40px;color:#fff"><h2>SISTEMA RESTAURADO! 🚀</h2><p>Parabéns, Programador!</p><p style="font-size:12px">Inspirado em: <a href="https://crix.com.br/games/game2/182" target="_blank">crix.com.br</a></p><button class="btn" onclick="location.reload()">JOGAR NOVAMENTE</button></div>`; 
+    function systemCrash() {
+        clearInterval(timerRef);
+        document.getElementById('game-app').classList.add('shake-anim');
+        setTimeout(() => { document.getElementById('crash-screen').style.display = 'flex'; }, 500);
+    }
+
+    function win() {
+        clearInterval(timerRef);
+        document.getElementById('play-area').innerHTML = `
+            <div style="text-align:center; padding:40px; color:white;">
+                <h2>SISTEMA RESTAURADO! 🚀</h2>
+                <p>Parabéns, Programador!<br>Você dominou as 100 palavras.</p>
+                <button class="btn-primary" style="width:100%" onclick="location.reload()">Jogar Novamente</button>
+            </div>`;
     }
 </script>
 </body>
