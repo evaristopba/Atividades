@@ -17,6 +17,7 @@
             --bg1: #a855f7;
             --bg2: #3b82f6;
             --white: #ffffff;
+            --card-bg: #f0f4ff;
             --shadow: 0 8px 32px rgba(80, 0, 180, .18);
         }
 
@@ -25,16 +26,16 @@
         body {
             font-family: 'Nunito', sans-serif;
             background: linear-gradient(135deg, #a855f7 0%, #3b82f6 60%, #06d6a0 100%);
-            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 10px;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 18px 8px 52px;
+            position: relative;
             overflow-x: hidden;
         }
 
+        /* ---- Estrelinhas decorativas no fundo ---- */
         body::before {
             content: '⭐🌟✨💫⭐🌟✨💫⭐🌟✨💫⭐🌟✨💫⭐🌟✨💫';
             position: fixed;
@@ -53,54 +54,70 @@
             100% { transform: translateX(-50%); }
         }
 
+        /* ========== GAME CARD ========== */
         .game {
             background: rgba(255, 255, 255, .97);
-            padding: 8px 12px; /* Mais compacto ainda */
-            border-radius: 20px;
+            padding: 22px 20px 28px;
+            border-radius: 28px;
             width: 100%;
-            max-width: 800px;
+            max-width: 920px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(80, 0, 180, .15);
+            box-shadow: 0 20px 60px rgba(80, 0, 180, .25);
             position: relative;
             animation: slideDown .5s cubic-bezier(.34, 1.56, .64, 1);
-            margin-bottom: 50px; /* Espaço para o rodapé fixo */
         }
 
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ========== TÍTULO ========== */
         .game-title {
             font-family: 'Fredoka One', cursive;
-            font-size: clamp(1.2rem, 3vw, 1.6rem); /* Menor */
+            font-size: clamp(1.7rem, 5vw, 2.6rem);
             background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            background-clip: text;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+            animation: pulse 2.5s ease-in-out infinite;
         }
 
+        @keyframes pulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.15); }
+        }
+
+        /* ========== INFO CARDS ========== */
         .info {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Força 3 colunas para ser mais denso */
-            gap: 5px;
-            margin-bottom: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0 0 14px;
+            justify-content: center;
         }
 
         .card {
-            padding: 4px;
-            border-radius: 10px;
+            flex: 1;
+            min-width: 90px;
+            padding: 8px 10px;
+            border-radius: 14px;
             font-weight: 800;
-            font-size: .7rem;
+            font-size: .82rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 1px solid transparent;
+            gap: 2px;
+            border: 2px solid transparent;
+            transition: transform .2s;
         }
+        .card:hover { transform: translateY(-2px); }
 
-        .card-icon { font-size: 0.9rem; margin-bottom: 1px; }
-        .card-label { font-size: .5rem; opacity: .7; text-transform: uppercase; }
-        .card-value { font-size: 0.8rem; font-weight: 800; }
+        .card-icon { font-size: 1.2rem; }
+        .card-label { font-size: .68rem; font-weight: 600; opacity: .7; text-transform: uppercase; letter-spacing: .5px; }
+        .card-value { font-size: 1rem; font-weight: 800; }
 
         .card-aluno { background: #fef3ff; border-color: #e9d5ff; color: #7e22ce; }
         .card-codigo { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
@@ -109,200 +126,325 @@
         .card-points { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
         .card-lives { background: #fff1f2; border-color: #fecdd3; color: #be123c; }
 
+        /* ========== BARRA DE PROGRESSO ========== */
         .progress-wrap {
-            margin-bottom: 10px;
+            margin: 0 0 18px;
             background: #f0f0f0;
             border-radius: 99px;
-            height: 8px; /* Mais fino */
-            border: 1px solid #e0e0e0;
+            height: 14px;
             overflow: hidden;
+            position: relative;
+            border: 2px solid #e0e0e0;
         }
 
         .progress-bar {
             height: 100%;
+            border-radius: 99px;
             background: linear-gradient(90deg, var(--green), var(--cyan));
-            transition: width .6s ease-in-out;
-            width: 4%;
+            transition: width .6s cubic-bezier(.34, 1.56, .64, 1);
+            position: relative;
         }
 
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0; width: 14px;
+            background: rgba(255, 255, 255, .4);
+            border-radius: 99px;
+            animation: shine .8s ease-in-out infinite alternate;
+        }
+
+        @keyframes shine {
+            from { opacity: .4; }
+            to { opacity: 1; }
+        }
+
+        /* ========== BOTÕES DE AÇÃO ========== */
         .action-buttons {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
         }
 
         .btn-action {
-            padding: 6px 14px; /* Reduzido */
+            padding: 10px 20px;
             border: none;
             border-radius: 50px;
             cursor: pointer;
+            font-family: 'Nunito', sans-serif;
             font-weight: 800;
-            font-size: .8rem;
-            color: white;
-            transition: transform .15s;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, .1);
+            font-size: .9rem;
+            transition: transform .15s, box-shadow .15s, filter .15s;
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
 
-        .btn-action:hover { transform: translateY(-1px) scale(1.02); }
+        .btn-action:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 7px 20px rgba(0,0,0,.2); }
+        .btn-action:active { transform: scale(.97); }
 
-        .btn-save { background: linear-gradient(135deg, #06d6a0, #0ea5e9); }
-        .file-label { background: linear-gradient(135deg, #4361ee, #7209b7); }
-        .btn-how { background: linear-gradient(135deg, #f72585, #7209b7); }
-        .btn-bncc { background: linear-gradient(135deg, #ffd60a, #fb5607); }
+        .btn-save { background: linear-gradient(135deg, #06d6a0, #0ea5e9); color: white; }
+        .btn-how { background: linear-gradient(135deg, #f72585, #7209b7); color: white; }
+        .btn-bncc { background: linear-gradient(135deg, #ffd60a, #fb5607); color: white; }
 
+        /* File input disfarçado */
+        .file-label {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: .9rem;
+            transition: transform .15s, box-shadow .15s;
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            color: white;
+        }
+        .file-label:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 7px 20px rgba(0,0,0,.2); }
         #fileInput { display: none; }
 
+        /* ========== PERGUNTA ========== */
         .question-label {
             font-family: 'Fredoka One', cursive;
-            font-size: 1.1rem; /* Reduzido */
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
             color: var(--purple);
-            margin-bottom: 6px;
+            margin-bottom: 14px;
         }
 
-        .mascote {
-            font-size: 2.2rem; /* Reduzido */
-            margin: 2px 0;
-            display: block;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
+        /* ========== AREA DAS CÉDULAS ========== */
         .money-area {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px; /* Reduzido */
-            margin-bottom: 12px; /* Reduzido */
+            gap: 14px;
+            justify-items: center;
+            align-items: center;
+            margin: 0 0 22px;
         }
 
         .money-area img {
-            width: 100%;
-            aspect-ratio: 2.1 / 1;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, .1);
-            transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s;
-            animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1) backwards;
-            position: relative;
-            cursor: zoom-in;
+            width: clamp(90px, 16vw, 130px);
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.18);
+            transition: transform .2s, box-shadow .2s;
+            animation: popIn .35s cubic-bezier(.34, 1.56, .64, 1) backwards;
+            referrerpolicy: no-referrer;
         }
 
-        .money-area img:hover {
-            transform: scale(1.1) rotate(1deg);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, .15);
-            z-index: 50;
+        /* Estilo para moedas */
+        .money-area img.coin {
+            width: clamp(65px, 11vw, 85px);
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
         }
 
         @keyframes popIn {
-            from { opacity: 0; transform: scale(.5); rotate: -5deg; }
-            to { opacity: 1; transform: scale(1); rotate: 0deg; }
+            from { opacity: 0; transform: scale(.5) rotate(-8deg); }
+            to { opacity: 1; transform: scale(1) rotate(0deg); }
         }
 
+        .money-area img:hover { transform: scale(1.08) rotate(1deg); box-shadow: 0 8px 24px rgba(0,0,0,.25); cursor: zoom-in; }
+
+        .note-fallback {
+            width: clamp(90px, 16vw, 130px);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            border-radius: 10px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            color: var(--purple);
+            box-shadow: 0 4px 12px rgba(0,0,0,.12);
+            animation: popIn .35s cubic-bezier(.34, 1.56, .64, 1) backwards;
+        }
+
+        /* ========== OPÇÕES ========== */
         .options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px; /* Reduzido */
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
         .option {
-            padding: 10px 5px; /* Reduzido */
+            padding: 14px 8px;
             background: linear-gradient(135deg, #f72585, #b5179e);
             color: white;
-            border-radius: 12px;
+            border-radius: 16px;
             cursor: pointer;
             font-family: 'Fredoka One', cursive;
-            font-size: 1.1rem; /* Reduzido */
-            transition: all .2s;
-            box-shadow: 0 4px 8px rgba(247, 37, 133, .2);
-            border: 2px solid transparent;
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            transition: transform .15s, box-shadow .15s, background .2s;
+            box-shadow: 0 4px 14px rgba(247, 37, 133, .35);
+            border: 3px solid transparent;
+            animation: popIn .3s cubic-bezier(.34, 1.56, .64, 1) backwards;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .option:hover { transform: translateY(-2px) scale(1.03); }
-        .option.correct { background: linear-gradient(135deg, #06d6a0, #0ea5e9); border-color: white; transform: scale(1.05); }
-        .option.wrong { background: linear-gradient(135deg, #ef233c, #780000); border-color: white; animation: shake .4s; }
+        .option:hover { transform: scale(1.06) translateY(-3px); box-shadow: 0 8px 22px rgba(247, 37, 133, .45); }
+        .option:active { transform: scale(.97); }
+
+        .option.correct {
+            background: linear-gradient(135deg, #06d6a0, #0ea5e9)!important;
+            border-color: #fff;
+            animation: correctBounce .4s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .option.wrong {
+            background: linear-gradient(135deg, #ef233c, #780000)!important;
+            animation: shake .4s ease;
+        }
+
+        @keyframes correctBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
         }
 
+        /* ========== MENSAGEM ========== */
         .message {
-            min-height: 25px; /* Reduzido */
+            min-height: 38px;
             font-family: 'Fredoka One', cursive;
-            font-size: 1.2rem; /* Reduzido */
-            margin: 8px 0;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            margin: 8px 0 4px;
+            transition: all .2s;
         }
 
-        .msg-correct { color: var(--green); }
-        .msg-wrong { color: #ef233c; }
+        .msg-correct { color: var(--green); animation: popIn .3s; }
+        .msg-wrong { color: #ef233c; animation: shake .3s; }
 
-        /* RODAPÉ CRÉDITOS */
-        .footer-credits {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(5px);
-            text-align: center;
-            padding: 8px;
-            font-size: 0.75rem;
-            z-index: 1000;
-            border-top: 2px solid #a855f7;
-            color: #444;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+        /* ========== MASCOTE ========== */
+        .mascote {
+            font-size: 2.8rem;
+            margin: 6px 0 2px;
+            display: block;
+            transition: all .3s;
+            animation: mascoteFloat 3s ease-in-out infinite;
         }
-        .footer-credits a {
+
+        @keyframes mascoteFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .mascote.happy { animation: mascoteJump .5s cubic-bezier(.34, 1.56, .64, 1); }
+        .mascote.sad { animation: mascoteSad .5s ease; }
+
+        @keyframes mascoteJump {
+            0% { transform: translateY(0) scale(1); }
+            40% { transform: translateY(-20px) scale(1.15); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        @keyframes mascoteSad {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        /* ========== TELA FINAL ========== */
+        .final { display: none; }
+
+        .final-content {
+            padding: 20px 10px;
+        }
+
+        .final-content h2 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
             color: var(--purple);
-            text-decoration: none;
-            font-weight: 800;
-            background: #f3e8ff;
-            padding: 2px 8px;
-            border-radius: 20px;
-            transition: all 0.2s;
-        }
-        .footer-credits a:hover {
-            background: var(--purple);
-            color: white;
-            transform: scale(1.05);
+            margin-bottom: 8px;
         }
 
-        /* MODAIS ESTILO ORIGINAL */
+        .final-points {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--pink), var(--orange), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-restart {
+            margin-top: 16px;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(6, 214, 160, .4);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .btn-restart:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(6, 214, 160, .5); }
+
+        /* ========== CONFETES ========== */
+        .confetti-container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ========== MODAIS ========== */
         .modal {
             position: fixed;
             inset: 0;
-            background: rgba(60, 0, 120, .6);
-            backdrop-filter: blur(5px);
+            background: rgba(60, 0, 120, .55);
+            backdrop-filter: blur(4px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 20px;
+            padding: 16px;
         }
 
         .modal-content {
             background: white;
-            padding: 30px;
-            border-radius: 28px;
-            max-width: 550px;
+            padding: 28px 24px;
+            border-radius: 24px;
+            max-width: 540px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
             text-align: left;
-            box-shadow: 0 25px 50px rgba(0,0,0,.3);
-            animation: modalPop .4s cubic-bezier(.34, 1.56, .64, 1);
+            box-shadow: 0 24px 60px rgba(80, 0, 180, .3);
+            animation: modalPop .35s cubic-bezier(.34, 1.56, .64, 1);
+            position: relative;
         }
 
         @keyframes modalPop {
@@ -318,6 +460,47 @@
             color: var(--purple);
         }
 
+        /* Modal Como Jogar */
+        .how-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin: 12px 0;
+            padding: 14px;
+            background: linear-gradient(135deg, #f8f0ff, #eff6ff);
+            border-radius: 16px;
+            border-left: 5px solid var(--purple);
+            animation: popIn .3s cubic-bezier(.34, 1.56, .64, 1) backwards;
+        }
+
+        .how-step:nth-child(2) { animation-delay: 0.05s; }
+        .how-step:nth-child(3) { animation-delay: 0.1s; }
+        .how-step:nth-child(4) { animation-delay: 0.15s; }
+        .how-step:nth-child(5) { animation-delay: 0.2s; }
+        .how-step:nth-child(6) { animation-delay: 0.25s; }
+        .how-step:nth-child(7) { animation-delay: 0.3s; }
+
+        .how-step-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .how-step-text strong {
+            display: block;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            color: var(--purple);
+            margin-bottom: 3px;
+        }
+
+        .how-step-text span {
+            font-size: .9rem;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        /* Modal BNCC */
         .hab {
             margin: 12px 0;
             padding: 12px;
@@ -336,30 +519,7 @@
             margin-bottom: 5px;
         }
 
-        .how-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            margin: 12px 0;
-            padding: 14px;
-            background: linear-gradient(135deg, #f8f0ff, #eff6ff);
-            border-radius: 16px;
-            border-left: 5px solid var(--purple);
-            animation: popIn .3s cubic-bezier(.34, 1.56, .64, 1) backwards;
-        }
-
-        .how-step-icon { font-size: 2rem; flex-shrink: 0; }
-
-        .how-step-text strong {
-            display: block;
-            font-family: 'Fredoka One', cursive;
-            font-size: 1rem;
-            color: var(--purple);
-            margin-bottom: 3px;
-        }
-
-        .how-step-text span { font-size: .9rem; color: #444; line-height: 1.5; }
-
+        /* Botão fechar modal */
         .btn-modal-close {
             display: block;
             margin: 22px auto 0;
@@ -369,17 +529,129 @@
             cursor: pointer;
             font-family: 'Fredoka One', cursive;
             font-size: 1.1rem;
+            transition: transform .15s, box-shadow .15s;
+            box-shadow: 0 4px 14px rgba(0,0,0,.15);
             color: white;
             background: linear-gradient(135deg, var(--green), var(--cyan));
-            transition: transform .2s;
         }
 
-        .btn-modal-close:hover { transform: scale(1.05); }
+        .btn-modal-close:hover { transform: scale(1.05); box-shadow: 0 8px 22px rgba(0,0,0,.2); }
 
+        /* ========== SISTEMA DE ABAS NO MODAL ========== */
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 12px 12px 0 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--purple);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--purple);
+            border-radius: 99px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn .3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ========== ESTRELAS NO MODAL ========== */
+        .stars-wrap {
+            font-size: 3rem;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .star { color: #e2e8f0; text-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .star.active { color: #fbbf24; text-shadow: 0 0 15px rgba(251, 191, 36, 0.5); animation: starPop .5s backwards; }
+
+        @keyframes starPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .breakdown {
+            margin-top: 10px;
+            padding: 8px;
+            background: #fef2f2;
+            border-radius: 12px;
+            font-size: .95rem;
+            color: #b91c1c;
+            border: 1px dashed #fecaca;
+            animation: popIn .3s;
+        }
+
+        /* ========== RESPONSIVO ========== */
         @media (max-width: 600px) {
             .money-area { grid-template-columns: repeat(2, 1fr); }
             .options { grid-template-columns: repeat(2, 1fr); }
+            .card { min-width: 70px; font-size: .75rem; }
         }
+
+        @media (max-width: 400px) {
+            .info { gap: 5px; }
+            .card { min-width: 60px; padding: 6px 6px; }
+        }
+
+        /* ========== RODAPÉ DE CRÉDITOS ========== */
+        .footer-credit {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(30, 0, 80, 0.82);
+            backdrop-filter: blur(6px);
+            text-align: center;
+            padding: 7px 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.75);
+            z-index: 500;
+            letter-spacing: .3px;
+        }
+        .footer-credit a {
+            color: #4cc9f0;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color .2s;
+        }
+        .footer-credit a:hover { color: #fff; }
     </style>
 </head>
 <body>
@@ -388,23 +660,26 @@
         <h1 class="game-title">💰 Somar as Cédulas 💰</h1>
 
         <div class="info">
-            <div class="card card-aluno">
-                <span class="card-icon">👤</span><span class="card-label">Aluno</span><span id="alunoNome" class="card-value">---</span>
+            <div class="card card-aluno" onclick="editarAluno()" style="cursor: pointer;" title="Clique para mudar o nome">
+                <span class="card-icon">👤</span><span class="card-label">ALUNO</span><span id="alunoNome" class="card-value">---</span>
             </div>
-            <div class="card card-codigo">
-                <span class="card-icon">🗂️</span><span class="card-label">Estado</span><span id="codigoAluno" class="card-value">---</span>
+            <div class="card card-codigo" onclick="editarCodigo()" style="cursor: pointer;" title="Clique para mudar o código">
+                <span class="card-icon">📁</span><span class="card-label">CÓDIGO</span><span id="codigoAluno" class="card-value">---</span>
             </div>
             <div class="card card-level">
-                <span class="card-icon">🎯</span><span class="card-label">Nível</span><span id="level" class="card-value">1</span>
+                <span class="card-icon">🎯</span><span class="card-label">NÍVEL</span><span id="level" class="card-value">1</span>
             </div>
             <div class="card card-screen">
-                <span class="card-icon">📋</span><span class="card-label">Exercício</span><span class="card-value"><span id="screen">1</span>/25</span>
+                <span class="card-icon">📋</span><span class="card-label">EXERCÍCIO</span><span class="card-value"><span id="screen">1</span>/20</span>
             </div>
             <div class="card card-points">
-                <span class="card-icon">⭐</span><span class="card-label">Pontos</span><span id="points" class="card-value">0</span>
+                <span class="card-icon">⭐</span><span class="card-label">PONTOS</span><span id="points" class="card-value">0</span>
+            </div>
+            <div id="comboCard" class="card" style="background: #f0f9ff; border-color: #bae6fd; color: #0369a1; display: none;">
+                <span class="card-icon">🔥</span><span class="card-label">COMBO</span><span id="comboValue" class="card-value">x0</span>
             </div>
             <div class="card card-lives">
-                <span class="card-icon">❤️</span><span class="card-label">Vidas</span><span id="lives" class="card-value">❤️❤️❤️❤️❤️</span>
+                <span class="card-icon">❤️</span><span class="card-label">VIDAS</span><span id="lives" class="card-value">❤️❤️❤️❤️❤️</span>
             </div>
         </div>
 
@@ -414,72 +689,77 @@
 
         <div class="action-buttons">
             <button class="btn-action btn-save" onclick="saveGame()">💾 Salvar</button>
-            <label class="btn-action file-label" for="fileInput">📂 Carregar</label>
+            <label class="file-label" for="fileInput">📂 Carregar</label>
             <input type="file" id="fileInput" onchange="loadGame(event)" accept=".txt">
-            <button class="btn-action btn-how" onclick="abrirModal('modalHowTo')">🎮 Como Jogar</button>
-            <button class="btn-action btn-bncc" onclick="abrirModal('modalBNCC')">📚 BNCC</button>
+            <button class="btn-action btn-how" onclick="abrirModal('modalHowTo')">💡 Guia & Pedagógico</button>
         </div>
 
-        <p class="question-label">🤔 Quanto vale esse dinheiro no total?</p>
+        <p class="question-label">🧐 Quanto vale esse dinheiro no total?</p>
         <span id="mascote" class="mascote">🤑</span>
 
         <div id="moneyArea" class="money-area"></div>
         <div id="options" class="options"></div>
         <div id="message" class="message"></div>
-    </div>
-
-    <!-- Modais -->
-    <div id="modalBNCC" class="modal" style="display: flex;">
-        <div class="modal-content">
-            <p class="modal-title">📚 Habilidades BNCC (1º ao 3º Ano)</p>
-            <div class="hab">
-                <strong>EF01MA19 — Reconhecimento de Valores</strong>
-                Reconhecer e relacionar valores de moedas e cédulas do sistema monetário brasileiro para resolver situações simples do cotidiano.
-                <br><br>
-                👉 Ideal para o Nível 1 do jogo!
-            </div>
-            <div class="hab">
-                <strong>EF02MA20 — Sistema Monetário</strong>
-                Estabelecer a equivalência de valores entre moedas e cédulas do sistema monetário brasileiro.
-            </div>
-            <div class="hab">
-                <strong>EF02MA06 — Adição e Estratégias</strong>
-                Resolver e elaborar problemas de adição com os significados de juntar e acrescentar.
-            </div>
-            <div class="hab">
-                <strong>EF03MA06 — Cálculo Mental</strong>
-                Utilizar diferentes estratégias de cálculo mental para resolver problemas de adição.
-            </div>
-            <button class="btn-modal-close" onclick="fecharModal('modalBNCC')">Entendido! Vamos jogar 🚀</button>
-        </div>
+        <button id="btnNext" class="btn-action" style="display: none; margin: 15px auto; background: var(--purple); color: white; padding: 12px 28px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 8px 20px rgba(114, 9, 183, 0.3);" onclick="continueAfterError()">Estudei a dica! Próximo ➡</button>
     </div>
 
     <div id="modalHowTo" class="modal">
         <div class="modal-content">
-            <p class="modal-title">🎮 Como Jogar</p>
-            <div class="how-step">
-                <span class="how-step-icon">👀</span>
-                <div class="how-step-text"><strong>Olhe as cédulas</strong><span>Aparecem 6 notas na tela. Observe bem cada uma!</span></div>
+            <div class="modal-tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'tabTutorial')">🎮 Como Jogar</button>
+                <button class="tab-btn" onclick="switchTab(this, 'tabPedagogico')">🧠 Pedagógico</button>
             </div>
-            <div class="how-step">
-                <span class="how-step-icon">🧮</span>
-                <div class="how-step-text"><strong>Some os valores</strong><span>Some o valor total na cabeça. Quanto dinheiro tem no total?</span></div>
+
+            <div id="tabTutorial" class="tab-content active">
+                <div class="how-step">
+                    <span class="how-step-icon">👀</span>
+                    <div class="how-step-text"><strong>Observe e Some</strong><span>Some o valor total das 6 cédulas mentalmente!</span></div>
+                </div>
+                <div class="how-step">
+                    <span class="how-step-icon">🎯</span>
+                    <div class="how-step-text"><strong>Sem Atalhos</strong><span>Você só avança se acertar. Se errar, precisa repetir o mesmo exercício!</span></div>
+                </div>
+                <div class="how-step">
+                    <span class="how-step-icon">🔥</span>
+                    <div class="how-step-text"><strong>Combo de Pontos</strong><span>Acertos seguidos aumentam seu multiplicador de pontos.</span></div>
+                </div>
+                <div class="how-step">
+                    <span class="how-step-icon">❤️</span>
+                    <div class="how-step-text"><strong>Recupere Vidas</strong><span>Cada erro tira 1 vida. Acertar 8 seguidos te dá uma vida extra!</span></div>
+                </div>
+                <div class="how-step">
+                    <span class="how-step-icon">🏆</span>
+                    <div class="how-step-text"><strong>Suba de Nível</strong><span>São 20 exercícios por nível. São 10 níveis ao todo!</span></div>
+                </div>
             </div>
-            <div class="how-step">
-                <span class="how-step-icon">👆</span>
-                <div class="how-step-text"><strong>Escolha a resposta</strong><span>Toque no botão com o valor somado correto.</span></div>
+
+            <div id="tabPedagogico" class="tab-content">
+                <p style="margin-bottom: 10px; font-size: 0.95rem; color: #475569;">Progresso Escalonado (BNCC 1º ao 5º Ano):</p>
+                <div class="hab">
+                    <strong>🌱 Ciclo de Alfabetização (1º e 2º Ano)</strong>
+                    Níveis 1 a 5 focam no reconhecimento de cédulas e somas simples de números inteiros (EF01MA19 e EF02MA20).
+                </div>
+                <div class="hab">
+                    <strong>🪙 Centavos e Decimais (3º e 4º Ano)</strong>
+                    Níveis 6 a 8 introduzem moedas e a ideia de "parte de um todo", trabalhando a composição de valores com vírgula (EF03MA24 e EF04MA25).
+                </div>
+                <div class="hab">
+                    <strong>🚀 Domínio e Agilidade (5º Ano)</strong>
+                    Níveis 9 e 10 exigem o cálculo mental de valores mistos (notas + moedas) de forma rápida, consolidando a fluidez numérica e financeira (EF05MA06).
+                </div>
+                <div class="hab">
+                    <strong>💖 Recompensa de Precisão</strong>
+                    O bônus de 90% de acerto de primeira treina a auto-verificação, competência essencial para lidar com dinheiro em situações reais.
+                </div>
             </div>
-            <div class="how-step">
-                <span class="how-step-icon">❤️</span>
-                <div class="how-step-text"><strong>Cuide das vidas</strong><span>Cada erro tira uma vida. ACERTE 8 seguidos para ganhar uma vida!</span></div>
-            </div>
+
             <button class="btn-modal-close" style="background: linear-gradient(135deg, var(--purple), var(--blue));" onclick="fecharModal('modalHowTo')">Arrasou! Vamos lá 💪</button>
         </div>
     </div>
 
     <div id="modalLevelUp" class="modal">
         <div class="modal-content" style="text-align: center;">
-            <span style="font-size: 4rem; display: block; margin-bottom: 15px;">🎉</span>
+            <div id="levelStars" class="stars-wrap"></div>
             <h2 id="levelUpTitle" style="font-family: 'Fredoka One', cursive; color: var(--green);">Uau! Você passou de nível!</h2>
             <p id="levelUpText" style="margin-bottom: 20px;">Agora você está no Nível 2!</p>
             <button class="btn-modal-close" onclick="fecharModal('modalLevelUp')">Bora lá! 🚀</button>
@@ -519,34 +799,61 @@
 
     <div id="confettiContainer" style="position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden;"></div>
 
-    <div class="footer-credits">
-        Créditos: <a href="https://www.estudamos.com.br/somar-valores-de-cedulas-dinheiro/soma-de-notas-de-dinheiro-1.php" target="_blank" rel="noopener noreferrer">Estudamos.com.br</a>
+    <!-- ===== RODAPÉ DE CRÉDITOS ===== -->
+    <div class="footer-credit">
+        🎓 Atividade baseada em:
+        <a href="https://www.estudamos.com.br/somar-valores-de-cedulas-dinheiro/soma-de-notas-de-dinheiro-1.php"
+           target="_blank" rel="noopener">estudamos.com.br — Soma de Notas de Dinheiro</a>
     </div>
 
     <script>
-        const NOTE_IMAGES = {
-            1: 'https://i.postimg.cc/c4zKLS8V/cedula-de-1-real.jpg',
-            2: 'https://i.postimg.cc/tCc14jVK/cedula-de-2-reais.jpg',
-            5: 'https://i.postimg.cc/Pr7L5jwG/cedula-de-5-reais.jpg',
-            10: 'https://i.postimg.cc/65P7pXvx/cedula-de-10-reais.jpg',
-            20: 'https://i.postimg.cc/qMFtvT3T/cedula-de-20-reais.jpg',
-            50: 'https://i.postimg.cc/vHK1ZsVb/cedula-de-50-reais.jpg',
-            100: 'https://i.postimg.cc/qMFtvT30/cedula-de-100-reais.jpg',
-            200: 'https://i.postimg.cc/dtf7VYyJ/cedula-de-200-reais.jpg'
+        const MONEY_IMAGES = {
+            "0.05": 'https://i.postimg.cc/90bC2127/Moeda-de-5-centavos.jpg',
+            "0.1": 'https://i.postimg.cc/ZqNmnJmf/Moeda-de-10-centavos.jpg',
+            "0.25": 'https://i.postimg.cc/zBS1wpV6/Moeda-de-25-centavos.jpg',
+            "0.5": 'https://i.postimg.cc/Kj0Swz77/Moeda-de-50-centavos.jpg',
+            "1.0": 'https://i.postimg.cc/hGQDm9Lw/Moeda-de-1-real.jpg',
+            "1": 'https://i.postimg.cc/c4zKLS8V/cedula-de-1-real.jpg',
+            "2": 'https://i.postimg.cc/tCc14jVK/cedula-de-2-reais.jpg',
+            "5": 'https://i.postimg.cc/Pr7L5jwG/cedula-de-5-reais.jpg',
+            "10": 'https://i.postimg.cc/65P7pXvx/cedula-de-10-reais.jpg',
+            "20": 'https://i.postimg.cc/qMFtvT3T/cedula-de-20-reais.jpg',
+            "50": 'https://i.postimg.cc/vHK1ZsVb/cedula-de-50-reais.jpg',
+            "100": 'https://i.postimg.cc/qMFtvT30/cedula-de-100-reais.jpg',
+            "200": 'https://i.postimg.cc/dtf7VYyJ/cedula-de-200-reais.jpg'
         };
 
-        const LEVELS = [[1,2,5], [1,2,5,10], [2,5,10,20], [5,10,20,50], [10,20,50,100,200]];
+        const LEVELS = [
+            [1, 2, 5],             // Nível 1
+            [1, 2, 5, 10],          // Nível 2
+            [2, 5, 10, 20],         // Nível 3
+            [5, 10, 20, 50],        // Nível 4
+            [10, 20, 50, 100, 200], // Nível 5
+            [0.05, 0.1, 0.25],      // Nível 6
+            [0.1, 0.25, 0.5],       // Nível 7
+            [0.1, 0.25, 0.5, 1.0],  // Nível 8
+            [0.5, 1.0, 2, 5],       // Nível 9
+            [2, 5, 10, 20, 50, 100, 200, 0.5, 0.25] // Nível 10
+        ];
 
         let aluno = "---";
-        let level = 1;
-        let screen = 1;
+        let currentLevel = 1;
+        let currentScreen = 1;
         let points = 0;
-        let pointsAtLevelStart = 0; // Checkpoint para evitar frustração
+        let checkpointPoints = 0;
         let lives = 5;
+        let maxLives = 5;
         let hitsForLife = 0;
         let correctAnswer = 0;
+        let answerBreakdown = "";
         let isAnswering = false;
         let gameTimer = null;
+        
+        // Novas variáveis de performance
+        let levelFirstTryHits = 0; 
+        let currentCombo = 0;
+        let isFirstTry = true; 
+        let exerciseErrors = 0;
 
         // Inicialização com parâmetros de URL
         window.addEventListener('DOMContentLoaded', () => {
@@ -554,61 +861,132 @@
             const levelParam = params.get('nivel') || params.get('level');
             if (levelParam) {
                 const requestedLevel = parseInt(levelParam);
-                if (requestedLevel >= 1 && requestedLevel <= 5) {
-                    level = requestedLevel;
-                    updateUI();
+                if (requestedLevel >= 1 && requestedLevel <= 10) {
+                    currentLevel = requestedLevel;
                 }
             }
+            updateUI();
+            abrirModal('modalHowTo');
+
+            // Drag and Drop
+            const gameEl = document.querySelector('.game');
+            gameEl.addEventListener('dragover', (e) => { e.preventDefault(); gameEl.style.transform = 'scale(1.02)'; });
+            gameEl.addEventListener('dragleave', () => { gameEl.style.transform = 'scale(1)'; });
+            gameEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                gameEl.style.transform = 'scale(1)';
+                const file = e.dataTransfer.files[0];
+                if (file) processFile(file);
+            });
         });
 
-        function formatMoney(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        function editarAluno() {
+            const novo = prompt("Qual o nome do aluno?", aluno === "---" ? "" : aluno);
+            if (novo) { aluno = novo; updateUI(); }
+        }
+
+        function editarCodigo() {
+            const novo = prompt("Qual o código de identificação?");
+            if (novo) { document.getElementById('codigoAluno').textContent = novo; }
+        }
+
         function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        
+        function switchTab(btn, tabId) {
+            // Remove active de todos os botões e conteúdos
+            const modal = btn.closest('.modal-content');
+            modal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            modal.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Adiciona active no selecionado
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
         function fecharModal(id) { 
             document.getElementById(id).style.display = 'none'; 
-            if(id === 'modalBNCC' || id === 'modalLevelUp' || id === 'modalGameOver') {
+            if ((id === 'modalHowTo') && correctAnswer === 0) {
+                generateQuestion();
+            } else if (id === 'modalLevelUp' || id === 'modalGameOver') {
                 generateQuestion();
             }
         }
 
         function restartLevel() {
             lives = 5;
-            points = pointsAtLevelStart;
-            screen = 1;
+            points = checkpointPoints;
+            currentScreen = 1;
             hitsForLife = 0;
             fecharModal('modalGameOver');
+        }
+
+        function createFallback(value) {
+            const div = document.createElement('div');
+            div.className = 'note-fallback';
+            div.textContent = formatMoney(value);
+            return div;
         }
 
         function generateQuestion() {
             if (gameTimer) clearTimeout(gameTimer);
             isAnswering = false;
+            isFirstTry = true; 
+            exerciseErrors = 0;
+            document.getElementById('btnNext').style.display = 'none';
             document.getElementById('message').innerHTML = "";
+            document.getElementById('mascote').className = "mascote";
             document.getElementById('mascote').textContent = "🤑";
             const area = document.getElementById('moneyArea');
             const opts = document.getElementById('options');
             area.innerHTML = ""; opts.innerHTML = "";
-
-            const notes = LEVELS[level - 1];
+ 
+            const notes = LEVELS[currentLevel - 1];
             correctAnswer = 0;
+            let vals = [];
             for (let i = 0; i < 6; i++) {
                 const val = notes[Math.floor(Math.random() * notes.length)];
                 correctAnswer += val;
+                vals.push(val);
                 const img = document.createElement('img');
-                img.src = NOTE_IMAGES[val];
+                img.src = MONEY_IMAGES[val];
+                if (val < 2 && val !== 1) img.classList.add('coin'); // 1.0 é moeda, 1 é cédula
                 img.referrerPolicy = "no-referrer";
+                img.onerror = () => img.replaceWith(createFallback(val));
+                img.style.animationDelay = (i * 0.05) + "s";
                 area.appendChild(img);
             }
+            
+            // Corrigir precisão decimal
+            correctAnswer = Math.round(correctAnswer * 100) / 100;
+
+            // Criar breakdown pedagógico com valores formatados
+            vals.sort((a,b) => b-a);
+            answerBreakdown = vals.map(v => v >= 1 ? v : v.toFixed(2).replace('.', ',')).join(' + ') + ' = ' + (correctAnswer >= 1 ? correctAnswer : correctAnswer.toFixed(2).replace('.', ','));
 
             let options = [correctAnswer];
             while (options.length < 6) {
-                let spread = Math.max(10, Math.floor(correctAnswer * 0.25));
-                let fake = correctAnswer + (Math.floor(Math.random() * (spread * 2 + 1)) - spread);
-                if (fake > 0 && !options.includes(fake)) options.push(fake);
+                let fake;
+                if (currentLevel >= 6) {
+                    // Spread para centavos
+                    let spread = 0.50; // Variação de até 50 centavos
+                    fake = correctAnswer + (Math.random() * (spread * 2) - spread);
+                    fake = Math.round(fake * 20) / 20; // Arredonda para o múltiplo de 0.05 mais próximo
+                } else {
+                    // Spread para inteiros
+                    let spread = Math.max(10, Math.floor(correctAnswer * 0.25));
+                    fake = correctAnswer + (Math.floor(Math.random() * (spread * 2 + 1)) - spread);
+                }
+                
+                if (fake > 0 && !options.some(o => Math.abs(o - fake) < 0.01)) {
+                    options.push(Math.round(fake * 100) / 100);
+                }
             }
             options.sort(() => Math.random() - 0.5);
 
-            options.forEach(v => {
+            options.forEach((v, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'option';
+                btn.style.animationDelay = (0.2 + i * 0.05) + "s";
                 btn.textContent = formatMoney(v);
                 btn.onclick = () => checkAnswer(v, btn);
                 opts.appendChild(btn);
@@ -621,49 +999,134 @@
             isAnswering = true;
             const msg = document.getElementById('message');
             const mascote = document.getElementById('mascote');
+            mascote.className = "mascote"; 
 
             if (val === correctAnswer) {
-                points += 10; hitsForLife++;
-                btn.classList.add('correct');
-                msg.innerHTML = "✅ Arrasou! Você acertou!";
-                msg.className = "message msg-correct";
-                mascote.textContent = "🤩";
-                launchConfetti(15);
-                if (hitsForLife >= 8) { if (lives < 5) lives++; hitsForLife = 0; msg.innerHTML += " +1 Vida! ❤️"; }
-            } else {
-                lives--; hitsForLife = 0;
-                btn.classList.add('wrong');
-                msg.innerHTML = `❌ Ops! Era ${formatMoney(correctAnswer)}`;
-                msg.className = "message msg-wrong";
-                mascote.textContent = "😢";
-                document.querySelectorAll('.option').forEach(b => { if (b.textContent === formatMoney(correctAnswer)) b.classList.add('correct'); });
-            }
+                // Cálculo de pontos com combo
+                let basePoints = 10;
+                let multiplier = 1 + (currentCombo * 0.1);
+                let gain = Math.floor(basePoints * multiplier);
+                
+                points += gain;
+                hitsForLife++;
+                currentCombo++;
+                
+                if (isFirstTry) levelFirstTryHits++;
 
-            updateUI();
-            if (lives <= 0) { 
-                gameTimer = setTimeout(() => abrirModal('modalGameOver'), 800); 
-            }
-            else {
+                btn.classList.add('correct');
+                
+                if (hitsForLife >= 8) { 
+                    if (lives < maxLives) {
+                        lives++;
+                        msg.innerHTML = `✅ Acertou! +1 Vida! (Combo x${currentCombo})`;
+                    } else {
+                        msg.innerHTML = `✅ Perfeito! (Combo x${currentCombo})`;
+                        points += 5; // Bônus extra se já tiver vidas cheias
+                    }
+                    hitsForLife = 0;
+                } else {
+                    msg.innerHTML = `✅ Acertou! +${gain} pts`;
+                }
+                
+                msg.className = "message msg-correct";
+                mascote.textContent = currentCombo > 5 ? "🔥" : "🤩";
+                mascote.classList.add('happy');
+                launchConfetti(currentCombo > 5 ? 25 : 15);
+
+                updateUI();
                 gameTimer = setTimeout(() => {
-                    screen++;
-                    if (screen > 25) { 
-                        screen = 1; 
-                        level++;
-                        pointsAtLevelStart = points; // Atualiza checkpoint ao subir de nível
-                        updateUI(); // Garante atualização imediata do nível em tela
-                        if (level > 5) {
+                    currentScreen++;
+                    if (currentScreen > 20) { 
+                        // Fim do Nível - Calcular Bônus de 90%
+                        const accuracy = (levelFirstTryHits / 20) * 100;
+                        let bonusText = "";
+                        
+                        if (accuracy >= 90) {
+                            points += 500;
+                            maxLives = 6; // Recompensa épica: aumenta limite de vidas
+                            lives = maxLives; // Já entrega a vida cheia como presente!
+                            bonusText = "🏆 BÔNUS DE MESTRE: +500 pts e +1 Coração Máximo (Preenchido!)";
+                            launchConfetti(100);
+                        } else if (accuracy >= 70) {
+                            points += 200;
+                            bonusText = "🥈 BÔNUS DE ELITE: +200 pts!";
+                        }
+
+                        currentScreen = 1; 
+                        currentLevel++;
+                        levelFirstTryHits = 0; // Reset para o próximo nível
+                        checkpointPoints = points;
+                        updateUI();
+
+                        if (currentLevel > 10) {
                             document.getElementById('finalPoints').textContent = points + " PONTOS!";
                             abrirModal('modalFinish');
-                            launchConfetti(60);
+                            launchConfetti(80);
                         } else {
-                            document.getElementById('levelUpText').textContent = `Agora você está no Nível ${level}!`;
+                            let stars = 1;
+                            if (accuracy >= 90) stars = 3;
+                            else if (accuracy >= 70) stars = 2;
+                            
+                            showStars(stars);
+                            document.getElementById('levelUpTitle').textContent = accuracy >= 90 ? "✨ DESEMPENHO INCRÍVEL! ✨" : "Uau! Você passou de nível!";
+                            document.getElementById('levelUpText').innerHTML = `Precisão: <strong>${accuracy.toFixed(0)}%</strong> de primeira!<br>${bonusText}<br><br>Agora você está no Nível ${currentLevel}!`;
                             abrirModal('modalLevelUp');
-                            launchConfetti(30);
                         }
                     } else {
                         generateQuestion();
                     }
-                }, 1000);
+                }, 1200);
+
+            } else {
+                lives--; 
+                hitsForLife = 0;
+                currentCombo = 0; 
+                isFirstTry = false; 
+                exerciseErrors++;
+                
+                btn.classList.add('wrong');
+                
+                let errorMsg = `❌ Ops! Era ${formatMoney(correctAnswer)}`;
+                if (exerciseErrors >= 1) {
+                    errorMsg += `<div class="breakdown">💡 Veja a soma: ${answerBreakdown}</div>`;
+                }
+                
+                msg.innerHTML = errorMsg;
+                msg.className = "message msg-wrong";
+                mascote.textContent = "😢";
+                mascote.classList.add('sad');
+                document.querySelectorAll('.option').forEach(b => { 
+                    if (b.textContent === formatMoney(correctAnswer)) b.classList.add('correct'); 
+                });
+
+                updateUI();
+                if (lives <= 0) { 
+                    gameTimer = setInterval(() => {
+                        if (document.getElementById('modalGameOver').style.display !== 'flex') {
+                           abrirModal('modalGameOver');
+                           clearInterval(gameTimer);
+                        }
+                    }, 500);
+                } else {
+                    document.getElementById('btnNext').style.display = 'flex';
+                }
+            }
+        }
+
+        function continueAfterError() {
+            isAnswering = false;
+            generateQuestion();
+        }
+
+        function showStars(count) {
+            const wrap = document.getElementById('levelStars');
+            wrap.innerHTML = "";
+            for (let i = 1; i <= 3; i++) {
+                const s = document.createElement('span');
+                s.className = i <= count ? 'star active' : 'star';
+                s.innerHTML = "★";
+                s.style.animationDelay = (i * 0.2) + "s";
+                wrap.appendChild(s);
             }
         }
 
@@ -689,12 +1152,39 @@
         }
 
         function updateUI() {
+            if (!document.getElementById('lives')) return;
             document.getElementById('alunoNome').textContent = aluno;
-            document.getElementById('level').textContent = level;
-            document.getElementById('screen').textContent = screen;
+            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('screen').textContent = currentScreen;
             document.getElementById('points').textContent = points;
-            document.getElementById('lives').textContent = "❤️".repeat(lives);
-            document.getElementById('progressBar').style.width = (screen / 25 * 100) + "%";
+            
+            // Combo UI
+            const comboCard = document.getElementById('comboCard');
+            if (currentCombo > 1) {
+                comboCard.style.display = 'flex';
+                document.getElementById('comboValue').textContent = `x${currentCombo}`;
+                if (currentCombo > 5) {
+                    comboCard.style.background = '#fff7ed';
+                    comboCard.style.borderColor = '#fb923c';
+                    comboCard.style.color = '#c2410c';
+                } else {
+                    comboCard.style.background = '#f0f9ff';
+                    comboCard.style.borderColor = '#bae6fd';
+                    comboCard.style.color = '#0369a1';
+                }
+            } else {
+                comboCard.style.display = 'none';
+            }
+
+            // Visual das vidas
+            let hearts = "";
+            for(let i=0; i<maxLives; i++) {
+                hearts += i < lives ? "❤️" : "🖤";
+            }
+            document.getElementById('lives').textContent = hearts;
+            
+            const pct = Math.max(4, ((currentScreen - 1) / 20) * 100);
+            document.getElementById('progressBar').style.width = pct + "%";
         }
 
         function saveGame() {
@@ -710,7 +1200,19 @@
             document.getElementById('codigoAluno').textContent = "✔ salvo";
             updateUI();
             
-            const state = { aluno, level, screen, points, lives, hitsForLife };
+            const dataSave = new Date().toLocaleString('pt-BR');
+            const state = { 
+                aluno, 
+                dataSave, 
+                currentLevel, 
+                currentScreen, 
+                points, 
+                lives, 
+                maxLives,
+                hitsForLife, 
+                levelFirstTryHits,
+                checkpointPoints 
+            };
             const json = JSON.stringify(state);
             const encoded = btoa(unescape(encodeURIComponent(json)));
             const blob = new Blob([encoded], { type: 'text/plain' });
@@ -724,7 +1226,11 @@
 
         function loadGame(e) {
             const file = e.target.files[0];
-            if (!file) return;
+            if (file) processFile(file);
+            e.target.value = "";
+        }
+
+        function processFile(file) {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 try {
@@ -733,31 +1239,31 @@
                     const d = JSON.parse(decoded);
                     
                     aluno = d.aluno || "---"; 
-                    level = d.level || 1; 
-                    screen = d.screen || 1; 
+                    currentLevel = d.currentLevel || d.level || 1; 
+                    currentScreen = d.currentScreen || d.screen || 1; 
                     points = d.points || 0; 
-                    pointsAtLevelStart = points; // Define checkpoint no momento do carregamento
+                    checkpointPoints = d.checkpointPoints !== undefined ? d.checkpointPoints : (d.pointsAtLevelStart !== undefined ? d.pointsAtLevelStart : points);
                     lives = d.lives || 5; 
+                    maxLives = d.maxLives || 5;
                     hitsForLife = d.hitsForLife || 0;
+                    levelFirstTryHits = d.levelFirstTryHits || 0;
                     
                     document.getElementById('codigoAluno').textContent = "✔ carregado";
                     
-                    // Reset do input de arquivo para permitir recarregar o mesmo arquivo
-                    e.target.value = "";
-                    
-                    // Força fechamento de modais de alerta e inicia questão
-                    fecharModal('modalBNCC');
                     fecharModal('modalGameOver');
-                    fecharModal('modalHowTo');
                     fecharModal('modalLevelUp');
+                    abrirModal('modalHowTo');
                     
-                    generateQuestion();
+                    updateUI();
                 } catch (err) { 
                     alert("Arquivo corrompido ou inválido!"); 
                 }
             };
             reader.readAsText(file);
         }
+        
+        // Função formatMoney movida para escopo global após o bloco reescrito
+        function formatMoney(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     </script>
 </body>
 </html>
