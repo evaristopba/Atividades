@@ -57,7 +57,7 @@
         /* ========== GAME CARD ========== */
         .game {
             background: rgba(255, 255, 255, .97);
-            padding: 22px 20px 28px;
+            padding: 16px 18px 24px;
             border-radius: 28px;
             width: 100%;
             max-width: 920px;
@@ -72,6 +72,20 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===== BADGE DE TIPO DE NÍVEL ===== */
+        .level-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 99px;
+            font-family: 'Fredoka One', cursive;
+            font-size: .9rem;
+            margin-bottom: 12px;
+            animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1);
+        }
+        .badge-cedula { background: #e0f7fa; color: #006064; border: 2px solid #80deea; }
+        .badge-moeda { background: #fff8e1; color: #e65100; border: 2px solid #ffcc80; }
+        .badge-misto { background: #f3e5f5; color: #6a1b9a; border: 2px solid #ce93d8; }
+
         /* ========== TÍTULO ========== */
         .game-title {
             font-family: 'Fredoka One', cursive;
@@ -80,7 +94,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 14px;
+            margin-bottom: 8px;
             letter-spacing: 1px;
             animation: pulse 2.5s ease-in-out infinite;
         }
@@ -95,7 +109,7 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
-            margin: 0 0 14px;
+            margin: 0 0 10px;
             justify-content: center;
         }
 
@@ -128,7 +142,7 @@
 
         /* ========== BARRA DE PROGRESSO ========== */
         .progress-wrap {
-            margin: 0 0 18px;
+            margin: 0 0 10px;
             background: #f0f0f0;
             border-radius: 99px;
             height: 14px;
@@ -165,7 +179,7 @@
             gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
         }
 
         .btn-action {
@@ -215,7 +229,7 @@
             font-family: 'Fredoka One', cursive;
             font-size: clamp(1.1rem, 3.5vw, 1.5rem);
             color: var(--purple);
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
 
         /* ========== AREA DAS CÉDULAS ========== */
@@ -225,7 +239,8 @@
             gap: 14px;
             justify-items: center;
             align-items: center;
-            margin: 0 0 22px;
+            margin: 0 0 14px;
+            min-height: 160px;
         }
 
         .money-area img {
@@ -235,7 +250,28 @@
             transition: transform .2s, box-shadow .2s;
             animation: popIn .35s cubic-bezier(.34, 1.56, .64, 1) backwards;
             referrerpolicy: no-referrer;
+            cursor: pointer;
         }
+
+        /* Modal de Zoom */
+        #zoomOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            cursor: zoom-out;
+        }
+        #zoomImg {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255,255,255,0.2);
+            animation: zoomIn .3s cubic-bezier(.34, 1.56, .64, 1);
+        }
+        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* Estilo para moedas */
         .money-area img.coin {
@@ -271,18 +307,18 @@
         .options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .option {
-            padding: 14px 8px;
+            padding: 8px 6px;
             background: linear-gradient(135deg, #f72585, #b5179e);
             color: white;
             border-radius: 16px;
             cursor: pointer;
             font-family: 'Fredoka One', cursive;
-            font-size: clamp(1rem, 3vw, 1.3rem);
+            font-size: clamp(0.9rem, 2.8vw, 1.1rem);
             transition: transform .15s, box-shadow .15s, background .2s;
             box-shadow: 0 4px 14px rgba(247, 37, 133, .35);
             border: 3px solid transparent;
@@ -619,6 +655,71 @@
             animation: popIn .3s;
         }
 
+        /* ========== DECOMPOSIÇÃO PEDAGÓGICA ========== */
+        .decomposicao {
+            margin: 10px auto 0;
+            padding: 8px 10px;
+            background: linear-gradient(135deg, #fff8e1, #fff3e0);
+            border: 2px solid #ffcc80;
+            border-radius: 18px;
+            max-width: 98%;
+            animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1);
+            display: none;
+        }
+        .decomposicao .dec-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: .9rem; color: #e65100;
+            margin-bottom: 12px; display: block;
+        }
+        .dec-grid {
+            display: flex; flex-wrap: nowrap; gap: 4px;
+            align-items: center; justify-content: center;
+            overflow: visible;
+        }
+        .dec-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            flex: 1 1 0; min-width: 0;
+        }
+        .dec-item img {
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            width: 100%; max-width: 52px; height: auto;
+        }
+        .dec-item img.coin { border-radius: 50%; }
+        .dec-item .dec-val {
+            font-family: 'Fredoka One', cursive;
+            font-size: .7rem; color: #bf360c;
+            white-space: nowrap;
+        }
+        .dec-plus, .dec-equals {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem; color: #ff8f00;
+            flex-shrink: 0; align-self: center;
+            padding-bottom: 16px;
+        }
+        .dec-total {
+            flex-shrink: 0;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #06d6a0, #0ea5e9);
+            color: white; border-radius: 10px;
+            font-family: 'Fredoka One', cursive;
+            font-size: .9rem;
+            align-self: center;
+            white-space: nowrap;
+        }
+
+        /* BNCC Labels */
+        .bncc-serie {
+            margin: 14px 0 4px; padding: 6px 12px; border-radius: 8px;
+            font-family: 'Fredoka One', cursive; font-size: 1rem; color: white;
+            display: inline-block;
+        }
+        .serie-1 { background: #e91e63; }
+        .serie-2 { background: #9c27b0; }
+        .serie-3 { background: #3f51b5; }
+        .serie-4 { background: #009688; }
+        .serie-5 { background: #ff9800; }
+
         /* ========== RESPONSIVO ========== */
         @media (max-width: 600px) {
             .money-area { grid-template-columns: repeat(2, 1fr); }
@@ -657,7 +758,9 @@
 <body>
 
     <div class="game">
-        <h1 class="game-title">💰 Somar as Cédulas 💰</h1>
+        <h1 class="game-title">💰 Mestre das Cédulas 💰</h1>
+        
+        <div id="levelBadge" class="level-badge badge-cedula">💵 Cédulas Simples</div>
 
         <div class="info">
             <div class="card card-aluno" onclick="editarAluno()" style="cursor: pointer;" title="Clique para mudar o nome">
@@ -670,7 +773,7 @@
                 <span class="card-icon">🎯</span><span class="card-label">NÍVEL</span><span id="level" class="card-value">1</span>
             </div>
             <div class="card card-screen">
-                <span class="card-icon">📋</span><span class="card-label">EXERCÍCIO</span><span class="card-value"><span id="screen">1</span>/20</span>
+                <span class="card-icon">📋</span><span class="card-label">EXERCÍCIO</span><span class="card-value"><span id="screen">1</span>/25</span>
             </div>
             <div class="card card-points">
                 <span class="card-icon">⭐</span><span class="card-label">PONTOS</span><span id="points" class="card-value">0</span>
@@ -700,6 +803,10 @@
         <div id="moneyArea" class="money-area"></div>
         <div id="options" class="options"></div>
         <div id="message" class="message"></div>
+        
+        <!-- Decomposição Visual -->
+        <div id="decomposicao" class="decomposicao"></div>
+
         <button id="btnNext" class="btn-action" style="display: none; margin: 15px auto; background: var(--purple); color: white; padding: 12px 28px; font-size: 1.1rem; border-radius: 16px; box-shadow: 0 8px 20px rgba(114, 9, 183, 0.3);" onclick="continueAfterError()">Estudei a dica! Próximo ➡</button>
     </div>
 
@@ -708,48 +815,114 @@
             <div class="modal-tabs">
                 <button class="tab-btn active" onclick="switchTab(this, 'tabTutorial')">🎮 Como Jogar</button>
                 <button class="tab-btn" onclick="switchTab(this, 'tabPedagogico')">🧠 Pedagógico</button>
+                <button class="tab-btn" onclick="switchTab(this, 'tabProfessores')">👩‍🏫 Para Professores</button>
+                <button class="tab-btn" onclick="updateStatsTab(this)">📊 Estatísticas</button>
             </div>
 
             <div id="tabTutorial" class="tab-content active">
                 <div class="how-step">
                     <span class="how-step-icon">👀</span>
-                    <div class="how-step-text"><strong>Observe e Some</strong><span>Some o valor total das 6 cédulas mentalmente!</span></div>
+                    <div class="how-step-text"><strong>Olhe as cédulas e moedas</strong><span>Aparecem 6 peças na tela. Observe bem se é nota ou moeda!</span></div>
                 </div>
                 <div class="how-step">
-                    <span class="how-step-icon">🎯</span>
-                    <div class="how-step-text"><strong>Sem Atalhos</strong><span>Você só avança se acertar. Se errar, precisa repetir o mesmo exercício!</span></div>
+                    <span class="how-step-icon">🧮</span>
+                    <div class="how-step-text"><strong>Some os valores</strong><span>Calcule o total na cabeça. Quanto dinheiro temos no total?</span></div>
                 </div>
                 <div class="how-step">
-                    <span class="how-step-icon">🔥</span>
-                    <div class="how-step-text"><strong>Combo de Pontos</strong><span>Acertos seguidos aumentam seu multiplicador de pontos.</span></div>
+                    <span class="how-step-icon">👆</span>
+                    <div class="how-step-text"><strong>Escolha a resposta</strong><span>Toque no botão com o valor correto. Se errar, terá uma dica visual!</span></div>
                 </div>
                 <div class="how-step">
                     <span class="how-step-icon">❤️</span>
-                    <div class="how-step-text"><strong>Recupere Vidas</strong><span>Cada erro tira 1 vida. Acertar 8 seguidos te dá uma vida extra!</span></div>
+                    <div class="how-step-text"><strong>Cuide das suas vidas</strong><span>Você começa com 5 vidas. Acerte 8 seguidas para ganhar uma vida extra!</span></div>
                 </div>
                 <div class="how-step">
                     <span class="how-step-icon">🏆</span>
-                    <div class="how-step-text"><strong>Suba de Nível</strong><span>São 20 exercícios por nível. São 10 níveis ao todo!</span></div>
+                    <div class="how-step-text"><strong>Domine os 10 Níveis</strong><span>Níveis 1-5: cédulas 💵 | Níveis 6-8: moedas 🪙 | Níveis 9-10: misturado 💰</span></div>
+                </div>
+                <div class="how-step">
+                    <span class="how-step-icon">💾</span>
+                    <div class="how-step-text"><strong>Salve seu Progresso</strong><span>Use o botão "Salvar" para não perder seus pontos e continuar depois!</span></div>
                 </div>
             </div>
 
             <div id="tabPedagogico" class="tab-content">
-                <p style="margin-bottom: 10px; font-size: 0.95rem; color: #475569;">Progresso Escalonado (BNCC 1º ao 5º Ano):</p>
+                <p style="margin-bottom: 10px; font-size: 0.95rem; color: #475569;">Mapeamento Completo de Habilidades (BNCC):</p>
+
+                <div class="bncc-serie serie-1">🎒 1º Ano — EF01MA19</div>
                 <div class="hab">
-                    <strong>🌱 Ciclo de Alfabetização (1º e 2º Ano)</strong>
-                    Níveis 1 a 5 focam no reconhecimento de cédulas e somas simples de números inteiros (EF01MA19 e EF02MA20).
+                    <strong>Reconhecimento de moedas e cédulas</strong>
+                    Identificar e reconhecer o valor de moedas e cédulas do cotidiano (Níveis 1-2).
+                </div>
+
+                <div class="bncc-serie serie-2">🎒 2º Ano — EF02MA20</div>
+                <div class="hab">
+                    <strong>Sistema Monetário Brasileiro</strong>
+                    Relacionar valores de cédulas e moedas e estabelecer equivalências em problemas de adição simples (Níveis 1-5).
+                </div>
+
+                <div class="bncc-serie serie-3">🎒 3º Ano — EF03MA24</div>
+                <div class="hab">
+                    <strong>Equivalência e Cálculo</strong>
+                    Resolver problemas que envolvam a comparação e a equivalência de valores para representar uma mesma quantia.
+                </div>
+
+                <div class="bncc-serie serie-4">🎒 4º Ano — EF04MA25</div>
+                <div class="hab">
+                    <strong>Números Decimais (Centavos)</strong>
+                    Operar com cédulas e moedas em situações-problema de compra e venda, incluindo o cálculo de valores quebrados (Níveis 6-8).
+                </div>
+
+                <div class="bncc-serie serie-5">🎒 5º Ano — EF05MA06</div>
+                <div class="hab">
+                    <strong>Raciocínio Financeiro Prático</strong>
+                    Resolver problemas complexos com decimais, integrando moedas e cédulas para calcular somas e trocos com precisão (Níveis 9-10).
+                </div>
+            </div>
+
+            <div id="tabProfessores" class="tab-content">
+                <p style="margin-bottom: 10px; font-size: 0.95rem; color: #475569;">Guia Técnico de Progressão:</p>
+                <div style="overflow-x: auto; margin-bottom: 15px;">
+                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse; text-align: left; background: #f8fafc; border-radius: 12px; overflow: hidden;">
+                        <thead>
+                            <tr style="background: #e2e8f0; color: #475569;">
+                                <th style="padding: 8px;">Níveis</th>
+                                <th style="padding: 8px;">Série (BNCC)</th>
+                                <th style="padding: 8px;">Itens na Tela</th>
+                                <th style="padding: 8px;">Valores</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">1 - 2</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">1º Ano</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">2 a 5</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">Conhecendo Cédulas</td></tr>
+                            <tr><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">3 - 4</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">2º Ano (A)</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">3 a 6</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">Cédulas até R$ 50</td></tr>
+                            <tr><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">5 - 7</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">2º Ano (B)</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">4 a 7</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">Cédulas até R$ 200</td></tr>
+                            <tr><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">8</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">3º e 4º Ano</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">4 a 7</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">Moedas e Decimais</td></tr>
+                            <tr><td style="padding: 6px 8px;">9 - 10</td><td style="padding: 6px 8px;">5º Ano</td><td style="padding: 6px 8px;">5 a 8</td><td style="padding: 6px 8px;">Misto e Troco</td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="hab">
-                    <strong>🪙 Centavos e Decimais (3º e 4º Ano)</strong>
-                    Níveis 6 a 8 introduzem moedas e a ideia de "parte de um todo", trabalhando a composição de valores com vírgula (EF03MA24 e EF04MA25).
+                    <strong>📈 Dificuldade Progressiva (Andaimes)</strong>
+                    O app não usa mais 6 itens fixos. Ele começa com menos itens e aumenta conforme o aluno acerta (a cada 8 exercícios). Isso respeita a <em>Carga Cognitiva</em>, evitando que o aluno se perca em cálculos muito extensos antes de dominar a identificação das notas.
                 </div>
                 <div class="hab">
-                    <strong>🚀 Domínio e Agilidade (5º Ano)</strong>
-                    Níveis 9 e 10 exigem o cálculo mental de valores mistos (notas + moedas) de forma rápida, consolidando a fluidez numérica e financeira (EF05MA06).
+                    <strong>🏗️ Andaime (Scaffolding)</strong>
+                    O app utiliza a técnica de <em>scaffolding</em>: inicia com baixa carga cognitiva (2-3 itens) e aumenta a complexidade conforme o aluno demonstra competência. Isso respeita a Zona de Desenvolvimento Proximal (ZDP).
                 </div>
                 <div class="hab">
-                    <strong>💖 Recompensa de Precisão</strong>
-                    O bônus de 90% de acerto de primeira treina a auto-verificação, competência essencial para lidar com dinheiro em situações reais.
+                    <strong>📊 Diagnóstico Sem Papel</strong>
+                    O arquivo <code>.txt</code> gerado ao "Salvar" permite acompanhar o nível e a pontuação. Use a aba "Estatísticas" para ver quais notas causam mais confusão.
+                </div>
+                <div class="hab">
+                    <strong>💡 Zoom e Detalhes</strong>
+                    Incentive o aluno a clicar nas moedas para ampliá-las. Isso ajuda na observação de detalhes que diferenciam, por exemplo, a moeda de 5¢ da de 50¢.
+                </div>
+            </div>
+
+            <div id="tabStats" class="tab-content">
+                <p style="margin-bottom: 10px; font-size: 0.95rem; color: #475569;">Desempenho Atual do Aluno:</p>
+                <div id="statsContainer">
+                    <p style="font-size: 0.9rem; color: #94a3b8; text-align: center; padding: 20px;">Nenhum erro registrado até agora. Continue assim! 🌟</p>
                 </div>
             </div>
 
@@ -798,6 +971,12 @@
     </div>
 
     <div id="confettiContainer" style="position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden;"></div>
+
+    <!-- Overlay de Zoom -->
+    <div id="zoomOverlay" onclick="this.style.display='none'">
+        <img id="zoomImg" src="" alt="Dinheiro ampliado">
+        <p style="position: absolute; bottom: 20px; color: white; font-weight: bold; font-family: 'Fredoka One', cursive;">Clique em qualquer lugar para fechar</p>
+    </div>
 
     <!-- ===== RODAPÉ DE CRÉDITOS ===== -->
     <div class="footer-credit">
@@ -854,6 +1033,42 @@
         let currentCombo = 0;
         let isFirstTry = true; 
         let exerciseErrors = 0;
+        let lastItems = []; // Guardar os itens da questão atual
+        let errorsLog = {}; // Guardar erros por valor de nota
+
+        // Sistema de Áudio (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1); // C6
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.3);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'level') {
+                osc.type = 'triangle';
+                [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+                    osc.frequency.setValueAtTime(f, now + i * 0.1);
+                });
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            }
+        }
 
         // Inicialização com parâmetros de URL
         window.addEventListener('DOMContentLoaded', () => {
@@ -890,7 +1105,14 @@
             if (novo) { document.getElementById('codigoAluno').textContent = novo; }
         }
 
-        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function abrirModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+            if (id === 'modalHowTo') {
+                // Resetar para a primeira aba sempre que abrir o guia
+                const tutorialBtn = document.querySelector('#modalHowTo .tab-btn');
+                if (tutorialBtn) switchTab(tutorialBtn, 'tabTutorial');
+            }
+        }
         
         function switchTab(btn, tabId) {
             // Remove active de todos os botões e conteúdos
@@ -900,7 +1122,36 @@
             
             // Adiciona active no selecionado
             btn.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+            if (tabId) document.getElementById(tabId).classList.add('active');
+        }
+
+        function updateStatsTab(btn) {
+            switchTab(btn, 'tabStats');
+            const container = document.getElementById('statsContainer');
+            const keys = Object.keys(errorsLog);
+            
+            if (keys.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.9rem; color: #94a3b8; text-align: center; padding: 20px;">Nenhum erro registrado até agora. Continue assim! 🌟</p>';
+                return;
+            }
+
+            let html = '<p style="font-size: 0.9rem; margin-bottom: 10px;">Notas/Moedas que causaram erros:</p>';
+            keys.sort((a,b) => errorsLog[b] - errorsLog[a]).forEach(val => {
+                const numericKey = parseFloat(val);
+                // Garantir que pegamos a imagem correta mesmo se a chave for string do JSON
+                let imgUri = MONEY_IMAGES[numericKey] || MONEY_IMAGES[val] || MONEY_IMAGES[String(numericKey)];
+                
+                html += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px; border-radius: 12px; margin-bottom: 6px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${imgUri}" style="width: 40px; border-radius: 4px;" onerror="this.src='https://placehold.co/40x20?text=$'">
+                            <span style="font-weight: bold; color: var(--purple);">${formatMoney(numericKey)}</span>
+                        </div>
+                        <span style="background: #fee2e2; color: #ef4444; padding: 2px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: bold;">${errorsLog[val]}x</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
         }
 
         function fecharModal(id) { 
@@ -927,34 +1178,72 @@
             return div;
         }
 
+        function updateBadge() {
+            const badge = document.getElementById('levelBadge');
+            badge.className = 'level-badge';
+            if (currentLevel <= 5) {
+                badge.classList.add('badge-cedula');
+                badge.textContent = '💵 Nível de Cédulas';
+            } else if (currentLevel <= 8) {
+                badge.classList.add('badge-moeda');
+                badge.textContent = '🪙 Nível de Moedas';
+            } else {
+                badge.classList.add('badge-misto');
+                badge.textContent = '💰 Nível Misto (Notas + Moedas)';
+            }
+        }
+
         function generateQuestion() {
             if (gameTimer) clearTimeout(gameTimer);
             isAnswering = false;
             isFirstTry = true; 
             exerciseErrors = 0;
             document.getElementById('btnNext').style.display = 'none';
+            document.getElementById('decomposicao').style.display = 'none';
             document.getElementById('message').innerHTML = "";
             document.getElementById('mascote').className = "mascote";
             document.getElementById('mascote').textContent = "🤑";
             const area = document.getElementById('moneyArea');
             const opts = document.getElementById('options');
             area.innerHTML = ""; opts.innerHTML = "";
+            
+            updateBadge();
  
             const notes = LEVELS[currentLevel - 1];
             correctAnswer = 0;
             let vals = [];
-            for (let i = 0; i < 6; i++) {
+            lastItems = [];
+
+            // QUANTIDADE PROGRESSIVA: Aumenta a base conforme o nível
+            const baseItemsByLevel = currentLevel <= 2 ? 2 : (currentLevel <= 4 ? 3 : (currentLevel <= 7 ? 4 : 5));
+            const maxItemsByLevel = currentLevel <= 2 ? 5 : (currentLevel <= 4 ? 6 : (currentLevel <= 7 ? 7 : 8));
+            
+            const itemsCount = Math.min(maxItemsByLevel, baseItemsByLevel + Math.floor((currentScreen - 1) / 6)); // Aumenta mais rápido (a cada 6)
+
+            for (let i = 0; i < itemsCount; i++) {
                 const val = notes[Math.floor(Math.random() * notes.length)];
                 correctAnswer += val;
                 vals.push(val);
+                lastItems.push(val);
                 const img = document.createElement('img');
                 img.src = MONEY_IMAGES[val];
-                if (val < 2 && val !== 1) img.classList.add('coin'); // 1.0 é moeda, 1 é cédula
+                if (val < 2 && val !== 1) img.classList.add('coin'); 
                 img.referrerPolicy = "no-referrer";
                 img.onerror = () => img.replaceWith(createFallback(val));
                 img.style.animationDelay = (i * 0.05) + "s";
+                img.title = "Clique para ampliar";
+                img.onclick = () => {
+                    const zoom = document.getElementById('zoomOverlay');
+                    const zoomImg = document.getElementById('zoomImg');
+                    zoomImg.src = img.src;
+                    zoom.style.display = 'flex';
+                };
                 area.appendChild(img);
             }
+            
+            // Layout dinâmico se tiver poucos itens
+            if (itemsCount <= 3) area.style.gridTemplateColumns = `repeat(${itemsCount}, 1fr)`;
+            else area.style.gridTemplateColumns = "repeat(3, 1fr)";
             
             // Corrigir precisão decimal
             correctAnswer = Math.round(correctAnswer * 100) / 100;
@@ -994,6 +1283,60 @@
             updateUI();
         }
 
+        function buildDecomposicao() {
+            const el = document.getElementById('decomposicao');
+            el.innerHTML = "";
+            
+            const title = document.createElement('span');
+            title.className = 'dec-title';
+            title.textContent = '🧮 Veja como calcular o total:';
+            el.appendChild(title);
+
+            const grid = document.createElement('div');
+            grid.className = 'dec-grid';
+
+            // Ordenar itens para o breakdown visual
+            const sortedItems = [...lastItems].sort((a, b) => b - a);
+
+            sortedItems.forEach((val, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'dec-item';
+                
+                const img = document.createElement('img');
+                img.src = MONEY_IMAGES[val];
+                if (val < 2 && val !== 1) img.classList.add('coin');
+                img.onerror = () => { img.style.display = 'none'; };
+
+                const label = document.createElement('span');
+                label.className = 'dec-val';
+                label.textContent = formatMoney(val);
+
+                wrap.appendChild(img);
+                wrap.appendChild(label);
+                grid.appendChild(wrap);
+
+                if (i < sortedItems.length - 1) {
+                    const plus = document.createElement('span');
+                    plus.className = 'dec-plus';
+                    plus.textContent = '+';
+                    grid.appendChild(plus);
+                }
+            });
+
+            const eq = document.createElement('span');
+            eq.className = 'dec-equals';
+            eq.textContent = '=';
+            grid.appendChild(eq);
+
+            const tot = document.createElement('div');
+            tot.className = 'dec-total';
+            tot.textContent = formatMoney(correctAnswer);
+            grid.appendChild(tot);
+
+            el.appendChild(grid);
+            el.style.display = 'block';
+        }
+
         function checkAnswer(val, btn) {
             if (isAnswering) return;
             isAnswering = true;
@@ -1010,6 +1353,18 @@
                 points += gain;
                 hitsForLife++;
                 currentCombo++;
+                
+                playSound('correct');
+
+                // Animação do card de combo
+                const cbCard = document.getElementById('comboCard');
+                if (currentCombo > 1) {
+                    cbCard.animate([
+                        { transform: 'scale(1)', filter: 'brightness(1)' },
+                        { transform: 'scale(1.15)', filter: 'brightness(1.5)' },
+                        { transform: 'scale(1)', filter: 'brightness(1)' }
+                    ], { duration: 300 });
+                }
                 
                 if (isFirstTry) levelFirstTryHits++;
 
@@ -1036,9 +1391,9 @@
                 updateUI();
                 gameTimer = setTimeout(() => {
                     currentScreen++;
-                    if (currentScreen > 20) { 
+                    if (currentScreen > 25) { 
                         // Fim do Nível - Calcular Bônus de 90%
-                        const accuracy = (levelFirstTryHits / 20) * 100;
+                        const accuracy = (levelFirstTryHits / 25) * 100;
                         let bonusText = "";
                         
                         if (accuracy >= 90) {
@@ -1051,6 +1406,8 @@
                             points += 200;
                             bonusText = "🥈 BÔNUS DE ELITE: +200 pts!";
                         }
+
+                        playSound('level');
 
                         currentScreen = 1; 
                         currentLevel++;
@@ -1084,13 +1441,15 @@
                 isFirstTry = false; 
                 exerciseErrors++;
                 
+                // Registrar quais notas estavam na tela quando errou
+                lastItems.forEach(v => {
+                    errorsLog[v] = (errorsLog[v] || 0) + 1;
+                });
+
                 btn.classList.add('wrong');
+                playSound('wrong');
                 
                 let errorMsg = `❌ Ops! Era ${formatMoney(correctAnswer)}`;
-                if (exerciseErrors >= 1) {
-                    errorMsg += `<div class="breakdown">💡 Veja a soma: ${answerBreakdown}</div>`;
-                }
-                
                 msg.innerHTML = errorMsg;
                 msg.className = "message msg-wrong";
                 mascote.textContent = "😢";
@@ -1108,6 +1467,7 @@
                         }
                     }, 500);
                 } else {
+                    buildDecomposicao();
                     document.getElementById('btnNext').style.display = 'flex';
                 }
             }
@@ -1183,7 +1543,7 @@
             }
             document.getElementById('lives').textContent = hearts;
             
-            const pct = Math.max(4, ((currentScreen - 1) / 20) * 100);
+            const pct = Math.max(4, ((currentScreen - 1) / 25) * 100);
             document.getElementById('progressBar').style.width = pct + "%";
         }
 
@@ -1211,9 +1571,10 @@
                 maxLives,
                 hitsForLife, 
                 levelFirstTryHits,
-                checkpointPoints 
+                checkpointPoints,
+                relatorioErros: errorsLog // Adiciona o log de erros no save
             };
-            const json = JSON.stringify(state);
+            const json = JSON.stringify(state, null, 2); // Mais legível se decodificado
             const encoded = btoa(unescape(encodeURIComponent(json)));
             const blob = new Blob([encoded], { type: 'text/plain' });
             const a = document.createElement('a');
@@ -1247,6 +1608,7 @@
                     maxLives = d.maxLives || 5;
                     hitsForLife = d.hitsForLife || 0;
                     levelFirstTryHits = d.levelFirstTryHits || 0;
+                    errorsLog = d.relatorioErros || {};
                     
                     document.getElementById('codigoAluno').textContent = "✔ carregado";
                     
