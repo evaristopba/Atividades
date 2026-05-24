@@ -36,6 +36,10 @@
         #btn-educacao { background-color: #007bff; }
         #btn-solo { background-color: #6f42c1; }
 
+        #difficulty-buttons button:disabled {
+            opacity: 0.35; cursor: not-allowed; transform: none;
+            box-shadow: none; filter: grayscale(40%);
+        }
         #btn-how-to-play {
             background-color: transparent; border: 2px solid #6c757d; color: #6c757d;
             padding: 12px 28px; margin-top: 25px; font-weight: bold; font-size: 16px;
@@ -98,14 +102,192 @@
         #message { margin-top: 20px; font-size: 20px; font-weight: bold; color: #d63384; min-height: 30px; text-align: center; }
         #restart-btn { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; width: 100%; border-radius: 5px; border: none; background-color: #6c757d; color: white; }
 
-        /* NOVOS ESTILOS PARA OS BOTÕES DE SALVAR/CARREGAR/PROXIMO NO PAINEL */
         .panel-btn { margin-top: 10px; padding: 12px; cursor: pointer; width: 100%; border-radius: 8px; border: none; color: white; font-weight: bold; font-size: 16px; }
         #btn-next-theme { background-color: #28a745; display: none; }
         #btn-save-prog { background-color: #007bff; }
         #btn-load-prog { background-color: #17a2b8; }
-        
-        /* Estilo do modal de nome */
-        .modal-input { width: 80%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+
+        /* =====================================================
+           MODAL DE NOME — estilo integrado ao app
+           Apenas as propriedades visuais foram alteradas;
+           IDs, estrutura e lógica são idênticos ao original.
+           ===================================================== */
+        #save-name-modal .modal-content {
+            max-width: 420px;
+            padding: 0;
+            border-radius: 14px;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+        }
+
+        #save-name-modal .save-modal-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            padding: 28px 30px 22px;
+            color: #fff;
+        }
+
+        #save-name-modal .save-modal-header .save-icon {
+            font-size: 38px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        #save-name-modal .save-modal-header h2 {
+            margin: 0 0 4px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        #save-name-modal .save-modal-header p {
+            margin: 0;
+            font-size: 13px;
+            color: rgba(255,255,255,0.82);
+        }
+
+        #save-name-modal .save-modal-body {
+            padding: 26px 28px 28px;
+            background: #fff;
+        }
+
+        #save-name-modal .save-input-wrap {
+            position: relative;
+            margin-bottom: 22px;
+        }
+
+        #save-name-modal .save-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        #student-name-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 16px 13px 42px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #student-name-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+        }
+
+        #student-name-input::placeholder {
+            color: #adb5bd;
+        }
+
+        #save-name-modal .save-modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #btn-confirm-save {
+            background-color: #28a745;
+            flex: 1;
+            margin-top: 0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: background-color 0.2s, transform 0.15s;
+        }
+        #btn-confirm-save:hover { background-color: #218838; transform: translateY(-1px); }
+
+        #btn-cancel-save {
+            background-color: #6c757d;
+            flex: 1;
+            margin-top: 0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: background-color 0.2s, transform 0.15s;
+        }
+        #btn-cancel-save:hover { background-color: #5a6268; transform: translateY(-1px); }
+
+        /* BARRA DE PROGRESSO DE TEMAS */
+        #theme-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 10px 0 4px;
+        }
+        .theme-dot {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; color: #fff;
+            border: 3px solid transparent;
+            transition: background-color 0.4s, border-color 0.4s, transform 0.3s;
+            cursor: default;
+            position: relative;
+        }
+        .theme-dot.done  { background-color: #28a745; border-color: #1e7e34; }
+        .theme-dot.current { background-color: #007bff; border-color: #0056b3; transform: scale(1.2); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
+        .theme-dot.pending { background-color: #ced4da; border-color: #adb5bd; }
+        .theme-connector {
+            flex: 1; height: 3px; border-radius: 2px;
+            background-color: #ced4da;
+            transition: background-color 0.4s;
+            max-width: 18px;
+        }
+        .theme-connector.done { background-color: #28a745; }
+
+        /* MODAL DE RELATÓRIO FINAL */
+        #report-modal .modal-content {
+            max-width: 520px; padding: 0; border-radius: 14px;
+            overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+        }
+        #report-modal .report-header {
+            background: linear-gradient(135deg, #28a745 0%, #1a6b2f 100%);
+            padding: 28px 30px 20px; color: #fff; text-align: center;
+        }
+        #report-modal .report-header .report-icon { font-size: 42px; display: block; margin-bottom: 6px; }
+        #report-modal .report-header h2 { margin: 0 0 4px; font-size: 22px; color: #fff; }
+        #report-modal .report-header p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.82); }
+        #report-modal .report-body { padding: 20px 24px 24px; background: #fff; }
+        #report-modal .report-score {
+            text-align: center; font-size: 36px; font-weight: bold;
+            color: #007bff; margin-bottom: 18px;
+        }
+        #report-modal .report-score small { display: block; font-size: 13px; color: #888; font-weight: normal; }
+        #report-modal table.report-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;
+        }
+        #report-modal table.report-table th {
+            background: #f8f9fa; padding: 8px 10px; text-align: left;
+            border-bottom: 2px solid #dee2e6; color: #555; font-weight: 600;
+        }
+        #report-modal table.report-table td {
+            padding: 7px 10px; border-bottom: 1px solid #f0f0f0;
+            color: #444; width: auto; height: auto; font-size: 14px;
+            font-weight: normal; border: none; border-bottom: 1px solid #f0f0f0;
+            cursor: default; user-select: text; background: #fff;
+        }
+        #report-modal table.report-table tr:last-child td { border-bottom: none; }
+        #report-modal .report-actions { display: flex; gap: 10px; }
+        #btn-download-report {
+            background-color: #007bff; flex: 2; padding: 12px;
+            border: none; border-radius: 8px; color: white;
+            font-weight: bold; font-size: 15px; cursor: pointer;
+        }
+        #btn-download-report:hover { background-color: #0056b3; }
+        #btn-close-report {
+            background-color: #6c757d; flex: 1; padding: 12px;
+            border: none; border-radius: 8px; color: white;
+            font-weight: bold; font-size: 15px; cursor: pointer;
+        }
+        #btn-close-report:hover { background-color: #5a6268; }
 
         .hidden { display: none; }
         .loader {
@@ -130,8 +312,8 @@
 </head>
 <body>
     <input type="file" id="file-input" class="hidden" accept=".txt">
+    <input type="file" id="prof-file-input" class="hidden" accept=".txt">
 
-    <!-- TELA INICIAL COM OS NOVOS TEMAS -->
     <div id="start-screen" class="hidden">
         <h1>Caça-Palavras: Temas Educativos</h1>
         <p>Escolha um tema para começar:</p>
@@ -144,6 +326,7 @@
             <button id="btn-solo">Solo</button>
         </div>
         <button id="btn-how-to-play">Como Jogar?</button>
+        <button id="btn-prof-reader" style="background-color:transparent;border:2px solid #28a745;color:#28a745;padding:12px 28px;margin-top:10px;font-weight:bold;font-size:16px;border-radius:8px;cursor:pointer;transition:all 0.3s ease;">🔍 Ver Relatório de Aluno</button>
     </div>
 
     <div id="game-area" class="hidden">
@@ -152,6 +335,7 @@
             <div id="message"></div>
         </div>
         <div id="status-panel">
+            <div id="theme-progress"></div>
             <h2>Status do Jogo</h2>
             <div id="status-info">
                 <div style="text-align: center; font-size: 14px; color: #666; margin-bottom: 5px;">ALUNO: <strong id="student-display">---</strong></div>
@@ -168,15 +352,72 @@
         </div>
     </div>
 
-    <!-- MODAL DE SALVAMENTO PARA COLETAR O NOME -->
+    <!-- MODAL DE SALVAMENTO — estrutura e IDs idênticos ao original; apenas o HTML interno foi estilizado -->
     <div id="save-name-modal" class="modal-container hidden">
-        <div class="modal-content" style="text-align: center;">
-            <h2>Identifique seu Arquivo</h2>
-            <p>Para salvar o progresso da aula, digite seu nome completo:</p>
-            <input type="text" id="student-name-input" class="modal-input" placeholder="Nome do Aluno">
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="btn-confirm-save" class="panel-btn" style="background-color: #28a745; width: 140px;">Confirmar</button>
-                <button id="btn-cancel-save" class="panel-btn" style="background-color: #6c757d; width: 140px;">Cancelar</button>
+        <div class="modal-content">
+            <div class="save-modal-header">
+                <span class="save-icon">💾</span>
+                <h2>Salvar Progresso</h2>
+                <p>Digite seu nome completo para identificar o arquivo</p>
+            </div>
+            <div class="save-modal-body">
+                <div class="save-input-wrap">
+                    <span class="save-input-icon">👤</span>
+                    <input type="text" id="student-name-input" placeholder="Nome do Aluno">
+                </div>
+                <div class="save-modal-actions">
+                    <button id="btn-confirm-save" class="panel-btn">✔ Confirmar</button>
+                    <button id="btn-cancel-save" class="panel-btn">✖ Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE RELATÓRIO FINAL -->
+    <div id="report-modal" class="modal-container hidden">
+        <div class="modal-content">
+            <div class="report-header">
+                <span class="report-icon">🏆</span>
+                <h2 id="report-modal-title">Atividade Concluída!</h2>
+                <p id="report-student-name"></p>
+            </div>
+            <div class="report-body">
+                <div class="report-score">
+                    <span id="report-score-value">0</span>
+                    <small>pontos no total</small>
+                </div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Tema</th>
+                            <th style="text-align:center">Status</th>
+                            <th style="text-align:center">Erros</th>
+                            <th>Palavra + difícil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-table-body"></tbody>
+                </table>
+                <div class="report-actions">
+                    <button id="btn-download-report">📄 Baixar Relatório</button>
+                    <button id="btn-close-report">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE SAÍDA -->
+    <div id="confirm-exit-modal" class="modal-container hidden">
+        <div class="modal-content">
+            <div class="save-modal-header" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+                <span class="save-icon">⚠️</span>
+                <h2>Voltar ao Início?</h2>
+                <p>O progresso não salvo será perdido.</p>
+            </div>
+            <div class="save-modal-body">
+                <div class="save-modal-actions">
+                    <button id="btn-confirm-exit" class="panel-btn" style="background-color: #dc3545; margin-top: 0; flex: 1; border-radius: 8px; font-size: 15px;">🏠 Confirmar</button>
+                    <button id="btn-cancel-exit" class="panel-btn" style="background-color: #28a745; margin-top: 0; flex: 1; border-radius: 8px; font-size: 15px;">▶ Continuar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -257,7 +498,55 @@
         let totalScore = 0;
         let originalLevelScore = 0;
         let originalTimeBonus = 0;
+        let levelSnapshotTaken = false;
         let studentName = "";
+
+        // Diagnóstico — acumulado por tema
+        let diagData = {};        // { tema: { errors, wordTimes: {palavra: segundos} } }
+        let levelErrors = 0;
+        let levelWordStartTs = {};  // { palavra: timestamp_ms quando nivel começou }
+        let levelWordFoundSec = {}; // { palavra: segundos ate encontrar }
+        let levelStartTime = 0;
+
+        // Ordem linear dos temas — usada para habilitar apenas o nível atual
+        const themeOrder = ['amiguinhos', 'trabalho', 'clima', 'alimentos', 'educacao', 'solo'];
+
+        function updateStartButtons(currentTheme) {
+            const idx = themeOrder.indexOf(currentTheme);
+            themeOrder.forEach((theme, i) => {
+                const btn = document.getElementById(`btn-${theme}`);
+                if (btn) btn.disabled = (i !== idx);
+            });
+        }
+
+
+        function updateProgressBar(currentTheme) {
+            const bar = document.getElementById('theme-progress');
+            if (!bar) return;
+            const idx = themeOrder.indexOf(currentTheme);
+            const labels = ['A', 'T', 'C', 'Al', 'E', 'S'];
+            bar.innerHTML = '';
+            themeOrder.forEach((theme, i) => {
+                // connector before each dot (except first)
+                if (i > 0) {
+                    const line = document.createElement('div');
+                    line.className = 'theme-connector' + (i <= idx ? ' done' : '');
+                    bar.appendChild(line);
+                }
+                const dot = document.createElement('div');
+                dot.title = theme.charAt(0).toUpperCase() + theme.slice(1);
+                dot.textContent = labels[i];
+                dot.className = 'theme-dot ' + (i < idx ? 'done' : i === idx ? 'current' : 'pending');
+                bar.appendChild(dot);
+            });
+        }
+
+        function resetStartButtons() {
+            updateStartButtons('amiguinhos');
+        }
+
+        // Ao carregar a página, apenas o primeiro nível habilitado
+        updateStartButtons('amiguinhos');
 
         // --- LÓGICA DE SALVAMENTO (RESOLUÇÃO DO DESAFIO) ---
         document.getElementById('btn-save-prog').onclick = () => {
@@ -285,12 +574,12 @@
         };
 
         function executeSaveDownload() {
-            const data = { n: studentName, d: currentDifficulty, s: score, b: timeLeft };
+            const data = { n: studentName, d: currentDifficulty, s: score, b: timeLeft, diag: diagData };
             const blob = new Blob([btoa(JSON.stringify(data))], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `progresso_${studentName.replace(/\s/g, '_')}.txt`;
+            a.download = `progresso_CPII_${studentName.replace(/\s/g, '_')}.txt`;
             a.click();
         }
 
@@ -306,7 +595,9 @@
                     currentDifficulty = data.d;
                     score = data.s;
                     timeBonusForNextLevel = data.b;
+                    diagData = data.diag || {};
                     studentLabel.textContent = studentName;
+                    updateStartButtons(currentDifficulty);
                     startScreen.classList.add('hidden');
                     gameArea.classList.remove('hidden');
                     updateScoreDisplay();
@@ -327,12 +618,15 @@
         }
 
         function startGame(difficulty) {
+            updateStartButtons(difficulty);
             startScreen.classList.add('hidden');
             gameArea.classList.remove('hidden');
             totalScore = 0;
             timeBonusForNextLevel = 0;
             originalLevelScore = 0;
             originalTimeBonus = 0;
+            levelSnapshotTaken = false;
+            diagData = {};
             saveProgress();
             score = totalScore;
             updateScoreDisplay();
@@ -341,6 +635,7 @@
 
         async function loadLevel(difficulty) {
             currentDifficulty = difficulty;
+            updateProgressBar(difficulty);
             nextThemeBtn.style.display = 'none';
             const settings = difficultySettings[difficulty];
             messageDiv.textContent = '';
@@ -373,10 +668,18 @@
                 fillEmptySpaces(dynamicGridSize);
                 renderGrid(dynamicGridSize);
                 renderWordList();
+
+                // Resetar contadores diagnósticos do nível
+                levelErrors = 0;
+                levelWordStartTs = {};
+                levelWordFoundSec = {};
+                levelStartTime = Date.now();
+                wordsData.forEach(w => { levelWordStartTs[w.word] = levelStartTime; });
                 
-                if (originalLevelScore === 0 && originalTimeBonus === 0) {
+                if (!levelSnapshotTaken) {
                     originalLevelScore = score;
                     originalTimeBonus = timeBonusForNextLevel;
+                    levelSnapshotTaken = true;
                 }
                 
                 timeLeft = settings.time + timeBonusForNextLevel;
@@ -415,6 +718,7 @@
                     clearInterval(timerInterval);
                     timerDisplay.textContent = "00:00";
                     messageDiv.textContent = "Tempo Esgotado!";
+                    saveLevelDiag(false);
                     revealNotFoundWords();
                     setTimeout(() => gameOver("Fim de Jogo!", true), 5000);
                 }
@@ -511,6 +815,9 @@
             });
             if (wordFound) {
                 wordFound.found = true;
+                // Registrar tempo gasto nessa palavra (segundos)
+                const elapsed = Math.round((Date.now() - (levelWordStartTs[wordFound.word] || levelStartTime)) / 1000);
+                levelWordFoundSec[wordFound.word] = elapsed;
                 score += wordFound.word.length * 10;
                 updateScoreDisplay();
                 currentSelectionCells.forEach(cell => { 
@@ -520,16 +827,32 @@
                 renderWordList(); 
                 checkWin();
             } else {
-                 currentSelectionCells.forEach(cell => cell.classList.remove('selected'));
+                levelErrors++;
+                currentSelectionCells.forEach(cell => cell.classList.remove('selected'));
             }
             selectionStartCell = null; 
             currentSelectionCells = [];
+        }
+
+        function saveLevelDiag(completed) {
+            const wordTimesResult = {};
+            wordsData.forEach(w => {
+                wordTimesResult[w.word] = w.found
+                    ? (levelWordFoundSec[w.word] !== undefined ? levelWordFoundSec[w.word] : Math.round((Date.now() - levelStartTime) / 1000))
+                    : null; // null = não encontrada
+            });
+            diagData[currentDifficulty] = {
+                completed,
+                errors: levelErrors,
+                wordTimes: wordTimesResult
+            };
         }
 
         function checkWin() {
             const allFound = wordsData.every(w => w.found);
             if (allFound) {
                 clearInterval(timerInterval);
+                saveLevelDiag(true);
                 const timeBonusPoints = timeLeft * 5;
                 score += timeBonusPoints;
                 timeBonusForNextLevel = timeLeft;
@@ -542,8 +865,9 @@
 
         nextThemeBtn.onclick = () => {
             const next = difficultySettings[currentDifficulty].next;
+            levelSnapshotTaken = false;
             if (next !== 'end') loadLevel(next);
-            else gameOver("Parabéns! Você completou tudo!", false);
+            else showReportModal();
         };
 
         function revealNotFoundWords() {
@@ -557,6 +881,107 @@
                 }
             });
         }
+
+        const themeLabels = {
+            amiguinhos: 'Amiguinhos', trabalho: 'Trabalho', clima: 'Clima',
+            alimentos: 'Alimentos', educacao: 'Educação', solo: 'Solo'
+        };
+
+        function showReportModal(extName, extScore, extDiag) {
+            const name  = extName  !== undefined ? extName  : studentName;
+            const scoreVal = extScore !== undefined ? extScore : score;
+            const diag  = extDiag  !== undefined ? extDiag  : diagData;
+
+            // Título dinâmico: concluída só se todos os temas têm completed=true
+            const allDone = themeOrder.every(t => diag[t] && diag[t].completed);
+            document.getElementById('report-modal-title').textContent = allDone ? 'Atividade Concluída! 🎉' : 'Atividade em Andamento';
+            document.getElementById('report-student-name').textContent = name || 'Aluno';
+            document.getElementById('report-score-value').textContent = scoreVal;
+
+            const tbody = document.getElementById('report-table-body');
+            tbody.innerHTML = '';
+            themeOrder.forEach(theme => {
+                const d = diag[theme];
+                const tr = document.createElement('tr');
+                if (!d) {
+                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td>—</td>`;
+                } else {
+                    const status = d.completed ? '✅' : '⏱️';
+                    const hardest = Object.entries(d.wordTimes)
+                        .filter(([,v]) => v !== null)
+                        .sort(([,a],[,b]) => b - a)[0];
+                    const hardestStr = hardest ? `${hardest[0]} (${hardest[1]}s)` : '—';
+                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td>${hardestStr}</td>`;
+                }
+                tbody.appendChild(tr);
+            });
+
+            // store current context for download button
+            document.getElementById('report-modal').dataset.dlName  = name;
+            document.getElementById('report-modal').dataset.dlScore = scoreVal;
+            document.getElementById('report-modal').dataset.dlDiag  = JSON.stringify(diag);
+            document.getElementById('report-modal').classList.remove('hidden');
+
+            // auto-download only when finishing the game (no external data)
+            if (extName === undefined) executeReportDownload(name, scoreVal, diag);
+        }
+
+        document.getElementById('btn-close-report').addEventListener('click', () => {
+            document.getElementById('report-modal').classList.add('hidden');
+        });
+
+        function executeReportDownload(name, scoreVal, diag) {
+            let txt = `RELATÓRIO CAÇA-PALAVRAS II\n`;
+            txt += `Aluno: ${name}\n`;
+            txt += `Pontuação Final: ${scoreVal}\n`;
+            txt += `Data: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+            themeOrder.forEach(theme => {
+                const d = diag[theme];
+                txt += `--- ${themeLabels[theme].toUpperCase()} ---\n`;
+                if (!d) { txt += `  Não jogado\n\n`; return; }
+                txt += `  Status: ${d.completed ? 'Concluído' : 'Tempo esgotado'}\n`;
+                txt += `  Erros de seleção: ${d.errors}\n`;
+                txt += `  Palavras:\n`;
+                Object.entries(d.wordTimes).forEach(([word, sec]) => {
+                    txt += `    ${word}: ${sec !== null ? sec + 's' : 'não encontrada'}\n`;
+                });
+                txt += `\n`;
+            });
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nota_CPII_${(name || 'aluno').replace(/\s/g, '_')}.txt`;
+            a.click();
+        }
+
+        document.getElementById('btn-download-report').addEventListener('click', () => {
+            const rm = document.getElementById('report-modal');
+            executeReportDownload(rm.dataset.dlName, rm.dataset.dlScore, JSON.parse(rm.dataset.dlDiag || '{}'));
+        });
+
+
+        // Leitor de relatório do professor
+        document.getElementById('btn-prof-reader').addEventListener('click', () => {
+            document.getElementById('prof-file-input').value = '';
+            document.getElementById('prof-file-input').click();
+        });
+
+        document.getElementById('prof-file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(atob(ev.target.result));
+                    if (!data.n) throw new Error('Arquivo sem nome de aluno');
+                    showReportModal(data.n, data.s, data.diag || {});
+                } catch (err) {
+                    alert('Arquivo inválido ou sem dados de relatório.');
+                }
+            };
+            reader.readAsText(file);
+        });
 
         function gameOver(text, isTimeout = false) {
             clearInterval(timerInterval);
@@ -597,10 +1022,25 @@
             }
         });
 
+        const confirmExitModal = document.getElementById('confirm-exit-modal');
+
         restartBtn.addEventListener('click', () => {
             clearInterval(timerInterval);
+            removeGridListeners();
+            confirmExitModal.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
+            confirmExitModal.classList.add('hidden');
+            resetStartButtons();
             gameArea.classList.add('hidden');
             startScreen.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-cancel-exit').addEventListener('click', () => {
+            confirmExitModal.classList.add('hidden');
+            startTimer();
+            addGridListeners();
         });
 
         function addGridListeners() {
