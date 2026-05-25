@@ -574,7 +574,7 @@
         };
 
         function executeSaveDownload() {
-            const data = { n: studentName, d: currentDifficulty, s: score, b: timeLeft, diag: diagData };
+            const data = { n: studentName, d: currentDifficulty, s: originalLevelScore, b: originalTimeBonus, diag: diagData };
             const blob = new Blob([btoa(JSON.stringify(data))], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -945,6 +945,15 @@
                 Object.entries(d.wordTimes).forEach(([word, sec]) => {
                     txt += `    ${word}: ${sec !== null ? sec + 's' : 'não encontrada'}\n`;
                 });
+                const found = Object.entries(d.wordTimes).filter(([, v]) => v !== null).sort(([, a], [, b]) => a - b);
+                if (found.length > 0) {
+                    txt += `  Mais rápida: ${found[0][0]} (${found[0][1]}s)\n`;
+                    txt += `  Mais lenta:  ${found[found.length - 1][0]} (${found[found.length - 1][1]}s)\n`;
+                }
+                const notFound = Object.entries(d.wordTimes).filter(([, v]) => v === null);
+                if (notFound.length > 0) {
+                    txt += `  Não encontradas: ${notFound.map(([w]) => w).join(', ')}\n`;
+                }
                 txt += `\n`;
             });
             const blob = new Blob([txt], { type: 'text/plain' });
