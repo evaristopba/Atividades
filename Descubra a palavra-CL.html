@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brinca & Escreve</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-main:#FFF9F0;--bg-card:#FFFFFF;--bg-h1:#FF6B6B;--bg-h2:#FF8E53;
+  --text-main:#3D2B1F;--text-light:#7A6055;
+  --l-bg:#FFF3E0;--l-bd:#FFAB40;--l-hv:#FFD54F;
+  --s-bg:#E8F5E9;--s-bd:#66BB6A;--s-fl:#C8E6C9;
+  --btn-ck:#6BCB77;--btn-ct:#fff;--star:#FFD93D;
+  --shad:rgba(0,0,0,0.12);--htxt:#fff;
+  --bg-pat:radial-gradient(circle at 20% 20%,#FFE0B2 0%,transparent 40%),
+           radial-gradient(circle at 80% 80%,#B2EBF2 0%,transparent 40%),
+           radial-gradient(circle at 50% 50%,#F8BBD0 0%,transparent 60%);
+}
+[data-theme="floresta"]{
+  --bg-main:#F1F8E9;--bg-card:#FFFFFF;--bg-h1:#388E3C;--bg-h2:#66BB6A;
+  --text-main:#1B5E20;--text-light:#558B2F;
+  --l-bg:#F9FBE7;--l-bd:#8BC34A;--l-hv:#DCEDC8;
+  --s-bg:#FFF8E1;--s-bd:#F9A825;--s-fl:#FFF9C4;
+  --btn-ck:#4CAF50;--btn-ct:#fff;--star:#FFD93D;--shad:rgba(0,60,0,0.12);--htxt:#fff;
+  --bg-pat:radial-gradient(circle at 20% 20%,#DCEDC8 0%,transparent 40%),
+           radial-gradient(circle at 80% 80%,#A5D6A7 0%,transparent 40%),
+           radial-gradient(circle at 50% 50%,#C8E6C9 0%,transparent 60%);
+}
+[data-theme="espaco"]{
+  --bg-main:#0D0D2B;--bg-card:#1A1A3E;--bg-h1:#6A0DAD;--bg-h2:#9C27B0;
+  --text-main:#E8EAF6;--text-light:#B0BEC5;
+  --l-bg:#1A237E;--l-bd:#7C4DFF;--l-hv:#311B92;
+  --s-bg:#0D1B3E;--s-bd:#00E5FF;--s-fl:#0D2B3E;
+  --btn-ck:#00E5FF;--btn-ct:#0D0D2B;--star:#FFD700;--shad:rgba(100,0,200,0.3);--htxt:#fff;
+  --bg-pat:radial-gradient(circle at 20% 20%,#1A0050 0%,transparent 50%),
+           radial-gradient(circle at 80% 80%,#0D003A 0%,transparent 50%),
+           radial-gradient(circle at 50% 50%,#160040 0%,transparent 70%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:var(--bg-pat);min-height:100vh;color:var(--text-main);transition:background .5s,color .5s;overflow-x:hidden}
+.app-header{background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 16px var(--shad);position:relative;z-index:10}
+.app-title{font-family:'Fredoka One',cursive;font-size:26px;color:var(--htxt);text-shadow:2px 2px 4px rgba(0,0,0,.2)}
+.header-right{display:flex;align-items:center;gap:12px}
+.lives-container{display:flex;gap:4px;align-items:center}
+.heart{font-size:22px;transition:transform .3s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.heart.lost{opacity:.3;transform:scale(.8)}
+.score-badge{background:rgba(255,255,255,.25);border-radius:20px;padding:4px 14px;font-size:15px;font-weight:800;color:var(--htxt);display:flex;align-items:center;gap:5px}
+.btn-settings{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:40px;height:40px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .3s;color:#fff}
+.btn-settings:hover{background:rgba(255,255,255,.4);transform:rotate(30deg)}
+.level-bar{background:linear-gradient(135deg,var(--bg-h2),var(--bg-h1));padding:8px 20px;display:flex;align-items:center;gap:16px;font-size:13px;color:rgba(255,255,255,.9);font-weight:700}
+.level-label{font-family:'Fredoka One',cursive;font-size:16px;color:#fff;white-space:nowrap}
+.progress-track{flex:1;background:rgba(255,255,255,.3);border-radius:10px;height:10px;overflow:hidden}
+.progress-fill{background:var(--star);height:100%;border-radius:10px;transition:width .5s ease;box-shadow:0 0 6px rgba(255,220,0,.6)}
+.level-count{font-size:13px;color:rgba(255,255,255,.9);white-space:nowrap}
+.main-content{max-width:680px;margin:0 auto;padding:24px 16px 40px;position:relative;z-index:1}
+.game-card{background:var(--bg-card);border-radius:28px;padding:28px 24px;box-shadow:0 8px 32px var(--shad);border:3px solid rgba(255,255,255,.8);transition:background .5s}
+[data-theme="espaco"] .game-card{border-color:rgba(124,77,255,.3)}
+.toy-image-container{text-align:center;margin-bottom:20px}
+.toy-image{width:200px;height:200px;object-fit:contain;border-radius:20px;background:var(--l-bg);padding:12px;border:3px solid var(--l-bd);box-shadow:0 4px 16px var(--shad);transition:transform .3s}
+.toy-image:hover{transform:scale(1.03)}
+.toy-image-placeholder{width:200px;height:200px;border-radius:20px;background:var(--l-bg);border:3px dashed var(--l-bd);display:inline-flex;align-items:center;justify-content:center;font-size:72px}
+.answer-label{text-align:center;font-size:14px;font-weight:700;color:var(--text-light);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.answer-slots{display:flex;justify-content:center;gap:6px;flex-wrap:nowrap;margin-bottom:24px;min-height:62px;align-items:center;overflow-x:auto;padding:4px 2px}
+.answer-slot{width:52px;height:58px;border-radius:14px;border:3px dashed var(--s-bd);background:var(--s-bg);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:26px;color:var(--text-main);transition:all .2s;cursor:pointer;user-select:none;position:relative}
+.answer-slot.filled{background:var(--s-fl);border-style:solid;border-color:var(--s-bd);animation:popIn .2s ease}
+.answer-slot.drag-over{border-color:#4D96FF;background:rgba(77,150,255,.15);transform:scale(1.05)}
+.answer-slot.correct{background:#E8F5E9;border-color:#4CAF50;animation:bounce .4s ease}
+.answer-slot.wrong{background:#FFEBEE;border-color:#F44336;animation:shake .4s ease}
+.answer-slot.hyphen{border:none;background:transparent;cursor:default;font-size:34px;width:24px;min-width:24px}
+@keyframes popIn{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.letters-label{text-align:center;font-size:14px;font-weight:700;color:var(--text-light);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.letters-pool{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:28px;min-height:66px;align-items:center}
+.letter-tile{width:56px;height:62px;border-radius:16px;background:var(--l-bg);border:3px solid var(--l-bd);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:28px;color:var(--text-main);cursor:grab;transition:all .15s;user-select:none;box-shadow:0 3px 8px var(--shad)}
+.letter-tile:hover{background:var(--l-hv);transform:translateY(-4px) scale(1.08);box-shadow:0 8px 16px var(--shad);z-index:5}
+.letter-tile:active{cursor:grabbing;transform:scale(1.15)}
+.letter-tile.dragging{opacity:.4;transform:scale(.9)}
+.letter-tile.used{opacity:.2;pointer-events:none;transform:scale(.9)}
+.btn-row{display:flex;gap:12px;justify-content:center}
+.btn-check{background:var(--btn-ck);color:var(--btn-ct);border:none;border-radius:20px;padding:14px 40px;font-family:'Fredoka One',cursive;font-size:20px;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px var(--shad)}
+.btn-check:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--shad)}
+.btn-check:active{transform:scale(.97)}
+.btn-clear{background:transparent;color:var(--text-light);border:2px solid var(--l-bd);border-radius:20px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;transition:all .2s}
+.btn-clear:hover{background:var(--l-bg)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);animation:fadeIn .3s ease}
+.modal-overlay.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideUp{from{transform:translateY(60px) scale(.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.modal-emoji{font-size:64px;margin-bottom:12px}
+.modal-title{font-family:'Fredoka One',cursive;font-size:30px;color:var(--text-main);margin-bottom:8px}
+.modal-subtitle{font-size:16px;color:var(--text-light);margin-bottom:24px;line-height:1.6;white-space:pre-line}
+.stars-row{display:flex;justify-content:center;gap:8px;font-size:40px;margin-bottom:20px}
+.modal-btn{background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px var(--shad);width:100%;margin-bottom:10px}
+.modal-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--shad)}
+.modal-btn.secondary{background:transparent;color:var(--text-light);border:2px solid var(--l-bd);box-shadow:none;font-size:16px;padding:10px 24px}
+.theme-menu{position:fixed;top:70px;right:16px;background:var(--bg-card);border-radius:20px;padding:16px;box-shadow:0 8px 32px var(--shad);z-index:50;min-width:220px;border:2px solid var(--l-bd);animation:slideDown .25s ease}
+.theme-menu.hidden{display:none}
+@keyframes slideDown{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.theme-menu-title{font-family:'Fredoka One',cursive;font-size:16px;color:var(--text-main);margin-bottom:12px;text-align:center}
+.theme-option{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;cursor:pointer;transition:background .2s;font-weight:700;font-size:15px;color:var(--text-main);margin-bottom:4px;border:2px solid transparent}
+.theme-option:hover{background:var(--l-bg)}
+.theme-option.active{background:var(--s-bg);border-color:var(--s-bd)}
+.theme-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0}
+.screen{display:none}
+.screen.active{display:block}
+.start-screen{text-align:center;padding:20px 0}
+.start-logo{font-family:'Fredoka One',cursive;font-size:46px;color:var(--bg-h1);text-shadow:3px 3px 0 var(--star);margin-bottom:8px;line-height:1}
+.start-sub{font-size:18px;color:var(--text-light);margin-bottom:28px;font-weight:700}
+.start-emojis{font-size:36px;margin-bottom:28px;letter-spacing:8px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.levels-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px}
+.level-btn{background:var(--l-bg);border:3px solid var(--l-bd);border-radius:18px;padding:14px 6px;cursor:pointer;transition:all .2s;font-family:'Fredoka One',cursive;text-align:center}
+.level-btn:hover:not(.locked){transform:translateY(-4px);box-shadow:0 6px 16px var(--shad)}
+.level-btn.locked{opacity:.4;cursor:not-allowed}
+.level-btn.completed{background:var(--s-fl);border-color:var(--s-bd)}
+.level-btn.selected{border-color:var(--bg-h1);box-shadow:0 0 0 3px rgba(255,107,107,.3)}
+.level-num{font-size:26px;color:var(--bg-h1);display:block}
+.level-stars{font-size:14px;color:var(--star);display:block;margin-top:2px}
+.btn-start{background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:22px;padding:18px 60px;font-family:'Fredoka One',cursive;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px var(--shad)}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 10px 28px var(--shad)}
+.feedback-banner{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--bg-card);border-radius:20px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:22px;box-shadow:0 8px 24px var(--shad);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:200;display:flex;align-items:center;gap:10px;white-space:nowrap;border:3px solid transparent}
+.feedback-banner.show{transform:translateX(-50%) translateY(0)}
+.feedback-banner.ok{border-color:#4CAF50;color:#2E7D32}
+.feedback-banner.err{border-color:#F44336;color:#C62828}
+.feedback-banner.warn{border-color:#FF9800;color:#E65100}
+.points-anim{position:fixed;font-family:'Fredoka One',cursive;font-size:28px;color:var(--btn-ck);pointer-events:none;z-index:300;animation:floatUp 1.2s ease forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.3)}}
+.name-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px}
+.name-label{font-family:'Fredoka One',cursive;font-size:17px;color:var(--text-main)}
+.name-input{font-family:'Fredoka One',cursive;font-size:20px;color:var(--text-main);background:var(--l-bg);border:3px solid var(--l-bd);border-radius:16px;padding:10px 20px;text-align:center;width:100%;max-width:340px;outline:none;transition:border-color .2s}
+.name-input:focus{border-color:var(--bg-h1)}
+.name-input::placeholder{color:var(--text-light);opacity:.7}
+.btn-load{background:var(--l-bg);color:var(--text-main);border:3px solid var(--l-bd);border-radius:22px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-load:hover{background:var(--l-hv);transform:translateY(-2px)}
+.btn-save{background:linear-gradient(135deg,#4D96FF,#845EF7);color:#fff;border:none;border-radius:18px;padding:12px 28px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(77,150,255,.35);display:inline-flex;align-items:center;gap:8px}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(77,150,255,.4)}
+.btn-save-bar{background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:18px;padding:4px 10px;cursor:pointer;transition:all .2s;flex-shrink:0;line-height:1}
+.btn-save-bar:hover{background:rgba(255,255,255,.45);transform:scale(1.1)}
+.btn-save-bar.saved{background:rgba(100,220,100,.4);border-color:rgba(100,255,100,.6)}
+.nome-display{font-family:'Fredoka One',cursive;font-size:15px;color:var(--htxt);background:rgba(255,255,255,.2);border-radius:14px;padding:4px 12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .2s}.nome-display:hover{background:rgba(255,255,255,.35)}
+@media(max-width:480px){@media(max-width:480px){
+  .app-title{font-size:18px}
+  .letter-tile{width:46px;height:52px;font-size:22px}
+  .answer-slot{width:44px;height:50px;font-size:21px}
+  .start-logo{font-size:34px}
+  .toy-image,.toy-image-placeholder{width:160px;height:160px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">🧸 Brinca &amp; Escreve</div>
+  <div class="header-right">
+    <div class="lives-container" id="livesDisplay"></div>
+    <div class="score-badge">⭐ <span id="scoreDisplay">0</span></div>
+    <div class="nome-display" id="nomeDisplay" style="display:none"></div>
+    <button class="btn-settings" id="btnSettings" aria-label="Tema">⚙️</button>
+  </div>
+</header>
+
+<div class="level-bar" id="levelBar" style="display:none">
+  <span class="level-label" id="levelLabel">Nível 1</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <span class="level-count" id="levelCount">0/8</span>
+  <button class="btn-save-bar" id="btnSaveBar" onclick="salvarProgressoBar()" title="Salvar progresso" style="display:none">💾</button>
+  <label class="btn-save-bar" title="Carregar progresso" style="cursor:pointer">📂<input type="file" accept=".txt" style="display:none" onchange="loadFromFile(event)"></label>
+</div>
+
+<div class="theme-menu hidden" id="themeMenu">
+  <div class="theme-menu-title">🎨 Escolha o tema</div>
+  <div class="theme-option" data-theme="cartoon" onclick="setTheme('cartoon')">
+    <div class="theme-dot" style="background:linear-gradient(135deg,#FF6B6B,#FFD93D)"></div>🎈 Cartoon
+  </div>
+  <div class="theme-option" data-theme="floresta" onclick="setTheme('floresta')">
+    <div class="theme-dot" style="background:linear-gradient(135deg,#388E3C,#8BC34A)"></div>🌿 Floresta
+  </div>
+  <div class="theme-option" data-theme="espaco" onclick="setTheme('espaco')">
+    <div class="theme-dot" style="background:linear-gradient(135deg,#6A0DAD,#00E5FF)"></div>🚀 Espaço
+  </div>
+</div>
+
+<div class="feedback-banner" id="feedbackBanner"></div>
+
+<main class="main-content">
+  <div class="screen active" id="screenStart">
+    <div class="game-card start-screen">
+      <div class="start-logo">Brinca &amp; Escreve</div>
+      <div class="start-sub">Aprenda os nomes dos brinquedos!</div>
+      <div class="start-emojis">🎮 🧩 🪀 🎯 🧸</div>
+      <div class="name-row">
+        <label class="name-label">👤 Nome do aluno:</label>
+        <input type="text" id="inputNome" class="name-input" placeholder="Digite seu nome..." maxlength="40" oninput="onNomeInput()">
+      </div>
+      <p style="font-size:15px;color:var(--text-light);margin-bottom:16px;font-weight:700">Escolha o nível para começar:</p>
+      <div class="levels-grid" id="levelsGrid"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center">
+        <button class="btn-start" onclick="startLevel(currentLevel)">▶ Jogar!</button>
+        <label class="btn-load" title="Carregar progresso salvo">
+          📂 Carregar progresso
+          <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="loadFromFile(event)">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenGame">
+    <div class="game-card">
+      <div class="toy-image-container" id="toyImageContainer"></div>
+      <div class="answer-label">Monte o nome do brinquedo:</div>
+      <div class="answer-slots" id="answerSlots"></div>
+      <div class="letters-label">Toque ou arraste as letras:</div>
+      <div class="letters-pool" id="lettersPool"></div>
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearAnswer()">↩ Apagar</button>
+        <button class="btn-check" onclick="checkAnswer()">✓ Verificar</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-emoji" id="mEmoji"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="stars-row" id="mStars"></div>
+    <div class="modal-subtitle" id="mSubtitle"></div>
+    <button class="modal-btn" id="mBtn1" onclick="modalAct(1)"></button>
+    <button class="modal-btn secondary" id="mBtn2" onclick="modalAct(2)" style="display:none"></button>
+    <button class="modal-btn secondary" id="mBtn3" onclick="modalAct(3)" style="display:none"></button>
+  </div>
+</div>
+
+<script>
+// ========== BRINQUEDOS (25 com imagem + 15 só emoji) ==========
+const TOYS = [
+  // NÍVEL 1 — 3 a 4 letras
+  {name:"BOLA",   img:"https://i.postimg.cc/RhNsPR9Y/Bola.jpg",      emoji:"⚽", level:1},
+  {name:"PIPA",   img:"https://i.postimg.cc/50PKqGdb/Pipa.png",      emoji:"🪁", level:1},
+  {name:"IOIÔ",   img:"https://i.postimg.cc/26H9FJRD/ioio.jpg",      emoji:"🪀", level:1},
+  {name:"PIÃO",   img:"https://i.postimg.cc/JnTYcgVm/Piao.jpg",      emoji:"🌀", level:1},
+  {name:"TREM",   img:"https://i.postimg.cc/85yXB3Q8/trem.jpg",      emoji:"🚂", level:1},
+  {name:"ROBÔ",   img:"https://i.postimg.cc/SsZ17505/Robo.jpg",      emoji:"🤖", level:1},
+  {name:"NAVIO",  img:"https://i.postimg.cc/pT0cY7Ng/Navio.jpg",     emoji:"⛵", level:1},
+  {name:"CARRO",  img:"https://i.postimg.cc/rmhZCbX2/carro.jpg",     emoji:"🚗", level:1},
+
+  // NÍVEL 2 — 5 a 6 letras
+  {name:"AVIÃO",   img:"https://i.postimg.cc/1tW7cTxb/Aviao.jpg",    emoji:"✈️", level:2},
+  {name:"SKATE",   img:"https://i.postimg.cc/vBP2LjRk/Skate.jpg",    emoji:"🛹", level:2},
+  {name:"BONECA",  img:"https://i.postimg.cc/C5zPvNY9/Boneca.webp",  emoji:"👧", level:2},
+  {name:"TRATOR",  img:"https://i.postimg.cc/zBd2SMmQ/Trator.jpg",   emoji:"🚜", level:2},
+  {name:"TAMBOR",  img:"https://i.postimg.cc/ydfpX5qr/Tambor.jpg",   emoji:"🥁", level:2},
+  {name:"PETECA",  img:"https://i.postimg.cc/sXnH98FH/Peteca.jpg",   emoji:"🏸", level:2},
+  {name:"CASTELO", img:"https://i.postimg.cc/LXyQB7dD/Castelo.jpg",  emoji:"🏰", level:2},
+  {name:"URSINHO", img:"https://i.postimg.cc/MHvPsDx4/Ursinho.jpg",  emoji:"🧸", level:2},
+
+  // NÍVEL 3 — 6 a 7 letras
+  {name:"FOGUETE",   img:"https://i.postimg.cc/76BtMcv0/Foguete.jpg",      emoji:"🚀", level:3},
+  {name:"BAMBOLÊ",   img:"https://i.postimg.cc/ydfpX5qL/Bambole.jpg",      emoji:"⭕", level:3},
+  {name:"BALANÇO",   img:"https://i.postimg.cc/HxSv4KG3/Balanco.jpg",      emoji:"🪢", level:3},
+  {name:"CAMINHÃO",  img:"https://i.postimg.cc/mDdpNqx3/Caminhao.jpg",     emoji:"🚛", level:3},
+  {name:"XILOFONE",  img:"https://i.postimg.cc/V6sHtwhD/Xilofone.jpg",     emoji:"🎵", level:3},
+  {name:"FANTOCHE",  img:"https://i.postimg.cc/Fz9jdhs9/Fantoche.jpg",      emoji:"🎭", level:3},
+  {name:"DOMINÓ",    img:"https://i.postimg.cc/kGvPsvCC/Domino.jpg",        emoji:"🁣", level:3},
+  {name:"ORIGAMI",   img:"https://i.postimg.cc/rwvZdt6t/Origami.jpg",       emoji:"🦢", level:3},
+
+  // NÍVEL 4 — 7 a 8 letras
+  {name:"PATINETE",   img:"https://i.postimg.cc/mDZ694nj/Patinete.jpg",    emoji:"🛵", level:4},
+  {name:"BICICLETA",  img:"https://i.postimg.cc/C1M6802J/Bicicleta.jpg",   emoji:"🚲", level:4},
+  {name:"HELICÓPTERO",img:"https://i.postimg.cc/k4MhSCHT/Helicoptero.jpg", emoji:"🚁", level:4},
+  {name:"MASSINHA",   img:"https://i.postimg.cc/Pf0HjyKL/Massinha.jpg",    emoji:"🎨", level:4},
+  {name:"GANGORRA",   img:"https://i.postimg.cc/sxhvg854/Gangorra.jpg",    emoji:"⚖️", level:4},
+  {name:"PANDEIRO",   img:"https://i.postimg.cc/bYFqC8Kn/Pandeiro.jpg",    emoji:"🥁", level:4},
+  {name:"CARIMBO",    img:"https://i.postimg.cc/CLvKkk4V/Carimbo.jpg",     emoji:"📮", level:4},
+  {name:"PALHAÇO",    img:"https://i.postimg.cc/8zLHXpXY/Palhaco.jpg",     emoji:"🤡", level:4},
+
+  // NÍVEL 5 — 9+ letras / palavras compostas
+  {name:"DINOSSAURO",   img:"https://i.postimg.cc/PJP364hB/Dinossauro.webp", emoji:"🦕", level:5},
+  {name:"PULA-CORDA",   img:"",                                               emoji:"🪢", level:5},
+  {name:"ESTILINGUE",   img:"https://i.postimg.cc/cC8YKhpq/Estilingue.jpg",   emoji:"🏹", level:5},
+  {name:"TELESCÓPIO",   img:"https://i.postimg.cc/GhmtSqMg/Telescopio.jpg",   emoji:"🔭", level:5},
+  {name:"QUEBRA-CABEÇA",img:"",                                               emoji:"🧩", level:5},
+  {name:"MARIONETE",    img:"",                                               emoji:"🎎", level:5},
+  {name:"SANDUÍCHE",    img:"",                                               emoji:"🥪", level:5},
+  {name:"PASSARINHO",   img:"",                                               emoji:"🐦", level:5},
+];
+
+const ALPHABET = "ABCDEFGHIJKLMNOPRSTUVXZ";
+
+// ========== ESTADO ==========
+let S = {
+  theme:'cartoon', currentLevel:1, lives:5, score:0,
+  levelStars:[0,0,0,0,0], levelUnlocked:[true,false,false,false,false],
+  queue:[], toy:null, slots:[], tileMap:{},
+  correctInLevel:0, cb1:null, cb2:null, poolOrder:[],
+};
+
+// ========== PERSISTÊNCIA ==========
+function save(){
+  // Progresso salvo apenas via arquivo .txt
+}
+function load(){
+  // Carregamento apenas via arquivo .txt
+}
+
+// ========== TEMA ==========
+function setTheme(t){
+  S.theme=t;
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-option').forEach(el=>el.classList.toggle('active',el.dataset.theme===t));
+  closeMenu(); save();
+}
+function closeMenu(){document.getElementById('themeMenu').classList.add('hidden');}
+function toggleMenu(e){e.stopPropagation();document.getElementById('themeMenu').classList.toggle('hidden');}
+document.getElementById('btnSettings').addEventListener('click',toggleMenu);
+document.addEventListener('click',closeMenu);
+document.getElementById('themeMenu').addEventListener('click',e=>e.stopPropagation());
+
+// ========== VIDAS & PONTOS ==========
+function renderLives(){
+  const c=document.getElementById('livesDisplay'); c.innerHTML='';
+  for(let i=0;i<5;i++){
+    const h=document.createElement('span');
+    h.className='heart'+(i>=S.lives?' lost':'');
+    h.textContent='❤️'; c.appendChild(h);
+  }
+}
+function renderScore(){document.getElementById('scoreDisplay').textContent=S.score;}
+
+// ========== TELA INICIAL ==========
+let currentLevel=1;
+function renderStart(){
+  const g=document.getElementById('levelsGrid'); g.innerHTML='';
+  for(let l=1;l<=5;l++){
+    const b=document.createElement('div');
+    const unlocked=S.levelUnlocked[l-1];
+    const completed=S.levelStars[l-1]===3;
+    // Nível disponível = desbloqueado E não completado com 3 estrelas
+    const playable=unlocked&&!completed;
+    b.className='level-btn'+(unlocked?'':' locked')+(completed?' completed':'')+(l===currentLevel?' selected':'');
+    const st='⭐'.repeat(S.levelStars[l-1])+'☆'.repeat(3-S.levelStars[l-1]);
+    const icon=!unlocked?'🔒':(completed?'🏆':l);
+    b.innerHTML=`<span class="level-num">${icon}</span><span class="level-stars">${st}</span>`;
+    b.addEventListener('click',()=>{
+      if(playable){currentLevel=l;renderStart();}
+      else if(completed) showFb('✅ Nível já concluído!','warn');
+    });
+    g.appendChild(b);
+  }
+}
+
+// ========== INICIAR NÍVEL ==========
+function startLevel(lvl){
+  if(!S.levelUnlocked[lvl-1])return;
+  S.currentLevel=lvl; S.lives=5; S.correctInLevel=0;
+  S.queue=shuffle(TOYS.filter(t=>t.level===lvl).slice());
+  showScreen('screenGame');
+  document.getElementById('levelBar').style.display='flex';
+  // Mostrar botão salvar apenas a partir do nível 2
+  const btnSave=document.getElementById('btnSaveBar');
+  btnSave.style.display=lvl>1?'inline-block':'none';
+  btnSave.textContent='💾'; btnSave.classList.remove('saved'); btnSave.disabled=false;
+  updateBar(); renderLives(); renderScore();
+  nextToy();
+}
+function updateBar(){
+  const total=TOYS.filter(t=>t.level===S.currentLevel).length;
+  document.getElementById('levelLabel').textContent='Nível '+S.currentLevel;
+  document.getElementById('levelCount').textContent=S.correctInLevel+'/'+total;
+  document.getElementById('progressFill').style.width=(S.correctInLevel/total*100)+'%';
+}
+
+// ========== BRINQUEDO ==========
+function nextToy(){
+  if(!S.queue.length){levelComplete();return;}
+  S.toy=S.queue.shift();
+  S.slots=new Array(S.toy.name.length).fill('');
+  S.tileMap={};
+  // Gerar pool uma vez só (ordem fixa durante todo o exercício)
+  const real=S.toy.name.replace(/-/g,'').split('').map((l,i)=>({l,id:'r'+i}));
+  const decoys=genDecoys(real.map(x=>x.l),3).map((l,i)=>({l,id:'d'+i}));
+  S.poolOrder=shuffle([...real,...decoys]);
+  renderToy();
+}
+
+function renderToy(){
+  const t=S.toy;
+  const c=document.getElementById('toyImageContainer');
+  if(t.img){
+    c.innerHTML=`<img class="toy-image" src="${t.img}" alt="${t.name}" onerror="this.outerHTML='<div class=\\'toy-image-placeholder\\'>${t.emoji}</div>'">`;
+  } else {
+    c.innerHTML=`<div class="toy-image-placeholder">${t.emoji}</div>`;
+  }
+  renderSlots(); renderPool();
+}
+
+// ========== SLOTS ==========
+function renderSlots(){
+  const c=document.getElementById('answerSlots'); c.innerHTML='';
+  S.toy.name.split('').forEach((ch,i)=>{
+    const s=document.createElement('div');
+    if(ch==='-'){
+      s.className='answer-slot hyphen'; s.textContent='-';
+    } else {
+      s.className='answer-slot'+(S.slots[i]?' filled':'');
+      s.dataset.index=i; s.textContent=S.slots[i]||'';
+      s.addEventListener('dragover',e=>{e.preventDefault();s.classList.add('drag-over');});
+      s.addEventListener('dragleave',()=>s.classList.remove('drag-over'));
+      s.addEventListener('drop',e=>{e.preventDefault();s.classList.remove('drag-over');dropOnSlot(i);});
+      s.addEventListener('click',()=>removeSlot(i));
+    }
+    c.appendChild(s);
+  });
+}
+
+// ========== POOL DE LETRAS ==========
+function renderPool(){
+  const c=document.getElementById('lettersPool'); c.innerHTML='';
+  // Usar ordem fixa gerada em nextToy (não embaralhar a cada render)
+  S.poolOrder.forEach(({l,id})=>{
+    const el=document.createElement('div');
+    el.className='letter-tile'+(isUsed(id)?' used':'');
+    el.textContent=l; el.dataset.id=id; el.dataset.l=l;
+    el.draggable=true;
+    el.addEventListener('dragstart',e=>{dragId=id;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    el.addEventListener('click',()=>tileClick(id,l));
+    el.addEventListener('touchstart',e=>touchStart(e,el),{passive:true});
+    el.addEventListener('touchmove',touchMove,{passive:false});
+    el.addEventListener('touchend',e=>touchEnd(e,id,l));
+    c.appendChild(el);
+  });
+}
+
+function genDecoys(used,n){
+  const s=new Set(used);
+  // Pool base + acentuadas comuns como possíveis decoys
+  const pool=(ALPHABET+"ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇ").split('');
+  return shuffle(pool.filter(c=>!s.has(c))).slice(0,n);
+}
+function isUsed(id){return Object.values(S.tileMap).includes(id);}
+
+// ========== DRAG desktop ==========
+let dragId=null;
+function dropOnSlot(i){
+  if(!dragId||isUsed(dragId))return;
+  const el=document.querySelector(`[data-id="${dragId}"]`);
+  if(!el)return;
+  place(i,el.dataset.l,dragId);
+}
+
+// ========== TOUCH mobile ==========
+let tEl=null,tClone=null,tOX=0,tOY=0;
+function touchStart(e,el){
+  if(el.classList.contains('used'))return;
+  tEl=el;
+  const r=el.getBoundingClientRect(),t=e.touches[0];
+  tOX=t.clientX-r.left; tOY=t.clientY-r.top;
+  tClone=el.cloneNode(true);
+  tClone.style.cssText=`position:fixed;z-index:9999;pointer-events:none;opacity:.85;width:${r.width}px;height:${r.height}px;left:${t.clientX-tOX}px;top:${t.clientY-tOY}px;transition:none`;
+  document.body.appendChild(tClone);
+}
+function touchMove(e){
+  e.preventDefault();
+  if(!tClone)return;
+  const t=e.touches[0];
+  tClone.style.left=(t.clientX-tOX)+'px';
+  tClone.style.top=(t.clientY-tOY)+'px';
+  document.querySelectorAll('.answer-slot').forEach(s=>s.classList.remove('drag-over'));
+  const under=document.elementFromPoint(t.clientX,t.clientY);
+  if(under&&under.classList.contains('answer-slot')&&under.dataset.index!==undefined)under.classList.add('drag-over');
+}
+function touchEnd(e,id,l){
+  if(tClone){tClone.remove();tClone=null;}
+  document.querySelectorAll('.answer-slot').forEach(s=>s.classList.remove('drag-over'));
+  if(!tEl)return;
+  const t=e.changedTouches[0];
+  const under=document.elementFromPoint(t.clientX,t.clientY);
+  if(under&&under.classList.contains('answer-slot')&&under.dataset.index!==undefined&&!isUsed(id)){
+    place(parseInt(under.dataset.index),l,id);
+  }
+  tEl=null;
+}
+
+// ========== CLIQUE DIRETO ==========
+function tileClick(id,l){
+  if(isUsed(id))return;
+  const i=firstEmpty(); if(i<0)return;
+  place(i,l,id);
+}
+function firstEmpty(){
+  const n=S.toy.name;
+  for(let i=0;i<n.length;i++){if(n[i]!=='-'&&!S.slots[i])return i;}
+  return -1;
+}
+
+// ========== COLOCAR ==========
+function place(i,l,id){
+  if(S.slots[i]){delete S.tileMap[i];}
+  S.slots[i]=l; S.tileMap[i]=id;
+  renderSlots(); renderPool();
+}
+function removeSlot(i){
+  if(!S.slots[i])return;
+  delete S.tileMap[i]; S.slots[i]='';
+  renderSlots(); renderPool();
+}
+function clearAnswer(){
+  S.slots=new Array(S.toy.name.length).fill('');
+  S.tileMap={};
+  renderSlots(); renderPool();
+}
+
+// ========== VERIFICAR ==========
+function checkAnswer(){
+  const name=S.toy.name;
+  // Monta resposta respeitando hifens fixos
+  let answer='';
+  for(let i=0;i<name.length;i++){
+    answer+=name[i]==='-'?'-':(S.slots[i]||'');
+  }
+  // Checa se completo
+  const incomplete=name.split('').some((ch,i)=>ch!=='-'&&!S.slots[i]);
+  if(incomplete){showFb('⚠️ Complete todas as letras!','warn');return;}
+
+  if(answer===name){
+    const pts=10*S.currentLevel;
+    S.score+=pts; S.correctInLevel++;
+    renderScore(); updateBar();
+    markSlots('correct'); showFb('🎉 Muito bem!','ok'); showPts('+'+pts);
+    save();
+    setTimeout(nextToy,1300);
+  } else {
+    S.lives--;
+    renderLives(); markSlots('wrong'); showFb('❌ Tente outra vez!','err');
+    S.queue.push(S.toy);
+    clearAnswer();
+    if(S.lives<=0) setTimeout(showLose,1100);
+    else setTimeout(nextToy,1300);
+  }
+}
+
+function markSlots(cls){
+  document.querySelectorAll('.answer-slot:not(.hyphen)').forEach(s=>{
+    if(s.dataset.index!==undefined) s.classList.add(cls);
+  });
+}
+
+// ========== FEEDBACK ==========
+let fbTimer=null;
+function showFb(msg,type){
+  const b=document.getElementById('feedbackBanner');
+  b.textContent=msg; b.className='feedback-banner show '+type;
+  clearTimeout(fbTimer);
+  fbTimer=setTimeout(()=>b.classList.remove('show'),1900);
+}
+function showPts(txt){
+  const el=document.createElement('div');
+  el.className='points-anim'; el.textContent=txt;
+  el.style.left=(window.innerWidth/2-20)+'px';
+  el.style.top=(window.innerHeight/2)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+}
+
+// ========== NÍVEL COMPLETO ==========
+function levelComplete(){
+  const lvl=S.currentLevel;
+  const total=TOYS.filter(t=>t.level===lvl).length;
+  const pct=S.correctInLevel/total;
+  const stars=pct>=1?3:pct>=0.75?2:1;
+  S.levelStars[lvl-1]=Math.max(S.levelStars[lvl-1],stars);
+  if(lvl<5) S.levelUnlocked[lvl]=true;
+  save();
+  // Mostrar modal com opção de salvar ao avançar de nível
+  const subtitle=`Você acertou ${S.correctInLevel} brinquedos!\nPontuação total: ${S.score} pontos`;
+  showModalSave('🏆',`Nível ${lvl} concluído!`,
+    '⭐'.repeat(stars)+'☆'.repeat(3-stars),
+    subtitle, lvl
+  );
+}
+
+function showModalSave(emoji,title,stars,sub,lvl){
+  document.getElementById('mEmoji').textContent=emoji;
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mStars').textContent=stars;
+  document.getElementById('mSubtitle').textContent=sub;
+  // Botão principal: próximo nível ou menu
+  document.getElementById('mBtn1').textContent=lvl<5?`▶ Ir para o Nível ${lvl+1}`:'🎊 Menu principal';
+  S.cb1=()=>{ if(lvl<5) startLevel(lvl+1); else showStartScreen(); };
+  // Botão salvar progresso
+  const b2=document.getElementById('mBtn2');
+  b2.style.display='block';
+  b2.className='modal-btn btn-save';
+  b2.textContent='💾 Salvar meu progresso';
+  S.cb2=()=>{
+    document.getElementById('modalOverlay').classList.add('hidden');
+    showModalNome(()=>{
+      salvarProgresso();
+      // Reabrir modal de conclusão com botão salvar desabilitado
+      document.getElementById('mBtn2').textContent='✅ Progresso salvo!';
+      document.getElementById('mBtn2').disabled=true;
+      document.getElementById('mBtn2').style.opacity='0.6';
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    });
+  };
+  // Botão menu
+  const b3=document.getElementById('mBtn3');
+  if(b3){
+    b3.style.display='block';
+    b3.textContent='🏠 Menu principal';
+    S.cb3=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); showStartScreen(); };
+  }
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+function showLose(){
+  showModal('💔','Não desista!','',
+    `Você perdeu todas as vidas no Nível ${S.currentLevel}.\nA pontuação é reiniciada neste nível.`,
+    '🔄 Tentar de novo', ()=>startLevel(S.currentLevel),
+    '🏠 Menu principal', ()=>showStartScreen()
+  );
+}
+
+// ========== MODAL ==========
+function showModal(emoji,title,stars,sub,t1,c1,t2,c2){
+  document.getElementById('mEmoji').textContent=emoji;
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mStars').textContent=stars;
+  document.getElementById('mSubtitle').textContent=sub;
+  document.getElementById('mBtn1').textContent=t1; S.cb1=c1;
+  const b2=document.getElementById('mBtn2');
+  b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
+  if(t2){b2.textContent=t2;b2.style.display='block';S.cb2=c2;}
+  else b2.style.display='none';
+  const b3=document.getElementById('mBtn3');
+  b3.style.display='none'; S.cb3=null;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+function modalAct(n){
+  if(n!==2){ // Não fechar ao clicar em salvar
+    document.getElementById('modalOverlay').classList.add('hidden');
+  }
+  if(n===1&&S.cb1) S.cb1();
+  if(n===2&&S.cb2) S.cb2();
+  if(n===3&&S.cb3){ document.getElementById('modalOverlay').classList.add('hidden'); S.cb3(); }
+}
+
+// ========== TELAS ==========
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showStartScreen(){
+  document.getElementById('levelBar').style.display='none';
+  showScreen('screenStart'); renderStart();
+}
+
+// ========== UTIL ==========
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// ========== NOME DO ALUNO ==========
+function onNomeInput(){
+  const nome=document.getElementById('inputNome').value.trim();
+  S.nomeAluno=nome;
+  const nd=document.getElementById('nomeDisplay');
+  if(nome){nd.textContent='👤 '+nome;nd.style.display='block';}
+  else nd.style.display='none';
+}
+// Permitir editar nome também durante o jogo (clique no display do header)
+document.addEventListener('DOMContentLoaded',()=>{
+  const nd=document.getElementById('nomeDisplay');
+  if(nd) nd.addEventListener('click',()=>{
+    showModalNome(()=>{ /* apenas atualiza nome */ });
+  });
+});
+
+// ========== SALVAR PROGRESSO ==========
+function salvarProgressoBar(){
+  // Sempre pede confirmação/edição do nome antes de salvar
+  showModalNome(()=>{
+    salvarProgresso();
+    const btn=document.getElementById('btnSaveBar');
+    btn.textContent='✅'; btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='💾';btn.classList.remove('saved');},2500);
+  });
+}
+
+function showModalNome(callback){
+  const nomeAtual=S.nomeAluno||'';
+  // Reutiliza o modal existente
+  document.getElementById('mEmoji').textContent='👤';
+  document.getElementById('mTitle').textContent='Nome do aluno';
+  document.getElementById('mStars').textContent='';
+  document.getElementById('mSubtitle').innerHTML=
+    '<input id="modalNomeInput" type="text" maxlength="40" placeholder="Digite seu nome..."'+
+    ' style="font-family:Fredoka One,cursive;font-size:22px;color:var(--text-main);background:var(--l-bg);'+
+    'border:3px solid var(--l-bd);border-radius:16px;padding:10px 20px;text-align:center;width:100%;outline:none;margin-top:8px">';
+  document.getElementById('mBtn1').textContent='✅ Confirmar e Salvar';
+  S.cb1=()=>{
+    const nome=document.getElementById('modalNomeInput').value.trim();
+    if(!nome){showFb('⚠️ Digite um nome!','warn'); return;}
+    S.nomeAluno=nome;
+    // Atualiza campo de nome na tela inicial e header
+    const inp=document.getElementById('inputNome');
+    if(inp) inp.value=nome;
+    const nd=document.getElementById('nomeDisplay');
+    nd.textContent='👤 '+nome; nd.style.display='block';
+    document.getElementById('modalOverlay').classList.add('hidden');
+    callback();
+  };
+  const b2=document.getElementById('mBtn2');
+  b2.textContent='✖ Cancelar'; b2.style.display='block';
+  b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
+  S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); };
+  document.getElementById('mBtn3').style.display='none';
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  // Pré-preencher e focar
+  setTimeout(()=>{
+    const inp=document.getElementById('modalNomeInput');
+    if(inp){inp.value=nomeAtual;inp.focus();inp.select();}
+  },100);
+}
+
+function salvarProgresso(){
+  const nome=S.nomeAluno||'Aluno';
+  const dados={
+    versao:1,
+    nomeAluno:nome,
+    dataSalvo:new Date().toLocaleDateString('pt-BR'),
+    theme:S.theme,
+    score:S.score,
+    levelStars:S.levelStars,
+    levelUnlocked:S.levelUnlocked,
+  };
+  const json=JSON.stringify(dados);
+  const b64=btoa(unescape(encodeURIComponent(json)));
+  const blob=new Blob([b64],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='progresso descubra a palavra '+nome+'.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ========== CARREGAR PROGRESSO ==========
+function loadFromFile(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const b64=e.target.result.trim();
+      const json=decodeURIComponent(escape(atob(b64)));
+      const dados=JSON.parse(json);
+      if(!dados.versao||!dados.nomeAluno){
+        alert('Arquivo inválido! Use apenas arquivos .txt salvos por este jogo.');
+        return;
+      }
+      S.nomeAluno=dados.nomeAluno;
+      S.theme=dados.theme||'cartoon';
+      S.score=dados.score||0;
+      S.levelStars=dados.levelStars||[0,0,0,0,0];
+      S.levelUnlocked=dados.levelUnlocked||[true,false,false,false,false];
+      setTheme(S.theme);
+      const inp=document.getElementById('inputNome');
+      if(inp) inp.value=S.nomeAluno;
+      const nd=document.getElementById('nomeDisplay');
+      nd.textContent='👤 '+S.nomeAluno; nd.style.display='block';
+      // Definir currentLevel como o primeiro nível desbloqueado e não completo
+      currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
+      renderScore(); renderLives();
+      showStartScreen();
+      showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+    }catch(err){
+      alert('Arquivo inválido ou corrompido. Use apenas arquivos .txt salvos por este jogo.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// ========== BOOT ==========
+S.nomeAluno='';
+S.cb3=null;
+setTheme(S.theme);
+renderStart();
+renderLives();
+renderScore();
+</script>
+</body>
+</html>
