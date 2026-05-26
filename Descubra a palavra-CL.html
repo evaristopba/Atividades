@@ -265,7 +265,7 @@ const TOYS = [
   {name:"XILOFONE",  img:"https://i.postimg.cc/V6sHtwhD/Xilofone.jpg",     emoji:"🎵", level:3},
   {name:"FANTOCHE",  img:"https://i.postimg.cc/Fz9jdhs9/Fantoche.jpg",      emoji:"🎭", level:3},
   {name:"DOMINÓ",    img:"https://i.postimg.cc/kGvPsvCC/Domino.jpg",        emoji:"🁣", level:3},
-  {name:"ORIGAMI",   img:"https://i.postimg.cc/rwvZdt6t/Origami.jpg",       emoji:"🦢", level:3},
+  {name:"ORIGAMI",   img:"https://i.postimg.cc/rwvZdt6t/Origami.jpg",                                                emoji:"🦢", level:3},
 
   // NÍVEL 4 — 7 a 8 letras
   {name:"PATINETE",   img:"https://i.postimg.cc/mDZ694nj/Patinete.jpg",    emoji:"🛵", level:4},
@@ -273,19 +273,19 @@ const TOYS = [
   {name:"HELICÓPTERO",img:"https://i.postimg.cc/k4MhSCHT/Helicoptero.jpg", emoji:"🚁", level:4},
   {name:"MASSINHA",   img:"https://i.postimg.cc/Pf0HjyKL/Massinha.jpg",    emoji:"🎨", level:4},
   {name:"GANGORRA",   img:"https://i.postimg.cc/sxhvg854/Gangorra.jpg",    emoji:"⚖️", level:4},
-  {name:"PANDEIRO",   img:"https://i.postimg.cc/bYFqC8Kn/Pandeiro.jpg",    emoji:"🥁", level:4},
+  {name:"PANDEIRO",   img:"https://i.postimg.cc/bYFqC8Kn/Pandeiro.jpg",                                               emoji:"🥁", level:4},
   {name:"CARIMBO",    img:"https://i.postimg.cc/CLvKkk4V/Carimbo.jpg",     emoji:"📮", level:4},
-  {name:"PALHAÇO",    img:"https://i.postimg.cc/8zLHXpXY/Palhaco.jpg",     emoji:"🤡", level:4},
+  {name:"PALHAÇO",    img:"https://i.postimg.cc/8zLHXpXY/Palhaco.jpg",                                               emoji:"🤡", level:4},
 
   // NÍVEL 5 — 9+ letras / palavras compostas
   {name:"DINOSSAURO",   img:"https://i.postimg.cc/PJP364hB/Dinossauro.webp", emoji:"🦕", level:5},
-  {name:"PULA-CORDA",   img:"",                                               emoji:"🪢", level:5},
-  {name:"ESTILINGUE",   img:"https://i.postimg.cc/cC8YKhpq/Estilingue.jpg",   emoji:"🏹", level:5},
-  {name:"TELESCÓPIO",   img:"https://i.postimg.cc/GhmtSqMg/Telescopio.jpg",   emoji:"🔭", level:5},
-  {name:"QUEBRA-CABEÇA",img:"",                                               emoji:"🧩", level:5},
-  {name:"MARIONETE",    img:"",                                               emoji:"🎎", level:5},
-  {name:"SANDUÍCHE",    img:"",                                               emoji:"🥪", level:5},
-  {name:"PASSARINHO",   img:"",                                               emoji:"🐦", level:5},
+  {name:"PULA-CORDA",   img:"https://i.postimg.cc/QN1pcpSR/Pula-corda.jpg",                                               emoji:"🪢", level:5},
+  {name:"ESTILINGUE",   img:"https://i.postimg.cc/cC8YKhpq/Estilingue.jpg",                                               emoji:"🏹", level:5},
+  {name:"TELESCÓPIO",   img:"https://i.postimg.cc/GhmtSqMg/Telescopio.jpg",                                               emoji:"🔭", level:5},
+  {name:"QUEBRA-CABEÇA",img:"https://i.postimg.cc/mZCQ7QVq/Quebra-cabeca.jpg",                                               emoji:"🧩", level:5},
+  {name:"MARIONETE",    img:"https://i.postimg.cc/Y2Y1Q18Z/Marionete.jpg",                                               emoji:"🎎", level:5},
+  {name:"SANDUÍCHE",    img:"https://i.postimg.cc/HWXQbQ3N/Sanduiche.jpg",                                               emoji:"🥪", level:5},
+  {name:"PASSARINHO",   img:"https://i.postimg.cc/h4T9V9M5/Passarinho.jpg",                                               emoji:"🐦", level:5},
 ];
 
 const ALPHABET = "ABCDEFGHIJKLMNOPRSTUVXZ";
@@ -359,9 +359,9 @@ function startLevel(lvl){
   S.queue=shuffle(TOYS.filter(t=>t.level===lvl).slice());
   showScreen('screenGame');
   document.getElementById('levelBar').style.display='flex';
-  // Mostrar botão salvar apenas a partir do nível 2
+  // Botão salvar disponível em qualquer nível
   const btnSave=document.getElementById('btnSaveBar');
-  btnSave.style.display=lvl>1?'inline-block':'none';
+  btnSave.style.display='inline-block';
   btnSave.textContent='💾'; btnSave.classList.remove('saved'); btnSave.disabled=false;
   updateBar(); renderLives(); renderScore();
   nextToy();
@@ -588,32 +588,38 @@ function showModalSave(emoji,title,stars,sub,lvl){
   document.getElementById('mTitle').textContent=title;
   document.getElementById('mStars').textContent=stars;
   document.getElementById('mSubtitle').textContent=sub;
-  // Botão principal: próximo nível ou menu
-  document.getElementById('mBtn1').textContent=lvl<5?`▶ Ir para o Nível ${lvl+1}`:'🎊 Menu principal';
-  S.cb1=()=>{ if(lvl<5) startLevel(lvl+1); else showStartScreen(); };
-  // Botão salvar progresso
-  const b2=document.getElementById('mBtn2');
-  b2.style.display='block';
-  b2.className='modal-btn btn-save';
-  b2.textContent='💾 Salvar meu progresso';
-  S.cb2=()=>{
+
+  const avancar=()=>{ if(lvl<5) startLevel(lvl+1); else showStartScreen(); };
+
+  // Btn1: Salvar e continuar
+  const b1=document.getElementById('mBtn1');
+  b1.textContent='💾 Salvar e continuar';
+  b1.className='modal-btn btn-save';
+  b1.style.cssText='';
+  S.cb1=()=>{
     document.getElementById('modalOverlay').classList.add('hidden');
     showModalNome(()=>{
       salvarProgresso();
-      // Reabrir modal de conclusão com botão salvar desabilitado
-      document.getElementById('mBtn2').textContent='✅ Progresso salvo!';
-      document.getElementById('mBtn2').disabled=true;
-      document.getElementById('mBtn2').style.opacity='0.6';
-      document.getElementById('modalOverlay').classList.remove('hidden');
+      showFb('✅ Progresso salvo!','ok');
+      avancar();
     });
   };
-  // Botão menu
+
+  // Btn2: Continuar sem salvar
+  const b2=document.getElementById('mBtn2');
+  b2.style.display='block';
+  b2.className='modal-btn secondary';
+  b2.disabled=false; b2.style.opacity='1';
+  b2.textContent=lvl<5?'▶ Continuar sem salvar':'▶ Finalizar sem salvar';
+  S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); avancar(); };
+
+  // Btn3: Menu principal
   const b3=document.getElementById('mBtn3');
-  if(b3){
-    b3.style.display='block';
-    b3.textContent='🏠 Menu principal';
-    S.cb3=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); showStartScreen(); };
-  }
+  b3.style.display='block';
+  b3.className='modal-btn secondary';
+  b3.textContent='🏠 Menu principal';
+  S.cb3=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); showStartScreen(); };
+
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 function showLose(){
@@ -630,22 +636,24 @@ function showModal(emoji,title,stars,sub,t1,c1,t2,c2){
   document.getElementById('mTitle').textContent=title;
   document.getElementById('mStars').textContent=stars;
   document.getElementById('mSubtitle').textContent=sub;
-  document.getElementById('mBtn1').textContent=t1; S.cb1=c1;
+  const b1=document.getElementById('mBtn1');
+  b1.textContent=t1; b1.className='modal-btn'; b1.style.cssText='';
+  S.cb1=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); c1(); };
   const b2=document.getElementById('mBtn2');
   b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
-  if(t2){b2.textContent=t2;b2.style.display='block';S.cb2=c2;}
-  else b2.style.display='none';
+  if(t2){
+    b2.textContent=t2; b2.style.display='block';
+    S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); c2(); };
+  } else b2.style.display='none';
   const b3=document.getElementById('mBtn3');
   b3.style.display='none'; S.cb3=null;
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 function modalAct(n){
-  if(n!==2){ // Não fechar ao clicar em salvar
-    document.getElementById('modalOverlay').classList.add('hidden');
-  }
+  // Não fechar automaticamente — cada callback decide quando fechar
   if(n===1&&S.cb1) S.cb1();
   if(n===2&&S.cb2) S.cb2();
-  if(n===3&&S.cb3){ document.getElementById('modalOverlay').classList.add('hidden'); S.cb3(); }
+  if(n===3&&S.cb3) S.cb3();
 }
 
 // ========== TELAS ==========
@@ -676,7 +684,7 @@ function onNomeInput(){
 document.addEventListener('DOMContentLoaded',()=>{
   const nd=document.getElementById('nomeDisplay');
   if(nd) nd.addEventListener('click',()=>{
-    showModalNome(()=>{ /* apenas atualiza nome */ });
+    showModalNome(null, true);
   });
 });
 
@@ -691,9 +699,9 @@ function salvarProgressoBar(){
   });
 }
 
-function showModalNome(callback){
+function showModalNome(callback, somenteNome){
   const nomeAtual=S.nomeAluno||'';
-  // Reutiliza o modal existente
+  const labelBtn=somenteNome?'✅ Salvar nome':'✅ Confirmar e Salvar';
   document.getElementById('mEmoji').textContent='👤';
   document.getElementById('mTitle').textContent='Nome do aluno';
   document.getElementById('mStars').textContent='';
@@ -701,26 +709,26 @@ function showModalNome(callback){
     '<input id="modalNomeInput" type="text" maxlength="40" placeholder="Digite seu nome..."'+
     ' style="font-family:Fredoka One,cursive;font-size:22px;color:var(--text-main);background:var(--l-bg);'+
     'border:3px solid var(--l-bd);border-radius:16px;padding:10px 20px;text-align:center;width:100%;outline:none;margin-top:8px">';
-  document.getElementById('mBtn1').textContent='✅ Confirmar e Salvar';
+  const b1=document.getElementById('mBtn1');
+  b1.textContent=labelBtn; b1.className='modal-btn'; b1.style.cssText='';
   S.cb1=()=>{
     const nome=document.getElementById('modalNomeInput').value.trim();
     if(!nome){showFb('⚠️ Digite um nome!','warn'); return;}
     S.nomeAluno=nome;
-    // Atualiza campo de nome na tela inicial e header
     const inp=document.getElementById('inputNome');
     if(inp) inp.value=nome;
     const nd=document.getElementById('nomeDisplay');
     nd.textContent='👤 '+nome; nd.style.display='block';
     document.getElementById('modalOverlay').classList.add('hidden');
-    callback();
+    if(callback) callback();
   };
   const b2=document.getElementById('mBtn2');
   b2.textContent='✖ Cancelar'; b2.style.display='block';
   b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
   S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); };
-  document.getElementById('mBtn3').style.display='none';
+  const b3=document.getElementById('mBtn3');
+  b3.style.display='none'; S.cb3=null;
   document.getElementById('modalOverlay').classList.remove('hidden');
-  // Pré-preencher e focar
   setTimeout(()=>{
     const inp=document.getElementById('modalNomeInput');
     if(inp){inp.value=nomeAtual;inp.focus();inp.select();}
@@ -729,14 +737,27 @@ function showModalNome(callback){
 
 function salvarProgresso(){
   const nome=S.nomeAluno||'Aluno';
+  // Serializar fila: guardar só os nomes (reconstruir objetos no load)
+  const queueNomes=S.queue.map(t=>t.name);
+  const toyAtual=S.toy?S.toy.name:null;
   const dados={
-    versao:1,
+    versao:2,
     nomeAluno:nome,
     dataSalvo:new Date().toLocaleDateString('pt-BR'),
+    horaSalvo:new Date().toLocaleTimeString('pt-BR'),
     theme:S.theme,
     score:S.score,
     levelStars:S.levelStars,
     levelUnlocked:S.levelUnlocked,
+    // Estado do nível em andamento
+    emJogo: S.toy !== null,
+    currentLevel:S.currentLevel,
+    lives:S.lives,
+    correctInLevel:S.correctInLevel,
+    toyAtual:toyAtual,
+    queueNomes:queueNomes,
+    slots:S.slots,
+    poolOrder:S.poolOrder,
   };
   const json=JSON.stringify(dados);
   const b64=btoa(unescape(encodeURIComponent(json)));
@@ -765,6 +786,7 @@ function loadFromFile(event){
         alert('Arquivo inválido! Use apenas arquivos .txt salvos por este jogo.');
         return;
       }
+      // Restaurar dados gerais
       S.nomeAluno=dados.nomeAluno;
       S.theme=dados.theme||'cartoon';
       S.score=dados.score||0;
@@ -775,12 +797,56 @@ function loadFromFile(event){
       if(inp) inp.value=S.nomeAluno;
       const nd=document.getElementById('nomeDisplay');
       nd.textContent='👤 '+S.nomeAluno; nd.style.display='block';
-      // Definir currentLevel como o primeiro nível desbloqueado e não completo
-      currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
-      renderScore(); renderLives();
-      showStartScreen();
-      showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+      renderScore();
+
+      if(dados.emJogo && dados.versao>=2 && dados.toyAtual){
+        // Restaurar nível em andamento exatamente onde parou
+        S.currentLevel=dados.currentLevel||1;
+        S.lives=dados.lives!=null?dados.lives:5;
+        S.correctInLevel=dados.correctInLevel||0;
+
+        // Reconstruir brinquedo atual a partir do nome
+        S.toy=TOYS.find(t=>t.name===dados.toyAtual)||null;
+
+        // Reconstruir fila a partir dos nomes salvos
+        S.queue=(dados.queueNomes||[]).map(n=>TOYS.find(t=>t.name===n)).filter(Boolean);
+
+        // Restaurar slots e pool
+        S.slots=dados.slots||[];
+        S.poolOrder=dados.poolOrder||[];
+        // Reconstruir tileMap a partir dos slots e poolOrder
+        S.tileMap={};
+        if(S.slots && S.poolOrder){
+          S.slots.forEach((letra,i)=>{
+            if(letra){
+              const tile=S.poolOrder.find(p=>p.l===letra&&!Object.values(S.tileMap).includes(p.id));
+              if(tile) S.tileMap[i]=tile.id;
+            }
+          });
+        }
+
+        // Ir direto para o jogo
+        showScreen('screenGame');
+        document.getElementById('levelBar').style.display='flex';
+        const btnSave=document.getElementById('btnSaveBar');
+        btnSave.style.display='inline-block';
+        btnSave.textContent='💾'; btnSave.classList.remove('saved'); btnSave.disabled=false;
+        updateBar(); renderLives();
+        if(S.toy){
+          renderToy();
+        } else {
+          nextToy();
+        }
+        showFb('✅ Olá, '+S.nomeAluno+'! Continuando de onde parou!','ok');
+      } else {
+        // Sem jogo em andamento: ir para menu no nível correto
+        currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
+        renderLives();
+        showStartScreen();
+        showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+      }
     }catch(err){
+      console.error(err);
       alert('Arquivo inválido ou corrompido. Use apenas arquivos .txt salvos por este jogo.');
     }
   };
