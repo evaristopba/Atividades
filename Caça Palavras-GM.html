@@ -257,7 +257,7 @@
             <div id="level-progress"></div>
             <h2>Status do Jogo</h2>
             <div id="status-info">
-                <div style="text-align:center;font-size:14px;color:#666;margin-bottom:5px;">ALUNO: <strong id="student-display">---</strong></div>
+                <div style="text-align:center;font-size:14px;color:#666;margin-bottom:5px;">ALUNO: <strong id="student-display" title="Clique para editar o nome" style="cursor:pointer;border-bottom:1px dashed #aaa;padding-bottom:1px;">---</strong></div>
                 <div>Pontuação<span id="score">0</span></div>
                 <div>Tempo<span id="timer">05:00</span></div>
             </div>
@@ -274,9 +274,9 @@
     <div id="save-name-modal" class="modal-container hidden">
         <div class="modal-content">
             <div class="save-modal-header">
-                <span class="save-icon">💾</span>
-                <h2>Salvar Progresso</h2>
-                <p>Digite seu nome completo para identificar o arquivo</p>
+                <span class="save-icon" id="save-modal-icon">💾</span>
+                <h2 id="save-modal-title">Salvar Progresso</h2>
+                <p id="save-modal-desc">Digite seu nome completo para identificar o arquivo</p>
             </div>
             <div class="save-modal-body">
                 <div class="save-input-wrap">
@@ -850,9 +850,27 @@
         });
 
         // ===== SALVAR PROGRESSO =====
+        // Clique no nome do aluno para editar
+        studentLabel.style.cursor = 'pointer';
+        studentLabel.addEventListener('click', () => {
+            document.getElementById('save-modal-icon').textContent = '✏️';
+            document.getElementById('save-modal-title').textContent = 'Editar Nome';
+            document.getElementById('save-modal-desc').textContent = 'Atualize o nome do aluno';
+            studentNameInput.value = studentName || '';
+            saveNameModal._editMode = true;
+            saveNameModal.classList.remove('hidden');
+            setTimeout(() => studentNameInput.focus(), 100);
+        });
+
         document.getElementById('btn-save-prog').onclick = () => {
+            document.getElementById('save-modal-icon').textContent = '💾';
+            document.getElementById('save-modal-title').textContent = 'Salvar Progresso';
+            document.getElementById('save-modal-desc').textContent = 'Digite seu nome completo para identificar o arquivo';
+            saveNameModal._editMode = false;
             if (!studentName || studentName === "") {
+                studentNameInput.value = '';
                 saveNameModal.classList.remove('hidden');
+                setTimeout(() => studentNameInput.focus(), 100);
             } else {
                 executeSaveDownload();
             }
@@ -864,7 +882,9 @@
                 studentName = val;
                 studentLabel.textContent = studentName;
                 saveNameModal.classList.add('hidden');
-                executeSaveDownload();
+                if (!saveNameModal._editMode) {
+                    executeSaveDownload();
+                }
             } else {
                 alert("Por favor, digite seu nome.");
             }
