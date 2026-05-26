@@ -338,7 +338,7 @@
             <div id="theme-progress"></div>
             <h2>Status do Jogo</h2>
             <div id="status-info">
-                <div style="text-align: center; font-size: 14px; color: #666; margin-bottom: 5px;">ALUNO: <strong id="student-display">---</strong></div>
+                <div style="text-align: center; font-size: 14px; color: #666; margin-bottom: 5px;">ALUNO: <strong id="student-display" title="Clique para editar o nome" style="cursor:pointer; border-bottom: 1px dashed #aaa;">---</strong></div>
                 <div>Pontuação<span id="score">0</span></div>
                 <div>Tempo<span id="timer">05:00</span></div>
             </div>
@@ -551,6 +551,8 @@
         // --- LÓGICA DE SALVAMENTO (RESOLUÇÃO DO DESAFIO) ---
         document.getElementById('btn-save-prog').onclick = () => {
             if (!studentName || studentName === "") {
+                document.querySelector('#save-name-modal .save-modal-header h2').textContent = 'Salvar Progresso';
+                document.querySelector('#save-name-modal .save-modal-header p').textContent = 'Digite seu nome completo para identificar o arquivo';
                 saveNameModal.classList.remove('hidden');
             } else {
                 executeSaveDownload();
@@ -572,6 +574,15 @@
         cancelSaveBtn.onclick = () => {
             saveNameModal.classList.add('hidden');
         };
+
+        // Clicar no nome abre o modal no modo edição
+        studentLabel.addEventListener('click', () => {
+            if (!studentName) return; // sem nome ainda, nada a editar
+            document.querySelector('#save-name-modal .save-modal-header h2').textContent = 'Editar Nome';
+            document.querySelector('#save-name-modal .save-modal-header p').textContent = 'Corrija o nome e confirme para salvar novamente.';
+            studentNameInput.value = studentName;
+            saveNameModal.classList.remove('hidden');
+        });
 
         function executeSaveDownload() {
             const data = { n: studentName, d: currentDifficulty, s: originalLevelScore, b: originalTimeBonus, diag: diagData };
