@@ -48,6 +48,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:
 .score-badge{background:rgba(255,255,255,.25);border-radius:20px;padding:4px 14px;font-size:15px;font-weight:800;color:var(--htxt);display:flex;align-items:center;gap:5px}
 .btn-settings{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:40px;height:40px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .3s;color:#fff}
 .btn-settings:hover{background:rgba(255,255,255,.4);transform:rotate(30deg)}
+.btn-prof{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;color:#fff}
+.btn-prof:hover{background:rgba(255,255,255,.4)}
 .level-bar{background:linear-gradient(135deg,var(--bg-h2),var(--bg-h1));padding:8px 20px;display:flex;align-items:center;gap:16px;font-size:13px;color:rgba(255,255,255,.9);font-weight:700}
 .level-label{font-family:'Fredoka One',cursive;font-size:16px;color:#fff;white-space:nowrap}
 .progress-track{flex:1;background:rgba(255,255,255,.3);border-radius:10px;height:10px;overflow:hidden}
@@ -158,6 +160,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:
     <div class="lives-container" id="livesDisplay"></div>
     <div class="score-badge">⭐ <span id="scoreDisplay">0</span></div>
     <div class="nome-display" id="nomeDisplay" style="display:none"></div>
+    <button class="btn-prof" id="btnProf" onclick="abrirRelatorio()" title="Relatório do professor">📋</button>
     <button class="btn-settings" id="btnSettings" aria-label="Tema">⚙️</button>
   </div>
 </header>
@@ -204,6 +207,22 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:
           <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="loadFromFile(event)">
         </label>
       </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenRelatorio">
+    <div class="game-card" style="padding:0;overflow:hidden">
+      <div style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#fff">📋 Relatório do Professor</div>
+        <button onclick="fecharRelatorio()" style="background:rgba(255,255,255,.25);border:none;border-radius:12px;color:#fff;padding:8px 16px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer">✖ Fechar</button>
+      </div>
+      <div style="padding:12px 24px 0;display:flex;gap:10px;align-items:center;border-top:1px solid var(--l-bg)">
+        <label style="background:var(--l-bg);border:2px solid var(--l-bd);border-radius:12px;padding:8px 16px;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer;color:var(--text-main)">
+          📂 Carregar outro arquivo
+          <input type="file" accept=".txt" style="display:none" onchange="abrirRelatorioDeTxt(event)">
+        </label>
+      </div>
+      <div id="relatorioConteudo" style="padding:24px;max-height:60vh;overflow-y:auto"></div>
     </div>
   </div>
 
@@ -295,7 +314,14 @@ let S = {
   theme:'cartoon', currentLevel:1, lives:5, score:0,
   levelStars:[0,0,0,0,0], levelUnlocked:[true,false,false,false,false],
   queue:[], toy:null, slots:[], tileMap:{},
-  correctInLevel:0, cb1:null, cb2:null, poolOrder:[],
+  correctInLevel:0, cb1:null, cb2:null, cb3:null, poolOrder:[],
+  // Telemetria
+  nomeAluno:'',
+  sessoes:[],          // histórico de sessões salvas
+  levelTempos:[0,0,0,0,0],   // tempo total por nível (ms)
+  levelInicio:0,             // timestamp início do nível atual
+  palavraInicio:0,           // timestamp início da palavra atual
+  registroPalavras:[],       // [{name, tentativas, erros, tempoMs, acertou}]
 };
 
 // ========== PERSISTÊNCIA ==========
@@ -357,9 +383,11 @@ function startLevel(lvl){
   if(!S.levelUnlocked[lvl-1])return;
   S.currentLevel=lvl; S.lives=5; S.correctInLevel=0;
   S.queue=shuffle(TOYS.filter(t=>t.level===lvl).slice());
+  S.registroPalavras=[];
+  S.levelInicio=Date.now();
+  S.palavraInicio=Date.now();
   showScreen('screenGame');
   document.getElementById('levelBar').style.display='flex';
-  // Botão salvar disponível em qualquer nível
   const btnSave=document.getElementById('btnSaveBar');
   btnSave.style.display='inline-block';
   btnSave.textContent='💾'; btnSave.classList.remove('saved'); btnSave.disabled=false;
@@ -379,7 +407,9 @@ function nextToy(){
   S.toy=S.queue.shift();
   S.slots=new Array(S.toy.name.length).fill('');
   S.tileMap={};
-  // Gerar pool uma vez só (ordem fixa durante todo o exercício)
+  S._tentativas=0;
+  S._erros=0;
+  S.palavraInicio=Date.now();
   const real=S.toy.name.replace(/-/g,'').split('').map((l,i)=>({l,id:'r'+i}));
   const decoys=genDecoys(real.map(x=>x.l),3).map((l,i)=>({l,id:'d'+i}));
   S.poolOrder=shuffle([...real,...decoys]);
@@ -526,20 +556,34 @@ function checkAnswer(){
   const incomplete=name.split('').some((ch,i)=>ch!=='-'&&!S.slots[i]);
   if(incomplete){showFb('⚠️ Complete todas as letras!','warn');return;}
 
+  S._tentativas=(S._tentativas||0)+1;
   if(answer===name){
+    const tempoMs=Date.now()-S.palavraInicio;
+    S.registroPalavras.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas, erros:S._erros||0,
+      tempoMs, acertou:true
+    });
     const pts=10*S.currentLevel;
     S.score+=pts; S.correctInLevel++;
     renderScore(); updateBar();
     markSlots('correct'); showFb('🎉 Muito bem!','ok'); showPts('+'+pts);
-    save();
     setTimeout(nextToy,1300);
   } else {
+    S._erros=(S._erros||0)+1;
     S.lives--;
     renderLives(); markSlots('wrong'); showFb('❌ Tente outra vez!','err');
     S.queue.push(S.toy);
     clearAnswer();
-    if(S.lives<=0) setTimeout(showLose,1100);
-    else setTimeout(nextToy,1300);
+    if(S.lives<=0){
+      // Registrar palavras não concluídas
+      S.registroPalavras.push({
+        name:S.toy.name, level:S.currentLevel,
+        tentativas:S._tentativas, erros:S._erros,
+        tempoMs:Date.now()-S.palavraInicio, acertou:false
+      });
+      setTimeout(showLose,1100);
+    } else setTimeout(nextToy,1300);
   }
 }
 
@@ -574,7 +618,15 @@ function levelComplete(){
   const stars=pct>=1?3:pct>=0.75?2:1;
   S.levelStars[lvl-1]=Math.max(S.levelStars[lvl-1],stars);
   if(lvl<5) S.levelUnlocked[lvl]=true;
-  save();
+  // Registrar tempo do nível
+  S.levelTempos[lvl-1]=(S.levelTempos[lvl-1]||0)+(Date.now()-S.levelInicio);
+  // Registrar sessão
+  S.sessoes.push({
+    data:new Date().toLocaleDateString('pt-BR'),
+    hora:new Date().toLocaleTimeString('pt-BR'),
+    nivel:lvl, stars, score:S.score,
+    palavras:[...S.registroPalavras]
+  });
   // Mostrar modal com opção de salvar ao avançar de nível
   const subtitle=`Você acertou ${S.correctInLevel} brinquedos!\nPontuação total: ${S.score} pontos`;
   showModalSave('🏆',`Nível ${lvl} concluído!`,
@@ -740,6 +792,11 @@ function salvarProgresso(){
   // Serializar fila: guardar só os nomes (reconstruir objetos no load)
   const queueNomes=S.queue.map(t=>t.name);
   const toyAtual=S.toy?S.toy.name:null;
+  // Registrar tempo parcial do nível se em jogo
+  const temposSnap=[...S.levelTempos];
+  if(S.toy && S.levelInicio){
+    temposSnap[S.currentLevel-1]=(temposSnap[S.currentLevel-1]||0)+(Date.now()-S.levelInicio);
+  }
   const dados={
     versao:2,
     nomeAluno:nome,
@@ -749,7 +806,6 @@ function salvarProgresso(){
     score:S.score,
     levelStars:S.levelStars,
     levelUnlocked:S.levelUnlocked,
-    // Estado do nível em andamento
     emJogo: S.toy !== null,
     currentLevel:S.currentLevel,
     lives:S.lives,
@@ -758,6 +814,10 @@ function salvarProgresso(){
     queueNomes:queueNomes,
     slots:S.slots,
     poolOrder:S.poolOrder,
+    // Telemetria
+    levelTempos:temposSnap,
+    sessoes:S.sessoes,
+    registroPalavras:S.registroPalavras,
   };
   const json=JSON.stringify(dados);
   const b64=btoa(unescape(encodeURIComponent(json)));
@@ -792,6 +852,9 @@ function loadFromFile(event){
       S.score=dados.score||0;
       S.levelStars=dados.levelStars||[0,0,0,0,0];
       S.levelUnlocked=dados.levelUnlocked||[true,false,false,false,false];
+      S.levelTempos=dados.levelTempos||[0,0,0,0,0];
+      S.sessoes=dados.sessoes||[];
+      S.registroPalavras=dados.registroPalavras||[];
       setTheme(S.theme);
       const inp=document.getElementById('inputNome');
       if(inp) inp.value=S.nomeAluno;
@@ -852,6 +915,326 @@ function loadFromFile(event){
   };
   reader.readAsText(file);
   event.target.value='';
+}
+
+// ========== RELATÓRIO DO PROFESSOR ==========
+function senhaHoje(){
+  const d=new Date();
+  const dia=String(d.getDate()).padStart(2,'0');
+  const mes=String(d.getMonth()+1).padStart(2,'0');
+  const ano=String(d.getFullYear());
+  return dia+mes+ano;
+}
+
+function abrirRelatorio(){
+  showModalSenha();
+}
+
+function showModalSenha(){
+  // Criar modal de senha temático
+  const overlay=document.createElement('div');
+  overlay.id='modalSenha';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);animation:fadeIn .3s ease';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
+      <div style="font-size:56px;margin-bottom:10px">🔒</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:26px;color:var(--text-main);margin-bottom:6px">Área do Professor</div>
+      <div style="font-size:14px;color:var(--text-light);margin-bottom:20px">Digite a senha de acesso</div>
+      <input id="senhaInput" type="password" maxlength="8"
+        placeholder="••••••••"
+        style="font-family:'Fredoka One',cursive;font-size:28px;letter-spacing:6px;color:var(--text-main);
+               background:var(--l-bg);border:3px solid var(--l-bd);border-radius:16px;
+               padding:12px 20px;text-align:center;width:100%;outline:none;
+               transition:border-color .2s;margin-bottom:8px"
+        oninput="this.style.borderColor='var(--l-bd)'"
+        onkeydown="if(event.key==='Enter')confirmarSenha()">
+      <div id="senhaErro" style="color:#e53935;font-size:13px;font-weight:700;min-height:20px;margin-bottom:12px"></div>
+      <button onclick="confirmarSenha()"
+        style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
+               border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;
+               cursor:pointer;width:100%;margin-bottom:10px;box-shadow:0 4px 14px var(--shad);transition:all .2s"
+        onmouseover="this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.transform=''">
+        ✅ Entrar
+      </button>
+      <button onclick="document.getElementById('modalSenha').remove()"
+        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
+               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;
+               font-size:16px;cursor:pointer;width:100%">
+        ✖ Cancelar
+      </button>
+
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('senhaInput')?.focus(),150);
+}
+
+function confirmarSenha(){
+  const inp=document.getElementById('senhaInput');
+  const err=document.getElementById('senhaErro');
+  const digitado=(inp?.value||'').trim();
+  if(digitado===senhaHoje()){
+    document.getElementById('modalSenha')?.remove();
+    if(!S.nomeAluno && !(S.sessoes&&S.sessoes.length)){
+      // Sem dados na memória: pedir arquivo
+      showModalCarregarRelatorio();
+    } else {
+      gerarRelatorio();
+      showScreen('screenRelatorio');
+      document.getElementById('levelBar').style.display='none';
+    }
+  } else {
+    if(inp) inp.style.borderColor='#e53935';
+    if(err) err.textContent='❌ Senha incorreta! Use o formato DDMMAAAA';
+    inp?.select();
+  }
+}
+
+function showModalCarregarRelatorio(){
+  const overlay=document.createElement('div');
+  overlay.id='modalCarregarRel';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);animation:fadeIn .3s ease';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
+      <div style="font-size:56px;margin-bottom:10px">📂</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:22px;color:var(--text-main);margin-bottom:8px">Carregar arquivo do aluno</div>
+      <div style="font-size:14px;color:var(--text-light);margin-bottom:24px">Selecione o arquivo .txt salvo pelo aluno para visualizar o relatório</div>
+      <label style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
+             border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;
+             cursor:pointer;display:block;margin-bottom:10px;box-shadow:0 4px 14px var(--shad)">
+        📂 Selecionar arquivo
+        <input type="file" accept=".txt" style="display:none" onchange="carregarRelatorioExterno(event)">
+      </label>
+      <button onclick="document.getElementById('modalCarregarRel').remove()"
+        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
+               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;
+               font-size:16px;cursor:pointer;width:100%">
+        ✖ Cancelar
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function carregarRelatorioExterno(event){
+  document.getElementById('modalCarregarRel')?.remove();
+  abrirRelatorioDeTxt(event);
+}
+
+function fecharRelatorio(){
+  // Se há aluno com jogo em andamento, reposiciona direto
+  if(S.nomeAluno && S.toy){
+    showScreen('screenGame');
+    document.getElementById('levelBar').style.display='flex';
+    renderToy();
+    return;
+  }
+  // Se há aluno sem jogo ativo (entre níveis ou no menu)
+  if(S.nomeAluno){
+    document.getElementById('levelBar').style.display='none';
+    showStartScreen();
+    return;
+  }
+  // Sem dados: pedir para carregar arquivo do aluno
+  showModalRecarregar();
+}
+
+function showModalRecarregar(){
+  const overlay=document.createElement('div');
+  overlay.id='modalRecarregar';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);animation:fadeIn .3s ease';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
+      <div style="font-size:56px;margin-bottom:10px">📂</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:22px;color:var(--text-main);margin-bottom:8px">Recarregar progresso</div>
+      <div style="font-size:14px;color:var(--text-light);margin-bottom:24px">Selecione o arquivo .txt do aluno para continuar de onde parou</div>
+      <label style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
+             border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;
+             cursor:pointer;display:block;margin-bottom:10px;box-shadow:0 4px 14px var(--shad)">
+        📂 Selecionar arquivo
+        <input type="file" accept=".txt" style="display:none" onchange="recarregarAlunoEFechar(event)">
+      </label>
+      <button onclick="document.getElementById('modalRecarregar').remove();showStartScreen();"
+        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
+               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;
+               font-size:16px;cursor:pointer;width:100%">
+        🏠 Ir para o menu
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function recarregarAlunoEFechar(event){
+  document.getElementById('modalRecarregar')?.remove();
+  // Reusar loadFromFile que já reposiciona corretamente
+  loadFromFile(event);
+}
+
+function abrirRelatorioDeTxt(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const b64=e.target.result.trim();
+      const json=decodeURIComponent(escape(atob(b64)));
+      const dados=JSON.parse(json);
+      if(!dados.versao||!dados.nomeAluno) throw new Error('inválido');
+      // Carregar temporariamente só para o relatório
+      const tmp={
+        nomeAluno:dados.nomeAluno,
+        score:dados.score||0,
+        levelStars:dados.levelStars||[0,0,0,0,0],
+        levelUnlocked:dados.levelUnlocked||[true,false,false,false,false],
+        levelTempos:dados.levelTempos||[0,0,0,0,0],
+        sessoes:dados.sessoes||[],
+        registroPalavras:dados.registroPalavras||[],
+      };
+      gerarRelatorioComDados(tmp);
+      showScreen('screenRelatorio');
+      document.getElementById('levelBar').style.display='none';
+    }catch(err){
+      alert('Arquivo inválido.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function fmtTempo(ms){
+  if(!ms||ms<=0) return '—';
+  const s=Math.floor(ms/1000);
+  if(s<60) return s+'s';
+  return Math.floor(s/60)+'min '+(s%60)+'s';
+}
+
+function gerarRelatorio(){
+  gerarRelatorioComDados({
+    nomeAluno:S.nomeAluno,
+    score:S.score,
+    levelStars:S.levelStars,
+    levelUnlocked:S.levelUnlocked,
+    levelTempos:S.levelTempos,
+    sessoes:S.sessoes,
+    registroPalavras:S.registroPalavras,
+  });
+}
+
+function gerarRelatorioComDados(d){
+  // Consolidar todos os registros de palavras de todas as sessões + atual
+  const todasPalavras=[...d.registroPalavras];
+  (d.sessoes||[]).forEach(s=>(s.palavras||[]).forEach(p=>todasPalavras.push(p)));
+
+  // Palavras mais erradas (ordenar por erros desc)
+  const errosPorPalavra={};
+  todasPalavras.forEach(p=>{
+    if(!errosPorPalavra[p.name]) errosPorPalavra[p.name]={erros:0,tentativas:0,acertos:0};
+    errosPorPalavra[p.name].erros+=p.erros||0;
+    errosPorPalavra[p.name].tentativas+=p.tentativas||0;
+    if(p.acertou) errosPorPalavra[p.name].acertos++;
+  });
+  const rankErros=Object.entries(errosPorPalavra)
+    .sort((a,b)=>b[1].erros-a[1].erros)
+    .filter(([,v])=>v.erros>0)
+    .slice(0,10);
+
+  const niveisConcluidos=d.levelStars.filter(s=>s>0).length;
+  const totalEstrelas=d.levelStars.reduce((a,b)=>a+b,0);
+
+  const el=document.getElementById('relatorioConteudo');
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--l-bd)">
+      <div style="font-size:48px">👤</div>
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:24px;color:var(--text-main)">${d.nomeAluno}</div>
+        <div style="font-size:14px;color:var(--text-light)">Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+      </div>
+    </div>
+
+    <!-- RESUMO -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+      ${cartaoResumo('🏆','Pontuação total',d.score+' pts')}
+      ${cartaoResumo('📚','Níveis concluídos',niveisConcluidos+' de 5')}
+      ${cartaoResumo('⭐','Total de estrelas',totalEstrelas+' de 15')}
+    </div>
+
+    <!-- NÍVEIS -->
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📊 Desempenho por Nível</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
+      <thead>
+        <tr style="background:var(--l-bg)">
+          <th style="padding:10px;text-align:left;border-radius:8px 0 0 8px">Nível</th>
+          <th style="padding:10px;text-align:center">Estrelas</th>
+          <th style="padding:10px;text-align:center">Tempo</th>
+          <th style="padding:10px;text-align:center;border-radius:0 8px 8px 0">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${[1,2,3,4,5].map(l=>{
+          const st=d.levelStars[l-1]||0;
+          const unlocked=d.levelUnlocked[l-1];
+          const tempo=fmtTempo(d.levelTempos[l-1]);
+          const status=!unlocked?'🔒 Bloqueado':st===3?'✅ Concluído':st>0?'🔄 Em progresso':'⏳ Não iniciado';
+          return `<tr style="border-bottom:1px solid var(--l-bg)">
+            <td style="padding:10px;font-weight:700">Nível ${l}</td>
+            <td style="padding:10px;text-align:center">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</td>
+            <td style="padding:10px;text-align:center;color:var(--text-light)">${tempo}</td>
+            <td style="padding:10px;text-align:center">${status}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+
+    <!-- PALAVRAS MAIS ERRADAS -->
+    ${rankErros.length>0?`
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">❌ Palavras com mais dificuldade</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
+      <thead>
+        <tr style="background:var(--l-bg)">
+          <th style="padding:10px;text-align:left;border-radius:8px 0 0 8px">Palavra</th>
+          <th style="padding:10px;text-align:center">Erros</th>
+          <th style="padding:10px;text-align:center">Tentativas</th>
+          <th style="padding:10px;text-align:center;border-radius:0 8px 8px 0">Acertos</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rankErros.map(([nome,v],i)=>`
+        <tr style="border-bottom:1px solid var(--l-bg);background:${i===0?'rgba(255,100,100,0.07)':''}">
+          <td style="padding:10px;font-family:'Fredoka One',cursive;letter-spacing:1px">${nome}</td>
+          <td style="padding:10px;text-align:center;color:#e53935;font-weight:700">${v.erros}</td>
+          <td style="padding:10px;text-align:center;color:var(--text-light)">${v.tentativas}</td>
+          <td style="padding:10px;text-align:center">${v.acertos>0?'✅':'❌'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`:'<div style="color:var(--text-light);text-align:center;padding:16px;margin-bottom:24px">🎉 Nenhum erro registrado ainda!</div>'}
+
+    <!-- HISTÓRICO DE SESSÕES -->
+    ${d.sessoes.length>0?`
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📅 Histórico de sessões</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      ${d.sessoes.map((s,i)=>`
+      <div style="background:var(--l-bg);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
+        <div><strong>Sessão ${i+1}</strong> — ${s.data} às ${s.hora}</div>
+        <div style="display:flex;gap:16px;color:var(--text-light)">
+          <span>Nível ${s.nivel}</span>
+          <span>${'⭐'.repeat(s.stars)}</span>
+          <span>${s.score} pts</span>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+
+    <!-- BOTÃO IMPRIMIR -->
+    <div style="text-align:center;margin-top:8px">
+      <button onclick="window.print()" style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:16px;padding:12px 32px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;box-shadow:0 4px 12px var(--shad)">🖨️ Imprimir relatório</button>
+    </div>
+  `;
+}
+
+function cartaoResumo(emoji, label, valor){
+  return `<div style="background:var(--l-bg);border-radius:16px;padding:16px;text-align:center;border:2px solid var(--l-bd)">
+    <div style="font-size:28px">${emoji}</div>
+    <div style="font-size:12px;color:var(--text-light);font-weight:700;margin:4px 0">${label}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:var(--text-main)">${valor}</div>
+  </div>`;
 }
 
 // ========== BOOT ==========
