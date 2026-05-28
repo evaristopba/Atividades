@@ -5,72 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caça-Palavras: Temas Educativos</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex; justify-content: center; align-items: flex-start;
             padding: 20px; background-color: #eef1f5; gap: 40px;
-            min-height: 100vh;
         }
         #start-screen {
             text-align: center; background-color: #fff; padding: 40px;
             border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            max-width: 700px;
-            width: 100%;
         }
         #difficulty-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
         }
         #difficulty-buttons button {
             margin: 5px; padding: 12px 20px; font-size: 16px; cursor: pointer;
             border-radius: 8px; border: 2px solid transparent; color: white;
-            font-weight: bold; transition: transform 0.2s, box-shadow 0.2s;
-            flex: 1 1 150px;
+            font-weight: bold; transition: transform 0.2s, box-shadow 0.2s; flex: 1 1 150px;
         }
         #difficulty-buttons button:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        
-        /* Cores Temáticas */
         #btn-amiguinhos { background-color: #e83e8c; }
         #btn-trabalho { background-color: #6610f2; }
         #btn-clima { background-color: #17a2b8; }
         #btn-alimentos { background-color: #fd7e14; }
         #btn-educacao { background-color: #007bff; }
         #btn-solo { background-color: #6f42c1; }
-
         #difficulty-buttons button:disabled {
             opacity: 0.35; cursor: not-allowed; transform: none;
             box-shadow: none; filter: grayscale(40%);
         }
         #btn-how-to-play {
             background-color: transparent; border: 2px solid #6c757d; color: #6c757d;
-            padding: 12px 28px; margin-top: 10px; font-weight: bold; font-size: 16px;
+            padding: 12px 28px; margin-top: 25px; font-weight: bold; font-size: 16px;
             border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
         }
         #btn-how-to-play:hover {
             background-color: #6c757d; color: white; transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        #btn-prof-reader {
-            background-color: transparent; border: 2px solid #28a745; color: #28a745;
-            padding: 12px 28px; margin-top: 10px; font-weight: bold; font-size: 16px;
-            border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
-            display: inline-block;
+        /* TELA DE PAUSA — reutiliza start-screen, este div fica oculto por padrão */
+        #pause-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #eef1f5; z-index: 500;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
         }
-        #btn-prof-reader:hover {
-            background-color: #28a745; color: white; transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        #pause-screen h2 { font-size: 32px; color: #555; margin-bottom: 8px; }
+        #pause-screen p  { color: #888; margin-bottom: 28px; }
+        #btn-resume {
+            padding: 14px 40px; font-size: 18px; border: none; border-radius: 8px;
+            background-color: #28a745; color: white; font-weight: bold; cursor: pointer;
         }
+        #btn-resume:hover { background-color: #218838; }
         .modal-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;
-            display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center; background-color: rgba(0,0,0,0.6);
         }
         .modal-container.hidden { display: none; }
         .modal-content {
@@ -106,7 +94,7 @@
         td.reveal { background-color: #fff3cd; border: 1px solid #ffc107; color: #000; }
         #grid-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); color: white; font-size: 2.5em;
+            background-color: rgba(0,0,0,0.5); color: white; font-size: 2.5em;
             font-weight: bold; display: flex; flex-direction: column; justify-content: center;
             align-items: center; text-align: center; border-radius: 0; padding: 10px;
         }
@@ -115,223 +103,92 @@
         #status-info { font-size: 20px; font-weight: bold; margin: 20px 0; text-align: center; }
         #status-info div { margin-bottom: 15px; }
         #status-info span { display: block; font-size: 1.5em; color: #007bff; }
-        #word-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
+        #word-list { list-style: none; padding: 0; margin: 0; }
         #word-list li { font-size: 18px; margin-bottom: 8px; color: #555; transition: color 0.3s; word-break: break-all; }
         #word-list li.found { text-decoration: line-through; color: #aaa; }
         #message { margin-top: 20px; font-size: 20px; font-weight: bold; color: #d63384; min-height: 30px; text-align: center; }
-
         .panel-btn { margin-top: 10px; padding: 12px; cursor: pointer; width: 100%; border-radius: 8px; border: none; color: white; font-weight: bold; font-size: 16px; }
         #btn-next-theme { background-color: #28a745; display: none; }
-        #btn-save-prog { background-color: #007bff; }
-        #btn-load-prog { background-color: #17a2b8; }
+        #btn-save-prog  { background-color: #007bff; }
+        #btn-load-prog  { background-color: #17a2b8; }
+        #btn-pause      { background-color: #fd7e14; }
+        #btn-restart    { background-color: #6c757d; margin-top: 6px; }
 
         /* MODAL DE NOME */
         #save-name-modal .modal-content {
-            max-width: 420px;
-            padding: 0;
-            border-radius: 14px;
-            overflow: hidden;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+            max-width: 420px; padding: 0; border-radius: 14px;
+            overflow: hidden; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.22);
         }
-
         #save-name-modal .save-modal-header {
             background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            padding: 28px 30px 22px;
-            color: #fff;
+            padding: 28px 30px 22px; color: #fff;
         }
-
-        #save-name-modal .save-modal-header .save-icon {
-            font-size: 38px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        #save-name-modal .save-modal-header h2 {
-            margin: 0 0 4px;
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        #save-name-modal .save-modal-header p {
-            margin: 0;
-            font-size: 13px;
-            color: rgba(255,255,255,0.82);
-        }
-
-        #save-name-modal .save-modal-body {
-            padding: 26px 28px 28px;
-            background: #fff;
-        }
-
-        #save-name-modal .save-input-wrap {
-            position: relative;
-            margin-bottom: 22px;
-        }
-
+        #save-name-modal .save-modal-header .save-icon { font-size: 38px; display: block; margin-bottom: 8px; }
+        #save-name-modal .save-modal-header h2 { margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #fff; }
+        #save-name-modal .save-modal-header p  { margin: 0; font-size: 13px; color: rgba(255,255,255,0.82); }
+        #save-name-modal .save-modal-body { padding: 26px 28px 28px; background: #fff; }
+        #save-name-modal .save-input-wrap { position: relative; margin-bottom: 22px; }
         #save-name-modal .save-input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            pointer-events: none;
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            font-size: 18px; pointer-events: none;
         }
-
         #student-name-input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 13px 16px 13px 42px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            color: #333;
-            outline: none;
+            width: 100%; box-sizing: border-box; padding: 13px 16px 13px 42px;
+            border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;
+            font-family: inherit; color: #333; outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-
-        #student-name-input:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
-        }
-
-        #student-name-input::placeholder {
-            color: #adb5bd;
-        }
-
-        #save-name-modal .save-modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        #btn-confirm-save, #btn-confirm-start {
-            background-color: #28a745;
-            flex: 1;
-            margin-top: 0;
-            border-radius: 8px;
-            font-size: 15px;
+        #student-name-input:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
+        #student-name-input::placeholder { color: #adb5bd; }
+        #save-name-modal .save-modal-actions { display: flex; gap: 10px; justify-content: center; }
+        #btn-confirm-save {
+            background-color: #28a745; flex: 1; margin-top: 0; border-radius: 8px; font-size: 15px;
             transition: background-color 0.2s, transform 0.15s;
-            padding: 12px;
-            cursor: pointer;
-            border: none;
-            color: white;
-            font-weight: bold;
         }
-        #btn-confirm-save:hover, #btn-confirm-start:hover { background-color: #218838; transform: translateY(-1px); }
-
+        #btn-confirm-save:hover { background-color: #218838; transform: translateY(-1px); }
         #btn-cancel-save {
-            background-color: #6c757d;
-            flex: 1;
-            margin-top: 0;
-            border-radius: 8px;
-            font-size: 15px;
+            background-color: #6c757d; flex: 1; margin-top: 0; border-radius: 8px; font-size: 15px;
             transition: background-color 0.2s, transform 0.15s;
-            padding: 12px;
-            cursor: pointer;
-            border: none;
-            color: white;
-            font-weight: bold;
         }
         #btn-cancel-save:hover { background-color: #5a6268; transform: translateY(-1px); }
 
-        /* BARRA DE PROGRESSO DE TEMAS */
-        #theme-progress {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-            padding: 10px 0 4px;
-        }
+        /* BARRA DE PROGRESSO */
+        #theme-progress { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 16px; padding: 10px 0 4px; }
         .theme-dot {
-            width: 28px; height: 28px;
-            border-radius: 50%;
+            width: 28px; height: 28px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: bold; color: #fff;
             border: 3px solid transparent;
             transition: background-color 0.4s, border-color 0.4s, transform 0.3s;
             cursor: default;
-            position: relative;
         }
-        .theme-dot.done  { background-color: #28a745; border-color: #1e7e34; }
+        .theme-dot.done    { background-color: #28a745; border-color: #1e7e34; }
         .theme-dot.current { background-color: #007bff; border-color: #0056b3; transform: scale(1.2); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
         .theme-dot.pending { background-color: #ced4da; border-color: #adb5bd; }
-        .theme-connector {
-            flex: 1; height: 3px; border-radius: 2px;
-            background-color: #ced4da;
-            transition: background-color 0.4s;
-            max-width: 18px;
-        }
+        .theme-connector { flex: 1; height: 3px; border-radius: 2px; background-color: #ced4da; transition: background-color 0.4s; max-width: 18px; }
         .theme-connector.done { background-color: #28a745; }
 
-        /* MODAL DE RELATÓRIO FINAL */
-        #report-modal .modal-content {
-            max-width: 520px; padding: 0; border-radius: 14px;
-            overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.28);
-        }
-        #report-modal .report-header {
-            background: linear-gradient(135deg, #28a745 0%, #1a6b2f 100%);
-            padding: 28px 30px 20px; color: #fff; text-align: center;
-        }
+        /* MODAL RELATÓRIO */
+        #report-modal .modal-content { max-width: 520px; padding: 0; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.28); }
+        #report-modal .report-header { background: linear-gradient(135deg, #28a745 0%, #1a6b2f 100%); padding: 28px 30px 20px; color: #fff; text-align: center; }
         #report-modal .report-header .report-icon { font-size: 42px; display: block; margin-bottom: 6px; }
         #report-modal .report-header h2 { margin: 0 0 4px; font-size: 22px; color: #fff; }
-        #report-modal .report-header p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.82); }
+        #report-modal .report-header p  { margin: 0; font-size: 13px; color: rgba(255,255,255,0.82); }
         #report-modal .report-body { padding: 20px 24px 24px; background: #fff; }
-        #report-modal .report-score {
-            text-align: center; font-size: 36px; font-weight: bold;
-            color: #007bff; margin-bottom: 18px;
-        }
+        #report-modal .report-score { text-align: center; font-size: 36px; font-weight: bold; color: #007bff; margin-bottom: 18px; }
         #report-modal .report-score small { display: block; font-size: 13px; color: #888; font-weight: normal; }
-        #report-modal table.report-table {
-            width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;
-        }
-        #report-modal table.report-table th {
-            background: #f8f9fa; padding: 8px 10px; text-align: left;
-            border-bottom: 2px solid #dee2e6; color: #555; font-weight: 600;
-        }
-        #report-modal table.report-table td {
-            padding: 7px 10px; border-bottom: 1px solid #f0f0f0;
-            color: #444; width: auto; height: auto; font-size: 14px;
-            font-weight: normal; border: none; border-bottom: 1px solid #f0f0f0;
-            cursor: default; user-select: text; background: #fff;
-        }
+        #report-modal table.report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+        #report-modal table.report-table th { background: #f8f9fa; padding: 8px 10px; text-align: left; border-bottom: 2px solid #dee2e6; color: #555; font-weight: 600; }
+        #report-modal table.report-table td { padding: 7px 10px; color: #444; width: auto; height: auto; font-size: 14px; font-weight: normal; border: none; border-bottom: 1px solid #f0f0f0; cursor: default; user-select: text; background: #fff; }
         #report-modal table.report-table tr:last-child td { border-bottom: none; }
         #report-modal .report-actions { display: flex; gap: 10px; }
-        #btn-download-report {
-            background-color: #007bff; flex: 2; padding: 12px;
-            border: none; border-radius: 8px; color: white;
-            font-weight: bold; font-size: 15px; cursor: pointer;
-        }
+        #btn-download-report { background-color: #007bff; flex: 2; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 15px; cursor: pointer; }
         #btn-download-report:hover { background-color: #0056b3; }
-        #btn-close-report {
-            background-color: #6c757d; flex: 1; padding: 12px;
-            border: none; border-radius: 8px; color: white;
-            font-weight: bold; font-size: 15px; cursor: pointer;
-        }
+        #btn-close-report { background-color: #6c757d; flex: 1; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 15px; cursor: pointer; }
         #btn-close-report:hover { background-color: #5a6268; }
 
-        #btn-pause   { background-color: #fd7e14; }
-        #btn-restart { background-color: #6c757d; margin-top: 6px; }
-        #btn-resume {
-            display: block; margin: 20px auto 0; padding: 14px 32px;
-            font-size: 18px; border: none; border-radius: 8px;
-            background-color: #28a745; color: white; font-weight: bold; cursor: pointer;
-        }
-        #btn-resume:hover { background-color: #218838; }
-        #pause-screen {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 40px 20px;
-            font-size: 28px; font-weight: bold; color: #555;
-        }
         .hidden { display: none; }
-        .loader {
-            width: 48px; height: 48px; border: 5px solid #ccc;
-            border-bottom-color: #007bff; border-radius: 50%;
-            display: inline-block; animation: rotation 1s linear infinite;
-        }
+        .loader { width: 48px; height: 48px; border: 5px solid #ccc; border-bottom-color: #007bff; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media (max-width: 800px) {
             body { flex-direction: column; align-items: center; gap: 20px; }
@@ -339,10 +196,7 @@
             #status-panel { width: 90%; max-width: 400px; order: -1; }
             #game-container { width: 100%; }
             table { width: 95vw; max-width: 500px; }
-            td {
-                width: auto; height: 9.5vw; max-height: 45px;
-                font-size: clamp(10px, 3.5vw, 18px);
-            }
+            td { width: auto; height: 9.5vw; max-height: 45px; font-size: clamp(10px, 3.5vw, 18px); }
             #grid-overlay { font-size: 1.8em; }
         }
     </style>
@@ -351,7 +205,7 @@
     <input type="file" id="file-input" class="hidden" accept=".txt">
     <input type="file" id="prof-file-input" class="hidden" accept=".txt">
 
-    <div id="start-screen">
+    <div id="start-screen" class="hidden">
         <h1>Caça-Palavras: Temas Educativos</h1>
         <p>Escolha um tema para começar:</p>
         <div id="difficulty-buttons">
@@ -363,7 +217,15 @@
             <button id="btn-solo">Solo</button>
         </div>
         <button id="btn-how-to-play">Como Jogar?</button>
-        <button id="btn-prof-reader">🔍 Ver Relatório de Aluno</button>
+        <button id="btn-prof-reader" style="background-color:transparent;border:2px solid #28a745;color:#28a745;padding:12px 28px;margin-top:10px;font-weight:bold;font-size:16px;border-radius:8px;cursor:pointer;transition:all 0.3s ease;">🔍 Ver Relatório de Aluno</button>
+    </div>
+
+    <!-- TELA DE PAUSA — completamente separada, no mesmo nível do start-screen -->
+    <div id="pause-screen" class="hidden">
+        <div style="font-size:52px; margin-bottom:12px;">⏸</div>
+        <h2>Jogo Pausado</h2>
+        <p>O cronômetro está parado.<br>Retome quando estiver pronto.</p>
+        <button id="btn-resume">▶ Retomar</button>
     </div>
 
     <div id="game-area" class="hidden">
@@ -375,28 +237,27 @@
             <div id="theme-progress"></div>
             <h2>Status do Jogo</h2>
             <div id="status-info">
-                <div style="text-align: center; font-size: 14px; color: #666; margin-bottom: 5px;">ALUNO: <strong id="student-display" style="cursor:pointer; border-bottom: 1px dashed #aaa;">---</strong></div>
+                <div style="text-align:center;font-size:14px;color:#666;margin-bottom:5px;">ALUNO: <strong id="student-display" title="Clique para editar o nome" style="cursor:pointer;border-bottom:1px dashed #aaa;">---</strong></div>
                 <div>Pontuação<span id="score">0</span></div>
                 <div>Tempo<span id="timer">05:00</span></div>
             </div>
             <h2>Palavras</h2>
             <ul id="word-list"></ul>
-
             <button id="btn-next-theme" class="panel-btn">⏩ Próximo Tema</button>
             <button id="btn-save-prog" class="panel-btn hidden">💾 Salvar Progresso</button>
             <button id="btn-load-prog" class="panel-btn">📂 Carregar Progresso</button>
-            <button id="btn-pause" class="panel-btn hidden">⏸ Pausar</button>
+            <button id="btn-pause"   class="panel-btn hidden">⏸ Pausar</button>
             <button id="btn-restart" class="panel-btn hidden">🏠 Voltar ao Início</button>
         </div>
     </div>
 
-    <!-- MODAL DE NOME OBRIGATÓRIO -->
+    <!-- MODAL DE SALVAMENTO -->
     <div id="save-name-modal" class="modal-container hidden">
         <div class="modal-content">
             <div class="save-modal-header">
-                <span class="save-icon">📝</span>
-                <h2>Qual é o seu nome?</h2>
-                <p>Digite seu nome completo para começar a jogar</p>
+                <span class="save-icon">💾</span>
+                <h2>Salvar Progresso</h2>
+                <p>Digite seu nome completo para identificar o arquivo</p>
             </div>
             <div class="save-modal-body">
                 <div class="save-input-wrap">
@@ -404,7 +265,8 @@
                     <input type="text" id="student-name-input" placeholder="Nome do Aluno">
                 </div>
                 <div class="save-modal-actions">
-                    <button id="btn-confirm-start">▶ Começar Jogo</button>
+                    <button id="btn-confirm-save" class="panel-btn">✔ Confirmar</button>
+                    <button id="btn-cancel-save"  class="panel-btn">✖ Cancelar</button>
                 </div>
             </div>
         </div>
@@ -445,15 +307,15 @@
     <!-- MODAL DE CONFIRMAÇÃO DE SAÍDA -->
     <div id="confirm-exit-modal" class="modal-container hidden">
         <div class="modal-content">
-            <div class="save-modal-header" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+            <div class="save-modal-header" style="background:linear-gradient(135deg,#6c757d 0%,#495057 100%);">
                 <span class="save-icon">⚠️</span>
                 <h2>Voltar ao Início?</h2>
-                <p>O progresso não salvo será perdido. O jogo será reiniciado completamente.</p>
+                <p>O progresso não salvo será perdido. O tempo continua correndo.</p>
             </div>
             <div class="save-modal-body">
                 <div class="save-modal-actions">
                     <button id="btn-confirm-exit" class="panel-btn" style="background-color:#dc3545;margin-top:0;flex:1;border-radius:8px;font-size:15px;">🏠 Confirmar</button>
-                    <button id="btn-cancel-exit" class="panel-btn" style="background-color:#28a745;margin-top:0;flex:1;border-radius:8px;font-size:15px;">▶ Continuar Jogando</button>
+                    <button id="btn-cancel-exit"  class="panel-btn" style="background-color:#28a745;margin-top:0;flex:1;border-radius:8px;font-size:15px;">▶ Continuar</button>
                 </div>
             </div>
         </div>
@@ -476,73 +338,69 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const startScreen = document.getElementById('start-screen');
-        const gameArea = document.getElementById('game-area');
+        const startScreen   = document.getElementById('start-screen');
+        const pauseScreen   = document.getElementById('pause-screen');
+        const gameArea      = document.getElementById('game-area');
         const gridContainer = document.getElementById('grid-container');
-        const wordListUl = document.getElementById('word-list');
-        const messageDiv = document.getElementById('message');
-        const scoreDisplay = document.getElementById('score');
-        const timerDisplay = document.getElementById('timer');
+        const wordListUl    = document.getElementById('word-list');
+        const messageDiv    = document.getElementById('message');
+        const scoreDisplay  = document.getElementById('score');
+        const timerDisplay  = document.getElementById('timer');
         const difficultyButtons = document.getElementById('difficulty-buttons');
-        const modal = document.getElementById('how-to-play-modal');
-        const openModalBtn = document.getElementById('btn-how-to-play');
+        const modal         = document.getElementById('how-to-play-modal');
+        const openModalBtn  = document.getElementById('btn-how-to-play');
         const closeModalBtns = document.querySelectorAll('.modal-close-btn, #modal-understand-btn');
-        
-        const fileInput = document.getElementById('file-input');
-        const studentLabel = document.getElementById('student-display');
-        const nextThemeBtn = document.getElementById('btn-next-theme');
+        const fileInput     = document.getElementById('file-input');
+        const studentLabel  = document.getElementById('student-display');
+        const nextThemeBtn  = document.getElementById('btn-next-theme');
         const saveNameModal = document.getElementById('save-name-modal');
         const studentNameInput = document.getElementById('student-name-input');
-        const confirmStartBtn = document.getElementById('btn-confirm-start');
+        const confirmSaveBtn   = document.getElementById('btn-confirm-save');
+        const cancelSaveBtn    = document.getElementById('btn-cancel-save');
+        const confirmExitModal = document.getElementById('confirm-exit-modal');
 
         modal.classList.remove('hidden');
 
-        openModalBtn.addEventListener('click', () => {
-            modal.classList.remove('hidden');
-        });
-
-        closeModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                modal.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            });
-        });
+        openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+        closeModalBtns.forEach(btn => btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }));
 
         const wordFiles = {
             amiguinhos: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/amiguinhos.json',
-            trabalho: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/trabalho.json',
-            clima: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/clima.json',
-            alimentos: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/alimentos.json',
-            educacao: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/educacao.json',
-            solo: 'https://raw.githubusercontent.com/evaristopba/Atividades/main/solo.json'
+            trabalho:   'https://raw.githubusercontent.com/evaristopba/Atividades/main/trabalho.json',
+            clima:      'https://raw.githubusercontent.com/evaristopba/Atividades/main/clima.json',
+            alimentos:  'https://raw.githubusercontent.com/evaristopba/Atividades/main/alimentos.json',
+            educacao:   'https://raw.githubusercontent.com/evaristopba/Atividades/main/educacao.json',
+            solo:       'https://raw.githubusercontent.com/evaristopba/Atividades/main/solo.json'
         };
 
         const difficultySettings = {
             amiguinhos: { time: 300, next: 'trabalho' },
-            trabalho: { time: 300, next: 'clima' },
-            clima: { time: 300, next: 'alimentos' },
-            alimentos: { time: 300, next: 'educacao' },
-            educacao: { time: 300, next: 'solo' },
-            solo: { time: 300, next: 'end' }
+            trabalho:   { time: 300, next: 'clima' },
+            clima:      { time: 300, next: 'alimentos' },
+            alimentos:  { time: 300, next: 'educacao' },
+            educacao:   { time: 300, next: 'solo' },
+            solo:       { time: 300, next: 'end' }
         };
 
         let grid = [], wordsData = [], foundWords = new Set();
         let isSelecting = false, selectionStartCell = null, currentSelectionCells = [];
         let score = 0, timeLeft = 0, timerInterval = null;
         let currentDifficulty = 'amiguinhos', timeBonusForNextLevel = 0;
-        let totalScore = 0;
-        let originalLevelScore = 0;
-        let originalTimeBonus = 0;
+        let totalScore = 0, originalLevelScore = 0, originalTimeBonus = 0;
         let levelSnapshotTaken = false;
         let studentName = "";
+        let isPaused = false;
 
-        let diagData = {};        
+        let diagData = {};
         let levelErrors = 0;
-        let levelWordStartTs = {};  
-        let levelWordFoundSec = {}; 
+        let levelWordStartTs = {};
+        let levelWordFoundSec = {};
         let levelStartTime = 0;
 
-        const themeOrder = ['amiguinhos', 'trabalho', 'clima', 'alimentos', 'educacao', 'solo'];
+        const themeOrder = ['amiguinhos','trabalho','clima','alimentos','educacao','solo'];
 
         function updateStartButtons(currentTheme) {
             const idx = themeOrder.indexOf(currentTheme);
@@ -552,11 +410,13 @@
             });
         }
 
+        function resetStartButtons() { updateStartButtons('amiguinhos'); }
+
         function updateProgressBar(currentTheme) {
             const bar = document.getElementById('theme-progress');
             if (!bar) return;
             const idx = themeOrder.indexOf(currentTheme);
-            const labels = ['A', 'T', 'C', 'Al', 'E', 'S'];
+            const labels = ['A','T','C','Al','E','S'];
             bar.innerHTML = '';
             themeOrder.forEach((theme, i) => {
                 if (i > 0) {
@@ -572,100 +432,104 @@
             });
         }
 
-        // Inicializa botões: apenas o primeiro habilitado
         updateStartButtons('amiguinhos');
 
-        let pendingDifficulty = null;
-        
-        // Evento para clicar nos botões de tema
-        difficultyButtons.addEventListener('click', (e) => {
-            const btn = e.target.closest('button');
-            if (!btn || !btn.id.startsWith('btn-')) return;
-            if (btn.disabled) return;
-            const diff = btn.id.split('-')[1];
-            if (!studentName) {
-                pendingDifficulty = diff;
-                saveNameModal.classList.remove('hidden');
-            } else {
-                startGame(diff);
-            }
-        });
-
-        confirmStartBtn.onclick = () => {
-            const val = studentNameInput.value.trim();
-            if (val) {
-                studentName = val;
-                studentLabel.textContent = studentName;
-                saveNameModal.classList.add('hidden');
-                if (pendingDifficulty) {
-                    startGame(pendingDifficulty);
-                    pendingDifficulty = null;
-                }
-            } else {
-                alert("Por favor, digite seu nome.");
-            }
-        };
-
-        // Função para verificar se todos os temas foram concluídos
-        function isAllThemesCompleted() {
-            return themeOrder.every(theme => 
-                diagData[theme] && diagData[theme].completed === true
-            );
+        // ── PAINEL: mostrar/ocultar botões conforme contexto ──
+        function showGameButtons() {
+            document.getElementById('btn-save-prog').classList.remove('hidden');
+            document.getElementById('btn-load-prog').classList.add('hidden');
+            document.getElementById('btn-pause').classList.remove('hidden');
+            document.getElementById('btn-restart').classList.remove('hidden');
+        }
+        function showIdleButtons() {
+            document.getElementById('btn-save-prog').classList.add('hidden');
+            document.getElementById('btn-load-prog').classList.remove('hidden');
+            document.getElementById('btn-pause').classList.add('hidden');
+            document.getElementById('btn-restart').classList.add('hidden');
         }
 
-        // Salvar progresso (solicita nome se não tiver)
+        // ── PAUSAR ──
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            if (isPaused) return;
+            isPaused = true;
+            clearInterval(timerInterval);
+            removeGridListeners();
+            gameArea.classList.add('hidden');
+            pauseScreen.style.display = 'flex';
+        });
+
+        document.getElementById('btn-resume').addEventListener('click', () => {
+            isPaused = false;
+            pauseScreen.style.display = 'none';
+            gameArea.classList.remove('hidden');
+            startTimer();
+            addGridListeners();
+        });
+
+        // ── VOLTAR AO INÍCIO ──
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            confirmExitModal.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
+            confirmExitModal.classList.add('hidden');
+            clearInterval(timerInterval);
+            isPaused = false;
+            pauseScreen.style.display = 'none';
+            resetStartButtons();
+            showIdleButtons();
+            gameArea.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-cancel-exit').addEventListener('click', () => {
+            confirmExitModal.classList.add('hidden');
+        });
+
+        // ── SALVAMENTO ──
         document.getElementById('btn-save-prog').onclick = () => {
-            if (!studentName || studentName === "") {
-                pendingDifficulty = null;
+            if (!studentName) {
+                document.querySelector('#save-name-modal .save-modal-header h2').textContent = 'Salvar Progresso';
+                document.querySelector('#save-name-modal .save-modal-header p').textContent = 'Digite seu nome completo para identificar o arquivo';
                 saveNameModal.classList.remove('hidden');
-                // Ajusta o modal para modo "salvar"
-                const modalHeader = document.querySelector('#save-name-modal .save-modal-header h2');
-                const modalText = document.querySelector('#save-name-modal .save-modal-header p');
-                if (modalHeader) modalHeader.textContent = 'Salvar Progresso';
-                if (modalText) modalText.textContent = 'Digite seu nome para salvar o progresso';
-                // Sobrescreve o botão de confirmação temporariamente
-                const originalClick = confirmStartBtn.onclick;
-                confirmStartBtn.onclick = () => {
-                    const val = studentNameInput.value.trim();
-                    if (val) {
-                        studentName = val;
-                        studentLabel.textContent = studentName;
-                        saveNameModal.classList.add('hidden');
-                        executeSaveDownload();
-                        // Restaura o click original
-                        confirmStartBtn.onclick = originalClick;
-                        const modalHeaderRestore = document.querySelector('#save-name-modal .save-modal-header h2');
-                        const modalTextRestore = document.querySelector('#save-name-modal .save-modal-header p');
-                        if (modalHeaderRestore) modalHeaderRestore.textContent = 'Qual é o seu nome?';
-                        if (modalTextRestore) modalTextRestore.textContent = 'Digite seu nome completo para começar a jogar';
-                    } else {
-                        alert("Por favor, digite seu nome.");
-                    }
-                };
             } else {
                 executeSaveDownload();
             }
         };
 
+        confirmSaveBtn.onclick = () => {
+            const val = studentNameInput.value.trim();
+            if (val) {
+                studentName = val;
+                studentLabel.textContent = studentName;
+                saveNameModal.classList.add('hidden');
+                executeSaveDownload();
+            } else {
+                alert("Por favor, digite seu nome.");
+            }
+        };
+
+        cancelSaveBtn.onclick = () => saveNameModal.classList.add('hidden');
+
+        studentLabel.addEventListener('click', () => {
+            if (!studentName) return;
+            document.querySelector('#save-name-modal .save-modal-header h2').textContent = 'Editar Nome';
+            document.querySelector('#save-name-modal .save-modal-header p').textContent = 'Corrija o nome e confirme para salvar novamente.';
+            studentNameInput.value = studentName;
+            saveNameModal.classList.remove('hidden');
+        });
+
         function executeSaveDownload() {
-            const completedAll = isAllThemesCompleted();
-            const data = { 
-                n: studentName, 
-                d: currentDifficulty, 
-                s: score, 
-                b: timeBonusForNextLevel, 
-                completedAll: completedAll,  // NOVO CAMPO
-                diag: diagData 
-            };
+            const data = { n: studentName, d: currentDifficulty, s: originalLevelScore, b: originalTimeBonus, diag: diagData };
             const blob = new Blob([btoa(JSON.stringify(data))], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
             a.download = `progresso_CPII_${studentName.replace(/\s/g, '_')}.txt`;
             a.click();
         }
 
-        // Carregar progresso
+        // ── CARREGAR ──
         document.getElementById('btn-load-prog').onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
@@ -674,19 +538,16 @@
             reader.onload = (ev) => {
                 try {
                     const data = JSON.parse(atob(ev.target.result));
-                    studentName = data.n;
-                    currentDifficulty = data.d;
-                    score = data.s;
+                    studentName           = data.n;
+                    currentDifficulty     = data.d;
+                    score                 = data.s;
                     timeBonusForNextLevel = data.b;
-                    diagData = data.diag || {};
+                    diagData              = data.diag || {};
                     studentLabel.textContent = studentName;
                     updateStartButtons(currentDifficulty);
                     startScreen.classList.add('hidden');
                     gameArea.classList.remove('hidden');
-                    document.getElementById('btn-save-prog').classList.remove('hidden');
-                    document.getElementById('btn-load-prog').classList.add('hidden');
-                    document.getElementById('btn-pause').classList.remove('hidden');
-                    document.getElementById('btn-restart').classList.remove('hidden');
+                    showGameButtons();
                     updateScoreDisplay();
                     loadLevel(currentDifficulty);
                 } catch (err) { alert("Arquivo inválido!"); }
@@ -696,21 +557,16 @@
 
         function saveProgress() {
             localStorage.setItem('totalScore', totalScore);
-            localStorage.setItem('timeBonus', timeBonusForNextLevel);
+            localStorage.setItem('timeBonus',  timeBonusForNextLevel);
         }
 
         function startGame(difficulty) {
             updateStartButtons(difficulty);
             startScreen.classList.add('hidden');
             gameArea.classList.remove('hidden');
-            document.getElementById('btn-save-prog').classList.remove('hidden');
-            document.getElementById('btn-load-prog').classList.add('hidden');
-            document.getElementById('btn-pause').classList.remove('hidden');
-            document.getElementById('btn-restart').classList.remove('hidden');
-            totalScore = 0;
-            timeBonusForNextLevel = 0;
-            originalLevelScore = 0;
-            originalTimeBonus = 0;
+            showGameButtons();
+            totalScore = 0; timeBonusForNextLevel = 0;
+            originalLevelScore = 0; originalTimeBonus = 0;
             levelSnapshotTaken = false;
             diagData = {};
             saveProgress();
@@ -731,42 +587,38 @@
 
             try {
                 const wordDataResponse = await fetchWords(wordFiles[difficulty]);
-                const wordCount = wordDataResponse.quantidade || 10;
-                const wordPool = wordDataResponse.palavras;
+                const wordCount    = wordDataResponse.quantidade || 10;
+                const wordPool     = wordDataResponse.palavras;
                 const wordsForLevel = [...wordPool].sort(() => 0.5 - Math.random()).slice(0, wordCount);
-                
-                if (wordsForLevel.length === 0) throw new Error("A lista de palavras está vazia.");
+                if (wordsForLevel.length === 0) throw new Error("Lista vazia.");
 
                 const longestWordLength = Math.max(...wordsForLevel.map(w => w.length));
-                const dynamicGridSize = Math.max(12, longestWordLength + 4);
+                const dynamicGridSize   = Math.max(12, longestWordLength + 4);
 
                 grid = Array.from({ length: dynamicGridSize }, () => Array(dynamicGridSize).fill(''));
                 wordsData = [];
                 for (const word of wordsForLevel) {
                     const wordObj = { word, found: false, coords: [] };
-                    if (placeWord(wordObj, dynamicGridSize)) {
-                        wordsData.push(wordObj);
-                    }
+                    if (placeWord(wordObj, dynamicGridSize)) wordsData.push(wordObj);
                 }
-                
-                if (wordsData.length === 0) throw new Error("Nenhuma palavra pôde ser posicionada.");
+                if (wordsData.length === 0) throw new Error("Nenhuma palavra posicionada.");
 
                 fillEmptySpaces(dynamicGridSize);
                 renderGrid(dynamicGridSize);
                 renderWordList();
 
                 levelErrors = 0;
-                levelWordStartTs = {};
+                levelWordStartTs  = {};
                 levelWordFoundSec = {};
-                levelStartTime = Date.now();
+                levelStartTime    = Date.now();
                 wordsData.forEach(w => { levelWordStartTs[w.word] = levelStartTime; });
-                
+
                 if (!levelSnapshotTaken) {
                     originalLevelScore = score;
-                    originalTimeBonus = timeBonusForNextLevel;
+                    originalTimeBonus  = timeBonusForNextLevel;
                     levelSnapshotTaken = true;
                 }
-                
+
                 timeLeft = settings.time + timeBonusForNextLevel;
                 timeBonusForNextLevel = 0;
                 saveProgress();
@@ -777,7 +629,7 @@
                 gameOver(`Erro ao carregar tema.`);
             }
         }
-        
+
         async function fetchWords(url) {
             try {
                 const response = await fetch(`${url}?t=${new Date().getTime()}`);
@@ -785,58 +637,46 @@
                 const data = await response.json();
                 return {
                     quantidade: data.quantidade,
-                    // PRESERVA ACENTOS E CEDILHA - NÃO remove caracteres especiais
-                    palavras: data.palavras.map(word => word.toUpperCase())
+                    palavras: data.palavras.map(word => word.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
                 };
-            } catch (error) {
-                return {
-                    quantidade: 5,
-                    palavras: ["JOGO", "BLOG", "DESAFIO", "ESCOLA", "ALUNO"]
-                };
+            } catch {
+                return { quantidade: 5, palavras: ["JOGO","BLOG","DESAFIO","ESCOLA","ALUNO"] };
             }
         }
 
         function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    updateTimerDisplay();
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        timerDisplay.textContent = "00:00";
-                        messageDiv.textContent = "Tempo Esgotado!";
-                        saveLevelDiag(false);
-                        revealNotFoundWords();
-                        setTimeout(() => gameOver("Fim de Jogo!", true), 5000);
-                    }
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "00:00";
+                    messageDiv.textContent   = "Tempo Esgotado!";
+                    saveLevelDiag(false);
+                    revealNotFoundWords();
+                    setTimeout(() => gameOver("Fim de Jogo!", true), 5000);
                 }
             }, 1000);
         }
 
         function placeWord(wordObj, gridSize) {
-            const directions = [ { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: -1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: -1 } ];
+            const directions = [{x:1,y:0},{x:0,y:1},{x:1,y:1},{x:-1,y:0},{x:0,y:-1},{x:-1,y:-1},{x:-1,y:1},{x:1,y:-1}];
             directions.sort(() => Math.random() - 0.5);
             for (const dir of directions) {
                 const potentialStarts = [];
-                for (let y = 0; y < gridSize; y++) {
-                    for (let x = 0; x < gridSize; x++) {
-                        const endX = x + (wordObj.word.length - 1) * dir.x;
-                        const endY = y + (wordObj.word.length - 1) * dir.y;
-                        if (endX < gridSize && endX >= 0 && endY < gridSize && endY >= 0) {
-                           potentialStarts.push({x, y});
-                        }
-                    }
+                for (let y = 0; y < gridSize; y++) for (let x = 0; x < gridSize; x++) {
+                    const endX = x + (wordObj.word.length-1)*dir.x;
+                    const endY = y + (wordObj.word.length-1)*dir.y;
+                    if (endX < gridSize && endX >= 0 && endY < gridSize && endY >= 0) potentialStarts.push({x,y});
                 }
                 potentialStarts.sort(() => Math.random() - 0.5);
                 for (const start of potentialStarts) {
                     if (canPlaceWord(wordObj.word, start.x, start.y, dir, gridSize)) {
                         wordObj.coords = [];
                         for (let i = 0; i < wordObj.word.length; i++) {
-                            const x = start.x + i * dir.x;
-                            const y = start.y + i * dir.y;
+                            const x = start.x + i*dir.x, y = start.y + i*dir.y;
                             grid[y][x] = wordObj.word[i];
-                            wordObj.coords.push({x, y});
+                            wordObj.coords.push({x,y});
                         }
                         return true;
                     }
@@ -847,39 +687,32 @@
 
         function canPlaceWord(word, startX, startY, dir, gridSize) {
             for (let i = 0; i < word.length; i++) {
-                const x = startX + i * dir.x;
-                const y = startY + i * dir.y;
+                const x = startX + i*dir.x, y = startY + i*dir.y;
                 if (grid[y][x] !== '' && grid[y][x] !== word[i]) return false;
             }
             return true;
         }
-        
+
         function fillEmptySpaces(gridSize) {
             const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    if (grid[y][x] === '') {
-                        grid[y][x] = alphabet[Math.floor(Math.random() * alphabet.length)];
-                    }
-                }
-            }
+            for (let y = 0; y < gridSize; y++) for (let x = 0; x < gridSize; x++)
+                if (grid[y][x] === '') grid[y][x] = alphabet[Math.floor(Math.random()*alphabet.length)];
         }
 
         function renderGrid(gridSize) {
-            gridContainer.innerHTML = ''; 
+            gridContainer.innerHTML = '';
             const table = document.createElement('table');
             for (let y = 0; y < gridSize; y++) {
                 const row = document.createElement('tr');
                 for (let x = 0; x < gridSize; x++) {
                     const cell = document.createElement('td');
-                    cell.textContent = grid[y][x]; 
-                    cell.dataset.x = x; 
-                    cell.dataset.y = y;
+                    cell.textContent = grid[y][x];
+                    cell.dataset.x = x; cell.dataset.y = y;
                     row.appendChild(cell);
                 }
                 table.appendChild(row);
             }
-            gridContainer.appendChild(table); 
+            gridContainer.appendChild(table);
             addGridListeners();
         }
 
@@ -908,17 +741,14 @@
                 levelWordFoundSec[wordFound.word] = elapsed;
                 score += wordFound.word.length * 10;
                 updateScoreDisplay();
-                currentSelectionCells.forEach(cell => { 
-                    cell.classList.remove('selected'); 
-                    cell.classList.add('correct'); 
-                });
-                renderWordList(); 
+                currentSelectionCells.forEach(cell => { cell.classList.remove('selected'); cell.classList.add('correct'); });
+                renderWordList();
                 checkWin();
             } else {
                 levelErrors++;
                 currentSelectionCells.forEach(cell => cell.classList.remove('selected'));
             }
-            selectionStartCell = null; 
+            selectionStartCell = null;
             currentSelectionCells = [];
         }
 
@@ -926,14 +756,10 @@
             const wordTimesResult = {};
             wordsData.forEach(w => {
                 wordTimesResult[w.word] = w.found
-                    ? (levelWordFoundSec[w.word] !== undefined ? levelWordFoundSec[w.word] : Math.round((Date.now() - levelStartTime) / 1000))
+                    ? (levelWordFoundSec[w.word] !== undefined ? levelWordFoundSec[w.word] : Math.round((Date.now()-levelStartTime)/1000))
                     : null;
             });
-            diagData[currentDifficulty] = {
-                completed,
-                errors: levelErrors,
-                wordTimes: wordTimesResult
-            };
+            diagData[currentDifficulty] = { completed, errors: levelErrors, wordTimes: wordTimesResult };
         }
 
         function checkWin() {
@@ -945,9 +771,8 @@
                 score += timeBonusPoints;
                 timeBonusForNextLevel = timeLeft;
                 updateScoreDisplay();
-                
                 messageDiv.textContent = "Tema Concluído!";
-                nextThemeBtn.style.display = 'block'; 
+                nextThemeBtn.style.display = 'block';
             }
         }
 
@@ -961,52 +786,49 @@
         function revealNotFoundWords() {
             removeGridListeners();
             wordsData.forEach(wordObj => {
-                if (!wordObj.found) {
-                    wordObj.coords.forEach(coord => {
-                        const cell = document.querySelector(`[data-x='${coord.x}'][data-y='${coord.y}']`);
-                        if(cell) cell.classList.add('reveal');
-                    });
-                }
+                if (!wordObj.found) wordObj.coords.forEach(coord => {
+                    const cell = document.querySelector(`[data-x='${coord.x}'][data-y='${coord.y}']`);
+                    if (cell) cell.classList.add('reveal');
+                });
             });
         }
 
         const themeLabels = {
-            amiguinhos: 'Amiguinhos', trabalho: 'Trabalho', clima: 'Clima',
-            alimentos: 'Alimentos', educacao: 'Educação', solo: 'Solo'
+            amiguinhos:'Amiguinhos', trabalho:'Trabalho', clima:'Clima',
+            alimentos:'Alimentos', educacao:'Educação', solo:'Solo'
         };
 
         function showReportModal(extName, extScore, extDiag) {
-            const name  = extName  !== undefined ? extName  : studentName;
+            const name     = extName  !== undefined ? extName  : studentName;
             const scoreVal = extScore !== undefined ? extScore : score;
-            const diag  = extDiag  !== undefined ? extDiag  : diagData;
+            const diag     = extDiag  !== undefined ? extDiag  : diagData;
 
             const allDone = themeOrder.every(t => diag[t] && diag[t].completed);
             document.getElementById('report-modal-title').textContent = allDone ? 'Atividade Concluída! 🎉' : 'Atividade em Andamento';
             document.getElementById('report-student-name').textContent = name || 'Aluno';
-            document.getElementById('report-score-value').textContent = scoreVal;
+            document.getElementById('report-score-value').textContent  = scoreVal;
 
             const tbody = document.getElementById('report-table-body');
             tbody.innerHTML = '';
             themeOrder.forEach(theme => {
-                const d = diag[theme];
+                const d  = diag[theme];
                 const tr = document.createElement('tr');
                 if (!d) {
-                    tr.innerHTML = `<td>${themeLabels[theme]}<td style="text-align:center">—<td style="text-align:center">—<td>—`;
+                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td>—</td>`;
                 } else {
-                    const status = d.completed ? '✅' : '⏱️';
-                    const hardest = Object.entries(d.wordTimes)
-                        .filter(([,v]) => v !== null)
-                        .sort(([,a],[,b]) => b - a)[0];
+                    const status  = d.completed ? '✅' : '⏱️';
+                    const hardest = Object.entries(d.wordTimes).filter(([,v]) => v !== null).sort(([,a],[,b]) => b-a)[0];
                     const hardestStr = hardest ? `${hardest[0]} (${hardest[1]}s)` : '—';
-                    tr.innerHTML = `<td>${themeLabels[theme]}<td style="text-align:center">${status}<td style="text-align:center">${d.errors}<td>${hardestStr}`;
+                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td>${hardestStr}</td>`;
                 }
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('report-modal').dataset.dlName  = name;
-            document.getElementById('report-modal').dataset.dlScore = scoreVal;
-            document.getElementById('report-modal').dataset.dlDiag  = JSON.stringify(diag);
-            document.getElementById('report-modal').classList.remove('hidden');
+            const rm = document.getElementById('report-modal');
+            rm.dataset.dlName  = name;
+            rm.dataset.dlScore = scoreVal;
+            rm.dataset.dlDiag  = JSON.stringify(diag);
+            rm.classList.remove('hidden');
 
             if (extName === undefined) executeReportDownload(name, scoreVal, diag);
         }
@@ -1017,10 +839,7 @@
 
         function executeReportDownload(name, scoreVal, diag) {
             let txt = `RELATÓRIO CAÇA-PALAVRAS II\n`;
-            txt += `Aluno: ${name}\n`;
-            txt += `Pontuação Final: ${scoreVal}\n`;
-            txt += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
-            txt += `Atividade Completa: ${themeOrder.every(t => diag[t] && diag[t].completed) ? 'SIM ✅' : 'NÃO ⏱️'}\n\n`;
+            txt += `Aluno: ${name}\nPontuação Final: ${scoreVal}\nData: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
             themeOrder.forEach(theme => {
                 const d = diag[theme];
                 txt += `--- ${themeLabels[theme].toUpperCase()} ---\n`;
@@ -1029,24 +848,22 @@
                 txt += `  Erros de seleção: ${d.errors}\n`;
                 txt += `  Palavras:\n`;
                 Object.entries(d.wordTimes).forEach(([word, sec]) => {
-                    txt += `    ${word}: ${sec !== null ? sec + 's' : 'não encontrada'}\n`;
+                    txt += `    ${word}: ${sec !== null ? sec+'s' : 'não encontrada'}\n`;
                 });
-                const found = Object.entries(d.wordTimes).filter(([, v]) => v !== null).sort(([, a], [, b]) => a - b);
+                const found = Object.entries(d.wordTimes).filter(([,v]) => v !== null).sort(([,a],[,b]) => a-b);
                 if (found.length > 0) {
                     txt += `  Mais rápida: ${found[0][0]} (${found[0][1]}s)\n`;
-                    txt += `  Mais lenta:  ${found[found.length - 1][0]} (${found[found.length - 1][1]}s)\n`;
+                    txt += `  Mais lenta:  ${found[found.length-1][0]} (${found[found.length-1][1]}s)\n`;
                 }
-                const notFound = Object.entries(d.wordTimes).filter(([, v]) => v === null);
-                if (notFound.length > 0) {
-                    txt += `  Não encontradas: ${notFound.map(([w]) => w).join(', ')}\n`;
-                }
+                const notFound = Object.entries(d.wordTimes).filter(([,v]) => v === null);
+                if (notFound.length > 0) txt += `  Não encontradas: ${notFound.map(([w]) => w).join(', ')}\n`;
                 txt += `\n`;
             });
             const blob = new Blob([txt], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `nota_CPII_${(name || 'aluno').replace(/\s/g, '_')}.txt`;
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `nota_CPII_${(name||'aluno').replace(/\s/g,'_')}.txt`;
             a.click();
         }
 
@@ -1067,129 +884,11 @@
             reader.onload = (ev) => {
                 try {
                     const data = JSON.parse(atob(ev.target.result));
-                    if (!data.n) throw new Error('Arquivo sem nome de aluno');
+                    if (!data.n) throw new Error('Sem nome');
                     showReportModal(data.n, data.s, data.diag || {});
-                } catch (err) {
-                    alert('Arquivo inválido ou sem dados de relatório.');
-                }
+                } catch { alert('Arquivo inválido ou sem dados de relatório.'); }
             };
             reader.readAsText(file);
-        });
-
-        // ========== PAUSA - ESCONDE O GRID ==========
-        let isPaused = false;
-        let pauseScreenDiv = null;
-        const gameContainerDiv = document.getElementById('game-container');
-
-        document.getElementById('btn-pause').addEventListener('click', () => {
-            if (isPaused) return;
-            isPaused = true;
-            if (timerInterval) clearInterval(timerInterval);
-            removeGridListeners();
-
-            gridContainer.classList.add('hidden');
-            
-            pauseScreenDiv = document.createElement('div');
-            pauseScreenDiv.id = 'pause-screen';
-            pauseScreenDiv.innerHTML = `⏸ Jogo Pausado<br><button id="btn-resume">▶ Retomar</button>`;
-            gameContainerDiv.appendChild(pauseScreenDiv);
-
-            document.getElementById('btn-resume').addEventListener('click', () => {
-                isPaused = false;
-                if (pauseScreenDiv) pauseScreenDiv.remove();
-                gridContainer.classList.remove('hidden');
-                startTimer();
-                addGridListeners();
-            });
-        });
-
-        // ========== VOLTAR AO INÍCIO - RESET COMPLETO ==========
-        const confirmExitModal = document.getElementById('confirm-exit-modal');
-
-        function fullResetToStart() {
-            // Para o timer
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-            
-            // Remove listeners do grid
-            removeGridListeners();
-            
-            // Remove tela de pausa se existir
-            if (pauseScreenDiv && pauseScreenDiv.parentNode) {
-                pauseScreenDiv.remove();
-                pauseScreenDiv = null;
-            }
-            
-            // LIMPA E RESETA O GRID COMPLETAMENTE
-            gridContainer.innerHTML = '';
-            gridContainer.classList.remove('hidden');
-            
-            // Remove qualquer overlay residual
-            const existingOverlay = document.getElementById('grid-overlay');
-            if (existingOverlay) existingOverlay.remove();
-            
-            // Reseta todas as variáveis de estado
-            isPaused = false;
-            isSelecting = false;
-            selectionStartCell = null;
-            currentSelectionCells = [];
-            grid = [];
-            wordsData = [];
-            foundWords.clear();
-            score = 0;
-            timeLeft = 0;
-            timeBonusForNextLevel = 0;
-            totalScore = 0;
-            originalLevelScore = 0;
-            originalTimeBonus = 0;
-            levelSnapshotTaken = false;
-            levelErrors = 0;
-            levelWordStartTs = {};
-            levelWordFoundSec = {};
-            levelStartTime = 0;
-            diagData = {};
-            
-            // Reseta UI
-            updateScoreDisplay();
-            updateStartButtons('amiguinhos');
-            
-            // Volta para a tela inicial
-            gameArea.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-            
-            // Reseta botões da área de jogo
-            document.getElementById('btn-save-prog').classList.add('hidden');
-            document.getElementById('btn-load-prog').classList.remove('hidden');
-            document.getElementById('btn-pause').classList.add('hidden');
-            document.getElementById('btn-restart').classList.add('hidden');
-            nextThemeBtn.style.display = 'none';
-            
-            // Reseta pendingDifficulty
-            pendingDifficulty = null;
-            
-            // Reseta timer display
-            timerDisplay.textContent = "05:00";
-            
-            // Limpa a mensagem
-            messageDiv.textContent = '';
-            
-            // Limpa a lista de palavras
-            wordListUl.innerHTML = '';
-        }
-
-        document.getElementById('btn-restart').addEventListener('click', () => {
-            confirmExitModal.classList.remove('hidden');
-        });
-
-        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
-            confirmExitModal.classList.add('hidden');
-            fullResetToStart();
-        });
-
-        document.getElementById('btn-cancel-exit').addEventListener('click', () => {
-            confirmExitModal.classList.add('hidden');
         });
 
         function gameOver(text, isTimeout = false) {
@@ -1197,33 +896,34 @@
             removeGridListeners();
             const overlay = document.createElement('div');
             overlay.id = 'grid-overlay';
-            let htmlContent = `<div>${text}</div>`;
             if (isTimeout) {
                 const retryButton = document.createElement('button');
                 retryButton.textContent = 'Tentar Novamente';
-                retryButton.style.cssText = "padding: 10px 20px; font-size: 0.5em; margin-top: 20px; cursor: pointer; border-radius: 5px; border: none; background-color: #ffc107; color: #333; font-weight: bold;";
+                retryButton.style.cssText = "padding:10px 20px;font-size:0.5em;margin-top:20px;cursor:pointer;border-radius:5px;border:none;background-color:#ffc107;color:#333;font-weight:bold;";
                 retryButton.onclick = () => {
                     score = originalLevelScore;
                     timeBonusForNextLevel = originalTimeBonus;
                     loadLevel(currentDifficulty);
                 };
-                overlay.innerHTML = htmlContent;
+                overlay.innerHTML = `<div>${text}</div>`;
                 overlay.appendChild(retryButton);
             } else {
-                overlay.innerHTML = htmlContent;
+                overlay.innerHTML = `<div>${text}</div>`;
             }
             gridContainer.appendChild(overlay);
         }
 
         function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60); 
-            const seconds = timeLeft % 60;
-            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const minutes = Math.floor(timeLeft/60), seconds = timeLeft%60;
+            timerDisplay.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
         }
 
-        function updateScoreDisplay() { 
-            scoreDisplay.textContent = score; 
-        }
+        function updateScoreDisplay() { scoreDisplay.textContent = score; }
+
+        difficultyButtons.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' && e.target.id.startsWith('btn-'))
+                startGame(e.target.id.split('-')[1]);
+        });
 
         function addGridListeners() {
             gridContainer.addEventListener('mousedown', startSelection);
@@ -1238,27 +938,21 @@
         }
 
         function startSelection(e) {
-            if (e.target.tagName === 'TD') {
-                isSelecting = true; 
-                selectionStartCell = e.target;
-                updateSelection(e.target);
-            }
+            if (e.target.tagName === 'TD') { isSelecting = true; selectionStartCell = e.target; updateSelection(e.target); }
         }
 
         function continueSelection(e) {
-            if (isSelecting && e.target.tagName === 'TD') {
-                updateSelection(e.target);
-            }
+            if (isSelecting && e.target.tagName === 'TD') updateSelection(e.target);
         }
 
         function updateSelection(endCell) {
             currentSelectionCells.forEach(cell => cell.classList.remove('selected'));
             currentSelectionCells = [];
             const x1 = parseInt(selectionStartCell.dataset.x), y1 = parseInt(selectionStartCell.dataset.y);
-            const x2 = parseInt(endCell.dataset.x), y2 = parseInt(endCell.dataset.y);
-            const dx = x2 - x1, dy = y2 - y1;
+            const x2 = parseInt(endCell.dataset.x),            y2 = parseInt(endCell.dataset.y);
+            const dx = x2-x1, dy = y2-y1;
             if (dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy)) {
-                const steps = Math.max(Math.abs(dx), Math.abs(dy)), sx = Math.sign(dx), sy = Math.sign(dy);
+                const steps = Math.max(Math.abs(dx),Math.abs(dy)), sx = Math.sign(dx), sy = Math.sign(dy);
                 for (let i = 0; i <= steps; i++) {
                     const cell = document.querySelector(`td[data-x='${x1+i*sx}'][data-y='${y1+i*sy}']`);
                     if (cell) { cell.classList.add('selected'); currentSelectionCells.push(cell); }
