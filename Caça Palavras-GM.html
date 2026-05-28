@@ -549,6 +549,7 @@
             }
         }
 
+        // CORREÇÃO: Preserva acentos e cedilha (apenas toUpperCase, sem remover caracteres especiais)
         async function fetchWords(url) {
             try {
                 const response = await fetch(`${url}?t=${new Date().getTime()}`);
@@ -557,7 +558,7 @@
                 if (!data.palavras || !Array.isArray(data.palavras)) throw new Error("Formato do JSON inválido.");
                 return {
                     quantidade: data.quantidade,
-                    palavras: data.palavras.map(word => word.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+                    palavras: data.palavras.map(word => word.toUpperCase())
                 };
             } catch (error) {
                 return {
@@ -627,7 +628,7 @@
         }
 
         function fillEmptySpaces(gridSize) {
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZÇÃÕÁÉÍÓÚÀÂÊÔ";
             for (let y = 0; y < gridSize; y++)
                 for (let x = 0; x < gridSize; x++)
                     if (grid[y][x] === '')
@@ -790,7 +791,7 @@
                         .sort(([,a],[,b]) => (a===null?99999:a) - (b===null?99999:b))
                         .map(([w,s]) => s !== null ? `${w} <span style="color:#888;font-size:12px">(${s}s)</span>` : `<span style="text-decoration:line-through;color:#ccc">${w}</span>`)
                         .join(', ');
-                    tr.innerHTML = `<td>${levelLabels[level]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td style="font-size:13px;line-height:1.8">${wordLines}</td>`;
+                    tr.innerHTML = `<tr>${levelLabels[level]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td style="font-size:13px;line-height:1.8">${wordLines}</td>`;
                 }
                 tbody.appendChild(tr);
             });
@@ -803,11 +804,48 @@
             if (extName === undefined) executeReportDownload(name, scoreVal, diag);
         }
 
+        // Botão fechar relatório - Reseta completamente para tela inicial
         document.getElementById('btn-close-report').addEventListener('click', () => {
             document.getElementById('report-modal').classList.add('hidden');
+            
+            // Reseta completamente para a tela inicial
+            clearInterval(timerInterval);
+            removeGridListeners();
+            
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('pause-screen').classList.add('hidden');
+            document.getElementById('grid-container').innerHTML = '';
+            document.getElementById('word-list').innerHTML = '';
+            document.getElementById('level-progress').innerHTML = '';
+            document.getElementById('btn-next-level').style.display = 'none';
+            messageDiv.textContent = '';
+            
+            score = 0;
+            timeLeft = 0;
+            studentName = "";
+            timeBonusForNextLevel = 0;
+            originalLevelScore = 0;
+            originalTimeBonus = 0;
+            levelSnapshotTaken = false;
+            diagData = {};
+            foundWords.clear();
+            wordsData = [];
+            grid = [];
+            isSelecting = false;
+            selectionStartCell = null;
+            currentSelectionCells = [];
+            
+            updateScoreDisplay();
+            timerDisplay.textContent = '05:00';
+            studentLabel.textContent = '---';
+            document.getElementById('status-info').style.visibility = 'hidden';
+            
+            ['btn-save-prog','btn-pause','restart-btn'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            resetStartButtons();
+            startScreen.classList.remove('hidden');
         });
 
-        // ALTERAÇÃO 3: Relatório final em Base64
+        // Relatório final em Base64
         function executeReportDownload(name, scoreVal, diag) {
             const data = { 
                 n: name, 
@@ -892,7 +930,7 @@
 
         cancelSaveBtn.onclick = () => saveNameModal.classList.add('hidden');
 
-        // ALTERAÇÃO 1: Adicionar flag gameCompleted no salvamento de progresso
+        // Salvar progresso com flag gameCompleted
         function executeSaveDownload() {
             // Verifica se todos os níveis foram concluídos
             const allLevelsCompleted = levelOrder.every(level => diagData[level] && diagData[level].completed === true);
@@ -917,7 +955,6 @@
             fileInput.click();
         });
 
-        // ALTERAÇÃO 2: Ao carregar arquivo, verificar gameCompleted e mostrar relatório se for o caso
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -1018,7 +1055,7 @@
             // NÃO faz mais nada — jogo continua exatamente como estava, timer rodando
         });
 
-        // ===== BOTÃO PAUSAR (já correto, apenas garantindo) =====
+        // ===== BOTÃO PAUSAR =====
         document.getElementById('btn-pause').addEventListener('click', () => {
             clearInterval(timerInterval);
             removeGridListeners();
