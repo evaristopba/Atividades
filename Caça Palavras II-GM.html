@@ -5,20 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caça-Palavras: Temas Educativos</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex; justify-content: center; align-items: flex-start;
             padding: 20px; background-color: #eef1f5; gap: 40px;
+            min-height: 100vh;
         }
         #start-screen {
             text-align: center; background-color: #fff; padding: 40px;
             border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
         }
         #difficulty-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
+            margin: 20px 0;
         }
         #difficulty-buttons button {
             margin: 5px; padding: 12px 20px; font-size: 16px; cursor: pointer;
@@ -42,11 +51,21 @@
         }
         #btn-how-to-play {
             background-color: transparent; border: 2px solid #6c757d; color: #6c757d;
-            padding: 12px 28px; margin-top: 25px; font-weight: bold; font-size: 16px;
+            padding: 12px 28px; margin-top: 10px; font-weight: bold; font-size: 16px;
             border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
         }
         #btn-how-to-play:hover {
             background-color: #6c757d; color: white; transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #btn-prof-reader {
+            background-color: transparent; border: 2px solid #28a745; color: #28a745;
+            padding: 12px 28px; margin-top: 10px; font-weight: bold; font-size: 16px;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
+            display: inline-block;
+        }
+        #btn-prof-reader:hover {
+            background-color: #28a745; color: white; transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .modal-container {
@@ -96,22 +115,17 @@
         #status-info { font-size: 20px; font-weight: bold; margin: 20px 0; text-align: center; }
         #status-info div { margin-bottom: 15px; }
         #status-info span { display: block; font-size: 1.5em; color: #007bff; }
-        #word-list { list-style: none; padding: 0; margin: 0; }
+        #word-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
         #word-list li { font-size: 18px; margin-bottom: 8px; color: #555; transition: color 0.3s; word-break: break-all; }
         #word-list li.found { text-decoration: line-through; color: #aaa; }
         #message { margin-top: 20px; font-size: 20px; font-weight: bold; color: #d63384; min-height: 30px; text-align: center; }
-        #restart-btn { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; width: 100%; border-radius: 5px; border: none; background-color: #6c757d; color: white; }
 
         .panel-btn { margin-top: 10px; padding: 12px; cursor: pointer; width: 100%; border-radius: 8px; border: none; color: white; font-weight: bold; font-size: 16px; }
         #btn-next-theme { background-color: #28a745; display: none; }
         #btn-save-prog { background-color: #007bff; }
         #btn-load-prog { background-color: #17a2b8; }
 
-        /* =====================================================
-           MODAL DE NOME — estilo integrado ao app
-           Apenas as propriedades visuais foram alteradas;
-           IDs, estrutura e lógica são idênticos ao original.
-           ===================================================== */
+        /* MODAL DE NOME */
         #save-name-modal .modal-content {
             max-width: 420px;
             padding: 0;
@@ -193,15 +207,20 @@
             justify-content: center;
         }
 
-        #btn-confirm-save {
+        #btn-confirm-save, #btn-confirm-start {
             background-color: #28a745;
             flex: 1;
             margin-top: 0;
             border-radius: 8px;
             font-size: 15px;
             transition: background-color 0.2s, transform 0.15s;
+            padding: 12px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            font-weight: bold;
         }
-        #btn-confirm-save:hover { background-color: #218838; transform: translateY(-1px); }
+        #btn-confirm-save:hover, #btn-confirm-start:hover { background-color: #218838; transform: translateY(-1px); }
 
         #btn-cancel-save {
             background-color: #6c757d;
@@ -210,6 +229,11 @@
             border-radius: 8px;
             font-size: 15px;
             transition: background-color 0.2s, transform 0.15s;
+            padding: 12px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            font-weight: bold;
         }
         #btn-cancel-save:hover { background-color: #5a6268; transform: translateY(-1px); }
 
@@ -289,6 +313,19 @@
         }
         #btn-close-report:hover { background-color: #5a6268; }
 
+        #btn-pause   { background-color: #fd7e14; }
+        #btn-restart { background-color: #6c757d; margin-top: 6px; }
+        #btn-resume {
+            display: block; margin: 20px auto 0; padding: 14px 32px;
+            font-size: 18px; border: none; border-radius: 8px;
+            background-color: #28a745; color: white; font-weight: bold; cursor: pointer;
+        }
+        #btn-resume:hover { background-color: #218838; }
+        #pause-screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 40px 20px;
+            font-size: 28px; font-weight: bold; color: #555;
+        }
         .hidden { display: none; }
         .loader {
             width: 48px; height: 48px; border: 5px solid #ccc;
@@ -314,7 +351,7 @@
     <input type="file" id="file-input" class="hidden" accept=".txt">
     <input type="file" id="prof-file-input" class="hidden" accept=".txt">
 
-    <div id="start-screen" class="hidden">
+    <div id="start-screen">
         <h1>Caça-Palavras: Temas Educativos</h1>
         <p>Escolha um tema para começar:</p>
         <div id="difficulty-buttons">
@@ -326,7 +363,7 @@
             <button id="btn-solo">Solo</button>
         </div>
         <button id="btn-how-to-play">Como Jogar?</button>
-        <button id="btn-prof-reader" style="background-color:transparent;border:2px solid #28a745;color:#28a745;padding:12px 28px;margin-top:10px;font-weight:bold;font-size:16px;border-radius:8px;cursor:pointer;transition:all 0.3s ease;">🔍 Ver Relatório de Aluno</button>
+        <button id="btn-prof-reader">🔍 Ver Relatório de Aluno</button>
     </div>
 
     <div id="game-area" class="hidden">
@@ -338,7 +375,7 @@
             <div id="theme-progress"></div>
             <h2>Status do Jogo</h2>
             <div id="status-info">
-                <div style="text-align: center; font-size: 14px; color: #666; margin-bottom: 5px;">ALUNO: <strong id="student-display" title="Clique para editar o nome" style="cursor:pointer; border-bottom: 1px dashed #aaa;">---</strong></div>
+                <div style="text-align: center; font-size: 14px; color: #666; margin-bottom: 5px;">ALUNO: <strong id="student-display" style="cursor:pointer; border-bottom: 1px dashed #aaa;">---</strong></div>
                 <div>Pontuação<span id="score">0</span></div>
                 <div>Tempo<span id="timer">05:00</span></div>
             </div>
@@ -346,19 +383,20 @@
             <ul id="word-list"></ul>
 
             <button id="btn-next-theme" class="panel-btn">⏩ Próximo Tema</button>
-            <button id="btn-save-prog" class="panel-btn">💾 Salvar Progresso</button>
+            <button id="btn-save-prog" class="panel-btn hidden">💾 Salvar Progresso</button>
             <button id="btn-load-prog" class="panel-btn">📂 Carregar Progresso</button>
-            <button id="restart-btn">🏠 Voltar ao Início</button>
+            <button id="btn-pause" class="panel-btn hidden">⏸ Pausar</button>
+            <button id="btn-restart" class="panel-btn hidden">🏠 Voltar ao Início</button>
         </div>
     </div>
 
-    <!-- MODAL DE SALVAMENTO — estrutura e IDs idênticos ao original; apenas o HTML interno foi estilizado -->
+    <!-- MODAL DE NOME OBRIGATÓRIO -->
     <div id="save-name-modal" class="modal-container hidden">
         <div class="modal-content">
             <div class="save-modal-header">
-                <span class="save-icon">💾</span>
-                <h2>Salvar Progresso</h2>
-                <p>Digite seu nome completo para identificar o arquivo</p>
+                <span class="save-icon">📝</span>
+                <h2>Qual é o seu nome?</h2>
+                <p>Digite seu nome completo para começar a jogar</p>
             </div>
             <div class="save-modal-body">
                 <div class="save-input-wrap">
@@ -366,8 +404,7 @@
                     <input type="text" id="student-name-input" placeholder="Nome do Aluno">
                 </div>
                 <div class="save-modal-actions">
-                    <button id="btn-confirm-save" class="panel-btn">✔ Confirmar</button>
-                    <button id="btn-cancel-save" class="panel-btn">✖ Cancelar</button>
+                    <button id="btn-confirm-start">▶ Começar Jogo</button>
                 </div>
             </div>
         </div>
@@ -411,12 +448,12 @@
             <div class="save-modal-header" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
                 <span class="save-icon">⚠️</span>
                 <h2>Voltar ao Início?</h2>
-                <p>O progresso não salvo será perdido.</p>
+                <p>O progresso não salvo será perdido. O jogo será reiniciado completamente.</p>
             </div>
             <div class="save-modal-body">
                 <div class="save-modal-actions">
-                    <button id="btn-confirm-exit" class="panel-btn" style="background-color: #dc3545; margin-top: 0; flex: 1; border-radius: 8px; font-size: 15px;">🏠 Confirmar</button>
-                    <button id="btn-cancel-exit" class="panel-btn" style="background-color: #28a745; margin-top: 0; flex: 1; border-radius: 8px; font-size: 15px;">▶ Continuar</button>
+                    <button id="btn-confirm-exit" class="panel-btn" style="background-color:#dc3545;margin-top:0;flex:1;border-radius:8px;font-size:15px;">🏠 Confirmar</button>
+                    <button id="btn-cancel-exit" class="panel-btn" style="background-color:#28a745;margin-top:0;flex:1;border-radius:8px;font-size:15px;">▶ Continuar Jogando</button>
                 </div>
             </div>
         </div>
@@ -446,7 +483,6 @@
         const messageDiv = document.getElementById('message');
         const scoreDisplay = document.getElementById('score');
         const timerDisplay = document.getElementById('timer');
-        const restartBtn = document.getElementById('restart-btn');
         const difficultyButtons = document.getElementById('difficulty-buttons');
         const modal = document.getElementById('how-to-play-modal');
         const openModalBtn = document.getElementById('btn-how-to-play');
@@ -457,8 +493,7 @@
         const nextThemeBtn = document.getElementById('btn-next-theme');
         const saveNameModal = document.getElementById('save-name-modal');
         const studentNameInput = document.getElementById('student-name-input');
-        const confirmSaveBtn = document.getElementById('btn-confirm-save');
-        const cancelSaveBtn = document.getElementById('btn-cancel-save');
+        const confirmStartBtn = document.getElementById('btn-confirm-start');
 
         modal.classList.remove('hidden');
 
@@ -501,14 +536,12 @@
         let levelSnapshotTaken = false;
         let studentName = "";
 
-        // Diagnóstico — acumulado por tema
-        let diagData = {};        // { tema: { errors, wordTimes: {palavra: segundos} } }
+        let diagData = {};        
         let levelErrors = 0;
-        let levelWordStartTs = {};  // { palavra: timestamp_ms quando nivel começou }
-        let levelWordFoundSec = {}; // { palavra: segundos ate encontrar }
+        let levelWordStartTs = {};  
+        let levelWordFoundSec = {}; 
         let levelStartTime = 0;
 
-        // Ordem linear dos temas — usada para habilitar apenas o nível atual
         const themeOrder = ['amiguinhos', 'trabalho', 'clima', 'alimentos', 'educacao', 'solo'];
 
         function updateStartButtons(currentTheme) {
@@ -519,7 +552,6 @@
             });
         }
 
-
         function updateProgressBar(currentTheme) {
             const bar = document.getElementById('theme-progress');
             if (!bar) return;
@@ -527,7 +559,6 @@
             const labels = ['A', 'T', 'C', 'Al', 'E', 'S'];
             bar.innerHTML = '';
             themeOrder.forEach((theme, i) => {
-                // connector before each dot (except first)
                 if (i > 0) {
                     const line = document.createElement('div');
                     line.className = 'theme-connector' + (i <= idx ? ' done' : '');
@@ -541,51 +572,91 @@
             });
         }
 
-        function resetStartButtons() {
-            updateStartButtons('amiguinhos');
-        }
-
-        // Ao carregar a página, apenas o primeiro nível habilitado
+        // Inicializa botões: apenas o primeiro habilitado
         updateStartButtons('amiguinhos');
 
-        // --- LÓGICA DE SALVAMENTO (RESOLUÇÃO DO DESAFIO) ---
-        document.getElementById('btn-save-prog').onclick = () => {
-            if (!studentName || studentName === "") {
-                document.querySelector('#save-name-modal .save-modal-header h2').textContent = 'Salvar Progresso';
-                document.querySelector('#save-name-modal .save-modal-header p').textContent = 'Digite seu nome completo para identificar o arquivo';
+        let pendingDifficulty = null;
+        
+        // Evento para clicar nos botões de tema
+        difficultyButtons.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn || !btn.id.startsWith('btn-')) return;
+            if (btn.disabled) return;
+            const diff = btn.id.split('-')[1];
+            if (!studentName) {
+                pendingDifficulty = diff;
                 saveNameModal.classList.remove('hidden');
             } else {
-                executeSaveDownload();
+                startGame(diff);
             }
-        };
+        });
 
-        confirmSaveBtn.onclick = () => {
+        confirmStartBtn.onclick = () => {
             const val = studentNameInput.value.trim();
             if (val) {
                 studentName = val;
                 studentLabel.textContent = studentName;
                 saveNameModal.classList.add('hidden');
-                executeSaveDownload();
+                if (pendingDifficulty) {
+                    startGame(pendingDifficulty);
+                    pendingDifficulty = null;
+                }
             } else {
                 alert("Por favor, digite seu nome.");
             }
         };
 
-        cancelSaveBtn.onclick = () => {
-            saveNameModal.classList.add('hidden');
+        // Função para verificar se todos os temas foram concluídos
+        function isAllThemesCompleted() {
+            return themeOrder.every(theme => 
+                diagData[theme] && diagData[theme].completed === true
+            );
+        }
+
+        // Salvar progresso (solicita nome se não tiver)
+        document.getElementById('btn-save-prog').onclick = () => {
+            if (!studentName || studentName === "") {
+                pendingDifficulty = null;
+                saveNameModal.classList.remove('hidden');
+                // Ajusta o modal para modo "salvar"
+                const modalHeader = document.querySelector('#save-name-modal .save-modal-header h2');
+                const modalText = document.querySelector('#save-name-modal .save-modal-header p');
+                if (modalHeader) modalHeader.textContent = 'Salvar Progresso';
+                if (modalText) modalText.textContent = 'Digite seu nome para salvar o progresso';
+                // Sobrescreve o botão de confirmação temporariamente
+                const originalClick = confirmStartBtn.onclick;
+                confirmStartBtn.onclick = () => {
+                    const val = studentNameInput.value.trim();
+                    if (val) {
+                        studentName = val;
+                        studentLabel.textContent = studentName;
+                        saveNameModal.classList.add('hidden');
+                        executeSaveDownload();
+                        // Restaura o click original
+                        confirmStartBtn.onclick = originalClick;
+                        const modalHeaderRestore = document.querySelector('#save-name-modal .save-modal-header h2');
+                        const modalTextRestore = document.querySelector('#save-name-modal .save-modal-header p');
+                        if (modalHeaderRestore) modalHeaderRestore.textContent = 'Qual é o seu nome?';
+                        if (modalTextRestore) modalTextRestore.textContent = 'Digite seu nome completo para começar a jogar';
+                    } else {
+                        alert("Por favor, digite seu nome.");
+                    }
+                };
+            } else {
+                executeSaveDownload();
+            }
         };
 
-        // Clicar no nome abre o modal no modo edição
-        studentLabel.addEventListener('click', () => {
-            if (!studentName) return; // sem nome ainda, nada a editar
-            document.querySelector('#save-name-modal .save-modal-header h2').textContent = 'Editar Nome';
-            document.querySelector('#save-name-modal .save-modal-header p').textContent = 'Corrija o nome e confirme para salvar novamente.';
-            studentNameInput.value = studentName;
-            saveNameModal.classList.remove('hidden');
-        });
-
         function executeSaveDownload() {
-            const data = { n: studentName, d: currentDifficulty, s: originalLevelScore, b: originalTimeBonus, diag: diagData };
+            const completedAll = isAllThemesCompleted();
+            const data = { 
+                n: studentName, 
+                d: currentDifficulty, 
+                s: score, 
+                b: timeBonusForNextLevel, 
+                completedAll: completedAll,  // NOVO CAMPO
+                diag: diagData 
+            };
             const blob = new Blob([btoa(JSON.stringify(data))], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -594,6 +665,7 @@
             a.click();
         }
 
+        // Carregar progresso
         document.getElementById('btn-load-prog').onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
@@ -611,17 +683,16 @@
                     updateStartButtons(currentDifficulty);
                     startScreen.classList.add('hidden');
                     gameArea.classList.remove('hidden');
+                    document.getElementById('btn-save-prog').classList.remove('hidden');
+                    document.getElementById('btn-load-prog').classList.add('hidden');
+                    document.getElementById('btn-pause').classList.remove('hidden');
+                    document.getElementById('btn-restart').classList.remove('hidden');
                     updateScoreDisplay();
                     loadLevel(currentDifficulty);
                 } catch (err) { alert("Arquivo inválido!"); }
             };
             reader.readAsText(file);
         };
-
-        function loadProgress() {
-            totalScore = parseInt(localStorage.getItem('totalScore')) || 0;
-            timeBonusForNextLevel = parseInt(localStorage.getItem('timeBonus')) || 0;
-        }
 
         function saveProgress() {
             localStorage.setItem('totalScore', totalScore);
@@ -632,6 +703,10 @@
             updateStartButtons(difficulty);
             startScreen.classList.add('hidden');
             gameArea.classList.remove('hidden');
+            document.getElementById('btn-save-prog').classList.remove('hidden');
+            document.getElementById('btn-load-prog').classList.add('hidden');
+            document.getElementById('btn-pause').classList.remove('hidden');
+            document.getElementById('btn-restart').classList.remove('hidden');
             totalScore = 0;
             timeBonusForNextLevel = 0;
             originalLevelScore = 0;
@@ -680,7 +755,6 @@
                 renderGrid(dynamicGridSize);
                 renderWordList();
 
-                // Resetar contadores diagnósticos do nível
                 levelErrors = 0;
                 levelWordStartTs = {};
                 levelWordFoundSec = {};
@@ -711,7 +785,8 @@
                 const data = await response.json();
                 return {
                     quantidade: data.quantidade,
-                    palavras: data.palavras.map(word => word.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+                    // PRESERVA ACENTOS E CEDILHA - NÃO remove caracteres especiais
+                    palavras: data.palavras.map(word => word.toUpperCase())
                 };
             } catch (error) {
                 return {
@@ -722,16 +797,19 @@
         }
 
         function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    timerDisplay.textContent = "00:00";
-                    messageDiv.textContent = "Tempo Esgotado!";
-                    saveLevelDiag(false);
-                    revealNotFoundWords();
-                    setTimeout(() => gameOver("Fim de Jogo!", true), 5000);
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timerDisplay.textContent = "00:00";
+                        messageDiv.textContent = "Tempo Esgotado!";
+                        saveLevelDiag(false);
+                        revealNotFoundWords();
+                        setTimeout(() => gameOver("Fim de Jogo!", true), 5000);
+                    }
                 }
             }, 1000);
         }
@@ -826,7 +904,6 @@
             });
             if (wordFound) {
                 wordFound.found = true;
-                // Registrar tempo gasto nessa palavra (segundos)
                 const elapsed = Math.round((Date.now() - (levelWordStartTs[wordFound.word] || levelStartTime)) / 1000);
                 levelWordFoundSec[wordFound.word] = elapsed;
                 score += wordFound.word.length * 10;
@@ -850,7 +927,7 @@
             wordsData.forEach(w => {
                 wordTimesResult[w.word] = w.found
                     ? (levelWordFoundSec[w.word] !== undefined ? levelWordFoundSec[w.word] : Math.round((Date.now() - levelStartTime) / 1000))
-                    : null; // null = não encontrada
+                    : null;
             });
             diagData[currentDifficulty] = {
                 completed,
@@ -903,7 +980,6 @@
             const scoreVal = extScore !== undefined ? extScore : score;
             const diag  = extDiag  !== undefined ? extDiag  : diagData;
 
-            // Título dinâmico: concluída só se todos os temas têm completed=true
             const allDone = themeOrder.every(t => diag[t] && diag[t].completed);
             document.getElementById('report-modal-title').textContent = allDone ? 'Atividade Concluída! 🎉' : 'Atividade em Andamento';
             document.getElementById('report-student-name').textContent = name || 'Aluno';
@@ -915,25 +991,23 @@
                 const d = diag[theme];
                 const tr = document.createElement('tr');
                 if (!d) {
-                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td>—</td>`;
+                    tr.innerHTML = `<td>${themeLabels[theme]}<td style="text-align:center">—<td style="text-align:center">—<td>—`;
                 } else {
                     const status = d.completed ? '✅' : '⏱️';
                     const hardest = Object.entries(d.wordTimes)
                         .filter(([,v]) => v !== null)
                         .sort(([,a],[,b]) => b - a)[0];
                     const hardestStr = hardest ? `${hardest[0]} (${hardest[1]}s)` : '—';
-                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td>${hardestStr}</td>`;
+                    tr.innerHTML = `<td>${themeLabels[theme]}<td style="text-align:center">${status}<td style="text-align:center">${d.errors}<td>${hardestStr}`;
                 }
                 tbody.appendChild(tr);
             });
 
-            // store current context for download button
             document.getElementById('report-modal').dataset.dlName  = name;
             document.getElementById('report-modal').dataset.dlScore = scoreVal;
             document.getElementById('report-modal').dataset.dlDiag  = JSON.stringify(diag);
             document.getElementById('report-modal').classList.remove('hidden');
 
-            // auto-download only when finishing the game (no external data)
             if (extName === undefined) executeReportDownload(name, scoreVal, diag);
         }
 
@@ -945,7 +1019,8 @@
             let txt = `RELATÓRIO CAÇA-PALAVRAS II\n`;
             txt += `Aluno: ${name}\n`;
             txt += `Pontuação Final: ${scoreVal}\n`;
-            txt += `Data: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+            txt += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+            txt += `Atividade Completa: ${themeOrder.every(t => diag[t] && diag[t].completed) ? 'SIM ✅' : 'NÃO ⏱️'}\n\n`;
             themeOrder.forEach(theme => {
                 const d = diag[theme];
                 txt += `--- ${themeLabels[theme].toUpperCase()} ---\n`;
@@ -980,8 +1055,6 @@
             executeReportDownload(rm.dataset.dlName, rm.dataset.dlScore, JSON.parse(rm.dataset.dlDiag || '{}'));
         });
 
-
-        // Leitor de relatório do professor
         document.getElementById('btn-prof-reader').addEventListener('click', () => {
             document.getElementById('prof-file-input').value = '';
             document.getElementById('prof-file-input').click();
@@ -1001,6 +1074,122 @@
                 }
             };
             reader.readAsText(file);
+        });
+
+        // ========== PAUSA - ESCONDE O GRID ==========
+        let isPaused = false;
+        let pauseScreenDiv = null;
+        const gameContainerDiv = document.getElementById('game-container');
+
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            if (isPaused) return;
+            isPaused = true;
+            if (timerInterval) clearInterval(timerInterval);
+            removeGridListeners();
+
+            gridContainer.classList.add('hidden');
+            
+            pauseScreenDiv = document.createElement('div');
+            pauseScreenDiv.id = 'pause-screen';
+            pauseScreenDiv.innerHTML = `⏸ Jogo Pausado<br><button id="btn-resume">▶ Retomar</button>`;
+            gameContainerDiv.appendChild(pauseScreenDiv);
+
+            document.getElementById('btn-resume').addEventListener('click', () => {
+                isPaused = false;
+                if (pauseScreenDiv) pauseScreenDiv.remove();
+                gridContainer.classList.remove('hidden');
+                startTimer();
+                addGridListeners();
+            });
+        });
+
+        // ========== VOLTAR AO INÍCIO - RESET COMPLETO ==========
+        const confirmExitModal = document.getElementById('confirm-exit-modal');
+
+        function fullResetToStart() {
+            // Para o timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Remove listeners do grid
+            removeGridListeners();
+            
+            // Remove tela de pausa se existir
+            if (pauseScreenDiv && pauseScreenDiv.parentNode) {
+                pauseScreenDiv.remove();
+                pauseScreenDiv = null;
+            }
+            
+            // LIMPA E RESETA O GRID COMPLETAMENTE
+            gridContainer.innerHTML = '';
+            gridContainer.classList.remove('hidden');
+            
+            // Remove qualquer overlay residual
+            const existingOverlay = document.getElementById('grid-overlay');
+            if (existingOverlay) existingOverlay.remove();
+            
+            // Reseta todas as variáveis de estado
+            isPaused = false;
+            isSelecting = false;
+            selectionStartCell = null;
+            currentSelectionCells = [];
+            grid = [];
+            wordsData = [];
+            foundWords.clear();
+            score = 0;
+            timeLeft = 0;
+            timeBonusForNextLevel = 0;
+            totalScore = 0;
+            originalLevelScore = 0;
+            originalTimeBonus = 0;
+            levelSnapshotTaken = false;
+            levelErrors = 0;
+            levelWordStartTs = {};
+            levelWordFoundSec = {};
+            levelStartTime = 0;
+            diagData = {};
+            
+            // Reseta UI
+            updateScoreDisplay();
+            updateStartButtons('amiguinhos');
+            
+            // Volta para a tela inicial
+            gameArea.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            
+            // Reseta botões da área de jogo
+            document.getElementById('btn-save-prog').classList.add('hidden');
+            document.getElementById('btn-load-prog').classList.remove('hidden');
+            document.getElementById('btn-pause').classList.add('hidden');
+            document.getElementById('btn-restart').classList.add('hidden');
+            nextThemeBtn.style.display = 'none';
+            
+            // Reseta pendingDifficulty
+            pendingDifficulty = null;
+            
+            // Reseta timer display
+            timerDisplay.textContent = "05:00";
+            
+            // Limpa a mensagem
+            messageDiv.textContent = '';
+            
+            // Limpa a lista de palavras
+            wordListUl.innerHTML = '';
+        }
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            confirmExitModal.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
+            confirmExitModal.classList.add('hidden');
+            fullResetToStart();
+        });
+
+        document.getElementById('btn-cancel-exit').addEventListener('click', () => {
+            confirmExitModal.classList.add('hidden');
         });
 
         function gameOver(text, isTimeout = false) {
@@ -1035,33 +1224,6 @@
         function updateScoreDisplay() { 
             scoreDisplay.textContent = score; 
         }
-
-        difficultyButtons.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON' && e.target.id.startsWith('btn-')) {
-                startGame(e.target.id.split('-')[1]);
-            }
-        });
-
-        const confirmExitModal = document.getElementById('confirm-exit-modal');
-
-        restartBtn.addEventListener('click', () => {
-            clearInterval(timerInterval);
-            removeGridListeners();
-            confirmExitModal.classList.remove('hidden');
-        });
-
-        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
-            confirmExitModal.classList.add('hidden');
-            resetStartButtons();
-            gameArea.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-        });
-
-        document.getElementById('btn-cancel-exit').addEventListener('click', () => {
-            confirmExitModal.classList.add('hidden');
-            startTimer();
-            addGridListeners();
-        });
 
         function addGridListeners() {
             gridContainer.addEventListener('mousedown', startSelection);
