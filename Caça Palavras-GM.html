@@ -204,6 +204,7 @@
 
         .panel-btn { margin-top: 10px; padding: 12px; cursor: pointer; width: 100%; border-radius: 8px; border: none; color: white; font-weight: bold; font-size: 16px; }
         #btn-next-level { background-color: #28a745; display: none; }
+        #btn-pause { background-color: #fd7e14; }
         #btn-save-prog { background-color: #007bff; }
         #btn-load-prog { background-color: #17a2b8; }
         #btn-confirm-save { background-color: #28a745; flex: 1; margin-top: 0; border-radius: 8px; font-size: 15px; transition: background-color 0.2s, transform 0.15s; }
@@ -212,7 +213,7 @@
         #btn-cancel-save:hover { background-color: #5a6268; transform: translateY(-1px); }
         #restart-btn { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; width: 100%; border-radius: 5px; border: none; background-color: #6c757d; color: white; }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         .loader {
             width: 48px; height: 48px; border: 5px solid #ccc;
             border-bottom-color: #007bff; border-radius: 50%;
@@ -248,10 +249,17 @@
     </div>
 
     <!-- ÁREA DO JOGO -->
-    <div id="game-area" class="hidden">
-        <div id="game-container">
+    <div id="game-area">
+        <div id="game-container" class="hidden">
             <div id="grid-container"></div>
             <div id="message"></div>
+        </div>
+        <!-- TELA DE PAUSA (substitui o grid quando pausado) -->
+        <div id="pause-screen" class="hidden" style="text-align:center;background:#fff;padding:60px 40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:300px;">
+            <div style="font-size:56px;margin-bottom:10px;">⏸</div>
+            <h2 style="margin:0 0 8px;">Jogo Pausado</h2>
+            <p style="color:#888;margin:0 0 30px;">O cronômetro está parado.<br>Retome quando estiver pronto.</p>
+            <button id="btn-resume" style="padding:14px 40px;font-size:18px;font-weight:bold;background:#28a745;color:#fff;border:none;border-radius:8px;cursor:pointer;">▶ Retomar</button>
         </div>
         <div id="status-panel">
             <div id="level-progress"></div>
@@ -264,9 +272,13 @@
             <h2>Palavras</h2>
             <ul id="word-list"></ul>
             <button id="btn-next-level" class="panel-btn">⏩ Próximo Nível</button>
-            <button id="btn-save-prog" class="panel-btn">💾 Salvar Progresso</button>
-            <button id="btn-load-prog" class="panel-btn">📂 Carregar Progresso</button>
-            <button id="restart-btn">🏠 Voltar ao Início</button>
+            <div id="panel-actions">
+                <h2 style="margin-top:20px;border-bottom:2px solid #eee;padding-bottom:10px;">Ações</h2>
+                <button id="btn-save-prog" class="panel-btn hidden">💾 Salvar Progresso</button>
+                <button id="btn-load-prog" class="panel-btn">📂 Carregar Progresso</button>
+                <button id="btn-pause" class="panel-btn hidden">⏸ Pausar</button>
+                <button id="restart-btn" class="panel-btn hidden" style="background-color:#6c757d;">🏠 Voltar ao Início</button>
+            </div>
         </div>
     </div>
 
@@ -323,23 +335,6 @@
         </div>
     </div>
 
-    <!-- MODAL: CONFIRMAÇÃO DE SAÍDA -->
-    <div id="confirm-exit-modal" class="modal-container hidden">
-        <div class="modal-content">
-            <div class="save-modal-header" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
-                <span class="save-icon">⚠️</span>
-                <h2>Voltar ao Início?</h2>
-                <p>O progresso não salvo será perdido.</p>
-            </div>
-            <div class="save-modal-body">
-                <div class="save-modal-actions">
-                    <button id="btn-confirm-exit" class="panel-btn" style="background-color:#dc3545;margin-top:0;flex:1;border-radius:8px;font-size:15px;">🏠 Confirmar</button>
-                    <button id="btn-cancel-exit" class="panel-btn" style="background-color:#28a745;margin-top:0;flex:1;border-radius:8px;font-size:15px;">▶ Continuar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL: COMO JOGAR -->
     <div id="how-to-play-modal" class="modal-container">
         <div class="modal-content">
@@ -354,6 +349,23 @@
                 <li><strong>Fim de Jogo:</strong> O jogo acaba se o tempo chegar a zero.</li>
             </ul>
             <button id="modal-understand-btn">Entendi! Vamos Jogar!</button>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO DE SAÍDA -->
+    <div id="confirm-exit-modal" class="modal-container hidden">
+        <div class="modal-content">
+            <div class="save-modal-header" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+                <span class="save-icon">⚠️</span>
+                <h2>Voltar ao Início?</h2>
+                <p>O progresso não salvo será perdido. Tem certeza?</p>
+            </div>
+            <div class="save-modal-body">
+                <div class="save-modal-actions">
+                    <button id="btn-confirm-exit" class="panel-btn" style="background-color:#dc3545;margin-top:0;flex:1;">✅ Sim, recomeçar</button>
+                    <button id="btn-cancel-exit" class="panel-btn" style="background-color:#28a745;margin-top:0;flex:1;">❌ Não, continuar</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -378,7 +390,6 @@
         const studentNameInput = document.getElementById('student-name-input');
         const confirmSaveBtn = document.getElementById('btn-confirm-save');
         const cancelSaveBtn = document.getElementById('btn-cancel-save');
-        const confirmExitModal = document.getElementById('confirm-exit-modal');
 
         // Ordem e labels dos níveis
         const levelOrder = ['easy', 'medium', 'hard'];
@@ -470,8 +481,9 @@
 
         function startGame(difficulty) {
             updateStartButtons(difficulty);
+            document.getElementById('game-container').classList.remove('hidden');
+            document.getElementById('status-info').style.visibility = 'visible';
             startScreen.classList.add('hidden');
-            gameArea.classList.remove('hidden');
             score = 0;
             timeBonusForNextLevel = 0;
             originalLevelScore = 0;
@@ -514,6 +526,7 @@
                 fillEmptySpaces(dynamicGridSize);
                 renderGrid(dynamicGridSize);
                 renderWordList();
+                ['btn-save-prog','btn-pause','restart-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
 
                 // Diagnóstico
                 levelErrors = 0;
@@ -770,7 +783,7 @@
                 const d = diag[level];
                 const tr = document.createElement('tr');
                 if (!d) {
-                    tr.innerHTML = `<td>${levelLabels[level]}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td>—</td>`;
+                    tr.innerHTML = `<td>${levelLabels[level]}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="font-size:13px;line-height:1.8">—</td>`;
                 } else {
                     const status = d.completed ? '✅' : '⏱️';
                     const wordLines = Object.entries(d.wordTimes)
@@ -794,31 +807,19 @@
             document.getElementById('report-modal').classList.add('hidden');
         });
 
+        // ALTERAÇÃO 3: Relatório final em Base64
         function executeReportDownload(name, scoreVal, diag) {
-            let txt = `RELATÓRIO CAÇA-PALAVRAS: O DESAFIO\n`;
-            txt += `Aluno: ${name}\n`;
-            txt += `Pontuação Final: ${scoreVal}\n`;
-            txt += `Data: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
-            levelOrder.forEach(level => {
-                const d = diag[level];
-                txt += `--- ${levelLabels[level].toUpperCase()} ---\n`;
-                if (!d) { txt += `  Não jogado\n\n`; return; }
-                txt += `  Status: ${d.completed ? 'Concluído' : 'Tempo esgotado'}\n`;
-                txt += `  Erros de seleção: ${d.errors}\n`;
-                txt += `  Palavras (tempo acumulado desde início do nível):\n`;
-                Object.entries(d.wordTimes)
-                    .sort(([,a],[,b]) => (a===null?99999:a) - (b===null?99999:b))
-                    .forEach(([word, sec]) => {
-                        const label = sec !== null ? sec + 's' : 'não encontrada';
-                        txt += `    ${word.padEnd(15)} ${label}\n`;
-                    });
-                txt += `\n`;
-            });
-            const blob = new Blob([txt], { type: 'text/plain' });
+            const data = { 
+                n: name, 
+                s: scoreVal, 
+                diag: diag,
+                gameCompleted: true
+            };
+            const blob = new Blob([btoa(JSON.stringify(data))], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `nota_CacaPalavras_${(name || 'aluno').replace(/\s/g, '_')}.txt`;
+            a.download = `relatorio_CacaPalavras_${(name || 'aluno').replace(/\s/g, '_')}.txt`;
             a.click();
         }
 
@@ -850,7 +851,6 @@
         });
 
         // ===== SALVAR PROGRESSO =====
-        // Clique no nome do aluno para editar
         studentLabel.style.cursor = 'pointer';
         studentLabel.addEventListener('click', () => {
             document.getElementById('save-modal-icon').textContent = '✏️';
@@ -892,8 +892,17 @@
 
         cancelSaveBtn.onclick = () => saveNameModal.classList.add('hidden');
 
+        // ALTERAÇÃO 1: Adicionar flag gameCompleted no salvamento de progresso
         function executeSaveDownload() {
+            // Verifica se todos os níveis foram concluídos
+            const allLevelsCompleted = levelOrder.every(level => diagData[level] && diagData[level].completed === true);
+            
             const data = { n: studentName, d: currentDifficulty, s: score, b: originalTimeBonus, diag: diagData };
+            
+            if (allLevelsCompleted) {
+                data.gameCompleted = true;
+            }
+            
             const blob = new Blob([btoa(JSON.stringify(data))], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -903,8 +912,12 @@
         }
 
         // ===== CARREGAR PROGRESSO =====
-        document.getElementById('btn-load-prog').onclick = () => fileInput.click();
+        document.getElementById('btn-load-prog').addEventListener('click', () => {
+            fileInput.value = '';
+            fileInput.click();
+        });
 
+        // ALTERAÇÃO 2: Ao carregar arquivo, verificar gameCompleted e mostrar relatório se for o caso
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -916,39 +929,106 @@
                     currentDifficulty = data.d;
                     score = data.s;
                     diagData = data.diag || {};
-                    // Ao restaurar, o bônus salvo já é o bônus de entrada do nível.
-                    // Travamos o snapshot para loadLevel não sobrescrever esses valores.
                     timeBonusForNextLevel = data.b;
                     originalTimeBonus = data.b;
                     originalLevelScore = data.s;
                     levelSnapshotTaken = true;
                     studentLabel.textContent = studentName;
-                    updateStartButtons(currentDifficulty);
-                    startScreen.classList.add('hidden');
-                    gameArea.classList.remove('hidden');
-                    updateScoreDisplay();
-                    loadLevel(currentDifficulty);
+                    
+                    // Verifica se o jogo já foi finalizado
+                    if (data.gameCompleted === true) {
+                        startScreen.classList.add('hidden');
+                        gameArea.classList.remove('hidden');
+                        document.getElementById('status-info').style.visibility = 'visible';
+                        updateScoreDisplay();
+                        showReportModal(studentName, score, diagData);
+                    } else {
+                        updateStartButtons(currentDifficulty);
+                        document.getElementById('game-container').classList.remove('hidden');
+                        document.getElementById('status-info').style.visibility = 'visible';
+                        startScreen.classList.add('hidden');
+                        updateScoreDisplay();
+                        loadLevel(currentDifficulty);
+                    }
                 } catch (err) { alert("Arquivo inválido!"); }
             };
             reader.readAsText(file);
         };
 
-        // ===== BOTÃO VOLTAR AO INÍCIO =====
-        restartBtn.addEventListener('click', () => {
+        // ===== FUNÇÃO DE RESET COMPLETO =====
+        function fullResetToStart() {
             clearInterval(timerInterval);
             removeGridListeners();
-            confirmExitModal.classList.remove('hidden');
-        });
-
-        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
-            confirmExitModal.classList.add('hidden');
+            
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('pause-screen').classList.add('hidden');
+            document.getElementById('grid-container').innerHTML = '';
+            document.getElementById('word-list').innerHTML = '';
+            document.getElementById('level-progress').innerHTML = '';
+            document.getElementById('btn-next-level').style.display = 'none';
+            messageDiv.textContent = '';
+            
+            score = 0;
+            timeLeft = 0;
+            studentName = "";
+            timeBonusForNextLevel = 0;
+            originalLevelScore = 0;
+            originalTimeBonus = 0;
+            levelSnapshotTaken = false;
+            diagData = {};
+            foundWords.clear();
+            wordsData = [];
+            grid = [];
+            isSelecting = false;
+            selectionStartCell = null;
+            currentSelectionCells = [];
+            
+            updateScoreDisplay();
+            timerDisplay.textContent = '05:00';
+            studentLabel.textContent = '---';
+            document.getElementById('status-info').style.visibility = 'hidden';
+            
+            ['btn-save-prog','btn-pause','restart-btn'].forEach(id => document.getElementById(id).classList.add('hidden'));
             resetStartButtons();
-            gameArea.classList.add('hidden');
             startScreen.classList.remove('hidden');
+        }
+
+        // ===== BOTÃO VOLTAR AO INÍCIO COM CONFIRMAÇÃO E TEMPO RODANDO =====
+        let isExitModalOpen = false;
+
+        restartBtn.addEventListener('click', () => {
+            if (isExitModalOpen) return;
+            isExitModalOpen = true;
+            // NÃO para o timer — o tempo continua rodando
+            // Apenas mostra o modal de confirmação
+            document.getElementById('confirm-exit-modal').classList.remove('hidden');
         });
 
+        // Botão CONFIRMAR saída
+        document.getElementById('btn-confirm-exit').addEventListener('click', () => {
+            isExitModalOpen = false;
+            document.getElementById('confirm-exit-modal').classList.add('hidden');
+            fullResetToStart();
+        });
+
+        // Botão CANCELAR saída
         document.getElementById('btn-cancel-exit').addEventListener('click', () => {
-            confirmExitModal.classList.add('hidden');
+            isExitModalOpen = false;
+            document.getElementById('confirm-exit-modal').classList.add('hidden');
+            // NÃO faz mais nada — jogo continua exatamente como estava, timer rodando
+        });
+
+        // ===== BOTÃO PAUSAR (já correto, apenas garantindo) =====
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            clearInterval(timerInterval);
+            removeGridListeners();
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('pause-screen').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-resume').addEventListener('click', () => {
+            document.getElementById('pause-screen').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
             startTimer();
             addGridListeners();
         });
