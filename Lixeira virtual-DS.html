@@ -167,7 +167,6 @@
         <button class="tab" data-tab="atividades">🎯 Atividades</button>
       </div>
 
-      <!-- ABA 1: JOGO -->
       <div class="tab-panel active" data-panel="jogo">
         <div class="content-box">
           <h3>🎮 Como jogar o Game Coleta Seletiva</h3>
@@ -177,96 +176,42 @@
             <li><strong>⭐ Pontuação:</strong> Cada acerto vale 1 ponto.</li>
             <li><strong>🏆 Ganhar vida extra:</strong> A cada <strong>10 acertos consecutivos</strong>, você ganha 1 vida extra!</li>
             <li><strong>🔄 Embaralhar:</strong> Use o botão "Embaralhar agora" para mudar a ordem dos itens restantes.</li>
-            <li><strong>⚠️ Erro:</strong> Quando você erra, o item <strong>vai para o final da lista</strong> para você tentar novamente depois.</li>
-            <li><strong>🏁 Fim de jogo:</strong> O jogo termina quando todos os resíduos foram separados corretamente ou quando as vidas acabam.</li>
-            <li><strong>📖 Modal de erro:</strong> Se errar, um modal explica qual era a lixeira correta e mostra qual você escolheu.</li>
+            <li><strong>⚠️ Erro:</strong> Quando você erra, o item <strong>vai para o final da lista</strong>.</li>
             <li><strong>📺 Se perder todas as vidas:</strong> Um vídeo educativo será exibido. Você só poderá tentar novamente após assistir ao vídeo completo.</li>
           </ul>
-          <p><strong>💡 Dica:</strong> Leia as abas ao lado para aprender mais sobre cada tipo de resíduo antes de jogar!</p>
         </div>
       </div>
 
-      <!-- ABA 2: TIPOS E LIXEIRAS (TABELA COMPLETA) -->
       <div class="tab-panel" data-panel="tipos">
         <div class="content-box">
           <h3>🗑️ Tipos de Lixo e Cores das Lixeiras</h3>
-          <table>
-            <thead>
-              <tr><th>Cor</th><th>Tipo de Lixo</th><th>O que colocar (exemplos)</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>🔵 Azul</th><td>Papel/Papelão</th><td>Jornais, revistas, folhas, caixas de papelão, impressos</th></tr>
-              <tr><td>🔴 Vermelha</th><td>Plástico</th><td>Garrafas PET, embalagens de plástico, sacolas, tubos de pasta</th></tr>
-              <tr><td>🟢 Verde</th><td>Vidro</th><td>Garrafas, frascos, copos, vidros de alimentos (lavar antes)</th></tr>
-              <tr><td>🟡 Amarela</th><td>Metal</th><td>Latas de alumínio, lata de óleo, ferro, aço, tampinhas</th></tr>
-              <tr><td>🟤 Marrom</th><td>Orgânico</th><td>Cascas de frutas, restos de comida, borra de café, folhas</th></tr>
-              <tr><td>⚫ Preta</th><td>Madeira</th><td>Tábuas, caixas de madeira, móveis velhos</th></tr>
-              <tr><td>🟠 Laranja</th><td>Eletrônicos</th><td>Baterias, carregadores, pilhas, celulares, computadores, fios</th></tr>
-              <tr><td>⬜ Cinza</th><td>Rejeitos</th><td>Papel higiênico usado, fraldas, esponjas, bitucas de cigarro, máscaras</th></tr>
-            </tbody>
-          </table>
-          <p class="muted" style="margin-top: var(--space-3);">⚠️ <strong>Atenção:</strong> Eletrônicos NUNCA vão no lixo comum! Leve a ecopontos ou pontos de coleta específicos.</p>
+          <table><thead><tr><th>Cor</th><th>Tipo</th><th>Exemplos</th></tr></thead><tbody>
+            <tr><td>🔵 Azul</th><td>Papel/Papelão</th><td>Jornais, revistas, caixas</th></tr>
+            <tr><td>🔴 Vermelha</th><td>Plástico</th><td>Garrafas PET, sacolas</th></tr>
+            <tr><td>🟢 Verde</th><td>Vidro</th><td>Garrafas, frascos, copos</th></tr>
+            <tr><td>🟡 Amarela</th><td>Metal</th><td>Latas, tampinhas, alumínio</th></tr>
+            <tr><td>🟤 Marrom</th><td>Orgânico</th><td>Cascas, restos de comida</th></tr>
+            <tr><td>⚫ Preta</th><td>Madeira</th><td>Tábuas, móveis velhos</th></tr>
+            <tr><td>🟠 Laranja</th><td>Eletrônicos</th><td>Baterias, celulares, carregadores</th></tr>
+            <tr><td>⬜ Cinza</th><td>Rejeitos</th><td>Papel higiênico usado, fraldas</th></tr>
+          </tbody></table>
         </div>
       </div>
 
-      <!-- ABA 3: DICAS + DOMÉSTICO X INDUSTRIAL (COMPLETO) -->
       <div class="tab-panel" data-panel="dicas">
         <div class="grid-2">
-          <div class="content-box">
-            <h3>💡 Dicas importantes para separar o lixo</h3>
-            <ul>
-              <li>❌ <strong>Não misture</strong> recicláveis com orgânicos - mantenha separados</li>
-              <li>🧼 <strong>Lave as embalagens</strong> antes de descartar (longa vida, latas, garrafas)</li>
-              <li>🌬️ <strong>Seque os materiais</strong> antes de colocar nos coletores</li>
-              <li>⚠️ <strong>Vidros quebrados</strong> → embale em jornal e identifique "vidro quebrado" para evitar acidentes</li>
-              <li>🥤 <strong>Retire líquidos</strong> das embalagens antes de descartar</li>
-              <li>🧴 <strong>Separe tampas</strong> das embalagens de plástico e vidro</li>
-              <li>🔋 <strong>Eletrônicos (baterias, celulares, carregadores)</strong> → pontos de coleta especiais!</li>
-            </ul>
-          </div>
-          <div class="content-box">
-            <h3>🏠 Lixo Doméstico vs. 🏭 Lixo Industrial</h3>
-            <h4>🏠 Doméstico (residências, comércio, serviços)</h4>
-            <ul><li>Restos de alimentos (orgânico)</li><li>Embalagens de produtos</li><li>Papel, plástico, vidro, metal</li><li>Produtos de limpeza vazios</li></ul>
-            <h4>🏭 Industrial (indústrias)</h4>
-            <ul><li>Materiais potencialmente tóxicos</li><li>Resíduos químicos</li><li>Metais pesados</li><li>⚠️ Requer <strong>tratamento especial</strong> e não pode ser misturado com lixo doméstico</li></ul>
-          </div>
+          <div class="content-box"><h3>💡 Dicas</h3><ul><li>Não misture recicláveis com orgânicos</li><li>Lave embalagens antes de descartar</li><li>Vidros quebrados: embale em jornal</li></ul></div>
+          <div class="content-box"><h3>🏠 Doméstico vs 🏭 Industrial</h3><p>Doméstico: restos de alimentos, embalagens<br>Industrial: resíduos químicos, tratamento especial</p></div>
         </div>
       </div>
 
-      <!-- ABA 4: ONDE RECOLHER (COMPLETO) -->
       <div class="tab-panel" data-panel="coleta">
-        <div class="content-box">
-          <h3>📍 Onde recolher cada tipo de resíduo</h3>
-          <ul>
-            <li><strong>🚛 Coleta porta a porta</strong> (recicláveis) - verifique os dias na sua cidade</li>
-            <li><strong>📍 Pontos de Entrega Voluntária (PEVs)</strong> - mais de 1.600 pontos disponíveis</li>
-            <li><strong>♻️ Ecopontos</strong> - 102 unidades para entrega de recicláveis grandes</li>
-            <li><strong>🏢 Coleta seletiva da prefeitura</strong> da sua cidade</li>
-            <li><strong>🌱 Para orgânicos:</strong> compostagem doméstica ou coleta regular de lixo orgânico</li>
-            <li><strong>🪵 Para madeiras e móveis velhos:</strong> ecopontos ou serviços de "cata-treco" da prefeitura</li>
-            <li><strong>🔋 Para eletrônicos (baterias, celulares, carregadores):</strong> pontos de coleta específicos em supermercados, lojas de eletrônicos e ecopontos</li>
-          </ul>
-          <p class="muted" style="margin-top: var(--space-3);">📞 <strong>Dica:</strong> Consulte o site da sua prefeitura para saber os dias e locais de coleta seletiva no seu bairro.</p>
-        </div>
+        <div class="content-box"><h3>📍 Onde recolher</h3><ul><li>Coleta porta a porta</li><li>PEVs (1.600 pontos)</li><li>Ecopontos (102 unidades)</li><li>Orgânicos: compostagem</li><li>Eletrônicos: pontos específicos</li></ul></div>
       </div>
 
-      <!-- ABA 5: ATIVIDADES PRÁTICAS (COMPLETA) -->
       <div class="tab-panel" data-panel="atividades">
-        <div class="content-box">
-          <h3>🎯 Atividades práticas sugeridas para sala de aula ou em casa</h3>
-          <ul>
-            <li><strong>🎮 Jogo das cores:</strong> Alunos classificam objetos nas lixeiras corretas (igual ao nosso game!)</li>
-            <li><strong>📦 Criação de lixeiras:</strong> Montar miniaturas das 8 cores com material reciclado</li>
-            <li><strong>🌱 Compostagem:</strong> Mostrar como transformar orgânicos em adubo</li>
-            <li><strong>🔋 Coleta de eletrônicos:</strong> Organizar um ponto de coleta de pilhas e baterias na escola</li>
-            <li><strong>📸 Antes e depois:</strong> Mostrar imagens de locais com e sem coleta seletiva</li>
-          </ul>
-          <div style="background: var(--accent); color: white; padding: var(--space-4); border-radius: var(--radius-md); margin-top: var(--space-5); text-align: center;">
-            <h3 style="margin: 0 0 var(--space-2); color: white;">💚 Mensagem final para os alunos</h3>
-            <p style="margin: 0; font-weight: 500;">"O primeiro passo para reciclar é separar o lixo corretamente! Cada cor tem sua função, e todos nós podemos ajudar a preservar o meio ambiente."</p>
-          </div>
-        </div>
+        <div class="content-box"><h3>🎯 Atividades</h3><ul><li>Jogo das cores</li><li>Criar lixeiras com material reciclado</li><li>Compostagem</li></ul>
+        <div style="background: var(--accent); color: white; padding: 1rem; border-radius: 1rem; text-align: center;">💚 "Cada cor tem sua função, todos podemos ajudar o meio ambiente"</div></div>
       </div>
     </div>
   </div>
@@ -275,62 +220,63 @@
 <!-- MODAL DE ERRO -->
 <div class="modal-backdrop" id="errorBackdrop" aria-hidden="true">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="errorTitle" style="width:min(640px,100%);">
-    <div class="modal-header"><div><h2 id="errorTitle" class="error-title" style="margin:0;">❌ Você errou</h2><p class="muted" id="errorLives" style="margin:.35rem 0 0;">Leia a explicação e continue jogando.</p></div><button id="closeErrorBtn">Fechar</button></div>
-    <div class="modal-body"><div class="content-box"><p id="errorText" style="margin:0;"></p><p id="errorChosenBin" style="margin:0.5rem 0 0; font-style:italic;"></p></div></div>
+    <div class="modal-header"><div><h2 id="errorTitle" class="error-title">❌ Você errou</h2><p class="muted" id="errorLives"></p></div><button id="closeErrorBtn">Fechar</button></div>
+    <div class="modal-body"><div class="content-box"><p id="errorText"></p><p id="errorChosenBin" style="margin-top:0.5rem;font-style:italic;"></p></div></div>
   </div>
 </div>
 
 <script>
 const trashItems = [
-  { name: '📰 Jornal velho', type: 'papel', wrong: 'Jornal pertence ao grupo do papel.' },
-  { name: '📦 Caixa de papelão', type: 'papel', wrong: 'Papelão é papel reciclável.' },
-  { name: '📄 Folha de caderno', type: 'papel', wrong: 'Folha de caderno deve ir para lixeira azul.' },
-  { name: '📚 Revista usada', type: 'papel', wrong: 'Revista é material de papel.' },
-  { name: '✉️ Envelope de papel', type: 'papel', wrong: 'Envelope é papel.' },
-  { name: '🛍️ Sacola plástica', type: 'plastico', wrong: 'Sacola plástica é plástico.' },
+  { name: '📰 Jornal velho', type: 'papel', wrong: 'Jornal é papel.' },
+  { name: '📦 Caixa de papelão', type: 'papel', wrong: 'Papelão é papel.' },
+  { name: '📄 Folha de caderno', type: 'papel', wrong: 'Folha é papel.' },
+  { name: '📚 Revista usada', type: 'papel', wrong: 'Revista é papel.' },
+  { name: '✉️ Envelope', type: 'papel', wrong: 'Envelope é papel.' },
+  { name: '🛍️ Sacola plástica', type: 'plastico', wrong: 'Sacola é plástico.' },
   { name: '🧴 Garrafa PET', type: 'plastico', wrong: 'PET é plástico.' },
-  { name: '🥤 Pote de iogurte', type: 'plastico', wrong: 'Pote de iogurte é plástico.' },
-  { name: '🧴 Embalagem de shampoo', type: 'plastico', wrong: 'Plástico vai na lixeira vermelha.' },
-  { name: '🥛 Copo plástico', type: 'plastico', wrong: 'Copo plástico é plástico.' },
-  { name: '🍾 Garrafa de vidro', type: 'vidro', wrong: 'Garrafa de vidro vai na lixeira verde.' },
-  { name: '🥫 Pote de geleia', type: 'vidro', wrong: 'Vidro vai na lixeira verde.' },
-  { name: '👃 Frasco de perfume vazio', type: 'vidro', wrong: 'Frasco de vidro vai na lixeira verde.' },
-  { name: '🥂 Copo de vidro quebrado', type: 'vidro', wrong: 'Vidro quebrado ainda é vidro.' },
-  { name: '🥫 Vidro de conserva', type: 'vidro', wrong: 'Vidro vai na lixeira verde.' },
-  { name: '🥤 Lata de refrigerante', type: 'metal', wrong: 'Lata é metal.' },
-  { name: '🔩 Tampinha metálica', type: 'metal', wrong: 'Metal vai na lixeira amarela.' },
-  { name: '🥫 Lata de milho', type: 'metal', wrong: 'Lata é metal.' },
-  { name: '📀 Papel-alumínio limpo', type: 'metal', wrong: 'Alumínio é metal.' },
-  { name: '🍳 Panela velha', type: 'metal', wrong: 'Panela metálica é metal.' },
-  { name: '🍌 Casca de banana', type: 'organico', wrong: 'Casca de banana é orgânico.' },
-  { name: '🍚 Resto de arroz', type: 'organico', wrong: 'Resto de comida é orgânico.' },
-  { name: '☕ Borra de café', type: 'organico', wrong: 'Borra de café é orgânica.' },
-  { name: '🥚 Casca de ovo', type: 'organico', wrong: 'Casca de ovo é orgânico.' },
-  { name: '🍂 Folhas secas', type: 'organico', wrong: 'Folhas secas são orgânicas.' },
-  { name: '🪵 Tábua de madeira', type: 'madeira', wrong: 'Madeira não é reciclável comum.' },
-  { name: '🪑 Cadeira velha de madeira', type: 'madeira', wrong: 'Madeira vai na lixeira preta.' },
-  { name: '📦 Caixa de madeira', type: 'madeira', wrong: 'Madeira deve ser descartada na lixeira preta.' },
-  { name: '🔋 Pilha usada', type: 'eletronico', wrong: 'Pilhas têm metais pesados! Lixeira laranja.' },
-  { name: '🔌 Carregador quebrado', type: 'eletronico', wrong: 'Eletrônicos nunca vão no lixo comum.' },
-  { name: '📱 Celular velho', type: 'eletronico', wrong: 'Celular é resíduo eletrônico.' },
-  { name: '💻 Placa-mãe', type: 'eletronico', wrong: 'Peças de computador são eletrônicos.' },
-  { name: '🔋 Bateria de notebook', type: 'eletronico', wrong: 'Baterias contêm substâncias tóxicas.' },
-  { name: '🎧 Fone quebrado', type: 'eletronico', wrong: 'Fone de ouvido é lixo eletrônico.' },
-  { name: '⌨️ Teclado', type: 'eletronico', wrong: 'Periféricos de computador são eletrônicos.' },
-  { name: '🖱️ Mouse sem fio', type: 'eletronico', wrong: 'Mouse é eletrônico.' },
-  { name: '📀 HD externo', type: 'eletronico', wrong: 'HD é componente eletrônico.' },
-  { name: '🔦 Lanterna velha', type: 'eletronico', wrong: 'Lanterna tem componentes eletrônicos.' },
-  { name: '🧻 Papel higiênico usado', type: 'rejeito', wrong: 'Papel higiênico usado não recicla.' },
-  { name: '👶 Fralda descartável', type: 'rejeito', wrong: 'Fralda é rejeito.' },
-  { name: '🧽 Esponja usada', type: 'rejeito', wrong: 'Esponja usada é rejeito.' },
-  { name: '🚬 Bituca de cigarro', type: 'rejeito', wrong: 'Bituca é rejeito.' },
-  { name: '😷 Máscara usada', type: 'rejeito', wrong: 'Máscara usada é rejeito.' },
-  { name: '🧴 Frasco químico vazio', type: 'rejeito', wrong: 'Produtos químicos vão para rejeito.' },
-  { name: '🩹 Curativo usado', type: 'rejeito', wrong: 'Curativo é rejeito.' }
+  { name: '🥤 Pote de iogurte', type: 'plastico', wrong: 'Pote é plástico.' },
+  { name: '🧴 Shampoo', type: 'plastico', wrong: 'Plástico.' },
+  { name: '🥛 Copo plástico', type: 'plastico', wrong: 'Plástico.' },
+  { name: '🍾 Garrafa de vidro', type: 'vidro', wrong: 'Vidro.' },
+  { name: '🥫 Pote de geleia', type: 'vidro', wrong: 'Vidro.' },
+  { name: '👃 Frasco de perfume', type: 'vidro', wrong: 'Vidro.' },
+  { name: '🥂 Copo quebrado', type: 'vidro', wrong: 'Vidro (embalar).' },
+  { name: '🥫 Vidro de conserva', type: 'vidro', wrong: 'Vidro.' },
+  { name: '🥤 Lata', type: 'metal', wrong: 'Metal.' },
+  { name: '🔩 Tampinha', type: 'metal', wrong: 'Metal.' },
+  { name: '🥫 Lata de milho', type: 'metal', wrong: 'Metal.' },
+  { name: '📀 Papel-alumínio', type: 'metal', wrong: 'Alumínio.' },
+  { name: '🍳 Panela velha', type: 'metal', wrong: 'Metal.' },
+  { name: '🍌 Casca de banana', type: 'organico', wrong: 'Orgânico.' },
+  { name: '🍚 Resto de arroz', type: 'organico', wrong: 'Orgânico.' },
+  { name: '☕ Borra de café', type: 'organico', wrong: 'Orgânico.' },
+  { name: '🥚 Casca de ovo', type: 'organico', wrong: 'Orgânico.' },
+  { name: '🍂 Folhas secas', type: 'organico', wrong: 'Orgânico.' },
+  { name: '🪵 Tábua de madeira', type: 'madeira', wrong: 'Madeira.' },
+  { name: '🪑 Cadeira velha', type: 'madeira', wrong: 'Madeira.' },
+  { name: '📦 Caixa de madeira', type: 'madeira', wrong: 'Madeira.' },
+  { name: '🔋 Pilha usada', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '🔌 Carregador', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '📱 Celular velho', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '💻 Placa-mãe', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '🔋 Bateria', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '🎧 Fone quebrado', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '⌨️ Teclado', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '🖱️ Mouse', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '📀 HD externo', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '🔦 Lanterna', type: 'eletronico', wrong: 'Eletrônico.' },
+  { name: '🧻 Papel higiênico', type: 'rejeito', wrong: 'Rejeito.' },
+  { name: '👶 Fralda', type: 'rejeito', wrong: 'Rejeito.' },
+  { name: '🧽 Esponja', type: 'rejeito', wrong: 'Rejeito.' },
+  { name: '🚬 Bituca', type: 'rejeito', wrong: 'Rejeito.' },
+  { name: '😷 Máscara', type: 'rejeito', wrong: 'Rejeito.' },
+  { name: '🧴 Frasco químico', type: 'rejeito', wrong: 'Rejeito.' },
+  { name: '🩹 Curativo', type: 'rejeito', wrong: 'Rejeito.' }
 ];
 
 let lives = 5, score = 0, streak = 0, currentItems = [], draggedId = null;
 const STREAK_GOAL = 10;
+
 const itemsEl = document.getElementById('items');
 const livesEl = document.getElementById('lives');
 const scoreEl = document.getElementById('score');
@@ -393,7 +339,7 @@ function labelBinHuman(b) { return { papel:'🔵 Azul', plastico:'🔴 Vermelha'
 function openErrorModal(item, chosen) {
   errorText.textContent = `${item.wrong} Correto: lixeira ${labelBin(item.type)}.`;
   errorChosenBin.textContent = `❌ Você colocou na ${labelBinHuman(chosen)}.`;
-  errorLives.textContent = lives > 0 ? `Ainda ${lives} vida(s). Item foi pro final da fila.` : 'Suas vidas acabaram. Reinicie.';
+  errorLives.textContent = lives > 0 ? `Ainda ${lives} vida(s). Item foi pro final.` : 'Vidas acabaram.';
   errorBackdrop.classList.add('open');
 }
 
@@ -408,71 +354,40 @@ function resetGame() {
 function checkState() {
   const itemsContainer = document.querySelector('.items-area');
   
-  // VITÓRIA
   if (currentItems.length === 0) {
-    setMessage('🎉 PARABÉNS! VOCÊ VENCEU O JOGO! 🎉', 'good');
-    itemsContainer.innerHTML = `
-      <div style="text-align: center; padding: 2rem;" class="victory-animation">
-        <div style="font-size: 4rem;">🏆🌟🎉</div>
-        <h3 style="color: #01696f;">MISSÃO CUMPRIDA!</h3>
-        <p>Você separou todos os ${score} resíduos corretamente!</p>
-        <button onclick="resetGame()" style="background: #01696f; color: white; padding: 0.8rem 1.5rem; margin-top: 1rem;">🎮 Jogar Novamente</button>
-        <p style="margin-top: 1rem;">♻️ Você é um defensor do meio ambiente! ♻️</p>
-      </div>
-    `;
+    setMessage('🎉 PARABÉNS! VOCÊ VENCEU! 🎉', 'good');
+    itemsContainer.innerHTML = `<div style="text-align:center;padding:2rem;"><div style="font-size:4rem;">🏆</div><h3>MISSÃO CUMPRIDA!</h3><button onclick="resetGame()" style="background:#01696f;color:white;padding:0.8rem 1.5rem;">🎮 Jogar Novamente</button></div>`;
     return;
   }
   
-  // DERROTA - exibe vídeo local com botão habilitado SOMENTE após término
   if (lives <= 0) {
-    setMessage('💀 GAME OVER! Assista ao vídeo até o final para liberar o botão! 💀', 'bad');
-    const botaoId = 'btnTentarNovamente';
+    setMessage('💀 GAME OVER! Assista ao vídeo e depois tente! 💀', 'bad');
     itemsContainer.innerHTML = `
-      <div style="text-align: center; padding: 1rem;">
-        <div style="font-size: 2rem;">📚😢</div>
-        <h3 style="color: #812a2a;">Você perdeu todas as vidas!</h3>
+      <div style="text-align:center;padding:1rem;">
+        <div style="font-size:2rem;">📚😢</div>
+        <h3 style="color:#812a2a;">Você perdeu todas as vidas!</h3>
         <p>Acertos: ${score} de 45</p>
-        <div style="background: #f0f0f0; border-radius: 1rem; padding: 1rem; margin: 1rem 0;">
-          <p><strong>📺 Assista ao vídeo até o final para liberar o botão "Tentar Novamente":</strong></p>
-          <video id="videoEducativo" width="100%" controls style="border-radius: 0.8rem;">
+        <div style="background:#f0f0f0;border-radius:1rem;padding:1rem;margin:1rem 0;">
+          <video id="videoEducativo" width="100%" controls style="border-radius:0.8rem;">
             <source src="ColetaSeletiva.mp4" type="video/mp4">
-            Seu navegador não suporta vídeo.
           </video>
-          <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666;">📹 Vídeo educativo: "Coleta Seletiva - Educação Infantil" por <strong>Bisnagas Flix</strong> (YouTube)</p>
+          <p style="font-size:0.75rem;margin-top:0.5rem;">📹 Vídeo: "Coleta Seletiva" por <strong>Bisnagas Flix</strong></p>
         </div>
-        <button id="${botaoId}" disabled style="background: #95a5a6; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 2rem; cursor: not-allowed;">
-          ⏳ Assista ao vídeo primeiro
-        </button>
-        <p style="font-size: 0.8rem; margin-top: 1rem;">💡 Dica: Preste atenção nas cores das lixeiras explicadas no vídeo!</p>
+        <button id="btnTentarNovamente" disabled style="background:#95a5a6;color:white;padding:0.8rem 1.5rem;border:none;border-radius:2rem;">⏳ Assista ao vídeo primeiro</button>
       </div>
     `;
-    
     const video = document.getElementById('videoEducativo');
-    const botao = document.getElementById(botaoId);
-    
-    // Habilita o botão e atribui a função quando o vídeo terminar
-    const habilitarBotao = function() {
+    const botao = document.getElementById('btnTentarNovamente');
+    video.addEventListener('ended', () => {
       botao.disabled = false;
       botao.style.background = '#01696f';
-      botao.style.cursor = 'pointer';
       botao.innerHTML = '💪 Tentar Novamente';
-      botao.onclick = function() {
-        resetGame();
-      };
-    };
-    
-    video.addEventListener('ended', habilitarBotao);
-    
-    // Fallback caso o vídeo já tenha terminado (ex: reinício rápido)
-    if (video.ended) {
-      habilitarBotao();
-    }
-    
+      botao.onclick = () => resetGame();
+    });
     renderItems();
     return;
   }
   
-  // Jogo continua normalmente
   renderItems();
 }
 
@@ -502,15 +417,14 @@ function setupGlobalImageFallback() {
   document.querySelectorAll('.bin-zone img').forEach(img => {
     if (!img.hasAttribute('data-fallback-checked')) {
       img.setAttribute('data-fallback-checked', 'true');
-      img.addEventListener('error', function() {
-        if (!this.hasAttribute('data-fallback-applied')) {
-          this.setAttribute('data-fallback-applied', 'true');
-          const binCard = this.closest('.bin-card');
-          const binType = binCard?.dataset.bin;
+      img.onerror = () => {
+        if (!img.hasAttribute('data-fallback-applied')) {
+          img.setAttribute('data-fallback-applied', 'true');
+          const binType = img.closest('.bin-card')?.dataset.bin;
           const cores = { papel:'🔵 Azul', plastico:'🔴 Vermelha', vidro:'🟢 Verde', metal:'🟡 Amarela', organico:'🟤 Marrom', madeira:'⚫ Preta', eletronico:'🟠 Laranja', rejeito:'⬜ Cinza' };
-          this.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23cccccc' stroke='%23999999' stroke-width='2'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23333333' font-size='16' font-family='sans-serif'%3E${cores[binType] || 'Lixeira'}%3C/text%3E%3C/svg%3E`;
+          img.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23cccccc' stroke='%23999999' stroke-width='2'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23333333' font-size='16'%3E${cores[binType] || 'Lixeira'}%3C/text%3E%3C/svg%3E`;
         }
-      });
+      };
     }
   });
 }
