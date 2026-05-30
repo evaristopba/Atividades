@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game Coleta Seletiva - 8 Lixeiras | Com Vídeo Educativo</title>
+  <title>Game Coleta Seletiva</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -31,12 +31,20 @@
     .stat strong { display: block; font-size: var(--text-lg); }
     .board { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); align-items: start; }
     .panel { padding: var(--space-4); display: flex; flex-direction: column; height: 100%; }
+    .nivel1-badge { display:inline-block; background:#e8f4fd; color:#1a6fa8; border:1px solid #b3d7f0; border-radius:999px; padding:.25rem .75rem; font-size:var(--text-sm); font-weight:700; margin-left:.5rem; vertical-align:middle; }
 
     .bins-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+    .bins-grid.nivel1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .bin-card {
       position: relative; border-radius: var(--radius-md); background: var(--surface-2); border: 1px solid var(--border); padding: var(--space-3);
       min-height: 180px; overflow: hidden; transition: transform 0.1s ease;
     }
+    /* nivel1: lixeiras maiores e fonte maior */
+    .nivel1 .bin-card { min-height: 200px; }
+    .nivel1 .bin-head h3 { font-size: 1.15rem; }
+    .nivel1 .bin-head small { font-size: .9rem; }
+    .nivel1 .bin-zone img { max-height: 120px; }
+
     .bin-card:hover { transform: scale(1.01); }
     .bin-card.dragover { outline: 4px solid rgba(1,105,111,.25); transform: translateY(-2px); }
     .bin-head { display: flex; justify-content: space-between; gap: var(--space-2); align-items: center; margin-bottom: var(--space-2); }
@@ -61,10 +69,14 @@
     .trash { background: #fff; border: 2px dashed var(--border); border-radius: var(--radius-md); padding: var(--space-2);
       min-height: 60px; display: flex; align-items: center; justify-content: center; text-align: center; user-select: none; cursor: grab;
       transition: transform .18s ease, border-color .18s ease, background .18s ease; font-size: var(--text-sm); }
+    /* nivel1: cards de item maiores */
+    body.nivel1 .trash { min-height: 70px; font-size: 1rem; }
     .trash:hover { border-color: #a8a091; background: #fffdf7; }
     .trash:active { transform: scale(.98); cursor: grabbing; }
     .message { margin-top: var(--space-4); min-height: 65px; display: flex; align-items: center; padding: var(--space-3); border-radius: var(--radius-md);
       border: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-sm); }
+    /* nivel1: feedback maior */
+    body.nivel1 .message { font-size: 1rem; min-height: 75px; }
     .message.good { background: #e7f6ea; color: #245a35; border-color: #bcdfc5; }
     .message.bad { background: #fdecec; color: #812a2a; border-color: #efb8b8; }
     button { min-height: 38px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-weight: 700;
@@ -93,17 +105,22 @@
     th { background: var(--surface-2); }
     .error-title { color: #8b2525; }
 
+    /* nivel1: modal de erro com fonte maior e mais visual */
+    body.nivel1 .modal-card { border-width: 2px; }
+    body.nivel1 #errorText, body.nivel1 #errorChosenBin { font-size: 1.05rem; line-height: 1.6; }
+
     @media (max-width: 1100px) { .bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 860px) { .board { grid-template-columns: 1fr; } .bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .items-area { max-height: 400px; min-height: auto; } }
-    @media (max-width: 580px) { .bins-grid { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 580px) { .bins-grid { grid-template-columns: 1fr; } .bins-grid.nivel1 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
 <body>
 <main class="wrap">
   <section class="hero">
-    <h1>♻️ Game Coleta Seletiva</h1>
-    <p class="subtitle">Aprenda brincando! Arraste cada resíduo para a lixeira correta. A cada 10 acertos consecutivos, você ganha uma vida extra. Ao errar, o item vai para o final da lista.</p>
+    <h1 id="gameTitle">♻️ Game Coleta Seletiva</h1>
+    <p class="subtitle" id="gameSubtitle">Aprenda brincando! Arraste cada resíduo para a lixeira correta. A cada 10 acertos consecutivos, você ganha uma vida extra. Ao errar, o item vai para o final da lista.</p>
     <div class="top-actions">
       <button class="primary" id="openHowBtn">📖 Como Jogar e Guia</button>
       <button id="resetBtnTop">🔄 Reiniciar partida</button>
@@ -112,30 +129,15 @@
       <div class="stat"><span>❤️ Vidas</span><strong id="lives">❤️❤️❤️❤️❤️</strong></div>
       <div class="stat"><span>⭐ Acertos</span><strong id="score">0</strong></div>
       <div class="stat"><span>🏆 Para ganhar 1 vida</span><strong id="streak">0 / 10</strong></div>
-      <div class="stat"><span>📦 Itens restantes</span><strong id="remaining">45</strong></div>
+      <div class="stat"><span>📦 Itens restantes</span><strong id="remaining">-</strong></div>
     </div>
   </section>
 
   <section class="board">
     <div class="panel">
       <h2>🗑️ Lixeiras</h2>
-      <div class="bins-grid">
-        <div class="bin-card" data-bin="papel"><div class="bin-head"><div><h3>🔵 Azul</h3><small>Papel e papelão</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/rmDQ1SF5/Lixeira-azul.webp" alt="Lixeira azul" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%233b82f6%22%20stroke%3D%22%232a5fbf%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23ffffff%22%20font-size%3D%2220%22%3EPapel%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="plastico"><div class="bin-head"><div><h3>🔴 Vermelha</h3><small>Plástico</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/9MmLrvvj/Lixeira-vermelha.jpg" alt="Lixeira vermelha" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23e74c3c%22%20stroke%3D%22%23c0392b%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23ffffff%22%20font-size%3D%2220%22%3EPl%C3%A1stico%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="vidro"><div class="bin-head"><div><h3>🟢 Verde</h3><small>Vidro</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/C1RmGjLq/Lixeira-verde.webp" alt="Lixeira verde" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%232ecc71%22%20stroke%3D%22%2327ae60%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23ffffff%22%20font-size%3D%2220%22%3EVidro%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="metal"><div class="bin-head"><div><h3>🟡 Amarela</h3><small>Metal</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/sXMwYpD7/Lixeira-amarela.webp" alt="Lixeira amarela" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23f1c40f%22%20stroke%3D%22%23f39c12%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23333%22%20font-size%3D%2220%22%3EMetal%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="rejeito"><div class="bin-head"><div><h3>⬜ Cinza</h3><small>Rejeitos / não recicláveis</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/mDP8YQ2Q/Lixeira-cinza.webp" alt="Lixeira cinza" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%2395a5a6%22%20stroke%3D%22%237f8c8d%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23333%22%20font-size%3D%2218%22%3ERejeitos%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="organico"><div class="bin-head"><div><h3>🟤 Marrom</h3><small>Orgânico</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/7LKTxd40/Lixeira-marrom.jpg" alt="Lixeira marrom" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23815a32%22%20stroke%3D%22%235a3e1e%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23ffffff%22%20font-size%3D%2218%22%3EOrg%C3%A2nico%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="madeira"><div class="bin-head"><div><h3>⚫ Preta</h3><small>Madeira</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/HsFTDChB/Lixeira-preta.jpg" alt="Lixeira preta" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23333%22%20stroke%3D%22%23111%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23fff%22%20font-size%3D%2218%22%3EMadeira%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
-        <div class="bin-card" data-bin="eletronico"><div class="bin-head"><div><h3>🟠 Laranja</h3><small>Eletrônicos (baterias, celulares)</small></div><span class="drop-pill">📌</span></div>
-          <div class="bin-zone"><img src="https://i.postimg.cc/B6ZjL0sM/Lixeira-laranja.jpg" alt="Lixeira laranja" width="180" height="180" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23e67e22%22%20stroke%3D%22%23b45f1b%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23ffffff%22%20font-size%3D%2216%22%3EEletr%C3%B4nicos%3C%2Ftext%3E%3C%2Fsvg%3E'"></div></div>
+      <div class="bins-grid" id="binsGrid">
+        <!-- lixeiras injetadas via JS conforme o nível -->
       </div>
       <div id="message" class="message">🎯 Arraste um resíduo da coluna da direita para a lixeira correta.</div>
     </div>
@@ -143,7 +145,7 @@
     <div class="panel">
       <div class="items-toolbar"><h2 style="margin:0;">📦 Itens para arrastar</h2><button id="shuffleBtn">🔄 Embaralhar agora</button></div>
       <div class="items-area"><div id="items" class="items"></div></div>
-      <p class="footer-note">✨ Acertou: item some | Errou: vai para o final da lista | Perdeu todas as vidas: vídeo educativo</p>
+      <p class="footer-note" id="footerNote">✨ Acertou: item some | Errou: vai para o final da lista | Perdeu todas as vidas: vídeo educativo</p>
     </div>
   </section>
 </main>
@@ -154,87 +156,52 @@
     <div class="modal-header">
       <div>
         <h2 id="howTitle" style="margin:0;">📖 Guia Completo: Coleta Seletiva</h2>
-        <p class="muted" style="margin:.35rem 0 0;">Regras do jogo, tipos de resíduos, dicas e onde descartar corretamente.</p>
+        <p class="muted" style="margin:.35rem 0 0;" id="howSubtitle">Regras do jogo, tipos de resíduos, dicas e onde descartar corretamente.</p>
       </div>
       <button id="closeHowBtn">❌ Fechar</button>
     </div>
     <div class="modal-body">
       <div class="tabs">
         <button class="tab active" data-tab="jogo">🎮 Jogo</button>
-        <button class="tab" data-tab="tipos">🗑️ Tipos e lixeiras</button>
-        <button class="tab" data-tab="dicas">💡 Dicas + Doméstico x Industrial</button>
-        <button class="tab" data-tab="coleta">📍 Onde recolher</button>
+        <button class="tab" data-tab="tipos">🗑️ Lixeiras</button>
+        <button class="tab" data-tab="dicas">💡 Dicas</button>
+        <button class="tab" data-tab="coleta">📍 Onde descartar</button>
         <button class="tab" data-tab="atividades">🎯 Atividades</button>
       </div>
-      <div class="tab-panel active" data-panel="jogo">
-        <div class="content-box">
-          <h3>🎮 Como jogar o Game Coleta Seletiva</h3>
-          <ul>
-            <li><strong>🎯 Objetivo:</strong> Arrastar cada resíduo da lista da direita para a lixeira correta à esquerda.</li>
-            <li><strong>❤️ Vidas:</strong> Você começa com 5 vidas. A cada erro, perde 1 vida.</li>
-            <li><strong>⭐ Pontuação:</strong> Cada acerto vale 1 ponto.</li>
-            <li><strong>🏆 Ganhar vida extra:</strong> A cada <strong>10 acertos consecutivos</strong>, você ganha 1 vida extra!</li>
-            <li><strong>🔄 Embaralhar:</strong> Use o botão "Embaralhar agora" para mudar a ordem dos itens restantes.</li>
-            <li><strong>⚠️ Erro:</strong> Quando você erra, o item <strong>vai para o final da lista</strong> para você tentar novamente depois.</li>
-            <li><strong>🏁 Fim de jogo:</strong> O jogo termina quando todos os resíduos foram separados corretamente ou quando as vidas acabam.</li>
-            <li><strong>📖 Modal de erro:</strong> Se errar, um modal explica qual era a lixeira correta e mostra qual você escolheu.</li>
-            <li><strong>📺 Se perder todas as vidas:</strong> Um vídeo educativo será exibido. Você só poderá tentar novamente após assistir ao vídeo completo.</li>
-          </ul>
-          <p><strong>💡 Dica:</strong> Leia as abas ao lado para aprender mais sobre cada tipo de resíduo antes de jogar!</p>
-        </div>
+      <div class="tab-panel active" data-panel="jogo" id="tabJogo">
+        <!-- injetado via JS -->
       </div>
       <div class="tab-panel" data-panel="tipos">
         <div class="content-box">
           <h3>🗑️ Tipos de Lixo e Cores das Lixeiras</h3>
-          <table>
-            <thead><tr><th>Cor</th><th>Tipo de Lixo</th><th>O que colocar (exemplos)</th></tr></thead>
-            <tbody>
-              <tr><td>🔵 Azul</td><td>Papel/Papelão</td><td>Jornais, revistas, folhas, caixas de papelão, impressos</td></tr>
-              <tr><td>🔴 Vermelha</td><td>Plástico</td><td>Garrafas PET, embalagens de plástico, sacolas, tubos de pasta</td></tr>
-              <tr><td>🟢 Verde</td><td>Vidro</td><td>Garrafas, frascos, copos, vidros de alimentos (lavar antes)</td></tr>
-              <tr><td>🟡 Amarela</td><td>Metal</td><td>Latas de alumínio, lata de óleo, ferro, aço, tampinhas</td></tr>
-              <tr><td>🟤 Marrom</td><td>Orgânico</td><td>Cascas de frutas, restos de comida, borra de café, folhas</td></tr>
-              <tr><td>⚫ Preta</td><td>Madeira</td><td>Tábuas, caixas de madeira, móveis velhos</td></tr>
-              <tr><td>🟠 Laranja</td><td>Eletrônicos</td><td>Baterias, carregadores, pilhas, celulares, computadores, fios</td></tr>
-              <tr><td>⬜ Cinza</td><td>Rejeitos</td><td>Papel higiênico usado, fraldas, esponjas, bitucas de cigarro, máscaras</td></tr>
-            </tbody>
-          </table>
+          <table id="tabelaTipos"><!-- injetado via JS --></table>
           <p class="muted" style="margin-top: var(--space-3);">⚠️ <strong>Atenção:</strong> Eletrônicos NUNCA vão no lixo comum! Leve a ecopontos ou pontos de coleta específicos.</p>
         </div>
       </div>
       <div class="tab-panel" data-panel="dicas">
         <div class="grid-2">
           <div class="content-box">
-            <h3>💡 Dicas importantes para separar o lixo</h3>
+            <h3>💡 Dicas para separar o lixo</h3>
             <ul>
               <li>❌ <strong>Não misture</strong> recicláveis com orgânicos</li>
               <li>🧼 <strong>Lave as embalagens</strong> antes de descartar</li>
               <li>🌬️ <strong>Seque os materiais</strong> antes de colocar nos coletores</li>
               <li>⚠️ <strong>Vidros quebrados</strong> → embale em jornal e identifique</li>
               <li>🥤 <strong>Retire líquidos</strong> das embalagens antes de descartar</li>
-              <li>🧴 <strong>Separe tampas</strong> das embalagens de plástico e vidro</li>
-              <li>🔋 <strong>Eletrônicos</strong> → pontos de coleta especiais!</li>
+              <li>🔋 <strong>Pilhas e baterias</strong> → pontos de coleta especiais!</li>
             </ul>
           </div>
-          <div class="content-box">
-            <h3>🏠 Lixo Doméstico vs. 🏭 Lixo Industrial</h3>
-            <h4>🏠 Doméstico</h4>
-            <ul><li>Restos de alimentos (orgânico)</li><li>Embalagens de produtos</li><li>Papel, plástico, vidro, metal</li></ul>
-            <h4>🏭 Industrial</h4>
-            <ul><li>Materiais potencialmente tóxicos</li><li>Resíduos químicos</li><li>⚠️ Requer <strong>tratamento especial</strong></li></ul>
-          </div>
+          <div class="content-box" id="dicasDomIndust"><!-- injetado via JS --></div>
         </div>
       </div>
       <div class="tab-panel" data-panel="coleta">
         <div class="content-box">
-          <h3>📍 Onde recolher cada tipo de resíduo</h3>
+          <h3>📍 Onde descartar cada tipo de resíduo</h3>
           <ul>
-            <li><strong>🚛 Coleta porta a porta</strong> (recicláveis) - verifique os dias na sua cidade</li>
-            <li><strong>📍 Pontos de Entrega Voluntária (PEVs)</strong> - mais de 1.600 pontos disponíveis</li>
-            <li><strong>♻️ Ecopontos</strong> - 102 unidades para entrega de recicláveis grandes</li>
-            <li><strong>🏢 Coleta seletiva da prefeitura</strong> da sua cidade</li>
+            <li><strong>🚛 Coleta porta a porta</strong> (recicláveis) – verifique os dias na sua cidade</li>
+            <li><strong>📍 Pontos de Entrega Voluntária (PEVs)</strong> – mais de 1.600 pontos disponíveis</li>
+            <li><strong>♻️ Ecopontos</strong> – 102 unidades para entrega de recicláveis grandes</li>
             <li><strong>🌱 Para orgânicos:</strong> compostagem doméstica ou coleta regular</li>
-            <li><strong>🪵 Para madeiras:</strong> ecopontos ou "cata-treco" da prefeitura</li>
             <li><strong>🔋 Para eletrônicos:</strong> pontos de coleta em supermercados e lojas</li>
           </ul>
           <p class="muted" style="margin-top: var(--space-3);">📞 <strong>Dica:</strong> Consulte o site da sua prefeitura para saber os dias e locais de coleta no seu bairro.</p>
@@ -243,16 +210,10 @@
       <div class="tab-panel" data-panel="atividades">
         <div class="content-box">
           <h3>🎯 Atividades práticas sugeridas</h3>
-          <ul>
-            <li><strong>🎮 Jogo das cores:</strong> Alunos classificam objetos nas lixeiras corretas</li>
-            <li><strong>📦 Criação de lixeiras:</strong> Montar miniaturas das 8 cores com material reciclado</li>
-            <li><strong>🌱 Compostagem:</strong> Mostrar como transformar orgânicos em adubo</li>
-            <li><strong>🔋 Coleta de eletrônicos:</strong> Organizar um ponto de coleta de pilhas na escola</li>
-            <li><strong>📸 Antes e depois:</strong> Mostrar imagens de locais com e sem coleta seletiva</li>
-          </ul>
+          <ul id="listaAtividades"><!-- injetado via JS --></ul>
           <div style="background: var(--accent); color: white; padding: var(--space-4); border-radius: var(--radius-md); margin-top: var(--space-5); text-align: center;">
-            <h3 style="margin: 0 0 var(--space-2); color: white;">💚 Mensagem final para os alunos</h3>
-            <p style="margin: 0; font-weight: 500;">"O primeiro passo para reciclar é separar o lixo corretamente! Cada cor tem sua função, e todos nós podemos ajudar a preservar o meio ambiente."</p>
+            <h3 style="margin: 0 0 var(--space-2); color: white;" id="msgFinalTitulo">💚 Mensagem final</h3>
+            <p style="margin: 0; font-weight: 500;" id="msgFinalTexto">"O primeiro passo para reciclar é separar o lixo corretamente! Cada cor tem sua função, e todos nós podemos ajudar a preservar o meio ambiente."</p>
           </div>
         </div>
       </div>
@@ -263,13 +224,89 @@
 <!-- MODAL DE ERRO -->
 <div class="modal-backdrop" id="errorBackdrop" aria-hidden="true">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="errorTitle" style="width:min(640px,100%);">
-    <div class="modal-header"><div><h2 id="errorTitle" class="error-title" style="margin:0;">❌ Você errou</h2><p class="muted" id="errorLives" style="margin:.35rem 0 0;">Leia a explicação e continue jogando.</p></div><button id="closeErrorBtn">Fechar</button></div>
+    <div class="modal-header">
+      <div><h2 id="errorTitle" class="error-title" style="margin:0;">❌ Ops! Não foi dessa vez!</h2>
+      <p class="muted" id="errorLives" style="margin:.35rem 0 0;">Leia a explicação e tente de novo!</p></div>
+      <button id="closeErrorBtn">Fechar</button>
+    </div>
     <div class="modal-body"><div class="content-box"><p id="errorText" style="margin:0;"></p><p id="errorChosenBin" style="margin:0.5rem 0 0; font-style:italic;"></p></div></div>
   </div>
 </div>
 
 <script>
-const trashItems = [
+// ════════════════════════════════════════════
+//  DETECÇÃO DO NÍVEL via ?nivel=1
+// ════════════════════════════════════════════
+const urlParams = new URLSearchParams(window.location.search);
+const NIVEL1 = urlParams.get('nivel') === '1';
+
+if (NIVEL1) {
+  document.body.classList.add('nivel1');
+}
+
+// ════════════════════════════════════════════
+//  CONFIGURAÇÕES POR NÍVEL
+// ════════════════════════════════════════════
+const CONFIG = {
+  // Lixeiras disponíveis por nível
+  bins: NIVEL1
+    ? [
+        { key:'papel',    label:'🔵 Azul',     sub:'Papel e papelão',  img:'https://i.postimg.cc/rmDQ1SF5/Lixeira-azul.webp'     },
+        { key:'plastico', label:'🔴 Vermelha',  sub:'Plástico',         img:'https://i.postimg.cc/9MmLrvvj/Lixeira-vermelha.jpg'  },
+        { key:'vidro',    label:'🟢 Verde',     sub:'Vidro',            img:'https://i.postimg.cc/C1RmGjLq/Lixeira-verde.webp'    },
+        { key:'metal',    label:'🟡 Amarela',   sub:'Metal',            img:'https://i.postimg.cc/sXMwYpD7/Lixeira-amarela.webp'  },
+      ]
+    : [
+        { key:'papel',      label:'🔵 Azul',     sub:'Papel e papelão',              img:'https://i.postimg.cc/rmDQ1SF5/Lixeira-azul.webp'     },
+        { key:'plastico',   label:'🔴 Vermelha',  sub:'Plástico',                     img:'https://i.postimg.cc/9MmLrvvj/Lixeira-vermelha.jpg'  },
+        { key:'vidro',      label:'🟢 Verde',     sub:'Vidro',                        img:'https://i.postimg.cc/C1RmGjLq/Lixeira-verde.webp'    },
+        { key:'metal',      label:'🟡 Amarela',   sub:'Metal',                        img:'https://i.postimg.cc/sXMwYpD7/Lixeira-amarela.webp'  },
+        { key:'rejeito',    label:'⬜ Cinza',     sub:'Rejeitos / não recicláveis',   img:'https://i.postimg.cc/mDP8YQ2Q/Lixeira-cinza.webp'    },
+        { key:'organico',   label:'🟤 Marrom',    sub:'Orgânico',                     img:'https://i.postimg.cc/7LKTxd40/Lixeira-marrom.jpg'    },
+        { key:'madeira',    label:'⚫ Preta',     sub:'Madeira',                      img:'https://i.postimg.cc/HsFTDChB/Lixeira-preta.jpg'     },
+        { key:'eletronico', label:'🟠 Laranja',   sub:'Eletrônicos (baterias, etc.)', img:'https://i.postimg.cc/B6ZjL0sM/Lixeira-laranja.jpg'   },
+      ],
+};
+
+// ════════════════════════════════════════════
+//  ITENS — NÍVEL 1: apenas 4 categorias, vocabulário simples
+// ════════════════════════════════════════════
+const trashItemsNivel1 = [
+  // Papel
+  { name: '📰 Jornal velho',         type: 'papel',    wrong: 'Jornal é feito de papel! Vai na lixeira azul. 🔵' },
+  { name: '📦 Caixa de papelão',     type: 'papel',    wrong: 'Papelão é um tipo de papel! Lixeira azul. 🔵' },
+  { name: '📄 Folha de caderno',     type: 'papel',    wrong: 'Folha de caderno é papel! Vai na lixeira azul. 🔵' },
+  { name: '📚 Revista usada',        type: 'papel',    wrong: 'Revista é papel! Vai na lixeira azul. 🔵' },
+  { name: '✉️ Envelope de papel',    type: 'papel',    wrong: 'Envelope é papel! Lixeira azul. 🔵' },
+  { name: '🧻 Rolo de papelão vazio',type: 'papel',    wrong: 'O rolo do papel higiênico é papelão! Lixeira azul. 🔵' },
+  { name: '📬 Panfleto de loja',     type: 'papel',    wrong: 'Panfleto é papel! Vai na lixeira azul. 🔵' },
+  // Plástico
+  { name: '🛍️ Sacola plástica',      type: 'plastico', wrong: 'Sacola plástica vai na lixeira vermelha. 🔴' },
+  { name: '🧴 Garrafa PET',          type: 'plastico', wrong: 'Garrafa PET é plástico! Lixeira vermelha. 🔴' },
+  { name: '🥤 Pote de iogurte',      type: 'plastico', wrong: 'Pote de iogurte é plástico! Lixeira vermelha. 🔴' },
+  { name: '🥛 Copo plástico',        type: 'plastico', wrong: 'Copo plástico vai na lixeira vermelha. 🔴' },
+  { name: '🧴 Frasco de shampoo',    type: 'plastico', wrong: 'Frasco de shampoo é plástico! Lixeira vermelha. 🔴' },
+  { name: '🧴 Frasco de detergente', type: 'plastico', wrong: 'Frasco de detergente é plástico! Lixeira vermelha. 🔴' },
+  { name: '🪣 Balde plástico',       type: 'plastico', wrong: 'Balde plástico vai na lixeira vermelha. 🔴' },
+  // Vidro
+  { name: '🍾 Garrafa de vidro',     type: 'vidro',    wrong: 'Garrafa de vidro vai na lixeira verde. 🟢' },
+  { name: '🥫 Pote de geleia',       type: 'vidro',    wrong: 'Pote de vidro vai na lixeira verde. 🟢' },
+  { name: '🫙 Pote de pasta de amendoim', type:'vidro',wrong: 'Pote de vidro vai na lixeira verde. 🟢' },
+  { name: '💊 Vidro de remédio vazio',type:'vidro',    wrong: 'Vidro de remédio vazio vai na lixeira verde. 🟢' },
+  { name: '🥂 Copo de vidro quebrado',type:'vidro',   wrong: 'Vidro quebrado ainda é vidro! Lixeira verde. 🟢' },
+  // Metal
+  { name: '🥤 Lata de refrigerante', type: 'metal',   wrong: 'Lata de refrigerante é metal! Lixeira amarela. 🟡' },
+  { name: '🥫 Lata de milho',        type: 'metal',   wrong: 'Lata de milho é metal! Lixeira amarela. 🟡' },
+  { name: '🔩 Tampinha metálica',    type: 'metal',   wrong: 'Tampinha metálica vai na lixeira amarela. 🟡' },
+  { name: '🪙 Moeda antiga',         type: 'metal',   wrong: 'Moedas são feitas de metal! Lixeira amarela. 🟡' },
+  { name: '🗝️ Chave velha',          type: 'metal',   wrong: 'Chave é metal! Vai na lixeira amarela. 🟡' },
+  { name: '🧲 Imã de geladeira',     type: 'metal',   wrong: 'Imã metálico vai na lixeira amarela. 🟡' },
+];
+
+// ════════════════════════════════════════════
+//  ITENS — COMPLETO (8 lixeiras)
+// ════════════════════════════════════════════
+const trashItemsCompleto = [
   { name: '📰 Jornal velho', type: 'papel', wrong: 'Jornal pertence ao grupo do papel.' },
   { name: '📦 Caixa de papelão', type: 'papel', wrong: 'Papelão é papel reciclável.' },
   { name: '📄 Folha de caderno', type: 'papel', wrong: 'Folha de caderno deve ir para lixeira azul.' },
@@ -314,28 +351,197 @@ const trashItems = [
   { name: '🚬 Bituca de cigarro', type: 'rejeito', wrong: 'Bituca é rejeito.' },
   { name: '😷 Máscara usada', type: 'rejeito', wrong: 'Máscara usada é rejeito.' },
   { name: '🧴 Frasco químico vazio', type: 'rejeito', wrong: 'Produtos químicos vão para rejeito.' },
-  { name: '🩹 Curativo usado', type: 'rejeito', wrong: 'Curativo é rejeito.' }
+  { name: '🩹 Curativo usado', type: 'rejeito', wrong: 'Curativo é rejeito.' },
+  { name: '🗞️ Papel de embrulho', type: 'papel', wrong: 'Papel de embrulho (sem laminado) é reciclável na lixeira azul.' },
+  { name: '🧾 Nota fiscal', type: 'papel', wrong: 'Nota fiscal é papel e vai na lixeira azul.' },
+  { name: '📋 Papel de fax', type: 'papel', wrong: 'Papel de fax é papel reciclável.' },
+  { name: '📬 Panfleto publicitário', type: 'papel', wrong: 'Panfleto é papel e vai na lixeira azul.' },
+  { name: '🧻 Rolo de papelão vazio', type: 'papel', wrong: 'O rolo interno do papel higiênico é papelão reciclável.' },
+  { name: '🥡 Embalagem de macarrão instantâneo', type: 'plastico', wrong: 'A embalagem do macarrão instantâneo é plástico.' },
+  { name: '🧴 Tampa plástica de garrafa', type: 'plastico', wrong: 'Tampas plásticas vão na lixeira vermelha.' },
+  { name: '🪣 Balde plástico quebrado', type: 'plastico', wrong: 'Balde plástico é plástico reciclável.' },
+  { name: '🧴 Frasco de detergente vazio', type: 'plastico', wrong: 'Frasco de detergente é plástico.' },
+  { name: '🥩 Bandeja de isopor', type: 'plastico', wrong: 'Isopor (EPS) é um tipo de plástico e vai na lixeira vermelha.' },
+  { name: '💊 Blister de remédio (plástico)', type: 'plastico', wrong: 'A parte plástica do blister vai na lixeira vermelha.' },
+  { name: '💊 Vidro de remédio vazio', type: 'vidro', wrong: 'Vidro de remédio vazio vai na lixeira verde.' },
+  { name: '🫙 Pote de pasta de amendoim', type: 'vidro', wrong: 'Pote de vidro vai na lixeira verde.' },
+  { name: '🕯️ Castiçal de vidro quebrado', type: 'vidro', wrong: 'Vidro quebrado ainda é vidro — embale com cuidado.' },
+  { name: '🪞 Espelho quebrado', type: 'vidro', wrong: 'Espelho é vidro. Em muitas cidades vai na lixeira verde, mas verifique seu município.' },
+  { name: '🥫 Lata de tinta vazia e seca', type: 'metal', wrong: 'Lata de tinta vazia e seca é metal reciclável.' },
+  { name: '🔧 Parafuso enferrujado', type: 'metal', wrong: 'Parafuso é metal e vai na lixeira amarela.' },
+  { name: '🪙 Moeda antiga', type: 'metal', wrong: 'Moedas são metal e vão na lixeira amarela.' },
+  { name: '🗝️ Chave velha', type: 'metal', wrong: 'Chaves são metal reciclável.' },
+  { name: '🧲 Imã de geladeira metálico', type: 'metal', wrong: 'Imã metálico vai na lixeira amarela.' },
+  { name: '🌽 Sabugo de milho', type: 'organico', wrong: 'Sabugo de milho é orgânico.' },
+  { name: '🍵 Saquinho de chá usado', type: 'organico', wrong: 'Saquinho de chá usado é resíduo orgânico.' },
+  { name: '💐 Flores murchas', type: 'organico', wrong: 'Flores e plantas são resíduos orgânicos.' },
+  { name: '🥜 Casca de amendoim', type: 'organico', wrong: 'Casca de amendoim é orgânico.' },
+  { name: '🍞 Pão velho mofado', type: 'organico', wrong: 'Pão velho é resíduo orgânico.' },
+  { name: '🖼️ Moldura de quadro de madeira', type: 'madeira', wrong: 'Moldura de madeira vai na lixeira preta.' },
+  { name: '🥢 Palito de churrasco usado', type: 'madeira', wrong: 'Palito de churrasco é madeira.' },
+  { name: '✏️ Lápis quebrado', type: 'madeira', wrong: 'O corpo do lápis é madeira e vai na lixeira preta.' },
+  { name: '🪚 Serragem', type: 'madeira', wrong: 'Serragem é resíduo de madeira e vai na lixeira preta.' },
+  { name: '💡 Lâmpada LED queimada', type: 'eletronico', wrong: 'Lâmpadas LED têm componentes eletrônicos e vão na lixeira laranja.' },
+  { name: '🖨️ Cartucho de impressora', type: 'eletronico', wrong: 'Cartucho de impressora é resíduo eletrônico.' },
+  { name: '📷 Câmera digital velha', type: 'eletronico', wrong: 'Câmeras digitais são eletrônicos.' },
+  { name: '🎮 Controle de videogame', type: 'eletronico', wrong: 'Controle de videogame é eletrônico.' },
+  { name: '📡 Roteador velho', type: 'eletronico', wrong: 'Roteador é equipamento eletrônico.' },
+  { name: '🔊 Caixa de som quebrada', type: 'eletronico', wrong: 'Caixa de som é eletrônico e vai na lixeira laranja.' },
+  { name: '🧣 Pano de limpeza sujo', type: 'rejeito', wrong: 'Pano de limpeza sujo é rejeito.' },
+  { name: '💄 Batom velho', type: 'rejeito', wrong: 'Batom velho é rejeito.' },
+  { name: '🪥 Escova de dentes usada', type: 'rejeito', wrong: 'Escova de dentes usada é rejeito.' },
+  { name: '🧤 Luva descartável usada', type: 'rejeito', wrong: 'Luva descartável usada é rejeito.' },
+  { name: '🫧 Embalagem de creme metálica', type: 'rejeito', wrong: 'Embalagem mista de creme geralmente é rejeito por misturar materiais.' },
 ];
 
+const trashItems = NIVEL1 ? trashItemsNivel1 : trashItemsCompleto;
+const totalItems = trashItems.length;
+
+// ════════════════════════════════════════════
+//  INJEÇÃO DINÂMICA: título, lixeiras, guia
+// ════════════════════════════════════════════
+function setupUI() {
+  // Título e subtítulo
+  if (NIVEL1) {
+    document.getElementById('gameTitle').innerHTML = '♻️ Game Coleta Seletiva <span class="nivel1-badge">🎒 4º e 5º ano</span>';
+    document.getElementById('gameSubtitle').textContent = 'Arraste cada resíduo para a lixeira correta! São 4 lixeiras: papel, plástico, vidro e metal. Você consegue?';
+    document.getElementById('footerNote').textContent = '✨ Acertou: item some | Errou: vai para o final | Total: ' + totalItems + ' itens';
+    document.title = 'Game Coleta Seletiva – 4º e 5º ano';
+  } else {
+    document.getElementById('footerNote').textContent = '✨ Acertou: item some | Errou: vai para o final da lista | Perdeu todas as vidas: vídeo educativo | Total: ' + totalItems + ' itens';
+  }
+
+  // Lixeiras
+  const grid = document.getElementById('binsGrid');
+  if (NIVEL1) grid.classList.add('nivel1');
+  grid.innerHTML = CONFIG.bins.map(b => {
+    const fallbackColor = {
+      papel:'%233b82f6', plastico:'%23e74c3c', vidro:'%232ecc71', metal:'%23f1c40f',
+      rejeito:'%2395a5a6', organico:'%23815a32', madeira:'%23333', eletronico:'%23e67e22'
+    }[b.key] || '%23ccc';
+    const fallbackTextColor = ['metal','rejeito','madeira'].includes(b.key) ? '%23333' : '%23fff';
+    const fallbackLabel = encodeURIComponent(b.sub);
+    return `<div class="bin-card" data-bin="${b.key}">
+      <div class="bin-head"><div><h3>${b.label}</h3><small>${b.sub}</small></div><span class="drop-pill">📌</span></div>
+      <div class="bin-zone"><img src="${b.img}" alt="${b.sub}" width="180" height="180"
+        onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22${fallbackColor}%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22${fallbackTextColor}%22 font-size=%2216%22%3E${fallbackLabel}%3C/text%3E%3C/svg%3E'">
+      </div></div>`;
+  }).join('');
+
+  // Reanexa eventos de drag nas lixeiras recém-criadas
+  document.querySelectorAll('.bin-card').forEach(bin => {
+    bin.ondragover = e => { e.preventDefault(); bin.classList.add('dragover'); };
+    bin.ondragleave = () => bin.classList.remove('dragover');
+    bin.ondrop = e => { e.preventDefault(); bin.classList.remove('dragover'); handleDrop(bin.dataset.bin, bin); };
+  });
+
+  // Tabela de lixeiras no guia (mostra só as do nível atual)
+  const linhasTabela = NIVEL1
+    ? `<thead><tr><th>Cor</th><th>O que vai aqui?</th><th>Exemplos</th></tr></thead><tbody>
+        <tr><td>🔵 Azul</td><td>Papel e papelão</td><td>Jornal, caderno, caixa de papelão, revista</td></tr>
+        <tr><td>🔴 Vermelha</td><td>Plástico</td><td>Garrafa PET, sacola, pote de iogurte, copo plástico</td></tr>
+        <tr><td>🟢 Verde</td><td>Vidro</td><td>Garrafa de vidro, pote de geleia, copo de vidro</td></tr>
+        <tr><td>🟡 Amarela</td><td>Metal</td><td>Lata de refrigerante, tampinha, lata de milho</td></tr>
+      </tbody>`
+    : `<thead><tr><th>Cor</th><th>Tipo</th><th>Exemplos</th></tr></thead><tbody>
+        <tr><td>🔵 Azul</td><td>Papel/Papelão</td><td>Jornais, revistas, folhas, caixas de papelão</td></tr>
+        <tr><td>🔴 Vermelha</td><td>Plástico</td><td>Garrafas PET, embalagens, sacolas</td></tr>
+        <tr><td>🟢 Verde</td><td>Vidro</td><td>Garrafas, frascos, copos de vidro</td></tr>
+        <tr><td>🟡 Amarela</td><td>Metal</td><td>Latas, tampinhas, panelas, parafusos</td></tr>
+        <tr><td>🟤 Marrom</td><td>Orgânico</td><td>Cascas de frutas, restos de comida, folhas</td></tr>
+        <tr><td>⚫ Preta</td><td>Madeira</td><td>Tábuas, caixas de madeira, móveis</td></tr>
+        <tr><td>🟠 Laranja</td><td>Eletrônicos</td><td>Pilhas, celulares, carregadores, computadores</td></tr>
+        <tr><td>⬜ Cinza</td><td>Rejeitos</td><td>Papel higiênico usado, fraldas, esponjas</td></tr>
+      </tbody>`;
+  document.getElementById('tabelaTipos').innerHTML = linhasTabela;
+
+  // Aba "Como jogar"
+  document.getElementById('tabJogo').innerHTML = NIVEL1
+    ? `<div class="content-box">
+        <h3>🎮 Como jogar</h3>
+        <ul>
+          <li>👀 Olhe o nome do resíduo na lista do lado direito</li>
+          <li>🖱️ Arraste ele até a lixeira certa do lado esquerdo</li>
+          <li>✅ Se acertar, o item some e você ganha um ponto!</li>
+          <li>❌ Se errar, o item vai para o final da lista — tente de novo!</li>
+          <li>❤️ Você tem <strong>5 vidas</strong>. A cada erro, perde 1 vida.</li>
+          <li>🏆 A cada <strong>10 acertos seguidos</strong>, você ganha 1 vida extra!</li>
+        </ul>
+        <p style="margin-top:.75rem;"><strong>Dica:</strong> Olhe bem a cor da lixeira! Azul = papel, Vermelha = plástico, Verde = vidro, Amarela = metal. 🎨</p>
+      </div>`
+    : `<div class="content-box">
+        <h3>🎮 Como jogar o Game Coleta Seletiva</h3>
+        <ul>
+          <li><strong>🎯 Objetivo:</strong> Arrastar cada resíduo para a lixeira correta.</li>
+          <li><strong>❤️ Vidas:</strong> Você começa com 5 vidas. A cada erro, perde 1 vida.</li>
+          <li><strong>⭐ Pontuação:</strong> Cada acerto vale 1 ponto.</li>
+          <li><strong>🏆 Vida extra:</strong> A cada <strong>10 acertos consecutivos</strong>, você ganha 1 vida!</li>
+          <li><strong>⚠️ Erro:</strong> O item vai para o final da lista para nova tentativa.</li>
+          <li><strong>📺 Game over:</strong> Um vídeo educativo é exibido. O botão de reinício só libera após assistir.</li>
+        </ul>
+      </div>`;
+
+  // Aba dicas — bloco doméstico x industrial
+  document.getElementById('dicasDomIndust').innerHTML = NIVEL1
+    ? `<h3>🏠 O que é lixo reciclável?</h3>
+       <p>Lixo reciclável é aquele que pode virar um produto novo!</p>
+       <ul>
+         <li>📰 <strong>Papel</strong> → vira papel de novo</li>
+         <li>🧴 <strong>Plástico</strong> → vira garrafa, vassoura, tapete...</li>
+         <li>🍾 <strong>Vidro</strong> → vira novo vidro</li>
+         <li>🥤 <strong>Metal</strong> → vira lata, bicicleta, carro...</li>
+       </ul>
+       <p>💚 Separar o lixo ajuda o planeta!</p>`
+    : `<h3>🏠 Lixo Doméstico vs. 🏭 Lixo Industrial</h3>
+       <h4>🏠 Doméstico</h4>
+       <ul><li>Restos de alimentos</li><li>Embalagens de produtos</li><li>Papel, plástico, vidro, metal</li></ul>
+       <h4>🏭 Industrial</h4>
+       <ul><li>Materiais potencialmente tóxicos</li><li>Resíduos químicos</li><li>⚠️ Requer <strong>tratamento especial</strong></li></ul>`;
+
+  // Aba atividades
+  document.getElementById('listaAtividades').innerHTML = NIVEL1
+    ? `<li>🎮 <strong>Jogo das cores:</strong> Separe objetos nas lixeiras corretas (igual a este game!)</li>
+       <li>🎨 <strong>Desenhe sua lixeira favorita</strong> com as cores certas</li>
+       <li>📦 <strong>Monte lixeiras</strong> com caixas de papelão e pinte nas 4 cores</li>
+       <li>🔍 <strong>Caça ao lixo:</strong> Encontre itens recicláveis em casa ou na sala</li>
+       <li>📷 <strong>Foto do bem:</strong> Fotografe um momento de descarte correto em casa</li>`
+    : `<li><strong>🎮 Jogo das cores:</strong> Alunos classificam objetos nas lixeiras corretas</li>
+       <li><strong>📦 Criação de lixeiras:</strong> Montar miniaturas das 8 cores com material reciclado</li>
+       <li><strong>🌱 Compostagem:</strong> Mostrar como transformar orgânicos em adubo</li>
+       <li><strong>🔋 Coleta de eletrônicos:</strong> Organizar um ponto de coleta de pilhas na escola</li>
+       <li><strong>📸 Antes e depois:</strong> Mostrar imagens de locais com e sem coleta seletiva</li>`;
+
+  if (NIVEL1) {
+    document.getElementById('msgFinalTitulo').textContent = '💚 Lembre-se!';
+    document.getElementById('msgFinalTexto').textContent = '"Separar o lixo é um gesto pequeno que faz uma diferença enorme para o nosso planeta! Você já é um herói do meio ambiente! 🌍"';
+    document.getElementById('howSubtitle').textContent = 'Para 4º e 5º ano — 4 lixeiras, linguagem simples!';
+  }
+
+  setupGlobalImageFallback();
+}
+
+// ════════════════════════════════════════════
+//  LÓGICA DO JOGO
+// ════════════════════════════════════════════
 let lives = 5, score = 0, streak = 0, currentItems = [], draggedId = null;
 const STREAK_GOAL = 10;
-const livesEl = document.getElementById('lives');
-const scoreEl = document.getElementById('score');
-const streakEl = document.getElementById('streak');
-const remainingEl = document.getElementById('remaining');
-const messageEl = document.getElementById('message');
-const binCards = [...document.querySelectorAll('.bin-card')];
-const howBackdrop = document.getElementById('howBackdrop');
-const errorBackdrop = document.getElementById('errorBackdrop');
-const errorText = document.getElementById('errorText');
-const errorLives = document.getElementById('errorLives');
+
+const livesEl    = document.getElementById('lives');
+const scoreEl    = document.getElementById('score');
+const streakEl   = document.getElementById('streak');
+const remainingEl= document.getElementById('remaining');
+const messageEl  = document.getElementById('message');
+const howBackdrop  = document.getElementById('howBackdrop');
+const errorBackdrop= document.getElementById('errorBackdrop');
+const errorText    = document.getElementById('errorText');
+const errorLives   = document.getElementById('errorLives');
 const errorChosenBin = document.getElementById('errorChosenBin');
 
-document.getElementById('openHowBtn').onclick = () => howBackdrop.classList.add('open');
+document.getElementById('openHowBtn').onclick  = () => howBackdrop.classList.add('open');
 document.getElementById('closeHowBtn').onclick = () => howBackdrop.classList.remove('open');
-document.getElementById('closeErrorBtn').onclick = () => errorBackdrop.classList.remove('open');
-howBackdrop.onclick = e => { if (e.target === howBackdrop) howBackdrop.classList.remove('open'); };
-errorBackdrop.onclick = e => { if (e.target === errorBackdrop) errorBackdrop.classList.remove('open'); };
+document.getElementById('closeErrorBtn').onclick= () => errorBackdrop.classList.remove('open');
+howBackdrop.onclick  = e => { if (e.target === howBackdrop)   howBackdrop.classList.remove('open'); };
+errorBackdrop.onclick= e => { if (e.target === errorBackdrop) errorBackdrop.classList.remove('open'); };
 
 document.querySelectorAll('.tab').forEach(btn => {
   btn.onclick = () => {
@@ -346,21 +552,35 @@ document.querySelectorAll('.tab').forEach(btn => {
   };
 });
 
-function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
-function updateStats() { livesEl.textContent = '❤️'.repeat(Math.max(0, lives)) || '💀'; scoreEl.textContent = score; streakEl.textContent = `${streak} / ${STREAK_GOAL}`; remainingEl.textContent = currentItems.length; }
-function setMessage(text, kind='') { messageEl.className = `message ${kind}`.trim(); messageEl.textContent = text; }
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
-// ─── FIX: restaura a estrutura da items-area antes de renderizar ───
+function updateStats() {
+  livesEl.textContent = '❤️'.repeat(Math.max(0, lives)) || '💀';
+  scoreEl.textContent = score;
+  streakEl.textContent = `${streak} / ${STREAK_GOAL}`;
+  remainingEl.textContent = currentItems.length;
+}
+
+function setMessage(text, kind = '') {
+  messageEl.className = `message ${kind}`.trim();
+  messageEl.textContent = text;
+}
+
 function restoreItemsArea() {
   const itemsArea = document.querySelector('.items-area');
-  // Se o #items foi removido (estado de vitória ou game over), recria
   if (!document.getElementById('items')) {
     itemsArea.innerHTML = '<div id="items" class="items"></div>';
   }
 }
 
 function renderItems() {
-  restoreItemsArea(); // garante que #items existe antes de popular
+  restoreItemsArea();
   const itemsEl = document.getElementById('items');
   itemsEl.innerHTML = '';
   currentItems.forEach((item, index) => {
@@ -370,7 +590,7 @@ function renderItems() {
     card.draggable = lives > 0;
     card.dataset.index = index;
     card.ondragstart = () => draggedId = index;
-    card.ondragend = () => draggedId = null;
+    card.ondragend   = () => draggedId = null;
     itemsEl.appendChild(card);
   });
   updateStats();
@@ -385,21 +605,22 @@ function animateIntoBin(binCard, label) {
   setTimeout(() => ghost.remove(), 1200);
 }
 
-function labelBin(t) { return { papel:'azul', plastico:'vermelha', vidro:'verde', metal:'amarela', organico:'marrom', madeira:'preta', eletronico:'laranja', rejeito:'cinza' }[t]; }
-function labelBinHuman(b) { return { papel:'🔵 Azul', plastico:'🔴 Vermelha', vidro:'🟢 Verde', metal:'🟡 Amarela', organico:'🟤 Marrom', madeira:'⚫ Preta', eletronico:'🟠 Laranja', rejeito:'⬜ Cinza' }[b]; }
+const labelBinMap = { papel:'azul', plastico:'vermelha', vidro:'verde', metal:'amarela', organico:'marrom', madeira:'preta', eletronico:'laranja', rejeito:'cinza' };
+const labelBinHumanMap = { papel:'🔵 Azul', plastico:'🔴 Vermelha', vidro:'🟢 Verde', metal:'🟡 Amarela', organico:'🟤 Marrom', madeira:'⚫ Preta', eletronico:'🟠 Laranja', rejeito:'⬜ Cinza' };
 
 function openErrorModal(item, chosen) {
-  errorText.textContent = `${item.wrong} Correto: lixeira ${labelBin(item.type)}.`;
-  errorChosenBin.textContent = `❌ Você colocou na ${labelBinHuman(chosen)}.`;
-  errorLives.textContent = lives > 0 ? `Ainda ${lives} vida(s). Item foi pro final da fila.` : 'Suas vidas acabaram. Reinicie.';
+  errorText.textContent = `${item.wrong}`;
+  errorChosenBin.textContent = `❌ Você colocou na lixeira ${labelBinHumanMap[chosen]}.  ✅ Correto: ${labelBinHumanMap[item.type]}.`;
+  errorLives.textContent = lives > 0
+    ? (NIVEL1 ? `Ainda tem ${lives} vida(s). Tente de novo!` : `Ainda ${lives} vida(s). Item foi pro final da fila.`)
+    : 'Suas vidas acabaram. Reinicie.';
   errorBackdrop.classList.add('open');
 }
 
 function resetGame() {
   lives = 5; score = 0; streak = 0;
   currentItems = shuffle(trashItems.map(i => ({ ...i })));
-  setMessage('🔄 Nova partida! Boa sorte! 🎯');
-  // ─── FIX: restaura a área de itens antes de renderizar ───
+  setMessage(NIVEL1 ? '🔄 Nova partida! Você consegue separar tudo? 💪' : '🔄 Nova partida! Boa sorte! 🎯');
   restoreItemsArea();
   renderItems();
   errorBackdrop.classList.remove('open');
@@ -410,88 +631,67 @@ function checkState() {
 
   // VITÓRIA
   if (currentItems.length === 0) {
-    setMessage('🎉 PARABÉNS! VOCÊ VENCEU O JOGO! 🎉', 'good');
+    setMessage('🎉 PARABÉNS! VOCÊ VENCEU! 🎉', 'good');
+    const msg = NIVEL1
+      ? `<h3 style="color:#01696f;">INCRÍVEL! Você separou tudo! 🌟</h3>
+         <p style="font-size:1.1rem;">Você acertou <strong>${score}</strong> resíduos!</p>
+         <p>🌍 Você já é um herói do meio ambiente!</p>`
+      : `<h3 style="color:#01696f;">MISSÃO CUMPRIDA!</h3>
+         <p>Você separou todos os ${score} resíduos corretamente!</p>
+         <p style="margin-top:1rem;">♻️ Você é um defensor do meio ambiente! ♻️</p>`;
     itemsArea.innerHTML = `
-      <div style="text-align: center; padding: 2rem;" class="victory-animation">
-        <div style="font-size: 4rem;">🏆🌟🎉</div>
-        <h3 style="color: #01696f;">MISSÃO CUMPRIDA!</h3>
-        <p>Você separou todos os ${score} resíduos corretamente!</p>
-        <button onclick="resetGame()" style="background: #01696f; color: white; padding: 0.8rem 1.5rem; margin-top: 1rem;">🎮 Jogar Novamente</button>
-        <p style="margin-top: 1rem;">♻️ Você é um defensor do meio ambiente! ♻️</p>
-      </div>
-    `;
+      <div style="text-align:center;padding:2rem;" class="victory-animation">
+        <div style="font-size:4rem;">🏆🌟🎉</div>
+        ${msg}
+        <button onclick="resetGame()" style="background:#01696f;color:white;padding:.8rem 1.5rem;margin-top:1rem;">🎮 Jogar Novamente</button>
+      </div>`;
     return;
   }
 
   // DERROTA
   if (lives <= 0) {
-    setMessage('💀 GAME OVER! Assista ao vídeo até o final para liberar o botão! 💀', 'bad');
+    const msgDerrota = NIVEL1
+      ? `<h3 style="color:#812a2a;">Não foi dessa vez! 😢</h3>
+         <p>Você acertou <strong>${score}</strong> de ${totalItems} itens.</p>
+         <p>Assista ao vídeo e tente de novo. Você vai conseguir! 💪</p>`
+      : `<h3 style="color:#812a2a;">Você perdeu todas as vidas!</h3>
+         <p>Acertos: ${score} de ${totalItems}</p>`;
+    setMessage('💀 GAME OVER! Assista ao vídeo para liberar o botão!', 'bad');
     const botaoId = 'btnTentarNovamente';
     itemsArea.innerHTML = `
-      <div style="text-align: center; padding: 1rem;">
-        <div style="font-size: 2rem;">📚😢</div>
-        <h3 style="color: #812a2a;">Você perdeu todas as vidas!</h3>
-        <p>Acertos: ${score} de 45</p>
-        <div style="background: #f0f0f0; border-radius: 1rem; padding: 1rem; margin: 1rem 0;">
-          <p><strong>📺 Assista ao vídeo até o final para liberar o botão "Tentar Novamente":</strong></p>
-          <video id="videoEducativo" width="100%" controls style="border-radius: 0.8rem;">
+      <div style="text-align:center;padding:1rem;">
+        <div style="font-size:2rem;">📚😢</div>
+        ${msgDerrota}
+        <div style="background:#f0f0f0;border-radius:1rem;padding:1rem;margin:1rem 0;">
+          <p><strong>📺 Assista ao vídeo até o final para liberar o botão:</strong></p>
+          <video id="videoEducativo" width="100%" controls style="border-radius:.8rem;">
             <source src="ColetaSeletiva.mp4" type="video/mp4">
             Seu navegador não suporta vídeo.
           </video>
-          <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666;">📹 Vídeo educativo: "Coleta Seletiva - Educação Infantil" por <strong>Bisnagas Flix</strong> (YouTube)</p>
+          <p style="font-size:.75rem;margin-top:.5rem;color:#666;">📹 Vídeo educativo: "Coleta Seletiva - Educação Infantil" por <strong>Bisnagas Flix</strong></p>
         </div>
-        <button id="${botaoId}" disabled style="background: #95a5a6; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 2rem; cursor: not-allowed;">
+        <button id="${botaoId}" disabled style="background:#95a5a6;color:white;padding:.8rem 1.5rem;border:none;border-radius:2rem;cursor:not-allowed;">
           ⏳ Assista ao vídeo primeiro
         </button>
-        <p style="font-size: 0.8rem; margin-top: 1rem;">💡 Dica: Preste atenção nas cores das lixeiras explicadas no vídeo!</p>
-      </div>
-    `;
+      </div>`;
 
     const video = document.getElementById('videoEducativo');
     const botao = document.getElementById(botaoId);
-
-    const habilitarBotao = function() {
+    const habilitar = () => {
       botao.disabled = false;
       botao.style.background = '#01696f';
       botao.style.cursor = 'pointer';
-      botao.innerHTML = '💪 Tentar Novamente';
-      // ─── FIX: resetGame já chama restoreItemsArea internamente ───
-      botao.onclick = function() { resetGame(); };
+      botao.innerHTML = NIVEL1 ? '💪 Tentar de Novo!' : '💪 Tentar Novamente';
+      botao.onclick = () => resetGame();
     };
-
-    video.addEventListener('ended', habilitarBotao);
-    if (video.ended) { habilitarBotao(); }
-
+    video.addEventListener('ended', habilitar);
+    if (video.ended) habilitar();
     updateStats();
     return;
   }
 
-  // Jogo continua normalmente
   renderItems();
 }
-
-function setupGlobalImageFallback() {
-  document.querySelectorAll('.bin-zone img').forEach(img => {
-    if (!img.hasAttribute('data-fallback-checked')) {
-      img.setAttribute('data-fallback-checked', 'true');
-      img.addEventListener('error', function() {
-        if (!this.hasAttribute('data-fallback-applied')) {
-          this.setAttribute('data-fallback-applied', 'true');
-          const binCard = this.closest('.bin-card');
-          const binType = binCard?.dataset.bin;
-          const cores = { papel:'🔵 Azul', plastico:'🔴 Vermelha', vidro:'🟢 Verde', metal:'🟡 Amarela', organico:'🟤 Marrom', madeira:'⚫ Preta', eletronico:'🟠 Laranja', rejeito:'⬜ Cinza' };
-          this.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23cccccc' stroke='%23999999' stroke-width='2'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23333333' font-size='16' font-family='sans-serif'%3E${cores[binType] || 'Lixeira'}%3C/text%3E%3C%2Fsvg%3E`;
-        }
-      });
-    }
-  });
-}
-
-binCards.forEach(bin => {
-  bin.ondragover = e => { e.preventDefault(); bin.classList.add('dragover'); };
-  bin.ondragleave = () => bin.classList.remove('dragover');
-  bin.ondrop = e => { e.preventDefault(); bin.classList.remove('dragover'); handleDrop(bin.dataset.bin, bin); };
-});
 
 function handleDrop(binType, binCard) {
   if (draggedId === null || lives <= 0) return;
@@ -502,17 +702,35 @@ function handleDrop(binType, binCard) {
     const removed = currentItems.splice(draggedId, 1)[0];
     animateIntoBin(binCard, removed.name);
     score++; streak++;
-    if (streak === STREAK_GOAL) { lives++; streak = 0; setMessage(`🏆 +1 vida! (${STREAK_GOAL} acertos seguidos)`, 'good'); }
-    else setMessage(`✅ ${removed.name} acertou!`, 'good');
+    if (streak === STREAK_GOAL) {
+      lives++; streak = 0;
+      setMessage(`🏆 +1 vida! (${STREAK_GOAL} acertos seguidos)`, 'good');
+    } else {
+      setMessage(NIVEL1 ? `✅ Muito bem! ${removed.name} está certo! 🎉` : `✅ ${removed.name} acertou!`, 'good');
+    }
   } else {
     const [wrong] = currentItems.splice(draggedId, 1);
     currentItems.push(wrong);
     lives--; streak = 0;
-    setMessage(`❌ ${wrong.name} errado. Foi pro final.`, 'bad');
+    setMessage(NIVEL1 ? `❌ Opa! ${wrong.name} foi pra outra lixeira. Tente de novo!` : `❌ ${wrong.name} errado. Foi pro final.`, 'bad');
     openErrorModal(wrong, binType);
   }
   draggedId = null;
   checkState();
+}
+
+function setupGlobalImageFallback() {
+  document.querySelectorAll('.bin-zone img').forEach(img => {
+    if (img.hasAttribute('data-fallback-checked')) return;
+    img.setAttribute('data-fallback-checked', 'true');
+    img.addEventListener('error', function() {
+      if (this.hasAttribute('data-fallback-applied')) return;
+      this.setAttribute('data-fallback-applied', 'true');
+      const binType = this.closest('.bin-card')?.dataset.bin;
+      const cores = { papel:'🔵 Azul', plastico:'🔴 Vermelha', vidro:'🟢 Verde', metal:'🟡 Amarela', organico:'🟤 Marrom', madeira:'⚫ Preta', eletronico:'🟠 Laranja', rejeito:'⬜ Cinza' };
+      this.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23cccccc' stroke='%23999' stroke-width='2'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23333' font-size='15' font-family='sans-serif'%3E${cores[binType]||'Lixeira'}%3C/text%3E%3C/svg%3E`;
+    });
+  });
 }
 
 document.getElementById('resetBtnTop').onclick = resetGame;
@@ -524,8 +742,9 @@ document.getElementById('shuffleBtn').onclick = () => {
 };
 document.ondragend = () => draggedId = null;
 
+// Init
+setupUI();
 resetGame();
-setupGlobalImageFallback();
 setTimeout(() => howBackdrop.classList.add('open'), 500);
 </script>
 </body>
