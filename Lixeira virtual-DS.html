@@ -195,14 +195,14 @@
               <tr><th>Cor</th><th>Tipo de Lixo</th><th>O que colocar (exemplos)</th></tr>
             </thead>
             <tbody>
-              <tr><td>🔵 Azul</th><td>Papel/Papelão</td><td>Jornais, revistas, folhas, caixas de papelão, impressos</td></tr>
-              <tr><td>🔴 Vermelha</td><td>Plástico</td><td>Garrafas PET, embalagens de plástico, sacolas, tubos de pasta</td></tr>
-              <tr><td>🟢 Verde</td><td>Vidro</td><td>Garrafas, frascos, copos, vidros de alimentos (lavar antes)</td></tr>
-              <tr><td>🟡 Amarela</td><td>Metal</td><td>Latas de alumínio, lata de óleo, ferro, aço, tampinhas</td></tr>
-              <tr><td>🟤 Marrom</td><td>Orgânico</td><td>Cascas de frutas, restos de comida, borra de café, folhas</td></tr>
-              <tr><td>⚫ Preta</td><td>Madeira</td><td>Tábuas, caixas de madeira, móveis velhos</td></tr>
-              <tr><td>🟠 Laranja</td><td>Eletrônicos</td><td>Baterias, carregadores, pilhas, celulares, computadores, fios</td></tr>
-              <tr><td>⬜ Cinza</td><td>Rejeitos</td><td>Papel higiênico usado, fraldas, esponjas, bitucas de cigarro, máscaras</td></tr>
+              <tr><td>🔵 Azul</th><td>Papel/Papelão</th><td>Jornais, revistas, folhas, caixas de papelão, impressos</th></tr>
+              <tr><td>🔴 Vermelha</th><td>Plástico</th><td>Garrafas PET, embalagens de plástico, sacolas, tubos de pasta</th></tr>
+              <tr><td>🟢 Verde</th><td>Vidro</th><td>Garrafas, frascos, copos, vidros de alimentos (lavar antes)</th></tr>
+              <tr><td>🟡 Amarela</th><td>Metal</th><td>Latas de alumínio, lata de óleo, ferro, aço, tampinhas</th></tr>
+              <tr><td>🟤 Marrom</th><td>Orgânico</th><td>Cascas de frutas, restos de comida, borra de café, folhas</th></tr>
+              <tr><td>⚫ Preta</th><td>Madeira</th><td>Tábuas, caixas de madeira, móveis velhos</th></tr>
+              <tr><td>🟠 Laranja</th><td>Eletrônicos</th><td>Baterias, carregadores, pilhas, celulares, computadores, fios</th></tr>
+              <tr><td>⬜ Cinza</th><td>Rejeitos</th><td>Papel higiênico usado, fraldas, esponjas, bitucas de cigarro, máscaras</th></tr>
             </tbody>
           </table>
           <p class="muted" style="margin-top: var(--space-3);">⚠️ <strong>Atenção:</strong> Eletrônicos NUNCA vão no lixo comum! Leve a ecopontos ou pontos de coleta específicos.</p>
@@ -450,13 +450,23 @@ function checkState() {
     const video = document.getElementById('videoEducativo');
     const botao = document.getElementById(botaoId);
     
-    video.addEventListener('ended', function() {
+    // Habilita o botão e atribui a função quando o vídeo terminar
+    const habilitarBotao = function() {
       botao.disabled = false;
       botao.style.background = '#01696f';
       botao.style.cursor = 'pointer';
       botao.innerHTML = '💪 Tentar Novamente';
-      botao.onclick = () => resetGame();
-    });
+      botao.onclick = function() {
+        resetGame();
+      };
+    };
+    
+    video.addEventListener('ended', habilitarBotao);
+    
+    // Fallback caso o vídeo já tenha terminado (ex: reinício rápido)
+    if (video.ended) {
+      habilitarBotao();
+    }
     
     renderItems();
     return;
