@@ -180,7 +180,7 @@
             <li><strong>⚠️ Erro:</strong> Quando você erra, o item <strong>vai para o final da lista</strong> para você tentar novamente depois.</li>
             <li><strong>🏁 Fim de jogo:</strong> O jogo termina quando todos os resíduos foram separados corretamente ou quando as vidas acabam.</li>
             <li><strong>📖 Modal de erro:</strong> Se errar, um modal explica qual era a lixeira correta e mostra qual você escolheu.</li>
-            <li><strong>📺 Se perder todas as vidas:</strong> Um vídeo educativo será exibido para você aprender e tentar novamente.</li>
+            <li><strong>📺 Se perder todas as vidas:</strong> Um vídeo educativo será exibido. Você só poderá tentar novamente após assistir ao vídeo completo.</li>
           </ul>
           <p><strong>💡 Dica:</strong> Leia as abas ao lado para aprender mais sobre cada tipo de resíduo antes de jogar!</p>
         </div>
@@ -195,7 +195,7 @@
               <tr><th>Cor</th><th>Tipo de Lixo</th><th>O que colocar (exemplos)</th></tr>
             </thead>
             <tbody>
-              <tr><td>🔵 Azul</td><td>Papel/Papelão</td><td>Jornais, revistas, folhas, caixas de papelão, impressos</td></tr>
+              <tr><td>🔵 Azul</th><td>Papel/Papelão</td><td>Jornais, revistas, folhas, caixas de papelão, impressos</td></tr>
               <tr><td>🔴 Vermelha</td><td>Plástico</td><td>Garrafas PET, embalagens de plástico, sacolas, tubos de pasta</td></tr>
               <tr><td>🟢 Verde</td><td>Vidro</td><td>Garrafas, frascos, copos, vidros de alimentos (lavar antes)</td></tr>
               <tr><td>🟡 Amarela</td><td>Metal</td><td>Latas de alumínio, lata de óleo, ferro, aço, tampinhas</td></tr>
@@ -227,19 +227,9 @@
           <div class="content-box">
             <h3>🏠 Lixo Doméstico vs. 🏭 Lixo Industrial</h3>
             <h4>🏠 Doméstico (residências, comércio, serviços)</h4>
-            <ul>
-              <li>Restos de alimentos (orgânico)</li>
-              <li>Embalagens de produtos</li>
-              <li>Papel, plástico, vidro, metal</li>
-              <li>Produtos de limpeza vazios</li>
-            </ul>
+            <ul><li>Restos de alimentos (orgânico)</li><li>Embalagens de produtos</li><li>Papel, plástico, vidro, metal</li><li>Produtos de limpeza vazios</li></ul>
             <h4>🏭 Industrial (indústrias)</h4>
-            <ul>
-              <li>Materiais potencialmente tóxicos</li>
-              <li>Resíduos químicos</li>
-              <li>Metais pesados</li>
-              <li>⚠️ Requer <strong>tratamento especial</strong> e não pode ser misturado com lixo doméstico</li>
-            </ul>
+            <ul><li>Materiais potencialmente tóxicos</li><li>Resíduos químicos</li><li>Metais pesados</li><li>⚠️ Requer <strong>tratamento especial</strong> e não pode ser misturado com lixo doméstico</li></ul>
           </div>
         </div>
       </div>
@@ -433,26 +423,41 @@ function checkState() {
     return;
   }
   
-  // DERROTA - exibe vídeo local (ColetaSeletiva.mp4)
+  // DERROTA - exibe vídeo local com botão habilitado SOMENTE após término
   if (lives <= 0) {
-    setMessage('💀 GAME OVER! Assista ao vídeo para aprender e tente novamente! 💀', 'bad');
+    setMessage('💀 GAME OVER! Assista ao vídeo até o final para liberar o botão! 💀', 'bad');
+    const botaoId = 'btnTentarNovamente';
     itemsContainer.innerHTML = `
       <div style="text-align: center; padding: 1rem;">
         <div style="font-size: 2rem;">📚😢</div>
         <h3 style="color: #812a2a;">Você perdeu todas as vidas!</h3>
         <p>Acertos: ${score} de 45</p>
         <div style="background: #f0f0f0; border-radius: 1rem; padding: 1rem; margin: 1rem 0;">
-          <p><strong>📺 Assista ao vídeo abaixo e depois tente outra vez:</strong></p>
-          <video width="100%" controls style="border-radius: 0.8rem;">
+          <p><strong>📺 Assista ao vídeo até o final para liberar o botão "Tentar Novamente":</strong></p>
+          <video id="videoEducativo" width="100%" controls style="border-radius: 0.8rem;">
             <source src="ColetaSeletiva.mp4" type="video/mp4">
             Seu navegador não suporta vídeo.
           </video>
           <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #666;">📹 Vídeo educativo: "Coleta Seletiva - Educação Infantil" por <strong>Bisnagas Flix</strong> (YouTube)</p>
         </div>
-        <button onclick="resetGame()" style="background: #01696f; color: white; padding: 0.8rem 1.5rem;">💪 Tentar Novamente</button>
+        <button id="${botaoId}" disabled style="background: #95a5a6; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 2rem; cursor: not-allowed;">
+          ⏳ Assista ao vídeo primeiro
+        </button>
         <p style="font-size: 0.8rem; margin-top: 1rem;">💡 Dica: Preste atenção nas cores das lixeiras explicadas no vídeo!</p>
       </div>
     `;
+    
+    const video = document.getElementById('videoEducativo');
+    const botao = document.getElementById(botaoId);
+    
+    video.addEventListener('ended', function() {
+      botao.disabled = false;
+      botao.style.background = '#01696f';
+      botao.style.cursor = 'pointer';
+      botao.innerHTML = '💪 Tentar Novamente';
+      botao.onclick = () => resetGame();
+    });
+    
     renderItems();
     return;
   }
