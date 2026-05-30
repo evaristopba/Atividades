@@ -398,9 +398,24 @@ function openErrorModal(item, chosen) {
 }
 
 function resetGame() {
-  lives = 5; score = 0; streak = 0;
+  lives = 5;
+  score = 0;
+  streak = 0;
   currentItems = shuffle(trashItems.map(i => ({ ...i })));
   setMessage('🔄 Nova partida! Boa sorte! 🎯');
+  
+  // Força a recriação da lista de itens no container correto
+  const itemsContainer = document.querySelector('.items-area');
+  if (itemsContainer) {
+    // Limpa o conteúdo (remove o vídeo e o botão)
+    itemsContainer.innerHTML = '';
+    // Recria a div que vai conter os itens
+    const itemsDiv = document.createElement('div');
+    itemsDiv.id = 'items';
+    itemsDiv.className = 'items';
+    itemsContainer.appendChild(itemsDiv);
+  }
+  
   renderItems();
   errorBackdrop.classList.remove('open');
 }
