@@ -410,6 +410,8 @@ function nextToy(){
   S._tentativas=0;
   S._erros=0;
   S.palavraInicio=Date.now();
+  // Limpar qualquer registro parcial desta palavra de tentativa anterior
+  S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
   const real=S.toy.name.replace(/-/g,'').split('').map((l,i)=>({l,id:'r'+i}));
   const decoys=genDecoys(real.map(x=>x.l),3).map((l,i)=>({l,id:'d'+i}));
   S.poolOrder=shuffle([...real,...decoys]);
@@ -559,10 +561,12 @@ function checkAnswer(){
   S._tentativas=(S._tentativas||0)+1;
   if(answer===name){
     const tempoMs=Date.now()-S.palavraInicio;
+    // Remover registro parcial desta palavra se existir
+    S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
     S.registroPalavras.push({
       name:S.toy.name, level:S.currentLevel,
       tentativas:S._tentativas, erros:S._erros||0,
-      tempoMs, acertou:true
+      tempoMs, acertou:true, parcial:false
     });
     const pts=10*S.currentLevel;
     S.score+=pts; S.correctInLevel++;
@@ -573,14 +577,23 @@ function checkAnswer(){
     S._erros=(S._erros||0)+1;
     S.lives--;
     renderLives(); markSlots('wrong'); showFb('❌ Tente outra vez!','err');
+    // Atualizar registro parcial em tempo real
+    S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    S.registroPalavras.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas, erros:S._erros,
+      tempoMs:Date.now()-S.palavraInicio,
+      acertou:false, parcial:true
+    });
     S.queue.push(S.toy);
     clearAnswer();
     if(S.lives<=0){
-      // Registrar palavras não concluídas
+      // Marcar como definitivo (sem vidas)
+      S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
       S.registroPalavras.push({
         name:S.toy.name, level:S.currentLevel,
         tentativas:S._tentativas, erros:S._erros,
-        tempoMs:Date.now()-S.palavraInicio, acertou:false
+        tempoMs:Date.now()-S.palavraInicio, acertou:false, parcial:false
       });
       setTimeout(showLose,1100);
     } else setTimeout(nextToy,1300);
@@ -792,6 +805,18 @@ function salvarProgresso(){
   // Serializar fila: guardar só os nomes (reconstruir objetos no load)
   const queueNomes=S.queue.map(t=>t.name);
   const toyAtual=S.toy?S.toy.name:null;
+  // Garantir que registro parcial da palavra atual está atualizado
+  // (mesmo que nenhuma verificação tenha sido feita ainda)
+  let registroSnap=[...S.registroPalavras];
+  if(S.toy){
+    registroSnap=registroSnap.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    registroSnap.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas||0, erros:S._erros||0,
+      tempoMs:Date.now()-S.palavraInicio,
+      acertou:false, parcial:true
+    });
+  }
   // Registrar tempo parcial do nível se em jogo
   const temposSnap=[...S.levelTempos];
   if(S.toy && S.levelInicio){
@@ -817,7 +842,7 @@ function salvarProgresso(){
     // Telemetria
     levelTempos:temposSnap,
     sessoes:S.sessoes,
-    registroPalavras:S.registroPalavras,
+    registroPalavras:registroSnap,
   };
   const json=JSON.stringify(dados);
   const b64=btoa(unescape(encodeURIComponent(json)));
@@ -833,6 +858,93 @@ function salvarProgresso(){
 }
 
 // ========== CARREGAR PROGRESSO ==========
+function restaurarEstadoDosDados(dados){
+  // Dados gerais sempre restaurados
+  S.nomeAluno=dados.nomeAluno;
+  S.theme=dados.theme||'cartoon';
+  S.score=dados.score||0;
+  S.levelStars=dados.levelStars||[0,0,0,0,0];
+  S.levelUnlocked=dados.levelUnlocked||[true,false,false,false,false];
+  S.levelTempos=dados.levelTempos||[0,0,0,0,0];
+  S.sessoes=dados.sessoes||[];
+  S.registroPalavras=dados.registroPalavras||[];
+  S._tentativas=0; S._erros=0;
+  setTheme(S.theme);
+  const inp=document.getElementById('inputNome');
+  if(inp) inp.value=S.nomeAluno;
+  const nd=document.getElementById('nomeDisplay');
+  nd.textContent='👤 '+S.nomeAluno; nd.style.display='block';
+  renderScore(); renderLives();
+
+  if(dados.emJogo && dados.versao>=2 && dados.toyAtual){
+    // ── Restaurar nível em andamento ──────────────────────────────────────
+    S.currentLevel=dados.currentLevel||1;
+    S.lives=dados.lives!=null?dados.lives:5;
+    S.correctInLevel=dados.correctInLevel||0;
+
+    // Brinquedo atual
+    S.toy=TOYS.find(t=>t.name===dados.toyAtual)||null;
+
+    // Fila de palavras pendentes
+    S.queue=(dados.queueNomes||[]).map(n=>TOYS.find(t=>t.name===n)).filter(Boolean);
+
+    if(S.toy){
+      // Restaurar poolOrder exatamente como estava (mesmos IDs)
+      S.poolOrder=dados.poolOrder||[];
+      // Se poolOrder não veio no arquivo, regenerar (compatibilidade)
+      if(!S.poolOrder.length){
+        const real=S.toy.name.replace(/-/g,'').split('').map((l,i)=>({l,id:'r'+i}));
+        const decoys=genDecoys(real.map(x=>x.l),3).map((l,i)=>({l,id:'d'+i}));
+        S.poolOrder=shuffle([...real,...decoys]);
+      }
+
+      // Restaurar slots
+      S.slots=dados.slots||new Array(S.toy.name.length).fill('');
+
+      // Reconstruir tileMap de forma robusta:
+      // Para cada slot preenchido, encontrar o tile pelo ID exato no poolOrder
+      // usando uma cópia dos IDs disponíveis para evitar duplicatas
+      S.tileMap={};
+      const idsDisponiveis=[...S.poolOrder.map(p=>p.id)];
+      S.slots.forEach((letra,i)=>{
+        if(!letra) return;
+        // Procurar tile com mesma letra entre os ainda disponíveis
+        const idx=idsDisponiveis.findIndex(id=>{
+          const tile=S.poolOrder.find(p=>p.id===id);
+          return tile && tile.l===letra;
+        });
+        if(idx>=0){
+          S.tileMap[i]=idsDisponiveis[idx];
+          idsDisponiveis.splice(idx,1); // remover para não reusar
+        }
+      });
+
+      // Mostrar tela do jogo
+      showScreen('screenGame');
+      document.getElementById('levelBar').style.display='flex';
+      const btnSave=document.getElementById('btnSaveBar');
+      btnSave.style.display='inline-block';
+      btnSave.textContent='💾';
+      btnSave.classList.remove('saved');
+      btnSave.disabled=false;
+      // Reiniciar cronômetros (tempo parcial já foi salvo em levelTempos)
+      S.levelInicio=Date.now();
+      S.palavraInicio=Date.now();
+      updateBar(); renderLives(); renderToy();
+      showFb('✅ Olá, '+S.nomeAluno+'! Continuando de onde parou!','ok');
+    } else {
+      // Nome do brinquedo não encontrado: iniciar nível do zero
+      startLevel(S.currentLevel);
+    }
+  } else {
+    // Sem jogo em andamento: menu no nível correto
+    S.toy=null; S.queue=[];
+    currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
+    showStartScreen();
+    showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+  }
+}
+
 function loadFromFile(event){
   const file=event.target.files[0];
   if(!file)return;
@@ -846,68 +958,13 @@ function loadFromFile(event){
         alert('Arquivo inválido! Use apenas arquivos .txt salvos por este jogo.');
         return;
       }
-      // Restaurar dados gerais
-      S.nomeAluno=dados.nomeAluno;
-      S.theme=dados.theme||'cartoon';
-      S.score=dados.score||0;
-      S.levelStars=dados.levelStars||[0,0,0,0,0];
-      S.levelUnlocked=dados.levelUnlocked||[true,false,false,false,false];
-      S.levelTempos=dados.levelTempos||[0,0,0,0,0];
-      S.sessoes=dados.sessoes||[];
-      S.registroPalavras=dados.registroPalavras||[];
-      setTheme(S.theme);
-      const inp=document.getElementById('inputNome');
-      if(inp) inp.value=S.nomeAluno;
-      const nd=document.getElementById('nomeDisplay');
-      nd.textContent='👤 '+S.nomeAluno; nd.style.display='block';
-      renderScore();
-
-      if(dados.emJogo && dados.versao>=2 && dados.toyAtual){
-        // Restaurar nível em andamento exatamente onde parou
-        S.currentLevel=dados.currentLevel||1;
-        S.lives=dados.lives!=null?dados.lives:5;
-        S.correctInLevel=dados.correctInLevel||0;
-
-        // Reconstruir brinquedo atual a partir do nome
-        S.toy=TOYS.find(t=>t.name===dados.toyAtual)||null;
-
-        // Reconstruir fila a partir dos nomes salvos
-        S.queue=(dados.queueNomes||[]).map(n=>TOYS.find(t=>t.name===n)).filter(Boolean);
-
-        // Restaurar slots e pool
-        S.slots=dados.slots||[];
-        S.poolOrder=dados.poolOrder||[];
-        // Reconstruir tileMap a partir dos slots e poolOrder
-        S.tileMap={};
-        if(S.slots && S.poolOrder){
-          S.slots.forEach((letra,i)=>{
-            if(letra){
-              const tile=S.poolOrder.find(p=>p.l===letra&&!Object.values(S.tileMap).includes(p.id));
-              if(tile) S.tileMap[i]=tile.id;
-            }
-          });
-        }
-
-        // Ir direto para o jogo
-        showScreen('screenGame');
-        document.getElementById('levelBar').style.display='flex';
-        const btnSave=document.getElementById('btnSaveBar');
-        btnSave.style.display='inline-block';
-        btnSave.textContent='💾'; btnSave.classList.remove('saved'); btnSave.disabled=false;
-        updateBar(); renderLives();
-        if(S.toy){
-          renderToy();
-        } else {
-          nextToy();
-        }
-        showFb('✅ Olá, '+S.nomeAluno+'! Continuando de onde parou!','ok');
-      } else {
-        // Sem jogo em andamento: ir para menu no nível correto
-        currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
-        renderLives();
-        showStartScreen();
-        showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+      // Avisar se for arquivo antigo (versão 1) sem estado completo
+      if(dados.versao===1){
+        showFb('⚠️ Progresso antigo: iniciando no nível '+
+          (dados.levelUnlocked.findIndex((u,i)=>u&&(dados.levelStars[i]||0)<3)+1||1)+
+          ' do zero.','warn');
       }
+      restaurarEstadoDosDados(dados);
     }catch(err){
       console.error(err);
       alert('Arquivo inválido ou corrompido. Use apenas arquivos .txt salvos por este jogo.');
@@ -975,19 +1032,100 @@ function confirmarSenha(){
   const digitado=(inp?.value||'').trim();
   if(digitado===senhaHoje()){
     document.getElementById('modalSenha')?.remove();
-    if(!S.nomeAluno && !(S.sessoes&&S.sessoes.length)){
-      // Sem dados na memória: pedir arquivo
-      showModalCarregarRelatorio();
-    } else {
-      gerarRelatorio();
-      showScreen('screenRelatorio');
-      document.getElementById('levelBar').style.display='none';
-    }
+    // Sempre oferecer opção: usar dados em memória OU carregar arquivo
+    showModalOpcaoRelatorio();
   } else {
     if(inp) inp.style.borderColor='#e53935';
     if(err) err.textContent='❌ Senha incorreta! Use o formato DDMMAAAA';
     inp?.select();
   }
+}
+
+function showModalOpcaoRelatorio(){
+  const temDados = S.nomeAluno && (S.registroPalavras.length>0 || S.sessoes.length>0);
+  const overlay=document.createElement('div');
+  overlay.id='modalOpcaoRel';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);animation:fadeIn .3s ease';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
+      <div style="font-size:52px;margin-bottom:10px">📋</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:24px;color:var(--text-main);margin-bottom:8px">Relatório do Professor</div>
+      <div style="font-size:14px;color:var(--text-light);margin-bottom:24px">Como deseja visualizar o relatório?</div>
+
+      ${temDados?`
+      <button onclick="document.getElementById('modalOpcaoRel').remove();
+        gerarRelatorio();
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+        document.getElementById('screenRelatorio').classList.add('active');
+        document.getElementById('levelBar').style.display='none';"
+        style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
+               border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:18px;
+               cursor:pointer;width:100%;margin-bottom:10px;box-shadow:0 4px 14px var(--shad)">
+        👤 Ver relatório de <strong>${S.nomeAluno}</strong>
+      </button>`:''}
+
+      <label style="background:${temDados?'transparent':'linear-gradient(135deg,var(--bg-h1),var(--bg-h2))'};
+             color:${temDados?'var(--text-main)':'#fff'};
+             border:${temDados?'2px solid var(--l-bd)':'none'};
+             border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:18px;
+             cursor:pointer;display:block;margin-bottom:10px;
+             ${temDados?'':'box-shadow:0 4px 14px var(--shad);'}">
+        📂 Carregar arquivo do aluno
+        <input type="file" accept=".txt" style="display:none" onchange="document.getElementById('modalOpcaoRel').remove();carregarParaRelatorio(event)">
+      </label>
+
+      <button onclick="document.getElementById('modalOpcaoRel').remove()"
+        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
+               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;
+               font-size:16px;cursor:pointer;width:100%">
+        ✖ Cancelar
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function carregarParaRelatorio(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const raw=e.target.result.trim();
+      // Suporte a base64 (v2) e JSON puro (v1)
+      let dados;
+      try{
+        const json=decodeURIComponent(escape(atob(raw)));
+        dados=JSON.parse(json);
+      }catch(_){
+        dados=JSON.parse(raw);
+      }
+      if(!dados||!dados.nomeAluno){
+        alert('Arquivo inválido! Verifique se é um arquivo salvo pelo jogo.'); return;
+      }
+      const d={
+        nomeAluno:dados.nomeAluno,
+        score:dados.score||0,
+        levelStars:dados.levelStars||[0,0,0,0,0],
+        levelUnlocked:dados.levelUnlocked||[true,false,false,false,false],
+        levelTempos:dados.levelTempos||[0,0,0,0,0],
+        sessoes:dados.sessoes||[],
+        registroPalavras:dados.registroPalavras||[],
+      };
+      // Garantir que a tela existe antes de mostrar
+      const tela=document.getElementById('screenRelatorio');
+      if(!tela){ alert('Erro interno: tela de relatório não encontrada.'); return; }
+      gerarRelatorioComDados(d);
+      // Esconder todas as telas e mostrar relatório
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      tela.classList.add('active');
+      document.getElementById('levelBar').style.display='none';
+    }catch(err){
+      console.error('Erro ao carregar relatório:',err);
+      alert('Erro ao processar o arquivo: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
 }
 
 function showModalCarregarRelatorio(){
@@ -1021,20 +1159,25 @@ function carregarRelatorioExterno(event){
 }
 
 function fecharRelatorio(){
-  // Se há aluno com jogo em andamento, reposiciona direto
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  // Aluno com jogo em andamento: voltar para palavra atual
   if(S.nomeAluno && S.toy){
-    showScreen('screenGame');
+    document.getElementById('screenGame').classList.add('active');
     document.getElementById('levelBar').style.display='flex';
-    renderToy();
+    const btnSave=document.getElementById('btnSaveBar');
+    if(btnSave){ btnSave.style.display='inline-block'; }
+    updateBar(); renderLives(); renderToy();
     return;
   }
-  // Se há aluno sem jogo ativo (entre níveis ou no menu)
+  // Aluno carregado mas sem jogo ativo
   if(S.nomeAluno){
+    currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
     document.getElementById('levelBar').style.display='none';
-    showStartScreen();
+    document.getElementById('screenStart').classList.add('active');
+    renderStart();
     return;
   }
-  // Sem dados: pedir para carregar arquivo do aluno
+  // Sem dados: pedir arquivo
   showModalRecarregar();
 }
 
@@ -1108,6 +1251,17 @@ function fmtTempo(ms){
 }
 
 function gerarRelatorio(){
+  // Snapshot do registro atual incluindo palavra em andamento
+  let regSnap=[...S.registroPalavras];
+  if(S.toy){
+    regSnap=regSnap.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    regSnap.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas||0, erros:S._erros||0,
+      tempoMs:Date.now()-(S.palavraInicio||Date.now()),
+      acertou:false, parcial:true
+    });
+  }
   gerarRelatorioComDados({
     nomeAluno:S.nomeAluno,
     score:S.score,
@@ -1115,7 +1269,7 @@ function gerarRelatorio(){
     levelUnlocked:S.levelUnlocked,
     levelTempos:S.levelTempos,
     sessoes:S.sessoes,
-    registroPalavras:S.registroPalavras,
+    registroPalavras:regSnap,
   });
 }
 
@@ -1124,23 +1278,26 @@ function gerarRelatorioComDados(d){
   const todasPalavras=[...d.registroPalavras];
   (d.sessoes||[]).forEach(s=>(s.palavras||[]).forEach(p=>todasPalavras.push(p)));
 
-  // Palavras mais erradas (ordenar por erros desc)
+  // Palavras mais erradas — agrupa por nome, soma erros/tentativas
   const errosPorPalavra={};
   todasPalavras.forEach(p=>{
-    if(!errosPorPalavra[p.name]) errosPorPalavra[p.name]={erros:0,tentativas:0,acertos:0};
-    errosPorPalavra[p.name].erros+=p.erros||0;
-    errosPorPalavra[p.name].tentativas+=p.tentativas||0;
-    if(p.acertou) errosPorPalavra[p.name].acertos++;
+    const k=p.name;
+    if(!errosPorPalavra[k]) errosPorPalavra[k]={erros:0,tentativas:0,acertos:0,emAndamento:false};
+    errosPorPalavra[k].erros+=p.erros||0;
+    errosPorPalavra[k].tentativas+=p.tentativas||0;
+    if(p.acertou) errosPorPalavra[k].acertos++;
+    if(p.parcial) errosPorPalavra[k].emAndamento=true;
   });
   const rankErros=Object.entries(errosPorPalavra)
     .sort((a,b)=>b[1].erros-a[1].erros)
-    .filter(([,v])=>v.erros>0)
+    .filter(([,v])=>v.tentativas>0||v.emAndamento)
     .slice(0,10);
 
   const niveisConcluidos=d.levelStars.filter(s=>s>0).length;
   const totalEstrelas=d.levelStars.reduce((a,b)=>a+b,0);
 
   const el=document.getElementById('relatorioConteudo');
+  if(!el){ console.error('relatorioConteudo não encontrado'); return; }
   el.innerHTML=`
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--l-bd)">
       <div style="font-size:48px">👤</div>
@@ -1185,8 +1342,8 @@ function gerarRelatorioComDados(d){
     </table>
 
     <!-- PALAVRAS MAIS ERRADAS -->
-    ${rankErros.length>0?`
-    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">❌ Palavras com mais dificuldade</div>
+    ${Object.keys(errosPorPalavra).length>0?`
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📝 Desempenho por palavra</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
       <thead>
         <tr style="background:var(--l-bg)">
@@ -1199,13 +1356,15 @@ function gerarRelatorioComDados(d){
       <tbody>
         ${rankErros.map(([nome,v],i)=>`
         <tr style="border-bottom:1px solid var(--l-bg);background:${i===0?'rgba(255,100,100,0.07)':''}">
-          <td style="padding:10px;font-family:'Fredoka One',cursive;letter-spacing:1px">${nome}</td>
+          <td style="padding:10px;font-family:'Fredoka One',cursive;letter-spacing:1px">
+            ${nome}${v.emAndamento?' <span style="font-size:11px;color:#FF9800;font-family:Nunito,sans-serif">⏳ em andamento</span>':''}
+          </td>
           <td style="padding:10px;text-align:center;color:#e53935;font-weight:700">${v.erros}</td>
           <td style="padding:10px;text-align:center;color:var(--text-light)">${v.tentativas}</td>
-          <td style="padding:10px;text-align:center">${v.acertos>0?'✅':'❌'}</td>
+          <td style="padding:10px;text-align:center">${v.acertos>0?'✅':v.emAndamento?'⏳':'❌'}</td>
         </tr>`).join('')}
       </tbody>
-    </table>`:'<div style="color:var(--text-light);text-align:center;padding:16px;margin-bottom:24px">🎉 Nenhum erro registrado ainda!</div>'}
+    </table>`:'<div style="color:var(--text-light);text-align:center;padding:16px;margin-bottom:24px">⏳ Nenhuma palavra verificada ainda!</div>'}
 
     <!-- HISTÓRICO DE SESSÕES -->
     ${d.sessoes.length>0?`
