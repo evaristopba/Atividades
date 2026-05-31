@@ -291,6 +291,7 @@
                             <th>Tema</th>
                             <th style="text-align:center">Status</th>
                             <th style="text-align:center">Erros</th>
+                            <th>Concluído em</th>
                             <th>Palavra + difícil</th>
                         </tr>
                     </thead>
@@ -305,7 +306,7 @@
     </div>
 
     <!-- MODAL DE CONFIRMAÇÃO DE SAÍDA -->
-    <div id="confirm-exit-modal" class="modal-container hidden">
+    <div id="confirm-exit-modal" class="modal-container hidden" style="background-color:transparent;">
         <div class="modal-content">
             <div class="save-modal-header" style="background:linear-gradient(135deg,#6c757d 0%,#495057 100%);">
                 <span class="save-icon">⚠️</span>
@@ -468,6 +469,8 @@
 
         // ── VOLTAR AO INÍCIO ──
         document.getElementById('btn-restart').addEventListener('click', () => {
+            gameArea.classList.add('hidden');
+            startScreen.classList.remove('hidden');
             confirmExitModal.classList.remove('hidden');
         });
 
@@ -478,12 +481,12 @@
             pauseScreen.style.display = 'none';
             resetStartButtons();
             showIdleButtons();
-            gameArea.classList.add('hidden');
-            startScreen.classList.remove('hidden');
         });
 
         document.getElementById('btn-cancel-exit').addEventListener('click', () => {
             confirmExitModal.classList.add('hidden');
+            startScreen.classList.add('hidden');
+            gameArea.classList.remove('hidden');
         });
 
         // ── SALVAMENTO ──
@@ -637,7 +640,7 @@
                 const data = await response.json();
                 return {
                     quantidade: data.quantidade,
-                    palavras: data.palavras.map(word => word.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+                    palavras: data.palavras.map(word => word.toUpperCase())
                 };
             } catch {
                 return { quantidade: 5, palavras: ["JOGO","BLOG","DESAFIO","ESCOLA","ALUNO"] };
@@ -754,12 +757,21 @@
 
         function saveLevelDiag(completed) {
             const wordTimesResult = {};
+            const levelDuration = Math.round((Date.now() - levelStartTime) / 1000);
             wordsData.forEach(w => {
-                wordTimesResult[w.word] = w.found
-                    ? (levelWordFoundSec[w.word] !== undefined ? levelWordFoundSec[w.word] : Math.round((Date.now()-levelStartTime)/1000))
-                    : null;
+                if (!w.found) {
+                    wordTimesResult[w.word] = null;
+                } else {
+                    // usar o tempo registrado no momento do clique; fallback limitado ao tempo do nível
+                    const t = levelWordFoundSec[w.word] !== undefined
+                        ? levelWordFoundSec[w.word]
+                        : Math.min(levelDuration, difficultySettings[currentDifficulty].time);
+                    wordTimesResult[w.word] = t;
+                }
             });
-            diagData[currentDifficulty] = { completed, errors: levelErrors, wordTimes: wordTimesResult };
+            const now = new Date();
+            const completedAt = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+            diagData[currentDifficulty] = { completed, completedAt, errors: levelErrors, wordTimes: wordTimesResult };
         }
 
         function checkWin() {
@@ -819,7 +831,8 @@
                     const status  = d.completed ? '✅' : '⏱️';
                     const hardest = Object.entries(d.wordTimes).filter(([,v]) => v !== null).sort(([,a],[,b]) => b-a)[0];
                     const hardestStr = hardest ? `${hardest[0]} (${hardest[1]}s)` : '—';
-                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td>${hardestStr}</td>`;
+                    const completedAt = d.completedAt || '—';
+                    tr.innerHTML = `<td>${themeLabels[theme]}</td><td style="text-align:center">${status}</td><td style="text-align:center">${d.errors}</td><td>${completedAt}</td><td>${hardestStr}</td>`;
                 }
                 tbody.appendChild(tr);
             });
@@ -845,6 +858,7 @@
                 txt += `--- ${themeLabels[theme].toUpperCase()} ---\n`;
                 if (!d) { txt += `  Não jogado\n\n`; return; }
                 txt += `  Status: ${d.completed ? 'Concluído' : 'Tempo esgotado'}\n`;
+                if (d.completedAt) txt += `  Data/Hora: ${d.completedAt}\n`;
                 txt += `  Erros de seleção: ${d.errors}\n`;
                 txt += `  Palavras:\n`;
                 Object.entries(d.wordTimes).forEach(([word, sec]) => {
