@@ -143,7 +143,17 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:
 .btn-save-bar:hover{background:rgba(255,255,255,.45);transform:scale(1.1)}
 .btn-save-bar.saved{background:rgba(100,220,100,.4);border-color:rgba(100,255,100,.6)}
 .nome-display{font-family:'Fredoka One',cursive;font-size:15px;color:var(--htxt);background:rgba(255,255,255,.2);border-radius:14px;padding:4px 12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .2s}.nome-display:hover{background:rgba(255,255,255,.35)}
-@media(max-width:480px){@media(max-width:480px){
+/* Esconder ícone de senha nativo */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button{display:none!important;visibility:hidden!important;pointer-events:none!important}
+@media(max-width:480px){/* Esconder ícone de senha nativo */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button{display:none!important;visibility:hidden!important;pointer-events:none!important}
+@media(max-width:480px){
   .app-title{font-size:18px}
   .letter-tile{width:46px;height:52px;font-size:22px}
   .answer-slot{width:44px;height:50px;font-size:21px}
@@ -1013,10 +1023,13 @@ function showModalSenha(){
       <div style="font-size:14px;color:var(--text-light);margin-bottom:20px">Digite a senha de acesso</div>
       <input id="senhaInput" type="password" maxlength="8"
         placeholder="••••••••"
+        autocomplete="off" autocorrect="off" spellcheck="false"
         style="font-family:'Fredoka One',cursive;font-size:28px;letter-spacing:6px;color:var(--text-main);
                background:var(--l-bg);border:3px solid var(--l-bd);border-radius:16px;
                padding:12px 20px;text-align:center;width:100%;outline:none;
-               transition:border-color .2s;margin-bottom:8px"
+               transition:border-color .2s;margin-bottom:8px;
+               -webkit-text-security:disc;
+               -moz-appearance:none;appearance:none"
         oninput="this.style.borderColor='var(--l-bd)'"
         onkeydown="if(event.key==='Enter')confirmarSenha()">
       <div id="senhaErro" style="color:#e53935;font-size:13px;font-weight:700;min-height:20px;margin-bottom:12px"></div>
