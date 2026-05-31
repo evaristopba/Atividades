@@ -663,11 +663,19 @@ function showModalSave(emoji,title,stars,sub,lvl){
   b1.style.cssText='';
   S.cb1=()=>{
     document.getElementById('modalOverlay').classList.add('hidden');
-    showModalNome(()=>{
+    if(S.nomeAluno && S.nomeAluno.trim()){
+      // Nome já existe: salvar direto e avançar
       salvarProgresso();
       showFb('✅ Progresso salvo!','ok');
       avancar();
-    });
+    } else {
+      // Sem nome: pedir antes de salvar
+      showModalNome(()=>{
+        salvarProgresso();
+        showFb('✅ Progresso salvo!','ok');
+        avancar();
+      });
+    }
   };
 
   // Btn2: Continuar sem salvar
@@ -755,13 +763,19 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ========== SALVAR PROGRESSO ==========
 function salvarProgressoBar(){
-  // Sempre pede confirmação/edição do nome antes de salvar
-  showModalNome(()=>{
+  const btn=document.getElementById('btnSaveBar');
+  const executarSalvar=()=>{
     salvarProgresso();
-    const btn=document.getElementById('btnSaveBar');
     btn.textContent='✅'; btn.classList.add('saved');
     setTimeout(()=>{btn.textContent='💾';btn.classList.remove('saved');},2500);
-  });
+  };
+  // Se já tem nome, salva direto sem pedir de novo
+  if(S.nomeAluno && S.nomeAluno.trim()){
+    executarSalvar();
+  } else {
+    // Sem nome: pedir antes de salvar
+    showModalNome(executarSalvar);
+  }
 }
 
 function showModalNome(callback, somenteNome){
