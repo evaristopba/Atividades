@@ -167,6 +167,7 @@
         <button class="tab" data-tab="dicas">💡 Dicas</button>
         <button class="tab" data-tab="coleta">📍 Onde descartar</button>
         <button class="tab" data-tab="atividades">🎯 Atividades</button>
+        <button class="tab" data-tab="bncc">📚 BNCC</button>
       </div>
       <div class="tab-panel active" data-panel="jogo" id="tabJogo">
         <!-- injetado via JS -->
@@ -206,6 +207,9 @@
           </ul>
           <p class="muted" style="margin-top: var(--space-3);">📞 <strong>Dica:</strong> Consulte o site da sua prefeitura para saber os dias e locais de coleta no seu bairro.</p>
         </div>
+      </div>
+      <div class="tab-panel" data-panel="bncc" id="tabBncc">
+        <!-- injetado via JS -->
       </div>
       <div class="tab-panel" data-panel="atividades">
         <div class="content-box">
@@ -301,6 +305,26 @@ const trashItemsNivel1 = [
   { name: '🪙 Moeda antiga',         type: 'metal',   wrong: 'Moedas são feitas de metal! Lixeira amarela. 🟡' },
   { name: '🗝️ Chave velha',          type: 'metal',   wrong: 'Chave é metal! Vai na lixeira amarela. 🟡' },
   { name: '🧲 Imã de geladeira',     type: 'metal',   wrong: 'Imã metálico vai na lixeira amarela. 🟡' },
+
+  // ── Novos itens Nível 1 ──────────────────────────────────────────────────
+  // Papel
+  { name: '🖨️ Folha impressa',         type: 'papel',    wrong: 'Folha impressa é papel! Vai na lixeira azul. 🔵' },
+  { name: '📓 Caderno velho',           type: 'papel',    wrong: 'Caderno é papel! Vai na lixeira azul. 🔵' },
+  { name: '🎁 Papel de presente',       type: 'papel',    wrong: 'Papel de presente é papel! Lixeira azul. 🔵' },
+  { name: '📋 Folha de desenho',        type: 'papel',    wrong: 'Folha de desenho é papel! Vai na lixeira azul. 🔵' },
+  // Plástico
+  { name: '🧃 Canudo plástico',         type: 'plastico', wrong: 'Canudo é plástico! Vai na lixeira vermelha. 🔴' },
+  { name: '🥡 Pote de margarina',       type: 'plastico', wrong: 'Pote de margarina é plástico! Lixeira vermelha. 🔴' },
+  { name: '🪣 Regador plástico',        type: 'plastico', wrong: 'Regador de plástico vai na lixeira vermelha. 🔴' },
+  { name: '🧴 Tampa de garrafa',        type: 'plastico', wrong: 'Tampa plástica vai na lixeira vermelha. 🔴' },
+  // Vidro
+  { name: '🍯 Pote de mel de vidro',    type: 'vidro',    wrong: 'Pote de vidro vai na lixeira verde. 🟢' },
+  { name: '🫗 Garrafa de azeite vazia', type: 'vidro',    wrong: 'Garrafa de vidro vai na lixeira verde. 🟢' },
+  { name: '🧪 Vidrinho vazio',          type: 'vidro',    wrong: 'Vidrinho vai na lixeira verde. 🟢' },
+  // Metal
+  { name: '🥄 Colher de metal',         type: 'metal',    wrong: 'Colher de metal vai na lixeira amarela. 🟡' },
+  { name: '🎺 Lata de spray vazia',     type: 'metal',    wrong: 'Lata de spray vazia é metal! Lixeira amarela. 🟡' },
+  { name: '📌 Clipe de metal',          type: 'metal',    wrong: 'Clipe de metal vai na lixeira amarela. 🟡' },
 ];
 
 // ════════════════════════════════════════════
@@ -392,6 +416,61 @@ const trashItemsCompleto = [
   { name: '🪥 Escova de dentes usada', type: 'rejeito', wrong: 'Escova de dentes usada é rejeito.' },
   { name: '🧤 Luva descartável usada', type: 'rejeito', wrong: 'Luva descartável usada é rejeito.' },
   { name: '🫧 Embalagem de creme metálica', type: 'rejeito', wrong: 'Embalagem mista de creme geralmente é rejeito por misturar materiais.' },
+
+  // ── Novos itens ──────────────────────────────────────────────────────────
+  // Papel
+  { name: '📓 Caderno espiral velho',      type: 'papel',     wrong: 'Caderno (sem a espiral metálica) é papel reciclável. Retire a espiral e descarte separado.' },
+  { name: '🗃️ Pasta de arquivo',           type: 'papel',     wrong: 'Pasta de arquivo é papelão e vai na lixeira azul.' },
+  { name: '📎 Papel com grampo',           type: 'papel',     wrong: 'O papel com grampo ainda é reciclável. O grampo metálico é separado na triagem.' },
+  { name: '🖨️ Folha impressa',             type: 'papel',     wrong: 'Folha impressa é papel reciclável e vai na lixeira azul.' },
+  { name: '📮 Caixa de leite (tetrapack)', type: 'rejeito',   wrong: 'Embalagem tetrapack mistura papel, plástico e alumínio — é rejeito na maioria das cidades. Verifique se há coleta específica na sua.' },
+
+  // Plástico
+  { name: '🧃 Canudo plástico',            type: 'plastico',  wrong: 'Canudo de plástico vai na lixeira vermelha.' },
+  { name: '🥡 Pote de margarina',          type: 'plastico',  wrong: 'Pote de margarina é plástico e vai na lixeira vermelha.' },
+  { name: '🧹 Cabo de vassoura plástico',  type: 'plastico',  wrong: 'Cabo de vassoura de plástico vai na lixeira vermelha.' },
+  { name: '💈 Embalagem de xampu vazia',   type: 'plastico',  wrong: 'Embalagem de xampu é plástico. Lave antes de descartar.' },
+  { name: '🪣 Regador plástico quebrado',  type: 'plastico',  wrong: 'Plástico vai na lixeira vermelha.' },
+
+  // Vidro
+  { name: '🍯 Pote de mel de vidro',       type: 'vidro',     wrong: 'Pote de vidro vai na lixeira verde.' },
+  { name: '🧪 Ampola de vidro vazia',      type: 'vidro',     wrong: 'Ampola de vidro vai na lixeira verde.' },
+  { name: '🫗 Garrafa de azeite vazia',    type: 'vidro',     wrong: 'Garrafa de vidro vai na lixeira verde.' },
+  { name: '🔭 Lente de óculos',            type: 'vidro',     wrong: 'Lentes de vidro vão na lixeira verde.' },
+
+  // Metal
+  { name: '🥄 Colher de metal velha',      type: 'metal',     wrong: 'Talheres metálicos vão na lixeira amarela.' },
+  { name: '🔗 Corrente metálica',          type: 'metal',     wrong: 'Corrente de metal vai na lixeira amarela.' },
+  { name: '📌 Grampo de metal',            type: 'metal',     wrong: 'Grampos e clipes metálicos vão na lixeira amarela.' },
+  { name: '🪤 Armadilha de metal velha',   type: 'metal',     wrong: 'Objetos de metal vão na lixeira amarela.' },
+  { name: '🎺 Lata de spray vazia',        type: 'metal',     wrong: 'Lata de spray vazia (sem pressão) é metal e vai na lixeira amarela.' },
+
+  // Orgânico
+  { name: '🥕 Casca de cenoura',           type: 'organico',  wrong: 'Cascas de legumes são resíduos orgânicos.' },
+  { name: '🍋 Casca de limão',             type: 'organico',  wrong: 'Casca de fruta é orgânico.' },
+  { name: '🫖 Folha de hortelã seca',      type: 'organico',  wrong: 'Ervas secas são resíduos orgânicos.' },
+  { name: '🌾 Palha de milho',             type: 'organico',  wrong: 'Palha é resíduo orgânico.' },
+  { name: '🍕 Sobra de pizza',             type: 'organico',  wrong: 'Restos de alimento são orgânicos e vão na lixeira marrom.' },
+
+  // Madeira
+  { name: '🪛 Cabo de ferramenta de madeira', type: 'madeira', wrong: 'Cabo de madeira vai na lixeira preta.' },
+  { name: '🖼️ Porta-retrato de madeira',   type: 'madeira',   wrong: 'Objetos de madeira vão na lixeira preta.' },
+  { name: '🎻 Pedaço de bambu',            type: 'madeira',   wrong: 'Bambu é madeira e vai na lixeira preta.' },
+  { name: '🧹 Vassoura de palha',          type: 'madeira',   wrong: 'Vassoura de palha é material vegetal/madeira e vai na lixeira preta.' },
+
+  // Eletrônico
+  { name: '⌚ Relógio digital quebrado',   type: 'eletronico', wrong: 'Relógio eletrônico é resíduo eletrônico.' },
+  { name: '🖥️ Monitor velho',              type: 'eletronico', wrong: 'Monitor é equipamento eletrônico e vai na lixeira laranja.' },
+  { name: '📟 Pager antigo',              type: 'eletronico', wrong: 'Equipamentos eletrônicos vão na lixeira laranja.' },
+  { name: '🔌 Tomada elétrica velha',      type: 'eletronico', wrong: 'Componentes elétricos vão na lixeira laranja.' },
+  { name: '💾 Pen drive',                  type: 'eletronico', wrong: 'Dispositivos de armazenamento são eletrônicos.' },
+
+  // Rejeito
+  { name: '🪒 Lâmina de barbear usada',    type: 'rejeito',   wrong: 'Lâmina de barbear usada é rejeito.' },
+  { name: '🧴 Frasco de tinta de cabelo',  type: 'rejeito',   wrong: 'Frascos com resíduo químico são rejeito.' },
+  { name: '🩺 Seringa usada',              type: 'rejeito',   wrong: 'Material perfurocortante é rejeito e precisa de descarte especial em farmácias.' },
+  { name: '🧸 Brinquedo misto quebrado',   type: 'rejeito',   wrong: 'Brinquedos que misturam materiais (plástico, tecido, metal) são rejeito.' },
+  { name: '🪣 Balde com resíduo químico',  type: 'rejeito',   wrong: 'Recipientes com resíduo de produto químico são rejeito.' },
 ];
 
 const trashItems = NIVEL1 ? trashItemsNivel1 : trashItemsCompleto;
@@ -516,6 +595,80 @@ function setupUI() {
     document.getElementById('msgFinalTexto').textContent = '"Separar o lixo é um gesto pequeno que faz uma diferença enorme para o nosso planeta! Você já é um herói do meio ambiente! 🌍"';
     document.getElementById('howSubtitle').textContent = 'Para 4º e 5º ano — 4 lixeiras, linguagem simples!';
   }
+
+  // Aba BNCC
+  document.getElementById('tabBncc').innerHTML = NIVEL1
+    ? `<div class="content-box">
+        <h3>📚 Alinhamento BNCC — 4º e 5º ano</h3>
+        <p style="margin-bottom:var(--space-3);font-size:var(--text-sm);">Este game apoia o desenvolvimento das seguintes competências e habilidades da Base Nacional Comum Curricular:</p>
+        <table>
+          <thead><tr><th>Código</th><th>Habilidade</th><th>Como o game contribui</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>EF04CI09</strong></td>
+              <td>Identificar os efeitos do descarte inadequado de resíduos sólidos no ambiente e na saúde humana.</td>
+              <td>O feedback de erro explica por que cada material precisa ir à lixeira certa, reforçando o impacto do descarte incorreto.</td>
+            </tr>
+            <tr>
+              <td><strong>EF05CI05</strong></td>
+              <td>Construir propostas coletivas para um consumo mais consciente e refletir sobre os hábitos de consumo e a produção de resíduos.</td>
+              <td>A aba "Atividades" propõe ações concretas (caça ao lixo, montagem de lixeiras) que estimulam reflexão e protagonismo.</td>
+            </tr>
+            <tr>
+              <td><strong>EF05GE10</strong></td>
+              <td>Reconhecer e comparar atributos da qualidade ambiental em diferentes lugares, destacando situações que envolvem riscos ao ambiente e à saúde.</td>
+              <td>A distinção entre recicláveis e não recicláveis aborda diretamente a qualidade ambiental e os riscos do descarte indevido.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:var(--space-3);">📌 <strong>Área:</strong> Ciências da Natureza e Geografia &nbsp;|&nbsp; <strong>Anos:</strong> 4º e 5º do Ensino Fundamental</p>
+      </div>
+      <div class="content-box">
+        <h3>🌱 Competências Gerais da BNCC relacionadas</h3>
+        <ul>
+          <li><strong>Competência 7 — Argumentação:</strong> Ao justificar por que cada resíduo pertence a uma lixeira, o aluno exercita o raciocínio e a argumentação com base em critérios científicos.</li>
+          <li><strong>Competência 10 — Responsabilidade e cidadania:</strong> A proposta de descarte correto desenvolve o senso de responsabilidade socioambiental e a participação cidadã.</li>
+        </ul>
+      </div>`
+    : `<div class="content-box">
+        <h3>📚 Alinhamento BNCC — Ensino Fundamental II e Médio</h3>
+        <p style="margin-bottom:var(--space-3);font-size:var(--text-sm);">Este game apoia o desenvolvimento das seguintes competências e habilidades da Base Nacional Comum Curricular:</p>
+        <table>
+          <thead><tr><th>Código</th><th>Habilidade</th><th>Como o game contribui</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>EF06CI05</strong></td>
+              <td>Construir propostas coletivas para um consumo mais consciente e discutir os efeitos do descarte inadequado de resíduos sólidos.</td>
+              <td>A classificação em 8 categorias exige que o estudante compreenda as propriedades dos materiais e as consequências do descarte incorreto.</td>
+            </tr>
+            <tr>
+              <td><strong>EF07CI08</strong></td>
+              <td>Avaliar como os processos de exploração dos recursos naturais e descarte de resíduos interferem na dinâmica de populações e nos ecossistemas.</td>
+              <td>O jogo aborda madeira, eletrônicos e rejeitos — categorias que evidenciam o ciclo de vida dos materiais e seus impactos ecossistêmicos.</td>
+            </tr>
+            <tr>
+              <td><strong>EF09CI13</strong></td>
+              <td>Propor iniciativas individuais e coletivas para a solução de problemas ambientais da cidade ou do campo.</td>
+              <td>A aba "Atividades" propõe ações reais (ponto de coleta de pilhas, compostagem) conectando o jogo à prática cidadã.</td>
+            </tr>
+            <tr>
+              <td><strong>EM13CNT207</strong></td>
+              <td>Analisar e debater situações que envolvem o descarte e reaproveitamento de materiais, avaliando riscos e benefícios para saúde e ambiente.</td>
+              <td>A presença de eletrônicos, rejeitos e itens ambíguos (ex.: bandeja de isopor, blister de remédio) promove análise crítica e debate.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:var(--space-3);">📌 <strong>Áreas:</strong> Ciências da Natureza, Geografia e Competências Gerais &nbsp;|&nbsp; <strong>Etapa:</strong> EF II e Ensino Médio</p>
+      </div>
+      <div class="content-box">
+        <h3>🌱 Competências Gerais da BNCC relacionadas</h3>
+        <ul>
+          <li><strong>Competência 2 — Pensamento científico:</strong> Classificar resíduos exige observação, análise de propriedades e aplicação de critérios científicos sobre os materiais.</li>
+          <li><strong>Competência 7 — Argumentação:</strong> O feedback de erro fundamenta cada classificação — o estudante aprende a justificar escolhas com base em evidências.</li>
+          <li><strong>Competência 9 — Empatia e cooperação:</strong> A dimensão coletiva do descarte correto é reforçada nas atividades e na mensagem final do guia.</li>
+          <li><strong>Competência 10 — Responsabilidade e cidadania:</strong> O game posiciona o estudante como agente ativo na preservação ambiental e no consumo consciente.</li>
+        </ul>
+      </div>`;
 
   setupGlobalImageFallback();
 }
