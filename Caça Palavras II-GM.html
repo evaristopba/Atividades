@@ -770,7 +770,7 @@
                 }
             });
             const now = new Date();
-            const completedAt = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+            const completedAt = now.toLocaleDateString('pt-BR') + ' ' + `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             diagData[currentDifficulty] = { completed, completedAt, errors: levelErrors, wordTimes: wordTimesResult };
         }
 
