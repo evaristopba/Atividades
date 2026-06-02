@@ -552,7 +552,16 @@
                     gameArea.classList.remove('hidden');
                     showGameButtons();
                     updateScoreDisplay();
-                    loadLevel(currentDifficulty);
+                    // Se todos os temas concluídos, exibir relatório final
+                    const allCompleted = themeOrder.every(t => diagData[t] && diagData[t].completed);
+                    if (allCompleted) {
+                        gameArea.classList.add('hidden');
+                        startScreen.classList.remove('hidden');
+                        showIdleButtons();
+                        setTimeout(() => showReportModal(), 100);
+                    } else {
+                        loadLevel(currentDifficulty);
+                    }
                 } catch (err) { alert("Arquivo inválido!"); }
             };
             reader.readAsText(file);
