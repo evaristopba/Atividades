@@ -1147,6 +1147,20 @@
         let alunoNome = 'Aluno';
         
         // ==============================================
+        // GERENCIAMENTO DE FOCO (NOVO)
+        // ==============================================
+        function returnFocusToGame() {
+            const verifyBtn = document.getElementById('verify-btn');
+            if (verifyBtn && !verifyBtn.disabled) {
+                verifyBtn.focus();
+            } else {
+                const firstCmdBtn = document.querySelector('#command-buttons .control-btn:not([disabled])');
+                if (firstCmdBtn) firstCmdBtn.focus();
+                else if (verifyBtn) verifyBtn.focus();
+            }
+        }
+
+        // ==============================================
         // SISTEMA DE CONFETE
         // ==============================================
         const canvas = document.getElementById('confetti-canvas');
@@ -1434,6 +1448,8 @@
                 b.disabled = level > currentLevel;
                 b.classList.toggle('active', level === currentLevel);
             });
+            
+            returnFocusToGame(); // Garante o foco de volta
         }
         
         // Função para mensagens temporárias
@@ -1533,7 +1549,7 @@
             isMoving = false;
             toggleControlButtons(true);
             
-            // CORREÇÃO: Atualiza botões de nível visualmente para refletir o nível carregado
+            // Atualiza botões de nível visualmente para refletir o nível carregado
             document.querySelectorAll('.level-btn').forEach(b => {
                 const level = parseInt(b.dataset.level);
                 b.disabled = level > currentLevel;
@@ -1544,9 +1560,7 @@
             const fileInputs = document.querySelectorAll('input[type="file"]');
             fileInputs.forEach(input => input.remove());
             
-            // Foca no botão Verificar
-            const verifyBtn = document.getElementById('verify-btn');
-            if (verifyBtn) verifyBtn.focus();
+            returnFocusToGame(); // Garante o foco de volta após carregar
             
             showTemporaryMessage(`Progresso de ${alunoNome} restaurado com sucesso!`, "success");
         }
@@ -1571,6 +1585,7 @@
         function closeNomeModal() {
             nomeOverlay.style.display = 'none';
             pendingSaveCallback = null;
+            returnFocusToGame(); // Garante o foco de volta ao fechar
         }
         
         if (confirmarNomeBtn) {
@@ -1610,6 +1625,9 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && nomeOverlay && nomeOverlay.style.display === 'flex') {
                 closeNomeModal();
+            }
+            if (e.key === 'Escape' && customAlertOverlay && customAlertOverlay.style.display === 'flex') {
+                closeCustomAlert();
             }
         });
         
@@ -1711,6 +1729,7 @@
                 pendingAlertCallback();
                 pendingAlertCallback = null;
             }
+            returnFocusToGame(); // Garante o foco de volta ao fechar alerta
         }
         
         if (customAlertOkBtn) {
@@ -1724,12 +1743,6 @@
                 }
             });
         }
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && customAlertOverlay && customAlertOverlay.style.display === 'flex') {
-                closeCustomAlert();
-            }
-        });
         
         // Substituir alerts feios por modais bonitos
         window.alert = function(message) {
@@ -1794,6 +1807,7 @@
                 closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
                 newCloseBtn.addEventListener('click', () => {
                     instructionsOverlay.style.display = 'none';
+                    returnFocusToGame(); // Garante o foco de volta ao fechar instruções
                 });
             }
             
@@ -1957,6 +1971,7 @@
                         }
                         setTimeout(() => {
                             if (input) input.remove();
+                            returnFocusToGame(); // Garante o foco de volta após carregar arquivo
                         }, 100);
                     };
                     input.click();
@@ -2021,7 +2036,7 @@
             toggleControlButtons(true);
             victoryMessage.style.display = 'none';
             newChallenge();
-            document.getElementById('verify-btn').focus();
+            returnFocusToGame(); // Garante o foco de volta ao reiniciar
         }
 
         // Função para habilitar/desabilitar controles
