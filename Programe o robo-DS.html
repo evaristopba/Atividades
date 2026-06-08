@@ -39,7 +39,7 @@
             padding: 0;
         }
         
-        /* ADICIONADO - Efeito de tremor */
+        /* Efeito de tremor */
         .shake-game {
             animation: shakeEffect 0.3s ease-in-out 0s 2;
         }
@@ -105,6 +105,31 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
+        }
+        
+        /* Botões de salvar/carregar */
+        #save-progress-btn, #load-progress-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: 3px solid var(--secondary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        #save-progress-btn {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        #load-progress-btn {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        #save-progress-btn:hover, #load-progress-btn:hover {
+            transform: scale(1.02);
         }
         
         .game-wrapper {
@@ -475,7 +500,91 @@
             background-color: #27ae60;
         }
 
-        /* ADICIONADO - Canvas para confetes */
+        /* Botão BNCC no modal */
+        #bncc-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        #bncc-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Modal BNCC (segundo modal) */
+        #bncc-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #bncc-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+        
+        #bncc-content h2 {
+            color: #f1c40f;
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        #bncc-content h3 {
+            color: #3498db;
+            margin-top: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        
+        #bncc-content ul {
+            padding-left: 20px;
+        }
+        
+        #bncc-content li {
+            margin: 8px 0;
+        }
+        
+        #close-bncc {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        #close-bncc:hover {
+            background-color: #27ae60;
+        }
+
+        /* Canvas para confetes */
         #confetti-canvas {
             position: fixed;
             top: 0;
@@ -484,6 +593,268 @@
             height: 100%;
             pointer-events: none;
             z-index: 999;
+        }
+
+        /* MODAL PARA SOLICITAR NOME DO ALUNO */
+        #nome-aluno-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 4000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .nome-modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .nome-modal-content h2 {
+            color: #f1c40f;
+            margin-top: 0;
+        }
+        
+        .nome-modal-content p {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .nome-modal-content input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        .nome-modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .nome-modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        #confirmar-nome-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        #confirmar-nome-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        #cancelar-nome-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #cancelar-nome-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* ============================================== */
+        /* MODAL DE AVISOS BONITOS (substitui alert) */
+        /* ============================================== */
+        .custom-alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .custom-alert-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeInScale 0.2s ease;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .custom-alert-content h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        
+        .custom-alert-content p {
+            margin: 15px 0;
+            font-size: 1.1em;
+            line-height: 1.4;
+            color: #2c3e50;
+        }
+        
+        .custom-alert-content button {
+            padding: 12px 25px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .custom-alert-content button:hover {
+            background-color: #27ae60;
+        }
+        
+        .custom-alert-content.warning h3 {
+            color: #e74c3c;
+        }
+        
+        .custom-alert-content.warning button {
+            background-color: #e74c3c;
+        }
+        
+        .custom-alert-content.warning button:hover {
+            background-color: #c0392b;
+        }
+        
+        .custom-alert-content.info h3 {
+            color: #3498db;
+        }
+        
+        .custom-alert-content.info button {
+            background-color: #3498db;
+        }
+        
+        .custom-alert-content.info button:hover {
+            background-color: #2980b9;
+        }
+        
+        .custom-alert-content.success h3 {
+            color: #2ecc71;
+        }
+
+        /* ============================================== */
+        /* TEMAS - ESPAÇO E FLORESTA */
+        /* ============================================== */
+        
+        body.space {
+            background: linear-gradient(135deg, #0c0c2c, #1a1a3e);
+        }
+        
+        body.space .game-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 30px;
+            padding: 20px;
+        }
+        
+        body.space .challenge-box,
+        body.space .command-slot,
+        body.space .grid-cell {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.forest {
+            background: linear-gradient(135deg, #0b3d0b, #1a6b1a);
+        }
+        
+        body.forest .game-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 30px;
+            padding: 20px;
+        }
+        
+        body.forest .challenge-box,
+        body.forest .command-slot,
+        body.forest .grid-cell {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* ============================================== */
+        /* ALTO CONTRASTE */
+        /* ============================================== */
+        
+        body.high-contrast {
+            background-color: black;
+        }
+        
+        body.high-contrast .game-container,
+        body.high-contrast .challenge-box,
+        body.high-contrast .command-slot,
+        body.high-contrast .grid-cell,
+        body.high-contrast #instructions-content,
+        body.high-contrast #bncc-content,
+        body.high-contrast .nome-modal-content,
+        body.high-contrast .custom-alert-content {
+            background-color: black !important;
+            color: yellow !important;
+            border-color: yellow !important;
+        }
+        
+        body.high-contrast button,
+        body.high-contrast .control-btn,
+        body.high-contrast .level-btn,
+        body.high-contrast #save-progress-btn,
+        body.high-contrast #load-progress-btn,
+        body.high-contrast #confirmar-nome-btn,
+        body.high-contrast #cancelar-nome-btn,
+        body.high-contrast .custom-alert-content button {
+            background-color: black !important;
+            color: yellow !important;
+            border: 2px solid yellow !important;
+        }
+        
+        body.high-contrast #player {
+            filter: invert(1);
+        }
+        
+        body.high-contrast #math-problem {
+            color: yellow !important;
+        }
+        
+        body.high-contrast #score,
+        body.high-contrast #challenge-progress,
+        body.high-contrast #lives-display {
+            color: yellow !important;
+        }
+        
+        body.high-contrast .custom-alert-content p {
+            color: yellow !important;
         }
 
         @media (max-width: 600px) {
@@ -550,6 +921,18 @@
                 margin: 20px;
                 padding: 20px;
             }
+            #bncc-content {
+                margin: 20px;
+                padding: 20px;
+            }
+            .nome-modal-content {
+                margin: 20px;
+                padding: 20px;
+            }
+            .custom-alert-content {
+                margin: 20px;
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -571,6 +954,8 @@
             <button id="instructions-btn" aria-label="Ver instruções do jogo">Instruções</button>
             <button id="high-contrast-btn" aria-label="Alternar modo de alto contraste">Alto Contraste</button>
             <button id="restart-btn" aria-label="Reiniciar o jogo">Reiniciar Jogo</button>
+            <button id="save-progress-btn">💾 Salvar Progresso</button>
+            <button id="load-progress-btn">📂 Carregar Progresso</button>
         </div>
         
         <div class="game-wrapper">
@@ -609,7 +994,7 @@
         
         <div id="victory-message"></div>
         
-        <!-- MODAL DE INSTRUÇÕES -->
+        <!-- MODAL DE INSTRUÇÕES (com botão BNCC) -->
         <div id="instructions-overlay">
             <div id="instructions-content">
                 <h2>🤖 Desafio do Robô Matemático</h2>
@@ -629,7 +1014,74 @@
                     <li><strong>Níveis:</strong> Avance de nível após 20 acertos corretos em cada um.</li>
                     <li><strong>Novo:</strong> Use "Reiniciar Desafio" se houver problemas técnicos!</li>
                 </ul>
+                <button id="bncc-btn">📚 Habilidades BNCC</button>
                 <button id="close-instructions">Entendi, vamos jogar!</button>
+            </div>
+        </div>
+
+        <!-- MODAL BNCC (segundo modal) -->
+        <div id="bncc-overlay">
+            <div id="bncc-content">
+                <h2>📚 Habilidades BNCC</h2>
+                
+                <h3>🌟 Nível 1 (2º e 3º ano)</h3>
+                <ul>
+                    <li><strong>EF02MA05</strong> – Construir fatos básicos da adição e subtração até 10</li>
+                    <li><strong>EF02MA06</strong> – Resolver problemas de adição e subtração envolvendo números até 20</li>
+                    <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
+                </ul>
+                
+                <h3>🌟 Nível 2 (3º e 4º ano)</h3>
+                <ul>
+                    <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
+                    <li><strong>EF04MA04</strong> – Calcular adição e subtração com números naturais</li>
+                    <li><strong>EF04MA05</strong> – Resolver problemas envolvendo adição e subtração</li>
+                </ul>
+                
+                <h3>🌟 Nível 3 (4º e 5º ano)</h3>
+                <ul>
+                    <li><strong>EF04MA06</strong> – Resolver problemas envolvendo diferentes significados da multiplicação</li>
+                    <li><strong>EF04MA07</strong> – Resolver problemas envolvendo a multiplicação</li>
+                    <li><strong>EF05MA07</strong> – Resolver problemas de multiplicação com números naturais</li>
+                </ul>
+                
+                <h3>🌟 Nível 4 (5º e 6º ano)</h3>
+                <ul>
+                    <li><strong>EF05MA08</strong> – Resolver problemas de divisão com números naturais</li>
+                    <li><strong>EF05MA09</strong> – Resolver problemas envolvendo as quatro operações</li>
+                    <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
+                </ul>
+                
+                <h3>🌟 Nível 5 (6º e 7º ano)</h3>
+                <ul>
+                    <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
+                    <li><strong>EF06MA06</strong> – Calcular resultados de adição, subtração, multiplicação e divisão</li>
+                    <li><strong>EF07MA02</strong> – Resolver problemas envolvendo números naturais e as quatro operações</li>
+                </ul>
+                
+                <button id="close-bncc">Fechar</button>
+            </div>
+        </div>
+
+        <!-- MODAL PARA SOLICITAR NOME DO ALUNO -->
+        <div id="nome-aluno-overlay">
+            <div class="nome-modal-content">
+                <h2>📝 Nome do Aluno</h2>
+                <p>Digite seu nome para salvar o progresso:</p>
+                <input type="text" id="nome-aluno-input" placeholder="Digite seu nome" autocomplete="off">
+                <div class="nome-modal-buttons">
+                    <button id="confirmar-nome-btn">💾 Salvar</button>
+                    <button id="cancelar-nome-btn">❌ Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE AVISOS BONITOS -->
+        <div id="custom-alert-overlay" class="custom-alert-overlay">
+            <div class="custom-alert-content" id="custom-alert-content">
+                <h3 id="custom-alert-title">⚠️ Aviso</h3>
+                <p id="custom-alert-message">Mensagem</p>
+                <button id="custom-alert-ok-btn">OK</button>
             </div>
         </div>
     </div>
@@ -638,7 +1090,7 @@
         Inspirado em <a href="https://www.coquinhos.com/programacao-para-criancas/play/" target="_blank">Coquinhos.com</a>
     </footer>
 
-    <!-- ADICIONADO - Canvas para confetes -->
+    <!-- Canvas para confetes -->
     <canvas id="confetti-canvas"></canvas>
 
     <script>
@@ -681,7 +1133,7 @@
         let visitedCells = [];
         
         // ==============================================
-        // ADICIONADO - SISTEMA DE CONFETE
+        // SISTEMA DE CONFETE
         // ==============================================
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
@@ -745,7 +1197,7 @@
         }
         
         // ==============================================
-        // ADICIONADO - SISTEMA DE TREMOR
+        // SISTEMA DE TREMOR
         // ==============================================
         const gameContainer = document.querySelector('.game-container');
         
@@ -1014,6 +1466,245 @@
         }
         
         // ==============================================
+        // SISTEMA DE SALVAR/CARREGAR PROGRESSO (Base64)
+        // ==============================================
+        
+        function getGameState() {
+            return {
+                currentLevel: currentLevel,
+                score: score,
+                correctAttempts: correctAttempts,
+                lives: lives,
+                levelEntryScore: levelEntryScore,
+                playerPos: playerPos,
+                startPos: startPos,
+                targetPos: targetPos,
+                targetNumber: targetNumber,
+                bombPositions: bombPositions,
+                decoyPositions: decoyPositions,
+                visitedCells: visitedCells,
+                currentProblemText: mathProblemEl.textContent
+            };
+        }
+        
+        function restoreGameState(state) {
+            currentLevel = state.currentLevel;
+            score = state.score;
+            correctAttempts = state.correctAttempts;
+            lives = state.lives;
+            levelEntryScore = state.levelEntryScore;
+            playerPos = state.playerPos;
+            startPos = state.startPos;
+            targetPos = state.targetPos;
+            targetNumber = state.targetNumber;
+            bombPositions = state.bombPositions;
+            decoyPositions = state.decoyPositions;
+            visitedCells = state.visitedCells;
+            
+            scoreEl.textContent = score;
+            updateLivesDisplay();
+            updateChallengeProgress();
+            updateGridDisplay();
+            updatePlayerPosition();
+            mathProblemEl.textContent = state.currentProblemText;
+            clearCommands();
+            
+            isGameOver = false;
+            isMoving = false;
+            toggleControlButtons(true);
+            
+            // Remove input file residual
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(input => input.remove());
+            
+            // Foca no botão Verificar
+            const verifyBtn = document.getElementById('verify-btn');
+            if (verifyBtn) verifyBtn.focus();
+            
+            const nomeAluno = state.alunoNome || "Aluno";
+            showTemporaryMessage(`Progresso de ${nomeAluno} restaurado com sucesso!`, "success");
+        }
+        
+        // ==============================================
+        // MODAL DE NOME DO ALUNO (sem prompt)
+        // ==============================================
+        const nomeOverlay = document.getElementById('nome-aluno-overlay');
+        const nomeInput = document.getElementById('nome-aluno-input');
+        const confirmarNomeBtn = document.getElementById('confirmar-nome-btn');
+        const cancelarNomeBtn = document.getElementById('cancelar-nome-btn');
+        
+        let pendingSaveCallback = null;
+        
+        function showNomeModal(callback) {
+            pendingSaveCallback = callback;
+            nomeInput.value = '';
+            nomeOverlay.style.display = 'flex';
+            setTimeout(() => nomeInput.focus(), 100);
+        }
+        
+        function closeNomeModal() {
+            nomeOverlay.style.display = 'none';
+            pendingSaveCallback = null;
+        }
+        
+        if (confirmarNomeBtn) {
+            confirmarNomeBtn.addEventListener('click', () => {
+                let alunoNome = nomeInput.value.trim();
+                if (!alunoNome) {
+                    alunoNome = 'anonimo';
+                } else {
+                    alunoNome = alunoNome.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '_').substring(0, 30);
+                }
+                if (pendingSaveCallback) {
+                    pendingSaveCallback(alunoNome);
+                }
+                closeNomeModal();
+            });
+        }
+        
+        if (cancelarNomeBtn) {
+            cancelarNomeBtn.addEventListener('click', () => {
+                closeNomeModal();
+            });
+        }
+        
+        if (nomeOverlay) {
+            nomeOverlay.addEventListener('click', (e) => {
+                if (e.target === nomeOverlay) {
+                    closeNomeModal();
+                }
+            });
+        }
+        
+        // Tecla ESC fecha o modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && nomeOverlay && nomeOverlay.style.display === 'flex') {
+                closeNomeModal();
+            }
+        });
+        
+        // Função de salvar com modal
+        function saveProgressWithModal() {
+            showNomeModal((alunoNome) => {
+                try {
+                    const gameState = getGameState();
+                    gameState.alunoNome = alunoNome;
+                    gameState.dataSalvamento = new Date().toISOString();
+                    
+                    const jsonString = JSON.stringify(gameState);
+                    const base64String = btoa(unescape(encodeURIComponent(jsonString)));
+                    
+                    const dataStr = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    const fileName = `robo_${alunoNome}_nivel_${currentLevel}_${dataStr}.txt`;
+                    
+                    const blob = new Blob([base64String], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    showTemporaryMessage(`Progresso de ${alunoNome} salvo com sucesso!`, "success");
+                } catch (error) {
+                    console.error("Erro ao salvar:", error);
+                    showCustomAlert("❌ ERRO AO SALVAR", "Erro ao salvar progresso!", "warning");
+                }
+            });
+        }
+        
+        function loadProgressFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const base64String = e.target.result;
+                    const jsonString = decodeURIComponent(escape(atob(base64String)));
+                    const gameState = JSON.parse(jsonString);
+                    restoreGameState(gameState);
+                    
+                    const fileInput = document.getElementById('temp-file-input');
+                    if (fileInput) fileInput.remove();
+                } catch (error) {
+                    console.error("Erro ao carregar:", error);
+                    showCustomAlert("❌ ERRO AO CARREGAR", "Arquivo inválido ou corrompido!", "warning");
+                }
+            };
+            reader.onerror = function() {
+                showCustomAlert("❌ ERRO AO LER", "Erro ao ler o arquivo!", "warning");
+            };
+            reader.readAsText(file);
+        }
+        
+        // ==============================================
+        // MODAL DE AVISOS BONITOS (substitui alert)
+        // ==============================================
+        const customAlertOverlay = document.getElementById('custom-alert-overlay');
+        const customAlertTitle = document.getElementById('custom-alert-title');
+        const customAlertMessage = document.getElementById('custom-alert-message');
+        const customAlertOkBtn = document.getElementById('custom-alert-ok-btn');
+        const customAlertContent = document.getElementById('custom-alert-content');
+        
+        let pendingAlertCallback = null;
+        
+        function showCustomAlert(title, message, type = 'warning', callback = null) {
+            customAlertTitle.textContent = title;
+            customAlertMessage.textContent = message;
+            customAlertContent.classList.remove('warning', 'info', 'success');
+            customAlertContent.classList.add(type);
+            pendingAlertCallback = callback;
+            customAlertOverlay.style.display = 'flex';
+        }
+        
+        function closeCustomAlert() {
+            customAlertOverlay.style.display = 'none';
+            if (pendingAlertCallback) {
+                pendingAlertCallback();
+                pendingAlertCallback = null;
+            }
+        }
+        
+        if (customAlertOkBtn) {
+            customAlertOkBtn.addEventListener('click', closeCustomAlert);
+        }
+        
+        if (customAlertOverlay) {
+            customAlertOverlay.addEventListener('click', (e) => {
+                if (e.target === customAlertOverlay) {
+                    closeCustomAlert();
+                }
+            });
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && customAlertOverlay && customAlertOverlay.style.display === 'flex') {
+                closeCustomAlert();
+            }
+        });
+        
+        // Substituir alerts feios por modais bonitos
+        window.alert = function(message) {
+            if (message.includes("Fim de Jogo")) {
+                showCustomAlert("💀 FIM DE JOGO", message, "warning");
+            } else if (message.includes("Continue tentando")) {
+                showCustomAlert("✅ CAMINHO POSSÍVEL", message, "success");
+            } else if (message.includes("Você estava certo")) {
+                showCustomAlert("🔄 GERANDO NOVO DESAFIO", message, "info");
+            } else if (message.includes("BOOM")) {
+                showCustomAlert("💣 EXPLOSÃO!", message, "warning");
+            } else if (message.includes("Cuidado! Número incorreto")) {
+                showCustomAlert("⚠️ NÚMERO INCORRETO", message, "warning");
+            } else if (message.includes("bateu na parede")) {
+                showCustomAlert("🧱 PAREDE!", message, "warning");
+            } else if (message.includes("Erro de movimento")) {
+                showCustomAlert("⚠️ ERRO DE MOVIMENTO", message, "warning");
+            } else {
+                showCustomAlert("📢 AVISO", message, "info");
+            }
+        };
+        
+        // ==============================================
         // FUNÇÕES PRINCIPAIS DO JOGO
         // ==============================================
         
@@ -1044,12 +1735,25 @@
         // Função para mostrar instruções
         function showInstructions() {
             instructionsOverlay.style.display = 'flex';
+            
+            // Configurar botão de fechar instruções
             const closeBtn = document.getElementById('close-instructions');
             if (closeBtn) {
                 const newCloseBtn = closeBtn.cloneNode(true);
                 closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
                 newCloseBtn.addEventListener('click', () => {
                     instructionsOverlay.style.display = 'none';
+                });
+            }
+            
+            // Configurar botão BNCC
+            const bnccBtn = document.getElementById('bncc-btn');
+            if (bnccBtn) {
+                const newBnccBtn = bnccBtn.cloneNode(true);
+                bnccBtn.parentNode.replaceChild(newBnccBtn, bnccBtn);
+                newBnccBtn.addEventListener('click', () => {
+                    const bnccOverlay = document.getElementById('bncc-overlay');
+                    if (bnccOverlay) bnccOverlay.style.display = 'flex';
                 });
             }
         }
@@ -1153,6 +1857,40 @@
             document.getElementById('btn-down').addEventListener('click', () => addCommand('⬇️'));
             document.getElementById('btn-clear').addEventListener('click', clearCommands);
             document.getElementById('verify-btn').addEventListener('click', executeCommands);
+            
+            // Botões de salvar/carregar
+            const saveBtn = document.getElementById('save-progress-btn');
+            const loadBtn = document.getElementById('load-progress-btn');
+            
+            if (saveBtn) {
+                const newSaveBtn = saveBtn.cloneNode(true);
+                saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+                newSaveBtn.addEventListener('click', saveProgressWithModal);
+            }
+            
+            if (loadBtn) {
+                loadBtn.addEventListener('click', () => {
+                    const existingInput = document.getElementById('temp-file-input');
+                    if (existingInput) existingInput.remove();
+                    
+                    const input = document.createElement('input');
+                    input.id = 'temp-file-input';
+                    input.type = 'file';
+                    input.accept = '.txt';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+                    
+                    input.onchange = (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            loadProgressFromFile(e.target.files[0]);
+                        }
+                        setTimeout(() => {
+                            if (input) input.remove();
+                        }, 100);
+                    };
+                    input.click();
+                });
+            }
             
             // Controles de teclado
             document.addEventListener('keydown', (e) => {
@@ -1563,7 +2301,7 @@
             movementTimeout = setTimeout(executeNextCommand, 400);
         }
         
-        // Verificar resultado (MODIFICADO: adicionado confetes e tremor)
+        // Verificar resultado (com confetes e tremor)
         function checkResult(finalPos) {
             // Marcar o caminho final como correto se chegou ao destino
             if (finalPos.x === targetPos.x && finalPos.y === targetPos.y) {
@@ -1638,9 +2376,8 @@
                     isGameOver = true;
                     toggleControlButtons(false);
                     
-                    alert(`Fim de Jogo! Você perdeu todas as suas vidas no Nível ${currentLevelBefore}. Reiniciando o nível...`);
-                    
-                    setTimeout(() => {
+                    // Usar modal bonito em vez de alert
+                    showCustomAlert("💀 FIM DE JOGO", `Fim de Jogo! Você perdeu todas as suas vidas no Nível ${currentLevelBefore}. Reiniciando o nível...`, "warning", () => {
                         score = levelEntryScore;
                         scoreEl.textContent = score;
                         lives = TOTAL_LIVES;
@@ -1648,15 +2385,34 @@
                         isGameOver = false;
                         toggleControlButtons(true);
                         newChallenge();
-                    }, 2000);
+                    });
                 } else {
-                    alert(message);
-                    playerPos = { ...startPos };
-                    updatePlayerPosition();
-                    clearCommands();
-                    player.classList.remove('exploded');
+                    showCustomAlert("⚠️ ERRO", message, "warning", () => {
+                        playerPos = { ...startPos };
+                        updatePlayerPosition();
+                        clearCommands();
+                        player.classList.remove('exploded');
+                    });
                 }
             }, 600);
+        }
+
+        // Configuração do modal BNCC
+        const bnccOverlay = document.getElementById('bncc-overlay');
+        const closeBncc = document.getElementById('close-bncc');
+        
+        if (closeBncc) {
+            closeBncc.addEventListener('click', () => {
+                if (bnccOverlay) bnccOverlay.style.display = 'none';
+            });
+        }
+        
+        if (bnccOverlay) {
+            bnccOverlay.addEventListener('click', (e) => {
+                if (e.target === bnccOverlay) {
+                    bnccOverlay.style.display = 'none';
+                }
+            });
         }
         
         // Inicializar o jogo
