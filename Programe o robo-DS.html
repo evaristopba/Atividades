@@ -240,6 +240,28 @@
             color: #e74c3c;
         }
         
+        /* Nome do aluno clicável */
+        #aluno-display {
+            font-size: 1em;
+            margin-top: 8px;
+            padding: 5px 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        #aluno-display:hover {
+            background-color: #d5dbdb;
+            border-color: #3498db;
+        }
+        
+        #aluno-display span {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
         #verify-btn {
             background-color: #007bff;
             color: white;
@@ -441,7 +463,7 @@
             color: white;
         }
 
-        /* MODAL DE INSTRUÇÕES */
+        /* MODAL DE INSTRUÇÕES COM ABAS */
         #instructions-overlay {
             display: none;
             position: fixed;
@@ -459,8 +481,8 @@
             background-color: white;
             padding: 30px;
             border-radius: 16px;
-            max-width: 500px;
-            max-height: 80vh;
+            max-width: 550px;
+            max-height: 85vh;
             overflow-y: auto;
             font-family: 'Arial', sans-serif;
             line-height: 1.5;
@@ -472,6 +494,44 @@
             color: #f1c40f;
             margin-top: 0;
             text-align: center;
+        }
+        
+        /* Sistema de Abas */
+        .tabs-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #f1c40f;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-button:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .tab-button.active {
+            background-color: #f1c40f;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         #instructions-content ul {
@@ -500,57 +560,6 @@
             background-color: #27ae60;
         }
 
-        /* Botão BNCC no modal */
-        #bncc-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        #bncc-btn:hover {
-            background-color: #2980b9;
-        }
-
-        /* Modal BNCC (segundo modal) */
-        #bncc-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.9);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #bncc-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 550px;
-            max-height: 85vh;
-            overflow-y: auto;
-            font-family: 'Arial', sans-serif;
-            line-height: 1.5;
-            color: #2c3e50;
-        }
-        
-        #bncc-content h2 {
-            color: #f1c40f;
-            margin-top: 0;
-            text-align: center;
-        }
-        
         #bncc-content h3 {
             color: #3498db;
             margin-top: 20px;
@@ -564,24 +573,6 @@
         
         #bncc-content li {
             margin: 8px 0;
-        }
-        
-        #close-bncc {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        
-        #close-bncc:hover {
-            background-color: #27ae60;
         }
 
         /* Canvas para confetes */
@@ -818,7 +809,6 @@
         body.high-contrast .command-slot,
         body.high-contrast .grid-cell,
         body.high-contrast #instructions-content,
-        body.high-contrast #bncc-content,
         body.high-contrast .nome-modal-content,
         body.high-contrast .custom-alert-content {
             background-color: black !important;
@@ -833,10 +823,16 @@
         body.high-contrast #load-progress-btn,
         body.high-contrast #confirmar-nome-btn,
         body.high-contrast #cancelar-nome-btn,
-        body.high-contrast .custom-alert-content button {
+        body.high-contrast .custom-alert-content button,
+        body.high-contrast .tab-button {
             background-color: black !important;
             color: yellow !important;
             border: 2px solid yellow !important;
+        }
+        
+        body.high-contrast .tab-button.active {
+            background-color: yellow !important;
+            color: black !important;
         }
         
         body.high-contrast #player {
@@ -854,6 +850,16 @@
         }
         
         body.high-contrast .custom-alert-content p {
+            color: yellow !important;
+        }
+        
+        body.high-contrast #aluno-display {
+            background-color: black !important;
+            color: yellow !important;
+            border-color: yellow !important;
+        }
+        
+        body.high-contrast #aluno-display span {
             color: yellow !important;
         }
 
@@ -921,10 +927,6 @@
                 margin: 20px;
                 padding: 20px;
             }
-            #bncc-content {
-                margin: 20px;
-                padding: 20px;
-            }
             .nome-modal-content {
                 margin: 20px;
                 padding: 20px;
@@ -932,6 +934,10 @@
             .custom-alert-content {
                 margin: 20px;
                 padding: 20px;
+            }
+            .tab-button {
+                font-size: 0.9em;
+                padding: 10px 15px;
             }
         }
     </style>
@@ -976,8 +982,11 @@
                     <div id="lives-display">
                         Vidas: <span id="lives-container"></span>
                     </div>
+                    <div id="aluno-display" title="Clique para alterar o nome">
+                        👤 Aluno: <span id="aluno-nome">Aluno</span>
+                    </div>
                 </div>
-                <button id="verify-btn" aria-label="Verificar sequência de comandos">Verificar</button>
+                <button id="verify-btn" aria-label="Verificar sequência de comandos" disabled>Verificar</button>
             </div>
         </div>
         
@@ -994,72 +1003,76 @@
         
         <div id="victory-message"></div>
         
-        <!-- MODAL DE INSTRUÇÕES (com botão BNCC) -->
+        <!-- MODAL DE INSTRUÇÕES COM ABAS -->
         <div id="instructions-overlay">
             <div id="instructions-content">
                 <h2>🤖 Desafio do Robô Matemático</h2>
-                <p>Bem-vindo! Programe o robô para alcançar o número correto resolvendo a operação matemática.</p>
-                <ul>
-                    <li><strong>Objetivo:</strong> Resolva a operação mostrada (ex.: 5 + 3) e mova o robô até a célula com o resultado correto.</li>
-                    <li><strong>Controles:</strong>
-                        <ul>
-                            <li>Clique nos botões (➡️ ⬅️ ⬆️ ⬇️) ou use as setas do teclado para adicionar comandos.</li>
-                            <li>Clique em "Limpar" ou pressione "C" para apagar os comandos.</li>
-                            <li>Clique em "Verificar" ou pressione "Enter" para executar.</li>
-                            <li>Se achar que um nível está sem solução, pressione a tecla 'H' para verificar.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Cuidado:</strong> Evite as bombas e números incorretos no caminho!</li>
-                    <li><strong>Pontuação:</strong> Use menos comandos para ganhar mais pontos!</li>
-                    <li><strong>Níveis:</strong> Avance de nível após 20 acertos corretos em cada um.</li>
-                    <li><strong>Novo:</strong> Use "Reiniciar Desafio" se houver problemas técnicos!</li>
-                </ul>
-                <button id="bncc-btn">📚 Habilidades BNCC</button>
+                
+                <!-- Sistema de Abas -->
+                <div class="tabs-container">
+                    <button class="tab-button active" data-tab="como-jogar">📖 Como Jogar</button>
+                    <button class="tab-button" data-tab="bncc">📚 Habilidades BNCC</button>
+                </div>
+                
+                <!-- Aba Como Jogar -->
+                <div id="tab-como-jogar" class="tab-content active">
+                    <p>Bem-vindo! Programe o robô para alcançar o número correto resolvendo a operação matemática.</p>
+                    <ul>
+                        <li><strong>Objetivo:</strong> Resolva a operação mostrada (ex.: 5 + 3) e mova o robô até a célula com o resultado correto.</li>
+                        <li><strong>Controles:</strong>
+                            <ul>
+                                <li>Clique nos botões (➡️ ⬅️ ⬆️ ⬇️) ou use as setas do teclado para adicionar comandos.</li>
+                                <li>Clique em "Limpar" ou pressione "C" para apagar os comandos.</li>
+                                <li>Clique em "Verificar" ou pressione "Enter" para executar.</li>
+                                <li>Se achar que um nível está sem solução, pressione a tecla 'H' para verificar.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Cuidado:</strong> Evite as bombas e números incorretos no caminho!</li>
+                        <li><strong>Pontuação:</strong> Use menos comandos para ganhar mais pontos!</li>
+                        <li><strong>Níveis:</strong> Avance de nível após 20 acertos corretos em cada um.</li>
+                        <li><strong>Novo:</strong> Use "Reiniciar Desafio" se houver problemas técnicos!</li>
+                    </ul>
+                </div>
+                
+                <!-- Aba BNCC -->
+                <div id="tab-bncc" class="tab-content">
+                    <h3>🌟 Nível 1 (2º e 3º ano)</h3>
+                    <ul>
+                        <li><strong>EF02MA05</strong> – Construir fatos básicos da adição e subtração até 10</li>
+                        <li><strong>EF02MA06</strong> – Resolver problemas de adição e subtração envolvendo números até 20</li>
+                        <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
+                    </ul>
+                    
+                    <h3>🌟 Nível 2 (3º e 4º ano)</h3>
+                    <ul>
+                        <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
+                        <li><strong>EF04MA04</strong> – Calcular adição e subtração com números naturais</li>
+                        <li><strong>EF04MA05</strong> – Resolver problemas envolvendo adição e subtração</li>
+                    </ul>
+                    
+                    <h3>🌟 Nível 3 (4º e 5º ano)</h3>
+                    <ul>
+                        <li><strong>EF04MA06</strong> – Resolver problemas envolvendo diferentes significados da multiplicação</li>
+                        <li><strong>EF04MA07</strong> – Resolver problemas envolvendo a multiplicação</li>
+                        <li><strong>EF05MA07</strong> – Resolver problemas de multiplicação com números naturais</li>
+                    </ul>
+                    
+                    <h3>🌟 Nível 4 (5º e 6º ano)</h3>
+                    <ul>
+                        <li><strong>EF05MA08</strong> – Resolver problemas de divisão com números naturais</li>
+                        <li><strong>EF05MA09</strong> – Resolver problemas envolvendo as quatro operações</li>
+                        <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
+                    </ul>
+                    
+                    <h3>🌟 Nível 5 (6º e 7º ano)</h3>
+                    <ul>
+                        <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
+                        <li><strong>EF06MA06</strong> – Calcular resultados de adição, subtração, multiplicação e divisão</li>
+                        <li><strong>EF07MA02</strong> – Resolver problemas envolvendo números naturais e as quatro operações</li>
+                    </ul>
+                </div>
+                
                 <button id="close-instructions">Entendi, vamos jogar!</button>
-            </div>
-        </div>
-
-        <!-- MODAL BNCC (segundo modal) -->
-        <div id="bncc-overlay">
-            <div id="bncc-content">
-                <h2>📚 Habilidades BNCC</h2>
-                
-                <h3>🌟 Nível 1 (2º e 3º ano)</h3>
-                <ul>
-                    <li><strong>EF02MA05</strong> – Construir fatos básicos da adição e subtração até 10</li>
-                    <li><strong>EF02MA06</strong> – Resolver problemas de adição e subtração envolvendo números até 20</li>
-                    <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
-                </ul>
-                
-                <h3>🌟 Nível 2 (3º e 4º ano)</h3>
-                <ul>
-                    <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
-                    <li><strong>EF04MA04</strong> – Calcular adição e subtração com números naturais</li>
-                    <li><strong>EF04MA05</strong> – Resolver problemas envolvendo adição e subtração</li>
-                </ul>
-                
-                <h3>🌟 Nível 3 (4º e 5º ano)</h3>
-                <ul>
-                    <li><strong>EF04MA06</strong> – Resolver problemas envolvendo diferentes significados da multiplicação</li>
-                    <li><strong>EF04MA07</strong> – Resolver problemas envolvendo a multiplicação</li>
-                    <li><strong>EF05MA07</strong> – Resolver problemas de multiplicação com números naturais</li>
-                </ul>
-                
-                <h3>🌟 Nível 4 (5º e 6º ano)</h3>
-                <ul>
-                    <li><strong>EF05MA08</strong> – Resolver problemas de divisão com números naturais</li>
-                    <li><strong>EF05MA09</strong> – Resolver problemas envolvendo as quatro operações</li>
-                    <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
-                </ul>
-                
-                <h3>🌟 Nível 5 (6º e 7º ano)</h3>
-                <ul>
-                    <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
-                    <li><strong>EF06MA06</strong> – Calcular resultados de adição, subtração, multiplicação e divisão</li>
-                    <li><strong>EF07MA02</strong> – Resolver problemas envolvendo números naturais e as quatro operações</li>
-                </ul>
-                
-                <button id="close-bncc">Fechar</button>
             </div>
         </div>
 
@@ -1131,6 +1144,7 @@
         let lives = TOTAL_LIVES;
         let levelEntryScore = 0;
         let visitedCells = [];
+        let alunoNome = 'Aluno';
         
         // ==============================================
         // SISTEMA DE CONFETE
@@ -1483,7 +1497,8 @@
                 bombPositions: bombPositions,
                 decoyPositions: decoyPositions,
                 visitedCells: visitedCells,
-                currentProblemText: mathProblemEl.textContent
+                currentProblemText: mathProblemEl.textContent,
+                alunoNome: alunoNome
             };
         }
         
@@ -1501,6 +1516,11 @@
             decoyPositions = state.decoyPositions;
             visitedCells = state.visitedCells;
             
+            if (state.alunoNome) {
+                alunoNome = state.alunoNome;
+                updateAlunoDisplay();
+            }
+            
             scoreEl.textContent = score;
             updateLivesDisplay();
             updateChallengeProgress();
@@ -1513,6 +1533,13 @@
             isMoving = false;
             toggleControlButtons(true);
             
+            // CORREÇÃO: Atualiza botões de nível visualmente para refletir o nível carregado
+            document.querySelectorAll('.level-btn').forEach(b => {
+                const level = parseInt(b.dataset.level);
+                b.disabled = level > currentLevel;
+                b.classList.toggle('active', level === currentLevel);
+            });
+            
             // Remove input file residual
             const fileInputs = document.querySelectorAll('input[type="file"]');
             fileInputs.forEach(input => input.remove());
@@ -1521,8 +1548,7 @@
             const verifyBtn = document.getElementById('verify-btn');
             if (verifyBtn) verifyBtn.focus();
             
-            const nomeAluno = state.alunoNome || "Aluno";
-            showTemporaryMessage(`Progresso de ${nomeAluno} restaurado com sucesso!`, "success");
+            showTemporaryMessage(`Progresso de ${alunoNome} restaurado com sucesso!`, "success");
         }
         
         // ==============================================
@@ -1537,7 +1563,7 @@
         
         function showNomeModal(callback) {
             pendingSaveCallback = callback;
-            nomeInput.value = '';
+            nomeInput.value = alunoNome !== 'Aluno' ? alunoNome : '';
             nomeOverlay.style.display = 'flex';
             setTimeout(() => nomeInput.focus(), 100);
         }
@@ -1549,12 +1575,16 @@
         
         if (confirmarNomeBtn) {
             confirmarNomeBtn.addEventListener('click', () => {
-                let alunoNome = nomeInput.value.trim();
-                if (!alunoNome) {
-                    alunoNome = 'anonimo';
+                let novoNome = nomeInput.value.trim();
+                if (!novoNome) {
+                    novoNome = 'Aluno';
                 } else {
-                    alunoNome = alunoNome.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '_').substring(0, 30);
+                    novoNome = novoNome.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '_').substring(0, 30);
                 }
+                
+                alunoNome = novoNome;
+                updateAlunoDisplay();
+                
                 if (pendingSaveCallback) {
                     pendingSaveCallback(alunoNome);
                 }
@@ -1582,6 +1612,24 @@
                 closeNomeModal();
             }
         });
+        
+        // Atualizar display do nome do aluno
+        function updateAlunoDisplay() {
+            const alunoNomeEl = document.getElementById('aluno-nome');
+            if (alunoNomeEl) {
+                alunoNomeEl.textContent = alunoNome;
+            }
+        }
+        
+        // Clique no nome do aluno para alterar
+        const alunoDisplay = document.getElementById('aluno-display');
+        if (alunoDisplay) {
+            alunoDisplay.addEventListener('click', () => {
+                showNomeModal((novoNome) => {
+                    showTemporaryMessage(`Nome alterado para: ${novoNome}`, "success");
+                });
+            });
+        }
         
         // Função de salvar com modal
         function saveProgressWithModal() {
@@ -1729,6 +1777,9 @@
             setupControls();
             newChallenge();
             
+            // Inicializa display do aluno
+            updateAlunoDisplay();
+            
             showInstructions();
         }
         
@@ -1746,16 +1797,28 @@
                 });
             }
             
-            // Configurar botão BNCC
-            const bnccBtn = document.getElementById('bncc-btn');
-            if (bnccBtn) {
-                const newBnccBtn = bnccBtn.cloneNode(true);
-                bnccBtn.parentNode.replaceChild(newBnccBtn, bnccBtn);
-                newBnccBtn.addEventListener('click', () => {
-                    const bnccOverlay = document.getElementById('bncc-overlay');
-                    if (bnccOverlay) bnccOverlay.style.display = 'flex';
+            // Configurar sistema de abas
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    
+                    // Remove active de todos os botões
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Remove active de todos os conteúdos
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Ativa o conteúdo correspondente
+                    const tabContent = document.getElementById(`tab-${tabName}`);
+                    if (tabContent) {
+                        tabContent.classList.add('active');
+                    }
                 });
-            }
+            });
         }
         
         // Função para criar a grade
@@ -1783,6 +1846,14 @@
                 const slot = document.createElement('div');
                 slot.className = 'command-slot';
                 commandBar.appendChild(slot);
+            }
+        }
+        
+        // Função para atualizar estado do botão Verificar
+        function updateVerifyButton() {
+            const verifyBtn = document.getElementById('verify-btn');
+            if (verifyBtn) {
+                verifyBtn.disabled = commandQueue.length === 0 || isMoving || isGameOver;
             }
         }
         
@@ -1914,7 +1985,7 @@
                 } else if (e.key === 'Enter') {
                     if (document.getElementById('recovery-message')) {
                         trySameCommands();
-                    } else {
+                    } else if (commandQueue.length > 0) {
                         executeCommands();
                     }
                 } else if (e.key.toLowerCase() === 'h') {
@@ -1966,6 +2037,11 @@
             });
             
             document.getElementById('theme-selector').disabled = !enabled;
+            
+            // Atualiza estado do botão Verificar baseado na fila de comandos
+            if (enabled) {
+                updateVerifyButton();
+            }
         }
 
         // Função para gerar problema matemático
@@ -2181,6 +2257,7 @@
             if (commandQueue.length < MAX_COMMANDS && !isMoving && !isGameOver) { 
                 commandQueue.push(command); 
                 updateCommandBar();
+                updateVerifyButton(); // Atualiza estado do botão Verificar
                 
                 const slot = document.querySelectorAll('.command-slot')[commandQueue.length - 1];
                 slot.classList.add('active');
@@ -2193,6 +2270,7 @@
         function clearCommands() { 
             commandQueue = []; 
             updateCommandBar(); 
+            updateVerifyButton(); // Atualiza estado do botão Verificar
             isMoving = false; 
         }
         
@@ -2218,6 +2296,7 @@
             window.__commandExecutionLock = true;
             isMoving = true;
             toggleControlButtons(false);
+            updateVerifyButton(); // Desabilita o botão durante execução
             
             // INICIAR MONITORAMENTO
             startPositionMonitoring();
@@ -2397,24 +2476,6 @@
             }, 600);
         }
 
-        // Configuração do modal BNCC
-        const bnccOverlay = document.getElementById('bncc-overlay');
-        const closeBncc = document.getElementById('close-bncc');
-        
-        if (closeBncc) {
-            closeBncc.addEventListener('click', () => {
-                if (bnccOverlay) bnccOverlay.style.display = 'none';
-            });
-        }
-        
-        if (bnccOverlay) {
-            bnccOverlay.addEventListener('click', (e) => {
-                if (e.target === bnccOverlay) {
-                    bnccOverlay.style.display = 'none';
-                }
-            });
-        }
-        
         // Inicializar o jogo
         init();
     </script>
