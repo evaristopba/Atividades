@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brinca & Escreve — Vogais</title>
+<title>Brinque e Escreva — Vogais</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -182,7 +182,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none!import
 <body>
 
 <header class="app-header">
-  <div class="app-title">🧸 Brinca &amp; Escreve</div>
+  <div class="app-title">🧸 Brinque e Escreva</div>
   <div class="header-right">
     <div class="lives-container" id="livesDisplay"></div>
     <div class="score-badge">⭐ <span id="scoreDisplay">0</span></div>
@@ -218,7 +218,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none!import
 <main class="main-content">
   <div class="screen active" id="screenStart">
     <div class="game-card start-screen">
-      <div class="start-logo">Brinca &amp; Escreve</div>
+      <div class="start-logo">Brinque e Escreva</div>
       <div class="start-sub">Complete as vogais do nome do brinquedo!</div>
       <div class="start-emojis">🅐 🅔 🅘 🅞 🅤</div>
       <div class="name-row">
@@ -859,7 +859,7 @@ function salvarProgresso(){
   const blob=new Blob([b64],{type:'text/plain'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download='progresso vogais '+nome+'.txt';
+  a.href=url; a.download='brinque e escreva vogais '+nome+'.txt';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
