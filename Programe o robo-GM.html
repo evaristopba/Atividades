@@ -1162,24 +1162,26 @@
         let visitedCells = [];
         
         // ==============================================
-        // SISTEMA DE CONFETE
+        // SISTEMA DE CONFETE RESISTENTE A INTERRUPÇÕES E ERROS
         // ==============================================
         const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas ? canvas.getContext('2d') : null;
         let animationId = null;
         let particles = [];
         
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         
         class ConfettiParticle {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height - canvas.height;
+                this.x = Math.random() * (canvas ? canvas.width : 800);
+                this.y = Math.random() * (canvas ? canvas.height : 600) - (canvas ? canvas.height : 600);
                 this.size = Math.random() * 8 + 3;
                 this.speedY = Math.random() * 5 + 3;
                 this.speedX = (Math.random() - 0.5) * 3;
@@ -1191,9 +1193,10 @@
                 this.y += this.speedY;
                 this.x += this.speedX;
                 this.rotation += this.rotateSpeed;
-                return this.y < canvas.height + 50;
+                return this.y < (canvas ? canvas.height : 600) + 50;
             }
             draw() {
+                if (!ctx) return;
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation * Math.PI / 180);
@@ -1204,25 +1207,43 @@
         }
         
         function startConfetti(seconds = 2.5) {
-            if (animationId) cancelAnimationFrame(animationId);
-            particles = [];
-            for(let i = 0; i < 200; i++) {
-                particles.push(new ConfettiParticle());
-            }
-            let startTime = performance.now();
-            function animateConfetti(now) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles = particles.filter(p => p.update());
-                particles.forEach(p => p.draw());
-                if (particles.length === 0 || (now - startTime > seconds * 1000)) {
-                    cancelAnimationFrame(animationId);
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    animationId = null;
-                    return;
+            try {
+                if (!canvas || !ctx) return;
+                if (animationId) cancelAnimationFrame(animationId);
+                particles = [];
+                for(let i = 0; i < 200; i++) {
+                    particles.push(new ConfettiParticle());
+                }
+                let startTime = performance.now();
+                function animateConfetti(now) {
+                    try {
+                        const timestamp = (typeof now === 'number' && !isNaN(now)) ? now : performance.now();
+                        const elapsed = timestamp - startTime;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        particles = particles.filter(p => p.update());
+                        particles.forEach(p => p.draw());
+                        
+                        if (particles.length === 0 || elapsed > seconds * 1000) {
+                            cancelAnimationFrame(animationId);
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            animationId = null;
+                            return;
+                        }
+                        animationId = requestAnimationFrame(animateConfetti);
+                    } catch (err) {
+                        console.error("Erro no frame de animação:", err);
+                        if (animationId) cancelAnimationFrame(animationId);
+                        animationId = null;
+                        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
                 }
                 animationId = requestAnimationFrame(animateConfetti);
+            } catch (e) {
+                console.error("Erro ao iniciar confete:", e);
+                if (animationId) cancelAnimationFrame(animationId);
+                animationId = null;
             }
-            animationId = requestAnimationFrame(animateConfetti);
         }
         
         // ==============================================
@@ -1605,14 +1626,14 @@
         
         if (confirmarNomeBtn) {
             confirmarNomeBtn.addEventListener('click', () => {
-                let alunoNome = nomeInput.value.trim();
-                if (!alunoNome) {
-                    alunoNome = 'anonimo';
+                let inputName = nomeInput.value.trim();
+                if (!inputName) {
+                    inputName = 'Aluno';
                 } else {
-                    alunoNome = alunoNome.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '_').substring(0, 30);
+                    inputName = inputName.replace(/[^a-zA-ZÀ-ÿ0-9 ]/g, '_').substring(0, 30);
                 }
                 if (pendingSaveCallback) {
-                    pendingSaveCallback(alunoNome);
+                    pendingSaveCallback(inputName);
                 }
                 closeNomeModal();
             });
@@ -1720,8 +1741,9 @@
         function closeCustomAlert() {
             customAlertOverlay.style.display = 'none';
             if (pendingAlertCallback) {
-                pendingAlertCallback();
+                const cb = pendingAlertCallback;
                 pendingAlertCallback = null;
+                cb();
             }
             toggleControlButtons(true);
             const rightBtn = document.getElementById('btn-right');
@@ -2477,8 +2499,12 @@
         function checkResult(finalPos) {
             // Marcar o caminho final como correto se chegou ao destino
             if (finalPos.x === targetPos.x && finalPos.y === targetPos.y) {
-                // CONFETES AO ACERTAR
-                startConfetti(2.5);
+                // CONFETES AO ACERTAR (Com bloco de captura seguro)
+                try {
+                    startConfetti(2.5);
+                } catch(e) {
+                    console.error("Erro ao disparar confetes:", e);
+                }
                 
                 visitedCells = visitedCells.map(cell => ({...cell, correct: true}));
                 updateGridDisplay();
