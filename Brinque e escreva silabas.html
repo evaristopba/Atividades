@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brinque e Escreva Sílabas</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-main:#FFF9F0;--bg-card:#FFFFFF;--bg-h1:#FF6B6B;--bg-h2:#FF8E53;
+  --text-main:#3D2B1F;--text-light:#7A6055;
+  --l-bg:#FFF3E0;--l-bd:#FFAB40;--l-hv:#FFD54F;
+  --s-bg:#E8F5E9;--s-bd:#66BB6A;--s-fl:#C8E6C9;
+  --btn-ck:#6BCB77;--btn-ct:#fff;--star:#FFD93D;
+  --shad:rgba(0,0,0,0.12);--htxt:#fff;
+  --bg-pat:radial-gradient(circle at 20% 20%,#FFE0B2 0%,transparent 40%),
+           radial-gradient(circle at 80% 80%,#B2EBF2 0%,transparent 40%),
+           radial-gradient(circle at 50% 50%,#F8BBD0 0%,transparent 60%);
+  /* Sílaba slot */
+  --v-bg:#EDE7F6;--v-bd:#7C4DFF;--v-fl:#D1C4E9;--v-hv:#B39DDB;
+}
+[data-theme="floresta"]{
+  --bg-main:#F1F8E9;--bg-card:#FFFFFF;--bg-h1:#388E3C;--bg-h2:#66BB6A;
+  --text-main:#1B5E20;--text-light:#558B2F;
+  --l-bg:#F9FBE7;--l-bd:#8BC34A;--l-hv:#DCEDC8;
+  --s-bg:#FFF8E1;--s-bd:#F9A825;--s-fl:#FFF9C4;
+  --btn-ck:#4CAF50;--btn-ct:#fff;--star:#FFD93D;--shad:rgba(0,60,0,0.12);--htxt:#fff;
+  --bg-pat:radial-gradient(circle at 20% 20%,#DCEDC8 0%,transparent 40%),
+           radial-gradient(circle at 80% 80%,#A5D6A7 0%,transparent 40%),
+           radial-gradient(circle at 50% 50%,#C8E6C9 0%,transparent 60%);
+  --v-bg:#FFF9C4;--v-bd:#F9A825;--v-fl:#FFE082;--v-hv:#FFD54F;
+}
+[data-theme="espaco"]{
+  --bg-main:#0D0D2B;--bg-card:#1A1A3E;--bg-h1:#6A0DAD;--bg-h2:#9C27B0;
+  --text-main:#E8EAF6;--text-light:#B0BEC5;
+  --l-bg:#1A237E;--l-bd:#7C4DFF;--l-hv:#311B92;
+  --s-bg:#0D1B3E;--s-bd:#00E5FF;--s-fl:#0D2B3E;
+  --btn-ck:#00E5FF;--btn-ct:#0D0D2B;--star:#FFD700;--shad:rgba(100,0,200,0.3);--htxt:#fff;
+  --bg-pat:radial-gradient(circle at 20% 20%,#1A0050 0%,transparent 50%),
+           radial-gradient(circle at 80% 80%,#0D003A 0%,transparent 50%),
+           radial-gradient(circle at 50% 50%,#160040 0%,transparent 70%);
+  --v-bg:#1A237E;--v-bd:#7C4DFF;--v-fl:#311B92;--v-hv:#4527A0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:var(--bg-pat);min-height:100vh;color:var(--text-main);transition:background .5s,color .5s;overflow-x:hidden}
+.app-header{background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 16px var(--shad);position:relative;z-index:10}
+.app-title{font-family:'Fredoka One',cursive;font-size:26px;color:var(--htxt);text-shadow:2px 2px 4px rgba(0,0,0,.2)}
+.header-right{display:flex;align-items:center;gap:12px}
+.lives-container{display:flex;gap:4px;align-items:center}
+.heart{font-size:22px;transition:transform .3s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.heart.lost{opacity:.3;transform:scale(.8)}
+.score-badge{background:rgba(255,255,255,.25);border-radius:20px;padding:4px 14px;font-size:15px;font-weight:800;color:var(--htxt);display:flex;align-items:center;gap:5px}
+.btn-settings{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:40px;height:40px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .3s;color:#fff}
+.btn-settings:hover{background:rgba(255,255,255,.4);transform:rotate(30deg)}
+.btn-prof{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;color:#fff}
+.btn-prof:hover{background:rgba(255,255,255,.4)}
+.level-bar{background:linear-gradient(135deg,var(--bg-h2),var(--bg-h1));padding:8px 20px;display:flex;align-items:center;gap:16px;font-size:13px;color:rgba(255,255,255,.9);font-weight:700}
+.level-label{font-family:'Fredoka One',cursive;font-size:16px;color:#fff;white-space:nowrap}
+.progress-track{flex:1;background:rgba(255,255,255,.3);border-radius:10px;height:10px;overflow:hidden}
+.progress-fill{background:var(--star);height:100%;border-radius:10px;transition:width .5s ease;box-shadow:0 0 6px rgba(255,220,0,.6)}
+.level-count{font-size:13px;color:rgba(255,255,255,.9);white-space:nowrap}
+.btn-save-bar{background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:18px;padding:4px 10px;cursor:pointer;transition:all .2s;flex-shrink:0;line-height:1}
+.btn-save-bar:hover{background:rgba(255,255,255,.45);transform:scale(1.1)}
+.btn-save-bar.saved{background:rgba(100,220,100,.4);border-color:rgba(100,255,100,.6)}
+.main-content{max-width:680px;margin:0 auto;padding:24px 16px 40px;position:relative;z-index:1}
+.game-card{background:var(--bg-card);border-radius:28px;padding:28px 24px;box-shadow:0 8px 32px var(--shad);border:3px solid rgba(255,255,255,.8);transition:background .5s}
+[data-theme="espaco"] .game-card{border-color:rgba(124,77,255,.3)}
+.toy-image-container{text-align:center;margin-bottom:20px}
+.toy-image{width:200px;height:200px;object-fit:contain;border-radius:20px;background:var(--l-bg);padding:12px;border:3px solid var(--l-bd);box-shadow:0 4px 16px var(--shad);transition:transform .3s}
+.toy-image:hover{transform:scale(1.03)}
+.toy-image-placeholder{width:200px;height:200px;border-radius:20px;background:var(--l-bg);border:3px dashed var(--l-bd);display:inline-flex;align-items:center;justify-content:center;font-size:72px}
+
+.answer-label{text-align:center;font-size:14px;font-weight:700;color:var(--text-light);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.answer-slots{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;min-height:74px;align-items:center;padding:4px 2px}
+
+/* Slot de SÍLABA (para preencher) */
+.answer-slot{min-width:90px;height:70px;padding:0 14px;border-radius:16px;border:3px dashed var(--v-bd);background:var(--v-bg);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:26px;color:var(--text-main);transition:all .2s;cursor:pointer;user-select:none;position:relative}
+.answer-slot.filled{background:var(--v-fl);border-style:solid;border-color:var(--v-bd);animation:popIn .2s ease}
+.answer-slot.drag-over{border-color:#4D96FF;background:rgba(77,150,255,.15);transform:scale(1.05)}
+.answer-slot.correct{background:#E8F5E9;border-color:#4CAF50;animation:bounce .4s ease}
+.answer-slot.wrong{background:#FFEBEE;border-color:#F44336;animation:shake .4s ease}
+
+@keyframes popIn{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+.letters-label{text-align:center;font-size:14px;font-weight:700;color:var(--text-light);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.letters-pool{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:28px;min-height:78px;align-items:center}
+.letter-tile{min-width:90px;height:72px;padding:0 14px;border-radius:18px;background:var(--v-bg);border:3px solid var(--v-bd);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:26px;color:var(--text-main);cursor:grab;transition:all .15s;user-select:none;box-shadow:0 3px 8px var(--shad)}
+.letter-tile:hover{background:var(--v-hv);transform:translateY(-4px) scale(1.05);box-shadow:0 8px 16px var(--shad);z-index:5}
+.letter-tile:active{cursor:grabbing;transform:scale(1.1)}
+.letter-tile.dragging{opacity:.4;transform:scale(.9)}
+.letter-tile.used{opacity:.2;pointer-events:none;transform:scale(.9)}
+.btn-row{display:flex;gap:12px;justify-content:center}
+.btn-check{background:var(--btn-ck);color:var(--btn-ct);border:none;border-radius:20px;padding:14px 40px;font-family:'Fredoka One',cursive;font-size:20px;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px var(--shad)}
+.btn-check:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--shad)}
+.btn-check:active{transform:scale(.97)}
+.btn-clear{background:transparent;color:var(--text-light);border:2px solid var(--v-bd);border-radius:20px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;transition:all .2s}
+.btn-clear:hover{background:var(--v-bg)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);animation:fadeIn .3s ease}
+.modal-overlay.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideUp{from{transform:translateY(60px) scale(.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.modal-emoji{font-size:64px;margin-bottom:12px}
+.modal-title{font-family:'Fredoka One',cursive;font-size:30px;color:var(--text-main);margin-bottom:8px}
+.modal-subtitle{font-size:16px;color:var(--text-light);margin-bottom:24px;line-height:1.6;white-space:pre-line}
+.stars-row{display:flex;justify-content:center;gap:8px;font-size:40px;margin-bottom:20px}
+.modal-btn{background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px var(--shad);width:100%;margin-bottom:10px}
+.modal-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--shad)}
+.modal-btn.secondary{background:transparent;color:var(--text-light);border:2px solid var(--v-bd);box-shadow:none;font-size:16px;padding:10px 24px}
+.theme-menu{position:fixed;top:70px;right:16px;background:var(--bg-card);border-radius:20px;padding:16px;box-shadow:0 8px 32px var(--shad);z-index:50;min-width:220px;border:2px solid var(--l-bd);animation:slideDown .25s ease}
+.theme-menu.hidden{display:none}
+@keyframes slideDown{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.theme-menu-title{font-family:'Fredoka One',cursive;font-size:16px;color:var(--text-main);margin-bottom:12px;text-align:center}
+.theme-option{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;cursor:pointer;transition:background .2s;font-weight:700;font-size:15px;color:var(--text-main);margin-bottom:4px;border:2px solid transparent}
+.theme-option:hover{background:var(--l-bg)}
+.theme-option.active{background:var(--s-bg);border-color:var(--s-bd)}
+.theme-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0}
+.screen{display:none}
+.screen.active{display:block}
+.start-screen{text-align:center;padding:20px 0}
+.start-logo{font-family:'Fredoka One',cursive;font-size:42px;color:var(--bg-h1);text-shadow:3px 3px 0 var(--star);margin-bottom:8px;line-height:1.1}
+.start-sub{font-size:18px;color:var(--text-light);margin-bottom:28px;font-weight:700}
+.start-emojis{font-size:36px;margin-bottom:28px;letter-spacing:8px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.levels-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px}
+.level-btn{background:var(--l-bg);border:3px solid var(--l-bd);border-radius:18px;padding:14px 6px;cursor:pointer;transition:all .2s;font-family:'Fredoka One',cursive;text-align:center}
+.level-btn:hover:not(.locked){transform:translateY(-4px);box-shadow:0 6px 16px var(--shad)}
+.level-btn.locked{opacity:.4;cursor:not-allowed}
+.level-btn.completed{background:var(--s-fl);border-color:var(--s-bd)}
+.level-btn.selected{border-color:var(--bg-h1);box-shadow:0 0 0 3px rgba(255,107,107,.3)}
+.level-num{font-size:26px;color:var(--bg-h1);display:block}
+.level-stars{font-size:14px;color:var(--star);display:block;margin-top:2px}
+.btn-start{background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:22px;padding:18px 60px;font-family:'Fredoka One',cursive;font-size:26px;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px var(--shad)}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 10px 28px var(--shad)}
+.feedback-banner{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--bg-card);border-radius:20px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:22px;box-shadow:0 8px 24px var(--shad);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:200;display:flex;align-items:center;gap:10px;white-space:nowrap;border:3px solid transparent}
+.feedback-banner.show{transform:translateX(-50%) translateY(0)}
+.feedback-banner.ok{border-color:#4CAF50;color:#2E7D32}
+.feedback-banner.err{border-color:#F44336;color:#C62828}
+.feedback-banner.warn{border-color:#FF9800;color:#E65100}
+.points-anim{position:fixed;font-family:'Fredoka One',cursive;font-size:28px;color:var(--btn-ck);pointer-events:none;z-index:300;animation:floatUp 1.2s ease forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.3)}}
+.name-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px}
+.name-label{font-family:'Fredoka One',cursive;font-size:17px;color:var(--text-main)}
+.name-input{font-family:'Fredoka One',cursive;font-size:20px;color:var(--text-main);background:var(--l-bg);border:3px solid var(--l-bd);border-radius:16px;padding:10px 20px;text-align:center;width:100%;max-width:340px;outline:none;transition:border-color .2s}
+.name-input:focus{border-color:var(--bg-h1)}
+.name-input::placeholder{color:var(--text-light);opacity:.7}
+.btn-load{background:var(--l-bg);color:var(--text-main);border:3px solid var(--l-bd);border-radius:22px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-load:hover{background:var(--l-hv);transform:translateY(-2px)}
+.nome-display{font-family:'Fredoka One',cursive;font-size:15px;color:var(--htxt);background:rgba(255,255,255,.2);border-radius:14px;padding:4px 12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .2s}
+.nome-display:hover{background:rgba(255,255,255,.35)}
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button{display:none!important;visibility:hidden!important;pointer-events:none!important}
+@media(max-width:480px){
+  .app-title{font-size:18px}
+  .letter-tile{min-width:70px;height:60px;font-size:20px;padding:0 10px}
+  .answer-slot{min-width:70px;height:58px;font-size:20px;padding:0 10px}
+  .start-logo{font-size:30px}
+  .toy-image,.toy-image-placeholder{width:160px;height:160px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">🧸 Brinque e Escreva Sílabas</div>
+  <div class="header-right">
+    <div class="lives-container" id="livesDisplay"></div>
+    <div class="score-badge">⭐ <span id="scoreDisplay">0</span></div>
+    <div class="nome-display" id="nomeDisplay" style="display:none"></div>
+    <button class="btn-prof" id="btnProf" onclick="abrirRelatorio()" title="Relatório do professor">📋</button>
+    <button class="btn-settings" id="btnSettings" aria-label="Tema">⚙️</button>
+  </div>
+</header>
+
+<div class="level-bar" id="levelBar" style="display:none">
+  <span class="level-label" id="levelLabel">Nível 1</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <span class="level-count" id="levelCount">0/8</span>
+  <button class="btn-save-bar" id="btnSaveBar" onclick="salvarProgressoBar()" title="Salvar progresso" style="display:none">💾</button>
+  <label class="btn-save-bar" title="Carregar progresso" style="cursor:pointer">📂<input type="file" accept=".txt" style="display:none" onchange="loadFromFile(event)"></label>
+</div>
+
+<div class="theme-menu hidden" id="themeMenu">
+  <div class="theme-menu-title">🎨 Escolha o tema</div>
+  <div class="theme-option" data-theme="cartoon" onclick="setTheme('cartoon')">
+    <div class="theme-dot" style="background:linear-gradient(135deg,#FF6B6B,#FFD93D)"></div>🎈 Cartoon
+  </div>
+  <div class="theme-option" data-theme="floresta" onclick="setTheme('floresta')">
+    <div class="theme-dot" style="background:linear-gradient(135deg,#388E3C,#8BC34A)"></div>🌿 Floresta
+  </div>
+  <div class="theme-option" data-theme="espaco" onclick="setTheme('espaco')">
+    <div class="theme-dot" style="background:linear-gradient(135deg,#6A0DAD,#00E5FF)"></div>🚀 Espaço
+  </div>
+</div>
+
+<div class="feedback-banner" id="feedbackBanner"></div>
+
+<main class="main-content">
+  <div class="screen active" id="screenStart">
+    <div class="game-card start-screen">
+      <div class="start-logo">Brinque e Escreva Sílabas</div>
+      <div class="start-sub">Monte o nome do brinquedo juntando as sílabas!</div>
+      <div class="start-emojis">🅱🅰 🇸🇮 🅻🅰</div>
+      <div class="name-row">
+        <label class="name-label">👤 Nome do aluno:</label>
+        <input type="text" id="inputNome" class="name-input" placeholder="Digite seu nome..." maxlength="40" oninput="onNomeInput()">
+      </div>
+      <p style="font-size:15px;color:var(--text-light);margin-bottom:16px;font-weight:700">Escolha o nível para começar:</p>
+      <div class="levels-grid" id="levelsGrid"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center">
+        <button class="btn-start" onclick="startLevel(currentLevel)">▶ Jogar!</button>
+        <label class="btn-load" title="Carregar progresso salvo">
+          📂 Carregar progresso
+          <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="loadFromFile(event)">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenRelatorio">
+    <div class="game-card" style="padding:0;overflow:hidden">
+      <div style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#fff">📋 Relatório do Professor</div>
+        <button onclick="fecharRelatorio()" style="background:rgba(255,255,255,.25);border:none;border-radius:12px;color:#fff;padding:8px 16px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer">✖ Fechar</button>
+      </div>
+      <div style="padding:12px 24px 0;display:flex;gap:10px;align-items:center;border-top:1px solid var(--l-bg)">
+        <label style="background:var(--l-bg);border:2px solid var(--l-bd);border-radius:12px;padding:8px 16px;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer;color:var(--text-main)">
+          📂 Carregar outro arquivo
+          <input type="file" accept=".txt" style="display:none" onchange="abrirRelatorioDeTxt(event)">
+        </label>
+      </div>
+      <div id="relatorioConteudo" style="padding:24px;max-height:60vh;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenGame">
+    <div class="game-card">
+      <div class="toy-image-container" id="toyImageContainer"></div>
+
+      <div class="answer-label">Monte a palavra com as sílabas:</div>
+      <div class="answer-slots" id="answerSlots"></div>
+      <div class="letters-label">Arraste ou toque na sílaba certa:</div>
+      <div class="letters-pool" id="lettersPool"></div>
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearAnswer()">↩ Apagar</button>
+        <button class="btn-check" onclick="checkAnswer()">✓ Verificar</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-emoji" id="mEmoji"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="stars-row" id="mStars"></div>
+    <div class="modal-subtitle" id="mSubtitle"></div>
+    <button class="modal-btn" id="mBtn1" onclick="modalAct(1)"></button>
+    <button class="modal-btn secondary" id="mBtn2" onclick="modalAct(2)" style="display:none"></button>
+    <button class="modal-btn secondary" id="mBtn3" onclick="modalAct(3)" style="display:none"></button>
+  </div>
+</div>
+
+<script>
+// ========== BRINQUEDOS (com divisão silábica) ==========
+// "silabas": array com as sílabas da palavra na ordem correta.
+// Distratoras são geradas automaticamente a partir de um banco geral de sílabas.
+const TOYS = [
+  {name:"BOLA",       silabas:["BO","LA"],            img:"https://i.postimg.cc/RhNsPR9Y/Bola.jpg",      emoji:"⚽", level:1},
+  {name:"PIPA",       silabas:["PI","PA"],            img:"https://i.postimg.cc/50PKqGdb/Pipa.png",      emoji:"🪁", level:1},
+  {name:"PATO",       silabas:["PA","TO"],            img:"https://i.postimg.cc/kM2CVCZH/Pato.jpg",    emoji:"🦆", level:1},
+  {name:"GATO",       silabas:["GA","TO"],            img:"https://i.postimg.cc/x8wt8M7s/Gato.jpg",    emoji:"🐱", level:1},
+  {name:"LIVRO",      silabas:["LI","VRO"],           img:"https://i.postimg.cc/br73rkM3/Livros.jpg",   emoji:"📖", level:1},
+  {name:"ROBÔ",       silabas:["RO","BÔ"],            img:"https://i.postimg.cc/SsZ17505/Robo.jpg",      emoji:"🤖", level:1},
+  {name:"NAVIO",      silabas:["NA","VI","O"],        img:"https://i.postimg.cc/pT0cY7Ng/Navio.jpg",     emoji:"⛵", level:1},
+  {name:"CARRO",      silabas:["CAR","RO"],           img:"https://i.postimg.cc/rmhZCbX2/carro.jpg",     emoji:"🚗", level:1},
+
+  {name:"AVIÃO",      silabas:["A","VI","ÃO"],        img:"https://i.postimg.cc/1tW7cTxb/Aviao.jpg",     emoji:"✈️", level:2},
+  {name:"SKATE",      silabas:["SKA","TE"],           img:"https://i.postimg.cc/vBP2LjRk/Skate.jpg",     emoji:"🛹", level:2},
+  {name:"BONECA",     silabas:["BO","NE","CA"],       img:"https://i.postimg.cc/C5zPvNY9/Boneca.webp",   emoji:"👧", level:2},
+  {name:"TRATOR",     silabas:["TRA","TOR"],          img:"https://i.postimg.cc/zBd2SMmQ/Trator.jpg",    emoji:"🚜", level:2},
+  {name:"TAMBOR",     silabas:["TAM","BOR"],          img:"https://i.postimg.cc/ydfpX5qr/Tambor.jpg",    emoji:"🥁", level:2},
+  {name:"PETECA",     silabas:["PE","TE","CA"],       img:"https://i.postimg.cc/sXnH98FH/Peteca.jpg",    emoji:"🏸", level:2},
+  {name:"CASTELO",    silabas:["CAS","TE","LO"],      img:"https://i.postimg.cc/LXyQB7dD/Castelo.jpg",   emoji:"🏰", level:2},
+  {name:"URSINHO",    silabas:["UR","SI","NHO"],      img:"https://i.postimg.cc/MHvPsDx4/Ursinho.jpg",   emoji:"🧸", level:2},
+
+  {name:"FOGUETE",    silabas:["FO","GUE","TE"],      img:"https://i.postimg.cc/76BtMcv0/Foguete.jpg",   emoji:"🚀", level:3},
+  {name:"CAVALO",     silabas:["CA","VA","LO"],       img:"https://i.postimg.cc/wMC0MLPF/Cavalo.jpg",  emoji:"🐴", level:3},
+  {name:"ELEFANTE",   silabas:["E","LE","FAN","TE"],  img:"https://i.postimg.cc/3NsnNm61/Elefante.jpg",emoji:"🐘", level:3},
+  {name:"CAMINHÃO",   silabas:["CA","MI","NHÃO"],     img:"https://i.postimg.cc/mDdpNqx3/Caminhao.jpg",  emoji:"🚛", level:3},
+  {name:"XILOFONE",   silabas:["XI","LO","FO","NE"],  img:"https://i.postimg.cc/V6sHtwhD/Xilofone.jpg",  emoji:"🎵", level:3},
+  {name:"FANTOCHE",   silabas:["FAN","TO","CHE"],     img:"https://i.postimg.cc/Fz9jdhs9/Fantoche.jpg",  emoji:"🎭", level:3},
+  {name:"DOMINÓ",     silabas:["DO","MI","NÓ"],       img:"https://i.postimg.cc/kGvPsvCC/Domino.jpg",    emoji:"🁣", level:3},
+  {name:"ORIGAMI",    silabas:["O","RI","GA","MI"],   img:"https://i.postimg.cc/rwvZdt6t/Origami.jpg",   emoji:"🦢", level:3},
+
+  {name:"PATINETE",    silabas:["PA","TI","NE","TE"],         img:"https://i.postimg.cc/mDZ694nj/Patinete.jpg",    emoji:"🛵", level:4},
+  {name:"BICICLETA",   silabas:["BI","CI","CLE","TA"],        img:"https://i.postimg.cc/C1M6802J/Bicicleta.jpg",   emoji:"🚲", level:4},
+  {name:"HELICÓPTERO", silabas:["HE","LI","CÓP","TE","RO"],   img:"https://i.postimg.cc/k4MhSCHT/Helicoptero.jpg", emoji:"🚁", level:4},
+  {name:"MASSINHA",    silabas:["MAS","SI","NHA"],            img:"https://i.postimg.cc/Pf0HjyKL/Massinha.jpg",    emoji:"🎨", level:4},
+  {name:"GANGORRA",    silabas:["GAN","GOR","RA"],            img:"https://i.postimg.cc/sxhvg854/Gangorra.jpg",    emoji:"⚖️", level:4},
+  {name:"PANDEIRO",    silabas:["PAN","DEI","RO"],            img:"https://i.postimg.cc/bYFqC8Kn/Pandeiro.jpg",    emoji:"🥁", level:4},
+  {name:"CARIMBO",     silabas:["CA","RIM","BO"],             img:"https://i.postimg.cc/CLvKkk4V/Carimbo.jpg",     emoji:"📮", level:4},
+  {name:"PALHAÇO",     silabas:["PA","LHA","ÇO"],             img:"https://i.postimg.cc/8zLHXpXY/Palhaco.jpg",     emoji:"🤡", level:4},
+
+  {name:"DINOSSAURO",  silabas:["DI","NOS","SAU","RO"],       img:"https://i.postimg.cc/PJP364hB/Dinossauro.webp", emoji:"🦕", level:5},
+  {name:"GIRAFA",      silabas:["GI","RA","FA"],              img:"https://i.postimg.cc/rsBQsxbN/Girafa.jpg",    emoji:"🦒", level:5},
+  {name:"ESTILINGUE",  silabas:["ES","TI","LIN","GUE"],       img:"https://i.postimg.cc/cC8YKhpq/Estilingue.jpg",  emoji:"🏹", level:5},
+  {name:"TELESCÓPIO",  silabas:["TE","LES","CÓ","PI","O"],    img:"https://i.postimg.cc/GhmtSqMg/Telescopio.jpg",  emoji:"🔭", level:5},
+  {name:"TARTARUGA",   silabas:["TAR","TA","RU","GA"],        img:"https://i.postimg.cc/d3b43rXB/Tartaruga.jpg", emoji:"🐢", level:5},
+  {name:"MARIONETE",   silabas:["MA","RIO","NE","TE"],        img:"https://i.postimg.cc/Y2Y1Q18Z/Marionete.jpg",   emoji:"🎎", level:5},
+  {name:"SANDUÍCHE",   silabas:["SAN","DUÍ","CHE"],           img:"https://i.postimg.cc/HWXQbQ3N/Sanduiche.jpg",   emoji:"🥪", level:5},
+  {name:"PASSARINHO",  silabas:["PAS","SA","RI","NHO"],       img:"https://i.postimg.cc/h4T9V9M5/Passarinho.jpg",  emoji:"🐦", level:5},
+];
+
+// Banco geral de sílabas para gerar distratoras plausíveis (CV simples)
+const SILABAS_DISTRATORAS = [
+  "BA","BE","BI","BO","BU","CA","CE","CI","CO","CU","DA","DE","DI","DO","DU",
+  "FA","FE","FI","FO","FU","GA","GE","GI","GO","GU","JA","JE","JI","JO","JU",
+  "LA","LE","LI","LO","LU","MA","ME","MI","MO","MU","NA","NE","NI","NO","NU",
+  "PA","PE","PI","PO","PU","RA","RE","RI","RO","RU","SA","SE","SI","SO","SU",
+  "TA","TE","TI","TO","TU","VA","VE","VI","VO","VU","XA","XE","XI","XO","XU"
+];
+
+// ========== ESTADO ==========
+let S = {
+  theme:'cartoon', currentLevel:1, lives:5, score:0,
+  levelStars:[0,0,0,0,0], levelUnlocked:[true,false,false,false,false],
+  queue:[], toy:null,
+  // slots: array de strings (preenchido) ou '' (vazio) — um item por sílaba
+  slots:[], tileMap:{},
+  correctInLevel:0, cb1:null, cb2:null, cb3:null, poolOrder:[],
+  nomeAluno:'',
+  sessoes:[], levelTempos:[0,0,0,0,0], levelInicio:0, palavraInicio:0,
+  registroPalavras:[], _tentativas:0, _erros:0,
+};
+
+// ========== TEMA ==========
+function setTheme(t){
+  S.theme=t;
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-option').forEach(el=>el.classList.toggle('active',el.dataset.theme===t));
+  closeMenu();
+}
+function closeMenu(){document.getElementById('themeMenu').classList.add('hidden');}
+function toggleMenu(e){e.stopPropagation();document.getElementById('themeMenu').classList.toggle('hidden');}
+document.getElementById('btnSettings').addEventListener('click',toggleMenu);
+document.addEventListener('click',closeMenu);
+document.getElementById('themeMenu').addEventListener('click',e=>e.stopPropagation());
+
+// ========== VIDAS & PONTOS ==========
+function renderLives(){
+  const c=document.getElementById('livesDisplay'); c.innerHTML='';
+  for(let i=0;i<5;i++){
+    const h=document.createElement('span');
+    h.className='heart'+(i>=S.lives?' lost':'');
+    h.textContent='❤️'; c.appendChild(h);
+  }
+}
+function renderScore(){document.getElementById('scoreDisplay').textContent=S.score;}
+
+// ========== TELA INICIAL ==========
+let currentLevel=1;
+function renderStart(){
+  const g=document.getElementById('levelsGrid'); g.innerHTML='';
+  for(let l=1;l<=5;l++){
+    const b=document.createElement('div');
+    const unlocked=S.levelUnlocked[l-1];
+    const completed=S.levelStars[l-1]===3;
+    const playable=unlocked&&!completed;
+    b.className='level-btn'+(unlocked?'':' locked')+(completed?' completed':'')+(l===currentLevel?' selected':'');
+    const st='⭐'.repeat(S.levelStars[l-1])+'☆'.repeat(3-S.levelStars[l-1]);
+    const icon=!unlocked?'🔒':(completed?'🏆':l);
+    b.innerHTML=`<span class="level-num">${icon}</span><span class="level-stars">${st}</span>`;
+    b.addEventListener('click',()=>{
+      if(playable){currentLevel=l;renderStart();}
+      else if(completed) showFb('✅ Nível já concluído!','warn');
+    });
+    g.appendChild(b);
+  }
+}
+
+// ========== INICIAR NÍVEL ==========
+function startLevel(lvl){
+  if(!S.levelUnlocked[lvl-1])return;
+  S.currentLevel=lvl; S.lives=5; S.correctInLevel=0;
+  S.queue=shuffle(TOYS.filter(t=>t.level===lvl).slice());
+  S.registroPalavras=[];
+  S.levelInicio=Date.now(); S.palavraInicio=Date.now();
+  showScreen('screenGame');
+  document.getElementById('levelBar').style.display='flex';
+  const btnSave=document.getElementById('btnSaveBar');
+  btnSave.style.display='inline-block';
+  btnSave.textContent='💾'; btnSave.classList.remove('saved'); btnSave.disabled=false;
+  updateBar(); renderLives(); renderScore();
+  nextToy();
+}
+function updateBar(){
+  const total=TOYS.filter(t=>t.level===S.currentLevel).length;
+  document.getElementById('levelLabel').textContent='Nível '+S.currentLevel;
+  document.getElementById('levelCount').textContent=S.correctInLevel+'/'+total;
+  document.getElementById('progressFill').style.width=(S.correctInLevel/total*100)+'%';
+}
+
+// ========== PRÓXIMO BRINQUEDO ==========
+function nextToy(){
+  if(!S.queue.length){levelComplete();return;}
+  S.toy=S.queue.shift();
+  S._tentativas=0; S._erros=0;
+  S.palavraInicio=Date.now();
+  S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
+
+  const silabasCorretas=S.toy.silabas.map((s,i)=>({l:s, id:'v'+i, correta:true}));
+
+  // Distratoras: sílabas que não fazem parte da palavra (máx 3, ou menos em níveis com muitas sílabas)
+  const usadas=new Set(S.toy.silabas.map(s=>s.toUpperCase()));
+  const maxDistratoras=Math.max(1, Math.min(3, 8-S.toy.silabas.length));
+  const distratoras=shuffle(SILABAS_DISTRATORAS.filter(s=>!usadas.has(s))).slice(0,maxDistratoras).map((l,i)=>({l,id:'d'+i,correta:false}));
+
+  S.poolOrder=shuffle([...silabasCorretas,...distratoras]);
+
+  // slots: um por sílaba, todos vazios no início
+  S.slots=S.toy.silabas.map(()=>'');
+  S.tileMap={};
+  renderToy();
+}
+
+function renderToy(){
+  const t=S.toy;
+  const c=document.getElementById('toyImageContainer');
+  if(t.img){
+    c.innerHTML=`<img class="toy-image" src="${t.img}" alt="${t.name}" onerror="this.outerHTML='<div class=\\'toy-image-placeholder\\'>${t.emoji}</div>'">`;
+  } else {
+    c.innerHTML=`<div class="toy-image-placeholder">${t.emoji}</div>`;
+  }
+  renderSlots(); renderPool();
+}
+
+// ========== SLOTS ==========
+function renderSlots(){
+  const c=document.getElementById('answerSlots'); c.innerHTML='';
+  S.slots.forEach((val,i)=>{
+    const s=document.createElement('div');
+    s.className='answer-slot'+(val?' filled':'');
+    s.dataset.index=i;
+    s.textContent=val||'';
+    s.addEventListener('dragover',e=>{e.preventDefault();s.classList.add('drag-over');});
+    s.addEventListener('dragleave',()=>s.classList.remove('drag-over'));
+    s.addEventListener('drop',e=>{e.preventDefault();s.classList.remove('drag-over');dropOnSlot(i);});
+    s.addEventListener('click',()=>removeSlot(i));
+    c.appendChild(s);
+  });
+}
+
+// ========== POOL DE SÍLABAS ==========
+function renderPool(){
+  const c=document.getElementById('lettersPool'); c.innerHTML='';
+  S.poolOrder.forEach(({l,id})=>{
+    const el=document.createElement('div');
+    el.className='letter-tile'+(isUsed(id)?' used':'');
+    el.textContent=l; el.dataset.id=id; el.dataset.l=l;
+    el.draggable=true;
+    el.addEventListener('dragstart',e=>{dragId=id;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    el.addEventListener('click',()=>tileClick(id,l));
+    el.addEventListener('touchstart',e=>touchStart(e,el),{passive:true});
+    el.addEventListener('touchmove',touchMove,{passive:false});
+    el.addEventListener('touchend',e=>touchEnd(e,id,l));
+    c.appendChild(el);
+  });
+}
+
+function isUsed(id){return Object.values(S.tileMap).includes(id);}
+
+// ========== DRAG desktop ==========
+let dragId=null;
+function dropOnSlot(i){
+  if(!dragId||isUsed(dragId))return;
+  const el=document.querySelector(`[data-id="${dragId}"]`);
+  if(!el)return;
+  place(i,el.dataset.l,dragId);
+}
+
+// ========== TOUCH mobile ==========
+let tEl=null,tClone=null,tOX=0,tOY=0;
+function touchStart(e,el){
+  if(el.classList.contains('used'))return;
+  tEl=el;
+  const r=el.getBoundingClientRect(),t=e.touches[0];
+  tOX=t.clientX-r.left; tOY=t.clientY-r.top;
+  tClone=el.cloneNode(true);
+  tClone.style.cssText=`position:fixed;z-index:9999;pointer-events:none;opacity:.85;width:${r.width}px;height:${r.height}px;left:${t.clientX-tOX}px;top:${t.clientY-tOY}px;transition:none`;
+  document.body.appendChild(tClone);
+}
+function touchMove(e){
+  e.preventDefault();
+  if(!tClone)return;
+  const t=e.touches[0];
+  tClone.style.left=(t.clientX-tOX)+'px';
+  tClone.style.top=(t.clientY-tOY)+'px';
+  document.querySelectorAll('.answer-slot').forEach(s=>s.classList.remove('drag-over'));
+  const under=document.elementFromPoint(t.clientX,t.clientY);
+  if(under&&under.classList.contains('answer-slot')&&under.dataset.index!==undefined)under.classList.add('drag-over');
+}
+function touchEnd(e,id,l){
+  if(tClone){tClone.remove();tClone=null;}
+  document.querySelectorAll('.answer-slot').forEach(s=>s.classList.remove('drag-over'));
+  if(!tEl)return;
+  const t=e.changedTouches[0];
+  const under=document.elementFromPoint(t.clientX,t.clientY);
+  if(under&&under.classList.contains('answer-slot')&&under.dataset.index!==undefined&&!isUsed(id)){
+    place(parseInt(under.dataset.index),l,id);
+  }
+  tEl=null;
+}
+
+// ========== CLIQUE DIRETO ==========
+function tileClick(id,l){
+  if(isUsed(id))return;
+  const i=firstEmptySlot(); if(i<0)return;
+  place(i,l,id);
+}
+function firstEmptySlot(){
+  for(let i=0;i<S.slots.length;i++){
+    if(!S.slots[i]) return i;
+  }
+  return -1;
+}
+
+// ========== COLOCAR ==========
+function place(i,l,id){
+  if(i<0||i>=S.slots.length) return;
+  if(S.slots[i]){delete S.tileMap[i];}
+  S.slots[i]=l; S.tileMap[i]=id;
+  renderSlots(); renderPool();
+}
+function removeSlot(i){
+  if(!S.slots[i])return;
+  delete S.tileMap[i]; S.slots[i]='';
+  renderSlots(); renderPool();
+}
+function clearAnswer(){
+  S.slots=S.toy.silabas.map(()=>'');
+  S.tileMap={};
+  renderSlots(); renderPool();
+}
+
+// ========== VERIFICAR ==========
+function checkAnswer(){
+  const incomplete=S.slots.some(v=>!v);
+  if(incomplete){showFb('⚠️ Complete todas as sílabas!','warn');return;}
+
+  S._tentativas=(S._tentativas||0)+1;
+
+  let correct=true;
+  S.toy.silabas.forEach((sil,i)=>{
+    if(S.slots[i].toUpperCase()!==sil.toUpperCase()) correct=false;
+  });
+
+  if(correct){
+    const tempoMs=Date.now()-S.palavraInicio;
+    S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    S.registroPalavras.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas, erros:S._erros||0,
+      tempoMs, acertou:true, parcial:false
+    });
+    const pts=10*S.currentLevel;
+    S.score+=pts; S.correctInLevel++;
+    renderScore(); updateBar();
+    markSlots('correct'); showFb('🎉 Muito bem!','ok'); showPts('+'+pts);
+    setTimeout(nextToy,1300);
+  } else {
+    S._erros=(S._erros||0)+1;
+    S.lives--;
+    renderLives(); markSlots('wrong'); showFb('❌ Tente outra vez!','err');
+    S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    S.registroPalavras.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas, erros:S._erros,
+      tempoMs:Date.now()-S.palavraInicio,
+      acertou:false, parcial:true
+    });
+    S.queue.push(S.toy);
+    clearAnswer();
+    if(S.lives<=0){
+      S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
+      S.registroPalavras.push({
+        name:S.toy.name, level:S.currentLevel,
+        tentativas:S._tentativas, erros:S._erros,
+        tempoMs:Date.now()-S.palavraInicio, acertou:false, parcial:false
+      });
+      setTimeout(showLose,1100);
+    } else setTimeout(nextToy,1300);
+  }
+}
+
+function markSlots(cls){
+  document.querySelectorAll('.answer-slot').forEach(s=>s.classList.add(cls));
+}
+
+// ========== FEEDBACK ==========
+let fbTimer=null;
+function showFb(msg,type){
+  const b=document.getElementById('feedbackBanner');
+  b.textContent=msg; b.className='feedback-banner show '+type;
+  clearTimeout(fbTimer);
+  fbTimer=setTimeout(()=>b.classList.remove('show'),1900);
+}
+function showPts(txt){
+  const el=document.createElement('div');
+  el.className='points-anim'; el.textContent=txt;
+  el.style.left=(window.innerWidth/2-20)+'px';
+  el.style.top=(window.innerHeight/2)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+}
+
+// ========== NÍVEL COMPLETO ==========
+function levelComplete(){
+  const lvl=S.currentLevel;
+  const total=TOYS.filter(t=>t.level===lvl).length;
+  const pct=S.correctInLevel/total;
+  const stars=pct>=1?3:pct>=0.75?2:1;
+  S.levelStars[lvl-1]=Math.max(S.levelStars[lvl-1],stars);
+  if(lvl<5) S.levelUnlocked[lvl]=true;
+  S.levelTempos[lvl-1]=(S.levelTempos[lvl-1]||0)+(Date.now()-S.levelInicio);
+  S.sessoes.push({
+    data:new Date().toLocaleDateString('pt-BR'),
+    hora:new Date().toLocaleTimeString('pt-BR'),
+    nivel:lvl, stars, score:S.score,
+    palavras:[...S.registroPalavras]
+  });
+  const subtitle=`Você completou ${S.correctInLevel} brinquedos!\nPontuação total: ${S.score} pontos`;
+  showModalSave('🏆',`Nível ${lvl} concluído!`,'⭐'.repeat(stars)+'☆'.repeat(3-stars),subtitle,lvl);
+}
+
+function showModalSave(emoji,title,stars,sub,lvl){
+  document.getElementById('mEmoji').textContent=emoji;
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mStars').textContent=stars;
+  document.getElementById('mSubtitle').textContent=sub;
+  const avancar=()=>{ if(lvl<5) startLevel(lvl+1); else showStartScreen(); };
+  const b1=document.getElementById('mBtn1');
+  b1.textContent='💾 Salvar e continuar'; b1.className='modal-btn'; b1.style.cssText='';
+  S.cb1=()=>{
+    document.getElementById('modalOverlay').classList.add('hidden');
+    if(S.nomeAluno&&S.nomeAluno.trim()){ salvarProgresso(); showFb('✅ Progresso salvo!','ok'); avancar(); }
+    else { showModalNome(()=>{ salvarProgresso(); showFb('✅ Progresso salvo!','ok'); avancar(); }); }
+  };
+  const b2=document.getElementById('mBtn2');
+  b2.style.display='block'; b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
+  b2.textContent=lvl<5?'▶ Continuar sem salvar':'▶ Finalizar sem salvar';
+  S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); avancar(); };
+  const b3=document.getElementById('mBtn3');
+  b3.style.display='block'; b3.className='modal-btn secondary'; b3.textContent='🏠 Menu principal';
+  S.cb3=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); showStartScreen(); };
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function showLose(){
+  showModal('💔','Não desista!','',
+    `Você perdeu todas as vidas no Nível ${S.currentLevel}.\nA pontuação é reiniciada neste nível.`,
+    '🔄 Tentar de novo',()=>startLevel(S.currentLevel),
+    '🏠 Menu principal',()=>showStartScreen()
+  );
+}
+
+// ========== MODAL ==========
+function showModal(emoji,title,stars,sub,t1,c1,t2,c2){
+  document.getElementById('mEmoji').textContent=emoji;
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mStars').textContent=stars;
+  document.getElementById('mSubtitle').textContent=sub;
+  const b1=document.getElementById('mBtn1');
+  b1.textContent=t1; b1.className='modal-btn'; b1.style.cssText='';
+  S.cb1=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); c1(); };
+  const b2=document.getElementById('mBtn2');
+  b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
+  if(t2){ b2.textContent=t2; b2.style.display='block'; S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); c2(); }; }
+  else b2.style.display='none';
+  const b3=document.getElementById('mBtn3'); b3.style.display='none'; S.cb3=null;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+function modalAct(n){
+  if(n===1&&S.cb1) S.cb1();
+  if(n===2&&S.cb2) S.cb2();
+  if(n===3&&S.cb3) S.cb3();
+}
+
+// ========== TELAS ==========
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showStartScreen(){
+  document.getElementById('levelBar').style.display='none';
+  showScreen('screenStart'); renderStart();
+}
+
+// ========== UTIL ==========
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// ========== NOME ==========
+function onNomeInput(){
+  const nome=document.getElementById('inputNome').value.trim();
+  S.nomeAluno=nome;
+  const nd=document.getElementById('nomeDisplay');
+  if(nome){nd.textContent='👤 '+nome;nd.style.display='block';}
+  else nd.style.display='none';
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const nd=document.getElementById('nomeDisplay');
+  if(nd) nd.addEventListener('click',()=>showModalNome(null,true));
+});
+
+function showModalNome(callback,somenteNome){
+  const nomeAtual=S.nomeAluno||'';
+  const labelBtn=somenteNome?'✅ Salvar nome':'✅ Confirmar e Salvar';
+  document.getElementById('mEmoji').textContent='👤';
+  document.getElementById('mTitle').textContent='Nome do aluno';
+  document.getElementById('mStars').textContent='';
+  document.getElementById('mSubtitle').innerHTML=
+    '<input id="modalNomeInput" type="text" maxlength="40" placeholder="Digite seu nome..."'+
+    ' style="font-family:Fredoka One,cursive;font-size:22px;color:var(--text-main);background:var(--l-bg);'+
+    'border:3px solid var(--l-bd);border-radius:16px;padding:10px 20px;text-align:center;width:100%;outline:none;margin-top:8px">';
+  const b1=document.getElementById('mBtn1');
+  b1.textContent=labelBtn; b1.className='modal-btn'; b1.style.cssText='';
+  S.cb1=()=>{
+    const nome=document.getElementById('modalNomeInput').value.trim();
+    if(!nome){showFb('⚠️ Digite um nome!','warn');return;}
+    S.nomeAluno=nome;
+    const inp=document.getElementById('inputNome');
+    if(inp) inp.value=nome;
+    const nd=document.getElementById('nomeDisplay');
+    nd.textContent='👤 '+nome; nd.style.display='block';
+    document.getElementById('modalOverlay').classList.add('hidden');
+    if(callback) callback();
+  };
+  const b2=document.getElementById('mBtn2');
+  b2.textContent='✖ Cancelar'; b2.style.display='block';
+  b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
+  S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); };
+  const b3=document.getElementById('mBtn3'); b3.style.display='none'; S.cb3=null;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  setTimeout(()=>{
+    const inp=document.getElementById('modalNomeInput');
+    if(inp){inp.value=nomeAtual;inp.focus();inp.select();}
+  },100);
+}
+
+// ========== SALVAR ==========
+function salvarProgressoBar(){
+  const btn=document.getElementById('btnSaveBar');
+  const executarSalvar=()=>{
+    salvarProgresso();
+    btn.textContent='✅'; btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='💾';btn.classList.remove('saved');},2500);
+  };
+  if(S.nomeAluno&&S.nomeAluno.trim()) executarSalvar();
+  else showModalNome(executarSalvar);
+}
+
+function salvarProgresso(){
+  const nome=S.nomeAluno||'Aluno';
+  const queueNomes=S.queue.map(t=>t.name);
+  const toyAtual=S.toy?S.toy.name:null;
+  let registroSnap=[...S.registroPalavras];
+  if(S.toy){
+    registroSnap=registroSnap.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    registroSnap.push({
+      name:S.toy.name, level:S.currentLevel,
+      tentativas:S._tentativas||0, erros:S._erros||0,
+      tempoMs:Date.now()-S.palavraInicio, acertou:false, parcial:true
+    });
+  }
+  const temposSnap=[...S.levelTempos];
+  if(S.toy&&S.levelInicio) temposSnap[S.currentLevel-1]=(temposSnap[S.currentLevel-1]||0)+(Date.now()-S.levelInicio);
+  const dados={
+    versao:2, nomeAluno:nome,
+    dataSalvo:new Date().toLocaleDateString('pt-BR'),
+    horaSalvo:new Date().toLocaleTimeString('pt-BR'),
+    theme:S.theme, score:S.score,
+    levelStars:S.levelStars, levelUnlocked:S.levelUnlocked,
+    emJogo:S.toy!==null, currentLevel:S.currentLevel, lives:S.lives,
+    correctInLevel:S.correctInLevel, toyAtual, queueNomes,
+    slots:S.slots, poolOrder:S.poolOrder,
+    levelTempos:temposSnap, sessoes:S.sessoes, registroPalavras:registroSnap,
+  };
+  const json=JSON.stringify(dados);
+  const b64=btoa(unescape(encodeURIComponent(json)));
+  const blob=new Blob([b64],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='brinque e escreva silabas '+nome+'.txt';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ========== CARREGAR ==========
+function restaurarEstadoDosDados(dados){
+  S.nomeAluno=dados.nomeAluno; S.theme=dados.theme||'cartoon';
+  S.score=dados.score||0; S.levelStars=dados.levelStars||[0,0,0,0,0];
+  S.levelUnlocked=dados.levelUnlocked||[true,false,false,false,false];
+  S.levelTempos=dados.levelTempos||[0,0,0,0,0];
+  S.sessoes=dados.sessoes||[]; S.registroPalavras=dados.registroPalavras||[];
+  S._tentativas=0; S._erros=0;
+  setTheme(S.theme);
+  const inp=document.getElementById('inputNome');
+  if(inp) inp.value=S.nomeAluno;
+  const nd=document.getElementById('nomeDisplay');
+  nd.textContent='👤 '+S.nomeAluno; nd.style.display='block';
+  renderScore(); renderLives();
+
+  if(dados.emJogo&&dados.versao>=2&&dados.toyAtual){
+    S.currentLevel=dados.currentLevel||1; S.lives=dados.lives!=null?dados.lives:5;
+    S.correctInLevel=dados.correctInLevel||0;
+    S.toy=TOYS.find(t=>t.name===dados.toyAtual)||null;
+    S.queue=(dados.queueNomes||[]).map(n=>TOYS.find(t=>t.name===n)).filter(Boolean);
+    if(S.toy){
+      S.poolOrder=dados.poolOrder||[];
+      if(!S.poolOrder.length){
+        const silabasCorretas=S.toy.silabas.map((s,i)=>({l:s,id:'v'+i,correta:true}));
+        const usadas=new Set(S.toy.silabas.map(s=>s.toUpperCase()));
+        const maxDistratoras=Math.max(1, Math.min(3, 8-S.toy.silabas.length));
+        const distratoras=shuffle(SILABAS_DISTRATORAS.filter(s=>!usadas.has(s))).slice(0,maxDistratoras).map((l,i)=>({l,id:'d'+i,correta:false}));
+        S.poolOrder=shuffle([...silabasCorretas,...distratoras]);
+      }
+      S.slots=dados.slots||S.toy.silabas.map(()=>'');
+      S.tileMap={};
+      const idsDisponiveis=[...S.poolOrder.map(p=>p.id)];
+      S.slots.forEach((silaba,i)=>{
+        if(!silaba) return;
+        const idx=idsDisponiveis.findIndex(id=>{
+          const tile=S.poolOrder.find(p=>p.id===id);
+          return tile&&tile.l.toUpperCase()===silaba.toUpperCase();
+        });
+        if(idx>=0){ S.tileMap[i]=idsDisponiveis[idx]; idsDisponiveis.splice(idx,1); }
+      });
+      showScreen('screenGame');
+      document.getElementById('levelBar').style.display='flex';
+      const btnSave=document.getElementById('btnSaveBar');
+      btnSave.style.display='inline-block'; btnSave.textContent='💾';
+      btnSave.classList.remove('saved'); btnSave.disabled=false;
+      S.levelInicio=Date.now(); S.palavraInicio=Date.now();
+      updateBar(); renderLives(); renderToy();
+      showFb('✅ Olá, '+S.nomeAluno+'! Continuando de onde parou!','ok');
+    } else startLevel(S.currentLevel);
+  } else {
+    S.toy=null; S.queue=[];
+    currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
+    showStartScreen();
+    showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+  }
+}
+
+function loadFromFile(event){
+  const file=event.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const b64=e.target.result.trim();
+      const json=decodeURIComponent(escape(atob(b64)));
+      const dados=JSON.parse(json);
+      if(!dados.versao||!dados.nomeAluno){ alert('Arquivo inválido!'); return; }
+      restaurarEstadoDosDados(dados);
+    }catch(err){ console.error(err); alert('Arquivo inválido ou corrompido.'); }
+  };
+  reader.readAsText(file); event.target.value='';
+}
+
+// ========== RELATÓRIO ==========
+function senhaHoje(){
+  const d=new Date();
+  return String(d.getDate()).padStart(2,'0')+String(d.getMonth()+1).padStart(2,'0')+String(d.getFullYear());
+}
+function abrirRelatorio(){ showModalSenha(); }
+function showModalSenha(){
+  const overlay=document.createElement('div');
+  overlay.id='modalSenha';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="font-size:56px;margin-bottom:10px">🔒</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:26px;color:var(--text-main);margin-bottom:6px">Área do Professor</div>
+      <div style="font-size:14px;color:var(--text-light);margin-bottom:20px">Digite a senha de acesso</div>
+      <input id="senhaInput" type="password" maxlength="8" placeholder="••••••••" autocomplete="off"
+        style="font-family:'Fredoka One',cursive;font-size:28px;letter-spacing:6px;color:var(--text-main);
+               background:var(--l-bg);border:3px solid var(--l-bd);border-radius:16px;
+               padding:12px 20px;text-align:center;width:100%;outline:none;margin-bottom:8px"
+        onkeydown="if(event.key==='Enter')confirmarSenha()">
+      <div id="senhaErro" style="color:#e53935;font-size:13px;font-weight:700;min-height:20px;margin-bottom:12px"></div>
+      <button onclick="confirmarSenha()"
+        style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
+               border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;
+               cursor:pointer;width:100%;margin-bottom:10px">✅ Entrar</button>
+      <button onclick="document.getElementById('modalSenha').remove()"
+        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
+               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;width:100%">✖ Cancelar</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('senhaInput')?.focus(),150);
+}
+function confirmarSenha(){
+  const inp=document.getElementById('senhaInput');
+  const err=document.getElementById('senhaErro');
+  const digitado=(inp?.value||'').trim();
+  if(digitado===senhaHoje()){
+    document.getElementById('modalSenha')?.remove();
+    showModalOpcaoRelatorio();
+  } else {
+    if(inp) inp.style.borderColor='#e53935';
+    if(err) err.textContent='❌ Senha incorreta! Use o formato DDMMAAAA';
+    inp?.select();
+  }
+}
+function showModalOpcaoRelatorio(){
+  const temDados=S.nomeAluno&&(S.registroPalavras.length>0||S.sessoes.length>0);
+  const overlay=document.createElement('div');
+  overlay.id='modalOpcaoRel';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)';
+  overlay.innerHTML=`
+    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="font-size:52px;margin-bottom:10px">📋</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:24px;color:var(--text-main);margin-bottom:8px">Relatório do Professor</div>
+      <div style="font-size:14px;color:var(--text-light);margin-bottom:24px">Como deseja visualizar o relatório?</div>
+      ${temDados?`<button onclick="document.getElementById('modalOpcaoRel').remove();gerarRelatorio();document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screenRelatorio').classList.add('active');document.getElementById('levelBar').style.display='none';"
+        style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
+               border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:18px;
+               cursor:pointer;width:100%;margin-bottom:10px">👤 Ver relatório de <strong>${S.nomeAluno}</strong></button>`:''}
+      <label style="background:${temDados?'transparent':'linear-gradient(135deg,var(--bg-h1),var(--bg-h2))'};color:${temDados?'var(--text-main)':'#fff'};border:${temDados?'2px solid var(--l-bd)':'none'};
+             border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;display:block;margin-bottom:10px">
+        📂 Carregar arquivo do aluno
+        <input type="file" accept=".txt" style="display:none" onchange="document.getElementById('modalOpcaoRel').remove();carregarParaRelatorio(event)">
+      </label>
+      <button onclick="document.getElementById('modalOpcaoRel').remove()"
+        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
+               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;width:100%">✖ Cancelar</button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+function carregarParaRelatorio(event){
+  const file=event.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const raw=e.target.result.trim();
+      let dados;
+      try{ const json=decodeURIComponent(escape(atob(raw))); dados=JSON.parse(json); }
+      catch(_){ dados=JSON.parse(raw); }
+      if(!dados||!dados.nomeAluno){ alert('Arquivo inválido!'); return; }
+      gerarRelatorioComDados({
+        nomeAluno:dados.nomeAluno, score:dados.score||0,
+        levelStars:dados.levelStars||[0,0,0,0,0],
+        levelUnlocked:dados.levelUnlocked||[true,false,false,false,false],
+        levelTempos:dados.levelTempos||[0,0,0,0,0],
+        sessoes:dados.sessoes||[], registroPalavras:dados.registroPalavras||[],
+      });
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById('screenRelatorio').classList.add('active');
+      document.getElementById('levelBar').style.display='none';
+    }catch(err){ alert('Erro ao processar o arquivo: '+err.message); }
+  };
+  reader.readAsText(file); event.target.value='';
+}
+function fecharRelatorio(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  if(S.nomeAluno&&S.toy){
+    document.getElementById('screenGame').classList.add('active');
+    document.getElementById('levelBar').style.display='flex';
+    document.getElementById('btnSaveBar').style.display='inline-block';
+    updateBar(); renderLives(); renderToy(); return;
+  }
+  if(S.nomeAluno){
+    currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
+    document.getElementById('levelBar').style.display='none';
+    document.getElementById('screenStart').classList.add('active');
+    renderStart(); return;
+  }
+  showStartScreen();
+}
+function abrirRelatorioDeTxt(event){
+  const file=event.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const b64=e.target.result.trim();
+      const json=decodeURIComponent(escape(atob(b64)));
+      const dados=JSON.parse(json);
+      if(!dados.versao||!dados.nomeAluno) throw new Error('inválido');
+      gerarRelatorioComDados({
+        nomeAluno:dados.nomeAluno, score:dados.score||0,
+        levelStars:dados.levelStars||[0,0,0,0,0],
+        levelUnlocked:dados.levelUnlocked||[true,false,false,false,false],
+        levelTempos:dados.levelTempos||[0,0,0,0,0],
+        sessoes:dados.sessoes||[], registroPalavras:dados.registroPalavras||[],
+      });
+      showScreen('screenRelatorio');
+      document.getElementById('levelBar').style.display='none';
+    }catch(err){ alert('Arquivo inválido.'); }
+  };
+  reader.readAsText(file); event.target.value='';
+}
+function fmtTempo(ms){
+  if(!ms||ms<=0) return '—';
+  const s=Math.floor(ms/1000);
+  if(s<60) return s+'s';
+  return Math.floor(s/60)+'min '+(s%60)+'s';
+}
+function gerarRelatorio(){
+  let regSnap=[...S.registroPalavras];
+  if(S.toy){
+    regSnap=regSnap.filter(r=>!(r.name===S.toy.name&&r.parcial));
+    regSnap.push({name:S.toy.name,level:S.currentLevel,tentativas:S._tentativas||0,erros:S._erros||0,tempoMs:Date.now()-(S.palavraInicio||Date.now()),acertou:false,parcial:true});
+  }
+  gerarRelatorioComDados({nomeAluno:S.nomeAluno,score:S.score,levelStars:S.levelStars,levelUnlocked:S.levelUnlocked,levelTempos:S.levelTempos,sessoes:S.sessoes,registroPalavras:regSnap});
+}
+function gerarRelatorioComDados(d){
+  const todasPalavras=[...d.registroPalavras];
+  (d.sessoes||[]).forEach(s=>(s.palavras||[]).forEach(p=>todasPalavras.push(p)));
+  const errosPorPalavra={};
+  todasPalavras.forEach(p=>{
+    const k=p.name;
+    if(!errosPorPalavra[k]) errosPorPalavra[k]={erros:0,tentativas:0,acertos:0,emAndamento:false};
+    errosPorPalavra[k].erros+=p.erros||0;
+    errosPorPalavra[k].tentativas+=p.tentativas||0;
+    if(p.acertou) errosPorPalavra[k].acertos++;
+    if(p.parcial) errosPorPalavra[k].emAndamento=true;
+  });
+  const rankErros=Object.entries(errosPorPalavra).sort((a,b)=>b[1].erros-a[1].erros).filter(([,v])=>v.tentativas>0||v.emAndamento).slice(0,10);
+  const niveisConcluidos=d.levelStars.filter(s=>s>0).length;
+  const totalEstrelas=d.levelStars.reduce((a,b)=>a+b,0);
+  const el=document.getElementById('relatorioConteudo');
+  if(!el) return;
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--l-bd)">
+      <div style="font-size:48px">👤</div>
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:24px;color:var(--text-main)">${d.nomeAluno}</div>
+        <div style="font-size:14px;color:var(--text-light)">Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+      ${cartaoResumo('🏆','Pontuação total',d.score+' pts')}
+      ${cartaoResumo('📚','Níveis concluídos',niveisConcluidos+' de 5')}
+      ${cartaoResumo('⭐','Total de estrelas',totalEstrelas+' de 15')}
+    </div>
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📊 Desempenho por Nível</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
+      <thead><tr style="background:var(--l-bg)">
+        <th style="padding:10px;text-align:left;border-radius:8px 0 0 8px">Nível</th>
+        <th style="padding:10px;text-align:center">Estrelas</th>
+        <th style="padding:10px;text-align:center">Tempo</th>
+        <th style="padding:10px;text-align:center;border-radius:0 8px 8px 0">Status</th>
+      </tr></thead>
+      <tbody>${[1,2,3,4,5].map(l=>{
+        const st=d.levelStars[l-1]||0;
+        const unlocked=d.levelUnlocked[l-1];
+        const tempo=fmtTempo(d.levelTempos[l-1]);
+        const status=!unlocked?'🔒 Bloqueado':st===3?'✅ Concluído':st>0?'🔄 Em progresso':'⏳ Não iniciado';
+        return `<tr style="border-bottom:1px solid var(--l-bg)">
+          <td style="padding:10px;font-weight:700">Nível ${l}</td>
+          <td style="padding:10px;text-align:center">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</td>
+          <td style="padding:10px;text-align:center;color:var(--text-light)">${tempo}</td>
+          <td style="padding:10px;text-align:center">${status}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    ${Object.keys(errosPorPalavra).length>0?`
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📝 Desempenho por palavra</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
+      <thead><tr style="background:var(--l-bg)">
+        <th style="padding:10px;text-align:left;border-radius:8px 0 0 8px">Palavra</th>
+        <th style="padding:10px;text-align:center">Erros</th>
+        <th style="padding:10px;text-align:center">Tentativas</th>
+        <th style="padding:10px;text-align:center;border-radius:0 8px 8px 0">Acertos</th>
+      </tr></thead>
+      <tbody>${rankErros.map(([nome,v],i)=>`
+        <tr style="border-bottom:1px solid var(--l-bg);background:${i===0?'rgba(255,100,100,0.07)':''}">
+          <td style="padding:10px;font-family:'Fredoka One',cursive;letter-spacing:1px">
+            ${nome}${v.emAndamento?' <span style="font-size:11px;color:#FF9800;font-family:Nunito,sans-serif">⏳ em andamento</span>':''}
+          </td>
+          <td style="padding:10px;text-align:center;color:#e53935;font-weight:700">${v.erros}</td>
+          <td style="padding:10px;text-align:center;color:var(--text-light)">${v.tentativas}</td>
+          <td style="padding:10px;text-align:center">${v.acertos>0?'✅':v.emAndamento?'⏳':'❌'}</td>
+        </tr>`).join('')}</tbody>
+    </table>`:'<div style="color:var(--text-light);text-align:center;padding:16px;margin-bottom:24px">⏳ Nenhuma palavra verificada ainda!</div>'}
+    ${d.sessoes.length>0?`
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📅 Histórico de sessões</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      ${d.sessoes.map((s,i)=>`
+      <div style="background:var(--l-bg);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
+        <div><strong>Sessão ${i+1}</strong> — ${s.data} às ${s.hora}</div>
+        <div style="display:flex;gap:16px;color:var(--text-light)">
+          <span>Nível ${s.nivel}</span><span>${'⭐'.repeat(s.stars)}</span><span>${s.score} pts</span>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+    <div style="text-align:center;margin-top:8px">
+      <button onclick="window.print()" style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:16px;padding:12px 32px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer">🖨️ Imprimir relatório</button>
+    </div>`;
+}
+function cartaoResumo(emoji,label,valor){
+  return `<div style="background:var(--l-bg);border-radius:16px;padding:16px;text-align:center;border:2px solid var(--l-bd)">
+    <div style="font-size:28px">${emoji}</div>
+    <div style="font-size:12px;color:var(--text-light);font-weight:700;margin:4px 0">${label}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:var(--text-main)">${valor}</div>
+  </div>`;
+}
+
+// ========== BOOT ==========
+S.nomeAluno=''; S.cb3=null;
+setTheme(S.theme);
+renderStart(); renderLives(); renderScore();
+</script>
+</body>
+</html>
