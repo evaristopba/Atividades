@@ -585,15 +585,32 @@
             padding-right: 5px;
         }
 
-        /* Canvas para confetes */
-        #confetti-canvas {
+        /* Partículas de Celebridade (Hardware accelerated CSS) */
+        .confetti-particle {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: -60px;
             pointer-events: none;
-            z-index: 999;
+            z-index: 9999;
+            will-change: transform, opacity;
+            animation: fallAndSway 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes fallAndSway {
+            0% {
+                transform: translate3d(0, 0, 0) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translate3d(var(--sway-1), 15vh, 0) rotate(var(--rot-1)) scale(1.3);
+            }
+            50% {
+                transform: translate3d(var(--sway-2), 60vh, 0) rotate(var(--rot-2)) scale(1.0);
+            }
+            100% {
+                transform: translate3d(var(--sway-3), 105vh, 0) rotate(var(--rot-3)) scale(0.4);
+                opacity: 0;
+            }
         }
 
         /* MODAL PARA SOLICITAR NOME DO ALUNO */
@@ -955,6 +972,261 @@
                 margin: 20px;
                 padding: 20px;
             }
+            #professor-panel-content {
+                margin: 10px;
+                padding: 15px;
+            }
+            .student-summary-card {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            .stats-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .stats-actions button {
+                width: 100%;
+            }
+        }
+
+        /* ============================================== */
+        /* ESTILOS DO PAINEL DO PROFESSOR (ESTATÍSTICAS)  */
+        /* ============================================== */
+        #professor-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #professor-panel-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 16px;
+            max-width: 750px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.5;
+            color: #2c3e50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        #professor-panel-content h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .student-summary-card {
+            background-color: #f8f9fa;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .student-summary-card div {
+            font-size: 0.95em;
+            color: #2c3e50;
+        }
+
+        .stats-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .stats-actions button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #export-excel-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        #export-excel-btn:hover {
+            background-color: #27ae60;
+        }
+
+        #clear-stats-btn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        #clear-stats-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .stats-table-container {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 40vh;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stats-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .stats-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .badge-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .badge-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .badge-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .detail-row-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            font-weight: bold;
+        }
+
+        .detail-row-btn:hover {
+            color: #2980b9;
+        }
+
+        #close-professor-panel {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #e2e8f0;
+            color: #475569;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #close-professor-panel:hover {
+            background-color: #cbd5e1;
+        }
+
+        #professor-panel-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: 3px solid var(--secondary-color);
+            background-color: #9b59b6;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #professor-panel-btn:hover {
+            transform: scale(1.02);
+            background-color: #8e44ad;
+        }
+
+        /* ALTO CONTRASTE PARA O PAINEL DO PROFESSOR */
+        body.high-contrast #professor-panel-overlay,
+        body.high-contrast #professor-panel-content,
+        body.high-contrast .student-summary-card,
+        body.high-contrast .stats-table-container,
+        body.high-contrast .stats-table,
+        body.high-contrast .stats-table th,
+        body.high-contrast .stats-table td {
+            background-color: black !important;
+            color: yellow !important;
+            border-color: yellow !important;
+        }
+
+        body.high-contrast .stats-table th {
+            border-bottom: 2px solid yellow !important;
+        }
+
+        body.high-contrast #export-excel-btn,
+        body.high-contrast #clear-stats-btn,
+        body.high-contrast #close-professor-panel,
+        body.high-contrast #professor-panel-btn,
+        body.high-contrast .detail-row-btn {
+            background-color: black !important;
+            color: yellow !important;
+            border: 2px solid yellow !important;
+            outline: none;
+        }
+
+        body.high-contrast .badge-success,
+        body.high-contrast .badge-danger,
+        body.high-contrast .badge-warning {
+            background-color: black !important;
+            color: yellow !important;
+            border: 1px dotted yellow !important;
         }
     </style>
 </head>
@@ -978,6 +1250,7 @@
             <button id="restart-btn" aria-label="Reiniciar o jogo">Reiniciar Jogo</button>
             <button id="save-progress-btn">💾 Salvar Progresso</button>
             <button id="load-progress-btn">📂 Carregar Progresso</button>
+            <button id="professor-panel-btn" aria-label="Abrir painel do professor">📊 Painel do Professor</button>
         </div>
         
         <div class="game-wrapper">
@@ -1088,6 +1361,47 @@
             </div>
         </div>
 
+        <!-- MODAL DO PAINEL DO PROFESSOR (ESTATÍSTICAS) -->
+        <div id="professor-panel-overlay">
+            <div id="professor-panel-content">
+                <h2>📊 Painel de Estatísticas (Professor)</h2>
+                
+                <div class="student-summary-card">
+                    <div><strong>👤 Aluno:</strong> <span id="prof-student-name">Aluno</span></div>
+                    <div><strong>📈 Nível Atual:</strong> <span id="prof-current-level">1</span></div>
+                    <div><strong>🏆 Pontuação Total:</strong> <span id="prof-total-score">0</span></div>
+                    <div><strong>🎯 Taxa de Acertos:</strong> <span id="prof-success-rate">0% (0/0)</span></div>
+                    <div><strong>❤️ Vidas Restantes:</strong> <span id="prof-lives">3 / 3</span></div>
+                </div>
+
+                <div class="stats-actions">
+                    <button id="export-excel-btn" title="Baixar relatório completo em formato CSV legível para Excel/Google Planilhas">📥 Exportar Planilha (CSV)</button>
+                    <button id="clear-stats-btn" title="Apagar histórico registrado neste navegador">🗑️ Limpar Estatísticas</button>
+                </div>
+
+                <div class="stats-table-container">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="text-align: center;">Nível</th>
+                                <th>Desafio</th>
+                                <th style="text-align: center;">Resposta</th>
+                                <th style="text-align: center;">Tentativas</th>
+                                <th style="text-align: center;">Status</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body">
+                            <!-- Inserido dinamicamente via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button id="close-professor-panel">Voltar ao Jogo</button>
+            </div>
+        </div>
+
         <!-- MODAL PARA SOLICITAR NOME DO ALUNO -->
         <div id="nome-aluno-overlay">
             <div class="nome-modal-content">
@@ -1118,8 +1432,7 @@
         Inspirado em <a href="https://www.coquinhos.com/programacao-para-criancas/play/" target="_blank">Coquinhos.com</a>
     </footer>
 
-    <!-- Canvas para confetes -->
-    <canvas id="confetti-canvas"></canvas>
+    <!-- Confetes de Emojis de Alto Desempenho e Leves (GPU) -->
 
     <script>
         // Constantes do jogo
@@ -1160,89 +1473,58 @@
         let lives = TOTAL_LIVES;
         let levelEntryScore = 0;
         let visitedCells = [];
+        let gameStats = [];
+        let currentChallengeData = null;
         
         // ==============================================
-        // SISTEMA DE CONFETE RESISTENTE A INTERRUPÇÕES E ERROS
+        // SISTEMA DE CONFETE (GPU / CSS OTIMIZADO)
         // ==============================================
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        let animationId = null;
-        let particles = [];
-        
-        function resizeCanvas() {
-            if (canvas) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        
-        class ConfettiParticle {
-            constructor() {
-                this.x = Math.random() * (canvas ? canvas.width : 800);
-                this.y = Math.random() * (canvas ? canvas.height : 600) - (canvas ? canvas.height : 600);
-                this.size = Math.random() * 8 + 3;
-                this.speedY = Math.random() * 5 + 3;
-                this.speedX = (Math.random() - 0.5) * 3;
-                this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                this.rotation = Math.random() * 360;
-                this.rotateSpeed = (Math.random() - 0.5) * 10;
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += this.speedX;
-                this.rotation += this.rotateSpeed;
-                return this.y < (canvas ? canvas.height : 600) + 50;
-            }
-            draw() {
-                if (!ctx) return;
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation * Math.PI / 180);
-                ctx.fillStyle = this.color;
-                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size/2);
-                ctx.restore();
-            }
-        }
-        
-        function startConfetti(seconds = 2.5) {
-            try {
-                if (!canvas || !ctx) return;
-                if (animationId) cancelAnimationFrame(animationId);
-                particles = [];
-                for(let i = 0; i < 200; i++) {
-                    particles.push(new ConfettiParticle());
-                }
-                let startTime = performance.now();
-                function animateConfetti(now) {
-                    try {
-                        const timestamp = (typeof now === 'number' && !isNaN(now)) ? now : performance.now();
-                        const elapsed = timestamp - startTime;
+        function startConfetti() {
+            // Remove qualquer confete antigo para limpar a memória DOM residual
+            document.querySelectorAll('.confetti-particle').forEach(p => p.remove());
 
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        particles = particles.filter(p => p.update());
-                        particles.forEach(p => p.draw());
-                        
-                        if (particles.length === 0 || elapsed > seconds * 1000) {
-                            cancelAnimationFrame(animationId);
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                            animationId = null;
-                            return;
-                        }
-                        animationId = requestAnimationFrame(animateConfetti);
-                    } catch (err) {
-                        console.error("Erro no frame de animação:", err);
-                        if (animationId) cancelAnimationFrame(animationId);
-                        animationId = null;
-                        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                }
-                animationId = requestAnimationFrame(animateConfetti);
-            } catch (e) {
-                console.error("Erro ao iniciar confete:", e);
-                if (animationId) cancelAnimationFrame(animationId);
-                animationId = null;
+            const emojis = ['🎉', '✨', '🎈', '🤖', '🌟', '🏆', '🤩', '🎯', '💫', '🌸', '⚡', '💡'];
+            const numParticles = 24; // Quantidade de partículas extremamente segura e fluida
+            
+            for (let i = 0; i < numParticles; i++) {
+                const p = document.createElement('div');
+                p.className = 'confetti-particle';
+                p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+                // Tamanho aleatório
+                const size = (Math.random() * 0.8 + 1.2).toFixed(1); // entre 1.2rem e 2.0rem
+                p.style.fontSize = `${size}rem`;
+
+                // Posição x inicial em porcentagem da tela
+                const startX = Math.random() * 95; // 0% a 95%
+                p.style.left = `${startX}%`;
+
+                // Direções de oscilação variadas (sway) usando variáveis CSS
+                const sway1 = Math.floor(Math.random() * 80 - 40); // -40px a +40px
+                const sway2 = Math.floor(Math.random() * 160 - 80); // -80px a +80px
+                const sway3 = Math.floor(Math.random() * 240 - 120); // -120px a +120px
+
+                const rot1 = Math.floor(Math.random() * 360);
+                const rot2 = Math.floor(Math.random() * 720);
+                const rot3 = Math.floor(Math.random() * 1080);
+
+                p.style.setProperty('--sway-1', `${sway1}px`);
+                p.style.setProperty('--sway-2', `${sway2}px`);
+                p.style.setProperty('--sway-3', `${sway3}px`);
+
+                p.style.setProperty('--rot-1', `${rot1}deg`);
+                p.style.setProperty('--rot-2', `${rot2}deg`);
+                p.style.setProperty('--rot-3', `${rot3}deg`);
+
+                // Delay sutil para suavizar o surgimento das partículas
+                p.style.animationDelay = `${(Math.random() * 0.4).toFixed(2)}s`;
+
+                document.body.appendChild(p);
+
+                // Autoremove do DOM assim que a animação terminar (2.2s + delay máximo de 0.4s)
+                setTimeout(() => {
+                    p.remove();
+                }, 2800);
             }
         }
         
@@ -1535,7 +1817,8 @@
                 bombPositions: bombPositions,
                 decoyPositions: decoyPositions,
                 visitedCells: visitedCells,
-                currentProblemText: mathProblemEl.textContent
+                currentProblemText: mathProblemEl.textContent,
+                gameStats: gameStats
             };
         }
         
@@ -1552,6 +1835,24 @@
             bombPositions = state.bombPositions;
             decoyPositions = state.decoyPositions;
             visitedCells = state.visitedCells;
+            gameStats = state.gameStats || [];
+            
+            // Re-vincular o desafio carregado ao desafio atual
+            if (gameStats.length > 0) {
+                currentChallengeData = gameStats[gameStats.length - 1];
+            } else {
+                currentChallengeData = {
+                    nivel: currentLevel,
+                    problema: state.currentProblemText || "Operação",
+                    respostaCerta: targetNumber,
+                    tentativas: 0,
+                    erros: 0,
+                    acertos: 0,
+                    historico: [],
+                    dataHora: new Date().toLocaleTimeString('pt-BR')
+                };
+                gameStats.push(currentChallengeData);
+            }
             
             scoreEl.textContent = score;
             updateLivesDisplay();
@@ -1626,14 +1927,14 @@
         
         if (confirmarNomeBtn) {
             confirmarNomeBtn.addEventListener('click', () => {
-                let inputName = nomeInput.value.trim();
-                if (!inputName) {
-                    inputName = 'Aluno';
+                let alunoNome = nomeInput.value.trim();
+                if (!alunoNome) {
+                    alunoNome = 'anonimo';
                 } else {
-                    inputName = inputName.replace(/[^a-zA-ZÀ-ÿ0-9 ]/g, '_').substring(0, 30);
+                    alunoNome = alunoNome.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '_').substring(0, 30);
                 }
                 if (pendingSaveCallback) {
-                    pendingSaveCallback(inputName);
+                    pendingSaveCallback(alunoNome);
                 }
                 closeNomeModal();
             });
@@ -1731,7 +2032,7 @@
         
         function showCustomAlert(title, message, type = 'warning', callback = null) {
             customAlertTitle.textContent = title;
-            customAlertMessage.textContent = message;
+            customAlertMessage.innerHTML = message;
             customAlertContent.classList.remove('warning', 'info', 'success');
             customAlertContent.classList.add(type);
             pendingAlertCallback = callback;
@@ -1741,9 +2042,8 @@
         function closeCustomAlert() {
             customAlertOverlay.style.display = 'none';
             if (pendingAlertCallback) {
-                const cb = pendingAlertCallback;
+                pendingAlertCallback();
                 pendingAlertCallback = null;
-                cb();
             }
             toggleControlButtons(true);
             const rightBtn = document.getElementById('btn-right');
@@ -1788,6 +2088,154 @@
                 showCustomAlert("📢 AVISO", message, "info");
             }
         };
+
+        // ==============================================
+        // MÉTODOS DO PAINEL DO PROFESSOR (ESTATÍSTICAS)
+        // ==============================================
+        function openProfessorPanel() {
+            const overlay = document.getElementById('professor-panel-overlay');
+            if (!overlay) return;
+
+            // Atualiza resumo
+            document.getElementById('prof-student-name').textContent = alunoNome;
+            document.getElementById('prof-current-level').textContent = currentLevel;
+            document.getElementById('prof-total-score').textContent = score;
+            document.getElementById('prof-lives').textContent = `${lives} / ${TOTAL_LIVES}`;
+
+            // Calcula taxa
+            let totalChallengesCount = gameStats.length;
+            let totalSuccess = 0;
+            let totalAttempts = 0;
+            
+            gameStats.forEach(s => {
+                if (s.acertos > 0) totalSuccess++;
+                totalAttempts += s.tentativas;
+            });
+
+            let ratePercent = totalChallengesCount > 0 ? Math.round((totalSuccess / totalChallengesCount) * 100) : 0;
+            document.getElementById('prof-success-rate').textContent = `${ratePercent}% (${totalSuccess}/${totalChallengesCount})`;
+
+            // Gera linhas da tabela
+            const tbody = document.getElementById('stats-table-body');
+            tbody.innerHTML = '';
+
+            if (gameStats.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #7f8c8d; font-style: italic; padding: 20px;">Nenhum desafio registrado. Comece a jogar para gerar estatísticas!</td></tr>`;
+            } else {
+                gameStats.forEach((stat, index) => {
+                    const row = document.createElement('tr');
+                    
+                    let statusBadge = '';
+                    if (stat.acertos > 0) {
+                        statusBadge = '<span class="badge-success">Resolvido</span>';
+                    } else if (stat.erros > 0) {
+                        statusBadge = '<span class="badge-danger">Pendente (Errou)</span>';
+                    } else {
+                        statusBadge = '<span class="badge-warning">Não Tentou</span>';
+                    }
+
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td style="text-align: center;">${stat.nivel}</td>
+                        <td style="font-weight: bold; color: #c0392b;">${stat.problema}</td>
+                        <td style="text-align: center; font-weight: bold;">${stat.respostaCerta}</td>
+                        <td style="text-align: center;">${stat.tentativas}</td>
+                        <td style="text-align: center;">${statusBadge}</td>
+                        <td style="text-align: center;">
+                            <button class="detail-row-btn" onclick="showChallengeDetail(${index})">👁️ Ver Detalhes</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            overlay.style.display = 'flex';
+            toggleControlButtons(false);
+        }
+
+        function closeProfessorPanel() {
+            const overlay = document.getElementById('professor-panel-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            toggleControlButtons(true);
+        }
+
+        function showChallengeDetail(index) {
+            const statObj = gameStats[index];
+            if (!statObj) return;
+
+            let detailHtml = `<div style="text-align: left; max-height: 50vh; overflow-y: auto; padding: 5px; font-family: monospace; font-size: 0.95em; color: #2c3e50;">`;
+            detailHtml += `<p style="margin-top: 0; font-size: 1.1em;"><strong>Desafio:</strong> ${statObj.problema} (Alvo: ${statObj.respostaCerta})</p>`;
+            detailHtml += `<p><strong>Nível de Dificuldade:</strong> Nível ${statObj.nivel}</p>`;
+            detailHtml += `<p><strong>Número de Tentativas Totais:</strong> ${statObj.tentativas}</p>`;
+            detailHtml += `<p style="border-bottom: 2px solid #ddd; padding-bottom: 5px; font-weight: bold; font-family: sans-serif;">Histórico de Comandos do Aluno:</p>`;
+
+            if (statObj.historico.length === 0) {
+                detailHtml += `<p style="color: #7f8c8d; font-style: italic;">Nenhum comando foi executado ainda para este desafio.</p>`;
+            } else {
+                statObj.historico.forEach((run, i) => {
+                    const num = i + 1;
+                    const isWin = run.resultado.includes("Acertou");
+                    const color = isWin ? "#27ae60" : "#c0392b";
+                    const bgColor = isWin ? "#e8f8f0" : "#fdf2f2";
+                    
+                    detailHtml += `<div style="margin-bottom: 10px; padding: 10px; border-radius: 6px; background-color: ${bgColor}; border-left: 5px solid ${color};">`;
+                    detailHtml += `<div><strong>Tentativa #${num}:</strong> <span style="background: #ffffff; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-weight: bold; font-size: 1.05em;">${run.comandos || '(Nenhum)'}</span></div>`;
+                    detailHtml += `<div style="color: ${color}; font-weight: bold; margin-top: 5px; font-family: sans-serif;">Resultado: ${run.resultado}</div>`;
+                    detailHtml += `</div>`;
+                });
+            }
+            detailHtml += `</div>`;
+
+            showCustomAlert(`Detalhamento do Desafio`, detailHtml, "info");
+        }
+
+        function exportStatsToCSV() {
+            if (gameStats.length === 0) {
+                showCustomAlert("⚠️ Atenção", "Não há estatísticas para exportar ainda.", "warning");
+                return;
+            }
+
+            // Adiciona BOM para abrir corretamente no Excel em português com UTF-8
+            let csvContent = "\uFEFF";
+            csvContent += "Aluno;Nivel;Desafio;Resposta Correta;Tentativas;Acertos;Erros;Hora;Historico de Comandos\r\n";
+
+            gameStats.forEach(stat => {
+                const problemaClean = stat.problema.replace(/;/g, ',');
+                const historicoStr = stat.historico.map(h => `[${h.comandos.replace(/;/g, ',')} -> ${h.resultado.replace(/;/g, ',')}]`).join(" | ");
+                
+                const row = [
+                    alunoNome.replace(/;/g, ','),
+                    stat.nivel,
+                    problemaClean,
+                    stat.respostaCerta,
+                    stat.tentativas,
+                    stat.acertos,
+                    stat.erros,
+                    stat.dataHora,
+                    historicoStr
+                ].join(";");
+                csvContent += row + "\r\n";
+            });
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `estatisticas_robo_${alunoNome.replace(/\s+/g, '_')}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Vincular ao escopo global para que as funções chamadas pelo onclick no HTML gerado funcionem
+        window.showChallengeDetail = showChallengeDetail;
+        
+        // ==============================================
+        // FUNÇÃO DE AJUSTE DOS ERROS DO DIALOG (HISTÓRICO)
+        // ==============================================
         
         // ==============================================
         // FUNÇÕES PRINCIPAIS DO JOGO
@@ -1977,12 +2425,86 @@
             // Botão de instruções
             document.getElementById('instructions-btn').addEventListener('click', showInstructions);
             
-            // Botão de reiniciar jogo
-            document.getElementById('restart-btn').addEventListener('click', () => {
-                const confirmReset = window.confirm("Deseja reiniciar o jogo completamente? Isso zerará sua pontuação e retornará ao Nível 1.");
-                if (!confirmReset) return;
-                resetGame();
-            });
+            // Botão de reiniciar jogo com dupla confirmação para evitar bloqueios de iframe
+            const restartBtn = document.getElementById('restart-btn');
+            if (restartBtn) {
+                restartBtn.addEventListener('click', () => {
+                    if (restartBtn.dataset.confirmed === "true") {
+                        resetGame();
+                        restartBtn.textContent = "Reiniciar Jogo";
+                        restartBtn.style.backgroundColor = "";
+                        restartBtn.style.color = "";
+                        delete restartBtn.dataset.confirmed;
+                        showTemporaryMessage("Jogo de robô reiniciado completamente!", "success");
+                    } else {
+                        restartBtn.dataset.confirmed = "true";
+                        restartBtn.textContent = "⚠️ Clique para Confirmar";
+                        restartBtn.style.backgroundColor = "#e74c3c";
+                        restartBtn.style.color = "white";
+                        
+                        setTimeout(() => {
+                            if (restartBtn.dataset.confirmed === "true") {
+                                restartBtn.textContent = "Reiniciar Jogo";
+                                restartBtn.style.backgroundColor = "";
+                                restartBtn.style.color = "";
+                                delete restartBtn.dataset.confirmed;
+                            }
+                        }, 4000);
+                    }
+                });
+            }
+
+            // Painel do Professor & Estatísticas
+            const profPanelBtn = document.getElementById('professor-panel-btn');
+            if (profPanelBtn) {
+                profPanelBtn.addEventListener('click', openProfessorPanel);
+            }
+            const closeProfBtn = document.getElementById('close-professor-panel');
+            if (closeProfBtn) {
+                closeProfBtn.addEventListener('click', closeProfessorPanel);
+            }
+            const exportCsvBtn = document.getElementById('export-excel-btn');
+            if (exportCsvBtn) {
+                exportCsvBtn.addEventListener('click', exportStatsToCSV);
+            }
+            const clearStatsBtn = document.getElementById('clear-stats-btn');
+            if (clearStatsBtn) {
+                clearStatsBtn.addEventListener('click', () => {
+                    if (clearStatsBtn.dataset.confirmed === "true") {
+                        gameStats = [];
+                        currentChallengeData = {
+                            nivel: currentLevel,
+                            problema: mathProblemEl.textContent || "Operação",
+                            respostaCerta: targetNumber,
+                            tentativas: 0,
+                            erros: 0,
+                            acertos: 0,
+                            historico: [],
+                            dataHora: new Date().toLocaleTimeString('pt-BR')
+                        };
+                        gameStats.push(currentChallengeData);
+                        
+                        clearStatsBtn.textContent = "🗑️ Limpar Estatísticas";
+                        clearStatsBtn.style.backgroundColor = "";
+                        delete clearStatsBtn.dataset.confirmed;
+
+                        openProfessorPanel(); // refresh data
+                        showTemporaryMessage("Estatísticas apagadas com sucesso!", "info");
+                    } else {
+                        clearStatsBtn.dataset.confirmed = "true";
+                        clearStatsBtn.textContent = "⚠️ Clique para Apagar";
+                        clearStatsBtn.style.backgroundColor = "#d35400";
+                        
+                        setTimeout(() => {
+                            if (clearStatsBtn.dataset.confirmed === "true") {
+                                clearStatsBtn.textContent = "🗑️ Limpar Estatísticas";
+                                clearStatsBtn.style.backgroundColor = "";
+                                delete clearStatsBtn.dataset.confirmed;
+                            }
+                        }, 4000);
+                    }
+                });
+            }
             
             // Botões de movimento
             document.getElementById('btn-right').addEventListener('click', () => addCommand('➡️'));
@@ -2059,6 +2581,15 @@
                     return;
                 }
                 
+                const isProfActive = document.getElementById('professor-panel-overlay') && document.getElementById('professor-panel-overlay').style.display === 'flex';
+                if (isProfActive) {
+                    if (e.key === 'Escape' || e.key === 'Enter') {
+                        e.preventDefault();
+                        closeProfessorPanel();
+                    }
+                    return;
+                }
+                
                 if (isMoving || isGameOver) return;
                 
                 if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
@@ -2124,9 +2655,10 @@
             const hasInstructions = instructionsOverlay && instructionsOverlay.style.display === 'flex';
             const hasName = nomeOverlay && nomeOverlay.style.display === 'flex';
             const hasVictoryMessage = victoryMessage && (victoryMessage.style.display === 'block' || victoryMessage.style.opacity === '1');
+            const hasProf = document.getElementById('professor-panel-overlay') && document.getElementById('professor-panel-overlay').style.display === 'flex';
             
             // Se houver qualquer overlay, modal ou mensagem de vitória ativa, os controles devem permanecer desabilitados
-            const shouldDisable = !enabled || isMoving || isGameOver || hasAlert || hasInstructions || hasName || hasVictoryMessage;
+            const shouldDisable = !enabled || isMoving || isGameOver || hasAlert || hasInstructions || hasName || hasVictoryMessage || hasProf;
             
             const buttons = [
                 document.getElementById('verify-btn'),
@@ -2228,6 +2760,19 @@
             const problem = generateMathProblem();
             targetNumber = problem.answer;
             mathProblemEl.textContent = problem.text;
+            
+            // Registrar novo desafio em estatísticas
+            currentChallengeData = {
+                nivel: currentLevel,
+                problema: problem.text,
+                respostaCerta: targetNumber,
+                tentativas: 0,
+                erros: 0,
+                acertos: 0,
+                historico: [],
+                dataHora: new Date().toLocaleTimeString('pt-BR')
+            };
+            gameStats.push(currentChallengeData);
             
             let allObstacles = [];
             visitedCells = [];
@@ -2499,11 +3044,17 @@
         function checkResult(finalPos) {
             // Marcar o caminho final como correto se chegou ao destino
             if (finalPos.x === targetPos.x && finalPos.y === targetPos.y) {
-                // CONFETES AO ACERTAR (Com bloco de captura seguro)
-                try {
-                    startConfetti(2.5);
-                } catch(e) {
-                    console.error("Erro ao disparar confetes:", e);
+                // CONFETES AO ACERTAR
+                startConfetti();
+                
+                // Registrar acerto em estatísticas
+                if (currentChallengeData) {
+                    currentChallengeData.tentativas++;
+                    currentChallengeData.acertos++;
+                    currentChallengeData.historico.push({
+                        comandos: [...commandQueue].join(' '),
+                        resultado: "Acertou!"
+                    });
                 }
                 
                 visitedCells = visitedCells.map(cell => ({...cell, correct: true}));
@@ -2563,6 +3114,16 @@
         function handleError(message) {
             // PARAR MONITORAMENTO EM ERRO
             stopPositionMonitoring();
+            
+            // Registrar erro em estatísticas
+            if (currentChallengeData) {
+                currentChallengeData.tentativas++;
+                currentChallengeData.erros++;
+                currentChallengeData.historico.push({
+                    comandos: [...commandQueue].join(' '),
+                    resultado: message
+                });
+            }
             
             lives--;
             updateLivesDisplay();
