@@ -717,6 +717,11 @@
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             animation: fadeInScale 0.2s ease;
+            transition: max-width 0.2s ease;
+        }
+        
+        .custom-alert-content.wide-modal {
+            max-width: 580px;
         }
         
         @keyframes fadeInScale {
@@ -2033,8 +2038,11 @@
         function showCustomAlert(title, message, type = 'warning', callback = null) {
             customAlertTitle.textContent = title;
             customAlertMessage.innerHTML = message;
-            customAlertContent.classList.remove('warning', 'info', 'success');
+            customAlertContent.classList.remove('warning', 'info', 'success', 'wide-modal');
             customAlertContent.classList.add(type);
+            if (type === 'info' || message.includes('max-height')) {
+                customAlertContent.classList.add('wide-modal');
+            }
             pendingAlertCallback = callback;
             customAlertOverlay.style.display = 'flex';
         }
