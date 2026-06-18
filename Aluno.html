@@ -20,9 +20,30 @@
         #submit-button { width: 100%; padding: 15px; margin-top: 30px; font-size: 1.3em; font-weight: bold; color: white; background-color: #28a745; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
         #submit-button:hover:not(:disabled) { opacity: 0.85; }
         #submit-button:disabled { background-color: #ced4da; }
+
+        /* ESTILOS DO MODAL CUSTOMIZADO (DEMANDA VISUAL) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-box h3 { margin-top: 0; color: #343a40; }
+        .modal-box p { color: #666; font-size: 1.1em; line-height: 1.4; }
+        .modal-footer { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+        #modal-ok { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #modal-cancel { background: #dc3545; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
+    <!-- Estrutura do Modal Customizado -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title">Aviso</h3>
+            <p id="modal-text"></p>
+            <div class="modal-footer">
+                <button id="modal-cancel" style="display: none;">Revisar</button>
+                <button id="modal-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
     <div id="game-container">
         <h1>Carregando sala...</h1>
     </div>
@@ -53,6 +74,22 @@
 
         const CATEGORIAS_AVANCADO = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
         const CATEGORIAS_SIMPLES = ["Nome", "Cor", "Animal", "Brinquedo", "Comida"];
+
+        // FUNÇÃO APOIO AO MODAL CUSTOMIZADO
+        function showCustomModal(title, text, type = 'alert', onConfirm = null) {
+            const overlay = document.getElementById('modal-overlay');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-text').textContent = text;
+            const btnCancel = document.getElementById('modal-cancel');
+            const btnOk = document.getElementById('modal-ok');
+            
+            btnCancel.style.display = (type === 'confirm') ? 'inline-block' : 'none';
+            btnOk.textContent = (type === 'confirm') ? 'Sim, Enviar!' : 'OK';
+            overlay.style.display = 'flex';
+
+            btnOk.onclick = () => { overlay.style.display = 'none'; if(onConfirm) onConfirm(); };
+            btnCancel.onclick = () => { overlay.style.display = 'none'; };
+        }
 
         if (!roomId) {
             gameContainer.innerHTML = '<h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>';
@@ -89,11 +126,22 @@
             overlay.style.display = isPlaying ? 'none' : 'flex';
             elementsToToggle.forEach(el => el.disabled = !isPlaying);
 
+            // REGRA EXTRA DE SEGURANÇA PARA O APELIDO:
+            const nicknameInput = document.getElementById('nickname-input');
+            if (nicknameInput && state.status !== 'AGUARDANDO') {
+                // Se o jogo já começou ou parou, e tem texto no apelido, ele fica travado.
+                if (nicknameInput.value.trim() !== "") {
+                    nicknameInput.disabled = true;
+                }
+            }
+
             if (state.status === 'AGUARDANDO') {
                 const categoryInputs = document.querySelectorAll('.game-input');
                 categoryInputs.forEach(input => {
                     input.value = '';
                 });
+                // No modo aguardando, garante que o apelido possa ser editado
+                if (nicknameInput) nicknameInput.disabled = false;
             }
         }
 
@@ -125,16 +173,31 @@
             const submitButton = document.getElementById('submit-button');
             submitButton.addEventListener('click', () => {
                 const nickname = document.getElementById('nickname-input').value.trim();
-                if (!nickname) { alert('Por favor, preencha seu apelido antes de enviar!'); return; }
-                const answers = {};
-                const categoryInputs = document.querySelectorAll('.game-input');
-                categoryInputs.forEach(input => {
-                    const categoryName = input.dataset.category;
-                    answers[categoryName] = input.value.trim();
+                
+                if (!nickname) { 
+                    showCustomModal("Atenção", "Por favor, preencha seu apelido antes de enviar!"); 
+                    return; 
+                }
+
+                // USO DO MODAL PARA CONFIRMAÇÃO (DEMANDA ATUAL)
+                showCustomModal("Confirmar Envio", "Você deseja enviar suas respostas agora?", "confirm", () => {
+                    const answers = {};
+                    const categoryInputs = document.querySelectorAll('.game-input');
+                    categoryInputs.forEach(input => {
+                        const categoryName = input.dataset.category;
+                        answers[categoryName] = input.value.trim();
+                    });
+
+                    // Engine original de envio preservada
+                    answersRef.child(nickname).set(answers)
+                        .then(() => { 
+                            showCustomModal("Sucesso!", "Suas respostas foram enviadas/atualizadas com sucesso!"); 
+                        })
+                        .catch((error) => { 
+                            console.error('Erro ao enviar respostas:', error); 
+                            showCustomModal("Erro", "Ocorreu um erro ao enviar suas respostas."); 
+                        });
                 });
-                answersRef.child(nickname).set(answers)
-                    .then(() => { alert('Suas respostas foram enviadas/atualizadas com sucesso!'); })
-                    .catch((error) => { console.error('Erro ao enviar respostas:', error); alert('Ocorreu um erro ao enviar suas respostas.'); });
             });
         }
     </script>
