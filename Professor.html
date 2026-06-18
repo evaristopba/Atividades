@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Controle do Professor - Jogo STOP Centralizado</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- BIBLIOTECA PARA EXPORTAR XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
         .container { background: white; max-width: 95%; width: 1200px; margin: auto; padding: 30px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
@@ -18,6 +20,7 @@
         #start-button { background-color: #28a745; }
         #stop-button { background-color: #dc3545; }
         #score-button { background-color: #17a2b8; } /* Estilo para o novo botão */
+        #export-button { background-color: #218838; } /* Estilo Verde para XLSX */
         #reset-button { background-color: #6c757d; }
         #change-room-button { background-color: #ffc107; color: #212529; }
         #game-controls { display: none; }
@@ -41,9 +44,30 @@
         .score-10 { background-color: #fff3cd; color: #856404; } /* Amarelo para 10 pontos */
         .score-0 { background-color: #f8d7da; color: #721c24; } /* Vermelho para 0 pontos */
         .score-total { font-weight: bold; background-color: #e2e6ea; } /* Fundo para total */
+
+        /* ESTILOS DO MODAL CUSTOMIZADO */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-box h3 { margin-top: 0; color: #343a40; }
+        .modal-box p { color: #666; font-size: 1.1em; line-height: 1.4; }
+        .modal-footer { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+        #modal-ok { background: #007bff; min-width: 80px; }
+        #modal-cancel { background: #6c757d; min-width: 80px; }
     </style>
 </head>
 <body>
+    <!-- Estrutura do Modal Customizado -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title">Aviso</h3>
+            <p id="modal-text"></p>
+            <div class="modal-footer">
+                <button id="modal-cancel" style="display: none;">Cancelar</button>
+                <button id="modal-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>Painel de Controle do Jogo STOP</h1>
         <div id="room-setup">
@@ -98,6 +122,7 @@
                 <button id="start-button" style="display: none;">Começar Rodada</button>
                 <button id="stop-button" style="display: none;">STOP (Para a Sala!)</button>
                 <button id="score-button" style="display: none;">Pontuar Rodada</button>
+                <button id="export-button" style="display: none;">Exportar Planilha (XLSX)</button>
                 <button id="reset-button" style="display: none;">Preparar Nova Rodada</button>
             </div>
             <button id="change-room-button">Trocar de Sala</button>
@@ -120,7 +145,6 @@
     <script>
         // LEMBRETE DE SEGURANÇA: Use a NOVA chave de API que você gerou!
         const firebaseConfig = {
-                    // COLE AQUI SUAS CREDENCIAIS ATUALIZADAS E SEGURAS
                     apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
                     authDomain: "meu-super-jogo-stop.firebaseapp.com",
                     databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
@@ -144,11 +168,26 @@
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
         const scoreButton = document.getElementById('score-button');
+        const exportButton = document.getElementById('export-button');
         const resetButton = document.getElementById('reset-button');
         const answersThead = document.getElementById('answers-thead');
         const answersTbody = document.getElementById('answers-tbody');
 
         let currentActiveCategories = [];
+        let ultimDadosScored = null; // Armazena objeto completo para exportação
+
+        // FUNÇÃO PARA O MODAL CUSTOMIZADO
+        function showCustomModal(title, text, type = 'alert', onConfirm = null) {
+            const overlay = document.getElementById('modal-overlay');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-text').textContent = text;
+            const btnCancel = document.getElementById('modal-cancel');
+            const btnOk = document.getElementById('modal-ok');
+            btnCancel.style.display = (type === 'confirm') ? 'inline-block' : 'none';
+            overlay.style.display = 'flex';
+            btnOk.onclick = () => { overlay.style.display = 'none'; if(onConfirm) onConfirm(); };
+            btnCancel.onclick = () => { overlay.style.display = 'none'; };
+        }
 
         // Função para remover acentos e cedilhas de uma string
         function normalizeWord(word) {
@@ -178,7 +217,10 @@
 
         connectButton.addEventListener('click', () => {
             const roomId = roomSelect.value;
-            if (!roomId) { alert("Por favor, selecione uma sala da lista."); return; }
+            if (!roomId) { 
+                showCustomModal("Atenção", "Por favor, selecione uma sala da lista."); 
+                return; 
+            }
             connectToRoom(roomId);
         });
 
@@ -239,6 +281,8 @@
             answersThead.innerHTML = '';
             answersTbody.innerHTML = '';
             currentActiveCategories = [];
+            exportButton.style.display = 'none';
+            ultimDadosScored = null;
         }
 
         function listenToAnswers(categorias) {
@@ -273,6 +317,7 @@
                 stopButton.style.display = state.status === 'JOGANDO' ? 'inline-block' : 'none';
                 scoreButton.style.display = state.status === 'PARADO' ? 'inline-block' : 'none';
                 resetButton.style.display = state.status === 'PARADO' ? 'inline-block' : 'none';
+                if(state.status !== 'PARADO') exportButton.style.display = 'none';
             });
         }
 
@@ -287,15 +332,51 @@
         };
 
         resetButton.onclick = () => {
-            if (confirm("Isso irá apagar as respostas da rodada e preparar uma nova letra. Continuar?")) {
+            showCustomModal("Confirmar", "Deseja preparar uma nova rodada?", "confirm", () => {
                 if (answersRef) answersRef.remove();
                 gameStateRef.update({ status: 'AGUARDANDO', letter: '?' });
                 renderTableHeader(currentActiveCategories);
-            }
+                exportButton.style.display = 'none';
+                ultimDadosScored = null;
+            });
         };
 
         scoreButton.onclick = () => {
             scoreRound();
+        };
+
+        // LÓGICA DE EXPORTAÇÃO XLSX COM COLUNAS SEPARADAS
+        exportButton.onclick = () => {
+            if (!ultimDadosScored) return;
+            const roomId = document.getElementById('current-room-id').textContent;
+            const letter = document.getElementById('letter-display').textContent;
+            const categorias = currentActiveCategories;
+
+            // Criar o cabeçalho personalizado
+            const header = ["Apelido"];
+            categorias.forEach(cat => {
+                header.push(`${cat} (Resposta)`);
+                header.push(`${cat} (Pontos)`);
+            });
+            header.push("Total Geral");
+
+            // Montar as linhas de dados
+            const rows = [header];
+            for (const nick in ultimDadosScored) {
+                const row = [nick];
+                const student = ultimDadosScored[nick];
+                categorias.forEach(cat => {
+                    row.push(student.answers[cat].palavra || "");
+                    row.push(student.answers[cat].pontuacao);
+                });
+                row.push(student.totalPontos);
+                rows.push(row);
+            }
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, "Resultados STOP");
+            XLSX.writeFile(wb, `STOP_${roomId}_Letra_${letter}.xlsx`);
         };
 
         async function scoreRound() {
@@ -312,7 +393,7 @@
             const allAnswers = allAnswersSnapshot.val();
 
             if (!allAnswers) {
-                alert("Nenhum aluno enviou respostas ainda. Não há o que pontuar.");
+                showCustomModal("Aviso", "Nenhum aluno enviou respostas ainda. Não há o que pontuar.");
                 return;
             }
 
@@ -408,6 +489,9 @@
                 totalCell.textContent = studentScoreData.totalPontos;
                 totalCell.classList.add('score-total');
             }
+            
+            ultimDadosScored = scoredResults; // SALVA PARA EXPORTAÇÃO
+            exportButton.style.display = 'inline-block';
         }
     </script>
 </body>
