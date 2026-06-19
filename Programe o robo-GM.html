@@ -97,7 +97,7 @@
             cursor: not-allowed;
         }
 
-        #instructions-btn, #high-contrast-btn, #restart-btn {
+        #instructions-btn, #high-contrast-btn, #restart-btn, #effects-btn {
             padding: 10px 20px;
             font-size: 1em;
             font-weight: bold;
@@ -1252,6 +1252,7 @@
             </div>
             <button id="instructions-btn" aria-label="Ver instruções do jogo">Instruções</button>
             <button id="high-contrast-btn" aria-label="Alternar modo de alto contraste">Alto Contraste</button>
+            <button id="effects-btn" aria-label="Alternar confetes de vitória">✨ Confetes: Ligados</button>
             <button id="restart-btn" aria-label="Reiniciar o jogo">Reiniciar Jogo</button>
             <button id="save-progress-btn">💾 Salvar Progresso</button>
             <button id="load-progress-btn">📂 Carregar Progresso</button>
@@ -1480,6 +1481,7 @@
         let visitedCells = [];
         let gameStats = [];
         let currentChallengeData = null;
+        let confettiEnabled = localStorage.getItem('confettiEnabled') !== 'false';
         
         // ==============================================
         // SISTEMA DE CONFETE (GPU / CSS OTIMIZADO)
@@ -1487,6 +1489,8 @@
         function startConfetti() {
             // Remove qualquer confete antigo para limpar a memória DOM residual
             document.querySelectorAll('.confetti-particle').forEach(p => p.remove());
+
+            if (!confettiEnabled) return;
 
             const emojis = ['🎉', '✨', '🎈', '🤖', '🌟', '🏆', '🤩', '🎯', '💫', '🌸', '⚡', '💡'];
             const numParticles = 24; // Quantidade de partículas extremamente segura e fluida
@@ -1543,6 +1547,23 @@
             setTimeout(() => {
                 gameContainer.classList.remove('shake-game');
             }, 400);
+        }
+        
+        // Função global para gerenciar o foco do jogo de forma inteligente (Comandos vs Verificar)
+        function refocusGameControls() {
+            const verifyBtn = document.getElementById('verify-btn');
+            const rightBtn = document.getElementById('btn-right');
+            if (commandQueue && commandQueue.length > 0) {
+                if (verifyBtn && !verifyBtn.disabled) {
+                    verifyBtn.focus();
+                } else if (rightBtn && !rightBtn.disabled) {
+                    rightBtn.focus();
+                }
+            } else {
+                if (rightBtn && !rightBtn.disabled) {
+                    rightBtn.focus();
+                }
+            }
         }
         
         // Sistema de detecção de falhas
@@ -1884,9 +1905,8 @@
             const fileInputs = document.querySelectorAll('input[type="file"]');
             fileInputs.forEach(input => input.remove());
             
-            // Foca na barra de comandos (no botão de mover para a direita)
-            const rightBtn = document.getElementById('btn-right');
-            if (rightBtn) rightBtn.focus();
+            // Foca na barra de comandos ou verificar de forma inteligente
+            refocusGameControls();
             
             alunoNome = state.alunoNome || "Aluno";
             updateStudentNameDisplay();
@@ -1926,8 +1946,7 @@
             nomeOverlay.style.display = 'none';
             pendingSaveCallback = null;
             toggleControlButtons(true);
-            const rightBtn = document.getElementById('btn-right');
-            if (rightBtn) rightBtn.focus();
+            refocusGameControls();
         }
         
         if (confirmarNomeBtn) {
@@ -2054,8 +2073,7 @@
                 pendingAlertCallback = null;
             }
             toggleControlButtons(true);
-            const rightBtn = document.getElementById('btn-right');
-            if (rightBtn) rightBtn.focus();
+            refocusGameControls();
         }
         
         if (customAlertOkBtn) {
@@ -2167,6 +2185,7 @@
                 overlay.style.display = 'none';
             }
             toggleControlButtons(true);
+            refocusGameControls();
         }
 
         function showChallengeDetail(index) {
@@ -2324,8 +2343,7 @@
         function closeInstructions() {
             instructionsOverlay.style.display = 'none';
             toggleControlButtons(true);
-            const rightBtn = document.getElementById('btn-right');
-            if (rightBtn) rightBtn.focus();
+            refocusGameControls();
         }
 
         // Função para mostrar instruções
@@ -2403,6 +2421,7 @@
                     lives = TOTAL_LIVES;
                     toggleControlButtons(true);
                     newChallenge();
+                    refocusGameControls();
                 });
 
                 b.addEventListener('keydown', (e) => {
@@ -2420,6 +2439,8 @@
                     document.body.classList.add(e.target.value);
                 }
                 updateGridDisplay();
+                refocusGameControls();
+                e.target.blur();
             });
 
             // Botão de alto contraste
@@ -2428,7 +2449,42 @@
                 const currentTheme = document.getElementById('theme-selector').value;
                 if (currentTheme !== 'default') document.body.classList.add(currentTheme);
                 updateGridDisplay();
+                refocusGameControls();
             });
+
+            // Botão de confetes e efeitos visuais (Isolar/Desativar para testes)
+            const effectsBtn = document.getElementById('effects-btn');
+            function updateEffectsButtonText() {
+                if (effectsBtn) {
+                    if (confettiEnabled) {
+                        effectsBtn.innerHTML = '✨ Confetes: Ligados';
+                        effectsBtn.style.backgroundColor = '#d4edda';
+                        effectsBtn.style.color = '#155724';
+                        effectsBtn.style.borderColor = '#c3e6cb';
+                    } else {
+                        effectsBtn.innerHTML = '✨ Confetes: Desligados';
+                        effectsBtn.style.backgroundColor = '#f8d7da';
+                        effectsBtn.style.color = '#721c24';
+                        effectsBtn.style.borderColor = '#f5c6cb';
+                    }
+                }
+            }
+            
+            if (effectsBtn) {
+                updateEffectsButtonText();
+                effectsBtn.addEventListener('click', () => {
+                    confettiEnabled = !confettiEnabled;
+                    localStorage.setItem('confettiEnabled', confettiEnabled);
+                    updateEffectsButtonText();
+                    
+                    if (confettiEnabled) {
+                        startConfetti();
+                    } else {
+                        document.querySelectorAll('.confetti-particle').forEach(p => p.remove());
+                    }
+                    refocusGameControls();
+                });
+            }
 
             // Botão de instruções
             document.getElementById('instructions-btn').addEventListener('click', showInstructions);
@@ -2930,9 +2986,18 @@
                 updateCommandBar();
                 
                 const slot = document.querySelectorAll('.command-slot')[commandQueue.length - 1];
-                slot.classList.add('active');
-                
-                setTimeout(() => slot.classList.remove('active'), 200);
+                if (slot) {
+                    slot.classList.add('active');
+                    setTimeout(() => slot.classList.remove('active'), 200);
+                }
+
+                // Se atingir o limite máximo de comandos (16), define o foco diretamente no botão Verificar
+                if (commandQueue.length === MAX_COMMANDS) {
+                    const verifyBtn = document.getElementById('verify-btn');
+                    if (verifyBtn && !verifyBtn.disabled) {
+                        verifyBtn.focus();
+                    }
+                }
             } 
         }
 
@@ -2941,6 +3006,8 @@
             commandQueue = []; 
             updateCommandBar(); 
             isMoving = false; 
+            // Após limpar os comandos, retorna o foco para o botão de mover para a direita (primeiro comando)
+            refocusGameControls();
         }
         
         // Atualizar barra de comandos
