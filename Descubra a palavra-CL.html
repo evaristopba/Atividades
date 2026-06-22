@@ -143,12 +143,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-main);background-image:
 .btn-save-bar:hover{background:rgba(255,255,255,.45);transform:scale(1.1)}
 .btn-save-bar.saved{background:rgba(100,220,100,.4);border-color:rgba(100,255,100,.6)}
 .nome-display{font-family:'Fredoka One',cursive;font-size:15px;color:var(--htxt);background:rgba(255,255,255,.2);border-radius:14px;padding:4px 12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .2s}.nome-display:hover{background:rgba(255,255,255,.35)}
-/* Esconder ícone de senha nativo */
-input[type="password"]::-ms-reveal,
-input[type="password"]::-ms-clear,
-input[type="password"]::-webkit-contacts-auto-fill-button,
-input[type="password"]::-webkit-credentials-auto-fill-button{display:none!important;visibility:hidden!important;pointer-events:none!important}
-@media(max-width:480px){/* Esconder ícone de senha nativo */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear,
 input[type="password"]::-webkit-contacts-auto-fill-button,
@@ -202,7 +196,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none!import
   <div class="screen active" id="screenStart">
     <div class="game-card start-screen">
       <div class="start-logo">Brinca &amp; Escreve</div>
-      <div class="start-sub">Aprenda os nomes dos brinquedos!</div>
+      <div class="start-sub">Aprenda palavras brincando!</div>
       <div class="start-emojis">🎮 🧩 🪀 🎯 🧸</div>
       <div class="name-row">
         <label class="name-label">👤 Nome do aluno:</label>
@@ -239,7 +233,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none!import
   <div class="screen" id="screenGame">
     <div class="game-card">
       <div class="toy-image-container" id="toyImageContainer"></div>
-      <div class="answer-label">Monte o nome do brinquedo:</div>
+      <div class="answer-label">Monte o nome:</div>
       <div class="answer-slots" id="answerSlots"></div>
       <div class="letters-label">Toque ou arraste as letras:</div>
       <div class="letters-pool" id="lettersPool"></div>
@@ -264,57 +258,96 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none!import
 </div>
 
 <script>
-// ========== BRINQUEDOS (25 com imagem + 15 só emoji) ==========
+// ========== PALAVRAS — LISTA MESCLADA ==========
+// Campo silabas mantido para uso futuro (app de sílabas)
 const TOYS = [
-  // NÍVEL 1 — 3 a 4 letras
-  {name:"BOLA",   img:"https://i.postimg.cc/RhNsPR9Y/Bola.jpg",      emoji:"⚽", level:1},
-  {name:"PIPA",   img:"https://i.postimg.cc/50PKqGdb/Pipa.png",      emoji:"🪁", level:1},
-  {name:"IOIÔ",   img:"https://i.postimg.cc/26H9FJRD/ioio.jpg",      emoji:"🪀", level:1},
-  {name:"PIÃO",   img:"https://i.postimg.cc/JnTYcgVm/Piao.jpg",      emoji:"🌀", level:1},
-  {name:"TREM",   img:"https://i.postimg.cc/85yXB3Q8/trem.jpg",      emoji:"🚂", level:1},
-  {name:"ROBÔ",   img:"https://i.postimg.cc/SsZ17505/Robo.jpg",      emoji:"🤖", level:1},
-  {name:"NAVIO",  img:"https://i.postimg.cc/pT0cY7Ng/Navio.jpg",     emoji:"⛵", level:1},
-  {name:"CARRO",  img:"https://i.postimg.cc/rmhZCbX2/carro.jpg",     emoji:"🚗", level:1},
 
-  // NÍVEL 2 — 5 a 6 letras
-  {name:"AVIÃO",   img:"https://i.postimg.cc/1tW7cTxb/Aviao.jpg",    emoji:"✈️", level:2},
-  {name:"SKATE",   img:"https://i.postimg.cc/vBP2LjRk/Skate.jpg",    emoji:"🛹", level:2},
-  {name:"BONECA",  img:"https://i.postimg.cc/C5zPvNY9/Boneca.webp",  emoji:"👧", level:2},
-  {name:"TRATOR",  img:"https://i.postimg.cc/zBd2SMmQ/Trator.jpg",   emoji:"🚜", level:2},
-  {name:"TAMBOR",  img:"https://i.postimg.cc/ydfpX5qr/Tambor.jpg",   emoji:"🥁", level:2},
-  {name:"PETECA",  img:"https://i.postimg.cc/sXnH98FH/Peteca.jpg",   emoji:"🏸", level:2},
-  {name:"CASTELO", img:"https://i.postimg.cc/LXyQB7dD/Castelo.jpg",  emoji:"🏰", level:2},
-  {name:"URSINHO", img:"https://i.postimg.cc/MHvPsDx4/Ursinho.jpg",  emoji:"🧸", level:2},
+  // ===== NÍVEL 1: dissílabas simples =====
+  {name:"BOLA",    silabas:["BO","LA"],       img:"https://i.postimg.cc/RhNsPR9Y/Bola.jpg",      emoji:"⚽", level:1},
+  {name:"PIPA",    silabas:["PI","PA"],       img:"https://i.postimg.cc/50PKqGdb/Pipa.png",      emoji:"🪁", level:1},
+  {name:"PATO",    silabas:["PA","TO"],       img:"https://i.postimg.cc/kM2CVCZH/Pato.jpg",      emoji:"🦆", level:1},
+  {name:"GATO",    silabas:["GA","TO"],       img:"https://i.postimg.cc/x8wt8M7s/Gato.jpg",      emoji:"🐱", level:1},
+  {name:"LIVRO",   silabas:["LI","VRO"],      img:"https://i.postimg.cc/br73rkM3/Livros.jpg",    emoji:"📖", level:1},
+  {name:"ROBÔ",    silabas:["RO","BÔ"],       img:"https://i.postimg.cc/SsZ17505/Robo.jpg",      emoji:"🤖", level:1},
+  {name:"CARRO",   silabas:["CAR","RO"],      img:"https://i.postimg.cc/rmhZCbX2/carro.jpg",     emoji:"🚗", level:1},
+  {name:"CASA",    silabas:["CA","SA"],       img:"https://i.postimg.cc/HnbJZ4PR/Casa.webp",     emoji:"🏠", level:1},
+  {name:"DADO",    silabas:["DA","DO"],       img:"https://i.postimg.cc/h4m7tcPG/Dado.webp",     emoji:"🎲", level:1},
+  {name:"FADA",    silabas:["FA","DA"],       img:"https://i.postimg.cc/sx5B690t/Fada.webp",     emoji:"🧚", level:1},
+  {name:"MESA",    silabas:["ME","SA"],       img:"https://i.postimg.cc/FFSJHNsf/Mesa.webp",     emoji:"🪑", level:1},
+  {name:"RATO",    silabas:["RA","TO"],       img:"https://i.postimg.cc/Zn697FDX/Rato.webp",     emoji:"🐭", level:1},
+  {name:"SAPO",    silabas:["SA","PO"],       img:"https://i.postimg.cc/bYn2wpNJ/Sapo.webp",     emoji:"🐸", level:1},
+  {name:"VACA",    silabas:["VA","CA"],       img:"https://i.postimg.cc/MZBjpqKZ/Vaca.webp",     emoji:"🐄", level:1},
+  {name:"UVA",     silabas:["U","VA"],        img:"https://i.postimg.cc/mDvmcHp8/Uvas.webp",     emoji:"🍇", level:1},
+  {name:"PEIXE",   silabas:["PEI","XE"],      img:"https://i.postimg.cc/76FKC2tn/Peixe.webp",    emoji:"🐟", level:1},
+  {name:"LOBO",    silabas:["LO","BO"],       img:"https://i.postimg.cc/mDvmcHpN/Lobo.webp",     emoji:"🐺", level:1},
+  {name:"COBRA",   silabas:["CO","BRA"],      img:"https://i.postimg.cc/rmBfdrZG/Cobra.webp",    emoji:"🐍", level:1},
+  {name:"IOIÔ",    silabas:["IO","IÔ"],       img:"https://i.postimg.cc/26H9FJRD/ioio.jpg",      emoji:"🪀", level:1},
+  {name:"PIÃO",    silabas:["PI","ÃO"],       img:"https://i.postimg.cc/JnTYcgVm/Piao.jpg",      emoji:"🌀", level:1},
+  {name:"TREM",    silabas:["TREM"],          img:"https://i.postimg.cc/85yXB3Q8/trem.jpg",      emoji:"🚂", level:1},
+  {name:"NAVIO",   silabas:["NA","VI","O"],   img:"https://i.postimg.cc/pT0cY7Ng/Navio.jpg",     emoji:"⛵", level:1},
 
-  // NÍVEL 3 — 6 a 7 letras
-  {name:"FOGUETE",   img:"https://i.postimg.cc/76BtMcv0/Foguete.jpg",      emoji:"🚀", level:3},
-  {name:"BAMBOLÊ",   img:"https://i.postimg.cc/ydfpX5qL/Bambole.jpg",      emoji:"⭕", level:3},
-  {name:"BALANÇO",   img:"https://i.postimg.cc/HxSv4KG3/Balanco.jpg",      emoji:"🪢", level:3},
-  {name:"CAMINHÃO",  img:"https://i.postimg.cc/mDdpNqx3/Caminhao.jpg",     emoji:"🚛", level:3},
-  {name:"XILOFONE",  img:"https://i.postimg.cc/V6sHtwhD/Xilofone.jpg",     emoji:"🎵", level:3},
-  {name:"FANTOCHE",  img:"https://i.postimg.cc/Fz9jdhs9/Fantoche.jpg",      emoji:"🎭", level:3},
-  {name:"DOMINÓ",    img:"https://i.postimg.cc/kGvPsvCC/Domino.jpg",        emoji:"🁣", level:3},
-  {name:"ORIGAMI",   img:"https://i.postimg.cc/rwvZdt6t/Origami.jpg",                                                emoji:"🦢", level:3},
+  // ===== NÍVEL 2: 2-3 sílabas, dígrafos/ditongos simples =====
+  {name:"AVIÃO",   silabas:["A","VI","ÃO"],   img:"https://i.postimg.cc/1tW7cTxb/Aviao.jpg",     emoji:"✈️", level:2},
+  {name:"SKATE",   silabas:["SKA","TE"],      img:"https://i.postimg.cc/vBP2LjRk/Skate.jpg",     emoji:"🛹", level:2},
+  {name:"BONECA",  silabas:["BO","NE","CA"],  img:"https://i.postimg.cc/C5zPvNY9/Boneca.webp",   emoji:"👧", level:2},
+  {name:"TRATOR",  silabas:["TRA","TOR"],     img:"https://i.postimg.cc/zBd2SMmQ/Trator.jpg",    emoji:"🚜", level:2},
+  {name:"TAMBOR",  silabas:["TAM","BOR"],     img:"https://i.postimg.cc/ydfpX5qr/Tambor.jpg",    emoji:"🥁", level:2},
+  {name:"PETECA",  silabas:["PE","TE","CA"],  img:"https://i.postimg.cc/sXnH98FH/Peteca.jpg",    emoji:"🏸", level:2},
+  {name:"CASTELO", silabas:["CAS","TE","LO"], img:"https://i.postimg.cc/LXyQB7dD/Castelo.jpg",   emoji:"🏰", level:2},
+  {name:"URSINHO", silabas:["UR","SI","NHO"], img:"https://i.postimg.cc/MHvPsDx4/Ursinho.jpg",   emoji:"🧸", level:2},
+  {name:"BALÃO",   silabas:["BA","LÃO"],      img:"https://i.postimg.cc/3N2ySCbq/Balao.webp",    emoji:"🎈", level:2},
+  {name:"BOLO",    silabas:["BO","LO"],       img:"https://i.postimg.cc/vT51qLNR/Bolo.webp",     emoji:"🍰", level:2},
+  {name:"COELHO",  silabas:["CO","E","LHO"],  img:"https://i.postimg.cc/T1ny7qHc/Coelho.webp",   emoji:"🐇", level:2},
+  {name:"PIRATA",  silabas:["PI","RA","TA"],  img:"https://i.postimg.cc/zvTLtSPw/Pirata.webp",   emoji:"🏴‍☠️", level:2},
+  {name:"SAPATO",  silabas:["SA","PA","TO"],  img:"https://i.postimg.cc/br1GCHFB/Sapato.webp",   emoji:"👞", level:2},
+  {name:"TOMATE",  silabas:["TO","MA","TE"],  img:"https://i.postimg.cc/SRcXT7t1/Tomate.webp",   emoji:"🍅", level:2},
+  {name:"CADEIRA", silabas:["CA","DEI","RA"], img:"https://i.postimg.cc/ydMLJZpm/Cadeira.webp",  emoji:"🪑", level:2},
+  {name:"PRATO",   silabas:["PRA","TO"],      img:"https://i.postimg.cc/XJRsZC1d/Prato.webp",    emoji:"🍽️", level:2},
 
-  // NÍVEL 4 — 7 a 8 letras
-  {name:"PATINETE",   img:"https://i.postimg.cc/mDZ694nj/Patinete.jpg",    emoji:"🛵", level:4},
-  {name:"BICICLETA",  img:"https://i.postimg.cc/C1M6802J/Bicicleta.jpg",   emoji:"🚲", level:4},
-  {name:"HELICÓPTERO",img:"https://i.postimg.cc/k4MhSCHT/Helicoptero.jpg", emoji:"🚁", level:4},
-  {name:"MASSINHA",   img:"https://i.postimg.cc/Pf0HjyKL/Massinha.jpg",    emoji:"🎨", level:4},
-  {name:"GANGORRA",   img:"https://i.postimg.cc/sxhvg854/Gangorra.jpg",    emoji:"⚖️", level:4},
-  {name:"PANDEIRO",   img:"https://i.postimg.cc/bYFqC8Kn/Pandeiro.jpg",                                               emoji:"🥁", level:4},
-  {name:"CARIMBO",    img:"https://i.postimg.cc/CLvKkk4V/Carimbo.jpg",     emoji:"📮", level:4},
-  {name:"PALHAÇO",    img:"https://i.postimg.cc/8zLHXpXY/Palhaco.jpg",                                               emoji:"🤡", level:4},
+  // ===== NÍVEL 3: trissílabas com encontros/dígrafos =====
+  {name:"FOGUETE",  silabas:["FO","GUE","TE"],    img:"https://i.postimg.cc/76BtMcv0/Foguete.jpg",   emoji:"🚀", level:3},
+  {name:"CAVALO",   silabas:["CA","VA","LO"],      img:"https://i.postimg.cc/wMC0MLPF/Cavalo.jpg",    emoji:"🐴", level:3},
+  {name:"CAMINHÃO", silabas:["CA","MI","NHÃO"],    img:"https://i.postimg.cc/mDdpNqx3/Caminhao.jpg",  emoji:"🚛", level:3},
+  {name:"FANTOCHE", silabas:["FAN","TO","CHE"],    img:"https://i.postimg.cc/Fz9jdhs9/Fantoche.jpg",  emoji:"🎭", level:3},
+  {name:"DOMINÓ",   silabas:["DO","MI","NÓ"],      img:"https://i.postimg.cc/kGvPsvCC/Domino.jpg",    emoji:"🁣", level:3},
+  {name:"ABACAXI",  silabas:["A","BA","CA","XI"],  img:"https://i.postimg.cc/RFk6LbG7/Abacaxi.webp",  emoji:"🍍", level:3},
+  {name:"BANANA",   silabas:["BA","NA","NA"],      img:"https://i.postimg.cc/C5bZPH6P/Banana.webp",   emoji:"🍌", level:3},
+  {name:"CACHORRO", silabas:["CA","CHOR","RO"],    img:"https://i.postimg.cc/vT51qLSW/Cachorro.webp", emoji:"🐕", level:3},
+  {name:"GALINHA",  silabas:["GA","LI","NHA"],     img:"https://i.postimg.cc/8cLFKBnw/Galinha.webp",  emoji:"🐔", level:3},
+  {name:"JACARÉ",   silabas:["JA","CA","RÉ"],      img:"https://i.postimg.cc/tTKZNmDh/Jacare.webp",   emoji:"🐊", level:3},
+  {name:"GIRASSOL", silabas:["GI","RAS","SOL"],    img:"https://i.postimg.cc/G2WXBygD/Girassol.webp", emoji:"🌻", level:3},
+  {name:"BORRACHA", silabas:["BOR","RA","CHA"],    img:"https://i.postimg.cc/SsBgXM1z/Borracha.webp", emoji:"🧽", level:3},
+  {name:"BAMBOLÊ",  silabas:["BAM","BO","LÊ"],     img:"https://i.postimg.cc/ydfpX5qL/Bambole.jpg",   emoji:"⭕", level:3},
+  {name:"BALANÇO",  silabas:["BA","LAN","ÇO"],     img:"https://i.postimg.cc/HxSv4KG3/Balanco.jpg",   emoji:"🪢", level:3},
+  {name:"ORIGAMI",  silabas:["O","RI","GA","MI"],  img:"https://i.postimg.cc/rwvZdt6t/Origami.jpg",   emoji:"🦢", level:3},
 
-  // NÍVEL 5 — 9+ letras / palavras compostas
-  {name:"DINOSSAURO",   img:"https://i.postimg.cc/PJP364hB/Dinossauro.webp", emoji:"🦕", level:5},
-  {name:"PULA-CORDA",   img:"https://i.postimg.cc/QN1pcpSR/Pula-corda.jpg",                                               emoji:"🪢", level:5},
-  {name:"ESTILINGUE",   img:"https://i.postimg.cc/cC8YKhpq/Estilingue.jpg",                                               emoji:"🏹", level:5},
-  {name:"TELESCÓPIO",   img:"https://i.postimg.cc/GhmtSqMg/Telescopio.jpg",                                               emoji:"🔭", level:5},
-  {name:"QUEBRA-CABEÇA",img:"https://i.postimg.cc/mZCQ7QVq/Quebra-cabeca.jpg",                                               emoji:"🧩", level:5},
-  {name:"MARIONETE",    img:"https://i.postimg.cc/Y2Y1Q18Z/Marionete.jpg",                                               emoji:"🎎", level:5},
-  {name:"SANDUÍCHE",    img:"https://i.postimg.cc/HWXQbQ3N/Sanduiche.jpg",                                               emoji:"🥪", level:5},
-  {name:"PASSARINHO",   img:"https://i.postimg.cc/h4T9V9M5/Passarinho.jpg",                                               emoji:"🐦", level:5},
+  // ===== NÍVEL 4: quadrissílabas, complexas =====
+  {name:"ELEFANTE",  silabas:["E","LE","FAN","TE"],      img:"https://i.postimg.cc/3NsnNm61/Elefante.jpg",   emoji:"🐘", level:4},
+  {name:"XILOFONE",  silabas:["XI","LO","FO","NE"],      img:"https://i.postimg.cc/V6sHtwhD/Xilofone.jpg",   emoji:"🎵", level:4},
+  {name:"PATINETE",  silabas:["PA","TI","NE","TE"],      img:"https://i.postimg.cc/mDZ694nj/Patinete.jpg",   emoji:"🛵", level:4},
+  {name:"BICICLETA", silabas:["BI","CI","CLE","TA"],     img:"https://i.postimg.cc/C1M6802J/Bicicleta.jpg",  emoji:"🚲", level:4},
+  {name:"MASSINHA",  silabas:["MAS","SI","NHA"],         img:"https://i.postimg.cc/Pf0HjyKL/Massinha.jpg",   emoji:"🎨", level:4},
+  {name:"GANGORRA",  silabas:["GAN","GOR","RA"],         img:"https://i.postimg.cc/sxhvg854/Gangorra.jpg",   emoji:"⚖️", level:4},
+  {name:"PANDEIRO",  silabas:["PAN","DEI","RO"],         img:"https://i.postimg.cc/bYFqC8Kn/Pandeiro.jpg",   emoji:"🥁", level:4},
+  {name:"CARIMBO",   silabas:["CA","RIM","BO"],          img:"https://i.postimg.cc/CLvKkk4V/Carimbo.jpg",    emoji:"📮", level:4},
+  {name:"PALHAÇO",   silabas:["PA","LHA","ÇO"],          img:"https://i.postimg.cc/8zLHXpXY/Palhaco.jpg",    emoji:"🤡", level:4},
+  {name:"BORBOLETA", silabas:["BOR","BO","LE","TA"],     img:"https://i.postimg.cc/MH1cPbrj/Borboleta.webp", emoji:"🦋", level:4},
+  {name:"PAPAGAIO",  silabas:["PA","PA","GAI","O"],      img:"https://i.postimg.cc/MTCMmrtm/Papagaio.webp",  emoji:"🦜", level:4},
+  {name:"TELEFONE",  silabas:["TE","LE","FO","NE"],      img:"https://i.postimg.cc/gJCXHB4q/Telefone.webp",  emoji:"📞", level:4},
+  {name:"CARROÇA",   silabas:["CAR","RO","ÇA"],          img:"https://i.postimg.cc/vBJ01V2V/Carroca.webp",   emoji:"🛻", level:4},
+
+  // ===== NÍVEL 5: 4-5 sílabas, complexas / palavras compostas =====
+  {name:"HELICÓPTERO",  silabas:["HE","LI","CÓP","TE","RO"],  img:"https://i.postimg.cc/k4MhSCHT/Helicoptero.jpg",  emoji:"🚁", level:5},
+  {name:"DINOSSAURO",   silabas:["DI","NOS","SAU","RO"],       img:"https://i.postimg.cc/PJP364hB/Dinossauro.webp",  emoji:"🦕", level:5},
+  {name:"GIRAFA",       silabas:["GI","RA","FA"],              img:"https://i.postimg.cc/rsBQsxbN/Girafa.jpg",       emoji:"🦒", level:5},
+  {name:"ESTILINGUE",   silabas:["ES","TI","LIN","GUE"],       img:"https://i.postimg.cc/cC8YKhpq/Estilingue.jpg",   emoji:"🏹", level:5},
+  {name:"TELESCÓPIO",   silabas:["TE","LES","CÓ","PI","O"],    img:"https://i.postimg.cc/GhmtSqMg/Telescopio.jpg",   emoji:"🔭", level:5},
+  {name:"TARTARUGA",    silabas:["TAR","TA","RU","GA"],        img:"https://i.postimg.cc/d3b43rXB/Tartaruga.jpg",    emoji:"🐢", level:5},
+  {name:"MARIONETE",    silabas:["MA","RI","O","NE","TE"],     img:"https://i.postimg.cc/Y2Y1Q18Z/Marionete.jpg",    emoji:"🎎", level:5},
+  {name:"SANDUÍCHE",    silabas:["SAN","DU","Í","CHE"],        img:"https://i.postimg.cc/HWXQbQ3N/Sanduiche.jpg",    emoji:"🥪", level:5},
+  {name:"PASSARINHO",   silabas:["PAS","SA","RI","NHO"],       img:"https://i.postimg.cc/h4T9V9M5/Passarinho.jpg",   emoji:"🐦", level:5},
+  {name:"PULA-CORDA",   silabas:["PU","LA","COR","DA"],        img:"https://i.postimg.cc/QN1pcpSR/Pula-corda.jpg",   emoji:"🪢", level:5},
+  {name:"QUEBRA-CABEÇA",silabas:["QUE","BRA","CA","BE","ÇA"],  img:"https://i.postimg.cc/mZCQ7QVq/Quebra-cabeca.jpg",emoji:"🧩", level:5},
 ];
 
 const ALPHABET = "ABCDEFGHIJKLMNOPRSTUVXZ";
@@ -325,29 +358,20 @@ let S = {
   levelStars:[0,0,0,0,0], levelUnlocked:[true,false,false,false,false],
   queue:[], toy:null, slots:[], tileMap:{},
   correctInLevel:0, cb1:null, cb2:null, cb3:null, poolOrder:[],
-  // Telemetria
   nomeAluno:'',
-  sessoes:[],          // histórico de sessões salvas
-  levelTempos:[0,0,0,0,0],   // tempo total por nível (ms)
-  levelInicio:0,             // timestamp início do nível atual
-  palavraInicio:0,           // timestamp início da palavra atual
-  registroPalavras:[],       // [{name, tentativas, erros, tempoMs, acertou}]
+  sessoes:[],
+  levelTempos:[0,0,0,0,0],
+  levelInicio:0,
+  palavraInicio:0,
+  registroPalavras:[],
 };
-
-// ========== PERSISTÊNCIA ==========
-function save(){
-  // Progresso salvo apenas via arquivo .txt
-}
-function load(){
-  // Carregamento apenas via arquivo .txt
-}
 
 // ========== TEMA ==========
 function setTheme(t){
   S.theme=t;
   document.documentElement.setAttribute('data-theme',t);
   document.querySelectorAll('.theme-option').forEach(el=>el.classList.toggle('active',el.dataset.theme===t));
-  closeMenu(); save();
+  closeMenu();
 }
 function closeMenu(){document.getElementById('themeMenu').classList.add('hidden');}
 function toggleMenu(e){e.stopPropagation();document.getElementById('themeMenu').classList.toggle('hidden');}
@@ -374,7 +398,6 @@ function renderStart(){
     const b=document.createElement('div');
     const unlocked=S.levelUnlocked[l-1];
     const completed=S.levelStars[l-1]===3;
-    // Nível disponível = desbloqueado E não completado com 3 estrelas
     const playable=unlocked&&!completed;
     b.className='level-btn'+(unlocked?'':' locked')+(completed?' completed':'')+(l===currentLevel?' selected':'');
     const st='⭐'.repeat(S.levelStars[l-1])+'☆'.repeat(3-S.levelStars[l-1]);
@@ -420,7 +443,6 @@ function nextToy(){
   S._tentativas=0;
   S._erros=0;
   S.palavraInicio=Date.now();
-  // Limpar qualquer registro parcial desta palavra de tentativa anterior
   S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
   const real=S.toy.name.replace(/-/g,'').split('').map((l,i)=>({l,id:'r'+i}));
   const decoys=genDecoys(real.map(x=>x.l),3).map((l,i)=>({l,id:'d'+i}));
@@ -461,7 +483,6 @@ function renderSlots(){
 // ========== POOL DE LETRAS ==========
 function renderPool(){
   const c=document.getElementById('lettersPool'); c.innerHTML='';
-  // Usar ordem fixa gerada em nextToy (não embaralhar a cada render)
   S.poolOrder.forEach(({l,id})=>{
     const el=document.createElement('div');
     el.className='letter-tile'+(isUsed(id)?' used':'');
@@ -479,7 +500,6 @@ function renderPool(){
 
 function genDecoys(used,n){
   const s=new Set(used);
-  // Pool base + acentuadas comuns como possíveis decoys
   const pool=(ALPHABET+"ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇ").split('');
   return shuffle(pool.filter(c=>!s.has(c))).slice(0,n);
 }
@@ -559,19 +579,16 @@ function clearAnswer(){
 // ========== VERIFICAR ==========
 function checkAnswer(){
   const name=S.toy.name;
-  // Monta resposta respeitando hifens fixos
   let answer='';
   for(let i=0;i<name.length;i++){
     answer+=name[i]==='-'?'-':(S.slots[i]||'');
   }
-  // Checa se completo
   const incomplete=name.split('').some((ch,i)=>ch!=='-'&&!S.slots[i]);
   if(incomplete){showFb('⚠️ Complete todas as letras!','warn');return;}
 
   S._tentativas=(S._tentativas||0)+1;
   if(answer===name){
     const tempoMs=Date.now()-S.palavraInicio;
-    // Remover registro parcial desta palavra se existir
     S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
     S.registroPalavras.push({
       name:S.toy.name, level:S.currentLevel,
@@ -587,7 +604,6 @@ function checkAnswer(){
     S._erros=(S._erros||0)+1;
     S.lives--;
     renderLives(); markSlots('wrong'); showFb('❌ Tente outra vez!','err');
-    // Atualizar registro parcial em tempo real
     S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
     S.registroPalavras.push({
       name:S.toy.name, level:S.currentLevel,
@@ -598,7 +614,6 @@ function checkAnswer(){
     S.queue.push(S.toy);
     clearAnswer();
     if(S.lives<=0){
-      // Marcar como definitivo (sem vidas)
       S.registroPalavras=S.registroPalavras.filter(r=>!(r.name===S.toy.name&&r.parcial));
       S.registroPalavras.push({
         name:S.toy.name, level:S.currentLevel,
@@ -641,17 +656,14 @@ function levelComplete(){
   const stars=pct>=1?3:pct>=0.75?2:1;
   S.levelStars[lvl-1]=Math.max(S.levelStars[lvl-1],stars);
   if(lvl<5) S.levelUnlocked[lvl]=true;
-  // Registrar tempo do nível
   S.levelTempos[lvl-1]=(S.levelTempos[lvl-1]||0)+(Date.now()-S.levelInicio);
-  // Registrar sessão
   S.sessoes.push({
     data:new Date().toLocaleDateString('pt-BR'),
     hora:new Date().toLocaleTimeString('pt-BR'),
     nivel:lvl, stars, score:S.score,
     palavras:[...S.registroPalavras]
   });
-  // Mostrar modal com opção de salvar ao avançar de nível
-  const subtitle=`Você acertou ${S.correctInLevel} brinquedos!\nPontuação total: ${S.score} pontos`;
+  const subtitle=`Você acertou ${S.correctInLevel} palavras!\nPontuação total: ${S.score} pontos`;
   showModalSave('🏆',`Nível ${lvl} concluído!`,
     '⭐'.repeat(stars)+'☆'.repeat(3-stars),
     subtitle, lvl
@@ -666,7 +678,6 @@ function showModalSave(emoji,title,stars,sub,lvl){
 
   const avancar=()=>{ if(lvl<5) startLevel(lvl+1); else showStartScreen(); };
 
-  // Btn1: Salvar e continuar
   const b1=document.getElementById('mBtn1');
   b1.textContent='💾 Salvar e continuar';
   b1.className='modal-btn btn-save';
@@ -674,12 +685,10 @@ function showModalSave(emoji,title,stars,sub,lvl){
   S.cb1=()=>{
     document.getElementById('modalOverlay').classList.add('hidden');
     if(S.nomeAluno && S.nomeAluno.trim()){
-      // Nome já existe: salvar direto e avançar
       salvarProgresso();
       showFb('✅ Progresso salvo!','ok');
       avancar();
     } else {
-      // Sem nome: pedir antes de salvar
       showModalNome(()=>{
         salvarProgresso();
         showFb('✅ Progresso salvo!','ok');
@@ -688,7 +697,6 @@ function showModalSave(emoji,title,stars,sub,lvl){
     }
   };
 
-  // Btn2: Continuar sem salvar
   const b2=document.getElementById('mBtn2');
   b2.style.display='block';
   b2.className='modal-btn secondary';
@@ -696,7 +704,6 @@ function showModalSave(emoji,title,stars,sub,lvl){
   b2.textContent=lvl<5?'▶ Continuar sem salvar':'▶ Finalizar sem salvar';
   S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); avancar(); };
 
-  // Btn3: Menu principal
   const b3=document.getElementById('mBtn3');
   b3.style.display='block';
   b3.className='modal-btn secondary';
@@ -705,6 +712,7 @@ function showModalSave(emoji,title,stars,sub,lvl){
 
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
+
 function showLose(){
   showModal('💔','Não desista!','',
     `Você perdeu todas as vidas no Nível ${S.currentLevel}.\nA pontuação é reiniciada neste nível.`,
@@ -733,7 +741,6 @@ function showModal(emoji,title,stars,sub,t1,c1,t2,c2){
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 function modalAct(n){
-  // Não fechar automaticamente — cada callback decide quando fechar
   if(n===1&&S.cb1) S.cb1();
   if(n===2&&S.cb2) S.cb2();
   if(n===3&&S.cb3) S.cb3();
@@ -763,12 +770,9 @@ function onNomeInput(){
   if(nome){nd.textContent='👤 '+nome;nd.style.display='block';}
   else nd.style.display='none';
 }
-// Permitir editar nome também durante o jogo (clique no display do header)
 document.addEventListener('DOMContentLoaded',()=>{
   const nd=document.getElementById('nomeDisplay');
-  if(nd) nd.addEventListener('click',()=>{
-    showModalNome(null, true);
-  });
+  if(nd) nd.addEventListener('click',()=>{ showModalNome(null, true); });
 });
 
 // ========== SALVAR PROGRESSO ==========
@@ -779,11 +783,9 @@ function salvarProgressoBar(){
     btn.textContent='✅'; btn.classList.add('saved');
     setTimeout(()=>{btn.textContent='💾';btn.classList.remove('saved');},2500);
   };
-  // Se já tem nome, salva direto sem pedir de novo
   if(S.nomeAluno && S.nomeAluno.trim()){
     executarSalvar();
   } else {
-    // Sem nome: pedir antes de salvar
     showModalNome(executarSalvar);
   }
 }
@@ -826,11 +828,8 @@ function showModalNome(callback, somenteNome){
 
 function salvarProgresso(){
   const nome=S.nomeAluno||'Aluno';
-  // Serializar fila: guardar só os nomes (reconstruir objetos no load)
   const queueNomes=S.queue.map(t=>t.name);
   const toyAtual=S.toy?S.toy.name:null;
-  // Garantir que registro parcial da palavra atual está atualizado
-  // (mesmo que nenhuma verificação tenha sido feita ainda)
   let registroSnap=[...S.registroPalavras];
   if(S.toy){
     registroSnap=registroSnap.filter(r=>!(r.name===S.toy.name&&r.parcial));
@@ -841,7 +840,6 @@ function salvarProgresso(){
       acertou:false, parcial:true
     });
   }
-  // Registrar tempo parcial do nível se em jogo
   const temposSnap=[...S.levelTempos];
   if(S.toy && S.levelInicio){
     temposSnap[S.currentLevel-1]=(temposSnap[S.currentLevel-1]||0)+(Date.now()-S.levelInicio);
@@ -863,7 +861,6 @@ function salvarProgresso(){
     queueNomes:queueNomes,
     slots:S.slots,
     poolOrder:S.poolOrder,
-    // Telemetria
     levelTempos:temposSnap,
     sessoes:S.sessoes,
     registroPalavras:registroSnap,
@@ -874,7 +871,7 @@ function salvarProgresso(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='progresso descubra a palavra '+nome+'.txt';
+  a.download='progresso brinca-escreve '+nome+'.txt';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -883,7 +880,6 @@ function salvarProgresso(){
 
 // ========== CARREGAR PROGRESSO ==========
 function restaurarEstadoDosDados(dados){
-  // Dados gerais sempre restaurados
   S.nomeAluno=dados.nomeAluno;
   S.theme=dados.theme||'cartoon';
   S.score=dados.score||0;
@@ -901,49 +897,33 @@ function restaurarEstadoDosDados(dados){
   renderScore(); renderLives();
 
   if(dados.emJogo && dados.versao>=2 && dados.toyAtual){
-    // ── Restaurar nível em andamento ──────────────────────────────────────
     S.currentLevel=dados.currentLevel||1;
     S.lives=dados.lives!=null?dados.lives:5;
     S.correctInLevel=dados.correctInLevel||0;
-
-    // Brinquedo atual
     S.toy=TOYS.find(t=>t.name===dados.toyAtual)||null;
-
-    // Fila de palavras pendentes
     S.queue=(dados.queueNomes||[]).map(n=>TOYS.find(t=>t.name===n)).filter(Boolean);
 
     if(S.toy){
-      // Restaurar poolOrder exatamente como estava (mesmos IDs)
       S.poolOrder=dados.poolOrder||[];
-      // Se poolOrder não veio no arquivo, regenerar (compatibilidade)
       if(!S.poolOrder.length){
         const real=S.toy.name.replace(/-/g,'').split('').map((l,i)=>({l,id:'r'+i}));
         const decoys=genDecoys(real.map(x=>x.l),3).map((l,i)=>({l,id:'d'+i}));
         S.poolOrder=shuffle([...real,...decoys]);
       }
-
-      // Restaurar slots
       S.slots=dados.slots||new Array(S.toy.name.length).fill('');
-
-      // Reconstruir tileMap de forma robusta:
-      // Para cada slot preenchido, encontrar o tile pelo ID exato no poolOrder
-      // usando uma cópia dos IDs disponíveis para evitar duplicatas
       S.tileMap={};
       const idsDisponiveis=[...S.poolOrder.map(p=>p.id)];
       S.slots.forEach((letra,i)=>{
         if(!letra) return;
-        // Procurar tile com mesma letra entre os ainda disponíveis
         const idx=idsDisponiveis.findIndex(id=>{
           const tile=S.poolOrder.find(p=>p.id===id);
           return tile && tile.l===letra;
         });
         if(idx>=0){
           S.tileMap[i]=idsDisponiveis[idx];
-          idsDisponiveis.splice(idx,1); // remover para não reusar
+          idsDisponiveis.splice(idx,1);
         }
       });
-
-      // Mostrar tela do jogo
       showScreen('screenGame');
       document.getElementById('levelBar').style.display='flex';
       const btnSave=document.getElementById('btnSaveBar');
@@ -951,17 +931,14 @@ function restaurarEstadoDosDados(dados){
       btnSave.textContent='💾';
       btnSave.classList.remove('saved');
       btnSave.disabled=false;
-      // Reiniciar cronômetros (tempo parcial já foi salvo em levelTempos)
       S.levelInicio=Date.now();
       S.palavraInicio=Date.now();
       updateBar(); renderLives(); renderToy();
       showFb('✅ Olá, '+S.nomeAluno+'! Continuando de onde parou!','ok');
     } else {
-      // Nome do brinquedo não encontrado: iniciar nível do zero
       startLevel(S.currentLevel);
     }
   } else {
-    // Sem jogo em andamento: menu no nível correto
     S.toy=null; S.queue=[];
     currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
     showStartScreen();
@@ -982,7 +959,6 @@ function loadFromFile(event){
         alert('Arquivo inválido! Use apenas arquivos .txt salvos por este jogo.');
         return;
       }
-      // Avisar se for arquivo antigo (versão 1) sem estado completo
       if(dados.versao===1){
         showFb('⚠️ Progresso antigo: iniciando no nível '+
           (dados.levelUnlocked.findIndex((u,i)=>u&&(dados.levelStars[i]||0)<3)+1||1)+
@@ -1007,12 +983,9 @@ function senhaHoje(){
   return dia+mes+ano;
 }
 
-function abrirRelatorio(){
-  showModalSenha();
-}
+function abrirRelatorio(){ showModalSenha(); }
 
 function showModalSenha(){
-  // Criar modal de senha temático
   const overlay=document.createElement('div');
   overlay.id='modalSenha';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);animation:fadeIn .3s ease';
@@ -1047,7 +1020,6 @@ function showModalSenha(){
                font-size:16px;cursor:pointer;width:100%">
         ✖ Cancelar
       </button>
-
     </div>`;
   document.body.appendChild(overlay);
   setTimeout(()=>document.getElementById('senhaInput')?.focus(),150);
@@ -1059,7 +1031,6 @@ function confirmarSenha(){
   const digitado=(inp?.value||'').trim();
   if(digitado===senhaHoje()){
     document.getElementById('modalSenha')?.remove();
-    // Sempre oferecer opção: usar dados em memória OU carregar arquivo
     showModalOpcaoRelatorio();
   } else {
     if(inp) inp.style.borderColor='#e53935';
@@ -1078,7 +1049,6 @@ function showModalOpcaoRelatorio(){
       <div style="font-size:52px;margin-bottom:10px">📋</div>
       <div style="font-family:'Fredoka One',cursive;font-size:24px;color:var(--text-main);margin-bottom:8px">Relatório do Professor</div>
       <div style="font-size:14px;color:var(--text-light);margin-bottom:24px">Como deseja visualizar o relatório?</div>
-
       ${temDados?`
       <button onclick="document.getElementById('modalOpcaoRel').remove();
         gerarRelatorio();
@@ -1090,7 +1060,6 @@ function showModalOpcaoRelatorio(){
                cursor:pointer;width:100%;margin-bottom:10px;box-shadow:0 4px 14px var(--shad)">
         👤 Ver relatório de <strong>${S.nomeAluno}</strong>
       </button>`:''}
-
       <label style="background:${temDados?'transparent':'linear-gradient(135deg,var(--bg-h1),var(--bg-h2))'};
              color:${temDados?'var(--text-main)':'#fff'};
              border:${temDados?'2px solid var(--l-bd)':'none'};
@@ -1100,7 +1069,6 @@ function showModalOpcaoRelatorio(){
         📂 Carregar arquivo do aluno
         <input type="file" accept=".txt" style="display:none" onchange="document.getElementById('modalOpcaoRel').remove();carregarParaRelatorio(event)">
       </label>
-
       <button onclick="document.getElementById('modalOpcaoRel').remove()"
         style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
                border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;
@@ -1118,7 +1086,6 @@ function carregarParaRelatorio(event){
   reader.onload=function(e){
     try{
       const raw=e.target.result.trim();
-      // Suporte a base64 (v2) e JSON puro (v1)
       let dados;
       try{
         const json=decodeURIComponent(escape(atob(raw)));
@@ -1138,11 +1105,9 @@ function carregarParaRelatorio(event){
         sessoes:dados.sessoes||[],
         registroPalavras:dados.registroPalavras||[],
       };
-      // Garantir que a tela existe antes de mostrar
       const tela=document.getElementById('screenRelatorio');
       if(!tela){ alert('Erro interno: tela de relatório não encontrada.'); return; }
       gerarRelatorioComDados(d);
-      // Esconder todas as telas e mostrar relatório
       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
       tela.classList.add('active');
       document.getElementById('levelBar').style.display='none';
@@ -1155,39 +1120,8 @@ function carregarParaRelatorio(event){
   event.target.value='';
 }
 
-function showModalCarregarRelatorio(){
-  const overlay=document.createElement('div');
-  overlay.id='modalCarregarRel';
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);animation:fadeIn .3s ease';
-  overlay.innerHTML=`
-    <div style="background:var(--bg-card);border-radius:28px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
-      <div style="font-size:56px;margin-bottom:10px">📂</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:22px;color:var(--text-main);margin-bottom:8px">Carregar arquivo do aluno</div>
-      <div style="font-size:14px;color:var(--text-light);margin-bottom:24px">Selecione o arquivo .txt salvo pelo aluno para visualizar o relatório</div>
-      <label style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;
-             border-radius:18px;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:20px;
-             cursor:pointer;display:block;margin-bottom:10px;box-shadow:0 4px 14px var(--shad)">
-        📂 Selecionar arquivo
-        <input type="file" accept=".txt" style="display:none" onchange="carregarRelatorioExterno(event)">
-      </label>
-      <button onclick="document.getElementById('modalCarregarRel').remove()"
-        style="background:transparent;color:var(--text-light);border:2px solid var(--l-bd);
-               border-radius:18px;padding:10px 24px;font-family:'Fredoka One',cursive;
-               font-size:16px;cursor:pointer;width:100%">
-        ✖ Cancelar
-      </button>
-    </div>`;
-  document.body.appendChild(overlay);
-}
-
-function carregarRelatorioExterno(event){
-  document.getElementById('modalCarregarRel')?.remove();
-  abrirRelatorioDeTxt(event);
-}
-
 function fecharRelatorio(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  // Aluno com jogo em andamento: voltar para palavra atual
   if(S.nomeAluno && S.toy){
     document.getElementById('screenGame').classList.add('active');
     document.getElementById('levelBar').style.display='flex';
@@ -1196,7 +1130,6 @@ function fecharRelatorio(){
     updateBar(); renderLives(); renderToy();
     return;
   }
-  // Aluno carregado mas sem jogo ativo
   if(S.nomeAluno){
     currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
     document.getElementById('levelBar').style.display='none';
@@ -1204,7 +1137,6 @@ function fecharRelatorio(){
     renderStart();
     return;
   }
-  // Sem dados: pedir arquivo
   showModalRecarregar();
 }
 
@@ -1235,7 +1167,6 @@ function showModalRecarregar(){
 
 function recarregarAlunoEFechar(event){
   document.getElementById('modalRecarregar')?.remove();
-  // Reusar loadFromFile que já reposiciona corretamente
   loadFromFile(event);
 }
 
@@ -1249,7 +1180,6 @@ function abrirRelatorioDeTxt(event){
       const json=decodeURIComponent(escape(atob(b64)));
       const dados=JSON.parse(json);
       if(!dados.versao||!dados.nomeAluno) throw new Error('inválido');
-      // Carregar temporariamente só para o relatório
       const tmp={
         nomeAluno:dados.nomeAluno,
         score:dados.score||0,
@@ -1278,7 +1208,6 @@ function fmtTempo(ms){
 }
 
 function gerarRelatorio(){
-  // Snapshot do registro atual incluindo palavra em andamento
   let regSnap=[...S.registroPalavras];
   if(S.toy){
     regSnap=regSnap.filter(r=>!(r.name===S.toy.name&&r.parcial));
@@ -1301,11 +1230,9 @@ function gerarRelatorio(){
 }
 
 function gerarRelatorioComDados(d){
-  // Consolidar todos os registros de palavras de todas as sessões + atual
   const todasPalavras=[...d.registroPalavras];
   (d.sessoes||[]).forEach(s=>(s.palavras||[]).forEach(p=>todasPalavras.push(p)));
 
-  // Palavras mais erradas — agrupa por nome, soma erros/tentativas
   const errosPorPalavra={};
   todasPalavras.forEach(p=>{
     const k=p.name;
@@ -1333,15 +1260,11 @@ function gerarRelatorioComDados(d){
         <div style="font-size:14px;color:var(--text-light)">Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
       </div>
     </div>
-
-    <!-- RESUMO -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
       ${cartaoResumo('🏆','Pontuação total',d.score+' pts')}
       ${cartaoResumo('📚','Níveis concluídos',niveisConcluidos+' de 5')}
       ${cartaoResumo('⭐','Total de estrelas',totalEstrelas+' de 15')}
     </div>
-
-    <!-- NÍVEIS -->
     <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📊 Desempenho por Nível</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
       <thead>
@@ -1367,8 +1290,6 @@ function gerarRelatorioComDados(d){
         }).join('')}
       </tbody>
     </table>
-
-    <!-- PALAVRAS MAIS ERRADAS -->
     ${Object.keys(errosPorPalavra).length>0?`
     <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📝 Desempenho por palavra</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
@@ -1392,8 +1313,6 @@ function gerarRelatorioComDados(d){
         </tr>`).join('')}
       </tbody>
     </table>`:'<div style="color:var(--text-light);text-align:center;padding:16px;margin-bottom:24px">⏳ Nenhuma palavra verificada ainda!</div>'}
-
-    <!-- HISTÓRICO DE SESSÕES -->
     ${d.sessoes.length>0?`
     <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text-main);margin-bottom:12px">📅 Histórico de sessões</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
@@ -1407,8 +1326,6 @@ function gerarRelatorioComDados(d){
         </div>
       </div>`).join('')}
     </div>`:''}
-
-    <!-- BOTÃO IMPRIMIR -->
     <div style="text-align:center;margin-top:8px">
       <button onclick="window.print()" style="background:linear-gradient(135deg,var(--bg-h1),var(--bg-h2));color:#fff;border:none;border-radius:16px;padding:12px 32px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;box-shadow:0 4px 12px var(--shad)">🖨️ Imprimir relatório</button>
     </div>
