@@ -1,4 +1,4 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -2192,6 +2192,22 @@
                     `;
                     tbody.appendChild(row);
                 });
+
+                // Se o jogo acabou, mostra uma linha de celebração especial indicando que todos os 100 desafios foram vencidos!
+                if (isGameOver || (currentLevel === 5 && correctAttempts >= minCorrectAttempts)) {
+                    const finalRow = document.createElement('tr');
+                    finalRow.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+                    finalRow.style.fontWeight = 'bold';
+                    finalRow.innerHTML = `
+                        <td style="text-align: center; font-size: 1.1em; color: #27ae60;">🎉</td>
+                        <td style="text-align: center; color: #27ae60;">Concluído!</td>
+                        <td colspan="4" style="text-align: center; color: #27ae60; font-size: 0.95em; letter-spacing: 0.5px;">
+                            🏆 ALUNO SUPEROU OS 5 NÍVEIS (100 DESAFIOS) E COMPLETOU TODO O JOGO COM SUCESSO! 🏁 (Desafio 20 de 20 do Nível 5 finalizado)
+                        </td>
+                        <td style="text-align: center;">-</td>
+                    `;
+                    tbody.appendChild(finalRow);
+                }
             }
 
             overlay.style.display = 'flex';
@@ -2264,6 +2280,22 @@
                 ].join(";");
                 csvContent += row + "\r\n";
             });
+
+            // Adiciona uma linha de encerramento se todo o jogo (todos os 100 desafios) foi concluído
+            if (isGameOver || (currentLevel === 5 && correctAttempts >= minCorrectAttempts)) {
+                const rowFim = [
+                    alunoNome.replace(/;/g, ','),
+                    "🏆 Concluído!",
+                    "🏁 TODOS OS NÍVEIS COMPLETOS",
+                    "N/A",
+                    "N/A",
+                    "N/A",
+                    "N/A",
+                    new Date().toLocaleTimeString('pt-BR'),
+                    "PARABÉNS! O ALUNO COMPLETOU TODOS OS 5 NÍVEIS COM SUCESSO!"
+                ].join(";");
+                csvContent += rowFim + "\r\n";
+            }
 
             const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
             const url = URL.createObjectURL(blob);
@@ -2769,7 +2801,7 @@
             }
         }
 
-        // Função para gerar problema matemático
+        // Função para gerar problema matemático sem limitação artificial de 36
         function generateMathProblem() {
             const settings = levelSettings[currentLevel];
             const op = settings.operations[Math.floor(Math.random() * settings.operations.length)];
@@ -2778,31 +2810,70 @@
             do {
                 switch (op) {
                     case '+':
+                        // Adição com parcelas baseadas no range do nível atual
                         num1 = Math.floor(Math.random() * (settings.range - 1)) + 1;
-                        num2 = Math.floor(Math.random() * (settings.range - num1)) + 1;
+                        num2 = Math.floor(Math.random() * (settings.range - 1)) + 1;
                         answer = num1 + num2;
                         break;
                     case '-':
-                        num1 = Math.floor(Math.random() * settings.range) + 2;
+                        // Subtração garantindo resposta positiva
+                        num1 = Math.floor(Math.random() * (settings.range * 1.5)) + 2;
                         num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
                         answer = num1 - num2;
                         break;
                     case '*':
-                        num1 = Math.floor(Math.random() * 9) + 2;
-                        num2 = Math.floor(Math.random() * 9) + 2;
+                        // Multiplicação amigável de tabuada de 2 a 10 ou baseada no range do nível
+                        const limit1 = Math.min(settings.range, 10);
+                        num1 = Math.floor(Math.random() * (limit1 - 1)) + 2;
+                        const limit2 = Math.min(settings.range, 10);
+                        num2 = Math.floor(Math.random() * (limit2 - 1)) + 2;
                         answer = num1 * num2;
                         break;
                     case '/':
-                        answer = Math.floor(Math.random() * 9) + 2;
-                        num2 = Math.floor(Math.random() * 9) + 2;
-                        if (num2 === 0) continue;
+                        // Divisão exata onde divisor e quociente são amigáveis
+                        const qLimit = Math.min(settings.range, 10);
+                        answer = Math.floor(Math.random() * (qLimit - 1)) + 2;
+                        const dLimit = Math.min(settings.range, 10);
+                        num2 = Math.floor(Math.random() * (dLimit - 1)) + 2;
                         num1 = answer * num2;
-                        if (!Number.isInteger(num1 / num2) || answer < 1) continue;
                         break;
                 }
-            } while (answer < 1 || answer > GRID_SIZE * GRID_SIZE);
+            } while (answer < 1);
             
             return { text: `${num1} ${op} ${num2}`, answer: answer };
+        }
+
+        // Encontra um caminho livre garantido de startPos para targetPos
+        function findAnyPath(start, end) {
+            const queue = [[start]];
+            const visited = new Set([`${start.x},${start.y}`]);
+            
+            while (queue.length > 0) {
+                const path = queue.shift();
+                const current = path[path.length - 1];
+                
+                if (current.x === end.x && current.y === end.y) {
+                    return path;
+                }
+                
+                const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                // Modifica a ordem das direções aleatoriamente para caminhos variados e divertidos
+                directions.sort(() => Math.random() - 0.5);
+                
+                for (const [dx, dy] of directions) {
+                    const nextX = current.x + dx;
+                    const nextY = current.y + dy;
+                    
+                    if (nextX >= 0 && nextX < GRID_SIZE && nextY >= 0 && nextY < GRID_SIZE) {
+                        const cellKey = `${nextX},${nextY}`;
+                        if (!visited.has(cellKey)) {
+                            visited.add(cellKey);
+                            queue.push([...path, { x: nextX, y: nextY }]);
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         // Função para verificar se há caminho possível
@@ -2857,86 +2928,72 @@
             };
             gameStats.push(currentChallengeData);
             
-            let allObstacles = [];
             visitedCells = [];
             
-            let pathAttempts = 0;
+            // 1. Gera posições de início e destino distintas
             do {
-                pathAttempts++;
-                bombPositions = [];
-                decoyPositions = [];
-                
-                do {
-                    startPos = { 
-                        x: Math.floor(Math.random() * GRID_SIZE), 
-                        y: Math.floor(Math.random() * GRID_SIZE) 
-                    };
-                    targetPos = { 
-                        x: Math.floor(Math.random() * GRID_SIZE), 
-                        y: Math.floor(Math.random() * GRID_SIZE) 
-                    };
-                } while (startPos.x === targetPos.x && startPos.y === targetPos.y);
+                startPos = { 
+                    x: Math.floor(Math.random() * GRID_SIZE), 
+                    y: Math.floor(Math.random() * GRID_SIZE) 
+                };
+                targetPos = { 
+                    x: Math.floor(Math.random() * GRID_SIZE), 
+                    y: Math.floor(Math.random() * GRID_SIZE) 
+                };
+            } while (startPos.x === targetPos.x && startPos.y === targetPos.y);
 
-                const settings = levelSettings[currentLevel];
-                let availableCells = [];
+            // 2. Encontra o caminho sagrado e garante que ele nunca será coberto por obstáculos
+            const sacredPath = findAnyPath(startPos, targetPos) || [startPos, targetPos];
+            const sacredSet = new Set(sacredPath.map(p => `${p.x},${p.y}`));
+
+            const settings = levelSettings[currentLevel];
+            let availableCells = [];
+            
+            // Células disponíveis não incluem posições do caminho sagrado do robô para o alvo
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    if (sacredSet.has(`${x},${y}`)) {
+                        continue;
+                    }
+                    availableCells.push({x, y});
+                }
+            }
+            
+            // 3. Posiciona as bombas
+            bombPositions = [];
+            for (let i = 0; i < settings.bombs; i++) {
+                if (availableCells.length === 0) break;
+                const randIndex = Math.floor(Math.random() * availableCells.length);
+                bombPositions.push(availableCells.splice(randIndex, 1)[0]);
+            }
+
+            // 4. Posiciona os decoys
+            decoyPositions = [];
+            const usedNumbers = new Set([targetNumber]);
+            
+            for (let i = 0; i < settings.decoys; i++) {
+                if (availableCells.length === 0) break;
                 
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    for (let y = 0; y < GRID_SIZE; y++) {
-                        if ((x === startPos.x && y === startPos.y) || 
-                            (x === targetPos.x && y === targetPos.y)) {
-                            continue;
-                        }
-                        availableCells.push({x, y});
+                let value;
+                let attempts = 0;
+                do { 
+                    const rangeLimit = 5 + Math.floor(attempts / 10);
+                    value = targetNumber + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * rangeLimit) + 1); 
+                    attempts++;
+                } while ((usedNumbers.has(value) || value <= 0) && attempts < 100);
+                
+                if (attempts >= 100) {
+                    value = 1;
+                    while (usedNumbers.has(value) || value === targetNumber) {
+                        value++;
                     }
                 }
                 
-                // Se houver dificuldade em achar um caminho resolvível por excesso de tentativas,
-                // reduzimos dinamicamente os obstáculos para termos certeza que haverá saída.
-                let activeBombsCount = settings.bombs;
-                if (pathAttempts > 50) {
-                    activeBombsCount = Math.max(0, settings.bombs - Math.floor((pathAttempts - 50) / 10));
-                }
-                
-                for (let i = 0; i < activeBombsCount; i++) {
-                    if (availableCells.length === 0) break;
-                    const randIndex = Math.floor(Math.random() * availableCells.length);
-                    bombPositions.push(availableCells.splice(randIndex, 1)[0]);
-                }
-
-                const usedNumbers = new Set([targetNumber]);
-                let activeDecoysCount = settings.decoys;
-                if (pathAttempts > 50) {
-                    activeDecoysCount = Math.max(0, settings.decoys - Math.floor((pathAttempts - 50) / 10));
-                }
-                
-                for (let i = 0; i < activeDecoysCount; i++) {
-                    if (availableCells.length === 0) break;
-                    
-                    let value;
-                    let attempts = 0;
-                    do { 
-                        // Gradualmente expande o multiplicador de intervalo para acomodar mais números se necessário
-                        const rangeLimit = 5 + Math.floor(attempts / 10);
-                        value = targetNumber + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * rangeLimit) + 1); 
-                        attempts++;
-                    } while ((usedNumbers.has(value) || value <= 0) && attempts < 100);
-                    
-                    // Failsafe se não conseguir valor único que seja maior que zero
-                    if (attempts >= 100) {
-                        value = 1;
-                        while (usedNumbers.has(value) || value === targetNumber) {
-                            value++;
-                        }
-                    }
-                    
-                    const randIndex = Math.floor(Math.random() * availableCells.length);
-                    const pos = availableCells.splice(randIndex, 1)[0];
-                    decoyPositions.push({ ...pos, value });
-                    usedNumbers.add(value);
-                }
-                
-                allObstacles = [...bombPositions, ...decoyPositions];
-            } while (!isPathPossible(startPos, targetPos, allObstacles) && pathAttempts < 1000);
+                const randIndex = Math.floor(Math.random() * availableCells.length);
+                const pos = availableCells.splice(randIndex, 1)[0];
+                decoyPositions.push({ ...pos, value });
+                usedNumbers.add(value);
+            }
 
             playerPos = { ...startPos };
             updatePlayerPosition();
