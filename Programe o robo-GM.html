@@ -179,6 +179,7 @@
             border: 2px solid #dc3545;
         }
         
+
         #player {
             width: var(--cell-size);
             height: var(--cell-size);
@@ -290,6 +291,7 @@
             transform: translateY(3px);
         }
         
+
         #command-bar-container {
             margin-top: 15px;
             display: flex;
@@ -1590,11 +1592,16 @@
         // ==============================================
         
         // Função para iniciar monitoramento
+        let lastVisualX = -1;
+        let lastVisualY = -1;
+
         function startPositionMonitoring() {
             stopPositionMonitoring();
             
             lastVerifiedPosition = { ...playerPos };
             inconsistencyCount = 0;
+            lastVisualX = -1;
+            lastVisualY = -1;
             
             monitoringInterval = setInterval(() => {
                 monitorPositionConsistency();
@@ -1609,7 +1616,7 @@
             }
         }
         
-        // Função principal de monitoramento
+        // Função principal de monitoramento - REATIVADA COM ALTA RESILIÊNCIA A LATÊNCIA PARA EVITAR FALSOS POSITIVOS
         function monitorPositionConsistency() {
             if (!isMoving) return;
             
@@ -1620,22 +1627,33 @@
             
             // Verifica dessincronização
             if (visualX !== playerPos.x || visualY !== playerPos.y) {
-                inconsistencyCount++;
+                // Se a posição visual mudou desde o último ciclo de 100ms, significa que o robô ainda está em animação/movimento ativo
+                if (visualX !== lastVisualX || visualY !== lastVisualY) {
+                    // Robô está em movimento e progredindo. Reduzimos ou desaceleramos o contador de inconsistências para evitar falhas em PCs lentos.
+                    lastVisualX = visualX;
+                    lastVisualY = visualY;
+                    inconsistencyCount = Math.max(0, inconsistencyCount - 3);
+                } else {
+                    // Robô está visualmente travado no mesmo ponto e não coincide com a posição do backend logístico
+                    inconsistencyCount++;
+                }
                 
-                console.warn(`Dessincronização detectada! Tentativa ${inconsistencyCount}`, {
+                console.warn(`Dessincronização detectada! Tentativa ${inconsistencyCount}/35`, {
                     posição_lógica: playerPos,
                     posição_visual: { x: visualX, y: visualY },
-                    comando_atual: commandQueue[commandQueue.length - 1]
+                    inconsistencyCount: inconsistencyCount
                 });
                 
-                // Se atingir limite crítico, toma ação
-                if (inconsistencyCount >= MAX_INCONSISTENCIES) {
+                // Se o robô ficar realmente estático e paralisado por mais de 3.5 segundos (35 ticks de 100ms), ativa o sistema de recuperação automatico!
+                if (inconsistencyCount >= 35) {
                     handlePositionFailure();
                 }
             } else {
-                // Reset do contador se estiver sincronizado
+                // Reset do contador se estiver perfeitamente sincronizado com o destino planejado
                 inconsistencyCount = 0;
                 lastVerifiedPosition = { ...playerPos };
+                lastVisualX = visualX;
+                lastVisualY = visualY;
             }
         }
         
@@ -1894,7 +1912,11 @@
             updateChallengeProgress();
             updateGridDisplay();
             updatePlayerPosition();
-            mathProblemEl.textContent = state.currentProblemText;
+            if (isGameOver) {
+                mathProblemEl.innerHTML = `<span style="color: #2ecc71; font-weight: bold; font-size: 1.15em;">🏆 PARABÉNS! JOGO CONCLUÍDO! 🎉</span>`;
+            } else {
+                mathProblemEl.textContent = state.currentProblemText;
+            }
             clearCommands();
             
             isMoving = false;
@@ -1920,6 +1942,26 @@
             alunoNome = state.alunoNome || "Aluno";
             updateStudentNameDisplay();
             showTemporaryMessage(`Progresso de ${alunoNome} restaurado com sucesso!`, "success");
+
+            if (isGameOver) {
+                // CONFETES EM LOTE PARA COMEMORAÇÃO
+                startConfetti();
+                setTimeout(() => startConfetti(), 800);
+                setTimeout(() => startConfetti(), 1600);
+                
+                showCustomAlert(
+                    "🏆 PROGRESSO CARREGADO - JOGO CONCLUÍDO!",
+                    `Olá, <strong>${alunoNome || "Aluno"}</strong>! 🎉<br><br>` + 
+                    `Este arquivo de progresso indica que você já <strong>concluiu com êxito</strong> todos os desafios do jogo!<br><br>` +
+                    `🏅 <strong>Pontuação Consolidada:</strong> <span style="font-size: 1.4em; color: #2ecc71; font-weight: bold;">${score}</span> pontos.<br>` +
+                    `❤️ <strong>Vidas Restantes:</strong> ${lives} / ${TOTAL_LIVES}!<br><br>` +
+                    `Clique em OK para visualizar seu status consolidado no <strong>Painel do Professor</strong> e visualizar as estatísticas completas!`,
+                    "success",
+                    () => {
+                        openProfessorPanel();
+                    }
+                );
+            }
         }
         
         // ==============================================
@@ -2729,13 +2771,7 @@
                         executeCommands();
                     }
                 } else if (e.key.toLowerCase() === 'h') {
-                    const allObstacles = [...bombPositions, ...decoyPositions];
-                    if (isPathPossible(startPos, targetPos, allObstacles)) {
-                        alert("Continue tentando! Confirmamos que existe um caminho possível para o alvo.");
-                    } else {
-                        alert("Você estava certo! Este nível tinha um erro. Gerando um novo desafio para você.");
-                        newChallenge();
-                    }
+                    checkPossiblePath();
                 } else if (e.key.toLowerCase() === 'r' && document.getElementById('recovery-message')) {
                     restartCurrentChallenge();
                 }
@@ -2799,6 +2835,28 @@
             if (themeSelector) {
                 themeSelector.disabled = shouldDisable;
             }
+        }
+
+        // Função de ajuda/dica: verifica se há caminho possível até o alvo
+        function checkPossiblePath() {
+            const allObstacles = [...bombPositions, ...decoyPositions];
+            if (isPathPossible(startPos, targetPos, allObstacles)) {
+                showCustomAlert(
+                    "✅ CAMINHO POSSÍVEL", 
+                    "Continue tentando! Confirmamos que existe pelo menos um caminho livre possível do robô até a resposta correta.", 
+                    "success"
+                );
+            } else {
+                showCustomAlert(
+                    "🔄 ATENÇÃO/ERRO", 
+                    "Você estava certo! Este desafio acabou gerando um layout sem caminho livre e acessível. Estamos gerando um novo desafio para você automaticamente!", 
+                    "info",
+                    () => {
+                        newChallenge();
+                    }
+                );
+            }
+            refocusGameControls();
         }
 
         // Função para gerar problema matemático sem limitação artificial de 36
@@ -3015,6 +3073,9 @@
         function updateChallengeProgress() {
             if (currentLevel === 5 && correctAttempts >= minCorrectAttempts) {
                 isGameOver = true;
+            }
+            if (isGameOver) {
+                mathProblemEl.innerHTML = `<span style="color: #2ecc71; font-weight: bold; font-size: 1.15em;">🏆 PARABÉNS! JOGO CONCLUÍDO! 🎉</span>`;
             }
             currentChallengeEl.textContent = isGameOver ? minCorrectAttempts : Math.min(minCorrectAttempts, correctAttempts + 1);
             totalChallengesEl.textContent = minCorrectAttempts;
@@ -3265,9 +3326,27 @@
                         correctAttempts = 0;
                         lives = TOTAL_LIVES;
                     } else {
-                        victoryMessage.textContent = `Você completou todos os desafios! Pontuação final: ${score}`;
                         isGameOver = true;
                         toggleControlButtons(false);
+                        
+                        // CONFETES EM LOTE PARA COMEMORAÇÃO MÁXIMA
+                        startConfetti();
+                        setTimeout(() => startConfetti(), 800);
+                        setTimeout(() => startConfetti(), 1600);
+                        
+                        // MODAL INTEGRADO DE ALTO DESEMPENHO E INFALÍVEL
+                        showCustomAlert(
+                            "🏆 VITÓRIA MÁXIMA! PARABÉNS!",
+                            `Muito bem, <strong>${alunoNome || "Aluno"}</strong>! 🎉<br><br>` + 
+                            `Você provou ser um excelente programador e matemático ao superar todos os desafios do <strong>Nível 5</strong> com sucesso!<br><br>` +
+                            `🏅 <strong>Pontuação Final:</strong> <span style="font-size: 1.4em; color: #2ecc71; font-weight: bold;">${score}</span> pontos.<br>` +
+                            `❤️ <strong>Vidas Restantes:</strong> ${lives} / ${TOTAL_LIVES}!<br><br>` +
+                            `Clíque em OK para visualizar seu status consolidado no <strong>Painel do Professor</strong> e salvar as suas estatísticas!`,
+                            "success",
+                            () => {
+                                openProfessorPanel();
+                            }
+                        );
                     }
                 }
 
