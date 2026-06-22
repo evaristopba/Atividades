@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -1372,6 +1372,10 @@
             <div id="professor-panel-content">
                 <h2>📊 Painel de Estatísticas (Professor)</h2>
                 
+                <div id="prof-completion-banner" style="display: none; margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: #27ae60; color: white; font-weight: bold; text-align: center; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    🎉 PARABÉNS! O aluno completou o desafio final! Todos os 5 níveis (100 desafios) foram vencidos com sucesso! 🏆
+                </div>
+                
                 <div class="student-summary-card">
                     <div><strong>👤 Aluno:</strong> <span id="prof-student-name">Aluno</span></div>
                     <div><strong>📈 Nível Atual:</strong> <span id="prof-current-level">1</span></div>
@@ -1844,7 +1848,8 @@
                 decoyPositions: decoyPositions,
                 visitedCells: visitedCells,
                 currentProblemText: mathProblemEl.textContent,
-                gameStats: gameStats
+                gameStats: gameStats,
+                isGameOver: isGameOver
             };
         }
         
@@ -1882,15 +1887,19 @@
             
             scoreEl.textContent = score;
             updateLivesDisplay();
+            
+            // Define isGameOver baseado no estado salvo ou calcula dinamicamente se o desafio final do nível 5 foi alcançado e vencido
+            isGameOver = state.isGameOver !== undefined ? state.isGameOver : (currentLevel === 5 && correctAttempts >= minCorrectAttempts);
+            
             updateChallengeProgress();
             updateGridDisplay();
             updatePlayerPosition();
             mathProblemEl.textContent = state.currentProblemText;
             clearCommands();
             
-            isGameOver = false;
             isMoving = false;
-            toggleControlButtons(true);
+            // Se o jogo estivessse acabado antes de carregar, mantém os botões desativados
+            toggleControlButtons(!isGameOver);
 
             // ==============================================================
             // CORREÇÃO: ATUALIZA OS BOTÕES DE NÍVEL AO RESTAURAR PROGRESSO
@@ -2122,9 +2131,19 @@
             const overlay = document.getElementById('professor-panel-overlay');
             if (!overlay) return;
 
+            // Mostra ou esconde o banner de conclusão de fases
+            const completionBanner = document.getElementById('prof-completion-banner');
+            if (completionBanner) {
+                if (isGameOver || (currentLevel === 5 && correctAttempts >= minCorrectAttempts)) {
+                    completionBanner.style.display = 'block';
+                } else {
+                    completionBanner.style.display = 'none';
+                }
+            }
+
             // Atualiza resumo
             document.getElementById('prof-student-name').textContent = alunoNome;
-            document.getElementById('prof-current-level').textContent = currentLevel;
+            document.getElementById('prof-current-level').textContent = isGameOver ? "Concluído! (Níveis 1-5)" : currentLevel;
             document.getElementById('prof-total-score').textContent = score;
             document.getElementById('prof-lives').textContent = `${lives} / ${TOTAL_LIVES}`;
 
@@ -2841,7 +2860,9 @@
             let allObstacles = [];
             visitedCells = [];
             
+            let pathAttempts = 0;
             do {
+                pathAttempts++;
                 bombPositions = [];
                 decoyPositions = [];
                 
@@ -2869,21 +2890,44 @@
                     }
                 }
                 
-                for (let i = 0; i < settings.bombs; i++) {
+                // Se houver dificuldade em achar um caminho resolvível por excesso de tentativas,
+                // reduzimos dinamicamente os obstáculos para termos certeza que haverá saída.
+                let activeBombsCount = settings.bombs;
+                if (pathAttempts > 50) {
+                    activeBombsCount = Math.max(0, settings.bombs - Math.floor((pathAttempts - 50) / 10));
+                }
+                
+                for (let i = 0; i < activeBombsCount; i++) {
                     if (availableCells.length === 0) break;
                     const randIndex = Math.floor(Math.random() * availableCells.length);
                     bombPositions.push(availableCells.splice(randIndex, 1)[0]);
                 }
 
                 const usedNumbers = new Set([targetNumber]);
+                let activeDecoysCount = settings.decoys;
+                if (pathAttempts > 50) {
+                    activeDecoysCount = Math.max(0, settings.decoys - Math.floor((pathAttempts - 50) / 10));
+                }
                 
-                for (let i = 0; i < settings.decoys; i++) {
+                for (let i = 0; i < activeDecoysCount; i++) {
                     if (availableCells.length === 0) break;
                     
                     let value;
+                    let attempts = 0;
                     do { 
-                        value = targetNumber + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 5) + 1); 
-                    } while (usedNumbers.has(value) || value <= 0);
+                        // Gradualmente expande o multiplicador de intervalo para acomodar mais números se necessário
+                        const rangeLimit = 5 + Math.floor(attempts / 10);
+                        value = targetNumber + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * rangeLimit) + 1); 
+                        attempts++;
+                    } while ((usedNumbers.has(value) || value <= 0) && attempts < 100);
+                    
+                    // Failsafe se não conseguir valor único que seja maior que zero
+                    if (attempts >= 100) {
+                        value = 1;
+                        while (usedNumbers.has(value) || value === targetNumber) {
+                            value++;
+                        }
+                    }
                     
                     const randIndex = Math.floor(Math.random() * availableCells.length);
                     const pos = availableCells.splice(randIndex, 1)[0];
@@ -2892,7 +2936,7 @@
                 }
                 
                 allObstacles = [...bombPositions, ...decoyPositions];
-            } while (!isPathPossible(startPos, targetPos, allObstacles));
+            } while (!isPathPossible(startPos, targetPos, allObstacles) && pathAttempts < 1000);
 
             playerPos = { ...startPos };
             updatePlayerPosition();
@@ -2912,7 +2956,10 @@
 
         // Atualizar progresso do desafio
         function updateChallengeProgress() {
-            currentChallengeEl.textContent = isGameOver ? minCorrectAttempts : correctAttempts + 1;
+            if (currentLevel === 5 && correctAttempts >= minCorrectAttempts) {
+                isGameOver = true;
+            }
+            currentChallengeEl.textContent = isGameOver ? minCorrectAttempts : Math.min(minCorrectAttempts, correctAttempts + 1);
             totalChallengesEl.textContent = minCorrectAttempts;
         }
         
