@@ -436,13 +436,15 @@ function startLevel(lvl){
 function updateBar(){
   const total=TOYS.filter(t=>t.level===S.currentLevel).length;
   document.getElementById('levelLabel').textContent='Nível '+S.currentLevel;
-  document.getElementById('levelCount').textContent=S.correctInLevel+'/'+total;
-  document.getElementById('progressFill').style.width=(S.correctInLevel/total*100)+'%';
+  const exibido=Math.min(S.correctInLevel,total);
+  document.getElementById("levelCount").textContent=exibido+"/"+total;
+  document.getElementById('progressFill').style.width=(exibido/total*100)+'%';
 }
 
 // ========== PRÓXIMO BRINQUEDO ==========
 function nextToy(){
-  if(!S.queue.length){levelComplete();return;}
+  const _total=TOYS.filter(t=>t.level===S.currentLevel).length;
+  if(!S.queue.length||S.correctInLevel>=_total){levelComplete();return;}
   S.toy=S.queue.shift();
   S._tentativas=0; S._erros=0;
   S.palavraInicio=Date.now();
@@ -658,7 +660,7 @@ function showPts(txt){
 function levelComplete(){
   const lvl=S.currentLevel;
   const total=TOYS.filter(t=>t.level===lvl).length;
-  const pct=S.correctInLevel/total;
+  const pct=Math.min(S.correctInLevel,total)/total;
   const stars=pct>=1?3:pct>=0.75?2:1;
   S.levelStars[lvl-1]=Math.max(S.levelStars[lvl-1],stars);
   if(lvl<5) S.levelUnlocked[lvl]=true;
@@ -669,8 +671,38 @@ function levelComplete(){
     nivel:lvl, stars, score:S.score,
     palavras:[...S.registroPalavras]
   });
-  const subtitle=`Você completou ${S.correctInLevel} brinquedos!\nPontuação total: ${S.score} pontos`;
+  // Verifica se todos os 5 níveis têm 3 estrelas → FIM DE JOGO
+  const jogoCompleto=S.levelStars.every(s=>s===3);
+  if(jogoCompleto){ setTimeout(showFimDeJogo,400); return; }
+  const subtitle=`Você completou ${Math.min(S.correctInLevel,total)} brinquedos!\nPontuação total: ${S.score} pontos`;
   showModalSave('🏆',`Nível ${lvl} concluído!`,'⭐'.repeat(stars)+'☆'.repeat(3-stars),subtitle,lvl);
+}
+
+function showFimDeJogo(){
+  document.getElementById('levelBar').style.display='none';
+  document.getElementById('modalOverlay').classList.add('hidden');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screenStart').classList.add('active');
+  renderStart();
+  const nome=S.nomeAluno||'campeão';
+  document.getElementById('mEmoji').textContent='🎉';
+  document.getElementById('mTitle').textContent='Parabéns, '+nome+'!';
+  document.getElementById('mStars').textContent='⭐⭐⭐⭐⭐';
+  document.getElementById('mSubtitle').textContent='Você completou todos os níveis com 3 estrelas!\nPontuação final: '+S.score+' pontos\n\nVocê é um mestre das sílabas! 🏆';
+  const b1=document.getElementById('mBtn1');
+  b1.textContent='💾 Salvar resultado'; b1.className='modal-btn'; b1.style.cssText='';
+  S.cb1=()=>{
+    document.getElementById('modalOverlay').classList.add('hidden');
+    if(S.nomeAluno&&S.nomeAluno.trim()) salvarProgresso();
+    else showModalNome(()=>salvarProgresso());
+    showFb('✅ Resultado salvo!','ok');
+  };
+  const b2=document.getElementById('mBtn2');
+  b2.style.display='block'; b2.className='modal-btn secondary'; b2.disabled=false; b2.style.opacity='1';
+  b2.textContent='🔄 Jogar novamente';
+  S.cb2=()=>{ document.getElementById('modalOverlay').classList.add('hidden'); showStartScreen(); };
+  const b3=document.getElementById('mBtn3'); b3.style.display='none'; S.cb3=null;
+  document.getElementById('modalOverlay').classList.remove('hidden');
 }
 
 function showModalSave(emoji,title,stars,sub,lvl){
@@ -823,7 +855,7 @@ function salvarProgresso(){
     horaSalvo:new Date().toLocaleTimeString('pt-BR'),
     theme:S.theme, score:S.score,
     levelStars:S.levelStars, levelUnlocked:S.levelUnlocked,
-    emJogo:S.toy!==null, currentLevel:S.currentLevel, lives:S.lives,
+    emJogo:S.toy!==null && S.levelStars[S.currentLevel-1]<3, currentLevel:S.currentLevel, lives:S.lives,
     correctInLevel:S.correctInLevel, toyAtual, queueNomes,
     slots:S.slots, poolOrder:S.poolOrder,
     levelTempos:temposSnap, sessoes:S.sessoes, registroPalavras:registroSnap,
@@ -853,9 +885,24 @@ function restaurarEstadoDosDados(dados){
   nd.textContent='👤 '+S.nomeAluno; nd.style.display='block';
   renderScore(); renderLives();
 
+  // Se jogo completo ao carregar, mostra fim de jogo direto
+  if(dados.levelStars&&dados.levelStars.every&&dados.levelStars.every(s=>s===3)){
+    S.toy=null; S.queue=[];
+    showStartScreen();
+    setTimeout(showFimDeJogo,400);
+    return;
+  }
   if(dados.emJogo&&dados.versao>=2&&dados.toyAtual){
     S.currentLevel=dados.currentLevel||1; S.lives=dados.lives!=null?dados.lives:5;
     S.correctInLevel=dados.correctInLevel||0;
+    // Se o nível salvo já tem 3 estrelas, não restaura em jogo — vai para o menu
+    if(S.levelStars[S.currentLevel-1]===3){
+      S.toy=null; S.queue=[];
+      currentLevel=S.levelUnlocked.findIndex((u,i)=>u&&S.levelStars[i]<3)+1||1;
+      showStartScreen();
+      showFb('✅ Olá, '+S.nomeAluno+'! Progresso carregado!','ok');
+      return;
+    }
     S.toy=TOYS.find(t=>t.name===dados.toyAtual)||null;
     S.queue=(dados.queueNomes||[]).map(n=>TOYS.find(t=>t.name===n)).filter(Boolean);
     if(S.toy){
