@@ -1,2516 +1,1669 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio do Robô Matemático</title>
-    <style>
-        :root {
-            --grid-size: 6;
-            --cell-size: 70px;
-            --grid-gap: 4px;
-            --primary-color: #5ab9ea;
-            --secondary-color: #2c3e50;
-            --accent-color: #f1c40f;
-            --correct-color: #d4edda;
-            --wrong-color: #f8d7da;
-        }
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: var(--primary-color);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            margin: 0;
-            padding: 10px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            overflow-x: hidden;
-        }
-        
-        .game-container {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0;
-        }
-        
-        /* Efeito de tremor */
-        .shake-game {
-            animation: shakeEffect 0.3s ease-in-out 0s 2;
-        }
-        
-        @keyframes shakeEffect {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
-        
-        .top-controls {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        
-        #theme-selector {
-            padding: 8px;
-            border-radius: 5px;
-            border: 2px solid var(--secondary-color);
-            font-weight: bold;
-            background-color: white;
-            color: var(--secondary-color);
-        }
-        
-        #level-selector {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        
-        .level-btn {
-            padding: 10px 20px;
-            font-size: 1em;
-            font-weight: bold;
-            border: 3px solid var(--secondary-color);
-            background-color: white;
-            color: var(--secondary-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .level-btn.active {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: #f39c12;
-        }
-        
-        .level-btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafio de Trajetória do Robô (Offline)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-        #instructions-btn, #high-contrast-btn, #restart-btn {
-            padding: 10px 20px;
-            font-size: 1em;
-            font-weight: bold;
-            border: 3px solid var(--secondary-color);
-            background-color: white;
-            color: var(--secondary-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        /* Botões de salvar/carregar */
-        #save-progress-btn, #load-progress-btn {
-            padding: 10px 20px;
-            font-size: 1em;
-            font-weight: bold;
-            border: 3px solid var(--secondary-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        #save-progress-btn {
-            background-color: #9b59b6;
-            color: white;
-        }
-        
-        #load-progress-btn {
-            background-color: #e67e22;
-            color: white;
-        }
-        
-        #save-progress-btn:hover, #load-progress-btn:hover {
-            transform: scale(1.02);
-        }
-        
-        .game-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            margin-top: 15px;
-        }
-        
-        #grid-container {
-            display: grid;
-            grid-template-columns: repeat(var(--grid-size), var(--cell-size));
-            grid-template-rows: repeat(var(--grid-size), var(--cell-size));
-            gap: var(--grid-gap);
-            background-color: var(--secondary-color);
-            border: 5px solid var(--secondary-color);
-            padding: var(--grid-gap);
-            border-radius: 8px;
-            position: relative;
-        }
-        
-        .grid-cell {
-            background-color: white;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.3em;
-            font-weight: bold;
-            color: var(--secondary-color);
-            position: relative;
-            transition: all 0.3s;
-        }
-        
-        .grid-cell.correct-path {
-            background-color: var(--correct-color);
-            border: 2px solid #28a745;
-        }
-        
-        .grid-cell.wrong-path {
-            background-color: var(--wrong-color);
-            border: 2px solid #dc3545;
-        }
-        
-        #player {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            background-image: url('https://i.postimg.cc/9FMqtjCf/RoboVitoria.jpg');
-            background-size: 90%;
-            background-repeat: no-repeat;
-            background-position: center;
-            position: absolute;
-            transition: all 0.3s ease-in-out;
-            z-index: 10;
-        }
-        
-        .bomb {
-            width: 90%;
-            height: 90%;
-            background-image: url('https://i.postimg.cc/7PsqHZmV/Bomba.jpg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-        
-        #ui-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .student-name-container {
-            margin-bottom: 12px;
-            font-size: 1.05em;
-            padding: 6px 4px;
-            border-bottom: 1px dashed var(--secondary-color);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: background-color 0.2s, color 0.2s;
-            border-radius: 4px;
-        }
-        
-        .student-name-container:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-        
-        .student-name-highlight {
-            font-weight: bold;
-            color: #3498db;
-            text-decoration: underline dotted;
-        }
-        
-        .challenge-box {
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            border: 3px solid var(--secondary-color);
-            text-align: center;
-            min-width: 200px;
-        }
-        
-        .challenge-box p {
-            margin: 0;
-            font-size: 1.1em;
-        }
-        
-        #math-problem {
-            font-size: 2em;
-            font-weight: bold;
-            color: #e74c3c;
-            margin: 5px 0;
-        }
-        
-        #score, #challenge-progress, #lives-display {
-            font-size: 1.1em;
-            margin-top: 5px;
-            color: var(--secondary-color);
-        }
-        
-        #score span, #challenge-progress span {
-            font-weight: bold;
-        }
-        
-        #lives-container {
-            color: #e74c3c;
-        }
-        
-        #verify-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1.3em;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            border-bottom: 5px solid #0056b3;
-            transition: all 0.2s;
-        }
-        
-        #verify-btn:disabled {
-            background-color: #ccc;
-            border-bottom: 5px solid #aaa;
-            cursor: not-allowed;
-        }
-        
-        #verify-btn:active {
-            border-bottom-width: 2px;
-            transform: translateY(3px);
-        }
-        
-        #command-bar-container {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        #command-bar {
-            display: flex;
-            gap: 5px;
-            background-color: var(--secondary-color);
-            padding: 8px;
-            border-radius: 8px;
-            min-height: 40px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .command-slot {
-            width: 35px;
-            height: 35px;
-            background-color: white;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8em;
-            transition: border 0.2s, transform 0.2s;
-        }
-        
-        .command-slot.active {
-            transform: scale(1.1);
-            border-color: var(--accent-color);
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        
-        #command-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .control-btn {
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 8px;
-            font-size: 2em;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .control-btn:disabled {
-            background-color: #ccc !important;
-            cursor: not-allowed;
-        }
-        
-        #btn-right { background-color: #2ecc71; }
-        #btn-left { background-color: #f1c40f; }
-        #btn-up { background-color: #3498db; }
-        #btn-down { background-color: #e74c3c; }
-        #btn-clear { background-color: #95a5a6; font-size: 0.9em; }
-        
-        #victory-message {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #2ecc71;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            font-size: 1.3em;
-            z-index: 100;
-            opacity: 0;
-            transition: opacity 0.5s;
-            text-align: center;
-            max-width: 80%;
-        }
-        
-        #player.exploded {
-            background-image: url('https://i.postimg.cc/7YWJKQZn/RoboExplode.jpg');
-            animation: shake 0.5s;
-        }
+    /* Grid borders and layout optimization */
+    .grid-cell {
+      transition: all 0.25s ease;
+    }
 
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-        
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 5px;
-            background-color: rgba(44, 62, 80, 0.7);
-            color: white;
-            text-align: center;
-            font-size: 0.9em;
-            z-index: 100;
-        }
-        
-        footer a {
-            color: #f1c40f;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        footer a:hover {
-            text-decoration: underline;
-        }
+    /* Exploding shake animation */
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-3px, -2px) rotate(-1deg); }
+      20% { transform: translate(-1px, 2px) rotate(1deg); }
+      30% { transform: translate(3px, 1px) rotate(0deg); }
+      40% { transform: translate(1px, -1px) rotate(1deg); }
+      50% { transform: translate(-2px, 3px) rotate(-1deg); }
+      60% { transform: translate(-3px, 1px) rotate(0deg); }
+      70% { transform: translate(2px, 1px) rotate(-1deg); }
+      82% { transform: translate(-1px, -2px) rotate(1deg); }
+      90% { transform: translate(3px, 3px) rotate(0deg); }
+    }
 
-        /* Estilos para o modal de recuperação */
-        #recovery-message {
-            animation: fadeIn 0.3s ease;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #ff4444;
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            z-index: 1000;
-            font-weight: bold;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 90%;
-            border: 3px solid #fff;
-        }
+    .animate-shake {
+      animation: shake 0.4s ease-in-out infinite;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -60%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
-        }
+    /* Confetti Particle styling */
+    .confetti-particle {
+      position: fixed;
+      top: -5%;
+      z-index: 1000;
+      pointer-events: none;
+      animation: fall 3.5s linear forwards;
+    }
 
-        #recovery-message::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: -1;
-        }
-
-        #temp-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 1000;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            background-color: #28a745;
-            color: white;
-        }
-
-        /* MODAL DE INSTRUÇÕES */
-        #instructions-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #instructions-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 550px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            font-family: 'Arial', sans-serif;
-            line-height: 1.5;
-            color: #2c3e50;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-        
-        #instructions-content h2 {
-            color: #f1c40f;
-            margin-top: 0;
-            text-align: center;
-            font-size: 1.6em;
-            margin-bottom: 15px;
-        }
-
-        /* Estilos de Abas */
-        .modal-tabs {
-            display: flex;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 20px;
-            gap: 10px;
-            justify-content: center;
-        }
-        
-        .modal-tab-btn {
-            background: none;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #7f8c8d;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-            outline: none;
-        }
-        
-        .modal-tab-btn:hover {
-            color: var(--secondary-color);
-        }
-        
-        .modal-tab-btn.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
-        }
-        
-        .tab-panel {
-            display: none;
-            text-align: left;
-        }
-        
-        .tab-panel.active {
-            display: block;
-        }
-
-        .tab-panel h3 {
-            color: #3498db;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 5px;
-            font-size: 1.2em;
-        }
-        
-        #instructions-content ul {
-            padding-left: 20px;
-        }
-        
-        #instructions-content li {
-            margin: 8px 0;
-        }
-        
-        #close-instructions {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        
-        #close-instructions:hover {
-            background-color: #27ae60;
-        }
-
-        .bncc-scroll-area {
-            max-height: 45vh;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        /* Canvas para confetes */
-        #confetti-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        /* MODAL PARA SOLICITAR NOME DO ALUNO */
-        #nome-aluno-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            z-index: 4000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .nome-modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .nome-modal-content h2 {
-            color: #f1c40f;
-            margin-top: 0;
-        }
-        
-        .nome-modal-content p {
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        
-        .nome-modal-content input {
-            width: 100%;
-            padding: 12px;
-            font-size: 1.1em;
-            border: 2px solid #3498db;
-            border-radius: 8px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        
-        .nome-modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .nome-modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        #confirmar-nome-btn {
-            background-color: #2ecc71;
-            color: white;
-        }
-        
-        #confirmar-nome-btn:hover {
-            background-color: #27ae60;
-        }
-        
-        #cancelar-nome-btn {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        #cancelar-nome-btn:hover {
-            background-color: #c0392b;
-        }
-
-        /* ============================================== */
-        /* MODAL DE AVISOS BONITOS (substitui alert) */
-        /* ============================================== */
-        .custom-alert-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            z-index: 5000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .custom-alert-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: fadeInScale 0.2s ease;
-        }
-        
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .custom-alert-content h3 {
-            margin-top: 0;
-            font-size: 1.5em;
-        }
-        
-        .custom-alert-content p {
-            margin: 15px 0;
-            font-size: 1.1em;
-            line-height: 1.4;
-            color: #2c3e50;
-        }
-        
-        .custom-alert-content button {
-            padding: 12px 25px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.2s;
-        }
-        
-        .custom-alert-content button:hover {
-            background-color: #27ae60;
-        }
-        
-        .custom-alert-content.warning h3 {
-            color: #e74c3c;
-        }
-        
-        .custom-alert-content.warning button {
-            background-color: #e74c3c;
-        }
-        
-        .custom-alert-content.warning button:hover {
-            background-color: #c0392b;
-        }
-        
-        .custom-alert-content.info h3 {
-            color: #3498db;
-        }
-        
-        .custom-alert-content.info button {
-            background-color: #3498db;
-        }
-        
-        .custom-alert-content.info button:hover {
-            background-color: #2980b9;
-        }
-        
-        .custom-alert-content.success h3 {
-            color: #2ecc71;
-        }
-
-        /* ============================================== */
-        /* TEMAS - ESPAÇO E FLORESTA */
-        /* ============================================== */
-        
-        body.space {
-            background: linear-gradient(135deg, #0c0c2c, #1a1a3e);
-        }
-        
-        body.space .game-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 30px;
-            padding: 20px;
-        }
-        
-        body.space .challenge-box,
-        body.space .command-slot,
-        body.space .grid-cell {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-        
-        body.forest {
-            background: linear-gradient(135deg, #0b3d0b, #1a6b1a);
-        }
-        
-        body.forest .game-container {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 30px;
-            padding: 20px;
-        }
-        
-        body.forest .challenge-box,
-        body.forest .command-slot,
-        body.forest .grid-cell {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-        
-        /* ============================================== */
-        /* ALTO CONTRASTE */
-        /* ============================================== */
-        
-        body.high-contrast {
-            background-color: black;
-        }
-        
-        body.high-contrast .game-container,
-        body.high-contrast .challenge-box,
-        body.high-contrast .command-slot,
-        body.high-contrast .grid-cell,
-        body.high-contrast #instructions-content,
-        body.high-contrast #bncc-content,
-        body.high-contrast .nome-modal-content,
-        body.high-contrast .custom-alert-content {
-            background-color: black !important;
-            color: yellow !important;
-            border-color: yellow !important;
-        }
-        
-        body.high-contrast button,
-        body.high-contrast .control-btn,
-        body.high-contrast .level-btn,
-        body.high-contrast #save-progress-btn,
-        body.high-contrast #load-progress-btn,
-        body.high-contrast #confirmar-nome-btn,
-        body.high-contrast #cancelar-nome-btn,
-        body.high-contrast .custom-alert-content button {
-            background-color: black !important;
-            color: yellow !important;
-            border: 2px solid yellow !important;
-        }
-        
-        body.high-contrast #player {
-            filter: invert(1);
-        }
-        
-        body.high-contrast #math-problem {
-            color: yellow !important;
-        }
-        
-        body.high-contrast #score,
-        body.high-contrast #challenge-progress,
-        body.high-contrast #lives-display {
-            color: yellow !important;
-        }
-        
-        body.high-contrast .custom-alert-content p {
-            color: yellow !important;
-        }
-        
-        body.high-contrast .student-name-container {
-            border-bottom: 1px dashed yellow !important;
-            color: yellow !important;
-        }
-        
-        body.high-contrast .student-name-highlight {
-            color: yellow !important;
-            text-decoration: underline yellow dotted !important;
-        }
-        
-        body.high-contrast .modal-tab-btn {
-            color: #ccc !important;
-            border-bottom: 3px solid transparent !important;
-        }
-        
-        body.high-contrast .modal-tab-btn.active {
-            color: yellow !important;
-            border-bottom: 3px solid yellow !important;
-            background-color: black !important;
-        }
-
-        @media (max-width: 600px) {
-            .top-controls {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-            #theme-selector {
-                width: 100%;
-            }
-            #level-selector {
-                justify-content: center;
-            }
-            .game-wrapper {
-                flex-direction: column;
-                gap: 15px;
-            }
-            #ui-panel {
-                width: 100%;
-                max-width: 200px;
-            }
-            .challenge-box {
-                min-width: 150px;
-                padding: 10px;
-            }
-            #math-problem {
-                font-size: 1.5em;
-            }
-            #command-bar {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .command-slot {
-                flex-shrink: 0;
-            }
-            #command-buttons {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .control-btn {
-                flex-shrink: 0;
-                width: 40px;
-                height: 40px;
-                font-size: 1.5em;
-            }
-            #btn-clear {
-                font-size: 0.8em;
-            }
-            #recovery-message {
-                width: 95%;
-                padding: 15px;
-            }
-            #recovery-message button {
-                padding: 10px 15px;
-                font-size: 0.9em;
-            }
-            #recovery-message div {
-                font-size: 0.8em;
-            }
-            #instructions-content {
-                margin: 20px;
-                padding: 20px;
-            }
-            #bncc-content {
-                margin: 20px;
-                padding: 20px;
-            }
-            .nome-modal-content {
-                margin: 20px;
-                padding: 20px;
-            }
-            .custom-alert-content {
-                margin: 20px;
-                padding: 20px;
-            }
-        }
-    </style>
+    @keyframes fall {
+      0% {
+        top: -5%;
+        transform: translateX(0) translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      33% {
+        transform: translateX(var(--sway-1)) translateY(33vh) rotate(var(--rot-1));
+      }
+      66% {
+        transform: translateX(var(--sway-2)) translateY(66vh) rotate(var(--rot-2));
+        opacity: 0.8;
+      }
+      100% {
+        top: 105%;
+        transform: translateX(var(--sway-3)) translateY(105vh) rotate(var(--rot-3));
+        opacity: 0;
+      }
+    }
+  </style>
 </head>
-<body>
-    <div class="game-container">
-        <div class="top-controls">
-            <select id="theme-selector" aria-label="Seleção de tema visual">
-                <option value="default">Padrão</option>
-                <option value="space">Espaço</option>
-                <option value="forest">Floresta</option>
-            </select>
-            <div id="level-selector" role="tablist" aria-label="Seleção de Nível">
-                <button class="level-btn active" data-level="1" role="tab" aria-selected="true" aria-label="Nível 1">Nível 1</button>
-                <button class="level-btn" data-level="2" role="tab" aria-selected="false" aria-label="Nível 2" disabled>Nível 2</button>
-                <button class="level-btn" data-level="3" role="tab" aria-selected="false" aria-label="Nível 3" disabled>Nível 3</button>
-                <button class="level-btn" data-level="4" role="tab" aria-selected="false" aria-label="Nível 4" disabled>Nível 4</button>
-                <button class="level-btn" data-level="5" role="tab" aria-selected="false" aria-label="Nível 5" disabled>Nível 5</button>
-            </div>
-            <button id="instructions-btn" aria-label="Ver instruções do jogo">Instruções</button>
-            <button id="high-contrast-btn" aria-label="Alternar modo de alto contraste">Alto Contraste</button>
-            <button id="restart-btn" aria-label="Reiniciar o jogo">Reiniciar Jogo</button>
-            <button id="save-progress-btn">💾 Salvar Progresso</button>
-            <button id="load-progress-btn">📂 Carregar Progresso</button>
+<body class="flex flex-col min-h-screen text-slate-800 selection:bg-sky-200">
+
+  <!-- ========================================================
+       TOP HEADER NAV BAR
+       ======================================================== -->
+  <header class="w-full bg-white border-b-3 border-slate-700 py-3 px-6 shadow-sm sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      
+      <!-- Brand Logo / Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-sky-500 border-3 border-slate-700 flex items-center justify-center text-white text-2xl font-black shadow-xs">
+          🤖
         </div>
+        <div>
+          <h1 class="text-xl font-black tracking-tight text-slate-900 font-display flex items-center gap-1.5 leading-none">
+            DESAFIO DO ROBÔ <span class="text-xs bg-sky-100 text-sky-800 border border-sky-300 font-extrabold px-1.5 py-0.5 rounded-md">PREDICTOR</span>
+          </h1>
+          <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Pensamento Computacional & Previsão espacial</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons / Student Identity -->
+      <div class="flex flex-wrap items-center gap-2">
         
-        <div class="game-wrapper">
-            <div id="grid-container" role="grid" aria-label="Tabuleiro do jogo">
-                <div id="player" role="img" aria-label="Robô"></div>
-            </div>
-            
-            <div id="ui-panel">
-                <div class="challenge-box">
-                    <div id="student-name-box" class="student-name-container" title="Clique para alterar seu nome" aria-label="Nome do aluno. Clique para alterar.">
-                        👤 Aluno: <span id="student-name-display" class="student-name-highlight">Aluno</span> ✏️
-                    </div>
-                    <p>Programe o robô para<br>se deslocar para</p>
-                    <div id="math-problem"></div>
-                    <div id="score">
-                        Pontuação: <span id="score-value">0</span>
-                    </div>
-                    <div id="challenge-progress">
-                        Desafio: <span id="current-challenge">1</span> de <span id="total-challenges">20</span>
-                    </div>
-                    <div id="lives-display">
-                        Vidas: <span id="lives-container"></span>
-                    </div>
-                </div>
-                <button id="verify-btn" aria-label="Verificar sequência de comandos">Verificar</button>
-            </div>
-        </div>
-        
-        <div id="command-bar-container">
-            <div id="command-bar"></div>
-            <div id="command-buttons" role="toolbar" aria-label="Botões de comando">
-                <button class="control-btn" id="btn-right" aria-label="Mover para a direita">➡️</button>
-                <button class="control-btn" id="btn-left" aria-label="Mover para a esquerda">⬅️</button>
-                <button class="control-btn" id="btn-up" aria-label="Mover para cima">⬆️</button>
-                <button class="control-btn" id="btn-down" aria-label="Mover para baixo">⬇️</button>
-                <button class="control-btn" id="btn-clear" aria-label="Limpar comandos">Limpar</button>
-            </div>
-        </div>
-          <!-- MODAL DE INSTRUÇÕES (com abas de manual e BNCC) -->
-        <div id="instructions-overlay">
-            <div id="instructions-content">
-                <h2>🤖 Desafio do Robô Matemático</h2>
-                
-                <div class="modal-tabs" role="tablist">
-                    <button class="modal-tab-btn active" id="tab-manual-btn" role="tab" aria-selected="true" aria-controls="panel-manual">🎮 Como Jogar</button>
-                    <button class="modal-tab-btn" id="tab-bncc-btn" role="tab" aria-selected="false" aria-controls="panel-bncc">📚 Habilidades BNCC</button>
-                </div>
+        <!-- Student Name Badge -->
+        <button id="btn-edit-student" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-700 rounded-lg text-xs font-extrabold text-slate-700 transition-all cursor-pointer">
+          👤 <span id="badge-student-name">Aluno</span>
+        </button>
 
-                <div class="tab-panel active" id="panel-manual" role="tabpanel" aria-labelledby="tab-manual-btn">
-                    <p>Bem-vindo! Programe o robô para alcançar o número correto resolvendo a operação matemática.</p>
-                    <ul>
-                        <li><strong>Objetivo:</strong> Resolva a operação mostrada (ex.: 5 + 3) e mova o robô até a célula com o resultado correto.</li>
-                        <li><strong>Controles:</strong>
-                            <ul>
-                                <li>Clique nos botões (➡️ ⬅️ ⬆️ ⬇️) ou use as setas do teclado para adicionar comandos.</li>
-                                <li>Clique em "Limpar" ou pressione "C" para apagar os comandos.</li>
-                                <li>Clique em "Verificar" ou pressione "Enter" para executar.</li>
-                                <li>Se achar que um nível está sem solução, pressione a tecla 'H' para verificar.</li>
-                            </ul>
-                        </li>
-                        <li><strong>Cuidado:</strong> Evite as bombas e números incorretos no caminho!</li>
-                        <li><strong>Pontuação:</strong> Use menos comandos para ganhar mais pontos!</li>
-                        <li><strong>Níveis:</strong> Avance de nível após 20 acertos corretos em cada um.</li>
-                        <li><strong>Novo:</strong> Use "Reiniciar Desafio" se houver problemas técnicos!</li>
-                    </ul>
-                </div>
+        <!-- Sound Toggle -->
+        <button id="btn-toggle-sound" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 border-2 border-slate-700 rounded-lg text-sm cursor-pointer" title="Ativar/Mudar Som">
+          🔊
+        </button>
 
-                <div class="tab-panel" id="panel-bncc" role="tabpanel" aria-labelledby="tab-bncc-btn">
-                    <div class="bncc-scroll-area">
-                        <h3>🌟 Nível 1 (2º e 3º ano)</h3>
-                        <ul>
-                            <li><strong>EF02MA05</strong> – Construir fatos básicos da adição e subtração até 10</li>
-                            <li><strong>EF02MA06</strong> – Resolver problemas de adição e subtração envolvendo números até 20</li>
-                            <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
-                        </ul>
-                        
-                        <h3>🌟 Nível 2 (3º e 4º ano)</h3>
-                        <ul>
-                            <li><strong>EF03MA03</strong> – Construir e utilizar fatos básicos da adição e subtração até 20</li>
-                            <li><strong>EF04MA04</strong> – Calcular adição e subtração com números naturais</li>
-                            <li><strong>EF04MA05</strong> – Resolver problemas envolvendo adição e subtração</li>
-                        </ul>
-                        
-                        <h3>🌟 Nível 3 (4º e 5º ano)</h3>
-                        <ul>
-                            <li><strong>EF04MA06</strong> – Resolver problemas envolvendo diferentes significados da multiplicação</li>
-                            <li><strong>EF04MA07</strong> – Resolver problemas envolvendo a multiplicação</li>
-                            <li><strong>EF05MA07</strong> – Resolver problemas de multiplicação com números naturais</li>
-                        </ul>
-                        
-                        <h3>🌟 Nível 4 (5º e 6º ano)</h3>
-                        <ul>
-                            <li><strong>EF05MA08</strong> – Resolver problemas de divisão com números naturais</li>
-                            <li><strong>EF05MA09</strong> – Resolver problemas envolvendo as quatro operações</li>
-                            <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
-                        </ul>
-                        
-                        <h3>🌟 Nível 5 (6º e 7º ano)</h3>
-                        <ul>
-                            <li><strong>EF06MA05</strong> – Resolver problemas com as quatro operações fundamentais</li>
-                            <li><strong>EF06MA06</strong> – Calcular resultados de adição, subtração, multiplicação e divisão</li>
-                            <li><strong>EF07MA02</strong> – Resolver problemas envolvendo números naturais e as quatro operações</li>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Effects Toggle -->
+        <button id="btn-toggle-effects" class="w-8 h-8 flex items-center justify-center bg-sky-100 hover:bg-sky-200 border-2 border-sky-600 rounded-lg text-sm cursor-pointer" title="Ativar/Desativar Efeitos Visuais">
+          ✨
+        </button>
 
-                <button id="close-instructions">Entendi, vamos jogar!</button>
-            </div>
+        <!-- Save Progress -->
+        <button id="btn-save-progress" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 border-2 border-slate-700 rounded-lg text-xs font-black text-white transition-all cursor-pointer shadow-xs">
+          💾 Salvar
+        </button>
+
+        <!-- Open Teacher Panel -->
+        <button id="btn-teacher-panel" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 border-2 border-slate-700 rounded-lg text-xs font-black text-white transition-all cursor-pointer shadow-xs">
+          📊 Relatório
+        </button>
+
+        <!-- Open Instructions -->
+        <button id="btn-help" class="w-8 h-8 flex items-center justify-center bg-amber-400 hover:bg-amber-500 border-2 border-slate-700 rounded-lg text-sm cursor-pointer" title="Instruções de Jogo">
+          ❓
+        </button>
+
+        <!-- Wipe Cache / Restart Game -->
+        <button id="btn-reset-game" class="w-8 h-8 flex items-center justify-center bg-rose-100 hover:bg-rose-200 border-2 border-rose-500 rounded-lg text-xs text-rose-700 cursor-pointer" title="Limpar Progresso">
+          🔄
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       MAIN CONTAINER (GRID & ACTIONS SIDEBAR)
+       ======================================================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- LEFT SIDE: GRID AREA (Col-span 7) -->
+    <div class="lg:col-span-7 flex flex-col items-center gap-4">
+      
+      <!-- Interactive Grid Box Container -->
+      <div id="grid-container" class="bg-sky-200 rounded-2xl p-2 border-4 border-slate-700 shadow-md relative overflow-hidden select-none select-none">
+        <!-- Interactive 8x7 Grid -->
+        <div id="grid-element" class="grid gap-1 bg-sky-300 rounded-xl overflow-hidden p-1">
+          <!-- Dynamically populated cells with JS -->
         </div>
+      </div>
 
-        <!-- MODAL PARA SOLICITAR NOME DO ALUNO -->
-        <div id="nome-aluno-overlay">
-            <div class="nome-modal-content">
-                <h2>📝 Nome do Aluno</h2>
-                <p>Digite seu nome para salvar o progresso:</p>
-                <input type="text" id="nome-aluno-input" placeholder="Digite seu nome" autocomplete="off">
-                <div class="nome-modal-buttons">
-                    <button id="confirmar-nome-btn">💾 Salvar</button>
-                    <button id="cancelar-nome-btn">❌ Cancelar</button>
-                </div>
-            </div>
+      <!-- Command Sequence Display -->
+      <div class="w-full bg-white rounded-2xl p-4 border-3 border-slate-700 shadow-sm flex flex-col items-center gap-2">
+        <p class="text-xs uppercase font-extrabold text-slate-600 tracking-wider">
+          Sequência de Trajetória Planejada
+        </p>
+        <div id="sequence-list" class="flex flex-wrap justify-center gap-1.5 min-h-[46px] py-1 w-full">
+          <!-- Dynamically populated command sequence arrows -->
         </div>
+      </div>
 
-        <!-- MODAL DE AVISOS BONITOS -->
-        <div id="custom-alert-overlay" class="custom-alert-overlay">
-            <div class="custom-alert-content" id="custom-alert-content">
-                <h3 id="custom-alert-title">⚠️ Aviso</h3>
-                <p id="custom-alert-message">Mensagem</p>
-                <button id="custom-alert-ok-btn">OK</button>
-            </div>
-        </div>
     </div>
 
-    <footer>
-        Inspirado em <a href="https://www.coquinhos.com/programacao-para-criancas/play/" target="_blank">Coquinhos.com</a>
-    </footer>
+    <!-- RIGHT SIDE: CONTROL PANEL (Col-span 5) -->
+    <div class="lg:col-span-5 space-y-4">
+      
+      <!-- Predict/Answering Card Panel -->
+      <div id="panel-gameplay" class="bg-white rounded-2xl p-5 border-3 border-slate-700 space-y-4 shadow-md text-slate-800">
+        
+        <div class="flex justify-between items-center border-b-3 border-slate-100 pb-2.5">
+          <p class="text-xs font-black text-slate-700 uppercase tracking-wider">
+            ❓ Onde o robô vai parar?
+          </p>
+          <div class="flex gap-2 text-xs font-black uppercase">
+            <span class="text-red-600">❤️ Vidas: <span id="label-lives">3</span></span>
+            <span class="text-sky-600">🏆 Pontos: <span id="label-score">0</span></span>
+          </div>
+        </div>
 
-    <!-- Canvas para confetes -->
-    <canvas id="confetti-canvas"></canvas>
+        <!-- Answer buttons -->
+        <div id="answer-buttons-container" class="grid grid-cols-4 gap-2">
+          <button data-shape="square" class="btn-answer flex flex-col items-center justify-center p-2 rounded-xl border-2 border-slate-300 hover:border-slate-500 bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer shadow-xs">
+            <img src="https://i.postimg.cc/Fz85qPnH/Esfera.png" alt="Esfera" class="w-11 h-11 object-contain">
+            <span class="text-[10px] font-black text-slate-700 truncate max-w-full mt-1.5">Esfera</span>
+          </button>
+          <button data-shape="octagon" class="btn-answer flex flex-col items-center justify-center p-2 rounded-xl border-2 border-slate-300 hover:border-slate-500 bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer shadow-xs">
+            <img src="https://i.postimg.cc/d37g82tP/Octogono.png" alt="Octógono" class="w-11 h-11 object-contain">
+            <span class="text-[10px] font-black text-slate-700 truncate max-w-full mt-1.5">Octógono</span>
+          </button>
+          <button data-shape="star" class="btn-answer flex flex-col items-center justify-center p-2 rounded-xl border-2 border-slate-300 hover:border-slate-500 bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer shadow-xs">
+            <img src="https://i.postimg.cc/ydfzh6m9/Estrela.png" alt="Estrela" class="w-11 h-11 object-contain">
+            <span class="text-[10px] font-black text-slate-700 truncate max-w-full mt-1.5">Estrela</span>
+          </button>
+          <button data-shape="heart" class="btn-answer flex flex-col items-center justify-center p-2 rounded-xl border-2 border-slate-300 hover:border-slate-500 bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer shadow-xs">
+            <img src="https://i.postimg.cc/CxDSyg0T/Cora-o.png" alt="Coração" class="w-11 h-11 object-contain">
+            <span class="text-[10px] font-black text-slate-700 truncate max-w-full mt-1.5">Coração</span>
+          </button>
+        </div>
 
-    <script>
-        // Constantes do jogo
-        const GRID_SIZE = 6;
-        const CELL_SIZE = 70;
-        const GRID_GAP = 4;
-        const MAX_COMMANDS = 16;
-        const minCorrectAttempts = 20;
-        const TOTAL_LIVES = 3;
-        
-        // Elementos do DOM
-        const gridContainer = document.getElementById('grid-container');
-        const player = document.getElementById('player');
-        const mathProblemEl = document.getElementById('math-problem');
-        const commandBar = document.getElementById('command-bar');
-        const scoreEl = document.getElementById('score-value');
-        const victoryMessage = document.getElementById('victory-message');
-        const currentChallengeEl = document.getElementById('current-challenge');
-        const totalChallengesEl = document.getElementById('total-challenges');
-        const instructionsOverlay = document.getElementById('instructions-overlay');
-        const instructionsContent = document.getElementById('instructions-content');
-        const livesContainer = document.getElementById('lives-container');
-        
-        // Estado do jogo
-        let alunoNome = localStorage.getItem('robo_aluno_nome') || "Aluno";
-        let playerPos = { x: 0, y: 0 };
-        let startPos = { x: 0, y: 0 };
-        let targetPos = { x: 0, y: 0 };
-        let bombPositions = [];
-        let decoyPositions = [];
-        let targetNumber = 0;
-        let commandQueue = [];
-        let isMoving = false;
-        let currentLevel = 1;
-        let score = 0;
-        let correctAttempts = 0;
-        let isGameOver = false;
-        let lives = TOTAL_LIVES;
-        let levelEntryScore = 0;
-        let visitedCells = [];
-        
-        // ==============================================
-        // SISTEMA DE CONFETE
-        // ==============================================
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        let animationId = null;
-        let particles = [];
-        
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        <!-- Level selection / Progression status -->
+        <div class="text-center pt-2 flex flex-col gap-1 text-xs text-slate-600 font-semibold border-t-2 border-slate-100">
+          <div class="flex justify-between items-center text-[10px] uppercase font-extrabold tracking-wide text-slate-500">
+            <span>NÍVEL ATUAL DE DIFICULDADE</span>
+            <span class="text-sky-600 font-black">Nível <span id="label-current-level">1</span></span>
+          </div>
+
+          <!-- Dynamic progress bar of tasks completed -->
+          <div class="w-full bg-slate-100 rounded-full h-3.5 border-2 border-slate-400 overflow-hidden relative flex items-center my-1.5">
+            <div id="level-progress-bar" class="bg-gradient-to-r from-sky-400 to-sky-500 h-full w-0 transition-all duration-500"></div>
+            <span id="level-progress-text" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-700 uppercase">0/10 Acertos</span>
+          </div>
+
+          <!-- Select specific level button list -->
+          <div class="flex justify-center gap-1 mt-1">
+            <button data-level="1" class="btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-700 transition-all cursor-pointer bg-sky-400 text-white shadow-xs">1</button>
+            <button data-level="2" class="btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed" disabled>2</button>
+            <button data-level="3" class="btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed" disabled>3</button>
+            <button data-level="4" class="btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed" disabled>4</button>
+            <button data-level="5" class="btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed" disabled>5</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Victory Card Panel -->
+      <div id="panel-victory" class="bg-white rounded-2xl p-6 border-3 border-emerald-500 space-y-4 shadow-md text-slate-800 text-center hidden animate-scale-up">
+        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-3xl mx-auto border-3 border-emerald-500">
+          🏆
+        </div>
+        <h3 class="text-base font-black text-emerald-800 uppercase tracking-tight">Parabéns! Desafio Concluído!</h3>
+        <p class="text-xs text-slate-600 leading-relaxed font-semibold">
+          Você completou todos os desafios com sucesso! Todas as metas de lateralidade e raciocínio lógico-algorítmico foram alcançadas com maestria.
+        </p>
+        <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-xs text-slate-700 space-y-1">
+          <div class="flex justify-between font-bold">
+            <span>Pontuação Final:</span>
+            <span class="text-amber-600 font-black" id="victory-total-score">0 pts</span>
+          </div>
+          <div class="flex justify-between font-bold">
+            <span>Aproveitamento:</span>
+            <span class="text-emerald-700 font-black" id="victory-success-rate">100%</span>
+          </div>
+        </div>
+        <button id="btn-victory-restart" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 border-2 border-slate-700 text-white rounded-xl text-xs font-black cursor-pointer transition-all shadow-md active:scale-95">
+          🔄 Jogar Novamente
+        </button>
+      </div>
+
+      <!-- Feedbacks and Prompts Alert box -->
+      <div id="prompt-alert-box" class="hidden rounded-2xl p-4 border-3 flex items-start gap-3 transition-all duration-300">
+        <span id="prompt-alert-icon" class="text-2xl shrink-0"></span>
+        <div>
+          <p id="prompt-alert-text" class="text-xs font-bold leading-relaxed"></p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================
+       MODAL: STUDENT NAME SETUP
+       ======================================================== -->
+  <div id="modal-name" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl border-4 border-slate-700 max-w-md w-full p-6 shadow-xl transform transition-all space-y-4">
+      <div class="text-center">
+        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-2xl mx-auto border-2 border-sky-400 mb-2">
+          🧑‍🎓
+        </div>
+        <h3 class="text-lg font-black text-slate-900 font-display">Identificação do Aluno</h3>
+        <p class="text-xs text-slate-500 mt-1">
+          Informe seu nome completo para gerar relatórios e registrar sua pontuação.
+        </p>
+      </div>
+
+      <input 
+        type="text" 
+        id="input-student-name" 
+        placeholder="Nome do Aluno" 
+        class="w-full px-4 py-3 border-3 border-slate-700 rounded-xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400"
+      >
+
+      <div class="flex gap-2">
+        <button id="btn-cancel-name" class="flex-1 py-2.5 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 cursor-pointer">
+          Cancelar
+        </button>
+        <button id="btn-save-name" class="flex-1 py-2.5 bg-sky-500 hover:bg-sky-600 border-2 border-slate-700 rounded-xl text-xs font-black text-white cursor-pointer">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: GENERAL INSTRUCTIONS (HELP)
+       ======================================================== -->
+  <div id="modal-instructions" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl border-4 border-slate-700 max-w-2xl w-full p-6 shadow-xl space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b-2 border-slate-100 pb-2.5">
+        <h3 class="text-lg font-black text-slate-900 font-display flex items-center gap-2">
+          📖 Como Jogar o Desafio?
+        </h3>
+        <button id="btn-close-instructions" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs leading-relaxed text-slate-600">
+        <p>
+          Bem-vindo ao <strong>Desafio do Robô Predictor</strong>! Um jogo educativo focado em <strong>Pensamento Computacional</strong>, onde você deve prever os passos e planejar trajetórias espaciais na sua mente!
+        </p>
+
+        <h4 class="font-extrabold text-slate-800 text-sm flex items-center gap-1 mt-4">
+          🎯 Objetivo do Jogo:
+        </h4>
+        <p>
+          O robô inicia em um ponto na grade (quadrado com o robô 🤖) e precisa seguir a <strong>Sequência de Trajetória Planejada</strong> que aparece na parte de baixo do tabuleiro.
+          Sua missão é <strong>olhar para as setas da sequência, calcular mentalmente cada passo do robô e responder qual é a forma geométrica (Esfera, Octógono, Estrela ou Coração) que ele alcançará no final</strong>.
+        </p>
+
+        <h4 class="font-extrabold text-slate-800 text-sm flex items-center gap-1 mt-4">
+          ⚠️ Obstáculos (Bomba 💣):
+        </h4>
+        <p>
+          Cuidado! No tabuleiro existem bombas espalhadas. Se a sequência de comandos programada fizer o robô passar por cima de uma bomba ou sair dos limites do tabuleiro, ele irá explodir!
+          Nesses casos, a resposta correta não é nenhuma forma geométrica, e você deve ter atenção ao planejar.
+        </p>
+
+        <h4 class="font-extrabold text-slate-800 text-sm flex items-center gap-1">
+          📊 Níveis e Vidas:
+        </h4>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>Você começa com <strong>3 vidas</strong>. Errar uma previsão desconta 1 vida.</li>
+          <li>Cada acerto te dá pontos adicionais e preenche a barra de progresso do nível!</li>
+          <li>Ao atingir o número necessário de acertos, você avança para o próximo nível (com comandos mais longos e mais bombas!).</li>
+        </ul>
+      </div>
+
+      <div class="text-center pt-2 border-t border-slate-100">
+        <button id="btn-close-instructions-ok" class="px-6 py-2 bg-sky-500 hover:bg-sky-600 border-2 border-slate-700 rounded-xl text-xs font-black text-white cursor-pointer">
+          Entendido, Vamos Jogar!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: TEACHER DASHBOARD (REPORT)
+       ======================================================== -->
+  <div id="modal-teacher" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl border-4 border-slate-700 max-w-4xl w-full p-6 shadow-xl space-y-4 max-h-[85vh] flex flex-col">
+      
+      <div class="flex justify-between items-center border-b-2 border-slate-100 pb-2.5 shrink-0">
+        <div>
+          <h3 class="text-lg font-black text-slate-900 font-display flex items-center gap-2">
+            📊 Painel de Relatório do Professor
+          </h3>
+          <p class="text-[10px] text-slate-500 uppercase font-bold mt-0.5">Histórico de desempenho e dados de avaliação do aluno</p>
+        </div>
+        <button id="btn-close-teacher" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <!-- General Statistics summary -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+          <p class="text-[9px] uppercase font-bold text-slate-400">Aluno Atual</p>
+          <p id="teacher-student-name" class="text-xs font-black text-slate-800 mt-0.5 truncate">Aluno</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+          <p class="text-[9px] uppercase font-bold text-slate-400">Total de Desafios</p>
+          <p id="teacher-total-challenges" class="text-xs font-black text-slate-800 mt-0.5">0</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+          <p class="text-[9px] uppercase font-bold text-slate-400">Taxa de Acerto</p>
+          <p id="teacher-accuracy" class="text-xs font-black text-emerald-600 mt-0.5">0%</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+          <p class="text-[9px] uppercase font-bold text-slate-400">Pontuação Máxima</p>
+          <p id="teacher-total-score" class="text-xs font-black text-indigo-600 mt-0.5">0 pts</p>
+        </div>
+      </div>
+
+      <!-- Action items for data download/upload -->
+      <div class="flex flex-wrap gap-2 shrink-0 bg-slate-100 p-3 rounded-xl border border-slate-200">
+        <button id="btn-export-csv" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase rounded-lg cursor-pointer flex items-center gap-1">
+          📥 Baixar Planilha (CSV)
+        </button>
+        <button id="btn-import-progress-trigger" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px] uppercase rounded-lg cursor-pointer flex items-center gap-1">
+          📤 Carregar Progresso (.json)
+        </button>
+        <input type="file" id="input-import-file" accept=".json" class="hidden">
+      </div>
+
+      <!-- Printable Table history -->
+      <div class="flex-1 overflow-auto border border-slate-200 rounded-xl bg-white">
+        <table class="w-full border-collapse text-left text-xs">
+          <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 text-[10px] text-slate-400 font-extrabold uppercase">
+            <tr>
+              <th class="p-3">Nível</th>
+              <th class="p-3">Problema</th>
+              <th class="p-3">Gabarito</th>
+              <th class="p-3">Acertos/Erros</th>
+              <th class="p-3">Ações/Tentativas</th>
+              <th class="p-3">Hora</th>
+            </tr>
+          </thead>
+          <tbody id="teacher-table-body" class="divide-y divide-slate-100 text-slate-700">
+            <tr>
+              <td colspan="6" class="p-8 text-center text-slate-400 italic">Nenhum exercício resolvido por enquanto.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- ========================================================
+       CUSTOM ALERT MODAL (AESTHETIC NOTIFICATIONS)
+       ======================================================== -->
+  <div id="modal-custom-alert" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-55 hidden">
+    <div class="bg-white rounded-2xl border-4 border-slate-700 max-w-md w-full p-6 shadow-xl space-y-4 text-center">
+      <span id="custom-alert-icon" class="text-5xl block"></span>
+      <h3 id="custom-alert-title" class="text-base font-black text-slate-900 uppercase tracking-tight font-display">Alerta</h3>
+      <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed font-semibold"></p>
+      <button id="btn-close-custom-alert" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 border-2 border-slate-700 rounded-xl text-xs font-black text-white cursor-pointer">
+        Confirmar
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full text-center py-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-auto border-t border-slate-200 shrink-0">
+    Desafio do Robô Predictor &copy; <span id="footer-year">2026</span> - Versão Offline Pronta para Escolas
+  </footer>
+
+  <!-- ========================================================
+       GAME LOGIC ENGINE (VANILLA JAVASCRIPT)
+       ======================================================= -->
+  <script>
+    // State declaration
+    const GRID_WIDTH = 8;
+    const GRID_HEIGHT = 7;
+    const SHAPES = ['square', 'octagon', 'star', 'heart'];
+    const SHAPE_LABELS = {
+      square: 'Esfera',
+      octagon: 'Octógono',
+      star: 'Estrela',
+      heart: 'Coração'
+    };
+
+    const IMAGE_SOURCES = {
+      square: 'https://i.postimg.cc/Fz85qPnH/Esfera.png',
+      octagon: 'https://i.postimg.cc/d37g82tP/Octogono.png',
+      star: 'https://i.postimg.cc/ydfzh6m9/Estrela.png',
+      heart: 'https://i.postimg.cc/CxDSyg0T/Cora-o.png',
+      bomba: 'https://i.postimg.cc/7PsqHZmV/Bomba.jpg',
+      robo: 'https://i.postimg.cc/9FMqtjCf/Robo-Vitoria.jpg',
+      explode: 'https://i.postimg.cc/7YWJKQZn/Robo-Explode.jpg'
+    };
+
+    const LEVEL_SETTINGS = {
+      1: { minCmd: 2, maxCmd: 4, bombs: 4, challengesToUnlock: 20 },
+      2: { minCmd: 3, maxCmd: 6, bombs: 6, challengesToUnlock: 20 },
+      3: { minCmd: 4, maxCmd: 8, bombs: 8, challengesToUnlock: 20 },
+      4: { minCmd: 5, maxCmd: 10, bombs: 10, challengesToUnlock: 20 },
+      5: { minCmd: 6, maxCmd: 12, bombs: 12, challengesToUnlock: 20 }
+    };
+
+    const COMMAND_UNICODE = { up: '↑', down: '↓', left: '←', right: '→' };
+
+    // Core State Variables
+    let studentName = 'Aluno';
+    let currentLevel = 1;
+    let totalScore = 0;
+    let scoreAtLevelStart = 0;
+    let lives = 3;
+    let unlockedLevels = [1];
+    let challengesCompleted = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let gameStats = [];
+
+    // Current challenge layout variables
+    let robotPos = { x: 0, y: 0 };
+    let visualRobotPos = { x: 0, y: 0 };
+    let robotImgSrc = IMAGE_SOURCES.robo;
+    let targetPositions = { square: { x: 0, y: 0 }, octagon: { x: 0, y: 0 }, star: { x: 0, y: 0 }, heart: { x: 0, y: 0 } };
+    let bombPositions = [];
+    let commandSequence = [];
+    let correctAnswerShape = null; // 'square' | 'octagon' | 'star' | 'heart' | null (null means explode/out)
+    
+    // Animation Locks
+    let isAnimating = false;
+    let isSoundEnabled = true;
+    let isEffectsEnabled = true;
+
+    // Web Audio Synthesizer Context
+    let audioCtx = null;
+
+    function playSynthSound(type) {
+      if (!isSoundEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        
-        class ConfettiParticle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height - canvas.height;
-                this.size = Math.random() * 8 + 3;
-                this.speedY = Math.random() * 5 + 3;
-                this.speedX = (Math.random() - 0.5) * 3;
-                this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                this.rotation = Math.random() * 360;
-                this.rotateSpeed = (Math.random() - 0.5) * 10;
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += this.speedX;
-                this.rotation += this.rotateSpeed;
-                return this.y < canvas.height + 50;
-            }
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation * Math.PI / 180);
-                ctx.fillStyle = this.color;
-                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size/2);
-                ctx.restore();
-            }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
         }
-        
-        function startConfetti(seconds = 2.5) {
-            if (animationId) cancelAnimationFrame(animationId);
-            particles = [];
-            for(let i = 0; i < 200; i++) {
-                particles.push(new ConfettiParticle());
-            }
-            let startTime = performance.now();
-            function animateConfetti(now) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles = particles.filter(p => p.update());
-                particles.forEach(p => p.draw());
-                if (particles.length === 0 || (now - startTime > seconds * 1000)) {
-                    cancelAnimationFrame(animationId);
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    animationId = null;
-                    return;
-                }
-                animationId = requestAnimationFrame(animateConfetti);
-            }
-            animationId = requestAnimationFrame(animateConfetti);
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(150, now + 0.12);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'beep') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.18);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'win') {
+          // Play upbeat positive major arpeggio
+          const notes = [440, 554, 659, 880];
+          notes.forEach((freq, idx) => {
+            const subOsc = audioCtx.createOscillator();
+            const subGain = audioCtx.createGain();
+            subOsc.connect(subGain);
+            subGain.connect(audioCtx.destination);
+            
+            subOsc.type = 'triangle';
+            subOsc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            subGain.gain.setValueAtTime(0.12, now + idx * 0.08);
+            subGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.25);
+            
+            subOsc.start(now + idx * 0.08);
+            subOsc.stop(now + idx * 0.08 + 0.25);
+          });
+        } else if (type === 'explode') {
+          // Noise-like low frequency explosion
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(100, now);
+          osc.frequency.linearRampToValueAtTime(10, now + 0.5);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        } else if (type === 'out') {
+          // Low buzzing sound
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.setValueAtTime(90, now + 0.1);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'levelUp') {
+          // Sparkling high chords
+          const chord = [523.25, 659.25, 783.99, 1046.50];
+          chord.forEach((freq) => {
+            const subOsc = audioCtx.createOscillator();
+            const subGain = audioCtx.createGain();
+            subOsc.connect(subGain);
+            subGain.connect(audioCtx.destination);
+            
+            subOsc.type = 'sine';
+            subOsc.frequency.setValueAtTime(freq, now);
+            subOsc.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.4);
+            subGain.gain.setValueAtTime(0.08, now);
+            subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            
+            subOsc.start(now);
+            subOsc.stop(now + 0.4);
+          });
         }
+      } catch (e) {
+        console.warn("Audio Context failure", e);
+      }
+    }
+
+    // Local Storage Utilities
+    const safeLocalStorage = {
+      getItem(key) {
+        try { return localStorage.getItem(key); } catch(e) { return null; }
+      },
+      setItem(key, val) {
+        try { localStorage.setItem(key, val); } catch(e) {}
+      },
+      removeItem(key) {
+        try { localStorage.removeItem(key); } catch(e) {}
+      }
+    };
+
+    // Load initial persistent values
+    function loadProgress() {
+      studentName = 'Aluno';
+      currentLevel = 1;
+      totalScore = 0;
+      scoreAtLevelStart = 0;
+      unlockedLevels = [1];
+      challengesCompleted = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      lives = 3;
+      gameStats = [];
+
+      isSoundEnabled = safeLocalStorage.getItem('robo_soundEnabled') !== 'false';
+      isEffectsEnabled = safeLocalStorage.getItem('robo_effectsEnabled') !== 'false';
+
+      // Update toggles visual on start
+      const soundBtn = document.getElementById('btn-toggle-sound');
+      const fxBtn = document.getElementById('btn-toggle-effects');
+      if (soundBtn) {
+        soundBtn.textContent = isSoundEnabled ? '🔊' : '🔇';
+        soundBtn.className = isSoundEnabled
+          ? 'w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 border-2 border-slate-700 rounded-lg text-sm cursor-pointer'
+          : 'w-8 h-8 flex items-center justify-center bg-rose-50 hover:bg-rose-100 border-2 border-rose-500 rounded-lg text-sm cursor-pointer';
+      }
+      if (fxBtn) {
+        fxBtn.className = isEffectsEnabled
+          ? 'w-8 h-8 flex items-center justify-center bg-sky-100 hover:bg-sky-200 border-2 border-sky-600 rounded-lg text-sm cursor-pointer'
+          : 'w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 border-2 border-slate-400 rounded-lg text-sm cursor-pointer';
+      }
+
+      // Sync views
+      document.getElementById('badge-student-name').textContent = studentName;
+      document.getElementById('teacher-student-name').textContent = studentName;
+      updateUI();
+    }
+
+    function saveProgress() {
+      // Game progress is intentionally not written to localStorage to preserve student privacy on school terminals.
+      // Preferences (sensory/effects toggles) are persisted during click and load events.
+    }
+
+    // Dynamic Level Tracker visual update
+    function updateUI() {
+      document.getElementById('label-lives').textContent = lives;
+      document.getElementById('label-score').textContent = totalScore;
+      document.getElementById('label-current-level').textContent = currentLevel;
+
+      const settings = LEVEL_SETTINGS[currentLevel];
+      const completed = challengesCompleted[currentLevel] || 0;
+      const targetCount = settings.challengesToUnlock;
+      const pct = Math.min(100, Math.floor((completed / targetCount) * 100));
+
+      document.getElementById('level-progress-bar').style.width = `${pct}%`;
+      document.getElementById('level-progress-text').textContent = `${completed}/${targetCount} Acertos`;
+
+      // Check game completion
+      const completedLevel5 = challengesCompleted[5] || 0;
+      const targetLevel5 = LEVEL_SETTINGS[5].challengesToUnlock;
+      const isCompleted = completedLevel5 >= targetLevel5;
+
+      if (isCompleted) {
+        document.getElementById('panel-gameplay').classList.add('hidden');
+        document.getElementById('panel-victory').classList.remove('hidden');
         
-        // ==============================================
-        // SISTEMA DE TREMOR
-        // ==============================================
-        const gameContainer = document.querySelector('.game-container');
+        // Update stats on victory screen
+        document.getElementById('victory-total-score').textContent = `${totalScore} pts`;
+        const totalCorrect = gameStats.reduce((sum, s) => sum + s.acertos, 0);
+        const totalItems = gameStats.length;
+        const rate = totalItems > 0 ? Math.round((totalCorrect / totalItems) * 100) : 100;
+        document.getElementById('victory-success-rate').textContent = `${rate}% (${totalCorrect}/${totalItems})`;
+      } else {
+        document.getElementById('panel-gameplay').classList.remove('hidden');
+        document.getElementById('panel-victory').classList.add('hidden');
+      }
+
+      // Update level selection buttons lock/active states
+      const btnLevels = document.querySelectorAll('.btn-level');
+      btnLevels.forEach(btn => {
+        const lvl = parseInt(btn.getAttribute('data-level'));
+        btn.disabled = !unlockedLevels.includes(lvl);
         
-        function shakeGameContainer() {
-            gameContainer.classList.add('shake-game');
-            setTimeout(() => {
-                gameContainer.classList.remove('shake-game');
-            }, 400);
+        if (lvl === currentLevel) {
+          btn.className = "btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-700 bg-sky-500 text-white shadow-xs cursor-pointer";
+        } else if (unlockedLevels.includes(lvl)) {
+          btn.className = "btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-700 bg-white text-slate-800 hover:bg-slate-100 cursor-pointer";
+        } else {
+          btn.className = "btn-level w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg border-2 border-slate-200 text-slate-300 opacity-50 cursor-not-allowed";
         }
+      });
+    }
+
+    // Confetti generator
+    function triggerConfettiEffect() {
+      if (!isEffectsEnabled) return;
+      const emojis = ['🎉', '✨', '🎈', '🤖', '🌟', '🏆', '🤩', '🎯', '💫', '🌸', '⚡', '💡'];
+      const numParticles = 28;
+      
+      for (let i = 0; i < numParticles; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-particle';
+        p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+        const size = (Math.random() * 0.8 + 1.2).toFixed(1);
+        p.style.fontSize = `${size}rem`;
+
+        const startX = Math.random() * 95;
+        p.style.left = `${startX}%`;
+
+        const sway1 = Math.floor(Math.random() * 80 - 40);
+        const sway2 = Math.floor(Math.random() * 160 - 80);
+        const sway3 = Math.floor(Math.random() * 240 - 120);
+
+        const rot1 = Math.floor(Math.random() * 360);
+        const rot2 = Math.floor(Math.random() * 720);
+        const rot3 = Math.floor(Math.random() * 1080);
+
+        p.style.setProperty('--sway-1', `${sway1}px`);
+        p.style.setProperty('--sway-2', `${sway2}px`);
+        p.style.setProperty('--sway-3', `${sway3}px`);
+
+        p.style.setProperty('--rot-1', `${rot1}deg`);
+        p.style.setProperty('--rot-2', `${rot2}deg`);
+        p.style.setProperty('--rot-3', `${rot3}deg`);
+
+        p.style.animationDelay = `${(Math.random() * 0.4).toFixed(2)}s`;
+        document.body.appendChild(p);
+
+        // Auto remove element
+        setTimeout(() => p.remove(), 3600);
+      }
+    }
+
+    // Pathfinding & Grid Generator logic
+    function getDistance(p1, p2) {
+      return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+    }
+
+    function findDirectPath(start, end, obstacles, maxSteps) {
+      const queue = [[start, []]];
+      const visited = new Set();
+      visited.add(`${start.x},${start.y}`);
+
+      while (queue.length > 0) {
+        const [curr, path] = queue.shift();
+        if (curr.x === end.x && curr.y === end.y) {
+          if (path.length <= maxSteps) return path;
+          continue;
+        }
+
+        if (path.length >= maxSteps) continue;
+
+        const dirs = [
+          { x: 0, y: -1, cmd: 'up' },
+          { x: 0, y: 1, cmd: 'down' },
+          { x: -1, y: 0, cmd: 'left' },
+          { x: 1, y: 0, cmd: 'right' }
+        ];
+
+        for (const d of dirs) {
+          const next = { x: curr.x + d.x, y: curr.y + d.y };
+          if (next.x < 0 || next.x >= GRID_WIDTH || next.y < 0 || next.y >= GRID_HEIGHT) continue;
+          
+          const isBlocked = obstacles.some(o => o.x === next.x && o.y === next.y);
+          const key = `${next.x},${next.y}`;
+          
+          if (!isBlocked && !visited.has(key)) {
+            visited.add(key);
+            queue.push([next, [...path, d.cmd]]);
+          }
+        }
+      }
+      return null;
+    }
+
+    function getCoordsAlongPath(start, path) {
+      const coords = [];
+      let curr = { ...start };
+      for (const cmd of path) {
+        if (cmd === 'up') curr.y--;
+        else if (cmd === 'down') curr.y++;
+        else if (cmd === 'left') curr.x--;
+        else if (cmd === 'right') curr.x++;
+        coords.push({ ...curr });
+      }
+      return coords;
+    }
+
+    function createPathAndBombs(start, end, settings, allTargetsList) {
+      let blockingBombs = [];
+      let path = findDirectPath(start, end, blockingBombs, settings.maxCmd);
+
+      if (!path) return { path: null, bombs: [] };
+
+      const pathCoords = getCoordsAlongPath(start, path);
+
+      // Add one bomb blocking direct path to force detours
+      if (path.length > 1) {
+        let blockIndex = -1;
+        let coordToBlock = null;
+
+        for (let i = 0; i < 10; i++) {
+          const tempIndex = Math.floor(Math.random() * (path.length - 1)) + 1;
+          const tempCoord = pathCoords[tempIndex];
+          if (
+            tempCoord &&
+            !blockingBombs.some(b => b.x === tempCoord.x && b.y === tempCoord.y) &&
+            !allTargetsList.some(t => t.x === tempCoord.x && t.y === tempCoord.y)
+          ) {
+            blockIndex = tempIndex;
+            coordToBlock = tempCoord;
+            break;
+          }
+        }
+
+        if (coordToBlock) {
+          blockingBombs.push(coordToBlock);
+          const alternatePath = findDirectPath(start, end, blockingBombs, settings.maxCmd);
+          if (alternatePath && alternatePath.length >= settings.minCmd && alternatePath.length <= settings.maxCmd) {
+            path = alternatePath;
+          } else {
+            blockingBombs = [];
+          }
+        }
+      }
+
+      const finalPathCoords = getCoordsAlongPath(start, path);
+      const occupiedCoords = [start, end, ...allTargetsList, ...finalPathCoords, ...blockingBombs];
+
+      const allGridCoords = [];
+      for (let y = 0; y < GRID_HEIGHT; y++) {
+        for (let x = 0; x < GRID_WIDTH; x++) {
+          allGridCoords.push({ x, y });
+        }
+      }
+
+      const availableCoords = allGridCoords.filter(
+        gc => !occupiedCoords.some(oc => oc.x === gc.x && oc.y === gc.y)
+      );
+
+      // Shuffle available coordinates to place additional bombs
+      const shuffledAvailable = availableCoords.sort(() => Math.random() - 0.5);
+      const extraBombsCount = Math.min(settings.bombs - blockingBombs.length, shuffledAvailable.length);
+      const finalBombs = [...blockingBombs];
+
+      for (let i = 0; i < extraBombsCount; i++) {
+        finalBombs.push(shuffledAvailable[i]);
+      }
+
+      return { path, bombs: finalBombs };
+    }
+
+    function generateValidChallenge() {
+      const settings = LEVEL_SETTINGS[currentLevel];
+      let attempts = 0;
+      
+      while (attempts < 80) {
+        attempts++;
         
-        // Sistema de detecção de falhas
-        let inconsistencyCount = 0;
-        const MAX_INCONSISTENCIES = 12; // Modificado para evitar falsos positivos durante a animação de transição do robô
-        let lastVerifiedPosition = { x: 0, y: 0 };
-        let monitoringInterval = null;
-        
-        // Configurações dos níveis
-        const levelSettings = {
-            1: { bombs: 4, operations: ['+', '-'], range: 10, decoys: 2 },
-            2: { bombs: 6, operations: ['+', '-'], range: 15, decoys: 3 },
-            3: { bombs: 8, operations: ['+', '-', '*'], range: 10, decoys: 4 },
-            4: { bombs: 10, operations: ['+', '-', '*', '/'], range: 10, decoys: 5 },
-            5: { bombs: 12, operations: ['+', '-', '*', '/'], range: 99, decoys: 6 }
+        // Random robot position
+        const robotStartPos = {
+          x: Math.floor(Math.random() * GRID_WIDTH),
+          y: Math.floor(Math.random() * GRID_HEIGHT)
         };
+
+        // Random shapes selection (no duplicate coordinates)
+        const targets = {};
+        const occupied = [robotStartPos];
         
-        // ==============================================
-        // SISTEMA DE DETECÇÃO E RECUPERAÇÃO DE FALHAS
-        // ==============================================
-        
-        // Função para iniciar monitoramento
-        function startPositionMonitoring() {
-            stopPositionMonitoring();
+        for (const shape of SHAPES) {
+          let foundCoord = false;
+          let candidate = null;
+          
+          for (let tc = 0; tc < 40; tc++) {
+            const cx = Math.floor(Math.random() * GRID_WIDTH);
+            const cy = Math.floor(Math.random() * GRID_HEIGHT);
+            candidate = { x: cx, y: cy };
             
-            lastVerifiedPosition = { ...playerPos };
-            inconsistencyCount = 0;
-            
-            monitoringInterval = setInterval(() => {
-                monitorPositionConsistency();
-            }, 100);
-        }
-        
-        // Função para parar monitoramento
-        function stopPositionMonitoring() {
-            if (monitoringInterval) {
-                clearInterval(monitoringInterval);
-                monitoringInterval = null;
+            if (!occupied.some(o => o.x === candidate.x && o.y === candidate.y)) {
+              foundCoord = true;
+              break;
             }
+          }
+          if (foundCoord && candidate) {
+            targets[shape] = candidate;
+            occupied.push(candidate);
+          }
         }
+
+        if (Object.keys(targets).length < 4) continue;
+
+        const targetsWithDistances = SHAPES.map(shape => ({
+          shape,
+          pos: targets[shape],
+          dist: getDistance(robotStartPos, targets[shape])
+        }));
+
+        // Filter target candidates to match the level's requirements.
+        // Ideally, the Manhattan distance should be between minCmd - 2 and maxCmd.
+        let candidates = targetsWithDistances.filter(
+          t => t.dist <= settings.maxCmd && t.dist >= Math.max(1, settings.minCmd - 2)
+        );
+
+        // Fallback 1: If no target is in the ideal range, pick any within maxCmd
+        if (candidates.length === 0) {
+          candidates = targetsWithDistances.filter(t => t.dist <= settings.maxCmd);
+        }
+
+        // Fallback 2: Safe fallback to all targets if still empty
+        if (candidates.length === 0) {
+          candidates = targetsWithDistances;
+        }
+
+        // To prevent consecutive target repeats, filter out the last correctAnswerShape if there are other candidate shapes available
+        if (correctAnswerShape) {
+          const nonRepeatingCandidates = candidates.filter(t => t.shape !== correctAnswerShape);
+          if (nonRepeatingCandidates.length > 0) {
+            candidates = nonRepeatingCandidates;
+          }
+        }
+
+        // Select randomly from the matching candidates to prevent repetitive closest targets
+        const trueTargetInfo = candidates[Math.floor(Math.random() * candidates.length)];
+        const targetEndPos = trueTargetInfo.pos;
+
+        const allTargetsList = Object.values(targets);
+        const { path, bombs } = createPathAndBombs(robotStartPos, targetEndPos, settings, allTargetsList);
+        if (!path) continue;
+
+        // Valid layout found! Set state variables
+        robotPos = robotStartPos;
+        visualRobotPos = { ...robotStartPos };
+        robotImgSrc = IMAGE_SOURCES.robo;
+        targetPositions = targets;
+        bombPositions = bombs;
         
-        // Função principal de monitoramento
-        function monitorPositionConsistency() {
-            if (!isMoving) return;
-            
-            // Calcula posição visual real do robô
-            const computedStyle = window.getComputedStyle(player);
-            const visualX = Math.round((parseFloat(computedStyle.left) - GRID_GAP) / (CELL_SIZE + GRID_GAP));
-            const visualY = Math.round((parseFloat(computedStyle.top) - GRID_GAP) / (CELL_SIZE + GRID_GAP));
-            
-            // Verifica dessincronização
-            if (visualX !== playerPos.x || visualY !== playerPos.y) {
-                inconsistencyCount++;
-                
-                console.warn(`Dessincronização detectada! Tentativa ${inconsistencyCount}`, {
-                    posição_lógica: playerPos,
-                    posição_visual: { x: visualX, y: visualY },
-                    comando_atual: commandQueue[commandQueue.length - 1]
-                });
-                
-                // Se atingir limite crítico, toma ação
-                if (inconsistencyCount >= MAX_INCONSISTENCIES) {
-                    handlePositionFailure();
-                }
-            } else {
-                // Reset do contador se estiver sincronizado
-                inconsistencyCount = 0;
-                lastVerifiedPosition = { ...playerPos };
+        // Setup prediction correct target or bomb explosion
+        // 15% of challenges can lead to a bomb to test student attention
+        const shouldExplode = Math.random() < 0.15;
+        if (shouldExplode && path.length > 1) {
+          // Divert last command to step into a random adjacent bomb
+          const pathSteps = [...path];
+          const lastStep = pathSteps.pop();
+          const secondToLastPos = getCoordsAlongPath(robotStartPos, pathSteps).pop() || robotStartPos;
+          
+          const validDivergentMoves = [];
+          const dirs = [
+            { x: 0, y: -1, cmd: 'up' },
+            { x: 0, y: 1, cmd: 'down' },
+            { x: -1, y: 0, cmd: 'left' },
+            { x: 1, y: 0, cmd: 'right' }
+          ];
+
+          for (const d of dirs) {
+            const next = { x: secondToLastPos.x + d.x, y: secondToLastPos.y + d.y };
+            const isBomb = bombs.some(b => b.x === next.x && b.y === next.y);
+            const isOutOfBounds = next.x < 0 || next.x >= GRID_WIDTH || next.y < 0 || next.y >= GRID_HEIGHT;
+            if (isBomb || isOutOfBounds) {
+              validDivergentMoves.push(d.cmd);
             }
+          }
+
+          if (validDivergentMoves.length > 0) {
+            const randomDiverg = validDivergentMoves[Math.floor(Math.random() * validDivergentMoves.length)];
+            commandSequence = [...pathSteps, randomDiverg];
+            correctAnswerShape = null; // explode
+          } else {
+            commandSequence = path;
+            correctAnswerShape = trueTargetInfo.shape;
+          }
+        } else {
+          commandSequence = path;
+          correctAnswerShape = trueTargetInfo.shape;
         }
-        
-        // Função para tratar falha de posicionamento
-        function handlePositionFailure() {
-            console.error("FALHA CRÍTICA: Dessincronização persistente detectada!");
-            
-            // Para imediatamente a execução
-            stopPositionMonitoring();
-            if (window.__commandExecutionLock) {
-                window.__commandExecutionLock = false;
+
+        // Render to DOM
+        renderGrid();
+        renderSequence();
+        return;
+      }
+
+      console.warn("Could not find a valid level challenge layout.");
+    }
+
+    // Rendering functions
+    function renderGrid() {
+      const gridElement = document.getElementById('grid-element');
+      gridElement.innerHTML = '';
+      
+      // Fixed aspect cell size dynamically styled
+      gridElement.style.gridTemplateColumns = `repeat(${GRID_WIDTH}, minmax(0, 1fr))`;
+      gridElement.style.gridTemplateRows = `repeat(${GRID_HEIGHT}, minmax(0, 1fr))`;
+
+      // Set grid pixel size container constraints
+      const cellPixels = 60;
+      const totalGridWidth = GRID_WIDTH * cellPixels;
+      const totalGridHeight = GRID_HEIGHT * cellPixels;
+      
+      const gridContainer = document.getElementById('grid-container');
+      gridContainer.style.width = '100%';
+      gridContainer.style.maxWidth = `${totalGridWidth + 16}px`;
+
+      for (let y = 0; y < GRID_HEIGHT; y++) {
+        for (let x = 0; x < GRID_WIDTH; x++) {
+          const cell = document.createElement('div');
+          cell.className = "grid-cell bg-[#d3efff] border-2 border-slate-700 rounded-lg flex items-center justify-center relative shadow-inner select-none";
+          cell.style.aspectRatio = "1 / 1";
+
+          // Check occupied
+          const isRobot = visualRobotPos.x === x && visualRobotPos.y === y;
+          const isBomb = bombPositions.some(b => b.x === x && b.y === b.y && b.x === x && b.y === y);
+          
+          let matchedShape = null;
+          for (const shape of SHAPES) {
+            if (targetPositions[shape] && targetPositions[shape].x === x && targetPositions[shape].y === y) {
+              matchedShape = shape;
+              break;
             }
-            isMoving = false;
-            
-            // Recuperação do estado
-            playerPos = { ...lastVerifiedPosition };
-            updatePlayerPosition();
-            
-            // Feedback visual para o usuário
-            showRecoveryMessage();
-            
-            // Reabilita controles
-            toggleControlButtons(true);
-            
-            // Log para análise posterior
-            logPositionFailure();
+          }
+
+          // Render appropriate item inside cell with elegant drop shadow
+          if (isRobot) {
+            const img = document.createElement('img');
+            img.src = robotImgSrc;
+            img.className = `w-11 h-11 object-contain z-20 transition-all duration-300 ${robotImgSrc === IMAGE_SOURCES.explode ? 'animate-shake' : ''}`;
+            cell.appendChild(img);
+          } else if (matchedShape) {
+            // White card board for target shapes
+            cell.className += " bg-white";
+            const img = document.createElement('img');
+            img.src = IMAGE_SOURCES[matchedShape];
+            img.className = "w-10 h-10 object-contain z-10 rounded-sm";
+            cell.appendChild(img);
+          } else if (isBomb) {
+            cell.className += " bg-white";
+            const img = document.createElement('img');
+            img.src = IMAGE_SOURCES.bomba;
+            img.className = "w-10 h-10 object-contain z-10 rounded-sm";
+            cell.appendChild(img);
+          }
+
+          gridElement.appendChild(cell);
         }
+      }
+    }
+
+    function renderSequence() {
+      const seqList = document.getElementById('sequence-list');
+      seqList.innerHTML = '';
+
+      commandSequence.forEach((cmd, idx) => {
+        const div = document.createElement('div');
         
-        // Mensagem de recuperação para o usuário
-        function showRecoveryMessage() {
-            const recoveryMsg = document.createElement('div');
-            recoveryMsg.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #ff4444;
-                color: white;
-                padding: 20px;
-                border-radius: 12px;
-                z-index: 1000;
-                font-weight: bold;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-                text-align: center;
-                max-width: 90%;
-                border: 3px solid #fff;
-            `;
-            
-            recoveryMsg.innerHTML = `
-                <div style="font-size: 1.3em; margin-bottom: 15px;">⚠️ PROBLEMA TÉCNICO</div>
-                <div style="margin-bottom: 15px; font-size: 0.9em;">
-                    O robô não conseguiu executar os comandos corretamente.<br>
-                    Posição reiniciada para: [${lastVerifiedPosition.x},${lastVerifiedPosition.y}]
-                </div>
-                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <button onclick="trySameCommands()" 
-                            style="padding: 12px 20px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        ▶️ Tentar Novamente
-                    </button>
-                    <button onclick="restartCurrentChallenge()" 
-                            style="padding: 12px 20px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        🔄 Novo Desafio
-                    </button>
-                </div>
-                <div style="margin-top: 15px; font-size: 0.8em; opacity: 0.8;">
-                    Tecle R para novo desafio ou Enter para tentar novamente
-                </div>
-            `;
-            
-            recoveryMsg.id = 'recovery-message';
-            document.body.appendChild(recoveryMsg);
-            
-            // Foco no botão de tentar novamente por padrão
-            setTimeout(() => {
-                const tryBtn = recoveryMsg.querySelector('button');
-                if (tryBtn) tryBtn.focus();
-            }, 100);
+        let colorClasses = '';
+        if (cmd === 'up') colorClasses = 'bg-blue-500 border-b-4 border-blue-700';
+        else if (cmd === 'down') colorClasses = 'bg-red-500 border-b-4 border-red-700';
+        else if (cmd === 'left') colorClasses = 'bg-yellow-500 border-b-4 border-yellow-600';
+        else colorClasses = 'bg-green-500 border-b-4 border-green-700';
+
+        div.className = `w-10 h-10 flex items-center justify-center rounded-lg text-lg font-bold text-white transition-all transform shadow-xs ${colorClasses}`;
+        div.textContent = COMMAND_UNICODE[cmd] || cmd;
+        div.title = `Passo ${idx + 1}: ${cmd}`;
+        
+        seqList.appendChild(div);
+      });
+    }
+
+    // Answering Trigger Sequence Simulation Animation
+    function animateTrajectory(selectedShape) {
+      if (isAnimating) return;
+      isAnimating = true;
+      
+      // Disable answer buttons
+      document.querySelectorAll('.btn-answer').forEach(btn => btn.disabled = true);
+
+      let stepIdx = 0;
+      let currentPos = { ...robotPos };
+      visualRobotPos = { ...currentPos };
+      robotImgSrc = IMAGE_SOURCES.robo;
+
+      const totalSteps = commandSequence.length;
+
+      const animInterval = setInterval(() => {
+        if (stepIdx >= totalSteps) {
+          clearInterval(animInterval);
+          evaluateOutcome(selectedShape);
+          return;
         }
-        
-        // Função para tentar os mesmos comandos
-        function trySameCommands() {
-            // Remove a mensagem de recuperação
-            const recoveryMsg = document.getElementById('recovery-message');
-            if (recoveryMsg) recoveryMsg.remove();
-            
-            // Limpa comandos e permite nova tentativa
-            clearCommands();
-            toggleControlButtons(true);
-            
-            // Mensagem de encorajamento
-            showTemporaryMessage("Tentando os mesmos comandos... Boa sorte!", "info");
+
+        // Highlight active command step
+        const stepElements = document.getElementById('sequence-list').children;
+        if (stepElements[stepIdx]) {
+          stepElements[stepIdx].className += " opacity-30 scale-90 rotate-12";
         }
-        window.trySameCommands = trySameCommands;
-        
-        // Função para reiniciar apenas o desafio atual
-        function restartCurrentChallenge() {
-            if (isMoving) return;
+
+        const cmd = commandSequence[stepIdx];
+        if (cmd === 'up') currentPos.y--;
+        else if (cmd === 'down') currentPos.y++;
+        else if (cmd === 'left') currentPos.x--;
+        else if (cmd === 'right') currentPos.x++;
+
+        // Sound effect for movement
+        playSynthSound('beep');
+
+        // Check if hit bomb or out of bounds
+        const isOut = currentPos.x < 0 || currentPos.x >= GRID_WIDTH || currentPos.y < 0 || currentPos.y >= GRID_HEIGHT;
+        const isBomb = !isOut && bombPositions.some(b => b.x === currentPos.x && b.y === currentPos.y);
+
+        if (isOut || isBomb) {
+          clearInterval(animInterval);
+          robotImgSrc = IMAGE_SOURCES.explode;
+          visualRobotPos = { ...currentPos };
+          renderGrid();
+          playSynthSound('explode');
+
+          setTimeout(() => {
+            evaluateOutcome(selectedShape, isBomb ? 'bomb' : 'out');
+          }, 800);
+          return;
+        }
+
+        visualRobotPos = { ...currentPos };
+        renderGrid();
+        stepIdx++;
+      }, 450);
+    }
+
+    // Evaluation outcomes
+    function evaluateOutcome(selectedShape, failureType = null) {
+      const isWin = selectedShape === correctAnswerShape;
+      
+      // Create evaluation feedback log stat
+      const targetShapePT = correctAnswerShape ? SHAPE_LABELS[correctAnswerShape] : 'Explosão/Bomba';
+      const selectedShapePT = selectedShape ? SHAPE_LABELS[selectedShape] : 'Nenhum';
+      
+      const probText = `Prever o destino final do robô após ${commandSequence.length} comandos`;
+      const sequenceString = commandSequence.map(v => COMMAND_UNICODE[v] || v).join(' ');
+
+      const newStat = {
+        id: `pred_${Date.now()}_${Math.random().toString(36).substring(2,7)}`,
+        nivel: currentLevel,
+        problema: probText,
+        respostaCerta: targetShapePT,
+        tentativas: 1,
+        erros: isWin ? 0 : 1,
+        acertos: isWin ? 1 : 0,
+        historico: [{
+          comandos: sequenceString,
+          resultado: isWin 
+            ? `Acertou! Previu que o robô terminaria em ${targetShapePT}.` 
+            : failureType === 'bomb'
+            ? `Errou! Previu ${selectedShapePT}, mas o robô explodiu em uma bomba!`
+            : failureType === 'out'
+            ? `Errou! Previu ${selectedShapePT}, mas o robô saiu do tabuleiro!`
+            : `Errou! Previu ${selectedShapePT}, mas o robô terminou em ${targetShapePT}.`
+        }],
+        dataHora: new Date().toLocaleTimeString('pt-BR'),
+        gameMode: 'predict'
+      };
+
+      if (isWin) {
+        playSynthSound('win');
+        triggerConfettiEffect();
+
+        const points = 100;
+        totalScore += points;
+        challengesCompleted[currentLevel] = (challengesCompleted[currentLevel] || 0) + 1;
+
+        const currentSettings = LEVEL_SETTINGS[currentLevel];
+        const nextLevel = currentLevel + 1;
+
+        // Level Up Trigger checks
+        if (LEVEL_SETTINGS[nextLevel] && !unlockedLevels.includes(nextLevel)) {
+          if (challengesCompleted[currentLevel] >= currentSettings.challengesToUnlock) {
+            unlockedLevels.push(nextLevel);
+            currentLevel = nextLevel;
+            scoreAtLevelStart = totalScore;
+            lives = 3; // refill lives
+            playSynthSound('levelUp');
             
-            const confirmRestart = confirm(
-                "Reiniciar o desafio atual?\n\n" +
-                "• Sua pontuação NÃO será alterada\n" +
-                "• Suas vidas NÃO serão afetadas\n" + 
-                "• Apenas a posição e comandos serão resetados"
+            showCustomAlert(
+              '🎉 NOVO NÍVEL DESBLOQUEADO!',
+              `Excelente trabalho, ${studentName}! Você completou o Nível ${currentLevel - 1} e desbloqueou o Nível ${currentLevel}. Suas vidas foram recarregadas!`,
+              'success'
             );
-            
-            if (!confirmRestart) return;
-            
-            // Para qualquer movimento em andamento
-            stopPositionMonitoring();
-            if (window.__commandExecutionLock) {
-                window.__commandExecutionLock = false;
-            }
-            isMoving = false;
-            
-            // Remove mensagem de recuperação se estiver visível
-            const recoveryMsg = document.getElementById('recovery-message');
-            if (recoveryMsg) recoveryMsg.remove();
-            
-            // Mantém pontuação e vidas
-            const currentScore = score;
-            const currentLives = lives;
-            const currentAttempts = correctAttempts;
-            const currentLevelBefore = currentLevel;
-            
-            // Gera novo desafio
-            newChallenge();
-            
-            // Restaura estado do jogo
-            score = currentScore;
-            lives = currentLives;
-            correctAttempts = currentAttempts;
-            currentLevel = currentLevelBefore;
-            
-            // Atualiza displays
-            scoreEl.textContent = score;
-            updateLivesDisplay();
-            updateChallengeProgress();
-            
-            // Feedback visual
-            showTemporaryMessage("Desafio reiniciado! Boa sorte!", "success");
-            
-            // Atualiza botões de nível
-            document.querySelectorAll('.level-btn').forEach(b => {
-                const level = parseInt(b.dataset.level);
-                b.disabled = level > currentLevel;
-                b.classList.toggle('active', level === currentLevel);
-            });
+          } else {
+            showPromptAlert(`🎯 Excelente! Resposta correta! Você ganhou +${points} pontos.`, 'success');
+          }
+        } else {
+          showPromptAlert(`🎯 Excelente! Resposta correta! Você ganhou +${points} pontos.`, 'success');
         }
-        window.restartCurrentChallenge = restartCurrentChallenge;
-        
-        // Função para mensagens temporárias
-        function showTemporaryMessage(message, type = "info") {
-            const msgDiv = document.createElement('div');
-            msgDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                padding: 15px;
-                border-radius: 8px;
-                z-index: 1000;
-                font-weight: bold;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                background-color: ${type === "success" ? "#28a745" : "#17a2b8"};
-                color: white;
-            `;
-            msgDiv.textContent = message;
-            msgDiv.id = 'temp-message';
-            
-            document.body.appendChild(msgDiv);
-            
-            setTimeout(() => {
-                const msg = document.getElementById('temp-message');
-                if (msg) msg.remove();
-            }, 3000);
-        }
-        
-        // Log para análise de falhas
-        function logPositionFailure() {
-            const logEntry = {
-                timestamp: new Date().toISOString(),
-                playerPos: { ...playerPos },
-                startPos: { ...startPos },
-                targetPos: { ...targetPos },
-                commandQueue: [...commandQueue],
-                inconsistencyCount: inconsistencyCount,
-                userAgent: navigator.userAgent,
-                windowSize: { width: window.innerWidth, height: window.innerHeight }
-            };
-            
-            console.error("LOG DE FALHA:", logEntry);
-        }
-        
-        // ==============================================
-        // SISTEMA DE SALVAR/CARREGAR PROGRESSO (Base64)
-        // ==============================================
-        
-        function getGameState() {
-            return {
-                currentLevel: currentLevel,
-                score: score,
-                correctAttempts: correctAttempts,
-                lives: lives,
-                levelEntryScore: levelEntryScore,
-                playerPos: playerPos,
-                startPos: startPos,
-                targetPos: targetPos,
-                targetNumber: targetNumber,
-                bombPositions: bombPositions,
-                decoyPositions: decoyPositions,
-                visitedCells: visitedCells,
-                currentProblemText: mathProblemEl.textContent
-            };
-        }
-        
-        function restoreGameState(state) {
-            currentLevel = state.currentLevel;
-            score = state.score;
-            correctAttempts = state.correctAttempts;
-            lives = state.lives;
-            levelEntryScore = state.levelEntryScore;
-            playerPos = state.playerPos;
-            startPos = state.startPos;
-            targetPos = state.targetPos;
-            targetNumber = state.targetNumber;
-            bombPositions = state.bombPositions;
-            decoyPositions = state.decoyPositions;
-            visitedCells = state.visitedCells;
-            
-            scoreEl.textContent = score;
-            updateLivesDisplay();
-            updateChallengeProgress();
-            updateGridDisplay();
-            updatePlayerPosition();
-            mathProblemEl.textContent = state.currentProblemText;
-            clearCommands();
-            
-            isGameOver = false;
-            isMoving = false;
-            toggleControlButtons(true);
+      } else {
+        lives--;
+        playSynthSound('out');
 
-            // ==============================================================
-            // CORREÇÃO: ATUALIZA OS BOTÕES DE NÍVEL AO RESTAURAR PROGRESSO
-            // ==============================================================
-            document.querySelectorAll('.level-btn').forEach(b => {
-                const level = parseInt(b.dataset.level);
-                b.disabled = level > currentLevel;
-                b.classList.toggle('active', level === currentLevel);
-            });
-            
-            // Remove input file residual
-            const fileInputs = document.querySelectorAll('input[type="file"]');
-            fileInputs.forEach(input => input.remove());
-            
-            // Foca no botão Verificar
-            const verifyBtn = document.getElementById('verify-btn');
-            if (verifyBtn) verifyBtn.focus();
-            
-            alunoNome = state.alunoNome || "Aluno";
-            localStorage.setItem('robo_aluno_nome', alunoNome);
-            updateStudentNameDisplay();
-            showTemporaryMessage(`Progresso de ${alunoNome} restaurado com sucesso!`, "success");
+        if (lives <= 0) {
+          // Restart level progress
+          challengesCompleted[currentLevel] = 0;
+          totalScore = scoreAtLevelStart;
+          lives = 3;
+          showCustomAlert(
+            '💥 FIM DE JOGO!',
+            `Suas 3 vidas acabaram no Nível ${currentLevel}! O progresso acumulado neste nível foi reiniciado. Tente novamente!`,
+            'warn'
+          );
+        } else {
+          const msg = failureType === 'bomb'
+            ? `💥 O robô colidiu com uma bomba e explodiu! Você perdeu 1 vida.`
+            : failureType === 'out'
+            ? `💥 O robô saiu do tabuleiro! Você perdeu 1 vida.`
+            : `💥 Destino errado! O robô não parou no(a) ${selectedShapePT}. Você perdeu 1 vida.`;
+          showPromptAlert(msg, 'warn');
         }
-        
-        // ==============================================
-        // MODAL DE NOME DO ALUNO (sem prompt)
-        // ==============================================
-        const nomeOverlay = document.getElementById('nome-aluno-overlay');
-        const nomeInput = document.getElementById('nome-aluno-input');
-        const confirmarNomeBtn = document.getElementById('confirmar-nome-btn');
-        const cancelarNomeBtn = document.getElementById('cancelar-nome-btn');
-        
-        let pendingSaveCallback = null;
-        
-        function showNomeModal(callback) {
-            pendingSaveCallback = callback;
-            nomeInput.value = (alunoNome && alunoNome !== "Aluno") ? alunoNome : '';
-            nomeOverlay.style.display = 'flex';
-            setTimeout(() => {
-                nomeInput.focus();
-                nomeInput.select();
-            }, 100);
+      }
+
+      // Append state logs
+      gameStats.unshift(newStat);
+      saveProgress();
+      updateUI();
+
+      // Regenerate challenge board after short delay
+      setTimeout(() => {
+        isAnimating = false;
+        document.querySelectorAll('.btn-answer').forEach(btn => btn.disabled = false);
+        hidePromptAlert();
+        generateValidChallenge();
+      }, 3500);
+    }
+
+    // Custom Alert Modals
+    function showCustomAlert(title, message, type = 'info') {
+      const modal = document.getElementById('modal-custom-alert');
+      const icon = document.getElementById('custom-alert-icon');
+      const titleEl = document.getElementById('custom-alert-title');
+      const msgEl = document.getElementById('custom-alert-message');
+
+      let iconGlyph = 'ℹ️';
+      if (type === 'success') iconGlyph = '🏆';
+      else if (type === 'warn') iconGlyph = '💥';
+      
+      icon.textContent = iconGlyph;
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCustomAlert() {
+      document.getElementById('modal-custom-alert').classList.add('hidden');
+    }
+
+    // Alert inline prompts
+    function showPromptAlert(text, mode) {
+      const box = document.getElementById('prompt-alert-box');
+      const icon = document.getElementById('prompt-alert-icon');
+      const textEl = document.getElementById('prompt-alert-text');
+
+      textEl.textContent = text;
+      
+      if (mode === 'success') {
+        box.className = "rounded-2xl p-4 border-3 flex items-start gap-3 transition-all duration-300 bg-emerald-50 border-emerald-500 text-emerald-950";
+        icon.textContent = '✅';
+      } else {
+        box.className = "rounded-2xl p-4 border-3 flex items-start gap-3 transition-all duration-300 bg-rose-50 border-rose-500 text-rose-950";
+        icon.textContent = '❌';
+      }
+
+      box.classList.remove('hidden');
+    }
+
+    function hidePromptAlert() {
+      document.getElementById('prompt-alert-box').classList.add('hidden');
+    }
+
+    // Teacher logs list table
+    function renderTeacherTable() {
+      const tbody = document.getElementById('teacher-table-body');
+      tbody.innerHTML = '';
+
+      // Update counters
+      document.getElementById('teacher-total-challenges').textContent = gameStats.length;
+      document.getElementById('teacher-total-score').textContent = `${totalScore} pts`;
+
+      if (gameStats.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">Nenhum exercício resolvido por enquanto.</td></tr>`;
+        document.getElementById('teacher-accuracy').textContent = '0%';
+        return;
+      }
+
+      let correctCount = 0;
+      gameStats.forEach(stat => {
+        if (stat.acertos > 0) correctCount++;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+
+        const tdLvl = document.createElement('td');
+        tdLvl.className = "p-3 font-extrabold text-slate-900";
+        tdLvl.textContent = `Nível ${stat.nivel}`;
+
+        const tdProb = document.createElement('td');
+        tdProb.className = "p-3";
+        tdProb.innerHTML = `<div class="font-semibold text-slate-800">${stat.problema}</div><div class="font-mono text-[9px] text-slate-400 mt-1">${stat.historico[0].comandos}</div>`;
+
+        const tdGabarito = document.createElement('td');
+        tdGabarito.className = "p-3 font-semibold text-slate-600";
+        tdGabarito.textContent = stat.respostaCerta;
+
+        const tdStatus = document.createElement('td');
+        tdStatus.className = "p-3";
+        if (stat.acertos > 0) {
+          tdStatus.innerHTML = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-extrabold text-[9px]">ACERTO</span>`;
+        } else {
+          tdStatus.innerHTML = `<span class="bg-rose-100 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-extrabold text-[9px]">ERRO</span>`;
         }
-        
-        if (nomeInput) {
-            nomeInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (confirmarNomeBtn) confirmarNomeBtn.click();
-                }
-            });
+
+        const tdOutcome = document.createElement('td');
+        tdOutcome.className = "p-3 font-medium text-slate-500 text-[11px] max-w-[200px] truncate";
+        tdOutcome.textContent = stat.historico[0].resultado;
+        tdOutcome.title = stat.historico[0].resultado;
+
+        const tdTime = document.createElement('td');
+        tdTime.className = "p-3 font-mono text-slate-400 text-[10px]";
+        tdTime.textContent = stat.dataHora;
+
+        tr.appendChild(tdLvl);
+        tr.appendChild(tdProb);
+        tr.appendChild(tdGabarito);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdOutcome);
+        tr.appendChild(tdTime);
+
+        tbody.appendChild(tr);
+      });
+
+      const accuracyPct = Math.floor((correctCount / gameStats.length) * 100);
+      document.getElementById('teacher-accuracy').textContent = `${accuracyPct}%`;
+    }
+
+    // CSV Spreadsheet Exporter
+    function downloadCSVReport() {
+      if (gameStats.length === 0) {
+        showCustomAlert("Planilha Vazia", "Não há registros disponíveis para exportar ainda.", "warn");
+        return;
+      }
+
+      let csvContent = "\uFEFF"; // UTF-8 BOM
+      csvContent += "Aluno,Nível,Modo,Problema,Comandos,Gabarito,Acertos,Erros,DataHora,Resultado\n";
+
+      gameStats.forEach(stat => {
+        const row = [
+          `"${studentName}"`,
+          `"${stat.nivel}"`,
+          `"${stat.gameMode}"`,
+          `"${stat.problema.replace(/"/g, '""')}"`,
+          `"${stat.historico[0].comandos}"`,
+          `"${stat.respostaCerta}"`,
+          `"${stat.acertos}"`,
+          `"${stat.erros}"`,
+          `"${stat.dataHora}"`,
+          `"${stat.historico[0].resultado.replace(/"/g, '""')}"`
+        ].join(",");
+        csvContent += row + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Relatorio_Robo_${studentName.replace(/\s+/g, '_')}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Download/Restore JSON Progress
+    function downloadJSONProgress() {
+      const stateObj = {
+        studentName,
+        totalScore,
+        scoreAtLevelStart,
+        unlockedLevels,
+        challengesCompleted,
+        currentLevel,
+        lives,
+        gameStats
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(stateObj, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `Progresso_Robo_${studentName.replace(/\s+/g, '_')}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importJSONProgress(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.studentName) studentName = parsed.studentName;
+          if (parsed.currentLevel) currentLevel = parsed.currentLevel;
+          if (parsed.totalScore !== undefined) totalScore = parsed.totalScore;
+          if (parsed.scoreAtLevelStart !== undefined) scoreAtLevelStart = parsed.scoreAtLevelStart;
+          if (parsed.unlockedLevels) unlockedLevels = parsed.unlockedLevels;
+          if (parsed.challengesCompleted) challengesCompleted = parsed.challengesCompleted;
+          if (parsed.lives !== undefined) lives = parsed.lives;
+          if (parsed.gameStats) gameStats = parsed.gameStats;
+
+          document.getElementById('badge-student-name').textContent = studentName;
+          document.getElementById('teacher-student-name').textContent = studentName;
+
+          saveProgress();
+          updateUI();
+          generateValidChallenge();
+          
+          showCustomAlert(
+            "Progresso Importado!",
+            `Os dados do aluno ${studentName} foram carregados com sucesso!`,
+            "success"
+          );
+        } catch(err) {
+          showCustomAlert("Erro de Importação", "O arquivo selecionado não é um arquivo de progresso válido.", "warn");
         }
-        
-        function closeNomeModal() {
-            nomeOverlay.style.display = 'none';
-            pendingSaveCallback = null;
-        }
-        
-        if (confirmarNomeBtn) {
-            confirmarNomeBtn.addEventListener('click', () => {
-                let alunoNome = nomeInput.value.trim();
-                if (!alunoNome) {
-                    alunoNome = 'anonimo';
-                } else {
-                    alunoNome = alunoNome.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '_').substring(0, 30);
-                }
-                if (pendingSaveCallback) {
-                    pendingSaveCallback(alunoNome);
-                }
-                closeNomeModal();
-            });
-        }
-        
-        if (cancelarNomeBtn) {
-            cancelarNomeBtn.addEventListener('click', () => {
-                closeNomeModal();
-            });
-        }
-        
-        if (nomeOverlay) {
-            nomeOverlay.addEventListener('click', (e) => {
-                if (e.target === nomeOverlay) {
-                    closeNomeModal();
-                }
-            });
-        }
-        
-        // Tecla ESC fecha o modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && nomeOverlay && nomeOverlay.style.display === 'flex') {
-                closeNomeModal();
-            }
+      };
+      reader.readAsText(file);
+    }
+
+    // SETUP EVENT LISTENERS
+    document.addEventListener("DOMContentLoaded", () => {
+      // Set footer year
+      document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+      // Scroll Lock on Modal Open
+      function updateBodyScrollLock() {
+        const modalIds = ['modal-name', 'modal-instructions', 'modal-teacher', 'modal-custom-alert'];
+        const anyVisible = modalIds.some(id => {
+          const el = document.getElementById(id);
+          return el && !el.classList.contains('hidden');
         });
-        
-        // Função de salvar com modal
-        function saveProgressWithModal() {
-            showNomeModal((alunoNomeInput) => {
-                try {
-                    // Atualiza a variável global, o localStorage e a interface de visualização
-                    alunoNome = alunoNomeInput;
-                    localStorage.setItem('robo_aluno_nome', alunoNome);
-                    updateStudentNameDisplay();
+        if (anyVisible) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      }
 
-                    const gameState = getGameState();
-                    gameState.alunoNome = alunoNome;
-                    gameState.dataSalvamento = new Date().toISOString();
-                    
-                    const jsonString = JSON.stringify(gameState);
-                    const base64String = btoa(unescape(encodeURIComponent(jsonString)));
-                    
-                    const dataStr = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                    const fileName = `robo_${alunoNome}_nivel_${currentLevel}_${dataStr}.txt`;
-                    
-                    const blob = new Blob([base64String], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    showTemporaryMessage(`Progresso de ${alunoNome} salvo com sucesso!`, "success");
-                } catch (error) {
-                    console.error("Erro ao salvar:", error);
-                    showCustomAlert("❌ ERRO AO SALVAR", "Erro ao salvar progresso!", "warning");
-                }
-            });
+      const modalIds = ['modal-name', 'modal-instructions', 'modal-teacher', 'modal-custom-alert'];
+      const observer = new MutationObserver(() => {
+        updateBodyScrollLock();
+      });
+      modalIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          observer.observe(el, { attributes: true, attributeFilter: ['class'] });
         }
-        
-        function loadProgressFromFile(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const base64String = e.target.result;
-                    const jsonString = decodeURIComponent(escape(atob(base64String)));
-                    const gameState = JSON.parse(jsonString);
-                    restoreGameState(gameState);
-                    
-                    const fileInput = document.getElementById('temp-file-input');
-                    if (fileInput) fileInput.remove();
-                } catch (error) {
-                    console.error("Erro ao carregar:", error);
-                    showCustomAlert("❌ ERRO AO CARREGAR", "Arquivo inválido ou corrompido!", "warning");
-                }
-            };
-            reader.onerror = function() {
-                showCustomAlert("❌ ERRO AO LER", "Erro ao ler o arquivo!", "warning");
-            };
-            reader.readAsText(file);
+      });
+      updateBodyScrollLock();
+
+      // Load progress
+      loadProgress();
+      generateValidChallenge();
+
+      // Student name button trigger
+      document.getElementById('btn-edit-student').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('input-student-name').value = studentName;
+        document.getElementById('modal-name').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-cancel-name').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('modal-name').classList.add('hidden');
+      });
+
+      document.getElementById('btn-save-name').addEventListener('click', () => {
+        playSynthSound('click');
+        const inputVal = document.getElementById('input-student-name').value.trim();
+        if (inputVal) {
+          studentName = inputVal;
+          document.getElementById('badge-student-name').textContent = studentName;
+          document.getElementById('teacher-student-name').textContent = studentName;
+          saveProgress();
+          document.getElementById('modal-name').classList.add('hidden');
         }
-        
-        // ==============================================
-        // MODAL DE AVISOS BONITOS (substitui alert)
-        // ==============================================
-        const customAlertOverlay = document.getElementById('custom-alert-overlay');
-        const customAlertTitle = document.getElementById('custom-alert-title');
-        const customAlertMessage = document.getElementById('custom-alert-message');
-        const customAlertOkBtn = document.getElementById('custom-alert-ok-btn');
-        const customAlertContent = document.getElementById('custom-alert-content');
-        
-        let pendingAlertCallback = null;
-        
-        function showCustomAlert(title, message, type = 'warning', callback = null) {
-            customAlertTitle.textContent = title;
-            customAlertMessage.textContent = message;
-            customAlertContent.classList.remove('warning', 'info', 'success');
-            customAlertContent.classList.add(type);
-            pendingAlertCallback = callback;
-            customAlertOverlay.style.display = 'flex';
-        }
-        
-        function closeCustomAlert() {
-            customAlertOverlay.style.display = 'none';
-            if (pendingAlertCallback) {
-                pendingAlertCallback();
-                pendingAlertCallback = null;
-            }
-        }
-        
-        if (customAlertOkBtn) {
-            customAlertOkBtn.addEventListener('click', closeCustomAlert);
-        }
-        
-        if (customAlertOverlay) {
-            customAlertOverlay.addEventListener('click', (e) => {
-                if (e.target === customAlertOverlay) {
-                    closeCustomAlert();
-                }
-            });
-        }
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && customAlertOverlay && customAlertOverlay.style.display === 'flex') {
-                closeCustomAlert();
-            }
+      });
+
+      // Sound toggle trigger
+      const soundBtn = document.getElementById('btn-toggle-sound');
+      soundBtn.addEventListener('click', () => {
+        isSoundEnabled = !isSoundEnabled;
+        safeLocalStorage.setItem('robo_soundEnabled', String(isSoundEnabled));
+        soundBtn.textContent = isSoundEnabled ? '🔊' : '🔇';
+        soundBtn.className = isSoundEnabled
+          ? 'w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 border-2 border-slate-700 rounded-lg text-sm cursor-pointer'
+          : 'w-8 h-8 flex items-center justify-center bg-rose-50 hover:bg-rose-100 border-2 border-rose-500 rounded-lg text-sm cursor-pointer';
+        playSynthSound('click');
+      });
+
+      // Visual effects toggle trigger
+      const fxBtn = document.getElementById('btn-toggle-effects');
+      fxBtn.addEventListener('click', () => {
+        isEffectsEnabled = !isEffectsEnabled;
+        safeLocalStorage.setItem('robo_effectsEnabled', String(isEffectsEnabled));
+        playSynthSound('click');
+        fxBtn.className = isEffectsEnabled
+          ? 'w-8 h-8 flex items-center justify-center bg-sky-100 hover:bg-sky-200 border-2 border-sky-600 rounded-lg text-sm cursor-pointer'
+          : 'w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 border-2 border-slate-400 rounded-lg text-sm cursor-pointer';
+      });
+
+      // Victory restart trigger
+      const victoryRestartBtn = document.getElementById('btn-victory-restart');
+      if (victoryRestartBtn) {
+        victoryRestartBtn.addEventListener('click', () => {
+          playSynthSound('click');
+          currentLevel = 1;
+          totalScore = 0;
+          scoreAtLevelStart = 0;
+          unlockedLevels = [1];
+          challengesCompleted = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          lives = 3;
+          gameStats = [];
+          
+          updateUI();
+          generateValidChallenge();
+          showCustomAlert("Novo Jogo Iniciado", "As metas foram resetadas com absoluto sucesso. Divirta-se!", "success");
         });
+      }
+
+      // Save progress JSON trigger
+      document.getElementById('btn-save-progress').addEventListener('click', () => {
+        playSynthSound('click');
+        downloadJSONProgress();
+      });
+
+      // Instructions open trigger
+      document.getElementById('btn-help').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('modal-instructions').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-instructions').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('modal-instructions').classList.add('hidden');
+      });
+
+      document.getElementById('btn-close-instructions-ok').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('modal-instructions').classList.add('hidden');
+      });
+
+      // Teacher Panel trigger
+      document.getElementById('btn-teacher-panel').addEventListener('click', () => {
+        playSynthSound('click');
+        renderTeacherTable();
+        document.getElementById('modal-teacher').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-teacher').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('modal-teacher').classList.add('hidden');
+      });
+
+      // Download CSV spreadsheet
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        playSynthSound('click');
+        downloadCSVReport();
+      });
+
+      // Upload progress JSON trigger
+      document.getElementById('btn-import-progress-trigger').addEventListener('click', () => {
+        playSynthSound('click');
+        document.getElementById('input-import-file').click();
+      });
+
+      document.getElementById('input-import-file').addEventListener('change', importJSONProgress);
+
+      // Custom alert ok close
+      document.getElementById('btn-close-custom-alert').addEventListener('click', () => {
+        playSynthSound('click');
+        closeCustomAlert();
+      });
+
+      // Wipe state progress reset
+      document.getElementById('btn-reset-game').addEventListener('click', () => {
+        playSynthSound('click');
+        if (confirm("Deseja realmente limpar e recomeçar todo o jogo? Isso apagará seu progresso e pontuação.")) {
+          currentLevel = 1;
+          totalScore = 0;
+          scoreAtLevelStart = 0;
+          unlockedLevels = [1];
+          challengesCompleted = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          lives = 3;
+          gameStats = [];
+          
+          safeLocalStorage.removeItem('robo_predictState');
+          safeLocalStorage.removeItem('robo_gameStats');
+          
+          updateUI();
+          generateValidChallenge();
+          showCustomAlert("Jogo Reiniciado", "Todo o progresso foi apagado com sucesso.", "info");
+        }
+      });
+
+      // Level select triggers
+      document.querySelectorAll('.btn-level').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const targetLvl = parseInt(e.currentTarget.getAttribute('data-level'));
+          if (unlockedLevels.includes(targetLvl)) {
+            playSynthSound('click');
+            currentLevel = targetLvl;
+            scoreAtLevelStart = totalScore;
+            lives = 3; // Reset lives for level
+            saveProgress();
+            updateUI();
+            generateValidChallenge();
+          }
+        });
+      });
+
+      // Answer selection triggers
+      document.querySelectorAll('.btn-answer').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (isAnimating) return;
+          const chosen = e.currentTarget.getAttribute('data-shape');
+          playSynthSound('click');
+          animateTrajectory(chosen);
+        });
+      });
+
+      // Listen keyboard numbers for answers (1-4)
+      window.addEventListener('keydown', (e) => {
+        if (isAnimating) return;
         
-        // Substituir alerts feios por modais bonitos
-        window.alert = function(message) {
-            if (message.includes("Fim de Jogo")) {
-                showCustomAlert("💀 FIM DE JOGO", message, "warning");
-            } else if (message.includes("Continue tentando")) {
-                showCustomAlert("✅ CAMINHO POSSÍVEL", message, "success");
-            } else if (message.includes("Você estava certo")) {
-                showCustomAlert("🔄 GERANDO NOVO DESAFIO", message, "info");
-            } else if (message.includes("BOOM")) {
-                showCustomAlert("💣 EXPLOSÃO!", message, "warning");
-            } else if (message.includes("Cuidado! Número incorreto")) {
-                showCustomAlert("⚠️ NÚMERO INCORRETO", message, "warning");
-            } else if (message.includes("bateu na parede")) {
-                showCustomAlert("🧱 PAREDE!", message, "warning");
-            } else if (message.includes("Erro de movimento")) {
-                showCustomAlert("⚠️ ERRO DE MOVIMENTO", message, "warning");
-            } else {
-                showCustomAlert("📢 AVISO", message, "info");
-            }
-        };
-        
-        // ==============================================
-        // FUNÇÕES PRINCIPAIS DO JOGO
-        // ==============================================
-        
-        // Inicialização do jogo
-        function init() {
-            isGameOver = false;
-            updateStudentNameDisplay();
-            
-            // Configurar alteração de nome ao clicar no display do painel
-            const nameBox = document.getElementById('student-name-box');
-            if (nameBox) {
-                nameBox.addEventListener('click', () => {
-                    showNomeModal((novoNome) => {
-                        alunoNome = novoNome;
-                        localStorage.setItem('robo_aluno_nome', alunoNome);
-                        updateStudentNameDisplay();
-                        showTemporaryMessage(`Nome alterado para ${alunoNome}!`, "success");
-                    });
-                });
-            }
+        // Exclude inputs
+        if (document.activeElement.tagName === 'INPUT') return;
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const levelFromUrl = parseInt(urlParams.get('level'));
-            
-            if (levelFromUrl >= 1 && levelFromUrl <= 5) {
-                currentLevel = levelFromUrl;
-                levelEntryScore = 0;
-            } else {
-                currentLevel = 1;
-                levelEntryScore = 0;
-            }
-            
-            score = levelEntryScore;
-            scoreEl.textContent = score;
-            createGrid();
-            createCommandSlots();
-            setupControls();
-            
-            // Configurar abas do modal de instruções/Manual/BNCC
-            setupModalTabs();
-            
-            newChallenge();
-            
-            showInstructions();
+        const key = e.key;
+        if (key === '1') {
+          document.querySelector('[data-shape="square"]').click();
+        } else if (key === '2') {
+          document.querySelector('[data-shape="octagon"]').click();
+        } else if (key === '3') {
+          document.querySelector('[data-shape="star"]').click();
+        } else if (key === '4') {
+          document.querySelector('[data-shape="heart"]').click();
         }
-        
-        // Função para alternar abas no modal de instruções
-        function setupModalTabs() {
-            const manualBtn = document.getElementById('tab-manual-btn');
-            const bnccBtn = document.getElementById('tab-bncc-btn');
-            const manualPanel = document.getElementById('panel-manual');
-            const bnccPanel = document.getElementById('panel-bncc');
-            
-            if (manualBtn && bnccBtn && manualPanel && bnccPanel) {
-                manualBtn.addEventListener('click', () => {
-                    manualBtn.classList.add('active');
-                    manualBtn.setAttribute('aria-selected', 'true');
-                    bnccBtn.classList.remove('active');
-                    bnccBtn.setAttribute('aria-selected', 'false');
-                    
-                    manualPanel.classList.add('active');
-                    bnccPanel.classList.remove('active');
-                });
-                
-                bnccBtn.addEventListener('click', () => {
-                    bnccBtn.classList.add('active');
-                    bnccBtn.setAttribute('aria-selected', 'true');
-                    manualBtn.classList.remove('active');
-                    manualBtn.setAttribute('aria-selected', 'false');
-                    
-                    bnccPanel.classList.add('active');
-                    manualPanel.classList.remove('active');
-                });
-            }
-        }
-        
-        // Função para mostrar instruções
-        function showInstructions() {
-            instructionsOverlay.style.display = 'flex';
-            
-            // Sempre abrir na aba do manual (Como Jogar) por padrão
-            const manualBtn = document.getElementById('tab-manual-btn');
-            if (manualBtn) {
-                manualBtn.click();
-            }
-            
-            // Configurar botão de fechar instruções
-            const closeBtn = document.getElementById('close-instructions');
-            if (closeBtn) {
-                const newCloseBtn = closeBtn.cloneNode(true);
-                closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-                newCloseBtn.addEventListener('click', () => {
-                    instructionsOverlay.style.display = 'none';
-                });
-            }
-        }
-        
-        // Função para criar a grade
-        function createGrid() {
-            gridContainer.innerHTML = '';
-            
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    cell.id = `cell-${x}-${y}`;
-                    gridContainer.appendChild(cell);
-                }
-            }
-            
-            gridContainer.appendChild(player);
-            updatePlayerPosition();
-        }
-        
-        // Função para criar os slots de comando
-        function createCommandSlots() {
-            commandBar.innerHTML = '';
-            
-            for (let i = 0; i < MAX_COMMANDS; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'command-slot';
-                commandBar.appendChild(slot);
-            }
-        }
-        
-        // Configuração dos controles
-        function setupControls() {
-            // Configuração dos botões de nível
-            document.querySelectorAll('.level-btn').forEach(b => {
-                const level = parseInt(b.dataset.level);
-                b.disabled = level > currentLevel;
-                
-                if (level === currentLevel) {
-                    b.classList.add('active');
-                } else {
-                    b.classList.remove('active');
-                }
-                
-                b.addEventListener('click', () => {
-                    if (parseInt(b.dataset.level) === currentLevel || b.disabled) return;
-                    
-                    victoryMessage.style.display = 'none';
-                    victoryMessage.style.opacity = '0';
-                    document.querySelector('.level-btn.active').classList.remove('active');
-                    b.classList.add('active');
-                    currentLevel = parseInt(b.dataset.level);
-                    levelEntryScore = score;
-                    correctAttempts = 0;
-                    isGameOver = false;
-                    lives = TOTAL_LIVES;
-                    toggleControlButtons(true);
-                    newChallenge();
-                });
+      });
 
-                b.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        b.click();
-                    }
-                });
-            });
+    });
+  </script>
 
-            // Seletor de tema
-            document.getElementById('theme-selector').addEventListener('change', (e) => {
-                document.body.classList.remove('default', 'space', 'forest');
-                if (e.target.value !== 'default') {
-                    document.body.classList.add(e.target.value);
-                }
-                updateGridDisplay();
-            });
-
-            // Botão de alto contraste
-            document.getElementById('high-contrast-btn').addEventListener('click', () => {
-                document.body.classList.toggle('high-contrast');
-                const currentTheme = document.getElementById('theme-selector').value;
-                if (currentTheme !== 'default') document.body.classList.add(currentTheme);
-                updateGridDisplay();
-            });
-
-            // Botão de instruções
-            document.getElementById('instructions-btn').addEventListener('click', showInstructions);
-            
-            // Botão de reiniciar jogo
-            document.getElementById('restart-btn').addEventListener('click', () => {
-                const confirmReset = window.confirm("Deseja reiniciar o jogo completamente? Isso zerará sua pontuação e retornará ao Nível 1.");
-                if (!confirmReset) return;
-                resetGame();
-            });
-            
-            // Botões de movimento
-            document.getElementById('btn-right').addEventListener('click', () => addCommand('➡️'));
-            document.getElementById('btn-left').addEventListener('click', () => addCommand('⬅️'));
-            document.getElementById('btn-up').addEventListener('click', () => addCommand('⬆️'));
-            document.getElementById('btn-down').addEventListener('click', () => addCommand('⬇️'));
-            document.getElementById('btn-clear').addEventListener('click', clearCommands);
-            document.getElementById('verify-btn').addEventListener('click', executeCommands);
-            
-            // Botões de salvar/carregar
-            const saveBtn = document.getElementById('save-progress-btn');
-            const loadBtn = document.getElementById('load-progress-btn');
-            
-            if (saveBtn) {
-                const newSaveBtn = saveBtn.cloneNode(true);
-                saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
-                newSaveBtn.addEventListener('click', saveProgressWithModal);
-            }
-            
-            if (loadBtn) {
-                loadBtn.addEventListener('click', () => {
-                    const existingInput = document.getElementById('temp-file-input');
-                    if (existingInput) existingInput.remove();
-                    
-                    const input = document.createElement('input');
-                    input.id = 'temp-file-input';
-                    input.type = 'file';
-                    input.accept = '.txt';
-                    input.style.display = 'none';
-                    document.body.appendChild(input);
-                    
-                    input.onchange = (e) => {
-                        if (e.target.files && e.target.files[0]) {
-                            loadProgressFromFile(e.target.files[0]);
-                        }
-                        setTimeout(() => {
-                            if (input) input.remove();
-                        }, 100);
-                    };
-                    input.click();
-                });
-            }
-            
-            // Controles de teclado
-            document.addEventListener('keydown', (e) => {
-                // Ignore keyboard shortcuts if the user is typing in any input, textarea, or select element
-                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
-                    return;
-                }
-                
-                if (isMoving || isGameOver) return;
-                
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                    e.preventDefault();
-                }
-                
-                const keyMap = {
-                    'ArrowRight': '➡️', 
-                    'ArrowLeft': '⬅️', 
-                    'ArrowUp': '⬆️', 
-                    'ArrowDown': '⬇️'
-                };
-                
-                if (keyMap[e.key]) {
-                    addCommand(keyMap[e.key]);
-                } else if (e.key.toLowerCase() === 'c') {
-                    clearCommands();
-                } else if (e.key === 'Enter') {
-                    if (document.getElementById('recovery-message')) {
-                        trySameCommands();
-                    } else {
-                        executeCommands();
-                    }
-                } else if (e.key.toLowerCase() === 'h') {
-                    const allObstacles = [...bombPositions, ...decoyPositions];
-                    if (isPathPossible(startPos, targetPos, allObstacles)) {
-                        alert("Continue tentando! Confirmamos que existe um caminho possível para o alvo.");
-                    } else {
-                        alert("Você estava certo! Este nível tinha um erro. Gerando um novo desafio para você.");
-                        newChallenge();
-                    }
-                } else if (e.key.toLowerCase() === 'r' && document.getElementById('recovery-message')) {
-                    restartCurrentChallenge();
-                }
-            });
-        }
-
-        // Função para reiniciar o jogo
-        function resetGame() {
-            score = 0;
-            levelEntryScore = 0;
-            correctAttempts = 0;
-            lives = TOTAL_LIVES;
-            isGameOver = false;
-            currentLevel = 1;
-            
-            scoreEl.textContent = score;
-            document.querySelectorAll('.level-btn').forEach(b => {
-                const level = parseInt(b.dataset.level);
-                b.disabled = level > currentLevel;
-                b.classList.toggle('active', level === currentLevel);
-            });
-
-            toggleControlButtons(true);
-            victoryMessage.style.display = 'none';
-            newChallenge();
-            document.getElementById('verify-btn').focus();
-        }
-
-        // Função para habilitar/desabilitar controles
-        function toggleControlButtons(enabled) {
-            const buttons = [
-                document.getElementById('verify-btn'),
-                ...document.querySelectorAll('#command-buttons .control-btn')
-            ];
-            
-            buttons.forEach(btn => {
-                btn.disabled = !enabled;
-                btn.style.opacity = enabled ? '1' : '0.6';
-            });
-            
-            document.getElementById('theme-selector').disabled = !enabled;
-        }
-
-        // Função para gerar problema matemático
-        function generateMathProblem() {
-            const settings = levelSettings[currentLevel];
-            const op = settings.operations[Math.floor(Math.random() * settings.operations.length)];
-            let num1, num2, answer;
-            
-            do {
-                switch (op) {
-                    case '+':
-                        num1 = Math.floor(Math.random() * (settings.range - 1)) + 1;
-                        num2 = Math.floor(Math.random() * (settings.range - num1)) + 1;
-                        answer = num1 + num2;
-                        break;
-                    case '-':
-                        num1 = Math.floor(Math.random() * settings.range) + 2;
-                        num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
-                        answer = num1 - num2;
-                        break;
-                    case '*':
-                        num1 = Math.floor(Math.random() * 9) + 2;
-                        num2 = Math.floor(Math.random() * 9) + 2;
-                        answer = num1 * num2;
-                        break;
-                    case '/':
-                        answer = Math.floor(Math.random() * 9) + 2;
-                        num2 = Math.floor(Math.random() * 9) + 2;
-                        if (num2 === 0) continue;
-                        num1 = answer * num2;
-                        if (!Number.isInteger(num1 / num2) || answer < 1) continue;
-                        break;
-                }
-            } while (answer < 1 || answer > GRID_SIZE * GRID_SIZE);
-            
-            return { text: `${num1} ${op} ${num2}`, answer: answer };
-        }
-
-        // Função para verificar se há caminho possível
-        function isPathPossible(start, end, obstacles) {
-            const queue = [start];
-            const visited = new Set([`${start.x},${start.y}`]);
-            
-            while (queue.length > 0) {
-                const current = queue.shift();
-                
-                if (current.x === end.x && current.y === end.y) {
-                    return true;
-                }
-                
-                const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-                
-                for (const [dx, dy] of directions) {
-                    const nextX = current.x + dx;
-                    const nextY = current.y + dy;
-                    
-                    if (nextX >= 0 && nextX < GRID_SIZE && 
-                        nextY >= 0 && nextY < GRID_SIZE && 
-                        !visited.has(`${nextX},${nextY}`) && 
-                        !obstacles.some(obs => obs.x === nextX && obs.y === nextY)) {
-                        
-                        visited.add(`${nextX},${nextY}`);
-                        queue.push({ x: nextX, y: nextY });
-                    }
-                }
-            }
-            
-            return false;
-        }
-
-        // Função para criar novo desafio
-        function newChallenge() {
-            player.classList.remove('exploded');
-            const problem = generateMathProblem();
-            targetNumber = problem.answer;
-            mathProblemEl.textContent = problem.text;
-            
-            let allObstacles = [];
-            visitedCells = [];
-            
-            do {
-                bombPositions = [];
-                decoyPositions = [];
-                
-                do {
-                    startPos = { 
-                        x: Math.floor(Math.random() * GRID_SIZE), 
-                        y: Math.floor(Math.random() * GRID_SIZE) 
-                    };
-                    targetPos = { 
-                        x: Math.floor(Math.random() * GRID_SIZE), 
-                        y: Math.floor(Math.random() * GRID_SIZE) 
-                    };
-                } while (startPos.x === targetPos.x && startPos.y === targetPos.y);
-
-                const settings = levelSettings[currentLevel];
-                let availableCells = [];
-                
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    for (let y = 0; y < GRID_SIZE; y++) {
-                        if ((x === startPos.x && y === startPos.y) || 
-                            (x === targetPos.x && y === targetPos.y)) {
-                            continue;
-                        }
-                        availableCells.push({x, y});
-                    }
-                }
-                
-                for (let i = 0; i < settings.bombs; i++) {
-                    if (availableCells.length === 0) break;
-                    const randIndex = Math.floor(Math.random() * availableCells.length);
-                    bombPositions.push(availableCells.splice(randIndex, 1)[0]);
-                }
-
-                const usedNumbers = new Set([targetNumber]);
-                
-                for (let i = 0; i < settings.decoys; i++) {
-                    if (availableCells.length === 0) break;
-                    
-                    let value;
-                    do { 
-                        value = targetNumber + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 5) + 1); 
-                    } while (usedNumbers.has(value) || value <= 0);
-                    
-                    const randIndex = Math.floor(Math.random() * availableCells.length);
-                    const pos = availableCells.splice(randIndex, 1)[0];
-                    decoyPositions.push({ ...pos, value });
-                    usedNumbers.add(value);
-                }
-                
-                allObstacles = [...bombPositions, ...decoyPositions];
-            } while (!isPathPossible(startPos, targetPos, allObstacles));
-
-            playerPos = { ...startPos };
-            updatePlayerPosition();
-            updateGridDisplay();
-            clearCommands();
-            updateChallengeProgress();
-            updateLivesDisplay();
-        }
-
-        // Atualizar nome do aluno no painel
-        function updateStudentNameDisplay() {
-            const displayEl = document.getElementById('student-name-display');
-            if (displayEl) {
-                displayEl.textContent = alunoNome || "Aluno";
-            }
-        }
-
-        // Atualizar progresso do desafio
-        function updateChallengeProgress() {
-            currentChallengeEl.textContent = isGameOver ? minCorrectAttempts : correctAttempts + 1;
-            totalChallengesEl.textContent = minCorrectAttempts;
-        }
-        
-        // Atualizar display de vidas
-        function updateLivesDisplay() {
-            livesContainer.innerHTML = '';
-            for (let i = 0; i < lives; i++) {
-                livesContainer.innerHTML += '❤️';
-            }
-        }
-
-        // Atualizar display da grade
-        function updateGridDisplay() {
-            document.querySelectorAll('.grid-cell').forEach(cell => { 
-                cell.innerHTML = ''; 
-                cell.setAttribute('aria-label', 'Célula vazia');
-                cell.classList.remove('target', 'decoy', 'correct-path', 'wrong-path');
-                
-                const x = parseInt(cell.id.split('-')[1]);
-                const y = parseInt(cell.id.split('-')[2]);
-                
-                // Célula alvo
-                if (x === targetPos.x && y === targetPos.y) {
-                    cell.textContent = targetNumber;
-                    cell.setAttribute('aria-label', `Alvo: número ${targetNumber}`);
-                    cell.classList.add('target');
-                }
-                
-                // Bombas
-                bombPositions.forEach(pos => {
-                    if (pos.x === x && pos.y === y) {
-                        const bombDiv = document.createElement('div');
-                        bombDiv.className = 'bomb';
-                        cell.appendChild(bombDiv);
-                        cell.setAttribute('aria-label', 'Bomba');
-                    }
-                });
-                
-                // Decoys (números incorretos)
-                decoyPositions.forEach(pos => {
-                    if (pos.x === x && pos.y === y) {
-                        cell.textContent = pos.value;
-                        cell.setAttribute('aria-label', `Número incorreto: ${pos.value}`);
-                        cell.classList.add('decoy');
-                    }
-                });
-                
-                // Células visitadas (feedback visual)
-                if (visitedCells.some(cell => cell.x === x && cell.y === y)) {
-                    const visitedCell = visitedCells.find(cell => cell.x === x && cell.y === y);
-                    if (visitedCell.correct) {
-                        cell.classList.add('correct-path');
-                    } else {
-                        cell.classList.add('wrong-path');
-                    }
-                }
-            });
-        }
-        
-        // Atualizar posição do jogador
-        function updatePlayerPosition() {
-            const cellTotalSize = CELL_SIZE + GRID_GAP;
-            player.style.left = `${playerPos.x * cellTotalSize + GRID_GAP}px`;
-            player.style.top = `${playerPos.y * cellTotalSize + GRID_GAP}px`;
-        }
-        
-        // Adicionar comando à fila
-        function addCommand(command) { 
-            if (commandQueue.length < MAX_COMMANDS && !isMoving && !isGameOver) { 
-                commandQueue.push(command); 
-                updateCommandBar();
-                
-                const slot = document.querySelectorAll('.command-slot')[commandQueue.length - 1];
-                slot.classList.add('active');
-                
-                setTimeout(() => slot.classList.remove('active'), 200);
-            } 
-        }
-
-        // Limpar comandos
-        function clearCommands() { 
-            commandQueue = []; 
-            updateCommandBar(); 
-            isMoving = false; 
-        }
-        
-        // Atualizar barra de comandos
-        function updateCommandBar() { 
-            document.querySelectorAll('.command-slot').forEach((slot, i) => {
-                slot.textContent = commandQueue[i] || '';
-            }); 
-        }
-        
-        // Função auxiliar para validar posição
-        function isValidPosition(pos) {
-            return Number.isInteger(pos.x) && Number.isInteger(pos.y) &&
-                   pos.x >= -1 && pos.x <= GRID_SIZE &&
-                   pos.y >= -1 && pos.y <= GRID_SIZE;
-        }
-
-        // Executar comandos - VERSÃO ESTÁVEL
-        function executeCommands() {
-            if (isMoving || commandQueue.length === 0 || isGameOver) return;
-            if (window.__commandExecutionLock) return;
-            
-            window.__commandExecutionLock = true;
-            isMoving = true;
-            toggleControlButtons(false);
-            
-            // INICIAR MONITORAMENTO
-            startPositionMonitoring();
-            
-            playerPos = {...startPos};
-            updatePlayerPosition();
-            
-            let currentIndex = 0;
-            visitedCells = [];
-            let movementTimeout = null;
-
-            const executeNextCommand = () => {
-                if (!window.__commandExecutionLock || currentIndex >= commandQueue.length) {
-                    finishExecution();
-                } else {
-                    const command = commandQueue[currentIndex];
-                    const newPos = {...playerPos};
-
-                    if (command === '➡️') newPos.x++; 
-                    else if (command === '⬅️') newPos.x--; 
-                    else if (command === '⬆️') newPos.y--; 
-                    else if (command === '⬇️') newPos.y++;
-
-                    if (!isValidPosition(newPos)) {
-                        handleError("Erro de movimento!");
-                        cleanup();
-                        return;
-                    }
-
-                    playerPos = newPos;
-                    updatePlayerPosition();
-                    
-                    // ATUALIZA ÚLTIMA POSIÇÃO VÁLIDA
-                    lastVerifiedPosition = { ...playerPos };
-                    
-                    const isBomb = bombPositions.some(b => b.x === playerPos.x && b.y === playerPos.y);
-                    const isDecoy = decoyPositions.some(d => d.x === playerPos.x && d.y === playerPos.y);
-                    const isWall = playerPos.x < 0 || playerPos.x >= GRID_SIZE || 
-                                  playerPos.y < 0 || playerPos.y >= GRID_SIZE;
-
-                    if (isBomb || isDecoy || isWall) {
-                        const errorMsg = isBomb ? "BOOM! Você atingiu uma bomba!" :
-                                       isDecoy ? "Cuidado! Número incorreto!" :
-                                       "Ops! O robô bateu na parede!";
-                        handleError(errorMsg);
-                        cleanup();
-                        return;
-                    }
-
-                    if (currentIndex > 0 || (playerPos.x !== startPos.x || playerPos.y !== startPos.y)) {
-                        visitedCells.push({x: playerPos.x, y: playerPos.y, correct: false});
-                        updateGridDisplay();
-                    }
-
-                    currentIndex++;
-                    movementTimeout = setTimeout(executeNextCommand, 400);
-                }
-            };
-
-            const finishExecution = () => {
-                // PARAR MONITORAMENTO AO FINALIZAR
-                stopPositionMonitoring();
-                cleanup();
-                checkResult(playerPos);
-            };
-
-            const cleanup = () => {
-                // GARANTIR que o monitoramento para
-                stopPositionMonitoring();
-                
-                if (movementTimeout) {
-                    clearTimeout(movementTimeout);
-                    movementTimeout = null;
-                }
-                window.__commandExecutionLock = false;
-                isMoving = false;
-                toggleControlButtons(true);
-            };
-
-            movementTimeout = setTimeout(executeNextCommand, 400);
-        }
-        
-        // Verificar resultado (com confetes e tremor)
-        function checkResult(finalPos) {
-            // Marcar o caminho final como correto se chegou ao destino
-            if (finalPos.x === targetPos.x && finalPos.y === targetPos.y) {
-                // CONFETES AO ACERTAR
-                startConfetti(2.5);
-                
-                visitedCells = visitedCells.map(cell => ({...cell, correct: true}));
-                updateGridDisplay();
-                
-                const levelScore = Math.max(1000 - (commandQueue.length * 50), 100);
-                score += levelScore;
-                scoreEl.textContent = score;
-                
-                victoryMessage.textContent = `Parabéns! +${levelScore} pontos!`;
-                victoryMessage.style.display = 'block';
-                victoryMessage.style.opacity = '1';
-                
-                correctAttempts++;
-                
-                if (correctAttempts >= minCorrectAttempts) {
-                    if (currentLevel < 5) {
-                        currentLevel++;
-                        
-                        document.querySelectorAll('.level-btn').forEach(b => {
-                            b.disabled = parseInt(b.dataset.level) > currentLevel;
-                        });
-                        
-                        document.querySelector('.level-btn.active').classList.remove('active');
-                        document.querySelector(`.level-btn[data-level="${currentLevel}"]`).classList.add('active');
-                        
-                        levelEntryScore = score;
-                        victoryMessage.textContent += ` Você avançou para o Nível ${currentLevel}!`;
-                        correctAttempts = 0;
-                        lives = TOTAL_LIVES;
-                    } else {
-                        victoryMessage.textContent = `Você completou todos os desafios! Pontuação final: ${score}`;
-                        isGameOver = true;
-                        toggleControlButtons(false);
-                    }
-                }
-
-                if (!isGameOver) {
-                    setTimeout(() => {
-                        victoryMessage.style.opacity = '0';
-                        setTimeout(() => {
-                            victoryMessage.style.display = 'none';
-                            newChallenge();
-                        }, 500);
-                    }, 2000);
-                } else {
-                    updateChallengeProgress();
-                }
-            } else {
-                // TREMOR AO ERRAR
-                shakeGameContainer();
-                handleError("Ops! Você não chegou ao alvo correto!");
-            }
-        }
-        
-        // Manipular erro
-        function handleError(message) {
-            // PARAR MONITORAMENTO EM ERRO
-            stopPositionMonitoring();
-            
-            lives--;
-            updateLivesDisplay();
-            player.classList.add('exploded');
-            
-            setTimeout(() => {
-                if (lives <= 0) {
-                    const currentLevelBefore = currentLevel;
-                    isGameOver = true;
-                    toggleControlButtons(false);
-                    
-                    // Usar modal bonito em vez de alert
-                    showCustomAlert("💀 FIM DE JOGO", `Fim de Jogo! Você perdeu todas as suas vidas no Nível ${currentLevelBefore}. Reiniciando o nível...`, "warning", () => {
-                        score = levelEntryScore;
-                        scoreEl.textContent = score;
-                        lives = TOTAL_LIVES;
-                        correctAttempts = 0;
-                        isGameOver = false;
-                        toggleControlButtons(true);
-                        newChallenge();
-                    });
-                } else {
-                    showCustomAlert("⚠️ ERRO", message, "warning", () => {
-                        playerPos = { ...startPos };
-                        updatePlayerPosition();
-                        clearCommands();
-                        player.classList.remove('exploded');
-                    });
-                }
-            }, 600);
-        }
-
-        // Inicializar o jogo
-        init();
-    </script>
 </body>
 </html>
