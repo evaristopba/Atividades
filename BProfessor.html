@@ -48,7 +48,6 @@
             font-weight: 300;
         }
 
-        /* CONFIGURAÇÃO INICIAL */
         .config-area {
             background: rgba(0, 0, 0, 0.25);
             border-radius: 18px;
@@ -166,7 +165,6 @@
             transform: translateY(-2px);
         }
 
-        /* SESSÃO ATIVA */
         #sessaoAtiva {
             display: none;
         }
@@ -236,7 +234,6 @@
             border-color: #d4a373;
         }
 
-        /* CONTROLES */
         .controles-area {
             display: flex;
             gap: 10px;
@@ -268,7 +265,6 @@
             font-weight: 600;
         }
 
-        /* CARTELAS DOS ALUNOS */
         .alunos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -455,6 +451,8 @@
             transition: all 0.2s;
             font-size: 0.85rem;
             margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
         }
 
         .back-btn:hover {
@@ -486,13 +484,38 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
+
+        /* ADMIN LINK */
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .admin-link a {
+            color: #6a8a95;
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .admin-link a:hover {
+            color: #d4a373;
+        }
+
+        .admin-link .separator {
+            color: #3d6b7a;
+            margin: 0 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- HEADER -->
         <div class="header">
             <div>
-                <a href="#" class="back-btn">← Voltar</a>
+                <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Alunos</a>
                 <h1>🎲 BINGO <small>Painel do Professor</small></h1>
             </div>
             <div class="sync-status">
@@ -593,6 +616,13 @@
             <!-- Cartelas dos Alunos -->
             <h3 style="color: #d8d2b0; margin-top: 20px;">🧑‍🎓 Cartelas dos Alunos</h3>
             <div class="alunos-grid" id="alunosGrid"></div>
+
+            <!-- Link Admin -->
+            <div class="admin-link">
+                <a href="BAdmin.html">🗑️ Administração</a>
+                <span class="separator">|</span>
+                <a href="BAluno.html" target="_blank">👁️ Ver como aluno</a>
+            </div>
         </div>
     </div>
 
@@ -616,6 +646,17 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // ============================================
+        // ⭐ CORREÇÃO: Remover parâmetros da URL
+        // ============================================
+        (function limparURL() {
+            if (window.location.search) {
+                const novaURL = window.location.pathname;
+                window.history.replaceState({}, document.title, novaURL);
+                console.log('🔗 URL limpa: parâmetros removidos');
+            }
+        })();
 
         // ============================================
         // ESTADO
@@ -781,8 +822,8 @@
             document.getElementById('totalAlunos').textContent = qtdAlunos;
             document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-            // Gerar link
-            const baseUrl = window.location.href.replace('Bingo-Professor.html', 'Bingo-Aluno.html');
+            // ⭐ CORREÇÃO: Gerar link para o ALUNO (não para o professor)
+            const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
             const linkAluno = `${baseUrl}?sala=${codigo}`;
             document.getElementById('linkAluno').value = linkAluno;
 
@@ -797,11 +838,18 @@
             const grid = document.getElementById('alunosGrid');
             let html = '';
 
-            for (const [alunoId, data] of Object.entries(participantes)) {
+            // Ordenar por nome
+            const sorted = Object.entries(participantes).sort((a, b) =>
+                (a[1].nome || a[0]).localeCompare(b[1].nome || b[0])
+            );
+
+            for (const [alunoId, data] of sorted) {
                 const isWinner = data.venceu;
+                const nomeExibicao = data.nome || alunoId;
+
                 html += `<div class="cartela-card ${isWinner ? 'winner' : ''}">`;
                 html += `<div class="cartela-header">`;
-                html += `<span>${data.nome}</span>`;
+                html += `<span>🧑‍🎓 ${nomeExibicao}</span>`;
                 html += `<span class="badge ${isWinner ? 'winner-badge' : ''}">${isWinner ? '🏆 BINGO!' : ''}</span>`;
                 html += `</div>`;
                 html += `<div class="card-letters">`;
@@ -875,7 +923,6 @@
                             chipsDiv.innerHTML = chipsHtml;
                         }
 
-                        // Último número
                         if (numerosChamados.length > 0) {
                             const ultimo = numerosChamados[numerosChamados.length - 1];
                             const letra = getLetterForNumber(ultimo);
@@ -884,7 +931,6 @@
                         }
                     }
 
-                    // Renderizar cartelas
                     if (sessao.participantes) {
                         renderizarCartelas(sessao.participantes);
                     }
@@ -908,7 +954,6 @@
                 }
 
                 if (sessao.status === 'aguardando') {
-                    // Ativar automaticamente
                     sessaoRef.update({ status: 'ativa' });
                 }
 
@@ -937,7 +982,6 @@
                     ultimaLetra: letra
                 });
 
-                // Verificar vencedores
                 const vencedores = [];
                 const participantes = sessao.participantes;
 
@@ -1070,6 +1114,8 @@
         // INICIALIZAÇÃO
         // ============================================
         console.log('🎲 BINGO - Painel do Professor carregado!');
+        console.log('📌 Use o formulário para criar uma nova sessão.');
+        console.log('🔗 O link gerado será para o ALUNO (BAluno.html? sala=CODIGO)');
     </script>
 </body>
 </html>
