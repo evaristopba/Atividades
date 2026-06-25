@@ -312,6 +312,14 @@
             border-color: #6c757d;
         }
 
+        .cartela-card .slot-number {
+            font-size: 0.6rem;
+            color: #6a8a95;
+            background: rgba(0,0,0,0.05);
+            padding: 0 6px;
+            border-radius: 10px;
+        }
+
         .cartela-header {
             display: flex;
             justify-content: space-between;
@@ -323,7 +331,6 @@
         }
 
         .cartela-header .badge {
-            background: #bfa27b;
             padding: 1px 10px;
             border-radius: 14px;
             font-size: 0.55rem;
@@ -345,6 +352,11 @@
         .cartela-header .badge.offline-badge {
             background: #6c757d;
             color: #fff;
+        }
+
+        .cartela-header .badge.empty-badge {
+            background: #e9ecef;
+            color: #6c757d;
         }
 
         @keyframes pulse-badge {
@@ -553,6 +565,11 @@
             color: #1a2f3a;
         }
 
+        .toast.error-toast {
+            background: #dc3545;
+            color: #fff;
+        }
+
         @keyframes slideIn {
             from { transform: translateX(100px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -615,6 +632,7 @@
                 <label for="qtdAlunos">👥 Quantos alunos vão jogar?</label>
                 <input type="number" id="qtdAlunos" min="2" max="50" value="10">
                 <small>Mínimo: 2 | Máximo: 50 alunos</small>
+                <small style="color: #ffd93d;">⚠️ Cada aluno precisa de uma cartela única</small>
             </div>
 
             <button class="btn btn-primary" onclick="criarSessao()">🎯 Iniciar Bingo</button>
@@ -636,6 +654,9 @@
                     <input type="text" id="linkAluno" readonly onclick="this.select();document.execCommand('copy')">
                     <button class="btn btn-secondary" onclick="copiarLink()">📋 Copiar</button>
                 </div>
+                <div style="margin-top: 8px; font-size: 0.8rem; color: #8aaab5;">
+                    💡 Alunos devem digitar seus nomes ao acessar
+                </div>
             </div>
 
             <div class="status-bar">
@@ -649,6 +670,7 @@
                 <button class="btn btn-secondary" onclick="sortearMultiplos(5)">⚡ Sortear 5</button>
                 <button class="btn btn-warning" onclick="resetarJogo()">🔄 Resetar</button>
                 <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
+                <button class="btn btn-secondary" onclick="expandirVagas()" style="background: #17a2b8;">➕ Expandir Vagas</button>
             </div>
 
             <div class="numeros-chamados">
@@ -658,7 +680,10 @@
                 </div>
             </div>
 
-            <h3 style="color: #d8d2b0; margin-top: 20px;">🧑‍🎓 Cartelas dos Alunos</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <h3 style="color: #d8d2b0;">🧑‍🎓 Cartelas dos Alunos</h3>
+                <span style="color: #8aaab5; font-size: 0.85rem;" id="ocupacaoVagas">0/0 ocupadas</span>
+            </div>
             <div class="alunos-grid" id="alunosGrid"></div>
 
             <div class="admin-link">
@@ -699,10 +724,12 @@
         // ============================================
         // TOAST
         // ============================================
-        function showToast(message, isWinner = false) {
+        function showToast(message, tipo = 'info') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.className = 'toast' + (isWinner ? ' winner-toast' : '');
+            toast.className = 'toast';
+            if (tipo === 'winner') toast.classList.add('winner-toast');
+            if (tipo === 'error') toast.classList.add('error-toast');
             toast.style.display = 'block';
             clearTimeout(toast._timeout);
             toast._timeout = setTimeout(() => {
@@ -825,7 +852,7 @@
             for (let i = 1; i <= qtdAlunos; i++) {
                 const cartela = gerarCartelaUnica(participantes);
                 participantes[`aluno_${i}`] = {
-                    nome: `Aluno ${i}`,
+                    nome: '', // Vazio = disponível
                     cartela: cartela,
                     marcacoes: Array.from({ length: 5 }, () => Array(5).fill(false)),
                     venceu: false
@@ -864,30 +891,96 @@
 
             renderizarCartelas(participantes);
             escutarSessao(codigo);
+            atualizarOcupacao(participantes);
         }
 
         // ============================================
-        // RENDERIZAR CARTELAS (com status online)
+        // EXPANDIR VAGAS
+        // ============================================
+        function expandirVagas() {
+            if (!sessaoAtual) return;
+            
+            const novasVagas = prompt('Quantas vagas adicionais deseja criar? (máximo 50 total)');
+            if (!novasVagas) return;
+            
+            const qtd = parseInt(novasVagas);
+            if (isNaN(qtd) || qtd < 1) {
+                showToast('❌ Número inválido!', 'error');
+                return;
+            }
+
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            sessaoRef.once('value', (snapshot) => {
+                const sessao = snapshot.val();
+                const participantes = sessao.participantes || {};
+                const totalAtual = Object.keys(participantes).length;
+                const novoTotal = totalAtual + qtd;
+
+                if (novoTotal > 50) {
+                    showToast(`❌ Máximo 50 alunos! Atualmente ${totalAtual}`, 'error');
+                    return;
+                }
+
+                for (let i = totalAtual + 1; i <= novoTotal; i++) {
+                    const cartela = gerarCartelaUnica(participantes);
+                    participantes[`aluno_${i}`] = {
+                        nome: '',
+                        cartela: cartela,
+                        marcacoes: Array.from({ length: 5 }, () => Array(5).fill(false)),
+                        venceu: false
+                    };
+                    participantes[`aluno_${i}`].marcacoes[2][2] = true;
+                }
+
+                sessaoRef.update({
+                    participantes: participantes,
+                    totalAlunos: novoTotal
+                });
+
+                document.getElementById('totalAlunos').textContent = novoTotal;
+                showToast(`✅ ${qtd} nova(s) vaga(s) criada(s)! Total: ${novoTotal}`, 'info');
+                renderizarCartelas(participantes);
+                atualizarOcupacao(participantes);
+            });
+        }
+
+        // ============================================
+        // RENDERIZAR CARTELAS
         // ============================================
         function renderizarCartelas(participantes) {
             const grid = document.getElementById('alunosGrid');
             let html = '';
 
-            const sorted = Object.entries(participantes).sort((a, b) =>
-                (a[1].nome || a[0]).localeCompare(b[1].nome || b[0])
-            );
+            const sorted = Object.entries(participantes).sort((a, b) => {
+                const numA = parseInt(a[0].replace('aluno_', ''));
+                const numB = parseInt(b[0].replace('aluno_', ''));
+                return numA - numB;
+            });
 
             for (const [alunoId, data] of sorted) {
                 const isWinner = data.venceu;
                 const isOnline = alunosConectados.has(alunoId);
-                const nomeExibicao = data.nome || alunoId;
+                const temNome = data.nome && data.nome.trim() !== '';
+                const nomeExibicao = temNome ? data.nome : `💺 Vaga ${alunoId.replace('aluno_', '')}`;
+                const isOcupada = temNome;
 
-                html += `<div class="cartela-card ${isWinner ? 'winner' : ''} ${!isOnline ? 'offline' : ''}">`;
+                let badgeClass = 'empty-badge';
+                let badgeText = '💺 Disponível';
+                if (isWinner) {
+                    badgeClass = 'winner-badge';
+                    badgeText = '🏆 BINGO!';
+                } else if (isOnline && isOcupada) {
+                    badgeClass = 'online-badge';
+                    badgeText = '🟢 Online';
+                } else if (isOcupada) {
+                    badgeClass = 'offline-badge';
+                    badgeText = '⚫ Offline';
+                }
+
+                html += `<div class="cartela-card ${isWinner ? 'winner' : ''} ${!isOnline && isOcupada ? 'offline' : ''}">`;
                 html += `<div class="cartela-header">`;
                 html += `<span>🧑‍🎓 ${nomeExibicao}</span>`;
-                html += `<span class="badge ${isWinner ? 'winner-badge' : isOnline ? 'online-badge' : 'offline-badge'}">
-                    ${isWinner ? '🏆 BINGO!' : isOnline ? '🟢 Online' : '⚫ Offline'}
-                </span>`;
+                html += `<span class="badge ${badgeClass}">${badgeText}</span>`;
                 html += `</div>`;
                 html += `<div class="card-letters">`;
                 ['B', 'I', 'N', 'G', 'O'].forEach(letra => {
@@ -920,23 +1013,38 @@
         }
 
         // ============================================
+        // ATUALIZAR OCUPAÇÃO
+        // ============================================
+        function atualizarOcupacao(participantes) {
+            let ocupadas = 0;
+            let total = 0;
+            for (const [id, data] of Object.entries(participantes)) {
+                total++;
+                if (data.nome && data.nome.trim() !== '') {
+                    ocupadas++;
+                }
+            }
+            document.getElementById('ocupacaoVagas').textContent = `${ocupadas}/${total} ocupadas`;
+        }
+
+        // ============================================
         // ESCUTAR SESSÃO
         // ============================================
         function escutarSessao(codigo) {
             const sessaoRef = db.ref(`bingo/sessoes/${codigo}`);
 
-            // Escutar participantes em tempo real para detectar online
             const participantesRef = db.ref(`bingo/sessoes/${codigo}/participantes`);
             participantesRef.on('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const participantes = snapshot.val();
-                    // Atualizar lista de conectados (todos que estão no Firebase são considerados online)
                     alunosConectados = new Set(Object.keys(participantes));
                     if (sessaoAtual) {
                         const sessaoRefLocal = db.ref(`bingo/sessoes/${sessaoAtual}`);
                         sessaoRefLocal.once('value', (s) => {
                             if (s.exists()) {
-                                renderizarCartelas(s.val().participantes);
+                                const dados = s.val();
+                                renderizarCartelas(dados.participantes);
+                                atualizarOcupacao(dados.participantes);
                             }
                         });
                     }
@@ -988,6 +1096,7 @@
 
                     if (sessao.participantes) {
                         renderizarCartelas(sessao.participantes);
+                        atualizarOcupacao(sessao.participantes);
                     }
                 }
             });
@@ -1004,19 +1113,19 @@
                 const sessao = snapshot.val();
 
                 if (sessao.status === 'finalizada') {
-                    alert('Esta sessão já foi finalizada!');
+                    showToast('⚠️ Jogo já finalizado!', 'error');
                     return;
                 }
 
                 if (sessao.status === 'aguardando') {
                     sessaoRef.update({ status: 'ativa' });
-                    showToast('🎯 Jogo iniciado! Boa sorte a todos!');
+                    showToast('🎯 Jogo iniciado! Boa sorte a todos!', 'info');
                 }
 
                 const numerosSorteados = sessao.numerosSorteados || [];
 
                 if (numerosSorteados.length >= 75) {
-                    alert('Todos os números já foram sorteados!');
+                    showToast('⚠️ Todos os números já foram sorteados!', 'error');
                     return;
                 }
 
@@ -1038,15 +1147,13 @@
                     ultimaLetra: letra
                 });
 
-                showToast(`🎯 Número sorteado: ${letra}${numero}`);
+                showToast(`🎯 ${letra}${numero}`, 'info');
 
-                // Verificar vencedores (alunos que marcaram todos)
                 const vencedores = [];
                 const participantes = sessao.participantes;
 
                 for (const [alunoId, data] of Object.entries(participantes)) {
                     const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                    // O centro (B) já está marcado
                     if (checkBingo(marcacoes) && !data.venceu) {
                         vencedores.push(alunoId);
                         sessaoRef.child(`participantes/${alunoId}`).update({
@@ -1064,7 +1171,7 @@
                     const nomes = vencedores.map(v =>
                         participantes[v]?.nome || v.replace('aluno_', 'Aluno ')
                     ).join(', ');
-                    showToast(`🏆 BINGO! ${nomes} venceu! 🎉`, true);
+                    showToast(`🏆 BINGO! ${nomes} venceu! 🎉`, 'winner');
                 }
 
                 document.getElementById('ultimoSorteio').innerHTML =
