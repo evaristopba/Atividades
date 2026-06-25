@@ -234,6 +234,12 @@
             border-color: #d4a373;
         }
 
+        .link-area .sala-nome-info {
+            margin-top: 8px;
+            color: #d4a373;
+            font-size: 0.9rem;
+        }
+
         .controles-area {
             display: flex;
             gap: 10px;
@@ -654,7 +660,8 @@
                     <input type="text" id="linkAluno" readonly onclick="this.select();document.execCommand('copy')">
                     <button class="btn btn-secondary" onclick="copiarLink()">📋 Copiar</button>
                 </div>
-                <div style="margin-top: 8px; font-size: 0.8rem; color: #8aaab5;">
+                <div class="sala-nome-info" id="salaNomeLink">📌 Sala: <strong>---</strong></div>
+                <div style="margin-top: 5px; font-size: 0.8rem; color: #8aaab5;">
                     💡 Alunos devem digitar seus nomes ao acessar
                 </div>
             </div>
@@ -828,7 +835,7 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO
+        // CRIAR SESSÃO (COM NOME DA SALA NO LINK)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -852,7 +859,7 @@
             for (let i = 1; i <= qtdAlunos; i++) {
                 const cartela = gerarCartelaUnica(participantes);
                 participantes[`aluno_${i}`] = {
-                    nome: '', // Vazio = disponível
+                    nome: '',
                     cartela: cartela,
                     marcacoes: Array.from({ length: 5 }, () => Array(5).fill(false)),
                     venceu: false
@@ -881,12 +888,14 @@
             document.getElementById('configuracao').style.display = 'none';
             document.getElementById('sessaoAtiva').style.display = 'block';
             document.getElementById('salaNome').textContent = salaNome;
+            document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${salaNome}</strong>`;
             document.getElementById('codigoSessao').textContent = codigo;
             document.getElementById('totalAlunos').textContent = qtdAlunos;
             document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
+            // ⭐ CORREÇÃO: Incluir nome da sala no link
             const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
-            const linkAluno = `${baseUrl}?sala=${codigo}`;
+            const linkAluno = `${baseUrl}?sala=${codigo}&nome=${encodeURIComponent(salaNome)}`;
             document.getElementById('linkAluno').value = linkAluno;
 
             renderizarCartelas(participantes);
