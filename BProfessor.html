@@ -842,7 +842,7 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO (COM CÓDIGO FIXO E LINK CORRETO)
+        // CRIAR SESSÃO (COM LINK CORRETO - SEM #)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -916,9 +916,11 @@
                 document.getElementById('totalAlunos').textContent = qtdAlunos;
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-                // ⭐⭐⭐ CORREÇÃO DO LINK ⭐⭐⭐
-                // Link SIMPLES: ?sala=CODIGO (SEM # e SEM &nome=)
-                const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
+                // ⭐⭐⭐ CORREÇÃO DO LINK - REMOVE QUALQUER # ⭐⭐⭐
+                const baseUrl = window.location.href
+                    .split('?')[0]
+                    .replace('BProfessor.html', 'BAluno.html')
+                    .replace('#', ''); // ← Remove o # se existir
                 const linkAluno = `${baseUrl}?sala=${codigo}`;
                 document.getElementById('linkAluno').value = linkAluno;
 
