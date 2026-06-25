@@ -606,7 +606,7 @@
         }
 
         // ============================================
-        // ⭐ ATRIBUIR CARTELA - PRIMEIRA DISPONÍVEL
+        // ⭐ ATRIBUIR CARTELA - PRIMEIRA DISPONÍVEL (CORRIGIDO)
         // ============================================
         function atribuirCartela(sessao, nome) {
             const participantes = sessao.participantes || {};
@@ -618,10 +618,12 @@
                 }
             }
 
-            // Procurar cartela disponível (sem nome atribuído)
+            // Procurar cartela disponível (NÃO ocupada)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
-                if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
+                // ⭐ CORREÇÃO: Verifica se a cartela está realmente vazia
+                const isOcupada = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
+                if (!isOcupada) {
                     cartelasDisponiveis.push({ id, data });
                 }
             }
@@ -630,7 +632,7 @@
                 return null;
             }
 
-            // ⭐ PEGAR A PRIMEIRA CARTELA DISPONÍVEL (NÃO A ÚLTIMA)
+            // Pegar a PRIMEIRA cartela disponível
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
