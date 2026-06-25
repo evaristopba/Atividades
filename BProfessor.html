@@ -318,14 +318,6 @@
             border-color: #6c757d;
         }
 
-        .cartela-card .slot-number {
-            font-size: 0.6rem;
-            color: #6a8a95;
-            background: rgba(0,0,0,0.05);
-            padding: 0 6px;
-            border-radius: 10px;
-        }
-
         .cartela-header {
             display: flex;
             justify-content: space-between;
@@ -580,6 +572,25 @@
             from { transform: translateX(100px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        .status-criacao {
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .status-criacao.info {
+            background: rgba(90, 143, 108, 0.2);
+            color: #5a8f6c;
+            border: 1px solid rgba(90, 143, 108, 0.3);
+        }
+
+        .status-criacao.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -641,6 +652,8 @@
                 <small style="color: #ffd93d;">⚠️ Cada aluno precisa de uma cartela única</small>
             </div>
 
+            <div id="statusCriacao"></div>
+
             <button class="btn btn-primary" onclick="criarSessao()">🎯 Iniciar Bingo</button>
         </div>
 
@@ -655,7 +668,7 @@
             </div>
 
             <div class="link-area">
-                <h4>📋 Compartilhe este link com os alunos:</h4>
+                <h4>📋 Link para os alunos (sempre o mesmo):</h4>
                 <div class="link-input-group">
                     <input type="text" id="linkAluno" readonly onclick="this.select();document.execCommand('copy')">
                     <button class="btn btn-secondary" onclick="copiarLink()">📋 Copiar</button>
@@ -825,21 +838,13 @@
             return diag1 || diag2;
         }
 
-        function gerarCodigoSessao() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let codigo = '';
-            for (let i = 0; i < 6; i++) {
-                codigo += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return codigo;
-        }
-
         // ============================================
-        // CRIAR SESSÃO (COM NOME DA SALA NO LINK)
+        // CRIAR SESSÃO (COM CÓDIGO FIXO)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
             const qtdAlunos = parseInt(document.getElementById('qtdAlunos').value);
+            const statusDiv = document.getElementById('statusCriacao');
 
             if (!salaSelect.value) {
                 alert('Por favor, selecione uma turma!');
@@ -852,55 +857,77 @@
             }
 
             const salaNome = salaSelect.options[salaSelect.selectedIndex].text;
-            const salaId = salaSelect.value;
-            const codigo = gerarCodigoSessao();
+            const salaId = salaSelect.value; // ← Código fixo (ex: 4a-cp)
 
-            const participantes = {};
-            for (let i = 1; i <= qtdAlunos; i++) {
-                const cartela = gerarCartelaUnica(participantes);
-                participantes[`aluno_${i}`] = {
-                    nome: '',
-                    cartela: cartela,
-                    marcacoes: Array.from({ length: 5 }, () => Array(5).fill(false)),
-                    venceu: false
+            // Usar o código fixo como identificador da sessão
+            const codigo = salaId;
+
+            statusDiv.innerHTML = `<div class="status-criacao info">🔄 Verificando sala "${salaNome}"...</div>`;
+
+            const sessaoRef = db.ref(`bingo/sessoes/${codigo}`);
+            
+            sessaoRef.once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    // Sala já existe
+                    statusDiv.innerHTML = `<div class="status-criacao warning">⚠️ Sala "${salaNome}" já existe. Resetando...</div>`;
+                    
+                    if (!confirm(`A sala "${salaNome}" já existe.\n\nDeseja resetá-la com ${qtdAlunos} alunos?`)) {
+                        statusDiv.innerHTML = '';
+                        return;
+                    }
+                }
+
+                // Criar/Resetar a sala
+                const participantes = {};
+                for (let i = 1; i <= qtdAlunos; i++) {
+                    const cartela = gerarCartelaUnica(participantes);
+                    participantes[`aluno_${i}`] = {
+                        nome: '',
+                        cartela: cartela,
+                        marcacoes: Array.from({ length: 5 }, () => Array(5).fill(false)),
+                        venceu: false
+                    };
+                }
+                for (const key in participantes) {
+                    participantes[key].marcacoes[2][2] = true;
+                }
+
+                const sessaoData = {
+                    salaId: salaId,
+                    salaNome: salaNome,
+                    status: 'aguardando',
+                    dataCriacao: new Date().toISOString(),
+                    totalAlunos: qtdAlunos,
+                    numerosSorteados: [],
+                    vencedores: [],
+                    participantes: participantes
                 };
-            }
-            for (const key in participantes) {
-                participantes[key].marcacoes[2][2] = true;
-            }
 
-            const sessaoData = {
-                salaId: salaId,
-                salaNome: salaNome,
-                status: 'aguardando',
-                dataCriacao: new Date().toISOString(),
-                totalAlunos: qtdAlunos,
-                numerosSorteados: [],
-                vencedores: [],
-                participantes: participantes
-            };
+                sessaoRef.set(sessaoData);
 
-            db.ref(`bingo/sessoes/${codigo}`).set(sessaoData);
+                sessaoAtual = codigo;
+                numerosChamados = [];
 
-            sessaoAtual = codigo;
-            numerosChamados = [];
+                document.getElementById('configuracao').style.display = 'none';
+                document.getElementById('sessaoAtiva').style.display = 'block';
+                document.getElementById('salaNome').textContent = salaNome;
+                document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${salaNome}</strong>`;
+                document.getElementById('codigoSessao').textContent = codigo;
+                document.getElementById('totalAlunos').textContent = qtdAlunos;
+                document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-            document.getElementById('configuracao').style.display = 'none';
-            document.getElementById('sessaoAtiva').style.display = 'block';
-            document.getElementById('salaNome').textContent = salaNome;
-            document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${salaNome}</strong>`;
-            document.getElementById('codigoSessao').textContent = codigo;
-            document.getElementById('totalAlunos').textContent = qtdAlunos;
-            document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
+                // ⭐ Link com código fixo (sempre o mesmo para cada turma)
+                const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
+                const linkAluno = `${baseUrl}?sala=${codigo}&nome=${encodeURIComponent(salaNome)}`;
+                document.getElementById('linkAluno').value = linkAluno;
 
-            // ⭐ CORREÇÃO: Incluir nome da sala no link
-            const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
-            const linkAluno = `${baseUrl}?sala=${codigo}&nome=${encodeURIComponent(salaNome)}`;
-            document.getElementById('linkAluno').value = linkAluno;
+                renderizarCartelas(participantes);
+                escutarSessao(codigo);
+                atualizarOcupacao(participantes);
 
-            renderizarCartelas(participantes);
-            escutarSessao(codigo);
-            atualizarOcupacao(participantes);
+                statusDiv.innerHTML = `<div class="status-criacao info">✅ Sala "${salaNome}" configurada com ${qtdAlunos} alunos!</div>`;
+                showToast(`✅ Sala "${salaNome}" criada/atualizada!`, 'info');
+            });
         }
 
         // ============================================
@@ -1268,6 +1295,7 @@
         // INICIALIZAÇÃO
         // ============================================
         console.log('🎲 BINGO - Painel do Professor carregado!');
+        console.log('📌 Usando códigos fixos de turma (como no STOP)');
         console.log('👀 Acompanhe os alunos em tempo real!');
     </script>
 </body>
