@@ -265,6 +265,11 @@
             font-weight: 600;
         }
 
+        .status-bar .online-count {
+            color: #5a8f6c;
+            font-size: 0.9rem;
+        }
+
         .alunos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -302,6 +307,11 @@
             background: #fff7e0;
         }
 
+        .cartela-card.offline {
+            opacity: 0.5;
+            border-color: #6c757d;
+        }
+
         .cartela-header {
             display: flex;
             justify-content: space-between;
@@ -325,6 +335,16 @@
             background: #ffd966;
             color: #1a2f3a;
             animation: pulse-badge 1s ease-in-out infinite alternate;
+        }
+
+        .cartela-header .badge.online-badge {
+            background: #5a8f6c;
+            color: #fff;
+        }
+
+        .cartela-header .badge.offline-badge {
+            background: #6c757d;
+            color: #fff;
         }
 
         @keyframes pulse-badge {
@@ -396,6 +416,10 @@
 
         .cartela-numeros .num.free.marked {
             background: #d4a373;
+        }
+
+        .cartela-numeros .num.sorteado {
+            border: 1px solid #ffd93d;
         }
 
         .numeros-chamados {
@@ -507,11 +531,36 @@
             color: #3d6b7a;
             margin: 0 8px;
         }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #5a8f6c;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        }
+
+        .toast.winner-toast {
+            background: #ffd966;
+            color: #1a2f3a;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
         <div class="header">
             <div>
                 <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Alunos</a>
@@ -573,15 +622,14 @@
 
         <!-- ===== SESSÃO ATIVA ===== -->
         <div id="sessaoAtiva">
-            <!-- Info da Sessão -->
             <div class="sessao-info">
                 <span class="info-item">🏫 <strong id="salaNome">---</strong></span>
                 <span class="info-item">📌 Código: <span class="codigo" id="codigoSessao">---</span></span>
                 <span class="info-item">👥 Alunos: <strong id="totalAlunos">0</strong></span>
                 <span class="info-item" id="statusSessao">⏳ Aguardando...</span>
+                <span class="info-item online-count" id="onlineCount">🟢 Online: 0</span>
             </div>
 
-            <!-- Link para Alunos -->
             <div class="link-area">
                 <h4>📋 Compartilhe este link com os alunos:</h4>
                 <div class="link-input-group">
@@ -590,7 +638,6 @@
                 </div>
             </div>
 
-            <!-- Controles -->
             <div class="status-bar">
                 <span class="last-call" id="ultimoSorteio">🎯 Último: ---</span>
                 <span class="stats" id="totalSorteados">0/75 sorteados</span>
@@ -604,7 +651,6 @@
                 <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
             </div>
 
-            <!-- Números Chamados -->
             <div class="numeros-chamados">
                 <h4>📋 Números chamados:</h4>
                 <div class="chips" id="numerosChamados">
@@ -612,11 +658,9 @@
                 </div>
             </div>
 
-            <!-- Cartelas dos Alunos -->
             <h3 style="color: #d8d2b0; margin-top: 20px;">🧑‍🎓 Cartelas dos Alunos</h3>
             <div class="alunos-grid" id="alunosGrid"></div>
 
-            <!-- Link Admin -->
             <div class="admin-link">
                 <a href="BAdmin.html">🗑️ Administração</a>
                 <span class="separator">|</span>
@@ -625,13 +669,12 @@
         </div>
     </div>
 
+    <div id="toast" class="toast"></div>
+
     <!-- ===== FIREBASE ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // ============================================
-        // FIREBASE CONFIG
-        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
             authDomain: "meu-super-jogo-stop.firebaseapp.com",
@@ -647,22 +690,25 @@
         const db = firebase.database();
 
         // ============================================
-        // REMOVER PARÂMETROS DA URL (CORREÇÃO)
-        // ============================================
-        (function limparURL() {
-            if (window.location.search) {
-                const novaURL = window.location.pathname;
-                window.history.replaceState({}, document.title, novaURL);
-                console.log('🔗 URL limpa: parâmetros removidos');
-            }
-        })();
-
-        // ============================================
         // ESTADO
         // ============================================
         let sessaoAtual = null;
-        let salaAtual = null;
         let numerosChamados = [];
+        let alunosConectados = new Set();
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, isWinner = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (isWinner ? ' winner-toast' : '');
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
 
         // ============================================
         // FUNÇÕES AUXILIARES
@@ -678,9 +724,7 @@
 
         function getRandomNumbers(min, max, count) {
             const pool = [];
-            for (let i = min; i <= max; i++) {
-                pool.push(i);
-            }
+            for (let i = min; i <= max; i++) pool.push(i);
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -719,14 +763,12 @@
                 const cartela = participantesExistentes[key].cartela;
                 cartelasUsadas.add(cartela.flat().join(','));
             }
-
             let cartela;
             let tentativas = 0;
             do {
                 cartela = gerarCartela();
                 tentativas++;
             } while (cartelasUsadas.has(cartela.flat().join(',')) && tentativas < 1000);
-
             return cartela;
         }
 
@@ -741,8 +783,7 @@
                 }
                 if (colFull) return true;
             }
-            let diag1 = true,
-                diag2 = true;
+            let diag1 = true, diag2 = true;
             for (let i = 0; i < 5; i++) {
                 if (!marcacoes[i][i]) diag1 = false;
                 if (!marcacoes[i][4 - i]) diag2 = false;
@@ -760,7 +801,7 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO (CORRIGIDO)
+        // CRIAR SESSÃO
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -779,9 +820,7 @@
             const salaNome = salaSelect.options[salaSelect.selectedIndex].text;
             const salaId = salaSelect.value;
             const codigo = gerarCodigoSessao();
-            salaAtual = salaId;
 
-            // Gerar cartelas
             const participantes = {};
             for (let i = 1; i <= qtdAlunos; i++) {
                 const cartela = gerarCartelaUnica(participantes);
@@ -792,7 +831,6 @@
                     venceu: false
                 };
             }
-            // Centro sempre marcado
             for (const key in participantes) {
                 participantes[key].marcacoes[2][2] = true;
             }
@@ -813,7 +851,6 @@
             sessaoAtual = codigo;
             numerosChamados = [];
 
-            // Atualizar interface
             document.getElementById('configuracao').style.display = 'none';
             document.getElementById('sessaoAtiva').style.display = 'block';
             document.getElementById('salaNome').textContent = salaNome;
@@ -821,8 +858,6 @@
             document.getElementById('totalAlunos').textContent = qtdAlunos;
             document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-            // ⭐⭐⭐ CORREÇÃO AQUI ⭐⭐⭐
-            // Gerar link para o ALUNO (BAluno.html) e não para o Professor
             const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
             const linkAluno = `${baseUrl}?sala=${codigo}`;
             document.getElementById('linkAluno').value = linkAluno;
@@ -832,25 +867,27 @@
         }
 
         // ============================================
-        // RENDERIZAR CARTELAS
+        // RENDERIZAR CARTELAS (com status online)
         // ============================================
         function renderizarCartelas(participantes) {
             const grid = document.getElementById('alunosGrid');
             let html = '';
 
-            // Ordenar por nome
             const sorted = Object.entries(participantes).sort((a, b) =>
                 (a[1].nome || a[0]).localeCompare(b[1].nome || b[0])
             );
 
             for (const [alunoId, data] of sorted) {
                 const isWinner = data.venceu;
+                const isOnline = alunosConectados.has(alunoId);
                 const nomeExibicao = data.nome || alunoId;
 
-                html += `<div class="cartela-card ${isWinner ? 'winner' : ''}">`;
+                html += `<div class="cartela-card ${isWinner ? 'winner' : ''} ${!isOnline ? 'offline' : ''}">`;
                 html += `<div class="cartela-header">`;
                 html += `<span>🧑‍🎓 ${nomeExibicao}</span>`;
-                html += `<span class="badge ${isWinner ? 'winner-badge' : ''}">${isWinner ? '🏆 BINGO!' : ''}</span>`;
+                html += `<span class="badge ${isWinner ? 'winner-badge' : isOnline ? 'online-badge' : 'offline-badge'}">
+                    ${isWinner ? '🏆 BINGO!' : isOnline ? '🟢 Online' : '⚫ Offline'}
+                </span>`;
                 html += `</div>`;
                 html += `<div class="card-letters">`;
                 ['B', 'I', 'N', 'G', 'O'].forEach(letra => {
@@ -866,9 +903,11 @@
                         const val = cartela[r][c];
                         const isMarked = marcacoes[r][c];
                         const isCenter = (r === 2 && c === 2);
+                        const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
                         let cls = 'num';
                         if (isMarked) cls += ' marked';
                         if (isCenter) cls += ' free';
+                        if (isSorteado && !isMarked && !isCenter) cls += ' sorteado';
                         const displayVal = isCenter ? 'B' : val;
                         html += `<div class="${cls}">${displayVal}</div>`;
                     }
@@ -877,6 +916,7 @@
             }
 
             grid.innerHTML = html;
+            document.getElementById('onlineCount').textContent = `🟢 Online: ${alunosConectados.size}`;
         }
 
         // ============================================
@@ -885,11 +925,28 @@
         function escutarSessao(codigo) {
             const sessaoRef = db.ref(`bingo/sessoes/${codigo}`);
 
+            // Escutar participantes em tempo real para detectar online
+            const participantesRef = db.ref(`bingo/sessoes/${codigo}/participantes`);
+            participantesRef.on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const participantes = snapshot.val();
+                    // Atualizar lista de conectados (todos que estão no Firebase são considerados online)
+                    alunosConectados = new Set(Object.keys(participantes));
+                    if (sessaoAtual) {
+                        const sessaoRefLocal = db.ref(`bingo/sessoes/${sessaoAtual}`);
+                        sessaoRefLocal.once('value', (s) => {
+                            if (s.exists()) {
+                                renderizarCartelas(s.val().participantes);
+                            }
+                        });
+                    }
+                }
+            });
+
             sessaoRef.on('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const sessao = snapshot.val();
 
-                    // Atualizar status
                     const statusMap = {
                         'aguardando': '⏳ Aguardando alunos...',
                         'ativa': '🟢 Jogo em andamento',
@@ -897,7 +954,6 @@
                     };
                     document.getElementById('statusSessao').textContent = statusMap[sessao.status] || sessao.status;
 
-                    // Atualizar vencedores
                     if (sessao.vencedores && sessao.vencedores.length > 0) {
                         const nomes = sessao.vencedores.map(id =>
                             sessao.participantes[id]?.nome || id
@@ -905,7 +961,6 @@
                         document.getElementById('vencedores').innerHTML = `🏆 Vencedor(es): ${nomes} 🎉`;
                     }
 
-                    // Atualizar números sorteados
                     if (sessao.numerosSorteados) {
                         numerosChamados = sessao.numerosSorteados;
                         document.getElementById('totalSorteados').textContent =
@@ -955,6 +1010,7 @@
 
                 if (sessao.status === 'aguardando') {
                     sessaoRef.update({ status: 'ativa' });
+                    showToast('🎯 Jogo iniciado! Boa sorte a todos!');
                 }
 
                 const numerosSorteados = sessao.numerosSorteados || [];
@@ -982,30 +1038,19 @@
                     ultimaLetra: letra
                 });
 
+                showToast(`🎯 Número sorteado: ${letra}${numero}`);
+
+                // Verificar vencedores (alunos que marcaram todos)
                 const vencedores = [];
                 const participantes = sessao.participantes;
 
                 for (const [alunoId, data] of Object.entries(participantes)) {
                     const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                    const cartela = data.cartela;
-
-                    for (let r = 0; r < 5; r++) {
-                        for (let c = 0; c < 5; c++) {
-                            if (cartela[r][c] === numero) {
-                                marcacoes[r][c] = true;
-                            }
-                        }
-                    }
-
+                    // O centro (B) já está marcado
                     if (checkBingo(marcacoes) && !data.venceu) {
                         vencedores.push(alunoId);
                         sessaoRef.child(`participantes/${alunoId}`).update({
-                            venceu: true,
-                            marcacoes: marcacoes
-                        });
-                    } else {
-                        sessaoRef.child(`participantes/${alunoId}`).update({
-                            marcacoes: marcacoes
+                            venceu: true
                         });
                     }
                 }
@@ -1016,20 +1061,16 @@
                     sessaoRef.update({
                         vencedores: novosVencedores
                     });
+                    const nomes = vencedores.map(v =>
+                        participantes[v]?.nome || v.replace('aluno_', 'Aluno ')
+                    ).join(', ');
+                    showToast(`🏆 BINGO! ${nomes} venceu! 🎉`, true);
                 }
 
                 document.getElementById('ultimoSorteio').innerHTML =
                     `🎯 Último: ${letra}${numero}`;
                 document.getElementById('totalSorteados').textContent =
                     `${numerosSorteados.length}/75 sorteados`;
-
-                if (vencedores.length > 0) {
-                    const nomes = vencedores.map(v =>
-                        participantes[v]?.nome || v.replace('aluno_', 'Aluno ')
-                    ).join(', ');
-                    document.getElementById('vencedores').innerHTML =
-                        `🏆 Vencedor(es): ${nomes} 🎉`;
-                }
             });
         }
 
@@ -1037,12 +1078,8 @@
         // SORTEAR MÚLTIPLOS
         // ============================================
         function sortearMultiplos(count) {
-            let sorted = 0;
             for (let i = 0; i < count; i++) {
-                setTimeout(() => {
-                    sortearNumero();
-                    sorted++;
-                }, i * 300);
+                setTimeout(() => sortearNumero(), i * 500);
             }
         }
 
@@ -1082,6 +1119,7 @@
                 document.getElementById('totalSorteados').textContent = '0/75 sorteados';
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
                 numerosChamados = [];
+                showToast('🔄 Jogo resetado!');
             });
         }
 
@@ -1097,7 +1135,7 @@
             });
 
             document.getElementById('statusSessao').textContent = '🔴 Finalizada';
-            alert('Sessão finalizada com sucesso!');
+            showToast('🔴 Sessão finalizada!');
         }
 
         // ============================================
@@ -1107,15 +1145,14 @@
             const linkInput = document.getElementById('linkAluno');
             linkInput.select();
             document.execCommand('copy');
-            alert('Link copiado para a área de transferência!');
+            showToast('📋 Link copiado!');
         }
 
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
         console.log('🎲 BINGO - Painel do Professor carregado!');
-        console.log('📌 Use o formulário para criar uma nova sessão.');
-        console.log('🔗 O link gerado será para o ALUNO (BAluno.html?sala=CODIGO)');
+        console.log('👀 Acompanhe os alunos em tempo real!');
     </script>
 </body>
 </html>
