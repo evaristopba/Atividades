@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BINGO - Aluno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2f3a, #0d1f26);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #f2e9d0;
+            font-size: 1.8rem;
+        }
+
+        .header h1 small {
+            font-size: 0.9rem;
+            color: #8aaab5;
+            font-weight: 300;
+        }
+
+        /* Aguardando */
+        #aguardando {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        #aguardando h2 {
+            color: #d8d2b0;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        #aguardando .status-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        #aguardando p {
+            color: #8aaab5;
+            font-size: 1rem;
+            margin: 5px 0;
+        }
+
+        #aguardando .codigo-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 16px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        #aguardando .codigo-info strong {
+            color: #ffd93d;
+            font-size: 1.2rem;
+        }
+
+        /* Jogo Ativo */
+        #jogoAtivo {
+            display: none;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-bar .last-call {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd93d;
+        }
+
+        .status-bar .count {
+            color: #8aaab5;
+            font-size: 0.85rem;
+        }
+
+        .status-bar .bingo-status {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-bar .bingo-status.winner {
+            color: #ffd966;
+            animation: pulse-text 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-text {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        /* Cartela */
+        .card-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 10px;
+            color: #d4a373;
+            font-family: 'Georgia', serif;
+            margin-bottom: 10px;
+        }
+
+        .card-letters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .card-letter {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 2px 0;
+            color: #d8d2b0;
+        }
+
+        .card-letter:nth-child(1) { color: #ff6b6b; }
+        .card-letter:nth-child(2) { color: #ffd93d; }
+        .card-letter:nth-child(3) { color: #6bcb77; }
+        .card-letter:nth-child(4) { color: #4d96ff; }
+        .card-letter:nth-child(5) { color: #ff6bb5; }
+
+        .cartela-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .cartela-grid .cell {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #d4e3e8;
+            transition: all 0.3s;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+        }
+
+        .cartela-grid .cell.marked {
+            background: #d4a373;
+            color: #fcf3e0;
+            border-color: #f0d5a8;
+            transform: scale(0.95);
+        }
+
+        .cartela-grid .cell.marked::after {
+            content: "✓";
+            font-size: 0.5rem;
+            margin-left: 3px;
+        }
+
+        .cartela-grid .cell.free {
+            background: #b48b5a;
+            color: #fcf7e8;
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Georgia', serif;
+        }
+
+        .cartela-grid .cell.free.marked {
+            background: #d4a373;
+        }
+
+        .cartela-grid .cell.winner-cell {
+            border-color: #ffd966;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            animation: glow-cell 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-cell {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
+            to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
+        }
+
+        /* Números chamados */
+        .numeros-chamados {
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .numeros-chamados h4 {
+            color: #d8d2b0;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .numeros-chamados .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .numeros-chamados .chip {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 10px;
+            border-radius: 14px;
+            color: #d4e3e8;
+            font-size: 0.75rem;
+        }
+
+        .numeros-chamados .chip.recent {
+            background: #d4a373;
+            color: #fcf3e0;
+        }
+
+        .empty-state {
+            color: #6a8a95;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.08);
+            color: #8aaab5;
+            border-radius: 18px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.18);
+            color: #f2e9d0;
+        }
+
+        .sync-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 12px;
+            border-radius: 14px;
+            color: #8aaab5;
+            font-size: 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #5a8f6c;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 30px 20px;
+            color: #b15e5e;
+        }
+
+        .error-msg h2 {
+            color: #b15e5e;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="#" class="back-btn">← Voltar</a>
+                <div class="sync-status">
+                    <span class="sync-dot"></span>
+                    <span>online</span>
+                </div>
+            </div>
+            <h1>🧑‍🎓 BINGO <small>Aluno</small></h1>
+        </div>
+
+        <!-- ===== AGUARDANDO ===== -->
+        <div id="aguardando">
+            <span class="status-icon">⏳</span>
+            <h2>Aguardando o professor iniciar...</h2>
+            <div class="codigo-info">
+                📌 Sala: <strong id="salaNomeAluno">---</strong>
+            </div>
+            <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                O jogo vai começar quando o professor sortear o primeiro número.
+            </p>
+        </div>
+
+        <!-- ===== JOGO ATIVO ===== -->
+        <div id="jogoAtivo">
+            <!-- Status -->
+            <div class="status-bar">
+                <span class="last-call" id="ultimoNumero">🎯 ---</span>
+                <span class="count" id="marcadosCount">📌 0 marcados</span>
+                <span class="bingo-status" id="statusBingo">⏳ Aguardando BINGO...</span>
+            </div>
+
+            <!-- Cartela -->
+            <div class="card-container">
+                <div class="card-title">B I N G O</div>
+                <div class="card-letters">
+                    <div class="card-letter">B</div>
+                    <div class="card-letter">I</div>
+                    <div class="card-letter">N</div>
+                    <div class="card-letter">G</div>
+                    <div class="card-letter">O</div>
+                </div>
+                <div class="cartela-grid" id="cartelaGrid"></div>
+            </div>
+
+            <!-- Números chamados -->
+            <div class="numeros-chamados">
+                <h4>📋 Números chamados:</h4>
+                <div class="chips" id="numerosChamadosAluno">
+                    <span class="empty-state">nenhum número chamado</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
+            authDomain: "meu-super-jogo-stop.firebaseapp.com",
+            databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
+            projectId: "meu-super-jogo-stop",
+            storageBucket: "meu-super-jogo-stop.firebasestorage.app",
+            messagingSenderId: "958593186721",
+            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
+            measurementId: "G-WGRJWRVBEN"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ============================================
+        // ESTADO
+        // ============================================
+        let sessaoId = null;
+        let alunoId = null;
+        let minhaCartela = null;
+        let minhasMarcacoes = null;
+        let numerosChamados = [];
+        let isWinner = false;
+
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        function getLetterForNumber(num) {
+            if (num >= 1 && num <= 15) return 'B';
+            if (num >= 16 && num <= 30) return 'I';
+            if (num >= 31 && num <= 45) return 'N';
+            if (num >= 46 && num <= 60) return 'G';
+            if (num >= 61 && num <= 75) return 'O';
+            return '';
+        }
+
+        function getAlunoId() {
+            // Buscar parâmetro da URL
+            const params = new URLSearchParams(window.location.search);
+            const sala = params.get('sala');
+
+            if (!sala) return null;
+
+            // Usar um ID único baseado na sessão
+            let alunoId = localStorage.getItem(`bingo_aluno_${sala}`);
+            if (!alunoId) {
+                // Verificar quantos alunos já estão na sessão
+                const ref = db.ref(`bingo/sessoes/${sala}/participantes`);
+                ref.once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const participantes = snapshot.val();
+                        const count = Object.keys(participantes).length;
+                        alunoId = `aluno_${count + 1}`;
+                    } else {
+                        alunoId = 'aluno_1';
+                    }
+                    localStorage.setItem(`bingo_aluno_${sala}`, alunoId);
+                    inicializar(sala, alunoId);
+                });
+                return null;
+            }
+
+            return alunoId;
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        function inicializar(sala, aluno) {
+            sessaoId = sala;
+            alunoId = aluno;
+
+            const sessaoRef = db.ref(`bingo/sessoes/${sala}`);
+
+            // Buscar dados da sessão
+            sessaoRef.once('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">❌</span>
+                        <h2>Sessão não encontrada!</h2>
+                        <p>Verifique o link e tente novamente.</p>
+                    `;
+                    return;
+                }
+
+                const sessao = snapshot.val();
+
+                // Verificar se o aluno já está na sessão
+                if (sessao.participantes && sessao.participantes[alunoId]) {
+                    const data = sessao.participantes[alunoId];
+                    minhaCartela = data.cartela;
+                    minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                    isWinner = data.venceu || false;
+                } else {
+                    // Criar novo participante
+                    const cartela = gerarCartelaUnica(sessao.participantes || {});
+                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                    marcacoes[2][2] = true;
+
+                    const novoParticipante = {
+                        nome: `Aluno ${alunoId.replace('aluno_', '')}`,
+                        cartela: cartela,
+                        marcacoes: marcacoes,
+                        venceu: false
+                    };
+
+                    sessaoRef.child(`participantes/${alunoId}`).set(novoParticipante);
+
+                    minhaCartela = cartela;
+                    minhasMarcacoes = marcacoes;
+                    isWinner = false;
+                }
+
+                // Atualizar interface
+                document.getElementById('salaNomeAluno').textContent = sessao.salaNome || sala;
+
+                // Renderizar cartela
+                renderizarCartela();
+
+                // Escutar mudanças
+                escutarSessao(sala);
+
+                // Verificar status
+                if (sessao.status === 'ativa' || sessao.status === 'finalizada') {
+                    document.getElementById('aguardando').style.display = 'none';
+                    document.getElementById('jogoAtivo').style.display = 'block';
+
+                    if (sessao.numerosSorteados) {
+                        numerosChamados = sessao.numerosSorteados;
+                        atualizarNumerosChamados();
+                        atualizarMarcacoes();
+                        atualizarStatus();
+                    }
+                } else {
+                    document.getElementById('aguardando').style.display = 'block';
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // GERAR CARTELA ÚNICA
+        // ============================================
+        function gerarCartelaUnica(participantesExistentes) {
+            const cartelasUsadas = new Set();
+            for (const key in participantesExistentes) {
+                const cartela = participantesExistentes[key].cartela;
+                cartelasUsadas.add(cartela.flat().join(','));
+            }
+
+            let cartela;
+            let tentativas = 0;
+            do {
+                cartela = gerarCartela();
+                tentativas++;
+            } while (cartelasUsadas.has(cartela.flat().join(',')) && tentativas < 1000);
+
+            return cartela;
+        }
+
+        function gerarCartela() {
+            const cartela = [];
+            const bCol = getRandomNumbers(1, 15, 5);
+            const iCol = getRandomNumbers(16, 30, 5);
+            const nCol = getRandomNumbers(31, 45, 4);
+            const gCol = getRandomNumbers(46, 60, 5);
+            const oCol = getRandomNumbers(61, 75, 5);
+
+            for (let row = 0; row < 5; row++) {
+                const line = [];
+                line.push(bCol[row]);
+                line.push(iCol[row]);
+                if (row === 2) {
+                    line.push('B');
+                } else {
+                    const nIndex = row < 2 ? row : row - 1;
+                    line.push(nCol[nIndex]);
+                }
+                line.push(gCol[row]);
+                line.push(oCol[row]);
+                cartela.push(line);
+            }
+            return cartela;
+        }
+
+        function getRandomNumbers(min, max, count) {
+            const pool = [];
+            for (let i = min; i <= max; i++) {
+                pool.push(i);
+            }
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, count).sort((a, b) => a - b);
+        }
+
+        // ============================================
+        // RENDERIZAR CARTELA
+        // ============================================
+        function renderizarCartela() {
+            const grid = document.getElementById('cartelaGrid');
+            let html = '';
+
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const val = minhaCartela[r][c];
+                    const isMarked = minhasMarcacoes[r][c];
+                    const isCenter = (r === 2 && c === 2);
+                    let cls = 'cell';
+                    if (isMarked) cls += ' marked';
+                    if (isCenter) cls += ' free';
+                    if (isWinner) cls += ' winner-cell';
+                    const displayVal = isCenter ? 'B' : val;
+                    html += `<div class="${cls}" id="cell_${r}_${c}">${displayVal}</div>`;
+                }
+            }
+
+            grid.innerHTML = html;
+
+            // Atualizar contador
+            const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
+            document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
+        }
+
+        // ============================================
+        // ATUALIZAR MARCAÇÕES
+        // ============================================
+        function atualizarMarcacoes() {
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const cell = document.getElementById(`cell_${r}_${c}`);
+                    if (cell) {
+                        if (minhasMarcacoes[r][c]) {
+                            cell.classList.add('marked');
+                        } else {
+                            cell.classList.remove('marked');
+                        }
+                    }
+                }
+            }
+
+            const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
+            document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
+        }
+
+        // ============================================
+        // ATUALIZAR NÚMEROS CHAMADOS
+        // ============================================
+        function atualizarNumerosChamados() {
+            const container = document.getElementById('numerosChamadosAluno');
+            if (numerosChamados.length === 0) {
+                container.innerHTML = `<span class="empty-state">nenhum número chamado</span>`;
+                return;
+            }
+
+            let html = '';
+            numerosChamados.forEach((num, idx) => {
+                const cls = idx === numerosChamados.length - 1 ? 'chip recent' : 'chip';
+                html += `<span class="${cls}">${num}</span>`;
+            });
+            container.innerHTML = html;
+
+            // Último número
+            if (numerosChamados.length > 0) {
+                const ultimo = numerosChamados[numerosChamados.length - 1];
+                const letra = getLetterForNumber(ultimo);
+                document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
+            }
+        }
+
+        // ============================================
+        // ATUALIZAR STATUS
+        // ============================================
+        function atualizarStatus() {
+            const statusEl = document.getElementById('statusBingo');
+            if (isWinner) {
+                statusEl.textContent = '🏆 BINGO! Você venceu! 🎉';
+                statusEl.className = 'bingo-status winner';
+            } else {
+                statusEl.textContent = '⏳ Aguardando BINGO...';
+                statusEl.className = 'bingo-status';
+            }
+        }
+
+        // ============================================
+        // ESCUTAR SESSÃO
+        // ============================================
+        function escutarSessao(sala) {
+            const sessaoRef = db.ref(`bingo/sessoes/${sala}`);
+
+            sessaoRef.on('value', (snapshot) => {
+                if (!snapshot.exists()) return;
+
+                const sessao = snapshot.val();
+
+                // Verificar status
+                if (sessao.status === 'aguardando') {
+                    document.getElementById('aguardando').style.display = 'block';
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('aguardando').style.display = 'none';
+                document.getElementById('jogoAtivo').style.display = 'block';
+
+                // Atualizar números chamados
+                if (sessao.numerosSorteados) {
+                    numerosChamados = sessao.numerosSorteados;
+                    atualizarNumerosChamados();
+                }
+
+                // Atualizar minhas marcações
+                if (sessao.participantes && sessao.participantes[alunoId]) {
+                    const data = sessao.participantes[alunoId];
+                    minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                    isWinner = data.venceu || false;
+
+                    atualizarMarcacoes();
+                    atualizarStatus();
+                }
+            });
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        const params = new URLSearchParams(window.location.search);
+        const sala = params.get('sala');
+
+        if (!sala) {
+            document.getElementById('aguardando').innerHTML = `
+                <span class="status-icon">❌</span>
+                <h2>Link inválido!</h2>
+                <p>Não foi possível identificar a sala.</p>
+                <p style="font-size: 0.85rem; color: #6a8a95; margin-top: 10px;">
+                    Verifique o link e tente novamente.
+                </p>
+            `;
+        } else {
+            const aluno = getAlunoId();
+            if (aluno) {
+                inicializar(sala, aluno);
+            }
+        }
+
+        console.log('🎲 BINGO - Painel do Aluno carregado!');
+    </script>
+</body>
+</html>
