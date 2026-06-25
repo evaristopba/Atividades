@@ -47,6 +47,23 @@
             font-weight: 300;
         }
 
+        .sala-nome-display {
+            text-align: center;
+            color: #d4a373;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+
+        .sala-nome-display small {
+            color: #8aaab5;
+            font-weight: 300;
+            font-size: 0.8rem;
+        }
+
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -378,6 +395,10 @@
         .nome-display strong {
             color: #ffd93d;
         }
+
+        .lista-salas {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -393,37 +414,39 @@
             <h1>🧑‍🎓 BINGO <small>Aluno</small></h1>
         </div>
 
+        <!-- ===== NOME DA SALA ===== -->
+        <div id="salaNomeDisplay" class="sala-nome-display">
+            🏫 Sala: <span id="salaNomeTexto">---</span>
+            <small>(Código: <span id="salaCodigoTexto">---</span>)</small>
+        </div>
+
         <!-- ===== AGUARDANDO ===== -->
         <div id="aguardando">
             <span class="status-icon">⏳</span>
             <h2>Aguardando o professor iniciar...</h2>
             <div class="loading-spinner"></div>
             <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
-                O jogo vai começar quando o professor sortear o primeiro número.
+                Sala: <strong id="aguardandoSala">---</strong>
             </p>
             <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera"></p>
         </div>
 
         <!-- ===== JOGO ATIVO ===== -->
         <div id="jogoAtivo" style="display:none;">
-            <!-- Nome do Aluno -->
             <div class="nome-display">
                 🎯 Jogando como: <strong id="nomeAluno">---</strong>
             </div>
 
-            <!-- Status -->
             <div class="status-bar">
                 <span class="last-call" id="ultimoNumero">🎯 ---</span>
                 <span class="count" id="marcadosCount">📌 0 marcados</span>
                 <span class="bingo-status" id="statusBingo">⏳ Aguardando BINGO...</span>
             </div>
 
-            <!-- Instrução -->
             <div class="instrucao">
                 💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!
             </div>
 
-            <!-- Cartela -->
             <div class="card-container">
                 <div class="card-title">B I N G O</div>
                 <div class="card-letters">
@@ -436,7 +459,6 @@
                 <div class="cartela-grid" id="cartelaGrid"></div>
             </div>
 
-            <!-- Números chamados -->
             <div class="numeros-chamados">
                 <h4>📋 Números chamados:</h4>
                 <div class="chips" id="numerosChamadosAluno">
@@ -599,18 +621,15 @@
             // Procurar cartela disponível (sem nome atribuído)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
-                // Verifica se a cartela não tem nome ou se o nome está vazio
-                // ou se é do tipo "Aluno X" (não foi renomeada)
                 if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
                     cartelasDisponiveis.push({ id, data });
                 }
             }
 
             if (cartelasDisponiveis.length === 0) {
-                return null; // Sem cartelas disponíveis
+                return null;
             }
 
-            // Pegar a primeira cartela disponível
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
@@ -618,9 +637,14 @@
         // ============================================
         // INICIALIZAR
         // ============================================
-        function inicializar(sala, nome) {
+        function inicializar(sala, nome, nomeSalaParam) {
             sessaoId = sala;
             meuNome = nome;
+
+            // Mostrar nome da sala
+            document.getElementById('salaNomeTexto').textContent = nomeSalaParam || 'Sala sem nome';
+            document.getElementById('salaCodigoTexto').textContent = sala;
+            document.getElementById('aguardandoSala').textContent = nomeSalaParam || 'Sala sem nome';
 
             const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
 
@@ -628,8 +652,11 @@
                 if (!snapshot.exists()) {
                     document.getElementById('aguardando').innerHTML = `
                         <span class="status-icon">❌</span>
-                        <h2>Sessão não encontrada!</h2>
+                        <h2>Sala não encontrada!</h2>
                         <p>Verifique o link e tente novamente.</p>
+                        <p style="font-size: 0.85rem; color: #6a8a95; margin-top: 10px;">
+                            O professor precisa criar a sala primeiro.
+                        </p>
                     `;
                     return;
                 }
@@ -637,11 +664,9 @@
                 const sessao = snapshot.val();
                 const totalAlunos = sessao.totalAlunos || 0;
 
-                // Verificar se há cartelas disponíveis
                 const resultado = atribuirCartela(sessao, nome);
 
                 if (!resultado) {
-                    // Sem cartelas disponíveis
                     document.getElementById('aguardando').innerHTML = `
                         <span class="status-icon">🚫</span>
                         <h2>Sala lotada!</h2>
@@ -656,20 +681,17 @@
                 const { id: alunoIdEncontrado, data, jaExistia } = resultado;
                 alunoId = alunoIdEncontrado;
 
-                // Se a cartela já existe, atualiza o nome se necessário
                 if (jaExistia) {
                     minhaCartela = data.cartela;
                     minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     isWinner = data.venceu || false;
                     
-                    // Se o nome estava vazio ou era "Aluno X", atualiza
                     if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
                         sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(nome);
                     }
                     
                     showToast(`👋 Bem-vindo de volta, ${nome}!`, 'info');
                 } else {
-                    // Nova cartela - atribuir ao aluno
                     const cartela = gerarCartelaUnica(sessao.participantes || {});
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                     marcacoes[2][2] = true;
@@ -689,17 +711,12 @@
                     showToast(`🎯 Bem-vindo, ${nome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
                 }
 
-                // Atualizar nome na tela
                 document.getElementById('nomeAluno').textContent = nome;
                 document.getElementById('nomeEspera').textContent = `👤 ${nome}`;
 
-                // Renderizar cartela
                 renderizarCartela();
-
-                // Escutar mudanças
                 escutarSessao(sala);
 
-                // Verificar status
                 if (sessao.status === 'ativa' || sessao.status === 'finalizada') {
                     document.getElementById('aguardando').style.display = 'none';
                     document.getElementById('jogoAtivo').style.display = 'block';
@@ -942,6 +959,7 @@
         // ============================================
         const params = new URLSearchParams(window.location.search);
         const sala = params.get('sala');
+        const nomeSalaParam = params.get('nome') || 'Sala sem nome';
 
         if (!sala) {
             document.getElementById('aguardando').innerHTML = `
@@ -953,18 +971,24 @@
                 </p>
             `;
         } else {
+            // Mostrar nome da sala
+            document.getElementById('salaNomeTexto').textContent = nomeSalaParam;
+            document.getElementById('salaCodigoTexto').textContent = sala;
+            document.getElementById('aguardandoSala').textContent = nomeSalaParam;
+
             // Perguntar nome do aluno
-            const nome = prompt('🎯 Digite seu nome ou apelido para jogar:');
+            let nome = prompt('🎯 Digite seu nome ou apelido para jogar:');
             if (!nome || nome.trim() === '') {
                 const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
-                inicializar(sala, nomeAleatorio);
+                inicializar(sala, nomeAleatorio, nomeSalaParam);
             } else {
-                inicializar(sala, nome.trim());
+                inicializar(sala, nome.trim(), nomeSalaParam);
             }
         }
 
         console.log('🎲 BINGO - Painel do Aluno carregado!');
         console.log('💡 Clique nos números da sua cartela para marcá-los!');
+        console.log(`📌 Sala: ${sala} - ${nomeSalaParam}`);
     </script>
 </body>
 </html>
