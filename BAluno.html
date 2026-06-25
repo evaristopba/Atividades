@@ -5,114 +5,425 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BINGO - Aluno</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #1a2f3a, #0d1f26); min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: center; }
-        .container { max-width: 900px; width: 100%; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 25px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h1 { color: #f2e9d0; font-size: 2rem; }
-        .header .subtitle { color: #8aaab5; margin-top: 5px; }
-        .sync-status { display: inline-block; background: rgba(0, 0, 0, 0.3); padding: 4px 12px; border-radius: 14px; color: #8aaab5; font-size: 0.75rem; margin-top: 8px; }
-        .sync-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #5a8f6c; animation: pulse-dot 2s ease-in-out infinite; }
-        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        
-        .salas-container { margin-top: 20px; }
-        .salas-container h2 { color: #d8d2b0; font-size: 1.2rem; margin-bottom: 15px; padding-left: 12px; border-left: 4px solid #d4a373; }
-        .salas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .sala-card { background: rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 18px 20px; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
-        .sala-card:hover { background: rgba(255, 255, 255, 0.1); border-color: #d4a373; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
-        .sala-card .sala-nome { color: #f2e9d0; font-size: 1.1rem; font-weight: 600; }
-        .sala-card .sala-info { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 5px; }
-        .sala-card .sala-status { font-size: 0.8rem; padding: 3px 12px; border-radius: 20px; font-weight: 500; }
-        .sala-card .sala-status.aguardando { background: #ffc107; color: #1a2f3a; }
-        .sala-card .sala-status.ativa { background: #5a8f6c; color: #fff; }
-        .sala-card .sala-status.finalizada { background: #6c757d; color: #fff; }
-        .sala-card .sala-alunos { color: #8aaab5; font-size: 0.85rem; }
-        .sala-card .sala-codigo { color: #6a8a95; font-size: 0.7rem; font-family: monospace; }
-        .sala-card .sala-badge { display: inline-block; background: rgba(212, 163, 115, 0.2); color: #d4a373; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #6a8a95; grid-column: 1 / -1; }
-        .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
-        
-        .debug-area { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #8aaab5; }
-        .debug-area .success { color: #5a8f6c; }
-        .debug-area .error { color: #dc3545; }
-        .debug-area .warning { color: #ffc107; }
-        .debug-area .info { color: #8aaab5; }
-        
-        .back-btn { display: inline-block; padding: 6px 16px; background: rgba(255,255,255,0.08); color: #8aaab5; border-radius: 18px; text-decoration: none; transition: all 0.2s; font-size: 0.85rem; margin-bottom: 15px; border: none; cursor: pointer; }
-        .back-btn:hover { background: rgba(255,255,255,0.18); color: #f2e9d0; }
-        
-        #jogoAtivo { display: none; }
-        .status-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 14px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .status-bar .last-call { font-size: 1.1rem; font-weight: 700; color: #ffd93d; }
-        .status-bar .count { color: #8aaab5; font-size: 0.85rem; }
-        .status-bar .bingo-status { font-weight: 600; font-size: 0.9rem; }
-        .status-bar .bingo-status.winner { color: #ffd966; animation: pulse-text 1s ease-in-out infinite alternate; }
-        @keyframes pulse-text { from { transform: scale(1); } to { transform: scale(1.05); } }
-        .card-container { background: rgba(0, 0, 0, 0.2); border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 15px; }
-        .card-title { text-align: center; font-size: 1.8rem; font-weight: 700; letter-spacing: 10px; color: #d4a373; font-family: 'Georgia', serif; margin-bottom: 10px; }
-        .card-letters { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-bottom: 3px; }
-        .card-letter { text-align: center; font-weight: 700; font-size: 0.8rem; padding: 2px 0; color: #d8d2b0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2f3a, #0d1f26);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #f2e9d0;
+            font-size: 1.8rem;
+        }
+
+        .header h1 small {
+            font-size: 0.9rem;
+            color: #8aaab5;
+            font-weight: 300;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-bar .last-call {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd93d;
+        }
+
+        .status-bar .count {
+            color: #8aaab5;
+            font-size: 0.85rem;
+        }
+
+        .status-bar .bingo-status {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-bar .bingo-status.winner {
+            color: #ffd966;
+            animation: pulse-text 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-text {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .card-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 10px;
+            color: #d4a373;
+            font-family: 'Georgia', serif;
+            margin-bottom: 10px;
+        }
+
+        .card-letters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .card-letter {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 2px 0;
+            color: #d8d2b0;
+        }
+
         .card-letter:nth-child(1) { color: #ff6b6b; }
         .card-letter:nth-child(2) { color: #ffd93d; }
         .card-letter:nth-child(3) { color: #6bcb77; }
         .card-letter:nth-child(4) { color: #4d96ff; }
         .card-letter:nth-child(5) { color: #ff6bb5; }
-        .cartela-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 100%; margin: 0 auto; }
-        .cartela-grid .cell { background: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 10px 0; text-align: center; font-weight: 700; font-size: 1rem; color: #d4e3e8; transition: all 0.3s; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; }
-        .cartela-grid .cell.marked { background: #d4a373; color: #fcf3e0; border-color: #f0d5a8; transform: scale(0.95); }
-        .cartela-grid .cell.marked::after { content: "✓"; font-size: 0.5rem; margin-left: 3px; }
-        .cartela-grid .cell.free { background: #b48b5a; color: #fcf7e8; font-size: 1.8rem; font-weight: 700; font-family: 'Georgia', serif; }
-        .cartela-grid .cell.free.marked { background: #d4a373; }
-        .numeros-chamados { padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .numeros-chamados h4 { color: #d8d2b0; font-size: 0.85rem; margin-bottom: 6px; }
-        .numeros-chamados .chips { display: flex; flex-wrap: wrap; gap: 4px; }
-        .numeros-chamados .chip { background: rgba(255, 255, 255, 0.08); padding: 2px 10px; border-radius: 14px; color: #d4e3e8; font-size: 0.75rem; }
-        .numeros-chamados .chip.recent { background: #d4a373; color: #fcf3e0; }
-        .empty-state-text { color: #6a8a95; font-style: italic; font-size: 0.85rem; }
-        .loading { text-align: center; padding: 30px; color: #8aaab5; grid-column: 1 / -1; }
-        .loading .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .refresh-btn { background: #3d6b7a; color: #fff; border: none; padding: 6px 16px; border-radius: 14px; cursor: pointer; font-size: 0.8rem; }
-        .refresh-btn:hover { background: #4d7b8a; }
+
+        .cartela-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .cartela-grid .cell {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #d4e3e8;
+            transition: all 0.3s;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .cartela-grid .cell:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .cartela-grid .cell.marked {
+            background: #d4a373;
+            color: #fcf3e0;
+            border-color: #f0d5a8;
+            transform: scale(0.95);
+        }
+
+        .cartela-grid .cell.marked::after {
+            content: "✓";
+            font-size: 0.5rem;
+            margin-left: 3px;
+        }
+
+        .cartela-grid .cell.free {
+            background: #b48b5a;
+            color: #fcf7e8;
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Georgia', serif;
+            cursor: default;
+        }
+
+        .cartela-grid .cell.free:hover {
+            background: #b48b5a;
+        }
+
+        .cartela-grid .cell.free.marked {
+            background: #d4a373;
+        }
+
+        .cartela-grid .cell.winner-cell {
+            border-color: #ffd966;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            animation: glow-cell 1s ease-in-out infinite alternate;
+        }
+
+        .cartela-grid .cell.sorteado {
+            border-color: #ffd93d;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        @keyframes glow-cell {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
+            to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
+        }
+
+        .numeros-chamados {
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .numeros-chamados h4 {
+            color: #d8d2b0;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .numeros-chamados .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .numeros-chamados .chip {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 10px;
+            border-radius: 14px;
+            color: #d4e3e8;
+            font-size: 0.75rem;
+        }
+
+        .numeros-chamados .chip.recent {
+            background: #d4a373;
+            color: #fcf3e0;
+        }
+
+        .empty-state-text {
+            color: #6a8a95;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .instrucao {
+            text-align: center;
+            color: #8aaab5;
+            font-size: 0.8rem;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+
+        .instrucao strong {
+            color: #ffd93d;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.08);
+            color: #8aaab5;
+            border-radius: 18px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.18);
+            color: #f2e9d0;
+        }
+
+        .sync-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 12px;
+            border-radius: 14px;
+            color: #8aaab5;
+            font-size: 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #5a8f6c;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #5a8f6c;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .toast.winner-toast {
+            background: #ffd966;
+            color: #1a2f3a;
+            font-size: 1.2rem;
+        }
+
+        .toast.error-toast {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        #aguardando {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        #aguardando .status-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        #aguardando h2 {
+            color: #d8d2b0;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        #aguardando p {
+            color: #8aaab5;
+            font-size: 1rem;
+        }
+
+        #aguardando .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #d4a373;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .nome-display {
+            text-align: center;
+            color: #f2e9d0;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .nome-display strong {
+            color: #ffd93d;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
         <div class="header">
-            <h1>🧑‍🎓 BINGO <small>Aluno</small></h1>
-            <p class="subtitle">Escolha sua sala para começar a jogar</p>
-            <div class="sync-status">
-                <span class="sync-dot"></span>
-                <span id="statusTexto">online</span>
-                <button class="refresh-btn" onclick="recarregarSalas()">🔄 Atualizar</button>
-            </div>
-        </div>
-
-        <!-- ===== LISTA DE SALAS ===== -->
-        <div id="listaSalas" class="salas-container">
-            <h2>📋 Salas disponíveis</h2>
-            <div id="salasGrid" class="salas-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p style="margin-top: 10px;">Carregando salas...</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Voltar</a>
+                <div class="sync-status">
+                    <span class="sync-dot"></span>
+                    <span id="statusTexto">online</span>
                 </div>
             </div>
+            <h1>🧑‍🎓 BINGO <small>Aluno</small></h1>
         </div>
 
-        <!-- ===== ÁREA DE DIAGNÓSTICO ===== -->
-        <div class="debug-area" id="debugArea">
-            <div class="info">[🔄] Aguardando ações...</div>
+        <!-- ===== AGUARDANDO ===== -->
+        <div id="aguardando">
+            <span class="status-icon">⏳</span>
+            <h2>Aguardando o professor iniciar...</h2>
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                O jogo vai começar quando o professor sortear o primeiro número.
+            </p>
+            <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera"></p>
         </div>
 
         <!-- ===== JOGO ATIVO ===== -->
-        <div id="jogoAtivo">
-            <button class="back-btn" onclick="voltarParaLista()">← Voltar para salas</button>
+        <div id="jogoAtivo" style="display:none;">
+            <!-- Nome do Aluno -->
+            <div class="nome-display">
+                🎯 Jogando como: <strong id="nomeAluno">---</strong>
+            </div>
+
+            <!-- Status -->
             <div class="status-bar">
                 <span class="last-call" id="ultimoNumero">🎯 ---</span>
                 <span class="count" id="marcadosCount">📌 0 marcados</span>
                 <span class="bingo-status" id="statusBingo">⏳ Aguardando BINGO...</span>
             </div>
+
+            <!-- Instrução -->
+            <div class="instrucao">
+                💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!
+            </div>
+
+            <!-- Cartela -->
             <div class="card-container">
                 <div class="card-title">B I N G O</div>
                 <div class="card-letters">
@@ -124,6 +435,8 @@
                 </div>
                 <div class="cartela-grid" id="cartelaGrid"></div>
             </div>
+
+            <!-- Números chamados -->
             <div class="numeros-chamados">
                 <h4>📋 Números chamados:</h4>
                 <div class="chips" id="numerosChamadosAluno">
@@ -132,6 +445,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast de notificação -->
+    <div id="toast" class="toast"></div>
 
     <!-- ===== FIREBASE ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -157,30 +473,29 @@
         // ============================================
         // ESTADO
         // ============================================
-        let sessaoAtual = null;
+        let sessaoId = null;
         let alunoId = null;
         let minhaCartela = null;
         let minhasMarcacoes = null;
         let numerosChamados = [];
         let isWinner = false;
-        let listaSalasRef = null;
         let sessaoRef = null;
+        let meuNome = '';
 
         // ============================================
-        // LOG
+        // TOAST
         // ============================================
-        function log(msg, tipo = 'info') {
-            const area = document.getElementById('debugArea');
-            const time = new Date().toLocaleTimeString();
-            const classes = {
-                info: 'info',
-                success: 'success',
-                error: 'error',
-                warning: 'warning'
-            };
-            area.innerHTML += `<div class="${classes[tipo] || 'info'}">[${time}] ${msg}</div>`;
-            area.scrollTop = area.scrollHeight;
-            console.log(`[${tipo.toUpperCase()}] ${msg}`);
+        function showToast(message, tipo = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast';
+            if (tipo === 'winner') toast.classList.add('winner-toast');
+            if (tipo === 'error') toast.classList.add('error-toast');
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
         }
 
         // ============================================
@@ -197,7 +512,9 @@
 
         function getRandomNumbers(min, max, count) {
             const pool = [];
-            for (let i = min; i <= max; i++) pool.push(i);
+            for (let i = min; i <= max; i++) {
+                pool.push(i);
+            }
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -236,220 +553,166 @@
                 const cartela = participantesExistentes[key].cartela;
                 cartelasUsadas.add(cartela.flat().join(','));
             }
+
             let cartela;
             let tentativas = 0;
             do {
                 cartela = gerarCartela();
                 tentativas++;
             } while (cartelasUsadas.has(cartela.flat().join(',')) && tentativas < 1000);
+
             return cartela;
         }
 
-        // ============================================
-        // RECARREGAR SALAS
-        // ============================================
-        function recarregarSalas() {
-            log('🔄 Recarregando salas manualmente...', 'info');
-            document.getElementById('statusTexto').textContent = 'atualizando...';
-            listarSalas();
+        function checkBingo(marcacoes) {
+            for (let r = 0; r < 5; r++) {
+                if (marcacoes[r].every(v => v === true)) return true;
+            }
+            for (let c = 0; c < 5; c++) {
+                let colFull = true;
+                for (let r = 0; r < 5; r++) {
+                    if (!marcacoes[r][c]) { colFull = false; break; }
+                }
+                if (colFull) return true;
+            }
+            let diag1 = true, diag2 = true;
+            for (let i = 0; i < 5; i++) {
+                if (!marcacoes[i][i]) diag1 = false;
+                if (!marcacoes[i][4 - i]) diag2 = false;
+            }
+            return diag1 || diag2;
         }
 
         // ============================================
-        // LISTAR SALAS
+        // ATRIBUIR CARTELA DISPONÍVEL
         // ============================================
-        function listarSalas() {
-            const grid = document.getElementById('salasGrid');
-            grid.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p style="margin-top: 10px;">Carregando salas...</p>
-                </div>
-            `;
-
-            if (listaSalasRef) {
-                listaSalasRef.off();
+        function atribuirCartela(sessao, nome) {
+            const participantes = sessao.participantes || {};
+            
+            // Verificar se o nome já existe
+            for (const [id, data] of Object.entries(participantes)) {
+                if (data.nome === nome) {
+                    return { id, data, jaExistia: true };
+                }
             }
 
-            listaSalasRef = db.ref('bingo/sessoes');
-
-            listaSalasRef.on('value', (snapshot) => {
-                const salas = snapshot.val();
-                grid.innerHTML = '';
-                document.getElementById('statusTexto').textContent = 'online';
-
-                if (!salas) {
-                    log('⚠️ Nenhuma sala encontrada no banco', 'warning');
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <span class="icon">🎯</span>
-                            <h3>Nenhuma sala disponível</h3>
-                            <p>Aguardando o professor criar uma sala...</p>
-                            <p style="font-size:0.8rem;color:#6a8a95;margin-top:8px;">💡 Dica: Crie uma sala no BProfessor.html</p>
-                        </div>
-                    `;
-                    return;
+            // Procurar cartela disponível (sem nome atribuído)
+            const cartelasDisponiveis = [];
+            for (const [id, data] of Object.entries(participantes)) {
+                // Verifica se a cartela não tem nome ou se o nome está vazio
+                // ou se é do tipo "Aluno X" (não foi renomeada)
+                if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
+                    cartelasDisponiveis.push({ id, data });
                 }
-
-                const salasArray = Object.entries(salas)
-                    .map(([codigo, dados]) => ({ codigo, ...dados }))
-                    .filter(s => s.status === 'aguardando' || s.status === 'ativa')
-                    .sort((a, b) => {
-                        const dataA = a.dataCriacao || '';
-                        const dataB = b.dataCriacao || '';
-                        return dataB.localeCompare(dataA);
-                    });
-
-                log(`📋 Encontradas ${salasArray.length} salas ativas`, 'success');
-
-                if (salasArray.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <span class="icon">⏳</span>
-                            <h3>Nenhuma sala ativa no momento</h3>
-                            <p>O professor precisa criar uma sala para você entrar.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                salasArray.forEach((sala) => {
-                    const statusMap = {
-                        'aguardando': '⏳ Aguardando',
-                        'ativa': '🟢 Em andamento',
-                        'finalizada': '🔴 Finalizada'
-                    };
-                    const statusClass = sala.status || 'aguardando';
-                    const totalAlunos = sala.totalAlunos || 0;
-                    const participantes = sala.participantes || {};
-                    const alunosConectados = Object.keys(participantes).length;
-
-                    const card = document.createElement('a');
-                    card.className = 'sala-card';
-                    card.href = '#';
-                    card.onclick = (e) => {
-                        e.preventDefault();
-                        log(`🎯 Entrando na sala: ${sala.codigo} (${sala.salaNome})`, 'info');
-                        entrarNaSala(sala.codigo);
-                    };
-
-                    card.innerHTML = `
-                        <div class="sala-nome">${sala.salaNome || 'Sala sem nome'}</div>
-                        <div class="sala-info">
-                            <span class="sala-status ${statusClass}">${statusMap[statusClass] || '⏳ Aguardando'}</span>
-                            <span class="sala-alunos">👥 ${alunosConectados}/${totalAlunos}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-top: 6px;">
-                            <span class="sala-codigo">📌 ${sala.codigo}</span>
-                            <span class="sala-badge">BINGO</span>
-                        </div>
-                    `;
-
-                    grid.appendChild(card);
-                });
-
-                log(`✅ ${salasArray.length} salas listadas com sucesso`, 'success');
-
-            }, (error) => {
-                log(`❌ Erro ao listar salas: ${error.message}`, 'error');
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <span class="icon">❌</span>
-                        <h3>Erro ao carregar salas</h3>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-            });
-        }
-
-        // ============================================
-        // ENTRAR NA SALA
-        // ============================================
-        function entrarNaSala(codigo) {
-            const nome = prompt('🎯 Digite seu nome ou apelido para jogar:\n(Ex: João, Maria, etc.)');
-            if (!nome || nome.trim() === '') {
-                log('❌ Nome não informado', 'error');
-                alert('Você precisa digitar um nome para jogar!');
-                return;
             }
 
-            const apelido = nome.trim();
-            log(`👤 Tentando entrar como: ${apelido}`, 'info');
+            if (cartelasDisponiveis.length === 0) {
+                return null; // Sem cartelas disponíveis
+            }
 
-            const ref = db.ref(`bingo/sessoes/${codigo}/participantes`);
-            ref.once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const participantes = snapshot.val();
-                    if (participantes[apelido]) {
-                        log(`⚠️ Nome "${apelido}" já está em uso`, 'warning');
-                        alert(`O nome "${apelido}" já está em uso! Por favor, escolha outro.`);
-                        return;
-                    }
-                }
-
-                localStorage.setItem(`bingo_aluno_${codigo}`, apelido);
-                log(`✅ Nome "${apelido}" registrado para a sala ${codigo}`, 'success');
-                iniciarJogo(codigo, apelido);
-            });
+            // Pegar a primeira cartela disponível
+            const { id, data } = cartelasDisponiveis[0];
+            return { id, data, jaExistia: false };
         }
 
         // ============================================
-        // INICIAR JOGO
+        // INICIALIZAR
         // ============================================
-        function iniciarJogo(codigo, apelido) {
-            sessaoAtual = codigo;
-            alunoId = apelido;
+        function inicializar(sala, nome) {
+            sessaoId = sala;
+            meuNome = nome;
 
-            document.getElementById('listaSalas').style.display = 'none';
-            document.getElementById('jogoAtivo').style.display = 'block';
-
-            const sessaoRefLocal = db.ref(`bingo/sessoes/${codigo}`);
+            const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
 
             sessaoRefLocal.once('value', (snapshot) => {
                 if (!snapshot.exists()) {
-                    log('❌ Sessão não encontrada no Firebase', 'error');
-                    alert('Sessão não encontrada!');
-                    voltarParaLista();
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">❌</span>
+                        <h2>Sessão não encontrada!</h2>
+                        <p>Verifique o link e tente novamente.</p>
+                    `;
                     return;
                 }
 
                 const sessao = snapshot.val();
-                log(`📊 Sessão "${codigo}" carregada: ${sessao.salaNome}`, 'info');
+                const totalAlunos = sessao.totalAlunos || 0;
 
-                if (sessao.participantes && sessao.participantes[apelido]) {
-                    const data = sessao.participantes[apelido];
+                // Verificar se há cartelas disponíveis
+                const resultado = atribuirCartela(sessao, nome);
+
+                if (!resultado) {
+                    // Sem cartelas disponíveis
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">🚫</span>
+                        <h2>Sala lotada!</h2>
+                        <p>Todas as ${totalAlunos} cartelas já estão ocupadas.</p>
+                        <p style="font-size: 0.9rem; color: #6a8a95; margin-top: 10px;">
+                            Fale com o professor para aumentar o número de alunos.
+                        </p>
+                    `;
+                    return;
+                }
+
+                const { id: alunoIdEncontrado, data, jaExistia } = resultado;
+                alunoId = alunoIdEncontrado;
+
+                // Se a cartela já existe, atualiza o nome se necessário
+                if (jaExistia) {
                     minhaCartela = data.cartela;
                     minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     isWinner = data.venceu || false;
-                    log(`♻️ Cartela restaurada para ${apelido}`, 'info');
+                    
+                    // Se o nome estava vazio ou era "Aluno X", atualiza
+                    if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
+                        sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(nome);
+                    }
+                    
+                    showToast(`👋 Bem-vindo de volta, ${nome}!`, 'info');
                 } else {
+                    // Nova cartela - atribuir ao aluno
                     const cartela = gerarCartelaUnica(sessao.participantes || {});
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                     marcacoes[2][2] = true;
 
                     const novoParticipante = {
-                        nome: apelido,
+                        nome: nome,
                         cartela: cartela,
                         marcacoes: marcacoes,
                         venceu: false
                     };
 
-                    sessaoRefLocal.child(`participantes/${apelido}`).set(novoParticipante);
+                    sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
                     minhaCartela = cartela;
                     minhasMarcacoes = marcacoes;
                     isWinner = false;
-                    log(`🆕 Nova cartela gerada para ${apelido}`, 'success');
+                    
+                    showToast(`🎯 Bem-vindo, ${nome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
                 }
 
+                // Atualizar nome na tela
+                document.getElementById('nomeAluno').textContent = nome;
+                document.getElementById('nomeEspera').textContent = `👤 ${nome}`;
+
+                // Renderizar cartela
                 renderizarCartela();
 
-                if (sessao.numerosSorteados) {
-                    numerosChamados = sessao.numerosSorteados;
-                    atualizarNumerosChamados();
-                    atualizarMarcacoes();
-                    atualizarStatus();
-                }
+                // Escutar mudanças
+                escutarSessao(sala);
 
-                escutarSessao(codigo);
+                // Verificar status
+                if (sessao.status === 'ativa' || sessao.status === 'finalizada') {
+                    document.getElementById('aguardando').style.display = 'none';
+                    document.getElementById('jogoAtivo').style.display = 'block';
+
+                    if (sessao.numerosSorteados) {
+                        numerosChamados = sessao.numerosSorteados;
+                        atualizarNumerosChamados();
+                        atualizarStatus();
+                    }
+                } else {
+                    document.getElementById('aguardando').style.display = 'block';
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                }
             });
         }
 
@@ -465,36 +728,100 @@
                     const val = minhaCartela[r][c];
                     const isMarked = minhasMarcacoes[r][c];
                     const isCenter = (r === 2 && c === 2);
+                    const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
+                    
                     let cls = 'cell';
                     if (isMarked) cls += ' marked';
                     if (isCenter) cls += ' free';
                     if (isWinner) cls += ' winner-cell';
+                    if (isSorteado && !isMarked && !isCenter) cls += ' sorteado';
+                    
                     const displayVal = isCenter ? 'B' : val;
-                    html += `<div class="${cls}" id="cell_${r}_${c}">${displayVal}</div>`;
+                    
+                    const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c}, ${val})"`;
+                    
+                    html += `<div class="${cls}" id="cell_${r}_${c}" ${onclick}>${displayVal}</div>`;
                 }
             }
 
             grid.innerHTML = html;
-            const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
-            document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
+            atualizarContador();
         }
 
         // ============================================
-        // ATUALIZAR MARCAÇÕES
+        // MARCAR NÚMERO
         // ============================================
-        function atualizarMarcacoes() {
-            for (let r = 0; r < 5; r++) {
-                for (let c = 0; c < 5; c++) {
-                    const cell = document.getElementById(`cell_${r}_${c}`);
-                    if (cell) {
-                        if (minhasMarcacoes[r][c]) {
-                            cell.classList.add('marked');
-                        } else {
-                            cell.classList.remove('marked');
-                        }
+        function marcarNumero(r, c, val) {
+            if (!numerosChamados.includes(val)) {
+                showToast('⚠️ Este número ainda não foi sorteado!', 'error');
+                return;
+            }
+
+            if (minhasMarcacoes[r][c]) {
+                showToast('ℹ️ Este número já foi marcado!', 'info');
+                return;
+            }
+
+            const sessaoRefLocal = db.ref(`bingo/sessoes/${sessaoId}`);
+            sessaoRefLocal.once('value', (snapshot) => {
+                const sessao = snapshot.val();
+                if (sessao.status === 'finalizada') {
+                    showToast('⚠️ O jogo já foi finalizado!', 'error');
+                    return;
+                }
+            });
+
+            minhasMarcacoes[r][c] = true;
+            
+            db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                marcacoes: minhasMarcacoes
+            });
+
+            const cell = document.getElementById(`cell_${r}_${c}`);
+            if (cell) {
+                cell.classList.add('marked');
+                cell.classList.remove('sorteado');
+            }
+            
+            atualizarContador();
+
+            if (checkBingo(minhasMarcacoes)) {
+                isWinner = true;
+                db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                    venceu: true
+                });
+                
+                sessaoRefLocal.once('value', (snapshot) => {
+                    const sessao = snapshot.val();
+                    const vencedoresAtuais = sessao.vencedores || [];
+                    if (!vencedoresAtuais.includes(alunoId)) {
+                        vencedoresAtuais.push(alunoId);
+                        db.ref(`bingo/sessoes/${sessaoId}`).update({
+                            vencedores: vencedoresAtuais
+                        });
                     }
+                });
+
+                showToast('🏆 BINGO! Você venceu! 🎉', 'winner');
+                atualizarStatus();
+                
+                document.querySelectorAll('.cell').forEach(el => {
+                    if (!el.classList.contains('free')) {
+                        el.classList.add('winner-cell');
+                    }
+                });
+            } else {
+                const total = minhasMarcacoes.flat().filter(v => v === true).length;
+                if (total >= 20) {
+                    showToast(`📌 Já marcou ${total} números! Falta pouco!`, 'info');
                 }
             }
+        }
+
+        // ============================================
+        // ATUALIZAR CONTADOR
+        // ============================================
+        function atualizarContador() {
             const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
             document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
         }
@@ -522,6 +849,26 @@
                 const letra = getLetterForNumber(ultimo);
                 document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
             }
+
+            if (minhaCartela) {
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const val = minhaCartela[r][c];
+                        if (typeof val === 'number') {
+                            const cell = document.getElementById(`cell_${r}_${c}`);
+                            if (cell) {
+                                const isMarked = minhasMarcacoes[r][c];
+                                const isSorteado = numerosChamados.includes(val);
+                                if (isSorteado && !isMarked) {
+                                    cell.classList.add('sorteado');
+                                } else {
+                                    cell.classList.remove('sorteado');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // ============================================
@@ -541,30 +888,30 @@
         // ============================================
         // ESCUTAR SESSÃO
         // ============================================
-        function escutarSessao(codigo) {
+        function escutarSessao(sala) {
             if (sessaoRef) {
                 sessaoRef.off();
             }
 
-            sessaoRef = db.ref(`bingo/sessoes/${codigo}`);
+            sessaoRef = db.ref(`bingo/sessoes/${sala}`);
 
             sessaoRef.on('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    log('⚠️ Sessão foi encerrada', 'warning');
-                    alert('A sessão foi encerrada!');
-                    voltarParaLista();
-                    return;
-                }
+                if (!snapshot.exists()) return;
 
                 const sessao = snapshot.val();
-                log(`🔄 Atualização da sessão: ${sessao.status}`, 'info');
 
-                if (sessao.status === 'finalizada') {
-                    log('🔴 Sessão finalizada pelo professor', 'warning');
-                    alert('A sessão foi finalizada pelo professor!');
-                    voltarParaLista();
+                if (sessao.status === 'aguardando') {
+                    document.getElementById('aguardando').style.display = 'block';
+                    document.getElementById('jogoAtivo').style.display = 'none';
                     return;
                 }
+
+                if (sessao.status === 'finalizada') {
+                    showToast('🔴 O jogo foi finalizado!', 'error');
+                }
+
+                document.getElementById('aguardando').style.display = 'none';
+                document.getElementById('jogoAtivo').style.display = 'block';
 
                 if (sessao.numerosSorteados) {
                     numerosChamados = sessao.numerosSorteados;
@@ -576,52 +923,48 @@
                     minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     isWinner = data.venceu || false;
 
-                    atualizarMarcacoes();
+                    atualizarContador();
                     atualizarStatus();
+                    
+                    if (isWinner) {
+                        document.querySelectorAll('.cell').forEach(el => {
+                            if (!el.classList.contains('free')) {
+                                el.classList.add('winner-cell');
+                            }
+                        });
+                    }
                 }
             });
         }
 
         // ============================================
-        // VOLTAR PARA LISTA
-        // ============================================
-        function voltarParaLista() {
-            if (sessaoRef) {
-                sessaoRef.off();
-                sessaoRef = null;
-            }
-
-            sessaoAtual = null;
-            alunoId = null;
-            minhaCartela = null;
-            minhasMarcacoes = null;
-            numerosChamados = [];
-            isWinner = false;
-
-            document.getElementById('jogoAtivo').style.display = 'none';
-            document.getElementById('listaSalas').style.display = 'block';
-            listarSalas();
-        }
-
-        // ============================================
         // INICIALIZAÇÃO
         // ============================================
-        log('🚀 BINGO - Painel do Aluno carregado', 'info');
-        log('📋 Firebase versão: ' + firebase.SDK_VERSION, 'info');
-        log('🔄 Escutando mudanças em tempo real...', 'info');
-        
-        listarSalas();
+        const params = new URLSearchParams(window.location.search);
+        const sala = params.get('sala');
 
-        // Verificar conexão
-        db.ref('.info/connected').on('value', (snap) => {
-            if (snap.val() === true) {
-                document.getElementById('statusTexto').textContent = 'online';
-                log('✅ Conectado ao Firebase', 'success');
+        if (!sala) {
+            document.getElementById('aguardando').innerHTML = `
+                <span class="status-icon">❌</span>
+                <h2>Link inválido!</h2>
+                <p>Não foi possível identificar a sala.</p>
+                <p style="font-size: 0.85rem; color: #6a8a95; margin-top: 10px;">
+                    Verifique o link e tente novamente.
+                </p>
+            `;
+        } else {
+            // Perguntar nome do aluno
+            const nome = prompt('🎯 Digite seu nome ou apelido para jogar:');
+            if (!nome || nome.trim() === '') {
+                const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
+                inicializar(sala, nomeAleatorio);
             } else {
-                document.getElementById('statusTexto').textContent = 'offline';
-                log('❌ Desconectado do Firebase', 'error');
+                inicializar(sala, nome.trim());
             }
-        });
+        }
+
+        console.log('🎲 BINGO - Painel do Aluno carregado!');
+        console.log('💡 Clique nos números da sua cartela para marcá-los!');
     </script>
 </body>
 </html>
