@@ -720,6 +720,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
             authDomain: "meu-super-jogo-stop.firebaseapp.com",
@@ -839,7 +842,7 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO (COM CÓDIGO FIXO E LINK SIMPLES)
+        // CRIAR SESSÃO (COM CÓDIGO FIXO E LINK CORRETO)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -857,7 +860,7 @@
             }
 
             const salaNome = salaSelect.options[salaSelect.selectedIndex].text;
-            const salaId = salaSelect.value; // ← Código fixo (ex: 1a-cp)
+            const salaId = salaSelect.value;
             const codigo = salaId;
 
             statusDiv.innerHTML = `<div class="status-criacao info">🔄 Verificando sala "${salaNome}"...</div>`;
@@ -914,8 +917,7 @@
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
                 // ⭐⭐⭐ CORREÇÃO DO LINK ⭐⭐⭐
-                // Gerar link SIMPLES, igual ao STOP: ?sala=CODIGO
-                // SEM #, SEM &nome=, SEM parâmetros extras
+                // Link SIMPLES: ?sala=CODIGO (SEM # e SEM &nome=)
                 const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
                 const linkAluno = `${baseUrl}?sala=${codigo}`;
                 document.getElementById('linkAluno').value = linkAluno;
@@ -1296,6 +1298,7 @@
         console.log('🎲 BINGO - Painel do Professor carregado!');
         console.log('📌 Usando códigos fixos de turma (como no STOP)');
         console.log('👀 Acompanhe os alunos em tempo real!');
+        console.log('✅ Link gerado: BAluno.html?sala=CODIGO (SEM # e SEM &nome=)');
     </script>
 </body>
 </html>
