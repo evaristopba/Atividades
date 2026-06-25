@@ -5,412 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BINGO - Aluno</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a2f3a, #0d1f26);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .header h1 {
-            color: #f2e9d0;
-            font-size: 2rem;
-        }
-
-        .header h1 small {
-            font-size: 0.9rem;
-            color: #8aaab5;
-            font-weight: 300;
-        }
-
-        .header .subtitle {
-            color: #8aaab5;
-            margin-top: 5px;
-        }
-
-        .sync-status {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 12px;
-            border-radius: 14px;
-            color: #8aaab5;
-            font-size: 0.75rem;
-            margin-top: 8px;
-        }
-
-        .sync-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
-            background: #5a8f6c;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* LISTA DE SALAS */
-        .salas-container {
-            margin-top: 20px;
-        }
-
-        .salas-container h2 {
-            color: #d8d2b0;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            padding-left: 12px;
-            border-left: 4px solid #d4a373;
-        }
-
-        .salas-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .sala-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 14px;
-            padding: 18px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .sala-card:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #d4a373;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .sala-card .sala-nome {
-            color: #f2e9d0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .sala-card .sala-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .sala-card .sala-status {
-            font-size: 0.8rem;
-            padding: 3px 12px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-
-        .sala-card .sala-status.aguardando {
-            background: #ffc107;
-            color: #1a2f3a;
-        }
-
-        .sala-card .sala-status.ativa {
-            background: #5a8f6c;
-            color: #fff;
-        }
-
-        .sala-card .sala-status.finalizada {
-            background: #6c757d;
-            color: #fff;
-        }
-
-        .sala-card .sala-alunos {
-            color: #8aaab5;
-            font-size: 0.85rem;
-        }
-
-        .sala-card .sala-codigo {
-            color: #6a8a95;
-            font-size: 0.7rem;
-            font-family: monospace;
-        }
-
-        .sala-card .sala-badge {
-            display: inline-block;
-            background: rgba(212, 163, 115, 0.2);
-            color: #d4a373;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6a8a95;
-        }
-
-        .empty-state .icon {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .empty-state h3 {
-            color: #8aaab5;
-            margin-bottom: 5px;
-        }
-
-        /* JOGO ATIVO (quando entra em uma sala) */
-        #jogoAtivo {
-            display: none;
-        }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 10px 14px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .status-bar .last-call {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #ffd93d;
-        }
-
-        .status-bar .count {
-            color: #8aaab5;
-            font-size: 0.85rem;
-        }
-
-        .status-bar .bingo-status {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .status-bar .bingo-status.winner {
-            color: #ffd966;
-            animation: pulse-text 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse-text {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-
-        .card-container {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 15px;
-        }
-
-        .card-title {
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: 10px;
-            color: #d4a373;
-            font-family: 'Georgia', serif;
-            margin-bottom: 10px;
-        }
-
-        .card-letters {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 3px;
-            margin-bottom: 3px;
-        }
-
-        .card-letter {
-            text-align: center;
-            font-weight: 700;
-            font-size: 0.8rem;
-            padding: 2px 0;
-            color: #d8d2b0;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #1a2f3a, #0d1f26); min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: center; }
+        .container { max-width: 900px; width: 100%; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 25px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: #f2e9d0; font-size: 2rem; }
+        .header .subtitle { color: #8aaab5; margin-top: 5px; }
+        .sync-status { display: inline-block; background: rgba(0, 0, 0, 0.3); padding: 4px 12px; border-radius: 14px; color: #8aaab5; font-size: 0.75rem; margin-top: 8px; }
+        .sync-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #5a8f6c; animation: pulse-dot 2s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        .salas-container { margin-top: 20px; }
+        .salas-container h2 { color: #d8d2b0; font-size: 1.2rem; margin-bottom: 15px; padding-left: 12px; border-left: 4px solid #d4a373; }
+        .salas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .sala-card { background: rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 18px 20px; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .sala-card:hover { background: rgba(255, 255, 255, 0.1); border-color: #d4a373; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .sala-card .sala-nome { color: #f2e9d0; font-size: 1.1rem; font-weight: 600; }
+        .sala-card .sala-info { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 5px; }
+        .sala-card .sala-status { font-size: 0.8rem; padding: 3px 12px; border-radius: 20px; font-weight: 500; }
+        .sala-card .sala-status.aguardando { background: #ffc107; color: #1a2f3a; }
+        .sala-card .sala-status.ativa { background: #5a8f6c; color: #fff; }
+        .sala-card .sala-status.finalizada { background: #6c757d; color: #fff; }
+        .sala-card .sala-alunos { color: #8aaab5; font-size: 0.85rem; }
+        .sala-card .sala-codigo { color: #6a8a95; font-size: 0.7rem; font-family: monospace; }
+        .sala-card .sala-badge { display: inline-block; background: rgba(212, 163, 115, 0.2); color: #d4a373; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #6a8a95; grid-column: 1 / -1; }
+        .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+        
+        .debug-area { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #8aaab5; }
+        .debug-area .success { color: #5a8f6c; }
+        .debug-area .error { color: #dc3545; }
+        .debug-area .warning { color: #ffc107; }
+        .debug-area .info { color: #8aaab5; }
+        
+        .back-btn { display: inline-block; padding: 6px 16px; background: rgba(255,255,255,0.08); color: #8aaab5; border-radius: 18px; text-decoration: none; transition: all 0.2s; font-size: 0.85rem; margin-bottom: 15px; border: none; cursor: pointer; }
+        .back-btn:hover { background: rgba(255,255,255,0.18); color: #f2e9d0; }
+        
+        #jogoAtivo { display: none; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 14px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .status-bar .last-call { font-size: 1.1rem; font-weight: 700; color: #ffd93d; }
+        .status-bar .count { color: #8aaab5; font-size: 0.85rem; }
+        .status-bar .bingo-status { font-weight: 600; font-size: 0.9rem; }
+        .status-bar .bingo-status.winner { color: #ffd966; animation: pulse-text 1s ease-in-out infinite alternate; }
+        @keyframes pulse-text { from { transform: scale(1); } to { transform: scale(1.05); } }
+        .card-container { background: rgba(0, 0, 0, 0.2); border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 15px; }
+        .card-title { text-align: center; font-size: 1.8rem; font-weight: 700; letter-spacing: 10px; color: #d4a373; font-family: 'Georgia', serif; margin-bottom: 10px; }
+        .card-letters { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-bottom: 3px; }
+        .card-letter { text-align: center; font-weight: 700; font-size: 0.8rem; padding: 2px 0; color: #d8d2b0; }
         .card-letter:nth-child(1) { color: #ff6b6b; }
         .card-letter:nth-child(2) { color: #ffd93d; }
         .card-letter:nth-child(3) { color: #6bcb77; }
         .card-letter:nth-child(4) { color: #4d96ff; }
         .card-letter:nth-child(5) { color: #ff6bb5; }
-
-        .cartela-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        .cartela-grid .cell {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            padding: 10px 0;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1rem;
-            color: #d4e3e8;
-            transition: all 0.3s;
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid transparent;
-        }
-
-        .cartela-grid .cell.marked {
-            background: #d4a373;
-            color: #fcf3e0;
-            border-color: #f0d5a8;
-            transform: scale(0.95);
-        }
-
-        .cartela-grid .cell.marked::after {
-            content: "✓";
-            font-size: 0.5rem;
-            margin-left: 3px;
-        }
-
-        .cartela-grid .cell.free {
-            background: #b48b5a;
-            color: #fcf7e8;
-            font-size: 1.8rem;
-            font-weight: 700;
-            font-family: 'Georgia', serif;
-        }
-
-        .cartela-grid .cell.free.marked {
-            background: #d4a373;
-        }
-
-        .cartela-grid .cell.winner-cell {
-            border-color: #ffd966;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
-            animation: glow-cell 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow-cell {
-            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
-            to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
-        }
-
-        .numeros-chamados {
-            padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .numeros-chamados h4 {
-            color: #d8d2b0;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-        }
-
-        .numeros-chamados .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .numeros-chamados .chip {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 2px 10px;
-            border-radius: 14px;
-            color: #d4e3e8;
-            font-size: 0.75rem;
-        }
-
-        .numeros-chamados .chip.recent {
-            background: #d4a373;
-            color: #fcf3e0;
-        }
-
-        .empty-state {
-            color: #6a8a95;
-            font-style: italic;
-            font-size: 0.85rem;
-        }
-
-        .back-btn {
-            display: inline-block;
-            padding: 6px 16px;
-            background: rgba(255,255,255,0.08);
-            color: #8aaab5;
-            border-radius: 18px;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            background: rgba(255,255,255,0.18);
-            color: #f2e9d0;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #8aaab5;
-        }
-
-        .loading .spinner {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #d4a373;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .sala-card .sala-professor {
-            color: #6a8a95;
-            font-size: 0.7rem;
-            margin-top: 4px;
-        }
+        .cartela-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 100%; margin: 0 auto; }
+        .cartela-grid .cell { background: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 10px 0; text-align: center; font-weight: 700; font-size: 1rem; color: #d4e3e8; transition: all 0.3s; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; }
+        .cartela-grid .cell.marked { background: #d4a373; color: #fcf3e0; border-color: #f0d5a8; transform: scale(0.95); }
+        .cartela-grid .cell.marked::after { content: "✓"; font-size: 0.5rem; margin-left: 3px; }
+        .cartela-grid .cell.free { background: #b48b5a; color: #fcf7e8; font-size: 1.8rem; font-weight: 700; font-family: 'Georgia', serif; }
+        .cartela-grid .cell.free.marked { background: #d4a373; }
+        .numeros-chamados { padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .numeros-chamados h4 { color: #d8d2b0; font-size: 0.85rem; margin-bottom: 6px; }
+        .numeros-chamados .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+        .numeros-chamados .chip { background: rgba(255, 255, 255, 0.08); padding: 2px 10px; border-radius: 14px; color: #d4e3e8; font-size: 0.75rem; }
+        .numeros-chamados .chip.recent { background: #d4a373; color: #fcf3e0; }
+        .empty-state-text { color: #6a8a95; font-style: italic; font-size: 0.85rem; }
+        .loading { text-align: center; padding: 30px; color: #8aaab5; grid-column: 1 / -1; }
+        .loading .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .refresh-btn { background: #3d6b7a; color: #fff; border: none; padding: 6px 16px; border-radius: 14px; cursor: pointer; font-size: 0.8rem; }
+        .refresh-btn:hover { background: #4d7b8a; }
     </style>
 </head>
 <body>
@@ -421,7 +84,8 @@
             <p class="subtitle">Escolha sua sala para começar a jogar</p>
             <div class="sync-status">
                 <span class="sync-dot"></span>
-                <span>online</span>
+                <span id="statusTexto">online</span>
+                <button class="refresh-btn" onclick="recarregarSalas()">🔄 Atualizar</button>
             </div>
         </div>
 
@@ -436,16 +100,19 @@
             </div>
         </div>
 
+        <!-- ===== ÁREA DE DIAGNÓSTICO ===== -->
+        <div class="debug-area" id="debugArea">
+            <div class="info">[🔄] Aguardando ações...</div>
+        </div>
+
         <!-- ===== JOGO ATIVO ===== -->
         <div id="jogoAtivo">
             <button class="back-btn" onclick="voltarParaLista()">← Voltar para salas</button>
-
             <div class="status-bar">
                 <span class="last-call" id="ultimoNumero">🎯 ---</span>
                 <span class="count" id="marcadosCount">📌 0 marcados</span>
                 <span class="bingo-status" id="statusBingo">⏳ Aguardando BINGO...</span>
             </div>
-
             <div class="card-container">
                 <div class="card-title">B I N G O</div>
                 <div class="card-letters">
@@ -457,11 +124,10 @@
                 </div>
                 <div class="cartela-grid" id="cartelaGrid"></div>
             </div>
-
             <div class="numeros-chamados">
                 <h4>📋 Números chamados:</h4>
                 <div class="chips" id="numerosChamadosAluno">
-                    <span class="empty-state">nenhum número chamado</span>
+                    <span class="empty-state-text">nenhum número chamado</span>
                 </div>
             </div>
         </div>
@@ -501,6 +167,23 @@
         let sessaoRef = null;
 
         // ============================================
+        // LOG
+        // ============================================
+        function log(msg, tipo = 'info') {
+            const area = document.getElementById('debugArea');
+            const time = new Date().toLocaleTimeString();
+            const classes = {
+                info: 'info',
+                success: 'success',
+                error: 'error',
+                warning: 'warning'
+            };
+            area.innerHTML += `<div class="${classes[tipo] || 'info'}">[${time}] ${msg}</div>`;
+            area.scrollTop = area.scrollHeight;
+            console.log(`[${tipo.toUpperCase()}] ${msg}`);
+        }
+
+        // ============================================
         // FUNÇÕES AUXILIARES
         // ============================================
         function getLetterForNumber(num) {
@@ -514,9 +197,7 @@
 
         function getRandomNumbers(min, max, count) {
             const pool = [];
-            for (let i = min; i <= max; i++) {
-                pool.push(i);
-            }
+            for (let i = min; i <= max; i++) pool.push(i);
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -555,15 +236,22 @@
                 const cartela = participantesExistentes[key].cartela;
                 cartelasUsadas.add(cartela.flat().join(','));
             }
-
             let cartela;
             let tentativas = 0;
             do {
                 cartela = gerarCartela();
                 tentativas++;
             } while (cartelasUsadas.has(cartela.flat().join(',')) && tentativas < 1000);
-
             return cartela;
+        }
+
+        // ============================================
+        // RECARREGAR SALAS
+        // ============================================
+        function recarregarSalas() {
+            log('🔄 Recarregando salas manualmente...', 'info');
+            document.getElementById('statusTexto').textContent = 'atualizando...';
+            listarSalas();
         }
 
         // ============================================
@@ -578,7 +266,6 @@
                 </div>
             `;
 
-            // Remover listener anterior se existir
             if (listaSalasRef) {
                 listaSalasRef.off();
             }
@@ -588,21 +275,21 @@
             listaSalasRef.on('value', (snapshot) => {
                 const salas = snapshot.val();
                 grid.innerHTML = '';
+                document.getElementById('statusTexto').textContent = 'online';
 
                 if (!salas) {
+                    log('⚠️ Nenhuma sala encontrada no banco', 'warning');
                     grid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state">
                             <span class="icon">🎯</span>
                             <h3>Nenhuma sala disponível</h3>
                             <p>Aguardando o professor criar uma sala...</p>
+                            <p style="font-size:0.8rem;color:#6a8a95;margin-top:8px;">💡 Dica: Crie uma sala no BProfessor.html</p>
                         </div>
                     `;
                     return;
                 }
 
-                let temSalaAtiva = false;
-
-                // Ordenar por data de criação (mais recente primeiro)
                 const salasArray = Object.entries(salas)
                     .map(([codigo, dados]) => ({ codigo, ...dados }))
                     .filter(s => s.status === 'aguardando' || s.status === 'ativa')
@@ -612,9 +299,11 @@
                         return dataB.localeCompare(dataA);
                     });
 
+                log(`📋 Encontradas ${salasArray.length} salas ativas`, 'success');
+
                 if (salasArray.length === 0) {
                     grid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state">
                             <span class="icon">⏳</span>
                             <h3>Nenhuma sala ativa no momento</h3>
                             <p>O professor precisa criar uma sala para você entrar.</p>
@@ -624,23 +313,22 @@
                 }
 
                 salasArray.forEach((sala) => {
-                    temSalaAtiva = true;
                     const statusMap = {
                         'aguardando': '⏳ Aguardando',
                         'ativa': '🟢 Em andamento',
                         'finalizada': '🔴 Finalizada'
                     };
                     const statusClass = sala.status || 'aguardando';
-
                     const totalAlunos = sala.totalAlunos || 0;
                     const participantes = sala.participantes || {};
                     const alunosConectados = Object.keys(participantes).length;
 
                     const card = document.createElement('a');
                     card.className = 'sala-card';
-                    card.href = `#`;
+                    card.href = '#';
                     card.onclick = (e) => {
                         e.preventDefault();
+                        log(`🎯 Entrando na sala: ${sala.codigo} (${sala.salaNome})`, 'info');
                         entrarNaSala(sala.codigo);
                     };
 
@@ -659,15 +347,17 @@
                     grid.appendChild(card);
                 });
 
-                if (!temSalaAtiva) {
-                    grid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1 / -1;">
-                            <span class="icon">⏳</span>
-                            <h3>Nenhuma sala ativa no momento</h3>
-                            <p>O professor precisa criar uma sala para você entrar.</p>
-                        </div>
-                    `;
-                }
+                log(`✅ ${salasArray.length} salas listadas com sucesso`, 'success');
+
+            }, (error) => {
+                log(`❌ Erro ao listar salas: ${error.message}`, 'error');
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <span class="icon">❌</span>
+                        <h3>Erro ao carregar salas</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
             });
         }
 
@@ -675,80 +365,83 @@
         // ENTRAR NA SALA
         // ============================================
         function entrarNaSala(codigo) {
-            // Gerar ID único para o aluno baseado na sessão
-            let aluno = localStorage.getItem(`bingo_aluno_${codigo}`);
-            if (!aluno) {
-                // Verificar quantos alunos já estão na sessão
-                const ref = db.ref(`bingo/sessoes/${codigo}/participantes`);
-                ref.once('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        const participantes = snapshot.val();
-                        const count = Object.keys(participantes).length;
-                        aluno = `aluno_${count + 1}`;
-                    } else {
-                        aluno = 'aluno_1';
-                    }
-                    localStorage.setItem(`bingo_aluno_${codigo}`, aluno);
-                    iniciarJogo(codigo, aluno);
-                });
-            } else {
-                iniciarJogo(codigo, aluno);
+            const nome = prompt('🎯 Digite seu nome ou apelido para jogar:\n(Ex: João, Maria, etc.)');
+            if (!nome || nome.trim() === '') {
+                log('❌ Nome não informado', 'error');
+                alert('Você precisa digitar um nome para jogar!');
+                return;
             }
+
+            const apelido = nome.trim();
+            log(`👤 Tentando entrar como: ${apelido}`, 'info');
+
+            const ref = db.ref(`bingo/sessoes/${codigo}/participantes`);
+            ref.once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const participantes = snapshot.val();
+                    if (participantes[apelido]) {
+                        log(`⚠️ Nome "${apelido}" já está em uso`, 'warning');
+                        alert(`O nome "${apelido}" já está em uso! Por favor, escolha outro.`);
+                        return;
+                    }
+                }
+
+                localStorage.setItem(`bingo_aluno_${codigo}`, apelido);
+                log(`✅ Nome "${apelido}" registrado para a sala ${codigo}`, 'success');
+                iniciarJogo(codigo, apelido);
+            });
         }
 
         // ============================================
         // INICIAR JOGO
         // ============================================
-        function iniciarJogo(codigo, aluno) {
+        function iniciarJogo(codigo, apelido) {
             sessaoAtual = codigo;
-            alunoId = aluno;
+            alunoId = apelido;
 
-            // Esconder lista, mostrar jogo
             document.getElementById('listaSalas').style.display = 'none';
             document.getElementById('jogoAtivo').style.display = 'block';
 
             const sessaoRefLocal = db.ref(`bingo/sessoes/${codigo}`);
 
-            // Buscar dados da sessão
             sessaoRefLocal.once('value', (snapshot) => {
                 if (!snapshot.exists()) {
+                    log('❌ Sessão não encontrada no Firebase', 'error');
                     alert('Sessão não encontrada!');
                     voltarParaLista();
                     return;
                 }
 
                 const sessao = snapshot.val();
+                log(`📊 Sessão "${codigo}" carregada: ${sessao.salaNome}`, 'info');
 
-                // Verificar se o aluno já está na sessão
-                if (sessao.participantes && sessao.participantes[aluno]) {
-                    const data = sessao.participantes[aluno];
+                if (sessao.participantes && sessao.participantes[apelido]) {
+                    const data = sessao.participantes[apelido];
                     minhaCartela = data.cartela;
                     minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     isWinner = data.venceu || false;
+                    log(`♻️ Cartela restaurada para ${apelido}`, 'info');
                 } else {
-                    // Criar novo participante
                     const cartela = gerarCartelaUnica(sessao.participantes || {});
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                     marcacoes[2][2] = true;
 
                     const novoParticipante = {
-                        nome: `Aluno ${aluno.replace('aluno_', '')}`,
+                        nome: apelido,
                         cartela: cartela,
                         marcacoes: marcacoes,
                         venceu: false
                     };
 
-                    sessaoRefLocal.child(`participantes/${aluno}`).set(novoParticipante);
-
+                    sessaoRefLocal.child(`participantes/${apelido}`).set(novoParticipante);
                     minhaCartela = cartela;
                     minhasMarcacoes = marcacoes;
                     isWinner = false;
+                    log(`🆕 Nova cartela gerada para ${apelido}`, 'success');
                 }
 
-                // Renderizar cartela
                 renderizarCartela();
 
-                // Atualizar números chamados
                 if (sessao.numerosSorteados) {
                     numerosChamados = sessao.numerosSorteados;
                     atualizarNumerosChamados();
@@ -756,7 +449,6 @@
                     atualizarStatus();
                 }
 
-                // Escutar mudanças
                 escutarSessao(codigo);
             });
         }
@@ -783,8 +475,6 @@
             }
 
             grid.innerHTML = html;
-
-            // Atualizar contador
             const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
             document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
         }
@@ -805,7 +495,6 @@
                     }
                 }
             }
-
             const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
             document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
         }
@@ -816,18 +505,18 @@
         function atualizarNumerosChamados() {
             const container = document.getElementById('numerosChamadosAluno');
             if (numerosChamados.length === 0) {
-                container.innerHTML = `<span class="empty-state">nenhum número chamado</span>`;
+                container.innerHTML = `<span class="empty-state-text">nenhum número chamado</span>`;
                 return;
             }
 
             let html = '';
-            numerosChamados.forEach((num, idx) => {
-                const cls = idx === numerosChamados.length - 1 ? 'chip recent' : 'chip';
+            const ultimos = numerosChamados.slice(-20);
+            ultimos.forEach((num, idx) => {
+                const cls = idx === ultimos.length - 1 ? 'chip recent' : 'chip';
                 html += `<span class="${cls}">${num}</span>`;
             });
             container.innerHTML = html;
 
-            // Último número
             if (numerosChamados.length > 0) {
                 const ultimo = numerosChamados[numerosChamados.length - 1];
                 const letra = getLetterForNumber(ultimo);
@@ -861,27 +550,27 @@
 
             sessaoRef.on('value', (snapshot) => {
                 if (!snapshot.exists()) {
+                    log('⚠️ Sessão foi encerrada', 'warning');
                     alert('A sessão foi encerrada!');
                     voltarParaLista();
                     return;
                 }
 
                 const sessao = snapshot.val();
+                log(`🔄 Atualização da sessão: ${sessao.status}`, 'info');
 
-                // Verificar se a sessão foi finalizada
                 if (sessao.status === 'finalizada') {
+                    log('🔴 Sessão finalizada pelo professor', 'warning');
                     alert('A sessão foi finalizada pelo professor!');
                     voltarParaLista();
                     return;
                 }
 
-                // Atualizar números chamados
                 if (sessao.numerosSorteados) {
                     numerosChamados = sessao.numerosSorteados;
                     atualizarNumerosChamados();
                 }
 
-                // Atualizar minhas marcações
                 if (sessao.participantes && sessao.participantes[alunoId]) {
                     const data = sessao.participantes[alunoId];
                     minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
@@ -897,7 +586,6 @@
         // VOLTAR PARA LISTA
         // ============================================
         function voltarParaLista() {
-            // Desconectar da sessão
             if (sessaoRef) {
                 sessaoRef.off();
                 sessaoRef = null;
@@ -912,18 +600,28 @@
 
             document.getElementById('jogoAtivo').style.display = 'none';
             document.getElementById('listaSalas').style.display = 'block';
-
-            // Recarregar lista de salas
             listarSalas();
         }
 
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
+        log('🚀 BINGO - Painel do Aluno carregado', 'info');
+        log('📋 Firebase versão: ' + firebase.SDK_VERSION, 'info');
+        log('🔄 Escutando mudanças em tempo real...', 'info');
+        
         listarSalas();
 
-        console.log('🎲 BINGO - Painel do Aluno carregado!');
-        console.log('📋 Listando salas disponíveis...');
+        // Verificar conexão
+        db.ref('.info/connected').on('value', (snap) => {
+            if (snap.val() === true) {
+                document.getElementById('statusTexto').textContent = 'online';
+                log('✅ Conectado ao Firebase', 'success');
+            } else {
+                document.getElementById('statusTexto').textContent = 'offline';
+                log('❌ Desconectado do Firebase', 'error');
+            }
+        });
     </script>
 </body>
 </html>
