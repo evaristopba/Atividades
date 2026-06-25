@@ -606,7 +606,7 @@
         }
 
         // ============================================
-        // ATRIBUIR CARTELA DISPONÍVEL
+        // ATRIBUIR CARTELA DISPONÍVEL (ÚNICA)
         // ============================================
         function atribuirCartela(sessao, nome) {
             const participantes = sessao.participantes || {};
@@ -621,6 +621,7 @@
             // Procurar cartela disponível (sem nome atribuído)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
+                // Verifica se a cartela está vazia (nome vazio ou padrão)
                 if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
                     cartelasDisponiveis.push({ id, data });
                 }
@@ -630,6 +631,7 @@
                 return null;
             }
 
+            // Pegar a PRIMEIRA cartela disponível
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
@@ -664,6 +666,7 @@
                 const sessao = snapshot.val();
                 const totalAlunos = sessao.totalAlunos || 0;
 
+                // ⭐ ATRIBUIR CARTELA ÚNICA
                 const resultado = atribuirCartela(sessao, nome);
 
                 if (!resultado) {
@@ -686,12 +689,14 @@
                     minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     isWinner = data.venceu || false;
                     
+                    // Se o nome estava vazio, atualiza
                     if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
                         sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(nome);
                     }
                     
                     showToast(`👋 Bem-vindo de volta, ${nome}!`, 'info');
                 } else {
+                    // ⭐ GERAR CARTELA ÚNICA
                     const cartela = gerarCartelaUnica(sessao.participantes || {});
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                     marcacoes[2][2] = true;
@@ -734,7 +739,7 @@
         }
 
         // ============================================
-        // RENDERIZAR CARTELA
+        // RENDERIZAR CARTELA (COM MARCAÇÃO MANUAL)
         // ============================================
         function renderizarCartela() {
             const grid = document.getElementById('cartelaGrid');
@@ -755,6 +760,7 @@
                     
                     const displayVal = isCenter ? 'B' : val;
                     
+                    // ⭐ CLIQUE MANUAL - Só permite clicar se não for o centro
                     const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c}, ${val})"`;
                     
                     html += `<div class="${cls}" id="cell_${r}_${c}" ${onclick}>${displayVal}</div>`;
@@ -766,19 +772,22 @@
         }
 
         // ============================================
-        // MARCAR NÚMERO
+        // ⭐ MARCAR NÚMERO (CLIQUE DO ALUNO)
         // ============================================
         function marcarNumero(r, c, val) {
+            // Verificar se o número foi sorteado
             if (!numerosChamados.includes(val)) {
                 showToast('⚠️ Este número ainda não foi sorteado!', 'error');
                 return;
             }
 
+            // Verificar se já está marcado
             if (minhasMarcacoes[r][c]) {
                 showToast('ℹ️ Este número já foi marcado!', 'info');
                 return;
             }
 
+            // Verificar se o jogo está ativo
             const sessaoRefLocal = db.ref(`bingo/sessoes/${sessaoId}`);
             sessaoRefLocal.once('value', (snapshot) => {
                 const sessao = snapshot.val();
@@ -788,12 +797,15 @@
                 }
             });
 
+            // ⭐ MARCAR O NÚMERO
             minhasMarcacoes[r][c] = true;
             
+            // Atualizar no Firebase para o professor ver
             db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
                 marcacoes: minhasMarcacoes
             });
 
+            // Atualizar visual
             const cell = document.getElementById(`cell_${r}_${c}`);
             if (cell) {
                 cell.classList.add('marked');
@@ -802,12 +814,14 @@
             
             atualizarContador();
 
+            // ⭐ VERIFICAR BINGO
             if (checkBingo(minhasMarcacoes)) {
                 isWinner = true;
                 db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
                     venceu: true
                 });
                 
+                // Atualizar vencedores na sessão
                 sessaoRefLocal.once('value', (snapshot) => {
                     const sessao = snapshot.val();
                     const vencedoresAtuais = sessao.vencedores || [];
@@ -822,6 +836,7 @@
                 showToast('🏆 BINGO! Você venceu! 🎉', 'winner');
                 atualizarStatus();
                 
+                // Destacar cartela
                 document.querySelectorAll('.cell').forEach(el => {
                     if (!el.classList.contains('free')) {
                         el.classList.add('winner-cell');
@@ -867,6 +882,7 @@
                 document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
             }
 
+            // ⭐ Destacar números sorteados na cartela (para o aluno saber quais foram chamados)
             if (minhaCartela) {
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
