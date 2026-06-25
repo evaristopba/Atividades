@@ -485,7 +485,6 @@
             50% { opacity: 0.3; }
         }
 
-        /* ADMIN LINK */
         .admin-link {
             text-align: center;
             margin-top: 20px;
@@ -648,7 +647,7 @@
         const db = firebase.database();
 
         // ============================================
-        // ⭐ CORREÇÃO: Remover parâmetros da URL
+        // REMOVER PARÂMETROS DA URL (CORREÇÃO)
         // ============================================
         (function limparURL() {
             if (window.location.search) {
@@ -761,7 +760,7 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO
+        // CRIAR SESSÃO (CORRIGIDO)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -822,7 +821,8 @@
             document.getElementById('totalAlunos').textContent = qtdAlunos;
             document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-            // ⭐ CORREÇÃO: Gerar link para o ALUNO (não para o professor)
+            // ⭐⭐⭐ CORREÇÃO AQUI ⭐⭐⭐
+            // Gerar link para o ALUNO (BAluno.html) e não para o Professor
             const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
             const linkAluno = `${baseUrl}?sala=${codigo}`;
             document.getElementById('linkAluno').value = linkAluno;
