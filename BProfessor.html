@@ -839,7 +839,7 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO (COM CÓDIGO FIXO)
+        // CRIAR SESSÃO (COM CÓDIGO FIXO E LINK SIMPLES)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -857,9 +857,7 @@
             }
 
             const salaNome = salaSelect.options[salaSelect.selectedIndex].text;
-            const salaId = salaSelect.value; // ← Código fixo (ex: 4a-cp)
-
-            // Usar o código fixo como identificador da sessão
+            const salaId = salaSelect.value; // ← Código fixo (ex: 1a-cp)
             const codigo = salaId;
 
             statusDiv.innerHTML = `<div class="status-criacao info">🔄 Verificando sala "${salaNome}"...</div>`;
@@ -868,7 +866,6 @@
             
             sessaoRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
-                    // Sala já existe
                     statusDiv.innerHTML = `<div class="status-criacao warning">⚠️ Sala "${salaNome}" já existe. Resetando...</div>`;
                     
                     if (!confirm(`A sala "${salaNome}" já existe.\n\nDeseja resetá-la com ${qtdAlunos} alunos?`)) {
@@ -916,9 +913,11 @@
                 document.getElementById('totalAlunos').textContent = qtdAlunos;
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-                // ⭐ Link com código fixo (sempre o mesmo para cada turma)
+                // ⭐⭐⭐ CORREÇÃO DO LINK ⭐⭐⭐
+                // Gerar link SIMPLES, igual ao STOP: ?sala=CODIGO
+                // SEM #, SEM &nome=, SEM parâmetros extras
                 const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
-                const linkAluno = `${baseUrl}?sala=${codigo}&nome=${encodeURIComponent(salaNome)}`;
+                const linkAluno = `${baseUrl}?sala=${codigo}`;
                 document.getElementById('linkAluno').value = linkAluno;
 
                 renderizarCartelas(participantes);
