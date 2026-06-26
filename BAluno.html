@@ -684,7 +684,13 @@
                 return null;
             }
 
-            // ⭐⭐⭐ CORREÇÃO: Pegar a PRIMEIRA cartela disponível (índice 0)
+            // ⭐⭐⭐ CORREÇÃO: Ordenar por número da cartela e pegar a PRIMEIRA
+            cartelasDisponiveis.sort((a, b) => {
+                const numA = parseInt(a.id.replace('aluno_', ''));
+                const numB = parseInt(b.id.replace('aluno_', ''));
+                return numA - numB;
+            });
+
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
