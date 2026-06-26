@@ -1830,6 +1830,2397 @@
                 if (sessao.status === 'aguardando') {
                     // Restaura o HTML da espera normal se ele foi sobrescrito pela mensagem de sala lotada
                     const aguardandoDiv = document.getElementById('aguardando');
+                    if (aguardandoDiv.innerHTML.includes('Sala lotada!') || aguardandoDiv.innerHTML.includes('Jogo finalizado') || aguardandoDiv.innerHTML.includes('Sessão encerrada')) {
+                        aguardandoDiv.innerHTML = `
+                            <span class="status-icon">⏳</span>
+                            <h2>Aguardando o professor iniciar...</h2>
+                            <div class="loading-spinner"></div>
+                            <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                                Sala: <strong id="aguardandoSala">${salaNome}</strong>
+                            </p>
+                            <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera">👤 ${meuNome}</p>
+                        `;
+                    }
+                    document.getElementById('aguardando').style.display = 'block';
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    return;
+                }
+
+                if (sessao.status === 'finalizada') {
+                    showToast('🔴 O jogo foi finalizado!', 'error');
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">🔴</span>
+                        <h2>Jogo finalizado</h2>
+                        <p>O professor finalizou esta sessão.</p>
+                    `;
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    document.getElementById('aguardando').style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('aguardando').style.display = 'none';
+                document.getElementById('jogoAtivo').style.display = 'block';
+
+                if (sessao.participantes && sessao.participantes[alunoId]) {
+                    const data = sessao.participantes[alunoId];
+                    
+                    let dataMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                    let dataCartela = data.cartela || minhaCartela;
+                    let corrigido = false;
+
+                    // --- ANTI-TRAPAÇA: DETECTAR E REVERTER MARCAÇÕES DE CONSOLE/DEVTOOLS EM TEMPO REAL ---
+                    if (dataCartela && dataMarcacoes) {
+                        for (let r = 0; r < 5; r++) {
+                            for (let c = 0; c < 5; c++) {
+                                const val = dataCartela[r][c];
+                                if (val !== 'B' && dataMarcacoes[r][c] && !numerosChamados.includes(val)) {
+                                    // O aluno marcou um número que NÃO foi sorteado! Reverter imediatamente.
+                                    dataMarcacoes[r][c] = false;
+                                    corrigido = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (corrigido) {
+                        showToast('⚠️ Tentativa de marcação inválida corrigida automaticamente pelo sistema anti-cheat!', 'error');
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                            marcacoes: dataMarcacoes,
+                            venceu: false
+                        });
+                        minhasMarcacoes = dataMarcacoes;
+                        isWinner = false;
+                    } else {
+                        const jaEraVencedor = isWinner;
+                        minhasMarcacoes = dataMarcacoes;
+                        isWinner = data.venceu || false;
+
+                        if (isWinner && !jaEraVencedor) {
+                            showToast(`🏆 BINGO! Você VENCEU! 🎉🎉🎉`, 'winner', 6000);
+                            dispararConfetti();
+                            try {
+                                const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+                                audio.play().catch(() => {});
+                            } catch(e) {}
+                        }
+                    }
+
+                    if (data.cartela && data.cartela !== minhaCartela) {
+                        minhaCartela = data.cartela;
+                        renderizarCartela();
+                    }
+                    
+                    atualizarContador();
+                    atualizarStatus();
+                    
+                    if (isWinner) {
+                        document.querySelectorAll('.cell').forEach(el => {
+                            if (!el.classList.contains('free')) {
+                                el.classList.add('winner-cell');
+                            }
+                        });
+                    }
+                }
+
+                if (sessao.mostrarNumeros !== undefined) {
+                    mostrarNumeros = sessao.mostrarNumeros;
+                    const container = document.getElementById('numerosChamadosContainer');
+                    container.style.display = mostrarNumeros ? 'block' : 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // RENDERIZAR CARTELA
+        // ============================================
+        function renderizarCartela() {
+            const grid = document.getElementById('cartelaGrid');
+            let html = '';
+
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const val = minhaCartela[r][c];
+                    const isMarked = minhasMarcacoes[r][c];
+                    const isCenter = (r === 2 && c === 2);
+                    const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
+                    const isUltimo = typeof val === 'number' && val === ultimoNumeroSorteado;
+                    
+                    let cls = 'cell';
+                    if (isMarked) cls += ' marked';
+                    if (isCenter) cls += ' free';
+                    if (isWinner) cls += ' winner-cell';
+                    if (isSorteado && !isMarked && !isCenter && mostrarNumeros) cls += ' sorteado';
+                    if (isUltimo && !isMarked && !isCenter && mostrarNumeros) cls += ' sorteado';
+                    
+                    const displayVal = isCenter ? 'B' : val;
+                    
+                    const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c}, ${val})"`;
+                    
+                    html += `<div class="${cls}" id="cell_${r}_${c}" ${onclick}>${displayVal}</div>`;
+                }
+            }
+
+            grid.innerHTML = html;
+            atualizarContador();
+            
+            const container = document.getElementById('numerosChamadosContainer');
+            if (mostrarNumeros) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // MARCAR NÚMERO COM VALIDACÃO DO ULTIMO SORTEADO
+        // ============================================
+        function marcarNumero(r, c, val) {
+            if (isWinner) {
+                showToast('🏆 Você já venceu! Parabéns! 🎉', 'info');
+                return;
+            }
+
+            if (jogoFinalizado) {
+                showToast('⚠️ O jogo já foi finalizado!', 'error');
+                return;
+            }
+
+            if (numerosChamados.length === 0) {
+                showToast('⚠️ Nenhum número foi sorteado ainda!', 'error');
+                return;
+            }
+            
+            const ultimoSorteado = numerosChamados[numerosChamados.length - 1];
+            
+            // --- BLOQUEAR TENTATIVAS DE MARCAR NÚMEROS NÃO SORTEADOS OU ANTIGOS ---
+            if (val !== ultimoSorteado) {
+                showToast('⚠️ Você só pode marcar o número sorteado AGORA!', 'error');
+                
+                for (let r2 = 0; r2 < 5; r2++) {
+                    for (let c2 = 0; c2 < 5; c2++) {
+                        if (minhaCartela[r2][c2] === val) {
+                            const cell = document.getElementById(`cell_${r2}_${c2}`);
+                            if (cell) {
+                                cell.classList.add('bloqueado');
+                                setTimeout(() => cell.classList.remove('bloqueado'), 2000);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (minhasMarcacoes[r][c]) {
+                showToast('ℹ️ Este número já foi marcado!', 'info');
+                return;
+            }
+
+            minhasMarcacoes[r][c] = true;
+            
+            db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                marcacoes: minhasMarcacoes
+            });
+
+            const cell = document.getElementById(`cell_${r}_${c}`);
+            if (cell) {
+                cell.classList.add('marked');
+                cell.classList.remove('sorteado');
+            }
+            
+            atualizarContador();
+
+            if (isCartelaCompleta()) {
+                if (checkBingo(minhasMarcacoes, minhaCartela, numerosChamados)) {
+                    isWinner = true;
+                    
+                    const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+                    alunoRef.update({
+                        venceu: true
+                    });
+                    
+                    db.ref(`bingo/sessoes/${sessaoId}/vencedores`).transaction((currentData) => {
+                        if (!currentData) return [alunoId];
+                        if (!currentData.includes(alunoId)) {
+                            currentData.push(alunoId);
+                        }
+                        return currentData;
+                    });
+
+                    showToast(`🏆 BINGO! ${meuNome} VENCEU! 🎉🎉🎉`, 'winner', 6000);
+                    dispararConfetti();
+                    
+                    document.querySelectorAll('.cell').forEach(el => {
+                        if (!el.classList.contains('free')) {
+                            el.classList.add('winner-cell');
+                        }
+                    });
+                    
+                    atualizarStatus();
+                    
+                    try {
+                        const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+                        audio.play().catch(() => {});
+                    } catch(e) {}
+                }
+            }
+        }
+
+        // ============================================
+        // ATUALIZAR CONTADOR
+        // ============================================
+        function atualizarContador() {
+            if (!minhasMarcacoes) return;
+            const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
+            document.getElementById('marcadosCount').textContent = `📌 ${totalMarked}/25 marcados`;
+        }
+
+        // ============================================
+        // ATUALIZAR NÚMEROS CHAMADOS
+        // ============================================
+        function atualizarNumerosChamados() {
+            const container = document.getElementById('numerosChamadosAluno');
+            if (numerosChamados.length === 0) {
+                container.innerHTML = `<span class="empty-state-text">nenhum número chamado</span>`;
+                return;
+            }
+
+            let html = '';
+            const ultimos = numerosChamados.slice(-20);
+            ultimos.forEach((num, idx) => {
+                const cls = idx === ultimos.length - 1 ? 'chip recent' : 'chip';
+                html += `<span class="${cls}">${num}</span>`;
+            });
+            container.innerHTML = html;
+
+            if (numerosChamados.length > 0) {
+                const ultimo = numerosChamados[numerosChamados.length - 1];
+                ultimoNumeroSorteado = ultimo;
+                const letra = getLetterForNumber(ultimo);
+                if (mostrarNumeros) {
+                    document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
+                } else {
+                    document.getElementById('ultimoNumero').innerHTML = `🎯 Voz (Ouvir)`;
+                }
+            }
+
+            if (minhaCartela) {
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const val = minhaCartela[r][c];
+                        if (typeof val === 'number') {
+                            const cell = document.getElementById(`cell_${r}_${c}`);
+                            if (cell) {
+                                const isMarked = minhasMarcacoes[r][c];
+                                const isSorteado = numerosChamados.includes(val);
+                                const isUltimo = val === ultimoNumeroSorteado;
+                                
+                                if (isMarked) {
+                                    cell.classList.add('marked');
+                                    cell.classList.remove('sorteado');
+                                } else if (isSorteado && !isUltimo && mostrarNumeros) {
+                                    cell.classList.add('sorteado');
+                                } else if (isUltimo && mostrarNumeros) {
+                                    cell.classList.add('sorteado');
+                                } else {
+                                    cell.classList.remove('sorteado');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // ATUALIZAR STATUS
+        // ============================================
+        function atualizarStatus() {
+            const statusEl = document.getElementById('statusBingo');
+            if (isWinner) {
+                statusEl.textContent = '🏆 BINGO! Você venceu! 🎉';
+                statusEl.className = 'bingo-status winner';
+            } else {
+                let totalMarked = 0;
+                if (minhasMarcacoes) {
+                    totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
+                }
+                statusEl.textContent = `⏳ ${totalMarked}/25 marcados`;
+                statusEl.className = 'bingo-status';
+            }
+        }
+
+        // ============================================
+        // VOLTAR PARA LISTA
+        // ============================================
+        function voltarParaLista() {
+            if (sessaoListenerRef) {
+                sessaoListenerRef.off();
+                sessaoListenerRef = null;
+            }
+            
+            sessaoId = null;
+            alunoId = null;
+            minhaCartela = null;
+            minhasMarcacoes = null;
+            numerosChamados = [];
+            isWinner = false;
+            meuNome = '';
+            ultimoResetToken = null;
+
+            document.getElementById('jogoAtivo').style.display = 'none';
+            document.getElementById('aguardando').style.display = 'block';
+            document.getElementById('aguardandoSala').textContent = '---';
+            
+            window.location.href = 'BAluno.html';
+        }
+
+        // ============================================
+        // MODAL DE SELEÇÃO DE SALA DINÂMICA
+        // ============================================
+        function abrirModalSelecaoSalas() {
+            document.getElementById('modalSelecaoSalas').classList.add('active');
+        }
+
+        function fecharModalSelecaoSalas() {
+            document.getElementById('modalSelecaoSalas').classList.remove('active');
+        }
+
+        function selecionarSalaModal() {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modalSelecaoSalas');
+                const container = document.getElementById('listaSalasContainer');
+                const inputManual = document.getElementById('codigoSalaManual');
+                const btnManual = document.getElementById('btnConfirmarSalaManual');
+                
+                inputManual.value = '';
+                
+                // Mostrar spinner de carregamento inicial
+                container.innerHTML = `
+                    <div class="loading-spinner-container" style="text-align: center; padding: 20px 0;">
+                        <div class="loading-spinner" style="width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #8aaab5; font-size: 0.9rem; margin-top: 10px;">Buscando salas abertas...</p>
+                    </div>
+                `;
+                
+                const sessoesRef = db.ref('bingo/sessoes');
+                
+                const handleUpdate = (snapshot) => {
+                    if (!snapshot.exists()) {
+                        container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                        return;
+                    }
+                    
+                    const sessoes = snapshot.val();
+                    let html = '';
+                    let encontrouAtiva = false;
+                    
+                    // Ordenar salas para estabilidade na visualização
+                    const sortedSessoes = Object.entries(sessoes).sort((a, b) => b[0].localeCompare(a[0]));
+                    
+                    for (const [id, sessao] of sortedSessoes) {
+                        if (sessao.status === 'finalizada') continue;
+                        
+                        encontrouAtiva = true;
+                        
+                        let totalVagas = sessao.totalAlunos || 0;
+                        let ocupados = 0;
+                        if (sessao.participantes) {
+                            ocupados = Object.values(sessao.participantes).filter(p => p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ')).length;
+                        }
+                        
+                        const statusTexto = sessao.status === 'ativa' ? 'Em Andamento' : 'Aguardando';
+                        const badgeClasse = sessao.status === 'ativa' ? 'style="background: rgba(77, 150, 255, 0.15); color: #4d96ff; border: 1px solid rgba(77, 150, 255, 0.3);"' : 'style="background: rgba(212, 163, 115, 0.15); color: #d4a373; border: 1px solid rgba(212, 163, 115, 0.3);"';
+                        
+                        const isCheia = ocupados >= totalVagas;
+                        const vagasTexto = isCheia ? 'Cheia' : `${ocupados}/${totalVagas} Alunos`;
+                        const vagasClasse = isCheia ? 'sala-item-vagas cheia' : 'sala-item-vagas';
+                        
+                        html += `
+                            <div class="sala-item" onclick="selecionarSalaDaLista('${id}', ${isCheia})">
+                                <div class="sala-item-info">
+                                    <span class="sala-item-nome">🏫 ${sessao.salaNome || 'Sem Nome'}</span>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;">
+                                        <span class="sala-item-detalhe" style="font-family: monospace;">Cód: ${id}</span>
+                                        <span class="sala-item-detalhe" ${badgeClasse} style="font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 600;">${statusTexto}</span>
+                                    </div>
+                                </div>
+                                <span class="${vagasClasse}">${vagasTexto}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    if (!encontrouAtiva) {
+                        container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                    } else {
+                        container.innerHTML = html;
+                    }
+                };
+                
+                sessoesRef.on('value', handleUpdate);
+                
+                const finalizeSelection = (id) => {
+                    sessoesRef.off('value', handleUpdate);
+                    fecharModalSelecaoSalas();
+                    resolve(id);
+                };
+                
+                window.selecionarSalaDaLista = function(id, isCheia) {
+                    if (isCheia) {
+                        showToast('⚠️ Esta sala está lotada! Peça para o professor expandir as vagas.', 'error');
+                        return;
+                    }
+                    finalizeSelection(id);
+                };
+                
+                const handleManualSubmit = function() {
+                    let cod = inputManual.value.trim();
+                    if (!cod) {
+                        showToast('⚠️ Digite o código da sala!', 'error');
+                        return;
+                    }
+                    
+                    // Se o usuário colou um link completo, extrair o código da sala
+                    if (cod.includes('sala=')) {
+                        try {
+                            const urlParts = cod.split('sala=');
+                            if (urlParts.length > 1) {
+                                cod = urlParts[1].split('&')[0];
+                            }
+                        } catch (e) {
+                            console.error('Erro ao extrair código do link:', e);
+                        }
+                    } else if (cod.includes('/') || cod.includes('\\')) {
+                        // Se colou um caminho ou link genérico, tentar extrair a última parte
+                        try {
+                            const lastPart = cod.substring(cod.lastIndexOf('/') + 1);
+                            if (lastPart) {
+                                cod = lastPart;
+                            }
+                        } catch (e) {}
+                    }
+                    
+                    db.ref(`bingo/sessoes/${cod}`).once('value', (snapshot) => {
+                        if (!snapshot.exists()) {
+                            showToast('❌ Código da sala não encontrado!', 'error');
+                            return;
+                        }
+                        
+                        const sessao = snapshot.val();
+                        if (sessao.status === 'finalizada') {
+                            showToast('🔴 Esta sala já foi encerrada pelo professor!', 'error');
+                            return;
+                        }
+                        
+                        let totalVagas = sessao.totalAlunos || 0;
+                        let ocupados = 0;
+                        if (sessao.participantes) {
+                            ocupados = Object.values(sessao.participantes).filter(p => p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ')).length;
+                        }
+                        
+                        if (ocupados >= totalVagas) {
+                            showToast('⚠️ Esta sala está lotada!', 'error');
+                            return;
+                        }
+                        
+                        finalizeSelection(cod);
+                    }).catch(err => {
+                        console.error(err);
+                        showToast('❌ Erro ao conectar!', 'error');
+                    });
+                };
+                
+                btnManual.onclick = handleManualSubmit;
+                inputManual.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        handleManualSubmit();
+                    }
+                };
+                
+                abrirModalSelecaoSalas();
+            });
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            let sala = params.get('sala');
+
+            if (!sala || sala.trim() === '') {
+                try {
+                    sala = await selecionarSalaModal();
+                } catch (e) {
+                    console.log('Seleção cancelada ou falhou, recarregando...');
+                    window.location.reload();
+                    return;
+                }
+                
+                if (!sala || sala.trim() === '') {
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">❌</span>
+                        <h2>Código Inválido</h2>
+                        <p>Você precisa do código da sala para poder jogar.</p>
+                        <button onclick="window.location.reload()" class="back-btn" style="margin-top: 15px;">Tentar Novamente</button>
+                    `;
+                    return;
+                }
+            }
+
+            configurarDetectorSaida();
+
+            const nome = await inputTexto(
+                '🎯 Entrar no BINGO',
+                'Digite seu <strong>nome</strong> ou <strong>apelido</strong> para jogar:',
+                'Ex: João, Maria, Pedrinho...'
+            );
+
+            if (!nome || nome.trim() === '') {
+                const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
+                inicializar(sala, nomeAleatorio);
+            } else {
+                inicializar(sala, nome.trim());
+            }
+        }
+
+        init();
+
+        console.log('✅ BINGO - Painel do Aluno protegido com rollback anti-cheat!');
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BINGO - Aluno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2f3a, #0d1f26);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #f2e9d0;
+            font-size: 1.8rem;
+        }
+
+        .header h1 small {
+            font-size: 0.9rem;
+            color: #8aaab5;
+            font-weight: 300;
+        }
+
+        .sala-nome-display {
+            text-align: center;
+            color: #d4a373;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+
+        .sala-nome-display small {
+            color: #8aaab5;
+            font-weight: 300;
+            font-size: 0.8rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-bar .last-call {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd93d;
+        }
+
+        .status-bar .count {
+            color: #8aaab5;
+            font-size: 0.85rem;
+        }
+
+        .status-bar .bingo-status {
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .status-bar .bingo-status.winner {
+            color: #ffd966;
+            background: rgba(255, 215, 0, 0.15);
+            animation: pulse-text 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-text {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .card-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 10px;
+            color: #d4a373;
+            font-family: 'Georgia', serif;
+            margin-bottom: 10px;
+        }
+
+        .card-letters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .card-letter {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 2px 0;
+            color: #d8d2b0;
+        }
+
+        .card-letter:nth-child(1) { color: #ff6b6b; }
+        .card-letter:nth-child(2) { color: #ffd93d; }
+        .card-letter:nth-child(3) { color: #6bcb77; }
+        .card-letter:nth-child(4) { color: #4d96ff; }
+        .card-letter:nth-child(5) { color: #ff6bb5; }
+
+        .cartela-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .cartela-grid .cell {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #d4e3e8;
+            transition: all 0.3s;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cartela-grid .cell:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .cartela-grid .cell.marked {
+            background: #d4a373;
+            color: #fcf3e0;
+            border-color: #f0d5a8;
+            transform: scale(0.95);
+        }
+
+        .cartela-grid .cell.marked::after {
+            content: "✓";
+            font-size: 0.5rem;
+            margin-left: 3px;
+        }
+
+        .cartela-grid .cell.free {
+            background: #b48b5a;
+            color: #fcf7e8;
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Georgia', serif;
+            cursor: default;
+        }
+
+        .cartela-grid .cell.free:hover {
+            background: #b48b5a;
+        }
+
+        .cartela-grid .cell.free.marked {
+            background: #d4a373;
+        }
+
+        .cartela-grid .cell.winner-cell {
+            border-color: #ffd966;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            animation: glow-cell 1s ease-in-out infinite alternate;
+        }
+
+        .cartela-grid .cell.sorteado {
+            border-color: #ffd93d;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .cartela-grid .cell.bloqueado {
+            border-color: #dc3545;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+            animation: pulse-error 0.8s ease-in-out 3;
+        }
+
+        @keyframes pulse-error {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes glow-cell {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
+            to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
+        }
+
+        .numeros-chamados {
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .numeros-chamados h4 {
+            color: #d8d2b0;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .numeros-chamados .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .numeros-chamados .chip {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 10px;
+            border-radius: 14px;
+            color: #d4e3e8;
+            font-size: 0.75rem;
+        }
+
+        .numeros-chamados .chip.recent {
+            background: #d4a373;
+            color: #fcf3e0;
+        }
+
+        .empty-state-text {
+            color: #6a8a95;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .instrucao {
+            text-align: center;
+            color: #8aaab5;
+            font-size: 0.8rem;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+
+        .instrucao strong {
+            color: #ffd93d;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.08);
+            color: #8aaab5;
+            border-radius: 18px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.18);
+            color: #f2e9d0;
+        }
+
+        .sync-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 12px;
+            border-radius: 14px;
+            color: #8aaab5;
+            font-size: 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #5a8f6c;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #5a8f6c;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.winner-toast {
+            background: #ffd966;
+            color: #1a2f3a;
+            font-size: 1.4rem;
+            padding: 20px 30px;
+        }
+
+        .toast.error-toast {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        #aguardando {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        #aguardando .status-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        #aguardando h2 {
+            color: #d8d2b0;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        #aguardando p {
+            color: #8aaab5;
+            font-size: 1rem;
+        }
+
+        #aguardando .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #d4a373;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .nome-display {
+            text-align: center;
+            color: #f2e9d0;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .nome-display strong {
+            color: #ffd93d;
+        }
+
+        /* CONFETTI ANIMATION */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== MODAL DE CONFIRMAÇÃO DE SAÍDA ===== */
+        .saida-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .saida-modal-overlay.active {
+            display: flex;
+        }
+
+        .saida-modal-box {
+            background: linear-gradient(145deg, #1a2f3a, #0d1f26);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid rgba(212, 163, 115, 0.3);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        .saida-modal-box .modal-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .saida-modal-box h2 {
+            color: #f2e9d0;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .saida-modal-box p {
+            color: #d4e3e8;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .saida-modal-box .detalhes {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .saida-modal-box .detalhes span {
+            color: #ffd93d;
+            font-weight: 600;
+        }
+
+        .saida-modal-box .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .saida-modal-box .btn-group .btn {
+            min-width: 140px;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .saida-modal-box .btn-group .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .saida-modal-box .btn-group .btn-cancelar {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+
+        .saida-modal-box .btn-group .btn-cancelar:hover {
+            background: #4d7b8a;
+        }
+
+        .saida-modal-box .btn-group .btn-sair {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .saida-modal-box .btn-group .btn-sair:hover {
+            background: #e74c5c;
+        }
+
+        /* ===== MODAL DE ENTRADA DE DADOS ===== */
+        .modal-input-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-input-overlay.active {
+            display: flex;
+        }
+
+        .modal-input-box {
+            background: linear-gradient(145deg, #1a2f3a, #0d1f26);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 480px;
+            width: 92%;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        .modal-input-box .modal-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .modal-input-box h2 {
+            color: #f2e9d0;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .modal-input-box .subtitulo {
+            color: #8aaab5;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-input-box .subtitulo strong {
+            color: #ffd93d;
+        }
+
+        .modal-input-box .input-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-input-box .input-group label {
+            display: block;
+            color: #d4e3e8;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .modal-input-box .input-group input,
+        .modal-input-box .input-group select,
+        .modal-input-box .input-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #3d6b7a;
+            background: #0d1f26;
+            color: #f2e9d0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .modal-input-box .input-group input:focus,
+        .modal-input-box .input-group select:focus,
+        .modal-input-box .input-group textarea:focus {
+            border-color: #d4a373;
+            box-shadow: 0 0 20px rgba(212, 163, 115, 0.1);
+        }
+
+        .modal-input-box .input-group input::placeholder {
+            color: #6a8a95;
+        }
+
+        .modal-input-box .input-group .hint {
+            color: #6a8a95;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .modal-input-box .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal-input-box .btn-group .btn {
+            min-width: 120px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-input-box .btn-group .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-input-box .btn-group .btn-cancelar {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+
+        .modal-input-box .btn-group .btn-cancelar:hover {
+            background: #4d7b8a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar {
+            background: #d4a373;
+            color: #1a2f3a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar:hover {
+            background: #e1b87a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.success {
+            background: #5a8f6c;
+            color: #fff;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.success:hover {
+            background: #6a9f7c;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.danger:hover {
+            background: #e74c5c;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.warning {
+            background: #ffc107;
+            color: #1a2f3a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.warning:hover {
+            background: #ffd93d;
+        }
+
+        .modal-input-box .erro {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        .modal-input-box .erro.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .cartela-grid .cell {
+                font-size: 0.8rem;
+                padding: 6px 0;
+            }
+            .status-bar {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .modal-input-box {
+                padding: 25px;
+            }
+        }
+
+        /* MODAL PEDAGÓGICO */
+        .pedagogico-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .pedagogico-modal-overlay.active {
+            display: flex;
+        }
+        .pedagogico-modal-box {
+            background: linear-gradient(145deg, #162730, #0a181e);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 650px;
+            width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            position: relative;
+            animation: slideUpModal 0.4s ease-out;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+        .pedagogico-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #d4e3e8;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .pedagogico-close:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .pedagogico-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+        .pedagogico-tab {
+            padding: 10px 16px;
+            color: #8aaab5;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .pedagogico-tab:hover {
+            color: #f2e9d0;
+        }
+        .pedagogico-tab.active {
+            color: #d4a373;
+        }
+        .pedagogico-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #d4a373;
+            border-radius: 2px;
+        }
+        .pedagogico-content {
+            display: none;
+            color: #d4e3e8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .pedagogico-content.active {
+            display: block;
+        }
+        .pedagogico-title {
+            color: #f2e9d0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pedagogico-subtitle {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .bncc-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .bncc-code {
+            display: inline-block;
+            background: rgba(212, 163, 115, 0.15);
+            color: #d4a373;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .bncc-desc {
+            color: #d4e3e8;
+            font-size: 0.9rem;
+        }
+        .como-jogar-step {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 12px;
+        }
+        .como-jogar-step .step-number {
+            background: #d4a373;
+            color: #1a2f3a;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .como-jogar-step .step-text strong {
+            color: #f2e9d0;
+        }
+
+        /* ESTILOS DA SELEÇÃO DE SALAS */
+        .sala-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 163, 115, 0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease-in-out;
+            text-align: left;
+            width: 100%;
+        }
+        .sala-item:hover {
+            background: rgba(212, 163, 115, 0.15);
+            border-color: #d4a373;
+            transform: translateY(-2px);
+        }
+        .sala-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sala-item-nome {
+            color: #f2e9d0;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .sala-item-detalhe {
+            color: #8aaab5;
+            font-size: 0.8rem;
+        }
+        .sala-item-vagas {
+            background: rgba(90, 143, 108, 0.2);
+            color: #6bcb77;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(107, 203, 119, 0.3);
+            white-space: nowrap;
+        }
+        .sala-item-vagas.cheia {
+            background: rgba(220, 53, 69, 0.15);
+            color: #ff6b6b;
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'" style="margin-bottom: 0;">← Voltar</a>
+                    <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
+                </div>
+                <div class="sync-status">
+                    <span class="sync-dot"></span>
+                    <span id="statusTexto">online</span>
+                </div>
+            </div>
+            <h1 style="margin-top: 15px;">🧑‍🎓 BINGO <small>Aluno</small></h1>
+        </div>
+
+        <!-- ===== NOME DA SALA ===== -->
+        <div id="salaNomeDisplay" class="sala-nome-display">
+            🏫 Sala: <span id="salaNomeTexto">---</span>
+            <small>(Código: <span id="salaCodigoTexto">---</span>)</small>
+        </div>
+
+        <!-- ===== AGUARDANDO ===== -->
+        <div id="aguardando">
+            <span class="status-icon">⏳</span>
+            <h2>Aguardando o professor iniciar...</h2>
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                Sala: <strong id="aguardandoSala">---</strong>
+            </p>
+            <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera"></p>
+        </div>
+
+        <!-- ===== JOGO ATIVO ===== -->
+        <div id="jogoAtivo" style="display:none;">
+            <div class="nome-display">
+                🎯 Jogando como: <strong id="nomeAluno">---</strong>
+            </div>
+
+            <div class="status-bar">
+                <span class="last-call" id="ultimoNumero">🎯 ---</span>
+                <span class="count" id="marcadosCount">📌 1/25 marcados</span>
+                <span class="bingo-status" id="statusBingo">⏳ 1/25 marcados</span>
+            </div>
+
+            <div class="instrucao">
+                💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!
+                <br><small style="color: #dc3545;">⚠️ Só pode marcar o número sorteado AGORA</small>
+            </div>
+
+            <div class="card-container">
+                <div class="card-title">B I N G O</div>
+                <div class="card-letters">
+                    <div class="card-letter">B</div>
+                    <div class="card-letter">I</div>
+                    <div class="card-letter">N</div>
+                    <div class="card-letter">G</div>
+                    <div class="card-letter">O</div>
+                </div>
+                <div class="cartela-grid" id="cartelaGrid"></div>
+            </div>
+
+            <!-- ===== NÚMEROS CHAMADOS ===== -->
+            <div class="numeros-chamados" id="numerosChamadosContainer">
+                <h4>📋 Números chamados:</h4>
+                <div class="chips" id="numerosChamadosAluno">
+                    <span class="empty-state-text">nenhum número chamado</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de notificação -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ===== MODAL DE CONFIRMAÇÃO DE SAÍDA ===== -->
+    <div id="modalSaida" class="saida-modal-overlay">
+        <div class="saida-modal-box">
+            <span class="modal-icon" id="saidaIcon">⚠️</span>
+            <h2 id="saidaTitulo">Deseja sair?</h2>
+            <p id="saidaTexto">Você está prestes a sair do jogo.</p>
+            <div class="detalhes" id="saidaDetalhes">
+                📌 <span id="saidaInfo">Seus dados estão sendo salvos automaticamente</span>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancelar" id="btnCancelarSaida">❌ Cancelar</button>
+                <button class="btn btn-sair" id="btnConfirmarSaida">🚪 Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE ENTRADA DE DADOS ===== -->
+    <div id="modalInput" class="modal-input-overlay">
+        <div class="modal-input-box">
+            <span class="modal-icon" id="inputIcon">✏️</span>
+            <h2 id="inputTitulo">Digite os dados</h2>
+            <div class="subtitulo" id="inputSubtitulo">Preencha as informações abaixo</div>
+            
+            <div id="inputCampos"></div>
+            
+            <div id="inputErro" class="erro">❌ Campo obrigatório!</div>
+            
+            <div class="btn-group">
+                <button class="btn btn-cancelar" id="btnInputCancelar">❌ Cancelar</button>
+                <button class="btn btn-confirmar" id="btnInputConfirmar">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE SELEÇÃO DE SALA ===== -->
+    <div id="modalSelecaoSalas" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box" style="max-width: 500px;">
+            <div class="pedagogico-title">🏫 Escolha sua Sala</div>
+            <div class="pedagogico-subtitle">Selecione uma das salas abertas pelo professor para começar a jogar!</div>
+            
+            <div id="listaSalasContainer" style="margin: 20px 0; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <!-- As salas serão inseridas aqui dinamicamente -->
+                <div class="loading-spinner-container" style="text-align: center; padding: 20px 0;">
+                    <div class="loading-spinner" style="width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="color: #8aaab5; font-size: 0.9rem; margin-top: 10px;">Buscando salas abertas...</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="color: #8aaab5; font-size: 0.85rem;">— OU —</span>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px; text-align: left;">
+                <label for="codigoSalaManual" style="display: block; color: #d4e3e8; font-size: 0.85rem; font-weight: 500; margin-bottom: 5px;">Digite o código da sala manualmente:</label>
+                <input type="text" id="codigoSalaManual" placeholder="Ex: sala_1" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #3d6b7a; background: #0d1f26; color: #f2e9d0; font-size: 1rem; outline: none; transition: all 0.3s;">
+            </div>
+            
+            <div class="btn-group" style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-confirmar" id="btnConfirmarSalaManual" style="min-width: 140px; padding: 12px 28px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s; background: #d4a373; color: #1a2f3a; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">✅ Entrar com Código</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PEDAGÓGICO (BNCC & COMO JOGAR) ===== -->
+    <div id="modalPedagogico" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box">
+            <button class="pedagogico-close" onclick="fecharModalPedagogico()">×</button>
+            
+            <div class="pedagogico-title">📖 Guia Pedagógico & Regras</div>
+            <div class="pedagogico-subtitle">BINGO de Matemática - Ensino Fundamental</div>
+
+            <div class="pedagogico-tabs">
+                <button class="pedagogico-tab active" id="tab-comoJogar-btn" onclick="selecionarAbaPedagogica('comoJogar')">🎮 Como Jogar</button>
+                <button class="pedagogico-tab" id="tab-bncc-btn" onclick="selecionarAbaPedagogica('bncc')">📚 Alinhamento BNCC</button>
+            </div>
+
+            <!-- ABA: COMO JOGAR -->
+            <div id="aba-comoJogar" class="pedagogico-content active">
+                <div class="como-jogar-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <strong>Criação da Sessão (Professor)</strong>: O professor cria uma sessão selecionando a sala/turma e configurando a quantidade de alunos/vagas.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <strong>Entrada dos Alunos</strong>: Os alunos entram na sala utilizando seus nomes. Cada aluno recebe automaticamente uma <strong>cartela única e exclusiva</strong> gerada pelo sistema (nenhuma cartela se repete). O espaço central "B" é livre.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <strong>Sorteio & Atenção</strong>: O professor realiza o sorteio de um número de cada vez. Os alunos devem identificar se possuem o número correspondente em sua cartela.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">
+                        <strong>Marcação em Tempo Real</strong>: Os alunos devem clicar para marcar o número na cartela <strong>assim que for sorteado</strong>. O sistema exige atenção ativa: não é possível marcar números sorteados anteriormente por conta própria (salvo ação explícita do professor para beneficiar um aluno atrasado).
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">
+                        <strong>Segurança & Anti-Cheat</strong>: O sistema audita todas as marcações em tempo real. Se um aluno tentar burlar o sistema marcando dezenas não sorteadas, a trapaça é sinalizada ao professor no painel de controle.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">6</div>
+                    <div class="step-text">
+                        <strong>Vitória e Validação</strong>: O primeiro aluno a completar toda a cartela (24 dezenas marcadas + o centro livre) faz o "BINGO". O sistema valida instantaneamente e notifica a sala toda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA: ALINHAMENTO BNCC -->
+            <div id="aba-bncc" class="pedagogico-content">
+                <p style="margin-bottom: 15px; font-weight: 600; color: #ffd93d;">🎯 Unidade Temática: Matemática (Números e Probabilidade)</p>
+                
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA01 (1º Ano)</span>
+                    <div class="bncc-desc">Utilizar números naturais como indicador de quantidade ou de ordem em diferentes situações cotidianas e reconhecer situações em que os números não indicam contagem nem ordem, mas sim código de identificação.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA04 (1º Ano)</span>
+                    <div class="bncc-desc">Contar a quantidade de objetos de coleções de até 100 unidades e apresentar o resultado por registros verbais e simbólicos, para resolver problemas cotidianos.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF02MA01 (2º Ano)</span>
+                    <div class="bncc-desc">Comparar e ordenar números naturais (até a ordem de centenas), pela compreensão de características do sistema de numeração decimal (valor posicional).</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF03MA02 (3º Ano)</span>
+                    <div class="bncc-desc">Identificar características do sistema de numeração decimal, utilizando a composição e a decomposição de número natural de até quatro ordens.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF04MA01 (4º Ano)</span>
+                    <div class="bncc-desc">Ler, escrever e ordenar números naturais até a ordem das dezenas de milhar.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF05MA22 (5º Ano)</span>
+                    <div class="bncc-desc">Apresentar todos os possíveis resultados de um experimento aleatório, estimando se esses resultados são igualmente prováveis ou não (espaço amostral e probabilidade elementar do sorteio).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
+            authDomain: "meu-super-jogo-stop.firebaseapp.com",
+            databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
+            projectId: "meu-super-jogo-stop",
+            storageBucket: "meu-super-jogo-stop.firebasestorage.app",
+            messagingSenderId: "958593186721",
+            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
+            measurementId: "G-WGRJWRVBEN"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ============================================
+        // ESTADO
+        // ============================================
+        let sessaoId = null;
+        let alunoId = null;
+        let minhaCartela = null;
+        let minhasMarcacoes = null;
+        let numerosChamados = [];
+        let isWinner = false;
+        let sessaoListenerRef = null;
+        let meuNome = '';
+        let mostrarNumeros = true;
+        let salaNome = '';
+        let ultimoNumeroSorteado = null;
+        let ultimoResetToken = null;
+        let jogoFinalizado = false;
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, tipo = 'info', duracao = 4000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast';
+            if (tipo === 'winner') toast.classList.add('winner-toast');
+            if (tipo === 'error') toast.classList.add('error-toast');
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, duracao);
+        }
+
+        // ============================================
+        // CONFETTI
+        // ============================================
+        function dispararConfetti() {
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            document.body.appendChild(container);
+
+            const cores = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bb5', '#ffd966', '#a66cff'];
+            
+            for (let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = cores[Math.floor(Math.random() * cores.length)];
+                confetti.style.width = (Math.random() * 8 + 4) + 'px';
+                confetti.style.height = (Math.random() * 8 + 4) + 'px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 2) + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                container.appendChild(confetti);
+            }
+
+            setTimeout(() => {
+                container.remove();
+            }, 5000);
+        }
+
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        function getLetterForNumber(num) {
+            if (num >= 1 && num <= 15) return 'B';
+            if (num >= 16 && num <= 30) return 'I';
+            if (num >= 31 && num <= 45) return 'N';
+            if (num >= 46 && num <= 60) return 'G';
+            if (num >= 61 && num <= 75) return 'O';
+            return '';
+        }
+
+        function getRandomNumbers(min, max, count) {
+            const pool = [];
+            for (let i = min; i <= max; i++) {
+                pool.push(i);
+            }
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, count).sort((a, b) => a - b);
+        }
+
+        function gerarCartela() {
+            const cartela = [];
+            const bCol = getRandomNumbers(1, 15, 5);
+            const iCol = getRandomNumbers(16, 30, 5);
+            const nCol = getRandomNumbers(31, 45, 4);
+            const gCol = getRandomNumbers(46, 60, 5);
+            const oCol = getRandomNumbers(61, 75, 5);
+
+            for (let row = 0; row < 5; row++) {
+                const line = [];
+                line.push(bCol[row]);
+                line.push(iCol[row]);
+                if (row === 2) {
+                    line.push('B');
+                } else {
+                    const nIndex = row < 2 ? row : row - 1;
+                    line.push(nCol[nIndex]);
+                }
+                line.push(gCol[row]);
+                line.push(oCol[row]);
+                cartela.push(line);
+            }
+            return cartela;
+        }
+
+        function gerarCartelaUnica(participantesExistentes) {
+            const cartelasUsadas = new Set();
+            for (const key in participantesExistentes) {
+                const cartela = participantesExistentes[key].cartela;
+                if (cartela) {
+                    cartelasUsadas.add(cartela.flat().join(','));
+                }
+            }
+
+            let cartela;
+            let tentativas = 0;
+            do {
+                cartela = gerarCartela();
+                tentativas++;
+            } while (cartelasUsadas.has(cartela.flat().join(',')) && tentativas < 1000);
+
+            return cartela;
+        }
+
+        // ============================================
+        // VERIFICAÇÃO DE BINGO (CARTELA CHEIA)
+        // ============================================
+        function checkBingo(marcacoes, cartela, sorteados) {
+            if (!cartela || !marcacoes) return false;
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const val = cartela[r][c];
+                    if (val === 'B') continue;
+                    if (!marcacoes[r][c] || !sorteados.includes(val)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // ============================================
+        // VERIFICAR SE CARTELA ESTÁ COMPLETA
+        // ============================================
+        function isCartelaCompleta() {
+            if (!minhaCartela || !minhasMarcacoes) return false;
+            
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const val = minhaCartela[r][c];
+                    if (val === 'B') continue;
+                    if (!minhasMarcacoes[r][c]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // ============================================
+        // SISTEMA DE MODAL DE ENTRADA DE DADOS
+        // ============================================
+        function mostrarModalInput(config) {
+            return new Promise((resolve, reject) => {
+                const modal = document.getElementById('modalInput');
+                const camposDiv = document.getElementById('inputCampos');
+                const erroDiv = document.getElementById('inputErro');
+                
+                document.getElementById('inputIcon').textContent = config.icon || '✏️';
+                document.getElementById('inputTitulo').textContent = config.titulo || 'Digite os dados';
+                document.getElementById('inputSubtitulo').innerHTML = config.subtitulo || 'Preencha as informações abaixo';
+                
+                let html = '';
+                
+                if (config.campos && config.campos.length > 0) {
+                    config.campos.forEach((campo, index) => {
+                        html += `<div class="input-group">`;
+                        html += `<label for="input_${index}">${campo.label}</label>`;
+                        html += `<input type="${campo.type || 'text'}" id="input_${index}" placeholder="${campo.placeholder || ''}" value="${campo.valor || ''}" ${campo.required ? 'required' : ''}>`;
+                        if (campo.hint) {
+                            html += `<div class="hint">${campo.hint}</div>`;
+                        }
+                        html += `</div>`;
+                    });
+                }
+                
+                camposDiv.innerHTML = html;
+                erroDiv.classList.remove('active');
+                
+                const btnConfirmar = document.getElementById('btnInputConfirmar');
+                const btnCancelar = document.getElementById('btnInputCancelar');
+                
+                btnConfirmar.className = 'btn btn-confirmar';
+                if (config.corBotao) {
+                    btnConfirmar.classList.add(config.corBotao);
+                }
+                btnConfirmar.textContent = config.textoBotao || '✅ Confirmar';
+                
+                const newBtnConfirmar = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(newBtnConfirmar, btnConfirmar);
+                
+                const newBtnCancelar = btnCancelar.cloneNode(true);
+                btnCancelar.parentNode.replaceChild(newBtnCancelar, btnCancelar);
+                
+                document.getElementById('btnInputConfirmar').addEventListener('click', function() {
+                    const valores = {};
+                    let valido = true;
+                    
+                    if (config.campos) {
+                        config.campos.forEach((campo, index) => {
+                            const el = document.getElementById(`input_${index}`);
+                            if (el) {
+                                const valor = el.value.trim();
+                                valores[campo.nome] = valor;
+                                
+                                if (campo.required && !valor) {
+                                    valido = false;
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (!valido) {
+                        erroDiv.textContent = '❌ Todos os campos obrigatórios devem ser preenchidos!';
+                        erroDiv.classList.add('active');
+                        return;
+                    }
+                    
+                    erroDiv.classList.remove('active');
+                    fecharModalInput();
+                    
+                    if (config.onConfirm) {
+                        const resultado = config.onConfirm(valores);
+                        if (resultado !== false) {
+                            resolve(resultado);
+                        }
+                    } else {
+                        resolve(valores);
+                    }
+                });
+                
+                document.getElementById('btnInputCancelar').addEventListener('click', function() {
+                    fecharModalInput();
+                    reject(new Error('Cancelado pelo usuário'));
+                });
+                
+                modal.classList.add('active');
+                
+                setTimeout(() => {
+                    const primeiroInput = camposDiv.querySelector('input, select, textarea');
+                    if (primeiroInput) {
+                        primeiroInput.focus();
+                        if (typeof primeiroInput.select === 'function') {
+                            primeiroInput.select();
+                        }
+                    }
+                }, 100);
+
+                const primeiroInput = camposDiv.querySelector('input, select, textarea');
+                if (primeiroInput) {
+                    primeiroInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            document.getElementById('btnInputConfirmar').click();
+                        }
+                    });
+                }
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        fecharModalInput();
+                        reject(new Error('Cancelado pelo usuário'));
+                    }
+                });
+            });
+        }
+
+        function fecharModalInput() {
+            document.getElementById('modalInput').classList.remove('active');
+        }
+
+        async function inputTexto(titulo, subtitulo, placeholder, valorPadrao = '') {
+            try {
+                const resultado = await mostrarModalInput({
+                    icon: '✏️',
+                    titulo: titulo,
+                    subtitulo: subtitulo,
+                    textoBotao: '✅ Confirmar',
+                    campos: [{
+                        nome: 'valor',
+                        label: '',
+                        type: 'text',
+                        placeholder: placeholder,
+                        valor: valorPadrao,
+                        required: true
+                    }],
+                    onConfirm: (valores) => {
+                        return valores.valor;
+                    }
+                });
+                return resultado;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE CONFIRMAÇÃO DE SAÍDA
+        // ============================================
+        let saidaPendente = false;
+
+        function mostrarModalSaida(icone, titulo, texto, info, aoConfirmar) {
+            const modal = document.getElementById('modalSaida');
+            document.getElementById('saidaIcon').textContent = icone;
+            document.getElementById('saidaTitulo').textContent = titulo;
+            document.getElementById('saidaTexto').textContent = texto;
+            document.getElementById('saidaInfo').textContent = info;
+            
+            const btnConfirmar = document.getElementById('btnConfirmarSaida');
+            btnConfirmar.onclick = function() {
+                fecharModalSaida();
+                if (aoConfirmar) aoConfirmar();
+            };
+            
+            document.getElementById('btnCancelarSaida').onclick = function() {
+                fecharModalSaida();
+                saidaPendente = false;
+            };
+            
+            modal.classList.add('active');
+        }
+
+        function fecharModalSaida() {
+            document.getElementById('modalSaida').classList.remove('active');
+            saidaPendente = false;
+        }
+
+        function configurarDetectorSaida() {
+            window.addEventListener('beforeunload', function(e) {
+                if (!saidaPendente) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    saidaPendente = true;
+                    
+                    mostrarModalSaida(
+                        '🚪',
+                        'Sair do BINGO?',
+                        'Você está prestes a sair do jogo.',
+                        'Seus dados estão sendo salvos automaticamente.',
+                        function() {
+                            saidaPendente = false;
+                            window.removeEventListener('beforeunload', this);
+                            window.close();
+                        }
+                    );
+                    return '';
+                }
+            });
+
+            window.addEventListener('popstate', function(e) {
+                if (!saidaPendente) {
+                    e.preventDefault();
+                    saidaPendente = true;
+                    mostrarModalSaida(
+                        '⬅️',
+                        'Voltar na página?',
+                        'Você está prestes a voltar na navegação.',
+                        'Voltar pode interromper o jogo atual.',
+                        function() {
+                            saidaPendente = false;
+                            history.back();
+                        }
+                    );
+                }
+            });
+        }
+
+        // ============================================
+        // ATRIBUIR CARTELA
+        // ============================================
+        function atribuirCartela(sessao, nome) {
+            const participantes = sessao.participantes || {};
+            
+            for (const [id, data] of Object.entries(participantes)) {
+                if (data.nome === nome) {
+                    return { id, data, jaExistia: true };
+                }
+            }
+
+            const cartelasDisponiveis = [];
+            for (const [id, data] of Object.entries(participantes)) {
+                const isOcupada = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
+                if (!isOcupada) {
+                    cartelasDisponiveis.push({ id, data });
+                }
+            }
+
+            if (cartelasDisponiveis.length === 0) {
+                return null;
+            }
+
+            cartelasDisponiveis.sort((a, b) => {
+                const numA = parseInt(a.id.replace('aluno_', ''));
+                const numB = parseInt(b.id.replace('aluno_', ''));
+                return numA - numB;
+            });
+
+            const { id, data } = cartelasDisponiveis[0];
+            return { id, data, jaExistia: false };
+        }
+
+        // ============================================
+        // MODAL PEDAGÓGICO
+        // ============================================
+        function abrirModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.add('active');
+            selecionarAbaPedagogica('comoJogar');
+        }
+
+        function fecharModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.remove('active');
+        }
+
+        function selecionarAbaPedagogica(aba) {
+            // Tabs
+            document.getElementById('tab-comoJogar-btn').classList.remove('active');
+            document.getElementById('tab-bncc-btn').classList.remove('active');
+            
+            // Content
+            document.getElementById('aba-comoJogar').classList.remove('active');
+            document.getElementById('aba-bncc').classList.remove('active');
+
+            if (aba === 'comoJogar') {
+                document.getElementById('tab-comoJogar-btn').classList.add('active');
+                document.getElementById('aba-comoJogar').classList.add('active');
+            } else if (aba === 'bncc') {
+                document.getElementById('tab-bncc-btn').classList.add('active');
+                document.getElementById('aba-bncc').classList.add('active');
+            }
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        async function inicializar(sala, nome) {
+            sessaoId = sala;
+            meuNome = nome;
+
+            // Inicia o listener de forma dinâmica, que lidará tanto com a entrada
+            // inicial quanto com as atualizações em tempo real (como expansão de vagas!)
+            iniciarListenerUnico(sala);
+        }
+
+        // ============================================
+        // LISTENER COM DETECÇÃO DE RESET E ANTI-TRAPAÇA
+        // ============================================
+        function iniciarListenerUnico(sala) {
+            if (sessaoListenerRef) {
+                sessaoListenerRef.off();
+                sessaoListenerRef = null;
+            }
+
+            const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
+            sessaoListenerRef = sessaoRefLocal;
+
+            sessaoListenerRef.on('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    showToast('⚠️ A sessão foi encerrada!', 'error');
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">🔴</span>
+                        <h2>Sessão encerrada</h2>
+                        <p>O professor finalizou esta sessão.</p>
+                    `;
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    document.getElementById('aguardando').style.display = 'block';
+                    return;
+                }
+
+                const sessao = snapshot.val();
+                jogoFinalizado = sessao.status === 'finalizada';
+                mostrarNumeros = sessao.mostrarNumeros !== false;
+                salaNome = sessao.salaNome || 'Sala sem nome';
+
+                document.getElementById('salaNomeTexto').textContent = salaNome;
+                document.getElementById('salaCodigoTexto').textContent = sala;
+                document.getElementById('aguardandoSala').textContent = salaNome;
+
+                const totalAlunos = sessao.totalAlunos || 0;
+
+                // Se o aluno ainda não tem ID associado nesta sessão, tentamos atribuir
+                if (!alunoId) {
+                    const resultado = atribuirCartela(sessao, meuNome);
+
+                    if (!resultado) {
+                        // Se não tem vaga, mostra a mensagem de sala lotada de forma elegante e amigável
+                        document.getElementById('aguardando').innerHTML = `
+                            <span class="status-icon">🚫</span>
+                            <h2>Sala lotada!</h2>
+                            <p>Todas as ${totalAlunos} vagas de cartelas já estão ocupadas.</p>
+                            <div class="loading-spinner" style="margin-top: 15px; width: 30px; height: 30px;"></div>
+                            <p style="font-size: 0.9rem; color: #8aaab5; margin-top: 10px;">
+                                ⏳ Aguardando o professor liberar novas vagas...
+                            </p>
+                        `;
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return; // Retorna neste ciclo, mas mantém o listener ativo!
+                    }
+
+                    // Se encontrou vaga, associa o aluno a ela
+                    const { id: alunoIdEncontrado, data, jaExistia } = resultado;
+                    alunoId = alunoIdEncontrado;
+
+                    if (jaExistia) {
+                        minhaCartela = data.cartela;
+                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        isWinner = data.venceu || false;
+                        
+                        if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
+                            sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(meuNome);
+                        }
+                        
+                        showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
+                    } else {
+                        const cartela = gerarCartelaUnica(sessao.participantes || {});
+                        const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        marcacoes[2][2] = true;
+
+                        const novoParticipante = {
+                            nome: meuNome,
+                            cartela: cartela,
+                            marcacoes: marcacoes,
+                            venceu: false
+                        };
+
+                        sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
+                        minhaCartela = cartela;
+                        minhasMarcacoes = marcacoes;
+                        isWinner = false;
+                        
+                        showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                    }
+
+                    document.getElementById('nomeAluno').textContent = meuNome;
+                    document.getElementById('nomeEspera').textContent = `👤 ${meuNome}`;
+
+                    renderizarCartela();
+                }
+
+                // A partir daqui, o aluno está registrado!
+                const novoResetToken = sessao.resetToken || '';
+                
+                // --- ATUALIZAR NÚMEROS CHAMADOS ---
+                if (sessao.numerosSorteados) {
+                    numerosChamados = sessao.numerosSorteados;
+                    ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
+                    atualizarNumerosChamados();
+                }
+
+                // --- DETECÇÃO DE RESET / NOVA RODADA ---
+                if (novoResetToken !== ultimoResetToken && ultimoResetToken !== null) {
+                    console.log('🔄 NOVA RODADA DETECTADA! Resetando tudo...');
+                    
+                    if (sessao.participantes && sessao.participantes[alunoId]) {
+                        const data = sessao.participantes[alunoId];
+                        
+                        minhaCartela = data.cartela;
+                        minhasMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        minhasMarcacoes[2][2] = true;
+                        isWinner = false;
+                        numerosChamados = [];
+                        ultimoNumeroSorteado = null;
+                        ultimoResetToken = novoResetToken;
+                        
+                        const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+                        alunoRef.update({
+                            marcacoes: minhasMarcacoes,
+                            venceu: false
+                        });
+                        
+                        renderizarCartela();
+                        atualizarStatus();
+                        document.getElementById('numerosChamadosAluno').innerHTML = 
+                            `<span class="empty-state-text">nenhum número chamado</span>`;
+                        document.getElementById('ultimoNumero').innerHTML = '🎯 ---';
+                        document.getElementById('marcadosCount').textContent = '📌 1/25 marcados';
+                        
+                        showToast('🔄 Nova rodada! Nova cartela carregada.', 'info');
+                    }
+                    return;
+                }
+                
+                if (novoResetToken && ultimoResetToken === null) {
+                    ultimoResetToken = novoResetToken;
+                }
+
+                if (sessao.status === 'aguardando') {
+                    // Restaura o HTML da espera normal se ele foi sobrescrito pela mensagem de sala lotada
+                    const aguardandoDiv = document.getElementById('aguardando');
                     if (aguardandoDiv.innerHTML.includes('Sala lotada!')) {
                         aguardandoDiv.innerHTML = `
                             <span class="status-icon">⏳</span>
