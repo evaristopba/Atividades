@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BINGO - Painel do Professor</title>
     <style>
+        /* ===== TODO O CSS ANTERIOR ===== */
         * {
             margin: 0;
             padding: 0;
@@ -53,7 +54,7 @@
             border-radius: 18px;
             padding: 25px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -99,6 +100,24 @@
             color: #8aaab5;
             font-size: 0.8rem;
             margin-top: 4px;
+        }
+
+        .config-group .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-group .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #d4a373;
+        }
+
+        .config-group .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
         }
 
         .btn {
@@ -652,6 +671,15 @@
                 <small style="color: #ffd93d;">⚠️ Cada aluno precisa de uma cartela única</small>
             </div>
 
+            <!-- ⭐ NOVO: Opção para mostrar números no aluno -->
+            <div class="config-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="mostrarNumeros" checked>
+                    <label for="mostrarNumeros">📊 Mostrar números sorteados para o aluno</label>
+                </div>
+                <small>Desative para turmas a partir do 3º ano (alunos mais experientes)</small>
+            </div>
+
             <div id="statusCriacao"></div>
 
             <button class="btn btn-primary" onclick="criarSessao()">🎯 Iniciar Bingo</button>
@@ -691,6 +719,7 @@
                 <button class="btn btn-warning" onclick="resetarJogo()">🔄 Resetar</button>
                 <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
                 <button class="btn btn-secondary" onclick="expandirVagas()" style="background: #17a2b8;">➕ Expandir Vagas</button>
+                <button class="btn btn-secondary" onclick="toggleMostrarNumeros()" style="background: #6f42c1;">👁️ Alternar Números</button>
             </div>
 
             <div class="numeros-chamados">
@@ -743,6 +772,7 @@
         let sessaoAtual = null;
         let numerosChamados = [];
         let alunosConectados = new Set();
+        let mostrarNumeros = true;
 
         // ============================================
         // TOAST
@@ -842,12 +872,13 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO (COM LINK CORRETO - SEM #)
+        // CRIAR SESSÃO
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
             const qtdAlunos = parseInt(document.getElementById('qtdAlunos').value);
             const statusDiv = document.getElementById('statusCriacao');
+            mostrarNumeros = document.getElementById('mostrarNumeros').checked;
 
             if (!salaSelect.value) {
                 alert('Por favor, selecione uma turma!');
@@ -900,6 +931,7 @@
                     totalAlunos: qtdAlunos,
                     numerosSorteados: [],
                     vencedores: [],
+                    mostrarNumeros: mostrarNumeros, // ⭐ Salva a opção
                     participantes: participantes
                 };
 
@@ -916,11 +948,11 @@
                 document.getElementById('totalAlunos').textContent = qtdAlunos;
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-                // ⭐⭐⭐ CORREÇÃO DO LINK - REMOVE QUALQUER # ⭐⭐⭐
+                // Link SEM # e SEM &nome=
                 const baseUrl = window.location.href
                     .split('?')[0]
                     .replace('BProfessor.html', 'BAluno.html')
-                    .replace('#', ''); // ← Remove o # se existir
+                    .replace('#', '');
                 const linkAluno = `${baseUrl}?sala=${codigo}`;
                 document.getElementById('linkAluno').value = linkAluno;
 
@@ -931,6 +963,21 @@
                 statusDiv.innerHTML = `<div class="status-criacao info">✅ Sala "${salaNome}" configurada com ${qtdAlunos} alunos!</div>`;
                 showToast(`✅ Sala "${salaNome}" criada/atualizada!`, 'info');
             });
+        }
+
+        // ============================================
+        // ALTERNAR MOSTRAR NÚMEROS
+        // ============================================
+        function toggleMostrarNumeros() {
+            if (!sessaoAtual) return;
+            
+            mostrarNumeros = !mostrarNumeros;
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            sessaoRef.update({
+                mostrarNumeros: mostrarNumeros
+            });
+            
+            showToast(`📊 Números ${mostrarNumeros ? '📌 VISÍVEIS' : '🚫 OCULTOS'} para os alunos`, 'info');
         }
 
         // ============================================
@@ -1301,6 +1348,7 @@
         console.log('📌 Usando códigos fixos de turma (como no STOP)');
         console.log('👀 Acompanhe os alunos em tempo real!');
         console.log('✅ Link gerado: BAluno.html?sala=CODIGO (SEM # e SEM &nome=)');
+        console.log('📊 Opção "Mostrar números" disponível no checkbox');
     </script>
 </body>
 </html>
