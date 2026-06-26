@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BINGO - Painel do Professor</title>
     <style>
+        /* ===== TODO O CSS ANTERIOR ===== */
         * {
             margin: 0;
             padding: 0;
@@ -734,7 +735,7 @@
             <div class="controles-area">
                 <button class="btn btn-success" onclick="sortearNumero()">🎲 Sortear</button>
                 <button class="btn btn-secondary" onclick="sortearMultiplos(5)">⚡ Sortear 5</button>
-                <button class="btn btn-warning" onclick="resetarJogo()">🔄 Resetar</button>
+                <button class="btn btn-warning" onclick="resetarJogo()">🔄 Nova Rodada</button>
                 <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
                 <button class="btn btn-secondary" onclick="expandirVagas()" style="background: #17a2b8;">➕ Expandir Vagas</button>
                 <button class="btn btn-secondary" onclick="toggleMostrarNumeros()" style="background: #6f42c1;">👁️ Alternar Números</button>
@@ -1620,36 +1621,51 @@
         }
 
         // ============================================
-        // ⭐ RESETAR JOGO (MANTÉM A SALA)
+        // ⭐ RESETAR JOGO (COM NOVAS CARTELAS)
         // ============================================
         function resetarJogo() {
             if (!sessaoAtual) return;
-            if (!confirm('⚠️ Isso vai limpar todos os números sorteados e marcações.\n\nOs alunos e cartelas serão mantidos.\n\nDeseja continuar?')) return;
+            if (!confirm('⚠️ Isso vai gerar NOVAS cartelas para todos os alunos.\n\nOs nomes dos alunos serão mantidos.\n\nDeseja continuar?')) return;
 
             const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
             sessaoRef.once('value', (snapshot) => {
                 const sessao = snapshot.val();
                 const participantes = sessao.participantes;
+                const nomesExistentes = {};
 
-                // 1. Resetar marcações de todos os alunos (mantém cartelas e nomes)
-                const updates = {};
+                // 1. Salvar os nomes dos alunos
                 for (const [alunoId, data] of Object.entries(participantes)) {
-                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
-                    marcacoes[2][2] = true; // Centro sempre marcado
-                    updates[`participantes/${alunoId}/marcacoes`] = marcacoes;
-                    updates[`participantes/${alunoId}/venceu`] = false;
+                    if (data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ')) {
+                        nomesExistentes[alunoId] = data.nome;
+                    }
                 }
 
-                // 2. Resetar números sorteados e vencedores
-                updates['numerosSorteados'] = [];
-                updates['vencedores'] = [];
-                updates['ultimoNumero'] = null;
-                updates['ultimaLetra'] = null;
-                updates['status'] = 'aguardando';
+                // 2. Gerar NOVAS cartelas para cada aluno
+                const novasParticipantes = {};
+                for (const [alunoId, nome] of Object.entries(nomesExistentes)) {
+                    const cartela = gerarCartelaUnica(novasParticipantes);
+                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                    marcacoes[2][2] = true;
+                    
+                    novasParticipantes[alunoId] = {
+                        nome: nome,
+                        cartela: cartela,
+                        marcacoes: marcacoes,
+                        venceu: false
+                    };
+                }
 
-                sessaoRef.update(updates);
+                // 3. Atualizar a sessão
+                sessaoRef.update({
+                    participantes: novasParticipantes,
+                    numerosSorteados: [],
+                    vencedores: [],
+                    ultimoNumero: null,
+                    ultimaLetra: null,
+                    status: 'aguardando'
+                });
 
-                // 3. Atualizar interface
+                // 4. Atualizar interface
                 document.getElementById('ultimoSorteio').innerHTML = '🎯 Último: ---';
                 document.getElementById('vencedores').innerHTML = '🏆 Vencedores: aguardando...';
                 document.getElementById('numerosChamados').innerHTML =
@@ -1658,11 +1674,10 @@
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
                 numerosChamados = [];
                 
-                // 4. Re-renderizar cartelas (sem marcações)
-                renderizarCartelas(participantes);
-                atualizarOcupacao(participantes);
+                renderizarCartelas(novasParticipantes);
+                atualizarOcupacao(novasParticipantes);
                 
-                showToast('🔄 Jogo resetado! Sala mantida.', 'info');
+                showToast('🔄 Nova rodada! Novas cartelas geradas.', 'info');
             });
         }
 
@@ -1695,21 +1710,17 @@
         // INICIALIZAÇÃO
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se há sala selecionada ao carregar
             const salaSelect = document.getElementById('salaSelect');
             if (salaSelect.value) {
                 verificarSalaExistente();
             }
             
-            // Escutar mudanças no select para verificar sala
             salaSelect.addEventListener('change', verificarSalaExistente);
             
             console.log('🎲 BINGO - Painel do Professor carregado!');
             console.log('✅ O sistema preserva o estado da sala ao recarregar');
             console.log('📌 Usando códigos fixos de turma (como no STOP)');
-            console.log('✅ BINGO só declarado se SORTEIO + MARCAÇÃO');
-            console.log('🔧 Botão "Beneficiar Aluno" disponível para quase-vencedores');
-            console.log('🔄 Botão "Resetar Jogo" mantém a sala e limpa o estado');
+            console.log('🔄 "Nova Rodada" gera novas cartelas para todos os alunos');
         });
     </script>
 </body>
