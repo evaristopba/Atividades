@@ -91,10 +91,14 @@
         .status-bar .bingo-status {
             font-weight: 600;
             font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.2);
         }
 
         .status-bar .bingo-status.winner {
             color: #ffd966;
+            background: rgba(255, 215, 0, 0.15);
             animation: pulse-text 1s ease-in-out infinite alternate;
         }
 
@@ -165,6 +169,7 @@
             justify-content: center;
             border: 2px solid transparent;
             cursor: pointer;
+            user-select: none;
         }
 
         .cartela-grid .cell:hover {
@@ -338,12 +343,15 @@
             display: none;
             z-index: 1000;
             animation: slideUp 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
         }
 
         .toast.winner-toast {
             background: #ffd966;
             color: #1a2f3a;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            padding: 20px 30px;
         }
 
         .toast.error-toast {
@@ -407,8 +415,47 @@
             color: #ffd93d;
         }
 
-        .lista-salas {
-            display: none;
+        /* CONFETTI ANIMATION */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .cartela-grid .cell {
+                font-size: 0.8rem;
+                padding: 6px 0;
+            }
+            .status-bar {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
@@ -450,8 +497,8 @@
 
             <div class="status-bar">
                 <span class="last-call" id="ultimoNumero">🎯 ---</span>
-                <span class="count" id="marcadosCount">📌 0 marcados</span>
-                <span class="bingo-status" id="statusBingo">⏳ Aguardando BINGO...</span>
+                <span class="count" id="marcadosCount">📌 0/25 marcados</span>
+                <span class="bingo-status" id="statusBingo">⏳ 0/25 marcados</span>
             </div>
 
             <div class="instrucao">
@@ -514,16 +561,18 @@
         let minhasMarcacoes = null;
         let numerosChamados = [];
         let isWinner = false;
-        let sessaoRef = null;
+        let sessaoListenerRef = null;
         let meuNome = '';
         let mostrarNumeros = true;
         let salaNome = '';
         let ultimoNumeroSorteado = null;
+        let ultimoResetToken = null;
+        let jogoFinalizado = false;
 
         // ============================================
         // TOAST
         // ============================================
-        function showToast(message, tipo = 'info') {
+        function showToast(message, tipo = 'info', duracao = 4000) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast';
@@ -533,7 +582,35 @@
             clearTimeout(toast._timeout);
             toast._timeout = setTimeout(() => {
                 toast.style.display = 'none';
-            }, 4000);
+            }, duracao);
+        }
+
+        // ============================================
+        // CONFETTI
+        // ============================================
+        function dispararConfetti() {
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            document.body.appendChild(container);
+
+            const cores = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bb5', '#ffd966', '#a66cff'];
+            
+            for (let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = cores[Math.floor(Math.random() * cores.length)];
+                confetti.style.width = (Math.random() * 8 + 4) + 'px';
+                confetti.style.height = (Math.random() * 8 + 4) + 'px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 2) + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                container.appendChild(confetti);
+            }
+
+            setTimeout(() => {
+                container.remove();
+            }, 5000);
         }
 
         // ============================================
@@ -589,7 +666,9 @@
             const cartelasUsadas = new Set();
             for (const key in participantesExistentes) {
                 const cartela = participantesExistentes[key].cartela;
-                cartelasUsadas.add(cartela.flat().join(','));
+                if (cartela) {
+                    cartelasUsadas.add(cartela.flat().join(','));
+                }
             }
 
             let cartela;
@@ -602,8 +681,11 @@
             return cartela;
         }
 
+        // ============================================
+        // VERIFICAÇÃO DE BINGO
+        // ============================================
         function checkBingo(marcacoes, cartela, sorteados) {
-            // Linhas
+            // Verificar LINHAS
             for (let r = 0; r < 5; r++) {
                 let linhaCompleta = true;
                 for (let c = 0; c < 5; c++) {
@@ -617,7 +699,7 @@
                 if (linhaCompleta) return true;
             }
 
-            // Colunas
+            // Verificar COLUNAS
             for (let c = 0; c < 5; c++) {
                 let colunaCompleta = true;
                 for (let r = 0; r < 5; r++) {
@@ -631,7 +713,7 @@
                 if (colunaCompleta) return true;
             }
 
-            // Diagonal principal
+            // Verificar DIAGONAL PRINCIPAL
             let diag1Completa = true;
             for (let i = 0; i < 5; i++) {
                 const val = cartela[i][i];
@@ -643,7 +725,7 @@
             }
             if (diag1Completa) return true;
 
-            // Diagonal secundária
+            // Verificar DIAGONAL SECUNDÁRIA
             let diag2Completa = true;
             for (let i = 0; i < 5; i++) {
                 const val = cartela[i][4 - i];
@@ -659,19 +741,37 @@
         }
 
         // ============================================
-        // ⭐ ATRIBUIR CARTELA - PRIMEIRA DISPONÍVEL (ORDENADA)
+        // VERIFICAR SE CARTELA ESTÁ COMPLETA
+        // ============================================
+        function isCartelaCompleta() {
+            if (!minhaCartela || !minhasMarcacoes) return false;
+            
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const val = minhaCartela[r][c];
+                    if (val === 'B') continue;
+                    if (!minhasMarcacoes[r][c]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // ============================================
+        // ATRIBUIR CARTELA
         // ============================================
         function atribuirCartela(sessao, nome) {
             const participantes = sessao.participantes || {};
             
-            // Verificar se o nome já existe
+            // 1. Verificar se o nome já existe
             for (const [id, data] of Object.entries(participantes)) {
                 if (data.nome === nome) {
                     return { id, data, jaExistia: true };
                 }
             }
 
-            // Procurar cartela disponível (NÃO ocupada)
+            // 2. Procurar cartela disponível (NÃO ocupada)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
                 const isOcupada = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
@@ -684,7 +784,7 @@
                 return null;
             }
 
-            // ⭐⭐⭐ CORREÇÃO: Ordenar por número da cartela e pegar a PRIMEIRA
+            // 3. Ordenar e pegar a PRIMEIRA disponível
             cartelasDisponiveis.sort((a, b) => {
                 const numA = parseInt(a.id.replace('aluno_', ''));
                 const numB = parseInt(b.id.replace('aluno_', ''));
@@ -772,7 +872,7 @@
                 document.getElementById('nomeEspera').textContent = `👤 ${nome}`;
 
                 renderizarCartela();
-                escutarSessao(sala);
+                iniciarListenerUnico(sala);
 
                 if (sessao.status === 'ativa' || sessao.status === 'finalizada') {
                     document.getElementById('aguardando').style.display = 'none';
@@ -787,6 +887,141 @@
                 } else {
                     document.getElementById('aguardando').style.display = 'block';
                     document.getElementById('jogoAtivo').style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // LISTENER COM DETECÇÃO DE RESET
+        // ============================================
+        function iniciarListenerUnico(sala) {
+            if (sessaoListenerRef) {
+                sessaoListenerRef.off();
+                sessaoListenerRef = null;
+            }
+
+            sessaoListenerRef = db.ref(`bingo/sessoes/${sala}`);
+
+            sessaoListenerRef.on('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    showToast('⚠️ A sessão foi encerrada!', 'error');
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">🔴</span>
+                        <h2>Sessão encerrada</h2>
+                        <p>O professor finalizou esta sessão.</p>
+                    `;
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    document.getElementById('aguardando').style.display = 'block';
+                    return;
+                }
+
+                const sessao = snapshot.val();
+                jogoFinalizado = sessao.status === 'finalizada';
+
+                // DETECTAR NOVA RODADA (resetToken mudou)
+                const novoResetToken = sessao.resetToken || '';
+                if (novoResetToken !== ultimoResetToken && ultimoResetToken !== null) {
+                    console.log('🔄 NOVA RODADA DETECTADA! Resetando tudo...');
+                    
+                    if (sessao.participantes && sessao.participantes[alunoId]) {
+                        const data = sessao.participantes[alunoId];
+                        
+                        // CARREGAR NOVA CARTELA
+                        minhaCartela = data.cartela;
+                        
+                        // RESETAR MARCAÇÕES (apenas espaço livre)
+                        minhasMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        minhasMarcacoes[2][2] = true;
+                        
+                        // RESETAR STATUS
+                        isWinner = false;
+                        numerosChamados = [];
+                        ultimoNumeroSorteado = null;
+                        ultimoResetToken = novoResetToken;
+                        
+                        // ATUALIZAR NO FIREBASE
+                        const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+                        alunoRef.update({
+                            marcacoes: minhasMarcacoes,
+                            venceu: false
+                        });
+                        
+                        // ATUALIZAR UI
+                        renderizarCartela();
+                        atualizarStatus();
+                        document.getElementById('numerosChamadosAluno').innerHTML = 
+                            `<span class="empty-state-text">nenhum número chamado</span>`;
+                        document.getElementById('ultimoNumero').innerHTML = '🎯 ---';
+                        document.getElementById('marcadosCount').textContent = '📌 1/25 marcados';
+                        
+                        showToast('🔄 Nova rodada! Nova cartela carregada.', 'info');
+                    }
+                    return;
+                }
+                
+                // Atualizar o reset token se for a primeira vez
+                if (novoResetToken && ultimoResetToken === null) {
+                    ultimoResetToken = novoResetToken;
+                }
+
+                if (sessao.status === 'aguardando') {
+                    document.getElementById('aguardando').style.display = 'block';
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    return;
+                }
+
+                if (sessao.status === 'finalizada') {
+                    showToast('🔴 O jogo foi finalizado!', 'error');
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">🔴</span>
+                        <h2>Jogo finalizado</h2>
+                        <p>O professor finalizou esta sessão.</p>
+                    `;
+                    document.getElementById('jogoAtivo').style.display = 'none';
+                    document.getElementById('aguardando').style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('aguardando').style.display = 'none';
+                document.getElementById('jogoAtivo').style.display = 'block';
+
+                // Atualizar números sorteados
+                if (sessao.numerosSorteados) {
+                    numerosChamados = sessao.numerosSorteados;
+                    ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
+                    atualizarNumerosChamados();
+                }
+
+                // Atualizar dados do aluno
+                if (sessao.participantes && sessao.participantes[alunoId]) {
+                    const data = sessao.participantes[alunoId];
+                    
+                    if (data.cartela && data.cartela !== minhaCartela) {
+                        minhaCartela = data.cartela;
+                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        isWinner = data.venceu || false;
+                        renderizarCartela();
+                    } else {
+                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        isWinner = data.venceu || false;
+                    }
+                    
+                    atualizarContador();
+                    atualizarStatus();
+                    
+                    if (isWinner) {
+                        document.querySelectorAll('.cell').forEach(el => {
+                            if (!el.classList.contains('free')) {
+                                el.classList.add('winner-cell');
+                            }
+                        });
+                    }
+                }
+
+                if (sessao.mostrarNumeros !== undefined) {
+                    mostrarNumeros = sessao.mostrarNumeros;
+                    const container = document.getElementById('numerosChamadosContainer');
+                    container.style.display = mostrarNumeros ? 'block' : 'none';
                 }
             });
         }
@@ -833,22 +1068,29 @@
         }
 
         // ============================================
-        // MARCAR NÚMERO - APENAS O ÚLTIMO SORTEADO
+        // MARCAR NÚMERO COM BINGO AUTOMÁTICO
         // ============================================
         function marcarNumero(r, c, val) {
-            // Verifica se há números sorteados
+            if (isWinner) {
+                showToast('🏆 Você já venceu! Parabéns! 🎉', 'info');
+                return;
+            }
+
+            if (jogoFinalizado) {
+                showToast('⚠️ O jogo já foi finalizado!', 'error');
+                return;
+            }
+
             if (numerosChamados.length === 0) {
                 showToast('⚠️ Nenhum número foi sorteado ainda!', 'error');
                 return;
             }
             
-            // ⭐⭐⭐ BLOQUEIA "COMER BARRIGA": Só permite marcar o ÚLTIMO número sorteado
             const ultimoSorteado = numerosChamados[numerosChamados.length - 1];
             
             if (val !== ultimoSorteado) {
                 showToast('⚠️ Você só pode marcar o número sorteado AGORA!', 'error');
                 
-                // Destacar o número que o aluno tentou marcar
                 for (let r2 = 0; r2 < 5; r2++) {
                     for (let c2 = 0; c2 < 5; c2++) {
                         if (minhaCartela[r2][c2] === val) {
@@ -863,23 +1105,12 @@
                 return;
             }
 
-            // Verifica se já está marcado
             if (minhasMarcacoes[r][c]) {
                 showToast('ℹ️ Este número já foi marcado!', 'info');
                 return;
             }
 
-            // Verifica se o jogo está ativo
-            const sessaoRefLocal = db.ref(`bingo/sessoes/${sessaoId}`);
-            sessaoRefLocal.once('value', (snapshot) => {
-                const sessao = snapshot.val();
-                if (sessao.status === 'finalizada') {
-                    showToast('⚠️ O jogo já foi finalizado!', 'error');
-                    return;
-                }
-            });
-
-            // PERMITIDO: Marcar o número atual
+            // MARCAR O NÚMERO
             minhasMarcacoes[r][c] = true;
             
             db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
@@ -894,41 +1125,51 @@
             
             atualizarContador();
 
-            // Verificar BINGO
-            if (checkBingo(minhasMarcacoes, minhaCartela, numerosChamados)) {
-                isWinner = true;
-                db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
-                    venceu: true
-                });
-                
-                sessaoRefLocal.once('value', (snapshot) => {
-                    const sessao = snapshot.val();
-                    const vencedoresAtuais = sessao.vencedores || [];
-                    if (!vencedoresAtuais.includes(alunoId)) {
-                        vencedoresAtuais.push(alunoId);
-                        db.ref(`bingo/sessoes/${sessaoId}`).update({
-                            vencedores: vencedoresAtuais
-                        });
-                    }
-                });
+            // VERIFICAR BINGO AUTOMATICAMENTE
+            if (isCartelaCompleta()) {
+                if (checkBingo(minhasMarcacoes, minhaCartela, numerosChamados)) {
+                    // DECLARAR BINGO AUTOMATICAMENTE!
+                    isWinner = true;
+                    
+                    const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+                    alunoRef.update({
+                        venceu: true
+                    });
+                    
+                    db.ref(`bingo/sessoes/${sessaoId}/vencedores`).transaction((currentData) => {
+                        if (!currentData) return [alunoId];
+                        if (!currentData.includes(alunoId)) {
+                            currentData.push(alunoId);
+                        }
+                        return currentData;
+                    });
 
-                showToast('🏆 BINGO! Você venceu! 🎉', 'winner');
-                atualizarStatus();
-                
-                document.querySelectorAll('.cell').forEach(el => {
-                    if (!el.classList.contains('free')) {
-                        el.classList.add('winner-cell');
-                    }
-                });
+                    showToast(`🏆 BINGO! ${meuNome} VENCEU! 🎉🎉🎉`, 'winner', 6000);
+                    dispararConfetti();
+                    
+                    document.querySelectorAll('.cell').forEach(el => {
+                        if (!el.classList.contains('free')) {
+                            el.classList.add('winner-cell');
+                        }
+                    });
+                    
+                    atualizarStatus();
+                    
+                    try {
+                        const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+                        audio.play().catch(() => {});
+                    } catch(e) {}
+                }
             }
         }
 
         // ============================================
-        // ATUALIZAR CONTADOR
+        // ATUALIZAR CONTADOR (CORRIGIDO)
         // ============================================
         function atualizarContador() {
+            if (!minhasMarcacoes) return;
             const totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
-            document.getElementById('marcadosCount').textContent = `📌 ${totalMarked} marcados`;
+            document.getElementById('marcadosCount').textContent = `📌 ${totalMarked}/25 marcados`;
         }
 
         // ============================================
@@ -966,9 +1207,13 @@
                                 const isMarked = minhasMarcacoes[r][c];
                                 const isSorteado = numerosChamados.includes(val);
                                 const isUltimo = val === ultimoNumeroSorteado;
-                                if (isSorteado && !isMarked && !isUltimo) {
+                                
+                                if (isMarked) {
+                                    cell.classList.add('marked');
+                                    cell.classList.remove('sorteado');
+                                } else if (isSorteado && !isUltimo) {
                                     cell.classList.add('sorteado');
-                                } else if (isUltimo && !isMarked) {
+                                } else if (isUltimo) {
                                     cell.classList.add('sorteado');
                                 } else {
                                     cell.classList.remove('sorteado');
@@ -981,7 +1226,7 @@
         }
 
         // ============================================
-        // ATUALIZAR STATUS
+        // ATUALIZAR STATUS (CORRIGIDO)
         // ============================================
         function atualizarStatus() {
             const statusEl = document.getElementById('statusBingo');
@@ -989,87 +1234,56 @@
                 statusEl.textContent = '🏆 BINGO! Você venceu! 🎉';
                 statusEl.className = 'bingo-status winner';
             } else {
-                statusEl.textContent = '⏳ Aguardando BINGO...';
+                let totalMarked = 0;
+                if (minhasMarcacoes) {
+                    totalMarked = minhasMarcacoes.flat().filter(v => v === true).length;
+                }
+                statusEl.textContent = `⏳ ${totalMarked}/25 marcados`;
                 statusEl.className = 'bingo-status';
             }
         }
 
         // ============================================
-        // ESCUTAR SESSÃO
+        // VOLTAR PARA LISTA
         // ============================================
-        function escutarSessao(sala) {
-            if (sessaoRef) {
-                sessaoRef.off();
+        function voltarParaLista() {
+            if (sessaoListenerRef) {
+                sessaoListenerRef.off();
+                sessaoListenerRef = null;
             }
+            
+            sessaoId = null;
+            alunoId = null;
+            minhaCartela = null;
+            minhasMarcacoes = null;
+            numerosChamados = [];
+            isWinner = false;
+            meuNome = '';
+            ultimoResetToken = null;
 
-            sessaoRef = db.ref(`bingo/sessoes/${sala}`);
-
-            sessaoRef.on('value', (snapshot) => {
-                if (!snapshot.exists()) return;
-
-                const sessao = snapshot.val();
-
-                if (sessao.status === 'aguardando') {
-                    document.getElementById('aguardando').style.display = 'block';
-                    document.getElementById('jogoAtivo').style.display = 'none';
-                    return;
-                }
-
-                if (sessao.status === 'finalizada') {
-                    showToast('🔴 O jogo foi finalizado!', 'error');
-                }
-
-                document.getElementById('aguardando').style.display = 'none';
-                document.getElementById('jogoAtivo').style.display = 'block';
-
-                if (sessao.numerosSorteados) {
-                    numerosChamados = sessao.numerosSorteados;
-                    ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
-                    atualizarNumerosChamados();
-                }
-
-                if (sessao.participantes && sessao.participantes[alunoId]) {
-                    const data = sessao.participantes[alunoId];
-                    minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                    isWinner = data.venceu || false;
-
-                    atualizarContador();
-                    atualizarStatus();
-                    
-                    if (isWinner) {
-                        document.querySelectorAll('.cell').forEach(el => {
-                            if (!el.classList.contains('free')) {
-                                el.classList.add('winner-cell');
-                            }
-                        });
-                    }
-                }
-
-                if (sessao.mostrarNumeros !== undefined) {
-                    mostrarNumeros = sessao.mostrarNumeros;
-                    const container = document.getElementById('numerosChamadosContainer');
-                    if (mostrarNumeros) {
-                        container.style.display = 'block';
-                    } else {
-                        container.style.display = 'none';
-                    }
-                }
-            });
+            document.getElementById('jogoAtivo').style.display = 'none';
+            document.getElementById('aguardando').style.display = 'block';
+            document.getElementById('aguardandoSala').textContent = '---';
+            
+            window.location.href = 'BAluno.html';
         }
 
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
-        const params = new URLSearchParams(window.location.search);
-        const sala = params.get('sala');
+        function init() {
+            const params = new URLSearchParams(window.location.search);
+            const sala = params.get('sala');
 
-        if (!sala) {
-            document.getElementById('aguardando').innerHTML = `
-                <span class="status-icon">❌</span>
-                <h2>Link inválido!</h2>
-                <p>Não foi possível identificar a sala.</p>
-            `;
-        } else {
+            if (!sala) {
+                document.getElementById('aguardando').innerHTML = `
+                    <span class="status-icon">❌</span>
+                    <h2>Link inválido!</h2>
+                    <p>Não foi possível identificar a sala.</p>
+                `;
+                return;
+            }
+
             let nome = prompt('🎯 Digite seu nome ou apelido para jogar:');
             if (!nome || nome.trim() === '') {
                 const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
@@ -1079,10 +1293,14 @@
             }
         }
 
-        console.log('🎲 BINGO - Painel do Aluno carregado!');
-        console.log('⚠️ Só pode marcar o número sorteado AGORA (bloqueia "comer barriga")');
-        console.log('📌 Verificação: SORTEIO + MARCAÇÃO para declarar BINGO');
-        console.log('✅ Atribuição: PRIMEIRA cartela disponível (ordenada)');
+        init();
+
+        console.log('✅ BINGO - Painel do Aluno CORRIGIDO!');
+        console.log('✅ Total: 25 células (24 números + 1 espaço livre)');
+        console.log('✅ BINGO declarado AUTOMATICAMENTE ao marcar o último número');
+        console.log('✅ Nova rodada: detecta resetToken e reseta tudo');
+        console.log('✅ Números antigos NÃO ficam marcados');
+        console.log('✅ Só pode marcar o número sorteado AGORA');
     </script>
 </body>
 </html>
