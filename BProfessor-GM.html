@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BINGO - Painel do Professor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2f3a, #0d1f26);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #f2e9d0;
+            font-size: 1.8rem;
+        }
+
+        .header h1 small {
+            font-size: 0.9rem;
+            color: #8aaab5;
+            font-weight: 300;
+        }
+
+        .config-area {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 18px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .config-area h2 {
+            color: #d8d2b0;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .config-group {
+            margin-bottom: 18px;
+        }
+
+        .config-group label {
+            display: block;
+            color: #d4e3e8;
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .config-group input,
+        .config-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #3d6b7a;
+            background: #1a2f3a;
+            color: #f2e9d0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .config-group input:focus,
+        .config-group select:focus {
+            border-color: #d4a373;
+        }
+
+        .config-group small {
+            display: block;
+            color: #8aaab5;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .config-group .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-group .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #d4a373;
+        }
+
+        .config-group .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: #d4a373;
+            color: #1a2f3a;
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary:hover {
+            background: #e1b87a;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #5a8f6c;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #6a9f7c;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+        .btn-secondary:hover {
+            background: #4d7b8a;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #b15e5e;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #c16e6e;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #1a2f3a;
+        }
+        .btn-warning:hover {
+            background: #ffd93d;
+            transform: translateY(-2px);
+        }
+
+        .btn-purple {
+            background: #6f42c1;
+            color: #fff;
+        }
+        .btn-purple:hover {
+            background: #7f52d1;
+            transform: translateY(-2px);
+        }
+
+        #sessaoAtiva {
+            display: none;
+        }
+
+        .sessao-info {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sessao-info .info-item {
+            color: #d4e3e8;
+        }
+
+        .sessao-info .info-item strong {
+            color: #f2e9d0;
+        }
+
+        .sessao-info .codigo {
+            background: #d4a373;
+            color: #1a2f3a;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .link-area {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .link-area h4 {
+            color: #d8d2b0;
+            margin-bottom: 8px;
+        }
+
+        .link-area .link-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .link-area input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #3d6b7a;
+            background: #1a2f3a;
+            color: #f2e9d0;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .link-area input:focus {
+            border-color: #d4a373;
+        }
+
+        .link-area .sala-nome-info {
+            margin-top: 8px;
+            color: #d4a373;
+            font-size: 0.9rem;
+        }
+
+        .controles-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-bar .last-call {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd93d;
+        }
+
+        .status-bar .winners {
+            color: #ffd966;
+            font-weight: 600;
+        }
+
+        .status-bar .online-count {
+            color: #5a8f6c;
+            font-size: 0.9rem;
+        }
+
+        .alunos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .alunos-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        .alunos-grid::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .alunos-grid::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+
+        .cartela-card {
+            background: #fcf7e8;
+            border-radius: 12px;
+            padding: 10px 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .cartela-card.winner {
+            border-color: #ffd966;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+            background: #fff7e0;
+        }
+
+        .cartela-card.offline {
+            opacity: 0.5;
+            border-color: #6c757d;
+        }
+
+        .cartela-card.pseudo-winner {
+            border-color: #6f42c1;
+            box-shadow: 0 0 25px rgba(111, 66, 193, 0.2);
+            background: #f3e8ff;
+        }
+
+        .cartela-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+            color: #273e48;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .cartela-header .badge {
+            padding: 1px 10px;
+            border-radius: 14px;
+            font-size: 0.55rem;
+            color: #1b1f1c;
+            font-weight: 600;
+        }
+
+        .cartela-header .badge.winner-badge {
+            background: #ffd966;
+            color: #1a2f3a;
+            animation: pulse-badge 1s ease-in-out infinite alternate;
+        }
+
+        .cartela-header .badge.cheat-badge {
+            background: #ff6b6b;
+            color: #fff;
+            animation: pulse-badge 0.5s ease-in-out infinite alternate;
+        }
+
+        .cartela-header .badge.falso-badge {
+            background: #dc3545;
+            color: #fff;
+            font-weight: bold;
+            animation: pulse-badge 0.5s ease-in-out infinite alternate;
+        }
+
+        .cartela-header .badge.online-badge {
+            background: #5a8f6c;
+            color: #fff;
+        }
+
+        .cartela-header .badge.offline-badge {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .cartela-header .badge.empty-badge {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .cartela-header .badge.pseudo-badge {
+            background: #6f42c1;
+            color: #fff;
+        }
+
+        @keyframes pulse-badge {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .card-letters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+
+        .card-letter {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.6rem;
+            padding: 1px 0;
+            color: #273e48;
+        }
+
+        .card-letter:nth-child(1) { color: #ff6b6b; }
+        .card-letter:nth-child(2) { color: #ffd93d; }
+        .card-letter:nth-child(3) { color: #6bcb77; }
+        .card-letter:nth-child(4) { color: #4d96ff; }
+        .card-letter:nth-child(5) { color: #ff6bb5; }
+
+        .cartela-numeros {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+        }
+
+        .cartela-numeros .num {
+            background: #f5ede0;
+            border-radius: 4px;
+            padding: 4px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #1a2f36;
+            transition: all 0.15s;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cartela-numeros .num.marked {
+            background: #d4a373;
+            color: #fcf3e0;
+            box-shadow: inset 0 -2px 0 #7a5d3e;
+        }
+
+        .cartela-numeros .num.marked::after {
+            content: "✓";
+            font-size: 0.4rem;
+            margin-left: 2px;
+        }
+
+        .cartela-numeros .num.free {
+            background: #b48b5a;
+            color: #fcf7e8;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'Georgia', serif;
+        }
+
+        .cartela-numeros .num.free.marked {
+            background: #d4a373;
+        }
+
+        .cartela-numeros .num.sorteado {
+            border: 1px solid #ffd93d;
+        }
+
+        .cartela-numeros .num.cheat-marked {
+            background: #ff6b6b !important;
+            color: #fff !important;
+            border: 2px dashed #dc3545 !important;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+        }
+
+        .numeros-chamados {
+            margin-top: 15px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .numeros-chamados h4 {
+            color: #d8d2b0;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .numeros-chamados .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .numeros-chamados .chip {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 10px;
+            border-radius: 14px;
+            color: #d4e3e8;
+            font-size: 0.8rem;
+        }
+
+        .numeros-chamados .chip.recent {
+            background: #d4a373;
+            color: #fcf3e0;
+        }
+
+        .stats {
+            color: #8aaab5;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            color: #6a8a95;
+            font-style: italic;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.08);
+            color: #8aaab5;
+            border-radius: 18px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.18);
+            color: #f2e9d0;
+        }
+
+        .sync-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 12px;
+            border-radius: 14px;
+            color: #8aaab5;
+            font-size: 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #5a8f6c;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .admin-link a {
+            color: #6a8a95;
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .admin-link a:hover {
+            color: #d4a373;
+        }
+
+        .admin-link .separator {
+            color: #3d6b7a;
+            margin: 0 8px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #5a8f6c;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        }
+
+        .toast.winner-toast {
+            background: #ffd966;
+            color: #1a2f3a;
+        }
+
+        .toast.error-toast {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .status-criacao {
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .status-criacao.info {
+            background: rgba(90, 143, 108, 0.2);
+            color: #5a8f6c;
+            border: 1px solid rgba(90, 143, 108, 0.3);
+        }
+
+        .status-criacao.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        /* ===== MODAL DE CONFIRMAÇÃO DE SAÍDA ===== */
+        .saida-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .saida-modal-overlay.active {
+            display: flex;
+        }
+
+        .saida-modal-box {
+            background: linear-gradient(145deg, #1a2f3a, #0d1f26);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid rgba(212, 163, 115, 0.3);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        .saida-modal-box .modal-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .saida-modal-box h2 {
+            color: #f2e9d0;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .saida-modal-box p {
+            color: #d4e3e8;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .saida-modal-box .detalhes {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .saida-modal-box .detalhes span {
+            color: #ffd93d;
+            font-weight: 600;
+        }
+
+        .saida-modal-box .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .saida-modal-box .btn-group .btn {
+            min-width: 140px;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .saida-modal-box .btn-group .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .saida-modal-box .btn-group .btn-cancelar {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+
+        .saida-modal-box .btn-group .btn-cancelar:hover {
+            background: #4d7b8a;
+        }
+
+        .saida-modal-box .btn-group .btn-sair {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .saida-modal-box .btn-group .btn-sair:hover {
+            background: #e74c5c;
+        }
+
+        /* ===== MODAL DE ENTRADA DE DADOS ===== */
+        .modal-input-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-input-overlay.active {
+            display: flex;
+        }
+
+        .modal-input-box {
+            background: linear-gradient(145deg, #1a2f3a, #0d1f26);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 480px;
+            width: 92%;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        .modal-input-box .modal-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .modal-input-box h2 {
+            color: #f2e9d0;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .modal-input-box .subtitulo {
+            color: #8aaab5;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-input-box .subtitulo strong {
+            color: #ffd93d;
+        }
+
+        .modal-input-box .input-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-input-box .input-group label {
+            display: block;
+            color: #d4e3e8;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .modal-input-box .input-group input,
+        .modal-input-box .input-group select,
+        .modal-input-box .input-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #3d6b7a;
+            background: #0d1f26;
+            color: #f2e9d0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .modal-input-box .input-group input:focus,
+        .modal-input-box .input-group select:focus,
+        .modal-input-box .input-group textarea:focus {
+            border-color: #d4a373;
+            box-shadow: 0 0 20px rgba(212, 163, 115, 0.1);
+        }
+
+        .modal-input-box .input-group input::placeholder {
+            color: #6a8a95;
+        }
+
+        .modal-input-box .input-group .hint {
+            color: #6a8a95;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .modal-input-box .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal-input-box .btn-group .btn {
+            min-width: 120px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-input-box .btn-group .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-input-box .btn-group .btn-cancelar {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+
+        .modal-input-box .btn-group .btn-cancelar:hover {
+            background: #4d7b8a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar {
+            background: #d4a373;
+            color: #1a2f3a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar:hover {
+            background: #e1b87a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.success {
+            background: #5a8f6c;
+            color: #fff;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.success:hover {
+            background: #6a9f7c;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.danger:hover {
+            background: #e74c5c;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.warning {
+            background: #ffc107;
+            color: #1a2f3a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.warning:hover {
+            background: #ffd93d;
+        }
+
+        .modal-input-box .erro {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        .modal-input-box .erro.active {
+            display: block;
+        }
+
+        .modal-input-box .opcoes-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .modal-input-box .opcoes-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-input-box .opcoes-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .modal-input-box .opcoes-list::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+
+        .modal-input-box .opcao-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #d4e3e8;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-input-box .opcao-item:hover {
+            background: rgba(212, 163, 115, 0.15);
+        }
+
+        .modal-input-box .opcao-item .num {
+            background: #d4a373;
+            color: #1a2f3a;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .modal-input-box .opcao-item.selecionado {
+            background: rgba(212, 163, 115, 0.25);
+            border-color: #d4a373;
+        }
+
+        .modal-input-box .opcao-item.selecionado::after {
+            content: " ✓";
+            color: #5a8f6c;
+            font-weight: 700;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .sessao-info {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .controles-area {
+                justify-content: center;
+            }
+            .alunos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .config-area {
+                padding: 15px;
+            }
+            .modal-input-box {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Alunos</a>
+                <h1>🎲 BINGO <small>Painel do Professor</small></h1>
+            </div>
+            <div class="sync-status">
+                <span class="sync-dot"></span>
+                <span>sincronizado</span>
+            </div>
+        </div>
+
+        <!-- ===== CONFIGURAÇÃO ===== -->
+        <div id="configuracao" class="config-area">
+            <h2>📋 Configurar Bingo</h2>
+            
+            <div class="config-group">
+                <label for="salaSelect">🏫 Selecione a Turma/Sala:</label>
+                <select id="salaSelect">
+                    <optgroup label="Escola Capitão">
+                        <option value="1a-cp">1º ano A - Manhã</option>
+                        <option value="1b-cp">1º ano B - Manhã</option>
+                        <option value="1c-cp">1º ano C - Manhã</option>
+                        <option value="2a-cp">2º ano A - Manhã</option>
+                        <option value="2b-cp">2º ano B - Manhã</option>
+                        <option value="2c-cp">2º ano C - Manhã</option>
+                        <option value="3a-cp">3º ano A - Manhã</option>
+                        <option value="3b-cp">3º ano B - Manhã</option>
+                        <option value="3c-cp">3º ano C - Manhã</option>
+                        <option value="4a-cp">4º ano A - Manhã</option>
+                        <option value="4b-cp">4º ano B - Tarde</option>
+                        <option value="5a-cp">5º ano A - Manhã</option>
+                        <option value="5b-cp">5º ano B - Manhã</option>
+                        <option value="5c-cp">5º ano C - Tarde</option>
+                    </optgroup>
+                    <optgroup label="Escola Thereza">
+                        <option value="1a-th">1º ano A - Manhã</option>
+                        <option value="1b-th">1º ano B - Tarde</option>
+                        <option value="2a-th">2º ano A - Manhã</option>
+                        <option value="2b-th">2º ano B - Manhã</option>
+                        <option value="3a-th">3º ano A - Manhã</option>
+                        <option value="3b-th">3º ano B - Manhã</option>
+                        <option value="4a-th">4º ano A - Manhã</option>
+                        <option value="4b-th">4º ano B - Manhã</option>
+                        <option value="4c-th">4º ano C - Tarde</option>
+                        <option value="5a-th">5º ano A - Manhã</option>
+                        <option value="5b-th">5º ano B - Tarde</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="config-group">
+                <label for="qtdAlunos">👥 Quantos alunos vão jogar?</label>
+                <input type="number" id="qtdAlunos" min="2" max="50" value="10">
+                <small>Mínimo: 2 | Máximo: 50 alunos</small>
+                <small style="color: #ffd93d;">⚠️ Cada aluno precisa de uma cartela única</small>
+            </div>
+
+            <div class="config-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="mostrarNumeros" checked>
+                    <label for="mostrarNumeros">📊 Mostrar números sorteados para o aluno</label>
+                </div>
+                <small>Desative para turmas a partir do 3º ano (alunos mais experientes)</small>
+            </div>
+
+            <div id="statusCriacao"></div>
+
+            <button class="btn btn-primary" onclick="criarSessao()">🎯 Iniciar Bingo</button>
+        </div>
+
+        <!-- ===== SESSÃO ATIVA ===== -->
+        <div id="sessaoAtiva">
+            <div class="sessao-info">
+                <span class="info-item">🏫 <strong id="salaNome">---</strong></span>
+                <span class="info-item">📌 Código: <span class="codigo" id="codigoSessao">---</span></span>
+                <span class="info-item">👥 Alunos: <strong id="totalAlunos">0</strong></span>
+                <span class="info-item" id="statusSessao">⏳ Aguardando...</span>
+                <span class="info-item online-count" id="onlineCount">🟢 Online: 0</span>
+            </div>
+
+            <div class="link-area">
+                <h4>📋 Link para os alunos (sempre o mesmo):</h4>
+                <div class="link-input-group">
+                    <input type="text" id="linkAluno" readonly onclick="this.select();document.execCommand('copy')">
+                    <button class="btn btn-secondary" onclick="copiarLink()">📋 Copiar</button>
+                </div>
+                <div class="sala-nome-info" id="salaNomeLink">📌 Sala: <strong>---</strong></div>
+                <div style="margin-top: 5px; font-size: 0.8rem; color: #8aaab5;">
+                    💡 Alunos devem digitar seus nomes ao acessar
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <span class="last-call" id="ultimoSorteio">🎯 Último: ---</span>
+                <span class="stats" id="totalSorteados">0/75 sorteados</span>
+                <span class="winners" id="vencedores">🏆 Vencedores: aguardando...</span>
+            </div>
+
+            <div class="controles-area">
+                <button class="btn btn-success" onclick="sortearNumero()">🎲 Sortear</button>
+                <button class="btn btn-warning" onclick="resetarJogo()">🔄 Nova Rodada</button>
+                <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
+                <button class="btn btn-secondary" onclick="expandirVagas()" style="background: #17a2b8;">➕ Expandir Vagas</button>
+                <button class="btn btn-secondary" onclick="toggleMostrarNumeros()" style="background: #6f42c1;">👁️ Alternar Números</button>
+                <button class="btn btn-purple" onclick="beneficiarAluno()">🔧 Beneficiar Aluno</button>
+            </div>
+
+            <div class="numeros-chamados">
+                <h4>📋 Números chamados:</h4>
+                <div class="chips" id="numerosChamados">
+                    <span class="empty-state">nenhum número chamado</span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <h3 style="color: #d8d2b0;">🧑‍🎓 Cartelas dos Alunos <span style="font-size: 0.8rem; color: #8aaab5;">(🔒 Com Auditoria Anti-Trapaça em Tempo Real)</span></h3>
+                <span style="color: #8aaab5; font-size: 0.85rem;" id="ocupacaoVagas">0/0 ocupadas</span>
+            </div>
+            <div class="alunos-grid" id="alunosGrid"></div>
+
+            <div class="admin-link">
+                <a href="BAdmin.html">🗑️ Administração</a>
+                <span class="separator">|</span>
+                <a href="BAluno.html" target="_blank">👁️ Ver como aluno</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- ===== MODAL DE CONFIRMAÇÃO DE SAÍDA ===== -->
+    <div id="modalSaida" class="saida-modal-overlay">
+        <div class="saida-modal-box">
+            <span class="modal-icon" id="saidaIcon">⚠️</span>
+            <h2 id="saidaTitulo">Deseja sair?</h2>
+            <p id="saidaTexto">Você está prestes a sair do jogo.</p>
+            <div class="detalhes" id="saidaDetalhes">
+                📌 <span id="saidaInfo">Seus dados estão sendo salvos automaticamente</span>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancelar" id="btnCancelarSaida">❌ Cancelar</button>
+                <button class="btn btn-sair" id="btnConfirmarSaida">🚪 Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE ENTRADA DE DADOS ===== -->
+    <div id="modalInput" class="modal-input-overlay">
+        <div class="modal-input-box">
+            <span class="modal-icon" id="inputIcon">✏️</span>
+            <h2 id="inputTitulo">Digite os dados</h2>
+            <div class="subtitulo" id="inputSubtitulo">Preencha as informações abaixo</div>
+            
+            <div id="inputCampos"></div>
+            
+            <div id="inputErro" class="erro">❌ Campo obrigatório!</div>
+            
+            <div class="btn-group">
+                <button class="btn btn-cancelar" id="btnInputCancelar">❌ Cancelar</button>
+                <button class="btn btn-confirmar" id="btnInputConfirmar">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
+            authDomain: "meu-super-jogo-stop.firebaseapp.com",
+            databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
+            projectId: "meu-super-jogo-stop",
+            storageBucket: "meu-super-jogo-stop.firebasestorage.app",
+            messagingSenderId: "958593186721",
+            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
+            measurementId: "G-WGRJWRVBEN"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ============================================
+        // ESTADO
+        // ============================================
+        let sessaoAtual = null;
+        let numerosChamados = [];
+        let alunosConectados = new Set();
+        let mostrarNumeros = true;
+        let listenerRef = null;
+        let vencedoresList = [];
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, tipo = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast';
+            if (tipo === 'winner') toast.classList.add('winner-toast');
+            if (tipo === 'error') toast.classList.add('error-toast');
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
+
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        function getLetterForNumber(num) {
+            if (num >= 1 && num <= 15) return 'B';
+            if (num >= 16 && num <= 30) return 'I';
+            if (num >= 31 && num <= 45) return 'N';
+            if (num >= 46 && num <= 60) return 'G';
+            if (num >= 61 && num <= 75) return 'O';
+            return '';
+        }
+
+        function getRandomNumbers(min, max, count) {
+            const pool = [];
+            for (let i = min; i <= max; i++) pool.push(i);
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, count).sort((a, b) => a - b);
+        }
+
+        function gerarCartela() {
+            const cartela = [];
+            const bCol = getRandomNumbers(1, 15, 5);
+            const iCol = getRandomNumbers(16, 30, 5);
+            const nCol = getRandomNumbers(31, 45, 4);
+            const gCol = getRandomNumbers(46, 60, 5);
+            const oCol = getRandomNumbers(61, 75, 5);
+
+            for (let row = 0; row < 5; row++) {
+                const line = [];
+                line.push(bCol[row]);
+                line.push(iCol[row]);
+                if (row === 2) {
+                    line.push('B');
+                } else {
+                    const nIndex = row < 2 ? row : row - 1;
+                    line.push(nCol[nIndex]);
+                }
+                line.push(gCol[row]);
+                line.push(oCol[row]);
+                cartela.push(line);
+            }
+            return cartela;
+        }
+
+        function gerarCartelaUnica(participantesExistentes) {
+            const cartelasUsadas = new Set();
+            for (const key in participantesExistentes) {
+                const cartela = participantesExistentes[key].cartela;
+                if (cartela) {
+                    cartelasUsadas.add(cartela.flat().join(','));
+                }
+            }
+            let cartela;
+            let tentativas = 0;
+            do {
+                cartela = gerarCartela();
+                tentativas++;
+            } while (cartelasUsadas.has(cartela.flat().join(',')) && tentativas < 1000);
+            return cartela;
+        }
+
+        function checkBingo(marcacoes, cartela, sorteados) {
+            if (!cartela || !marcacoes) return false;
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const val = cartela[r][c];
+                    if (val === 'B') continue;
+                    if (!marcacoes[r][c] || !sorteados.includes(val)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // ============================================
+        // CARREGAR SESSÃO
+        // ============================================
+        function carregarSessao(codigo, sessao) {
+            sessaoAtual = codigo;
+            numerosChamados = sessao.numerosSorteados || [];
+            mostrarNumeros = sessao.mostrarNumeros !== false;
+            vencedoresList = sessao.vencedores || [];
+
+            const statusMap = {
+                'aguardando': '⏳ Aguardando alunos...',
+                'ativa': '🟢 Jogo em andamento',
+                'finalizada': '🔴 Finalizada'
+            };
+
+            document.getElementById('configuracao').style.display = 'none';
+            document.getElementById('sessaoAtiva').style.display = 'block';
+            document.getElementById('salaNome').textContent = sessao.salaNome;
+            document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${sessao.salaNome}</strong>`;
+            document.getElementById('codigoSessao').textContent = codigo;
+            document.getElementById('totalAlunos').textContent = sessao.totalAlunos;
+            document.getElementById('statusSessao').textContent = statusMap[sessao.status] || sessao.status;
+
+            if (sessao.numerosSorteados && sessao.numerosSorteados.length > 0) {
+                const ultimo = sessao.numerosSorteados[sessao.numerosSorteados.length - 1];
+                const letra = getLetterForNumber(ultimo);
+                document.getElementById('ultimoSorteio').innerHTML = `🎯 Último: ${letra}${ultimo}`;
+                document.getElementById('totalSorteados').textContent = `${sessao.numerosSorteados.length}/75 sorteados`;
+
+                const chipsDiv = document.getElementById('numerosChamados');
+                let chipsHtml = '';
+                sessao.numerosSorteados.forEach((num, idx) => {
+                    const cls = idx === sessao.numerosSorteados.length - 1 ? 'chip recent' : 'chip';
+                    chipsHtml += `<span class="${cls}">${num}</span>`;
+                });
+                chipsDiv.innerHTML = chipsHtml;
+            }
+
+            atualizarPainelVencedores(sessao);
+
+            const baseUrl = window.location.href.split('?')[0].replace('BProfessor', 'BAluno');
+            const linkAluno = `${baseUrl}?sala=${codigo}`;
+            document.getElementById('linkAluno').value = linkAluno;
+
+            renderizarCartelas(sessao.participantes);
+            iniciarListenerUnico(codigo);
+            atualizarOcupacao(sessao.participantes);
+        }
+
+        // ============================================
+        // AUDITORIA E ATUALIZAÇÃO DOS VENCEDORES
+        // ============================================
+        function atualizarPainelVencedores(sessao) {
+            if (sessao.vencedores && sessao.vencedores.length > 0) {
+                const nomesValidos = [];
+                let fraudesDetectadas = false;
+
+                sessao.vencedores.forEach(id => {
+                    const p = sessao.participantes ? sessao.participantes[id] : null;
+                    if (p && p.cartela) {
+                        const m = p.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        const realmenteGanhou = checkBingo(m, p.cartela, numerosChamados);
+                        if (realmenteGanhou) {
+                            nomesValidos.push(p.nome || id);
+                        } else {
+                            fraudesDetectadas = true;
+                        }
+                    }
+                });
+
+                if (nomesValidos.length > 0) {
+                    let text = `🏆 Vencedor(es) Real(is): ${nomesValidos.join(', ')} 🎉`;
+                    if (fraudesDetectadas) {
+                        text += ` <span style="color: #ff6b6b; font-size: 0.8rem; font-weight: bold; margin-left: 10px;">⚠️ (Tentativas de trapaça ignoradas!)</span>`;
+                    }
+                    document.getElementById('vencedores').innerHTML = text;
+                } else {
+                    document.getElementById('vencedores').innerHTML = `🏆 Vencedores: aguardando... ${fraudesDetectadas ? '<span style="color: #ff6b6b; font-size: 0.8rem;">(⚠️ Falso BINGO detectado e ignorado!)</span>' : ''}`;
+                }
+            } else {
+                document.getElementById('vencedores').innerHTML = '🏆 Vencedores: aguardando...';
+            }
+        }
+
+        // ============================================
+        // LISTENER ÚNICO
+        // ============================================
+        function iniciarListenerUnico(codigo) {
+            if (listenerRef) {
+                listenerRef.off();
+                listenerRef = null;
+            }
+
+            listenerRef = db.ref(`bingo/sessoes/${codigo}`);
+            listenerRef.on('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    showToast('⚠️ Sessão foi encerrada!', 'error');
+                    document.getElementById('configuracao').style.display = 'block';
+                    document.getElementById('sessaoAtiva').style.display = 'none';
+                    return;
+                }
+
+                const sessao = snapshot.val();
+                const statusMap = {
+                    'aguardando': '⏳ Aguardando alunos...',
+                    'ativa': '🟢 Jogo em andamento',
+                    'finalizada': '🔴 Finalizada'
+                };
+
+                document.getElementById('statusSessao').textContent = statusMap[sessao.status] || sessao.status;
+
+                if (sessao.numerosSorteados) {
+                    numerosChamados = sessao.numerosSorteados;
+                    document.getElementById('totalSorteados').textContent =
+                        `${numerosChamados.length}/75 sorteados`;
+
+                    const chipsDiv = document.getElementById('numerosChamados');
+                    if (numerosChamados.length === 0) {
+                        chipsDiv.innerHTML = `<span class="empty-state">nenhum número chamado</span>`;
+                    } else {
+                        let chipsHtml = '';
+                        numerosChamados.forEach((num, idx) => {
+                            const cls = idx === numerosChamados.length - 1 ? 'chip recent' : 'chip';
+                            chipsHtml += `<span class="${cls}">${num}</span>`;
+                        });
+                        chipsDiv.innerHTML = chipsHtml;
+                    }
+
+                    if (numerosChamados.length > 0) {
+                        const ultimo = numerosChamados[numerosChamados.length - 1];
+                        const letra = getLetterForNumber(ultimo);
+                        document.getElementById('ultimoSorteio').innerHTML =
+                            `🎯 Último: ${letra}${ultimo}`;
+                    } else {
+                        document.getElementById('ultimoSorteio').innerHTML = '🎯 Último: ---';
+                    }
+                }
+
+                atualizarPainelVencedores(sessao);
+
+                if (sessao.participantes) {
+                    alunosConectados = new Set(Object.keys(sessao.participantes));
+                    renderizarCartelas(sessao.participantes);
+                    atualizarOcupacao(sessao.participantes);
+                }
+            });
+        }
+
+        // ============================================
+        // VERIFICAR SALA EXISTENTE
+        // ============================================
+        function verificarSalaExistente() {
+            const salaSelect = document.getElementById('salaSelect');
+            const salaId = salaSelect.value;
+
+            if (!salaId) {
+                document.getElementById('configuracao').style.display = 'block';
+                document.getElementById('sessaoAtiva').style.display = 'none';
+                return;
+            }
+
+            const sessaoRef = db.ref(`bingo/sessoes/${salaId}`);
+            sessaoRef.once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const sessao = snapshot.val();
+                    carregarSessao(salaId, sessao);
+                } else {
+                    document.getElementById('configuracao').style.display = 'block';
+                    document.getElementById('sessaoAtiva').style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // SISTEMA DE MODAL DE ENTRADA DE DADOS
+        // ============================================
+        function mostrarModalInput(config) {
+            return new Promise((resolve, reject) => {
+                const modal = document.getElementById('modalInput');
+                const camposDiv = document.getElementById('inputCampos');
+                const erroDiv = document.getElementById('inputErro');
+                
+                document.getElementById('inputIcon').textContent = config.icon || '✏️';
+                document.getElementById('inputTitulo').textContent = config.titulo || 'Digite os dados';
+                document.getElementById('inputSubtitulo').innerHTML = config.subtitulo || 'Preencha as informações abaixo';
+                
+                let html = '';
+                
+                if (config.campos && config.campos.length > 0) {
+                    config.campos.forEach((campo, index) => {
+                        html += `<div class="input-group">`;
+                        html += `<label for="input_${index}">${campo.label}</label>`;
+                        
+                        if (campo.tipo === 'select') {
+                            html += `<select id="input_${index}">`;
+                            campo.opcoes.forEach(op => {
+                                const selected = op.valor === (campo.valor || '') ? 'selected' : '';
+                                html += `<option value="${op.valor}" ${selected}>${op.texto}</option>`;
+                            });
+                            html += `</select>`;
+                        } else if (campo.tipo === 'textarea') {
+                            html += `<textarea id="input_${index}" placeholder="${campo.placeholder || ''}" rows="${campo.linhas || 3}">${campo.valor || ''}</textarea>`;
+                        } else {
+                            html += `<input type="${campo.tipo || 'text'}" id="input_${index}" placeholder="${campo.placeholder || ''}" value="${campo.valor || ''}" ${campo.required ? 'required' : ''}>`;
+                        }
+                        
+                        if (campo.hint) {
+                            html += `<div class="hint">${campo.hint}</div>`;
+                        }
+                        html += `</div>`;
+                    });
+                }
+                
+                camposDiv.innerHTML = html;
+                erroDiv.classList.remove('active');
+                
+                const btnConfirmar = document.getElementById('btnInputConfirmar');
+                const btnCancelar = document.getElementById('btnInputCancelar');
+                
+                btnConfirmar.className = 'btn btn-confirmar';
+                if (config.corBotao) {
+                    btnConfirmar.classList.add(config.corBotao);
+                }
+                btnConfirmar.textContent = config.textoBotao || '✅ Confirmar';
+                
+                const newBtnConfirmar = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(newBtnConfirmar, btnConfirmar);
+                
+                const newBtnCancelar = btnCancelar.cloneNode(true);
+                btnCancelar.parentNode.replaceChild(newBtnCancelar, btnCancelar);
+                
+                document.getElementById('btnInputConfirmar').addEventListener('click', function() {
+                    const valores = {};
+                    let valido = true;
+                    
+                    if (config.campos) {
+                        config.campos.forEach((campo, index) => {
+                            const el = document.getElementById(`input_${index}`);
+                            if (el) {
+                                const valor = el.value.trim();
+                                const campoNome = campo.nome || campo.name;
+                                valores[campoNome] = valor;
+                                
+                                if (campo.required && !valor) {
+                                    valido = false;
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (!valido) {
+                        erroDiv.textContent = '❌ Todos os campos obrigatórios devem ser preenchidos!';
+                        erroDiv.classList.add('active');
+                        return;
+                    }
+                    
+                    erroDiv.classList.remove('active');
+                    fecharModalInput();
+                    
+                    if (config.onConfirm) {
+                        const resultado = config.onConfirm(valores);
+                        if (resultado !== false) {
+                            resolve(resultado);
+                        }
+                    } else {
+                        resolve(valores);
+                    }
+                });
+                
+                document.getElementById('btnInputCancelar').addEventListener('click', function() {
+                    fecharModalInput();
+                    reject(new Error('Cancelado pelo usuário'));
+                });
+                
+                modal.classList.add('active');
+                
+                setTimeout(() => {
+                    const primeiroInput = camposDiv.querySelector('input, select, textarea');
+                    if (primeiroInput) {
+                        primeiroInput.focus();
+                        if (typeof primeiroInput.select === 'function') {
+                            primeiroInput.select();
+                        }
+                    }
+                }, 100);
+
+                const primeiroInput = camposDiv.querySelector('input, select, textarea');
+                if (primeiroInput) {
+                    primeiroInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            document.getElementById('btnInputConfirmar').click();
+                        }
+                    });
+                }
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        fecharModalInput();
+                        reject(new Error('Cancelado pelo usuário'));
+                    }
+                });
+            });
+        }
+
+        function fecharModalInput() {
+            document.getElementById('modalInput').classList.remove('active');
+        }
+
+        // ============================================
+        // FUNÇÕES DE ENTRADA SUBSTITUINDO O PROMPT
+        // ============================================
+        async function inputTexto(titulo, subtitulo, placeholder, valorPadrao = '') {
+            try {
+                const resultado = await mostrarModalInput({
+                    icon: '✏️',
+                    titulo: titulo,
+                    subtitulo: subtitulo,
+                    textoBotao: '✅ Confirmar',
+                    campos: [{
+                        nome: 'valor',
+                        label: '',
+                        tipo: 'text',
+                        placeholder: placeholder,
+                        valor: valorPadrao,
+                        required: true
+                    }],
+                    onConfirm: (valores) => {
+                        return valores.valor;
+                    }
+                });
+                return resultado;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function inputNumero(titulo, subtitulo, placeholder, valorPadrao = '', min = null, max = null) {
+            try {
+                const resultado = await mostrarModalInput({
+                    icon: '🔢',
+                    titulo: titulo,
+                    subtitulo: subtitulo,
+                    textoBotao: '✅ Confirmar',
+                    campos: [{
+                        nome: 'valor',
+                        label: '',
+                        tipo: 'number',
+                        placeholder: placeholder,
+                        valor: valorPadrao,
+                        required: true,
+                        hint: min !== null && max !== null ? `Mínimo: ${min} | Máximo: ${max}` : ''
+                    }],
+                    onConfirm: (valores) => {
+                        const num = parseInt(valores.valor);
+                        if (isNaN(num)) {
+                            document.getElementById('inputErro').textContent = '❌ Digite um número válido!';
+                            document.getElementById('inputErro').classList.add('active');
+                            return false;
+                        }
+                        if (min !== null && num < min) {
+                            document.getElementById('inputErro').textContent = `❌ Valor mínimo: ${min}`;
+                            document.getElementById('inputErro').classList.add('active');
+                            return false;
+                        }
+                        if (max !== null && num > max) {
+                            document.getElementById('inputErro').textContent = `❌ Valor máximo: ${max}`;
+                            document.getElementById('inputErro').classList.add('active');
+                            return false;
+                        }
+                        return num;
+                    }
+                });
+                return resultado;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function inputSelecao(titulo, subtitulo, opcoes, textoBotao = '✅ Selecionar') {
+            try {
+                let opcoesHtml = '<div class="opcoes-list">';
+                opcoes.forEach((op, idx) => {
+                    opcoesHtml += `
+                        <div class="opcao-item" data-index="${idx}" data-valor="${op.valor}">
+                            <span>${op.texto}</span>
+                            <span class="num">#${idx + 1}</span>
+                        </div>
+                    `;
+                });
+                opcoesHtml += '</div>';
+                
+                const camposDiv = document.getElementById('inputCampos');
+                camposDiv.innerHTML = opcoesHtml;
+                
+                document.getElementById('inputIcon').textContent = '📋';
+                document.getElementById('inputTitulo').textContent = titulo;
+                document.getElementById('inputSubtitulo').innerHTML = subtitulo;
+                document.getElementById('inputErro').classList.remove('active');
+                
+                const btnConfirmar = document.getElementById('btnInputConfirmar');
+                const btnCancelar = document.getElementById('btnInputCancelar');
+                
+                btnConfirmar.className = 'btn btn-confirmar';
+                btnConfirmar.textContent = textoBotao;
+                
+                const newBtnConfirmar = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(newBtnConfirmar, btnConfirmar);
+                
+                const newBtnCancelar = btnCancelar.cloneNode(true);
+                btnCancelar.parentNode.replaceChild(newBtnCancelar, btnCancelar);
+                
+                document.querySelectorAll('.opcao-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        document.querySelectorAll('.opcao-item').forEach(el => el.classList.remove('selecionado'));
+                        this.classList.add('selecionado');
+                        document.getElementById('inputErro').classList.remove('active');
+                    });
+                });
+                
+                document.getElementById('modalInput').classList.add('active');
+                
+                return new Promise((resolve, reject) => {
+                    document.getElementById('btnInputConfirmar').addEventListener('click', function() {
+                        const selecionado = document.querySelector('.opcao-item.selecionado');
+                        if (!selecionado) {
+                            document.getElementById('inputErro').textContent = '❌ Selecione uma opção!';
+                            document.getElementById('inputErro').classList.add('active');
+                            return;
+                        }
+                        fecharModalInput();
+                        resolve(selecionado.dataset.valor);
+                    });
+                    
+                    document.getElementById('btnInputCancelar').addEventListener('click', function() {
+                        fecharModalInput();
+                        reject(new Error('Cancelado pelo usuário'));
+                    });
+                    
+                    document.getElementById('modalInput').addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            fecharModalInput();
+                            reject(new Error('Cancelado pelo usuário'));
+                        }
+                    });
+                });
+                
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE CONFIRMAÇÃO DE SAÍDA
+        // ============================================
+        let saidaPendente = false;
+
+        function mostrarModalSaida(icone, titulo, texto, info, aoConfirmar) {
+            const modal = document.getElementById('modalSaida');
+            document.getElementById('saidaIcon').textContent = icone;
+            document.getElementById('saidaTitulo').textContent = titulo;
+            document.getElementById('saidaTexto').textContent = texto;
+            document.getElementById('saidaInfo').textContent = info;
+            
+            const btnConfirmar = document.getElementById('btnConfirmarSaida');
+            btnConfirmar.onclick = function() {
+                fecharModalSaida();
+                if (aoConfirmar) aoConfirmar();
+            };
+            
+            document.getElementById('btnCancelarSaida').onclick = function() {
+                fecharModalSaida();
+                saidaPendente = false;
+            };
+            
+            modal.classList.add('active');
+        }
+
+        function fecharModalSaida() {
+            document.getElementById('modalSaida').classList.remove('active');
+            saidaPendente = false;
+        }
+
+        function configurarDetectorSaida() {
+            window.addEventListener('beforeunload', function(e) {
+                if (!saidaPendente) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    saidaPendente = true;
+                    
+                    mostrarModalSaida(
+                        '🚪',
+                        'Sair do BINGO?',
+                        'Você está prestes a sair do jogo.',
+                        'Seus dados estão sendo salvos automaticamente.',
+                        function() {
+                            saidaPendente = false;
+                            window.removeEventListener('beforeunload', this);
+                            window.close();
+                        }
+                    );
+                    return '';
+                }
+            });
+
+            window.addEventListener('popstate', function(e) {
+                if (!saidaPendente) {
+                    e.preventDefault();
+                    saidaPendente = true;
+                    mostrarModalSaida(
+                        '⬅️',
+                        'Voltar na página?',
+                        'Você está prestes a voltar na navegação.',
+                        'Voltar pode interromper o jogo atual.',
+                        function() {
+                            saidaPendente = false;
+                            history.back();
+                        }
+                    );
+                }
+            });
+        }
+
+        // ============================================
+        // CRIAR SESSÃO
+        // ============================================
+        async function criarSessao() {
+            const salaSelect = document.getElementById('salaSelect');
+            const qtdAlunos = parseInt(document.getElementById('qtdAlunos').value);
+            const statusDiv = document.getElementById('statusCriacao');
+            mostrarNumeros = document.getElementById('mostrarNumeros').checked;
+
+            if (!salaSelect.value) {
+                showToast('❌ Por favor, selecione uma turma!', 'error');
+                return;
+            }
+
+            if (qtdAlunos < 2 || qtdAlunos > 50) {
+                showToast('❌ Número de alunos deve ser entre 2 e 50!', 'error');
+                return;
+            }
+
+            const salaNome = salaSelect.options[salaSelect.selectedIndex].text;
+            const salaId = salaSelect.value;
+            const codigo = salaId;
+
+            statusDiv.innerHTML = `<div class="status-criacao info">🔄 Verificando sala "${salaNome}"...</div>`;
+
+            const sessaoRef = db.ref(`bingo/sessoes/${codigo}`);
+
+            try {
+                const snapshot = await sessaoRef.once('value');
+                
+                if (snapshot.exists()) {
+                    const sessao = snapshot.val();
+                    statusDiv.innerHTML = `<div class="status-criacao warning">⚠️ Sala "${salaNome}" já existe. Resetando...</div>`;
+
+                    try {
+                        await mostrarModalInput({
+                            icon: '⚠️',
+                            titulo: 'Resetar Sala',
+                            subtitulo: `A sala "<strong>${salaNome}</strong>" já existe.<br><br>Deseja resetá-la com <strong>${qtdAlunos}</strong> alunos?<br><br>⚠️ Todos os alunos extras serão removidos!`,
+                            textoBotao: '🔄 Resetar',
+                            corBotao: 'warning',
+                            campos: [{
+                                name: 'confirmar',
+                                label: 'Digite "RESETAR" para confirmar:',
+                                tipo: 'text',
+                                placeholder: 'Digite RESETAR',
+                                required: true
+                            }],
+                            onConfirm: (valores) => {
+                                if (valores.confirmar.toUpperCase() !== 'RESETAR') {
+                                    document.getElementById('inputErro').textContent = '❌ Digite exatamente "RESETAR" para confirmar!';
+                                    document.getElementById('inputErro').classList.add('active');
+                                    return false;
+                                }
+                                return true;
+                            }
+                        });
+                    } catch (e) {
+                        statusDiv.innerHTML = '';
+                        return;
+                    }
+
+                    const novasParticipantes = {};
+                    for (let i = 1; i <= qtdAlunos; i++) {
+                        const cartela = gerarCartelaUnica(novasParticipantes);
+                        const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        marcacoes[2][2] = true;
+                        novasParticipantes[`aluno_${i}`] = {
+                            nome: '',
+                            cartela: cartela,
+                            marcacoes: marcacoes,
+                            venceu: false
+                        };
+                    }
+
+                    const novoResetToken = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+
+                    await sessaoRef.update({
+                        participantes: novasParticipantes,
+                        numerosSorteados: [],
+                        vencedores: [],
+                        ultimoNumero: null,
+                        ultimaLetra: null,
+                        status: 'aguardando',
+                        totalAlunos: qtdAlunos,
+                        resetToken: novoResetToken
+                    });
+
+                    carregarSessao(codigo, {
+                        ...sessao,
+                        participantes: novasParticipantes,
+                        numerosSorteados: [],
+                        vencedores: [],
+                        ultimoNumero: null,
+                        ultimaLetra: null,
+                        status: 'aguardando',
+                        totalAlunos: qtdAlunos,
+                        salaNome: salaNome,
+                        resetToken: novoResetToken
+                    });
+                    statusDiv.innerHTML = `<div class="status-criacao info">✅ Sala "${salaNome}" resetada com ${qtdAlunos} alunos!</div>`;
+                    showToast(`✅ Sala "${salaNome}" resetada! ${qtdAlunos} alunos.`, 'info');
+                    return;
+                }
+
+                statusDiv.innerHTML = `<div class="status-criacao info">🆕 Criando sala "${salaNome}"...</div>`;
+
+                const participantes = {};
+                for (let i = 1; i <= qtdAlunos; i++) {
+                    const cartela = gerarCartelaUnica(participantes);
+                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                    marcacoes[2][2] = true;
+                    participantes[`aluno_${i}`] = {
+                        nome: '',
+                        cartela: cartela,
+                        marcacoes: marcacoes,
+                        venceu: false
+                    };
+                }
+
+                const resetTokenInicial = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+
+                const sessaoData = {
+                    salaId: salaId,
+                    salaNome: salaNome,
+                    status: 'aguardando',
+                    dataCriacao: new Date().toISOString(),
+                    totalAlunos: qtdAlunos,
+                    numerosSorteados: [],
+                    vencedores: [],
+                    ultimoNumero: null,
+                    ultimaLetra: null,
+                    mostrarNumeros: mostrarNumeros,
+                    participantes: participantes,
+                    resetToken: resetTokenInicial
+                };
+
+                await sessaoRef.set(sessaoData);
+                carregarSessao(codigo, sessaoData);
+                statusDiv.innerHTML = `<div class="status-criacao info">✅ Sala "${salaNome}" criada com ${qtdAlunos} alunos!</div>`;
+                showToast(`✅ Sala "${salaNome}" criada!`, 'info');
+
+            } catch (error) {
+                console.error('Erro ao criar sessão:', error);
+                showToast('❌ Erro ao criar sessão!', 'error');
+            }
+        }
+
+        // ============================================
+        // TOGGLE MOSTRAR NÚMEROS
+        // ============================================
+        function toggleMostrarNumeros() {
+            if (!sessaoAtual) return;
+
+            mostrarNumeros = !mostrarNumeros;
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            sessaoRef.update({
+                mostrarNumeros: mostrarNumeros
+            });
+
+            showToast(`📊 Números ${mostrarNumeros ? '📌 VISÍVEIS' : '🚫 OCULTOS'} para os alunos`, 'info');
+        }
+
+        // ============================================
+        // EXPANDIR VAGAS
+        // ============================================
+        async function expandirVagas() {
+            if (!sessaoAtual) return;
+
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            const snapshot = await sessaoRef.once('value');
+            const sessao = snapshot.val();
+            const participantes = sessao.participantes || {};
+            const totalAtual = Object.keys(participantes).length;
+
+            const novasVagas = await inputNumero(
+                '➕ Expandir Vagas',
+                `Atualmente ${totalAtual} alunos. Quantas vagas adicionais deseja criar?<br><br>⚠️ Máximo 50 alunos no total.`,
+                'Digite o número de vagas',
+                '',
+                1,
+                50 - totalAtual
+            );
+
+            if (!novasVagas) return;
+
+            const qtd = parseInt(novasVagas);
+            const novoTotal = totalAtual + qtd;
+
+            if (novoTotal > 50) {
+                showToast(`❌ Máximo 50 alunos! Atualmente ${totalAtual}`, 'error');
+                return;
+            }
+
+            for (let i = totalAtual + 1; i <= novoTotal; i++) {
+                const cartela = gerarCartelaUnica(participantes);
+                const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                marcacoes[2][2] = true;
+                participantes[`aluno_${i}`] = {
+                    nome: '',
+                    cartela: cartela,
+                    marcacoes: marcacoes,
+                    venceu: false
+                };
+            }
+
+            await sessaoRef.update({
+                participantes: participantes,
+                totalAlunos: novoTotal
+            });
+
+            document.getElementById('totalAlunos').textContent = novoTotal;
+            showToast(`✅ ${qtd} nova(s) vaga(s) criada(s)! Total: ${novoTotal}`, 'info');
+            renderizarCartelas(participantes);
+            atualizarOcupacao(participantes);
+        }
+
+        // ============================================
+        // RENDERIZAR CARTELAS COM AUDITORIA ANTI-TRAPAÇA
+        // ============================================
+        function renderizarCartelas(participantes) {
+            const grid = document.getElementById('alunosGrid');
+            let html = '';
+
+            const sorted = Object.entries(participantes).sort((a, b) => {
+                const numA = parseInt(a[0].replace('aluno_', ''));
+                const numB = parseInt(b[0].replace('aluno_', ''));
+                return numA - numB;
+            });
+
+            const quaseVencedores = identificarQuaseVencedores(participantes);
+
+            for (const [alunoId, data] of sorted) {
+                const isWinner = data.venceu;
+                const isOnline = alunosConectados.has(alunoId);
+                const temNome = data.nome && data.nome.trim() !== '';
+                const nomeExibicao = temNome ? data.nome : `💺 Vaga ${alunoId.replace('aluno_', '')}`;
+                const isOcupada = temNome;
+                const isQuase = quaseVencedores.includes(alunoId) && !isWinner;
+
+                // --- AUDITORIA DE SEGURANÇA EM TEMPO REAL (ANTI-TRAPAÇA) ---
+                let possuiMarcacaoInvalida = false;
+                let numerosInvalidos = [];
+                const cartela = data.cartela;
+                const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+
+                if (cartela) {
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            const val = cartela[r][c];
+                            if (val !== 'B' && marcacoes[r][c] && !numerosChamados.includes(val)) {
+                                possuiMarcacaoInvalida = true;
+                                if (!numerosInvalidos.includes(val)) {
+                                    numerosInvalidos.push(val);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const realmenteGanhou = cartela ? checkBingo(marcacoes, cartela, numerosChamados) : false;
+                const falsoBingo = isWinner && !realmenteGanhou;
+
+                let badgeClass = 'empty-badge';
+                let badgeText = '💺 Disponível';
+
+                if (falsoBingo) {
+                    badgeClass = 'falso-badge';
+                    badgeText = '🚫 FALSO BINGO!';
+                } else if (possuiMarcacaoInvalida) {
+                    badgeClass = 'cheat-badge';
+                    badgeText = `⚠️ Trapaça (${numerosInvalidos.join(',')})`;
+                } else if (isWinner) {
+                    badgeClass = 'winner-badge';
+                    badgeText = '🏆 BINGO!';
+                } else if (isQuase) {
+                    badgeClass = 'pseudo-badge';
+                    badgeText = '🔮 Quase lá!';
+                } else if (isOnline && isOcupada) {
+                    badgeClass = 'online-badge';
+                    badgeText = '🟢 Online';
+                } else if (isOcupada) {
+                    badgeClass = 'offline-badge';
+                    badgeText = '⚫ Offline';
+                }
+
+                let cardClass = 'cartela-card';
+                if (falsoBingo) cardClass += ' offline' // visually dim fraudulent cards slightly or style differently
+                else if (isWinner) cardClass += ' winner';
+                else if (isQuase) cardClass += ' pseudo-winner';
+                else if (!isOnline && isOcupada) cardClass += ' offline';
+
+                // Se houver trapaça, aplicamos uma borda de aviso avermelhada
+                let cardStyle = '';
+                if (falsoBingo) {
+                    cardStyle = 'style="border: 2px solid #dc3545; box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);"';
+                } else if (possuiMarcacaoInvalida) {
+                    cardStyle = 'style="border: 2px dashed #ff6b6b; box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);"';
+                }
+
+                html += `<div class="${cardClass}" ${cardStyle}>`;
+                html += `<div class="cartela-header">`;
+                html += `<span>🧑‍🎓 ${nomeExibicao}</span>`;
+                html += `<span class="badge ${badgeClass}">${badgeText}</span>`;
+                html += `</div>`;
+                html += `<div class="card-letters">`;
+                ['B', 'I', 'N', 'G', 'O'].forEach(letra => {
+                    html += `<div class="card-letter">${letra}</div>`;
+                });
+                html += `</div>`;
+                html += `<div class="cartela-numeros">`;
+
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const val = cartela ? cartela[r][c] : '';
+                        const isMarked = marcacoes[r][c];
+                        const isCenter = (r === 2 && c === 2);
+                        const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
+                        
+                        let cls = 'num';
+                        const isIlegal = val !== 'B' && isMarked && !isSorteado;
+
+                        if (isIlegal) {
+                            cls += ' cheat-marked';
+                        } else {
+                            if (isMarked) cls += ' marked';
+                            if (isCenter) cls += ' free';
+                            if (isSorteado && !isMarked && !isCenter) cls += ' sorteado';
+                        }
+
+                        const displayVal = isCenter ? 'B' : val;
+                        html += `<div class="${cls}" title="${isIlegal ? 'Número marcado ilegalmente pelo console/devtools!' : ''}">${displayVal}</div>`;
+                    }
+                }
+                html += `</div></div>`;
+            }
+
+            grid.innerHTML = html;
+            document.getElementById('onlineCount').textContent = `🟢 Online: ${alunosConectados.size}`;
+        }
+
+        // ============================================
+        // IDENTIFICAR QUASE-VENCEDORES COM AUDITORIA INTEGRADA (CARTELA CHEIA)
+        // ============================================
+        function identificarQuaseVencedores(participantes) {
+            const quase = [];
+            const sorteados = numerosChamados || [];
+
+            for (const [alunoId, data] of Object.entries(participantes)) {
+                if (data.venceu) continue;
+                const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                const cartela = data.cartela;
+
+                if (!cartela) continue;
+
+                let validMarks = 0;
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const val = cartela[r][c];
+                        if (val === 'B') {
+                            validMarks++;
+                            continue;
+                        }
+                        if (marcacoes[r][c] && sorteados.includes(val)) {
+                            validMarks++;
+                        }
+                    }
+                }
+
+                // A cartela tem 25 células (24 números + 1 'B' central).
+                // Se o aluno tem 23 ou 24 marcações válidas (ou seja, falta apenas 1 ou 2 números legítimos para fechar a cartela inteira), ele está "Quase lá".
+                if (validMarks >= 23 && validMarks < 25) {
+                    quase.push(alunoId);
+                }
+            }
+            return quase;
+        }
+
+        // ============================================
+        // SORTEAR NÚMERO
+        // ============================================
+        function sortearNumero() {
+            if (!sessaoAtual) return;
+
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            sessaoRef.once('value', (snapshot) => {
+                const sessao = snapshot.val();
+
+                if (sessao.status === 'finalizada') {
+                    showToast('⚠️ Jogo já finalizado!', 'error');
+                    return;
+                }
+
+                if (sessao.status === 'aguardando') {
+                    sessaoRef.update({ status: 'ativa' });
+                    showToast('🎯 Jogo iniciado! Boa sorte a todos!', 'info');
+                }
+
+                const numerosSorteados = sessao.numerosSorteados || [];
+
+                if (numerosSorteados.length >= 75) {
+                    showToast('⚠️ Todos os números já foram sorteados!', 'error');
+                    return;
+                }
+
+                const disponiveis = [];
+                for (let i = 1; i <= 75; i++) {
+                    if (!numerosSorteados.includes(i)) {
+                        disponiveis.push(i);
+                    }
+                }
+
+                const randomIdx = Math.floor(Math.random() * disponiveis.length);
+                const numero = disponiveis[randomIdx];
+                const letra = getLetterForNumber(numero);
+
+                numerosSorteados.push(numero);
+                sessaoRef.update({
+                    numerosSorteados: numerosSorteados,
+                    ultimoNumero: numero,
+                    ultimaLetra: letra
+                });
+
+                showToast(`🎯 ${letra}${numero}`, 'info');
+
+                document.getElementById('ultimoSorteio').innerHTML =
+                    `🎯 Último: ${letra}${numero}`;
+                document.getElementById('totalSorteados').textContent =
+                    `${numerosSorteados.length}/75 sorteados`;
+            });
+        }
+
+        // ============================================
+        // RESETAR JOGO
+        // ============================================
+        async function resetarJogo() {
+            if (!sessaoAtual) return;
+
+            try {
+                await mostrarModalInput({
+                    icon: '🔄',
+                    titulo: 'Nova Rodada',
+                    subtitulo: '⚠️ Nova Rodada vai gerar <strong>NOVAS cartelas</strong> e limpar <strong>TODOS os números sorteados</strong>.<br><br>Os alunos e nomes serão <strong>MANTIDOS</strong>.',
+                    textoBotao: '🔄 Nova Rodada',
+                    corBotao: 'warning',
+                    campos: [{
+                        name: 'confirmar',
+                        label: 'Digite "NOVA" para confirmar:',
+                        tipo: 'text',
+                        placeholder: 'Digite NOVA',
+                        required: true
+                    }],
+                    onConfirm: (valores) => {
+                        if (valores.confirmar.toUpperCase() !== 'NOVA') {
+                            document.getElementById('inputErro').textContent = '❌ Digite exatamente "NOVA" para confirmar!';
+                            document.getElementById('inputErro').classList.add('active');
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+            } catch (e) {
+                return;
+            }
+
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+
+            sessaoRef.once('value', (snapshot) => {
+                const sessao = snapshot.val();
+                if (!sessao) {
+                    showToast('❌ Sessão não encontrada!', 'error');
+                    return;
+                }
+
+                const participantes = sessao.participantes || {};
+                const totalAlunos = Object.keys(participantes).length;
+
+                const novasParticipantes = {};
+
+                for (const [alunoId, data] of Object.entries(participantes)) {
+                    const temNome = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
+                    const nome = temNome ? data.nome : '';
+                    
+                    const cartela = gerarCartelaUnica(novasParticipantes);
+                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                    marcacoes[2][2] = true;
+                    
+                    novasParticipantes[alunoId] = {
+                        nome: nome,
+                        cartela: cartela,
+                        marcacoes: marcacoes,
+                        venceu: false
+                    };
+                }
+
+                const novoResetToken = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+
+                const updates = {
+                    participantes: novasParticipantes,
+                    numerosSorteados: [],
+                    vencedores: [],
+                    ultimoNumero: null,
+                    ultimaLetra: null,
+                    status: 'aguardando',
+                    resetToken: novoResetToken,
+                    totalAlunos: totalAlunos
+                };
+
+                sessaoRef.update(updates).then(() => {
+                    numerosChamados = [];
+
+                    document.getElementById('ultimoSorteio').innerHTML = '🎯 Último: ---';
+                    document.getElementById('vencedores').innerHTML = '🏆 Vencedores: aguardando...';
+                    document.getElementById('numerosChamados').innerHTML =
+                        `<span class="empty-state">nenhum número chamado</span>`;
+                    document.getElementById('totalSorteados').textContent = '0/75 sorteados';
+                    document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
+                    document.getElementById('totalAlunos').textContent = totalAlunos;
+
+                    renderizarCartelas(novasParticipantes);
+                    atualizarOcupacao(novasParticipantes);
+
+                    showToast(`🔄 Nova rodada! ${totalAlunos} alunos mantidos, novas cartelas geradas com segurança.`, 'info');
+                });
+            });
+        }
+
+        // ============================================
+        // BENEFICIAR ALUNO
+        // ============================================
+        // ============================================
+        // BENEFICIAR ALUNO (CORRIGIR "COMER BARRIGA")
+        // ============================================
+        async function beneficiarAluno() {
+            if (!sessaoAtual) return;
+
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            const snapshot = await sessaoRef.once('value');
+            const sessao = snapshot.val();
+            const participantes = sessao.participantes || {};
+            const sorteados = sessao.numerosSorteados || [];
+
+            const esquecidos = [];
+            for (const [alunoId, data] of Object.entries(participantes)) {
+                if (data.venceu) continue;
+                const cartela = data.cartela;
+                const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                if (!cartela) continue;
+
+                // Identificar quais números da cartela deste aluno já foram sorteados, mas o aluno esqueceu de marcar
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const val = cartela[r][c];
+                        if (val === 'B') continue;
+                        
+                        // Se o número foi sorteado, mas o aluno NÃO marcou, ele "comeu barriga"
+                        if (sorteados.includes(val) && !marcacoes[r][c]) {
+                            esquecidos.push({
+                                alunoId,
+                                nome: data.nome || alunoId,
+                                numero: val,
+                                r,
+                                c
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (esquecidos.length === 0) {
+                showToast('❌ Nenhum aluno "comeu barriga" (todos marcaram todos os números sorteados até agora!).', 'error');
+                return;
+            }
+
+            const opcoes = esquecidos.map((item, idx) => ({
+                valor: idx.toString(),
+                texto: `${item.nome} - Esqueceu de marcar: ${item.numero}`
+            }));
+
+            const escolha = await inputSelecao(
+                '🔧 Beneficiar Aluno (Comer Barriga)',
+                'Selecione o aluno que deseja beneficiar. O sistema permitirá que ele marque retroativamente o número sorteado que ele esqueceu de anotar:',
+                opcoes,
+                '🎯 Permitir Marcar'
+            );
+
+            if (escolha === null) return;
+            const idx = parseInt(escolha);
+            const beneficiado = esquecidos[idx];
+
+            const alunoRef = db.ref(`bingo/sessoes/${sessaoAtual}/participantes/${beneficiado.alunoId}`);
+            alunoRef.transaction((alunoData) => {
+                if (!alunoData) return alunoData;
+                const marcacoes = alunoData.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                
+                // Marcar o número esquecido
+                marcacoes[beneficiado.r][beneficiado.c] = true;
+                alunoData.marcacoes = marcacoes;
+
+                // Verificar se com essa marcação ele ganhou
+                if (checkBingo(marcacoes, alunoData.cartela, sorteados)) {
+                    alunoData.venceu = true;
+                }
+                return alunoData;
+            }, (err, committed, snap) => {
+                if (err || !committed) {
+                    showToast('❌ Erro ao beneficiar o aluno.', 'error');
+                    return;
+                }
+
+                const alunoData = snap.val();
+                if (alunoData && alunoData.venceu) {
+                    // Adicionar à lista de vencedores da sessão
+                    const vencedoresAtuais = sessao.vencedores || [];
+                    if (!vencedoresAtuais.includes(beneficiado.alunoId)) {
+                        vencedoresAtuais.push(beneficiado.alunoId);
+                        db.ref(`bingo/sessoes/${sessaoAtual}/vencedores`).set(vencedoresAtuais);
+                    }
+                    showToast(`🏆 ${beneficiado.nome} recuperou o número ${beneficiado.numero} e venceu o BINGO! 🎉`, 'winner');
+                } else {
+                    showToast(`📌 ${beneficiado.nome} recuperou o número ${beneficiado.numero} com sucesso!`, 'info');
+                }
+            });
+        }
+
+        // ============================================
+        // FINALIZAR JOGO
+        // ============================================
+        async function finalizarJogo() {
+            if (!sessaoAtual) return;
+
+            try {
+                await mostrarModalInput({
+                    icon: '⏹️',
+                    titulo: 'Finalizar Jogo',
+                    subtitulo: 'Deseja realmente <strong>finalizar</strong> esta sessão?<br><br>Os alunos não poderão mais jogar.',
+                    textoBotao: '⏹️ Finalizar',
+                    corBotao: 'danger',
+                    campos: [{
+                        name: 'confirmar',
+                        label: 'Digite "FINALIZAR" para confirmar:',
+                        type: 'text',
+                        placeholder: 'Digite FINALIZAR',
+                        required: true
+                    }],
+                    onConfirm: (valores) => {
+                        if (valores.confirmar.toUpperCase() !== 'FINALIZAR') {
+                            document.getElementById('inputErro').textContent = '❌ Digite exatamente "FINALIZAR" para confirmar!';
+                            document.getElementById('inputErro').classList.add('active');
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+            } catch (e) {
+                return;
+            }
+
+            await db.ref(`bingo/sessoes/${sessaoAtual}`).update({
+                status: 'finalizada'
+            });
+
+            document.getElementById('statusSessao').textContent = '🔴 Finalizada';
+            showToast('🔴 Sessão finalizada!');
+        }
+
+        // ============================================
+        // ATUALIZAR OCUPAÇÃO
+        // ============================================
+        function atualizarOcupacao(participantes) {
+            let ocupadas = 0;
+            let total = 0;
+            for (const [id, data] of Object.entries(participantes)) {
+                total++;
+                if (data.nome && data.nome.trim() !== '') {
+                    ocupadas++;
+                }
+            }
+            document.getElementById('ocupacaoVagas').textContent = `${ocupadas}/${total} ocupadas`;
+        }
+
+        // ============================================
+        // COPIAR LINK
+        // ============================================
+        function copiarLink() {
+            const linkInput = document.getElementById('linkAluno');
+            linkInput.select();
+            document.execCommand('copy');
+            showToast('📋 Link copiado!');
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const salaSelect = document.getElementById('salaSelect');
+            salaSelect.addEventListener('change', verificarSalaExistente);
+
+            // Verificar automaticamente se a sala selecionada por padrão já possui uma sessão ativa no banco de dados
+            verificarSalaExistente();
+
+            configurarDetectorSaida();
+
+            console.log('🎲 BINGO - Painel do Professor carregado!');
+            console.log('🔒 Auditoria de Segurança Anti-Cheat Ativada e em tempo real.');
+        });
+    </script>
+</body>
+</html>

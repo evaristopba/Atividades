@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BINGO - Administração</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2f3a, #0d1f26);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #f2e9d0;
+            font-size: 2rem;
+        }
+
+        .header .subtitle {
+            color: #8aaab5;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .header .warning {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card h3 {
+            color: #d8d2b0;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            padding-left: 12px;
+            border-left: 4px solid #d4a373;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 .badge {
+            font-size: 0.6rem;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .badge-bingo {
+            background: #d4a373;
+            color: #1a2f3a;
+        }
+
+        .badge-stop {
+            background: #5a8f6c;
+            color: #fff;
+        }
+
+        .badge-all {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .card .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .card .info-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #d4e3e8;
+        }
+
+        .card .info-item .label {
+            color: #8aaab5;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card .info-item .value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f2e9d0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            margin: 4px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+        .btn-primary:hover {
+            background: #4d7b8a;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #1a2f3a;
+        }
+        .btn-warning:hover {
+            background: #ffd93d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #e74c5c;
+        }
+
+        .btn-success {
+            background: #5a8f6c;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #6a9f7c;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: #7c858d;
+        }
+
+        .btn-purple {
+            background: #6f42c1;
+            color: #fff;
+        }
+        .btn-purple:hover {
+            background: #7f52d1;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .btn-group .divider {
+            width: 2px;
+            background: rgba(255,255,255,0.1);
+            margin: 4px 8px;
+            border-radius: 2px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.08);
+            color: #8aaab5;
+            border-radius: 18px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.18);
+            color: #f2e9d0;
+        }
+
+        .empty-state {
+            color: #6a8a95;
+            font-style: italic;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: #1a2f3a;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-box h3 {
+            color: #f2e9d0;
+            margin-bottom: 10px;
+        }
+
+        .modal-box p {
+            color: #d4e3e8;
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+
+        .modal-box .modal-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .modal-box input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #3d6b7a;
+            background: #0d1f26;
+            color: #f2e9d0;
+            font-size: 1rem;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        .modal-box input:focus {
+            border-color: #d4a373;
+        }
+
+        .modal-box .btn-group-modal {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .log-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #8aaab5;
+            margin-top: 10px;
+        }
+
+        .log-area .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .log-area .log-entry .time {
+            color: #6a8a95;
+        }
+
+        .log-area .log-entry .action {
+            color: #d4e3e8;
+        }
+
+        .log-area .log-entry .success {
+            color: #5a8f6c;
+        }
+
+        .log-area .log-entry .error {
+            color: #dc3545;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            color: #6a8a95;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .section-divider::before {
+            margin-right: 15px;
+        }
+
+        .section-divider::after {
+            margin-left: 15px;
+        }
+
+        .sessoes-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .sessoes-list .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .sessoes-list .item .nome {
+            color: #d4e3e8;
+        }
+
+        .sessoes-list .item .info {
+            color: #8aaab5;
+            font-size: 0.85rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: #d4a373;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 2px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .status-dot.aguardando { background: #ffc107; }
+        .status-dot.ativa { background: #5a8f6c; }
+        .status-dot.finalizada { background: #6c757d; }
+
+        .btn-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            display: block;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div style="text-align: left;">
+                <button class="back-btn" onclick="window.location.href='BProfessor.html'">← Voltar</button>
+            </div>
+            <h1>🗑️ Administração do BINGO</h1>
+            <p class="subtitle">Gerenciamento e manutenção do banco de dados</p>
+            <p class="warning">⚠️ Operações irreversíveis! Use com cuidado.</p>
+        </div>
+
+        <!-- CARD: ESTATÍSTICAS -->
+        <div class="card">
+            <h3>📊 Estatísticas do Banco</h3>
+            <div id="stats">
+                <p style="color: #6a8a95;">Carregando...</p>
+            </div>
+        </div>
+
+        <!-- CARD: BACKUP -->
+        <div class="card">
+            <h3>💾 Backup e Restauração</h3>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="exportarDados()">📥 Exportar Backup</button>
+                <button class="btn btn-primary" onclick="importarDados()">📤 Importar Backup</button>
+            </div>
+        </div>
+
+        <!-- CARD: LIMPEZA POR JOGO -->
+        <div class="card">
+            <h3>🧹 Limpeza Seletiva</h3>
+            <div class="btn-group">
+                <button class="btn btn-warning" onclick="limparBingo()">
+                    🧹 Limpar BINGO
+                    <span class="btn-label">Apenas dados do BINGO</span>
+                </button>
+                <button class="btn btn-purple" onclick="limparSTOP()">
+                    🧹 Limpar STOP
+                    <span class="btn-label">Apenas dados do STOP</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- CARD: LIMPEZA TOTAL -->
+        <div class="card" style="border-color: rgba(220, 53, 69, 0.3);">
+            <h3>💥 Limpeza Total <span class="badge badge-all">EXTREMO</span></h3>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="limparTudo()">
+                    💥 Limpar TUDO
+                    <span class="btn-label">BINGO + STOP + TODOS os dados</span>
+                </button>
+            </div>
+            <p style="color: #dc3545; font-size: 0.8rem; margin-top: 8px;">
+                ⚠️ Atenção: Esta ação é IRREVERSÍVEL e apaga TODO o banco de dados!
+            </p>
+        </div>
+
+        <!-- CARD: RECRIAR ESTRUTURA -->
+        <div class="card" style="border-color: rgba(90, 143, 108, 0.3);">
+            <h3>🔄 Recriar Estrutura Padrão</h3>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="recriarEstrutura()">
+                    🔄 Recriar Salas do STOP
+                    <span class="btn-label">Recria todas as salas padrão</span>
+                </button>
+            </div>
+            <p style="color: #8aaab5; font-size: 0.8rem; margin-top: 8px;">
+                ⚡ Cria todas as salas das escolas Capitão e Thereza com status "AGUARDANDO"
+            </p>
+        </div>
+
+        <!-- CARD: SESSÕES ATIVAS -->
+        <div class="card">
+            <h3>📋 Sessões Ativas</h3>
+            <div id="sessoesList">
+                <p style="color: #6a8a95;">Carregando...</p>
+            </div>
+        </div>
+
+        <!-- CARD: LOG -->
+        <div class="card">
+            <h3>📜 Log de Atividades</h3>
+            <div id="logArea" class="log-area">
+                <div class="log-entry">
+                    <span class="time">[---]</span>
+                    <span class="action">Aguardando ações...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE CONFIRMAÇÃO -->
+        <div id="modal" class="modal-overlay">
+            <div class="modal-box">
+                <span class="modal-icon" id="modalIcon">⚠️</span>
+                <h3 id="modalTitle">Confirmação</h3>
+                <p id="modalText">Deseja continuar?</p>
+                <input type="password" id="modalPassword" placeholder="🔐 Digite a data de hoje ddmmaaaa">
+                <div id="modalInfo" style="color: #8aaab5; font-size: 0.8rem; margin: 5px 0;"></div>
+                <div class="btn-group-modal">
+                    <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                    <button class="btn btn-danger" id="modalConfirmBtn" onclick="confirmarAcao()">Confirmar</button>
+                </div>
+                <div id="modalError" style="color: #dc3545; font-size: 0.85rem; margin-top: 8px; display: none;">
+                    ❌ Senha incorreta! Digite a data de hoje (DDMMAAAA) como senha.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9eapu_h3mbN35TOVc2kbv86J7OFLRk4k",
+            authDomain: "meu-super-jogo-stop.firebaseapp.com",
+            databaseURL: "https://meu-super-jogo-stop-default-rtdb.firebaseio.com",
+            projectId: "meu-super-jogo-stop",
+            storageBucket: "meu-super-jogo-stop.firebasestorage.app",
+            messagingSenderId: "958593186721",
+            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
+            measurementId: "G-WGRJWRVBEN"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ============================================
+        // LISTA DE SALAS PADRÃO
+        // ============================================
+        const SALAS_PADRAO = {
+            // Escola Capitão
+            '1a-cp': { displayName: 'Escola Capitão - 1º ano A - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '1b-cp': { displayName: 'Escola Capitão - 1º ano B - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '1c-cp': { displayName: 'Escola Capitão - 1º ano C - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '2a-cp': { displayName: 'Escola Capitão - 2º ano A - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '2b-cp': { displayName: 'Escola Capitão - 2º ano B - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '2c-cp': { displayName: 'Escola Capitão - 2º ano C - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '3a-cp': { displayName: 'Escola Capitão - 3º ano A - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '3b-cp': { displayName: 'Escola Capitão - 3º ano B - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '3c-cp': { displayName: 'Escola Capitão - 3º ano C - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '4a-cp': { displayName: 'Escola Capitão - 4º ano A - Manhã', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '4b-cp': { displayName: 'Escola Capitão - 4º ano B - Tarde', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '5a-cp': { displayName: 'Escola Capitão - 5º ano A - Manhã', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '5b-cp': { displayName: 'Escola Capitão - 5º ano B - Manhã', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '5c-cp': { displayName: 'Escola Capitão - 5º ano C - Tarde', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            // Escola Thereza
+            '1a-th': { displayName: 'Escola Thereza - 1º ano A - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '1b-th': { displayName: 'Escola Thereza - 1º ano B - Tarde', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '2a-th': { displayName: 'Escola Thereza - 2º ano A - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '2b-th': { displayName: 'Escola Thereza - 2º ano B - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '3a-th': { displayName: 'Escola Thereza - 3º ano A - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '3b-th': { displayName: 'Escola Thereza - 3º ano B - Manhã', mode: 'simples', status: 'AGUARDANDO', letter: '?' },
+            '4a-th': { displayName: 'Escola Thereza - 4º ano A - Manhã', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '4b-th': { displayName: 'Escola Thereza - 4º ano B - Manhã', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '4c-th': { displayName: 'Escola Thereza - 4º ano C - Tarde', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '5a-th': { displayName: 'Escola Thereza - 5º ano A - Manhã', mode: 'avancado', status: 'AGUARDANDO', letter: '?' },
+            '5b-th': { displayName: 'Escola Thereza - 5º ano B - Tarde', mode: 'avancado', status: 'AGUARDANDO', letter: '?' }
+        };
+
+        // ============================================
+        // ESTADO
+        // ============================================
+        let acaoPendente = null;
+        let logs = [];
+
+        // ============================================
+        // LOGS
+        // ============================================
+        function adicionarLog(mensagem, tipo = 'action') {
+            const time = new Date().toLocaleTimeString();
+            logs.push({ time, mensagem, tipo });
+            if (logs.length > 50) logs.shift();
+            atualizarLogs();
+        }
+
+        function atualizarLogs() {
+            const area = document.getElementById('logArea');
+            let html = '';
+            logs.slice().reverse().forEach(log => {
+                const cls = log.tipo === 'success' ? 'success' : 
+                           log.tipo === 'error' ? 'error' : 'action';
+                html += `<div class="log-entry">
+                    <span class="time">[${log.time}]</span>
+                    <span class="${cls}">${log.mensagem}</span>
+                </div>`;
+            });
+            area.innerHTML = html;
+        }
+
+        // ============================================
+        // MODAL
+        // ============================================
+        function abrirModal(icone, titulo, texto, acao, info = '') {
+            document.getElementById('modalIcon').textContent = icone;
+            document.getElementById('modalTitle').textContent = titulo;
+            document.getElementById('modalText').textContent = texto;
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('modalPassword').style.display = 'block';
+            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('modalInfo').textContent = info;
+            acaoPendente = acao;
+            document.getElementById('modal').style.display = 'flex';
+            setTimeout(() => {
+                const pwdInput = document.getElementById('modalPassword');
+                if (pwdInput) {
+                    pwdInput.focus();
+                    pwdInput.select();
+                }
+            }, 100);
+        }
+
+        function fecharModal() {
+            document.getElementById('modal').style.display = 'none';
+            acaoPendente = null;
+        }
+
+        function confirmarAcao() {
+            const senha = document.getElementById('modalPassword').value;
+            
+            if (!validarSenha(senha)) {
+                document.getElementById('modalError').style.display = 'block';
+                document.getElementById('modalPassword').value = '';
+                setTimeout(() => {
+                    const pwdInput = document.getElementById('modalPassword');
+                    if (pwdInput) {
+                        pwdInput.focus();
+                    }
+                }, 100);
+                adicionarLog('❌ Tentativa de senha incorreta', 'error');
+                return;
+            }
+
+            document.getElementById('modal').style.display = 'none';
+            
+            if (acaoPendente) {
+                acaoPendente();
+                acaoPendente = null;
+            }
+        }
+
+        function validarSenha(senha) {
+            if (!/^\d{8}$/.test(senha)) return false;
+            
+            const dia = parseInt(senha.substring(0, 2));
+            const mes = parseInt(senha.substring(2, 4));
+            const ano = parseInt(senha.substring(4, 8));
+            
+            if (dia < 1 || dia > 31) return false;
+            if (mes < 1 || mes > 12) return false;
+            if (ano < 1900 || ano > 2099) return false;
+            
+            const data = new Date(ano, mes - 1, dia);
+            if (data.getDate() !== dia || 
+                data.getMonth() !== mes - 1 || 
+                data.getFullYear() !== ano) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        // ============================================
+        // ESTATÍSTICAS
+        // ============================================
+        function carregarStats() {
+            const bingoRef = db.ref('bingo');
+            const sessoesRef = db.ref('bingo/sessoes');
+            const salasRef = db.ref('salas');
+            
+            let bingoCount = 0;
+            let stopCount = 0;
+            
+            bingoRef.once('value', (snapshot) => {
+                const dados = snapshot.val();
+                bingoCount = dados ? Object.keys(dados).length : 0;
+                
+                salasRef.once('value', (salasSnapshot) => {
+                    const salas = salasSnapshot.val();
+                    stopCount = salas ? Object.keys(salas).length : 0;
+                    
+                    sessoesRef.once('value', (sessSnapshot) => {
+                        const sessoes = sessSnapshot.val();
+                        const sessCount = sessoes ? Object.keys(sessoes).length : 0;
+                        
+                        let totalAlunos = 0;
+                        let ativas = 0;
+                        let finalizadas = 0;
+                        
+                        if (sessoes) {
+                            for (const [cod, data] of Object.entries(sessoes)) {
+                                if (data.participantes) {
+                                    totalAlunos += Object.keys(data.participantes).length;
+                                }
+                                if (data.status === 'ativa') ativas++;
+                                if (data.status === 'finalizada') finalizadas++;
+                            }
+                        }
+                        
+                        document.getElementById('stats').innerHTML = `
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="label">📌 BINGO</div>
+                                    <div class="value">${sessCount} sessões</div>
+                                    <div style="font-size:0.7rem;color:#8aaab5;">${totalAlunos} alunos</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">📌 STOP</div>
+                                    <div class="value">${stopCount} salas</div>
+                                    <div style="font-size:0.7rem;color:#8aaab5;">${ativas} ativas | ${finalizadas} finalizadas</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">📌 Total</div>
+                                    <div class="value">${sessCount + stopCount}</div>
+                                    <div style="font-size:0.7rem;color:#8aaab5;">${new Date().toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Listar sessões
+                        const listDiv = document.getElementById('sessoesList');
+                        if (sessCount === 0 && stopCount === 0) {
+                            listDiv.innerHTML = `<p class="empty-state">Nenhuma sessão ou sala encontrada.</p>`;
+                        } else {
+                            let html = '<div class="sessoes-list">';
+                            
+                            // Mostrar salas do STOP
+                            if (salas) {
+                                for (const [cod, data] of Object.entries(salas)) {
+                                    const statusMap = {
+                                        'AGUARDANDO': '⏳',
+                                        'JOGANDO': '🟢',
+                                        'PARADO': '🔴'
+                                    };
+                                    html += `
+                                        <div class="item">
+                                            <span class="nome">📘 ${data.displayName || cod}</span>
+                                            <span class="info">${statusMap[data.status] || '⏳'} STOP</span>
+                                        </div>
+                                    `;
+                                }
+                            }
+                            
+                            // Mostrar sessões do BINGO
+                            if (sessoes) {
+                                for (const [cod, data] of Object.entries(sessoes)) {
+                                    const statusMap = {
+                                        'aguardando': '⏳',
+                                        'ativa': '🟢',
+                                        'finalizada': '🔴'
+                                    };
+                                    const alunos = data.participantes ? Object.keys(data.participantes).length : 0;
+                                    html += `
+                                        <div class="item">
+                                            <span class="nome">🎲 ${data.salaNome || cod}</span>
+                                            <span class="info">${statusMap[data.status] || '⏳'} ${alunos} alunos</span>
+                                        </div>
+                                    `;
+                                }
+                            }
+                            
+                            html += '</div>';
+                            listDiv.innerHTML = html;
+                        }
+                        
+                        adicionarLog('📊 Estatísticas atualizadas', 'action');
+                    });
+                });
+            });
+        }
+
+        // ============================================
+        // EXPORTAR DADOS
+        // ============================================
+        function exportarDados() {
+            adicionarLog('📥 Iniciando exportação...', 'action');
+            
+            db.ref().once('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) {
+                    alert('⚠️ Não há dados para exportar!');
+                    adicionarLog('⚠️ Tentativa de exportar dados vazios', 'error');
+                    return;
+                }
+                
+                const json = JSON.stringify(dados, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const dataStr = new Date().toISOString().split('T')[0];
+                a.download = `backup_completo_${dataStr}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                adicionarLog(`✅ Backup completo exportado (${new Blob([json]).size} bytes)`, 'success');
+            }).catch(err => {
+                adicionarLog(`❌ Erro na exportação: ${err.message}`, 'error');
+            });
+        }
+
+        // ============================================
+        // IMPORTAR DADOS
+        // ============================================
+        function importarDados() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const dados = JSON.parse(event.target.result);
+                        if (!dados) {
+                            alert('❌ Arquivo inválido!');
+                            return;
+                        }
+                        
+                        const total = Object.keys(dados).length;
+                        abrirModal(
+                            '📤',
+                            'Importar Dados',
+                            `Deseja importar ${total} registros? Isso vai substituir todos os dados atuais!`,
+                            () => {
+                                db.ref().set(dados)
+                                    .then(() => {
+                                        adicionarLog(`✅ Dados importados (${total} registros)`, 'success');
+                                        alert('✅ Dados importados com sucesso!');
+                                        carregarStats();
+                                    })
+                                    .catch(err => {
+                                        adicionarLog(`❌ Erro na importação: ${err.message}`, 'error');
+                                        alert('❌ Erro na importação: ' + err.message);
+                                    });
+                            }
+                        );
+                    } catch (err) {
+                        alert('❌ Arquivo inválido! Verifique o formato JSON.');
+                        adicionarLog('❌ Tentativa de importar arquivo inválido', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ============================================
+        // LIMPAR BINGO
+        // ============================================
+        function limparBingo() {
+            abrirModal(
+                '🧹',
+                'Limpar BINGO',
+                '⚠️ ATENÇÃO! Isso vai apagar TODAS as sessões do BINGO.\n\nOs dados do STOP não serão afetados.\n\nTem certeza?',
+                () => {
+                    adicionarLog('🧹 Iniciando limpeza do BINGO...', 'action');
+                    
+                    db.ref('bingo').remove()
+                        .then(() => {
+                            adicionarLog('✅ BINGO limpo com sucesso!', 'success');
+                            alert('✅ BINGO limpo com sucesso!');
+                            carregarStats();
+                        })
+                        .catch(err => {
+                            adicionarLog(`❌ Erro ao limpar BINGO: ${err.message}`, 'error');
+                            alert('❌ Erro ao limpar BINGO: ' + err.message);
+                        });
+                },
+                'Apenas os dados do BINGO serão removidos.'
+            );
+        }
+
+        // ============================================
+        // LIMPAR STOP
+        // ============================================
+        function limparSTOP() {
+            abrirModal(
+                '🧹',
+                'Limpar STOP',
+                '⚠️ ATENÇÃO! Isso vai apagar TODAS as salas do STOP.\n\nOs dados do BINGO não serão afetados.\n\nTem certeza?',
+                () => {
+                    adicionarLog('🧹 Iniciando limpeza do STOP...', 'action');
+                    
+                    db.ref('salas').remove()
+                        .then(() => {
+                            adicionarLog('✅ STOP limpo com sucesso!', 'success');
+                            alert('✅ STOP limpo com sucesso!');
+                            carregarStats();
+                        })
+                        .catch(err => {
+                            adicionarLog(`❌ Erro ao limpar STOP: ${err.message}`, 'error');
+                            alert('❌ Erro ao limpar STOP: ' + err.message);
+                        });
+                },
+                'Apenas os dados do STOP serão removidos.'
+            );
+        }
+
+        // ============================================
+        // LIMPAR TUDO
+        // ============================================
+        function limparTudo() {
+            abrirModal(
+                '💥',
+                'Limpar TUDO',
+                '⚠️⚠️⚠️ ATENÇÃO EXTREMA!\n\nIsso vai apagar TODO o banco de dados:\n• Sessões do BINGO\n• Dados do STOP\n\nEssa ação é IRREVERSÍVEL!\n\nTem certeza absoluta?',
+                () => {
+                    adicionarLog('💥 Iniciando limpeza total...', 'action');
+                    
+                    db.ref().remove()
+                        .then(() => {
+                            adicionarLog('✅ Banco de dados limpo completamente!', 'success');
+                            alert('✅ Banco de dados limpo completamente!');
+                            carregarStats();
+                        })
+                        .catch(err => {
+                            adicionarLog(`❌ Erro na limpeza total: ${err.message}`, 'error');
+                            alert('❌ Erro na limpeza total: ' + err.message);
+                        });
+                },
+                'TODOS os dados serão removidos. Use com EXTREMA cautela!'
+            );
+        }
+
+        // ============================================
+        // RECRIAR ESTRUTURA PADRÃO
+        // ============================================
+        function recriarEstrutura() {
+            const totalSalas = Object.keys(SALAS_PADRAO).length;
+            
+            abrirModal(
+                '🔄',
+                'Recriar Salas do STOP',
+                `Isso vai recriar as ${totalSalas} salas padrão das escolas Capitão e Thereza.\n\nAs salas existentes serão substituídas.\n\nTem certeza?`,
+                () => {
+                    adicionarLog(`🔄 Iniciando recriação de ${totalSalas} salas...`, 'action');
+                    
+                    let criadas = 0;
+                    const promises = [];
+                    
+                    for (const [salaId, dados] of Object.entries(SALAS_PADRAO)) {
+                        promises.push(
+                            db.ref(`salas/${salaId}`).set(dados)
+                                .then(() => {
+                                    criadas++;
+                                    return true;
+                                })
+                                .catch(err => {
+                                    adicionarLog(`❌ Erro ao criar sala ${salaId}: ${err.message}`, 'error');
+                                    return false;
+                                })
+                        );
+                    }
+                    
+                    Promise.all(promises)
+                        .then(() => {
+                            adicionarLog(`✅ ${criadas}/${totalSalas} salas recriadas com sucesso!`, 'success');
+                            alert(`✅ ${criadas}/${totalSalas} salas recriadas com sucesso!`);
+                            carregarStats();
+                        })
+                        .catch(err => {
+                            adicionarLog(`❌ Erro na recriação: ${err.message}`, 'error');
+                            alert('❌ Erro na recriação: ' + err.message);
+                        });
+                },
+                `Serão recriadas ${totalSalas} salas com status "AGUARDANDO".`
+            );
+        }
+
+        // ============================================
+        // ENTER NO MODAL
+        // ============================================
+        document.getElementById('modalPassword').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                confirmarAcao();
+            }
+        });
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        carregarStats();
+        adicionarLog('🚀 Página de administração carregada', 'action');
+        
+        // Atualizar a cada 30 segundos
+        setInterval(carregarStats, 30000);
+    </script>
+</body>
+</html>
