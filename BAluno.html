@@ -212,6 +212,17 @@
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
         }
 
+        .cartela-grid .cell.bloqueado {
+            border-color: #dc3545;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+            animation: pulse-error 0.8s ease-in-out 3;
+        }
+
+        @keyframes pulse-error {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
         @keyframes glow-cell {
             from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
             to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
@@ -445,6 +456,7 @@
 
             <div class="instrucao">
                 💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!
+                <br><small style="color: #dc3545;">⚠️ Só pode marcar o número sorteado AGORA</small>
             </div>
 
             <div class="card-container">
@@ -459,7 +471,7 @@
                 <div class="cartela-grid" id="cartelaGrid"></div>
             </div>
 
-            <!-- ===== NÚMEROS CHAMADOS (CONTROLADO PELO PROFESSOR) ===== -->
+            <!-- ===== NÚMEROS CHAMADOS ===== -->
             <div class="numeros-chamados" id="numerosChamadosContainer">
                 <h4>📋 Números chamados:</h4>
                 <div class="chips" id="numerosChamadosAluno">
@@ -505,6 +517,8 @@
         let sessaoRef = null;
         let meuNome = '';
         let mostrarNumeros = true;
+        let salaNome = '';
+        let ultimoNumeroSorteado = null;
 
         // ============================================
         // TOAST
@@ -588,42 +602,76 @@
             return cartela;
         }
 
-        function checkBingo(marcacoes) {
+        function checkBingo(marcacoes, cartela, sorteados) {
+            // Linhas
             for (let r = 0; r < 5; r++) {
-                if (marcacoes[r].every(v => v === true)) return true;
-            }
-            for (let c = 0; c < 5; c++) {
-                let colFull = true;
-                for (let r = 0; r < 5; r++) {
-                    if (!marcacoes[r][c]) { colFull = false; break; }
+                let linhaCompleta = true;
+                for (let c = 0; c < 5; c++) {
+                    const val = cartela[r][c];
+                    if (val === 'B') continue;
+                    if (!sorteados.includes(val) || !marcacoes[r][c]) {
+                        linhaCompleta = false;
+                        break;
+                    }
                 }
-                if (colFull) return true;
+                if (linhaCompleta) return true;
             }
-            let diag1 = true, diag2 = true;
+
+            // Colunas
+            for (let c = 0; c < 5; c++) {
+                let colunaCompleta = true;
+                for (let r = 0; r < 5; r++) {
+                    const val = cartela[r][c];
+                    if (val === 'B') continue;
+                    if (!sorteados.includes(val) || !marcacoes[r][c]) {
+                        colunaCompleta = false;
+                        break;
+                    }
+                }
+                if (colunaCompleta) return true;
+            }
+
+            // Diagonal principal
+            let diag1Completa = true;
             for (let i = 0; i < 5; i++) {
-                if (!marcacoes[i][i]) diag1 = false;
-                if (!marcacoes[i][4 - i]) diag2 = false;
+                const val = cartela[i][i];
+                if (val === 'B') continue;
+                if (!sorteados.includes(val) || !marcacoes[i][i]) {
+                    diag1Completa = false;
+                    break;
+                }
             }
-            return diag1 || diag2;
+            if (diag1Completa) return true;
+
+            // Diagonal secundária
+            let diag2Completa = true;
+            for (let i = 0; i < 5; i++) {
+                const val = cartela[i][4 - i];
+                if (val === 'B') continue;
+                if (!sorteados.includes(val) || !marcacoes[i][4 - i]) {
+                    diag2Completa = false;
+                    break;
+                }
+            }
+            if (diag2Completa) return true;
+
+            return false;
         }
 
         // ============================================
-        // ⭐ ATRIBUIR CARTELA - PRIMEIRA DISPONÍVEL (CORRIGIDO)
+        // ATRIBUIR CARTELA
         // ============================================
         function atribuirCartela(sessao, nome) {
             const participantes = sessao.participantes || {};
             
-            // Verificar se o nome já existe
             for (const [id, data] of Object.entries(participantes)) {
                 if (data.nome === nome) {
                     return { id, data, jaExistia: true };
                 }
             }
 
-            // Procurar cartela disponível (NÃO ocupada)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
-                // ⭐ CORREÇÃO: Verifica se a cartela está realmente vazia
                 const isOcupada = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
                 if (!isOcupada) {
                     cartelasDisponiveis.push({ id, data });
@@ -634,7 +682,6 @@
                 return null;
             }
 
-            // ⭐ PEGAR A PRIMEIRA CARTELA DISPONÍVEL (índice 0)
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
@@ -642,14 +689,9 @@
         // ============================================
         // INICIALIZAR
         // ============================================
-        function inicializar(sala, nome, nomeSalaParam) {
+        function inicializar(sala, nome) {
             sessaoId = sala;
             meuNome = nome;
-
-            // Mostrar nome da sala
-            document.getElementById('salaNomeTexto').textContent = nomeSalaParam || 'Sala sem nome';
-            document.getElementById('salaCodigoTexto').textContent = sala;
-            document.getElementById('aguardandoSala').textContent = nomeSalaParam || 'Sala sem nome';
 
             const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
 
@@ -659,9 +701,6 @@
                         <span class="status-icon">❌</span>
                         <h2>Sala não encontrada!</h2>
                         <p>Verifique o link e tente novamente.</p>
-                        <p style="font-size: 0.85rem; color: #6a8a95; margin-top: 10px;">
-                            O professor precisa criar a sala primeiro.
-                        </p>
                     `;
                     return;
                 }
@@ -669,10 +708,13 @@
                 const sessao = snapshot.val();
                 const totalAlunos = sessao.totalAlunos || 0;
 
-                // ⭐ VERIFICAR SE O PROFESSOR QUER MOSTRAR NÚMEROS
-                mostrarNumeros = sessao.mostrarNumeros !== false; // Padrão: true
+                salaNome = sessao.salaNome || 'Sala sem nome';
+                document.getElementById('salaNomeTexto').textContent = salaNome;
+                document.getElementById('salaCodigoTexto').textContent = sala;
+                document.getElementById('aguardandoSala').textContent = salaNome;
 
-                // ⭐ ATRIBUIR PRIMEIRA CARTELA DISPONÍVEL
+                mostrarNumeros = sessao.mostrarNumeros !== false;
+
                 const resultado = atribuirCartela(sessao, nome);
 
                 if (!resultado) {
@@ -680,9 +722,6 @@
                         <span class="status-icon">🚫</span>
                         <h2>Sala lotada!</h2>
                         <p>Todas as ${totalAlunos} cartelas já estão ocupadas.</p>
-                        <p style="font-size: 0.9rem; color: #6a8a95; margin-top: 10px;">
-                            Fale com o professor para aumentar o número de alunos.
-                        </p>
                     `;
                     return;
                 }
@@ -701,7 +740,6 @@
                     
                     showToast(`👋 Bem-vindo de volta, ${nome}!`, 'info');
                 } else {
-                    // ⭐ GERAR CARTELA ÚNICA
                     const cartela = gerarCartelaUnica(sessao.participantes || {});
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                     marcacoes[2][2] = true;
@@ -733,6 +771,7 @@
 
                     if (sessao.numerosSorteados) {
                         numerosChamados = sessao.numerosSorteados;
+                        ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
                         atualizarNumerosChamados();
                         atualizarStatus();
                     }
@@ -756,12 +795,14 @@
                     const isMarked = minhasMarcacoes[r][c];
                     const isCenter = (r === 2 && c === 2);
                     const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
+                    const isUltimo = typeof val === 'number' && val === ultimoNumeroSorteado;
                     
                     let cls = 'cell';
                     if (isMarked) cls += ' marked';
                     if (isCenter) cls += ' free';
                     if (isWinner) cls += ' winner-cell';
                     if (isSorteado && !isMarked && !isCenter) cls += ' sorteado';
+                    if (isUltimo && !isMarked && !isCenter) cls += ' sorteado';
                     
                     const displayVal = isCenter ? 'B' : val;
                     
@@ -774,7 +815,6 @@
             grid.innerHTML = html;
             atualizarContador();
             
-            // ⭐ MOSTRAR/OCULTAR NÚMEROS CONFORME CONFIGURAÇÃO DO PROFESSOR
             const container = document.getElementById('numerosChamadosContainer');
             if (mostrarNumeros) {
                 container.style.display = 'block';
@@ -784,19 +824,43 @@
         }
 
         // ============================================
-        // MARCAR NÚMERO (CLIQUE DO ALUNO)
+        // ⭐ MARCAR NÚMERO - APENAS O ÚLTIMO SORTEADO
         // ============================================
         function marcarNumero(r, c, val) {
-            if (!numerosChamados.includes(val)) {
-                showToast('⚠️ Este número ainda não foi sorteado!', 'error');
+            // Verifica se há números sorteados
+            if (numerosChamados.length === 0) {
+                showToast('⚠️ Nenhum número foi sorteado ainda!', 'error');
+                return;
+            }
+            
+            // ⭐⭐⭐ BLOQUEIA "COMER BARRIGA": Só permite marcar o ÚLTIMO número sorteado
+            const ultimoSorteado = numerosChamados[numerosChamados.length - 1];
+            
+            if (val !== ultimoSorteado) {
+                showToast('⚠️ Você só pode marcar o número sorteado AGORA!', 'error');
+                
+                // Destacar o número que o aluno tentou marcar
+                for (let r2 = 0; r2 < 5; r2++) {
+                    for (let c2 = 0; c2 < 5; c2++) {
+                        if (minhaCartela[r2][c2] === val) {
+                            const cell = document.getElementById(`cell_${r2}_${c2}`);
+                            if (cell) {
+                                cell.classList.add('bloqueado');
+                                setTimeout(() => cell.classList.remove('bloqueado'), 2000);
+                            }
+                        }
+                    }
+                }
                 return;
             }
 
+            // Verifica se já está marcado
             if (minhasMarcacoes[r][c]) {
                 showToast('ℹ️ Este número já foi marcado!', 'info');
                 return;
             }
 
+            // Verifica se o jogo está ativo
             const sessaoRefLocal = db.ref(`bingo/sessoes/${sessaoId}`);
             sessaoRefLocal.once('value', (snapshot) => {
                 const sessao = snapshot.val();
@@ -806,6 +870,7 @@
                 }
             });
 
+            // ⭐ PERMITIDO: Marcar o número atual
             minhasMarcacoes[r][c] = true;
             
             db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
@@ -820,7 +885,8 @@
             
             atualizarContador();
 
-            if (checkBingo(minhasMarcacoes)) {
+            // Verificar BINGO
+            if (checkBingo(minhasMarcacoes, minhaCartela, numerosChamados)) {
                 isWinner = true;
                 db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
                     venceu: true
@@ -845,11 +911,6 @@
                         el.classList.add('winner-cell');
                     }
                 });
-            } else {
-                const total = minhasMarcacoes.flat().filter(v => v === true).length;
-                if (total >= 20) {
-                    showToast(`📌 Já marcou ${total} números! Falta pouco!`, 'info');
-                }
             }
         }
 
@@ -881,6 +942,7 @@
 
             if (numerosChamados.length > 0) {
                 const ultimo = numerosChamados[numerosChamados.length - 1];
+                ultimoNumeroSorteado = ultimo;
                 const letra = getLetterForNumber(ultimo);
                 document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
             }
@@ -894,7 +956,10 @@
                             if (cell) {
                                 const isMarked = minhasMarcacoes[r][c];
                                 const isSorteado = numerosChamados.includes(val);
-                                if (isSorteado && !isMarked) {
+                                const isUltimo = val === ultimoNumeroSorteado;
+                                if (isSorteado && !isMarked && !isUltimo) {
+                                    cell.classList.add('sorteado');
+                                } else if (isUltimo && !isMarked) {
                                     cell.classList.add('sorteado');
                                 } else {
                                     cell.classList.remove('sorteado');
@@ -950,6 +1015,7 @@
 
                 if (sessao.numerosSorteados) {
                     numerosChamados = sessao.numerosSorteados;
+                    ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
                     atualizarNumerosChamados();
                 }
 
@@ -970,7 +1036,6 @@
                     }
                 }
 
-                // ⭐ ATUALIZAR CONFIGURAÇÃO DE MOSTRAR NÚMEROS
                 if (sessao.mostrarNumeros !== undefined) {
                     mostrarNumeros = sessao.mostrarNumeros;
                     const container = document.getElementById('numerosChamadosContainer');
@@ -988,37 +1053,26 @@
         // ============================================
         const params = new URLSearchParams(window.location.search);
         const sala = params.get('sala');
-        const nomeSalaParam = params.get('nome') || 'Sala sem nome';
 
         if (!sala) {
             document.getElementById('aguardando').innerHTML = `
                 <span class="status-icon">❌</span>
                 <h2>Link inválido!</h2>
                 <p>Não foi possível identificar a sala.</p>
-                <p style="font-size: 0.85rem; color: #6a8a95; margin-top: 10px;">
-                    Verifique o link e tente novamente.
-                </p>
             `;
         } else {
-            // Mostrar nome da sala
-            document.getElementById('salaNomeTexto').textContent = nomeSalaParam;
-            document.getElementById('salaCodigoTexto').textContent = sala;
-            document.getElementById('aguardandoSala').textContent = nomeSalaParam;
-
-            // Perguntar nome do aluno
             let nome = prompt('🎯 Digite seu nome ou apelido para jogar:');
             if (!nome || nome.trim() === '') {
                 const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
-                inicializar(sala, nomeAleatorio, nomeSalaParam);
+                inicializar(sala, nomeAleatorio);
             } else {
-                inicializar(sala, nome.trim(), nomeSalaParam);
+                inicializar(sala, nome.trim());
             }
         }
 
         console.log('🎲 BINGO - Painel do Aluno carregado!');
-        console.log('💡 Clique nos números da sua cartela para marcá-los!');
-        console.log(`📌 Sala: ${sala} - ${nomeSalaParam}`);
-        console.log(`📊 Mostrar números: ${mostrarNumeros ? '✅' : '🚫'}`);
+        console.log('⚠️ Só pode marcar o número sorteado AGORA (bloqueia "comer barriga")');
+        console.log('📌 Verificação: SORTEIO + MARCAÇÃO para declarar BINGO');
     </script>
 </body>
 </html>
