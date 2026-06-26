@@ -459,7 +459,8 @@
                 <div class="cartela-grid" id="cartelaGrid"></div>
             </div>
 
-            <div class="numeros-chamados">
+            <!-- ===== NÚMEROS CHAMADOS (CONTROLADO PELO PROFESSOR) ===== -->
+            <div class="numeros-chamados" id="numerosChamadosContainer">
                 <h4>📋 Números chamados:</h4>
                 <div class="chips" id="numerosChamadosAluno">
                     <span class="empty-state-text">nenhum número chamado</span>
@@ -503,6 +504,7 @@
         let isWinner = false;
         let sessaoRef = null;
         let meuNome = '';
+        let mostrarNumeros = true;
 
         // ============================================
         // TOAST
@@ -632,7 +634,7 @@
                 return null;
             }
 
-            // Pegar a PRIMEIRA cartela disponível
+            // ⭐ PEGAR A PRIMEIRA CARTELA DISPONÍVEL (índice 0)
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
@@ -666,6 +668,9 @@
 
                 const sessao = snapshot.val();
                 const totalAlunos = sessao.totalAlunos || 0;
+
+                // ⭐ VERIFICAR SE O PROFESSOR QUER MOSTRAR NÚMEROS
+                mostrarNumeros = sessao.mostrarNumeros !== false; // Padrão: true
 
                 // ⭐ ATRIBUIR PRIMEIRA CARTELA DISPONÍVEL
                 const resultado = atribuirCartela(sessao, nome);
@@ -768,6 +773,14 @@
 
             grid.innerHTML = html;
             atualizarContador();
+            
+            // ⭐ MOSTRAR/OCULTAR NÚMEROS CONFORME CONFIGURAÇÃO DO PROFESSOR
+            const container = document.getElementById('numerosChamadosContainer');
+            if (mostrarNumeros) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
         }
 
         // ============================================
@@ -956,6 +969,17 @@
                         });
                     }
                 }
+
+                // ⭐ ATUALIZAR CONFIGURAÇÃO DE MOSTRAR NÚMEROS
+                if (sessao.mostrarNumeros !== undefined) {
+                    mostrarNumeros = sessao.mostrarNumeros;
+                    const container = document.getElementById('numerosChamadosContainer');
+                    if (mostrarNumeros) {
+                        container.style.display = 'block';
+                    } else {
+                        container.style.display = 'none';
+                    }
+                }
             });
         }
 
@@ -994,6 +1018,7 @@
         console.log('🎲 BINGO - Painel do Aluno carregado!');
         console.log('💡 Clique nos números da sua cartela para marcá-los!');
         console.log(`📌 Sala: ${sala} - ${nomeSalaParam}`);
+        console.log(`📊 Mostrar números: ${mostrarNumeros ? '✅' : '🚫'}`);
     </script>
 </body>
 </html>
