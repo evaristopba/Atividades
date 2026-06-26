@@ -928,7 +928,7 @@
         }
 
         // ============================================
-        // ⭐ CARREGAR SESSÃO EXISTENTE
+        // CARREGAR SESSÃO EXISTENTE
         // ============================================
         function carregarSessao(codigo, sessao) {
             sessaoAtual = codigo;
@@ -982,7 +982,7 @@
         }
 
         // ============================================
-        // ⭐ VERIFICAR SALA EXISTENTE AO CARREGAR
+        // VERIFICAR SALA EXISTENTE AO CARREGAR
         // ============================================
         function verificarSalaExistente() {
             const salaSelect = document.getElementById('salaSelect');
@@ -1007,7 +1007,7 @@
         }
 
         // ============================================
-        // ⭐ CRIAR SESSÃO (COM VERIFICAÇÃO)
+        // CRIAR SESSÃO (COM VERIFICAÇÃO)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -1035,7 +1035,6 @@
             
             sessaoRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
-                    // Sala já existe! Carregar em vez de recriar
                     const sessao = snapshot.val();
                     statusDiv.innerHTML = `<div class="status-criacao info">📂 Sala "${salaNome}" encontrada! Carregando...</div>`;
                     carregarSessao(codigo, sessao);
@@ -1043,7 +1042,6 @@
                     return;
                 }
 
-                // Sala não existe → criar nova
                 statusDiv.innerHTML = `<div class="status-criacao info">🆕 Criando sala "${salaNome}"...</div>`;
 
                 const participantes = {};
@@ -1622,34 +1620,36 @@
         }
 
         // ============================================
-        // RESETAR JOGO
+        // ⭐ RESETAR JOGO (MANTÉM A SALA)
         // ============================================
         function resetarJogo() {
             if (!sessaoAtual) return;
-            if (!confirm('Deseja resetar a rodada? Todas as marcações serão limpas.')) return;
+            if (!confirm('⚠️ Isso vai limpar todos os números sorteados e marcações.\n\nOs alunos e cartelas serão mantidos.\n\nDeseja continuar?')) return;
 
             const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
             sessaoRef.once('value', (snapshot) => {
                 const sessao = snapshot.val();
                 const participantes = sessao.participantes;
 
+                // 1. Resetar marcações de todos os alunos (mantém cartelas e nomes)
+                const updates = {};
                 for (const [alunoId, data] of Object.entries(participantes)) {
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
-                    marcacoes[2][2] = true;
-                    sessaoRef.child(`participantes/${alunoId}`).update({
-                        marcacoes: marcacoes,
-                        venceu: false
-                    });
+                    marcacoes[2][2] = true; // Centro sempre marcado
+                    updates[`participantes/${alunoId}/marcacoes`] = marcacoes;
+                    updates[`participantes/${alunoId}/venceu`] = false;
                 }
 
-                sessaoRef.update({
-                    numerosSorteados: [],
-                    vencedores: [],
-                    ultimoNumero: null,
-                    ultimaLetra: null,
-                    status: 'aguardando'
-                });
+                // 2. Resetar números sorteados e vencedores
+                updates['numerosSorteados'] = [];
+                updates['vencedores'] = [];
+                updates['ultimoNumero'] = null;
+                updates['ultimaLetra'] = null;
+                updates['status'] = 'aguardando';
 
+                sessaoRef.update(updates);
+
+                // 3. Atualizar interface
                 document.getElementById('ultimoSorteio').innerHTML = '🎯 Último: ---';
                 document.getElementById('vencedores').innerHTML = '🏆 Vencedores: aguardando...';
                 document.getElementById('numerosChamados').innerHTML =
@@ -1657,7 +1657,12 @@
                 document.getElementById('totalSorteados').textContent = '0/75 sorteados';
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
                 numerosChamados = [];
-                showToast('🔄 Jogo resetado!');
+                
+                // 4. Re-renderizar cartelas (sem marcações)
+                renderizarCartelas(participantes);
+                atualizarOcupacao(participantes);
+                
+                showToast('🔄 Jogo resetado! Sala mantida.', 'info');
             });
         }
 
@@ -1704,6 +1709,7 @@
             console.log('📌 Usando códigos fixos de turma (como no STOP)');
             console.log('✅ BINGO só declarado se SORTEIO + MARCAÇÃO');
             console.log('🔧 Botão "Beneficiar Aluno" disponível para quase-vencedores');
+            console.log('🔄 Botão "Resetar Jogo" mantém a sala e limpa o estado');
         });
     </script>
 </body>
