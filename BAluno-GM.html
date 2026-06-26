@@ -926,6 +926,56 @@
         .como-jogar-step .step-text strong {
             color: #f2e9d0;
         }
+
+        /* ESTILOS DA SELEÇÃO DE SALAS */
+        .sala-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 163, 115, 0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease-in-out;
+            text-align: left;
+            width: 100%;
+        }
+        .sala-item:hover {
+            background: rgba(212, 163, 115, 0.15);
+            border-color: #d4a373;
+            transform: translateY(-2px);
+        }
+        .sala-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sala-item-nome {
+            color: #f2e9d0;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .sala-item-detalhe {
+            color: #8aaab5;
+            font-size: 0.8rem;
+        }
+        .sala-item-vagas {
+            background: rgba(90, 143, 108, 0.2);
+            color: #6bcb77;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(107, 203, 119, 0.3);
+            white-space: nowrap;
+        }
+        .sala-item-vagas.cheia {
+            background: rgba(220, 53, 69, 0.15);
+            color: #ff6b6b;
+            border-color: rgba(220, 53, 69, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -1033,6 +1083,35 @@
             <div class="btn-group">
                 <button class="btn btn-cancelar" id="btnInputCancelar">❌ Cancelar</button>
                 <button class="btn btn-confirmar" id="btnInputConfirmar">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE SELEÇÃO DE SALA ===== -->
+    <div id="modalSelecaoSalas" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box" style="max-width: 500px;">
+            <div class="pedagogico-title">🏫 Escolha sua Sala</div>
+            <div class="pedagogico-subtitle">Selecione uma das salas abertas pelo professor para começar a jogar!</div>
+            
+            <div id="listaSalasContainer" style="margin: 20px 0; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <!-- As salas serão inseridas aqui dinamicamente -->
+                <div class="loading-spinner-container" style="text-align: center; padding: 20px 0;">
+                    <div class="loading-spinner" style="width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="color: #8aaab5; font-size: 0.9rem; margin-top: 10px;">Buscando salas abertas...</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="color: #8aaab5; font-size: 0.85rem;">— OU —</span>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px; text-align: left;">
+                <label for="codigoSalaManual" style="display: block; color: #d4e3e8; font-size: 0.85rem; font-weight: 500; margin-bottom: 5px;">Digite o código da sala manualmente:</label>
+                <input type="text" id="codigoSalaManual" placeholder="Ex: sala_1" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #3d6b7a; background: #0d1f26; color: #f2e9d0; font-size: 1rem; outline: none; transition: all 0.3s;">
+            </div>
+            
+            <div class="btn-group" style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-confirmar" id="btnConfirmarSalaManual" style="min-width: 140px; padding: 12px 28px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s; background: #d4a373; color: #1a2f3a; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">✅ Entrar com Código</button>
             </div>
         </div>
     </div>
@@ -1600,99 +1679,9 @@
             sessaoId = sala;
             meuNome = nome;
 
-            const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
-
-            try {
-                const snapshot = await sessaoRefLocal.once('value');
-                
-                if (!snapshot.exists()) {
-                    document.getElementById('aguardando').innerHTML = `
-                        <span class="status-icon">❌</span>
-                        <h2>Sala não encontrada!</h2>
-                        <p>Verifique o link e tente novamente.</p>
-                    `;
-                    return;
-                }
-
-                const sessao = snapshot.val();
-                const totalAlunos = sessao.totalAlunos || 0;
-
-                salaNome = sessao.salaNome || 'Sala sem nome';
-                document.getElementById('salaNomeTexto').textContent = salaNome;
-                document.getElementById('salaCodigoTexto').textContent = sala;
-                document.getElementById('aguardandoSala').textContent = salaNome;
-
-                mostrarNumeros = sessao.mostrarNumeros !== false;
-
-                const resultado = atribuirCartela(sessao, nome);
-
-                if (!resultado) {
-                    document.getElementById('aguardando').innerHTML = `
-                        <span class="status-icon">🚫</span>
-                        <h2>Sala lotada!</h2>
-                        <p>Todas as ${totalAlunos} cartelas já estão ocupadas.</p>
-                    `;
-                    return;
-                }
-
-                const { id: alunoIdEncontrado, data, jaExistia } = resultado;
-                alunoId = alunoIdEncontrado;
-
-                if (jaExistia) {
-                    minhaCartela = data.cartela;
-                    minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                    isWinner = data.venceu || false;
-                    
-                    if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
-                        sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(nome);
-                    }
-                    
-                    showToast(`👋 Bem-vindo de volta, ${nome}!`, 'info');
-                } else {
-                    const cartela = gerarCartelaUnica(sessao.participantes || {});
-                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
-                    marcacoes[2][2] = true;
-
-                    const novoParticipante = {
-                        nome: nome,
-                        cartela: cartela,
-                        marcacoes: marcacoes,
-                        venceu: false
-                    };
-
-                    sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
-                    minhaCartela = cartela;
-                    minhasMarcacoes = marcacoes;
-                    isWinner = false;
-                    
-                    showToast(`🎯 Bem-vindo, ${nome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
-                }
-
-                document.getElementById('nomeAluno').textContent = nome;
-                document.getElementById('nomeEspera').textContent = `👤 ${nome}`;
-
-                renderizarCartela();
-                iniciarListenerUnico(sala);
-
-                if (sessao.status === 'ativa' || sessao.status === 'finalizada') {
-                    document.getElementById('aguardando').style.display = 'none';
-                    document.getElementById('jogoAtivo').style.display = 'block';
-
-                    if (sessao.numerosSorteados) {
-                        numerosChamados = sessao.numerosSorteados;
-                        ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
-                        atualizarNumerosChamados();
-                        atualizarStatus();
-                    }
-                } else {
-                    document.getElementById('aguardando').style.display = 'block';
-                    document.getElementById('jogoAtivo').style.display = 'none';
-                }
-
-            } catch (error) {
-                console.error('Erro ao inicializar:', error);
-                showToast('❌ Erro ao conectar com o servidor!', 'error');
-            }
+            // Inicia o listener de forma dinâmica, que lidará tanto com a entrada
+            // inicial quanto com as atualizações em tempo real (como expansão de vagas!)
+            iniciarListenerUnico(sala);
         }
 
         // ============================================
@@ -1704,7 +1693,8 @@
                 sessaoListenerRef = null;
             }
 
-            sessaoListenerRef = db.ref(`bingo/sessoes/${sala}`);
+            const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
+            sessaoListenerRef = sessaoRefLocal;
 
             sessaoListenerRef.on('value', (snapshot) => {
                 if (!snapshot.exists()) {
@@ -1722,7 +1712,75 @@
                 const sessao = snapshot.val();
                 jogoFinalizado = sessao.status === 'finalizada';
                 mostrarNumeros = sessao.mostrarNumeros !== false;
+                salaNome = sessao.salaNome || 'Sala sem nome';
 
+                document.getElementById('salaNomeTexto').textContent = salaNome;
+                document.getElementById('salaCodigoTexto').textContent = sala;
+                document.getElementById('aguardandoSala').textContent = salaNome;
+
+                const totalAlunos = sessao.totalAlunos || 0;
+
+                // Se o aluno ainda não tem ID associado nesta sessão, tentamos atribuir
+                if (!alunoId) {
+                    const resultado = atribuirCartela(sessao, meuNome);
+
+                    if (!resultado) {
+                        // Se não tem vaga, mostra a mensagem de sala lotada de forma elegante e amigável
+                        document.getElementById('aguardando').innerHTML = `
+                            <span class="status-icon">🚫</span>
+                            <h2>Sala lotada!</h2>
+                            <p>Todas as ${totalAlunos} vagas de cartelas já estão ocupadas.</p>
+                            <div class="loading-spinner" style="margin-top: 15px; width: 30px; height: 30px;"></div>
+                            <p style="font-size: 0.9rem; color: #8aaab5; margin-top: 10px;">
+                                ⏳ Aguardando o professor liberar novas vagas...
+                            </p>
+                        `;
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return; // Retorna neste ciclo, mas mantém o listener ativo!
+                    }
+
+                    // Se encontrou vaga, associa o aluno a ela
+                    const { id: alunoIdEncontrado, data, jaExistia } = resultado;
+                    alunoId = alunoIdEncontrado;
+
+                    if (jaExistia) {
+                        minhaCartela = data.cartela;
+                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        isWinner = data.venceu || false;
+                        
+                        if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
+                            sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(meuNome);
+                        }
+                        
+                        showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
+                    } else {
+                        const cartela = gerarCartelaUnica(sessao.participantes || {});
+                        const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        marcacoes[2][2] = true;
+
+                        const novoParticipante = {
+                            nome: meuNome,
+                            cartela: cartela,
+                            marcacoes: marcacoes,
+                            venceu: false
+                        };
+
+                        sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
+                        minhaCartela = cartela;
+                        minhasMarcacoes = marcacoes;
+                        isWinner = false;
+                        
+                        showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                    }
+
+                    document.getElementById('nomeAluno').textContent = meuNome;
+                    document.getElementById('nomeEspera').textContent = `👤 ${meuNome}`;
+
+                    renderizarCartela();
+                }
+
+                // A partir daqui, o aluno está registrado!
                 const novoResetToken = sessao.resetToken || '';
                 
                 // --- ATUALIZAR NÚMEROS CHAMADOS ---
@@ -1770,6 +1828,19 @@
                 }
 
                 if (sessao.status === 'aguardando') {
+                    // Restaura o HTML da espera normal se ele foi sobrescrito pela mensagem de sala lotada
+                    const aguardandoDiv = document.getElementById('aguardando');
+                    if (aguardandoDiv.innerHTML.includes('Sala lotada!')) {
+                        aguardandoDiv.innerHTML = `
+                            <span class="status-icon">⏳</span>
+                            <h2>Aguardando o professor iniciar...</h2>
+                            <div class="loading-spinner"></div>
+                            <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                                Sala: <strong id="aguardandoSala">${salaNome}</strong>
+                            </p>
+                            <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera">👤 ${meuNome}</p>
+                        `;
+                    }
                     document.getElementById('aguardando').style.display = 'block';
                     document.getElementById('jogoAtivo').style.display = 'none';
                     return;
@@ -2104,6 +2175,152 @@
         }
 
         // ============================================
+        // MODAL DE SELEÇÃO DE SALA DINÂMICA
+        // ============================================
+        function abrirModalSelecaoSalas() {
+            document.getElementById('modalSelecaoSalas').classList.add('active');
+        }
+
+        function fecharModalSelecaoSalas() {
+            document.getElementById('modalSelecaoSalas').classList.remove('active');
+        }
+
+        function selecionarSalaModal() {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modalSelecaoSalas');
+                const container = document.getElementById('listaSalasContainer');
+                const inputManual = document.getElementById('codigoSalaManual');
+                const btnManual = document.getElementById('btnConfirmarSalaManual');
+                
+                inputManual.value = '';
+                
+                // Mostrar spinner de carregamento inicial
+                container.innerHTML = `
+                    <div class="loading-spinner-container" style="text-align: center; padding: 20px 0;">
+                        <div class="loading-spinner" style="width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #8aaab5; font-size: 0.9rem; margin-top: 10px;">Buscando salas abertas...</p>
+                    </div>
+                `;
+                
+                const sessoesRef = db.ref('bingo/sessoes');
+                
+                const handleUpdate = (snapshot) => {
+                    if (!snapshot.exists()) {
+                        container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                        return;
+                    }
+                    
+                    const sessoes = snapshot.val();
+                    let html = '';
+                    let encontrouAtiva = false;
+                    
+                    // Ordenar salas para estabilidade na visualização
+                    const sortedSessoes = Object.entries(sessoes).sort((a, b) => b[0].localeCompare(a[0]));
+                    
+                    for (const [id, sessao] of sortedSessoes) {
+                        if (sessao.status === 'finalizada') continue;
+                        
+                        encontrouAtiva = true;
+                        
+                        let totalVagas = sessao.totalAlunos || 0;
+                        let ocupados = 0;
+                        if (sessao.participantes) {
+                            ocupados = Object.values(sessao.participantes).filter(p => p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ')).length;
+                        }
+                        
+                        const statusTexto = sessao.status === 'ativa' ? 'Em Andamento' : 'Aguardando';
+                        const badgeClasse = sessao.status === 'ativa' ? 'style="background: rgba(77, 150, 255, 0.15); color: #4d96ff; border: 1px solid rgba(77, 150, 255, 0.3);"' : 'style="background: rgba(212, 163, 115, 0.15); color: #d4a373; border: 1px solid rgba(212, 163, 115, 0.3);"';
+                        
+                        const isCheia = ocupados >= totalVagas;
+                        const vagasTexto = isCheia ? 'Cheia' : `${ocupados}/${totalVagas} Alunos`;
+                        const vagasClasse = isCheia ? 'sala-item-vagas cheia' : 'sala-item-vagas';
+                        
+                        html += `
+                            <div class="sala-item" onclick="selecionarSalaDaLista('${id}', ${isCheia})">
+                                <div class="sala-item-info">
+                                    <span class="sala-item-nome">🏫 ${sessao.salaNome || 'Sem Nome'}</span>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;">
+                                        <span class="sala-item-detalhe" style="font-family: monospace;">Cód: ${id}</span>
+                                        <span class="sala-item-detalhe" ${badgeClasse} style="font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 600;">${statusTexto}</span>
+                                    </div>
+                                </div>
+                                <span class="${vagasClasse}">${vagasTexto}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    if (!encontrouAtiva) {
+                        container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                    } else {
+                        container.innerHTML = html;
+                    }
+                };
+                
+                sessoesRef.on('value', handleUpdate);
+                
+                const finalizeSelection = (id) => {
+                    sessoesRef.off('value', handleUpdate);
+                    fecharModalSelecaoSalas();
+                    resolve(id);
+                };
+                
+                window.selecionarSalaDaLista = function(id, isCheia) {
+                    if (isCheia) {
+                        showToast('⚠️ Esta sala está lotada! Peça para o professor expandir as vagas.', 'error');
+                        return;
+                    }
+                    finalizeSelection(id);
+                };
+                
+                const handleManualSubmit = function() {
+                    const cod = inputManual.value.trim();
+                    if (!cod) {
+                        showToast('⚠️ Digite o código da sala!', 'error');
+                        return;
+                    }
+                    
+                    db.ref(`bingo/sessoes/${cod}`).once('value', (snapshot) => {
+                        if (!snapshot.exists()) {
+                            showToast('❌ Código da sala não encontrado!', 'error');
+                            return;
+                        }
+                        
+                        const sessao = snapshot.val();
+                        if (sessao.status === 'finalizada') {
+                            showToast('🔴 Esta sala já foi encerrada pelo professor!', 'error');
+                            return;
+                        }
+                        
+                        let totalVagas = sessao.totalAlunos || 0;
+                        let ocupados = 0;
+                        if (sessao.participantes) {
+                            ocupados = Object.values(sessao.participantes).filter(p => p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ')).length;
+                        }
+                        
+                        if (ocupados >= totalVagas) {
+                            showToast('⚠️ Esta sala está lotada!', 'error');
+                            return;
+                        }
+                        
+                        finalizeSelection(cod);
+                    }).catch(err => {
+                        console.error(err);
+                        showToast('❌ Erro ao conectar!', 'error');
+                    });
+                };
+                
+                btnManual.onclick = handleManualSubmit;
+                inputManual.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        handleManualSubmit();
+                    }
+                };
+                
+                abrirModalSelecaoSalas();
+            });
+        }
+
+        // ============================================
         // INICIALIZAÇÃO
         // ============================================
         async function init() {
@@ -2111,11 +2328,14 @@
             let sala = params.get('sala');
 
             if (!sala || sala.trim() === '') {
-                sala = await inputTexto(
-                    '🏫 Entrar em uma Sala',
-                    'Digite o <strong>Código da Sala</strong> (fornecido pelo seu professor):',
-                    'Ex: -N_abc123...'
-                );
+                try {
+                    sala = await selecionarSalaModal();
+                } catch (e) {
+                    console.log('Seleção cancelada ou falhou, recarregando...');
+                    window.location.reload();
+                    return;
+                }
+                
                 if (!sala || sala.trim() === '') {
                     document.getElementById('aguardando').innerHTML = `
                         <span class="status-icon">❌</span>
