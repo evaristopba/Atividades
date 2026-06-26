@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BINGO - Painel do Professor</title>
     <style>
-        /* ===== TODO O CSS ANTERIOR ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1621,11 +1620,11 @@
         }
 
         // ============================================
-        // ⭐ RESETAR JOGO (COM NOVAS CARTELAS)
+        // ⭐ RESETAR JOGO (COMPLETO - LIMPA TUDO)
         // ============================================
         function resetarJogo() {
             if (!sessaoAtual) return;
-            if (!confirm('⚠️ Isso vai gerar NOVAS cartelas para todos os alunos.\n\nOs nomes dos alunos serão mantidos.\n\nDeseja continuar?')) return;
+            if (!confirm('⚠️ Isso vai gerar NOVAS cartelas e limpar TODOS os números sorteados.\n\nOs nomes dos alunos serão mantidos.\n\nDeseja continuar?')) return;
 
             const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
             sessaoRef.once('value', (snapshot) => {
@@ -1645,7 +1644,7 @@
                 for (const [alunoId, nome] of Object.entries(nomesExistentes)) {
                     const cartela = gerarCartelaUnica(novasParticipantes);
                     const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
-                    marcacoes[2][2] = true;
+                    marcacoes[2][2] = true; // Centro sempre marcado
                     
                     novasParticipantes[alunoId] = {
                         nome: nome,
@@ -1655,29 +1654,34 @@
                     };
                 }
 
-                // 3. Atualizar a sessão
-                sessaoRef.update({
+                // 3. ⭐⭐⭐ LIMPAR COMPLETAMENTE A SESSÃO ⭐⭐⭐
+                const updates = {
                     participantes: novasParticipantes,
-                    numerosSorteados: [],
-                    vencedores: [],
-                    ultimoNumero: null,
-                    ultimaLetra: null,
-                    status: 'aguardando'
-                });
+                    numerosSorteados: [],      // ← LIMPO
+                    vencedores: [],            // ← LIMPO
+                    ultimoNumero: null,        // ← LIMPO
+                    ultimaLetra: null,         // ← LIMPO
+                    status: 'aguardando'       // ← RESETADO
+                };
 
-                // 4. Atualizar interface
+                sessaoRef.update(updates);
+
+                // 4. Atualizar variáveis locais
+                numerosChamados = [];
+
+                // 5. Atualizar interface
                 document.getElementById('ultimoSorteio').innerHTML = '🎯 Último: ---';
                 document.getElementById('vencedores').innerHTML = '🏆 Vencedores: aguardando...';
                 document.getElementById('numerosChamados').innerHTML =
                     `<span class="empty-state">nenhum número chamado</span>`;
                 document.getElementById('totalSorteados').textContent = '0/75 sorteados';
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
-                numerosChamados = [];
                 
+                // 6. Re-renderizar
                 renderizarCartelas(novasParticipantes);
                 atualizarOcupacao(novasParticipantes);
                 
-                showToast('🔄 Nova rodada! Novas cartelas geradas.', 'info');
+                showToast('🔄 Nova rodada! Tudo limpo e novas cartelas geradas.', 'info');
             });
         }
 
@@ -1720,7 +1724,7 @@
             console.log('🎲 BINGO - Painel do Professor carregado!');
             console.log('✅ O sistema preserva o estado da sala ao recarregar');
             console.log('📌 Usando códigos fixos de turma (como no STOP)');
-            console.log('🔄 "Nova Rodada" gera novas cartelas para todos os alunos');
+            console.log('🔄 "Nova Rodada" gera novas cartelas e limpa TODOS os números sorteados');
         });
     </script>
 </body>
