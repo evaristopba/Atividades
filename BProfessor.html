@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BINGO - Painel do Professor</title>
     <style>
-        /* ===== TODO O CSS ANTERIOR ===== */
         * {
             margin: 0;
             padding: 0;
@@ -184,6 +183,15 @@
             transform: translateY(-2px);
         }
 
+        .btn-purple {
+            background: #6f42c1;
+            color: #fff;
+        }
+        .btn-purple:hover {
+            background: #7f52d1;
+            transform: translateY(-2px);
+        }
+
         #sessaoAtiva {
             display: none;
         }
@@ -337,6 +345,12 @@
             border-color: #6c757d;
         }
 
+        .cartela-card .pseudo-winner {
+            border-color: #6f42c1;
+            box-shadow: 0 0 25px rgba(111, 66, 193, 0.2);
+            background: #f3e8ff;
+        }
+
         .cartela-header {
             display: flex;
             justify-content: space-between;
@@ -374,6 +388,11 @@
         .cartela-header .badge.empty-badge {
             background: #e9ecef;
             color: #6c757d;
+        }
+
+        .cartela-header .badge.pseudo-badge {
+            background: #6f42c1;
+            color: #fff;
         }
 
         @keyframes pulse-badge {
@@ -671,7 +690,6 @@
                 <small style="color: #ffd93d;">⚠️ Cada aluno precisa de uma cartela única</small>
             </div>
 
-            <!-- ⭐ NOVO: Opção para mostrar números no aluno -->
             <div class="config-group">
                 <div class="checkbox-group">
                     <input type="checkbox" id="mostrarNumeros" checked>
@@ -720,6 +738,7 @@
                 <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
                 <button class="btn btn-secondary" onclick="expandirVagas()" style="background: #17a2b8;">➕ Expandir Vagas</button>
                 <button class="btn btn-secondary" onclick="toggleMostrarNumeros()" style="background: #6f42c1;">👁️ Alternar Números</button>
+                <button class="btn btn-purple" onclick="beneficiarAluno()">🔧 Beneficiar Aluno</button>
             </div>
 
             <div class="numeros-chamados">
@@ -852,23 +871,60 @@
             return cartela;
         }
 
-        function checkBingo(marcacoes) {
+        function checkBingo(marcacoes, cartela, sorteados) {
+            // Linhas
             for (let r = 0; r < 5; r++) {
-                if (marcacoes[r].every(v => v === true)) return true;
-            }
-            for (let c = 0; c < 5; c++) {
-                let colFull = true;
-                for (let r = 0; r < 5; r++) {
-                    if (!marcacoes[r][c]) { colFull = false; break; }
+                let linhaCompleta = true;
+                for (let c = 0; c < 5; c++) {
+                    const val = cartela[r][c];
+                    if (val === 'B') continue;
+                    if (!sorteados.includes(val) || !marcacoes[r][c]) {
+                        linhaCompleta = false;
+                        break;
+                    }
                 }
-                if (colFull) return true;
+                if (linhaCompleta) return true;
             }
-            let diag1 = true, diag2 = true;
+
+            // Colunas
+            for (let c = 0; c < 5; c++) {
+                let colunaCompleta = true;
+                for (let r = 0; r < 5; r++) {
+                    const val = cartela[r][c];
+                    if (val === 'B') continue;
+                    if (!sorteados.includes(val) || !marcacoes[r][c]) {
+                        colunaCompleta = false;
+                        break;
+                    }
+                }
+                if (colunaCompleta) return true;
+            }
+
+            // Diagonal principal
+            let diag1Completa = true;
             for (let i = 0; i < 5; i++) {
-                if (!marcacoes[i][i]) diag1 = false;
-                if (!marcacoes[i][4 - i]) diag2 = false;
+                const val = cartela[i][i];
+                if (val === 'B') continue;
+                if (!sorteados.includes(val) || !marcacoes[i][i]) {
+                    diag1Completa = false;
+                    break;
+                }
             }
-            return diag1 || diag2;
+            if (diag1Completa) return true;
+
+            // Diagonal secundária
+            let diag2Completa = true;
+            for (let i = 0; i < 5; i++) {
+                const val = cartela[i][4 - i];
+                if (val === 'B') continue;
+                if (!sorteados.includes(val) || !marcacoes[i][4 - i]) {
+                    diag2Completa = false;
+                    break;
+                }
+            }
+            if (diag2Completa) return true;
+
+            return false;
         }
 
         // ============================================
@@ -908,7 +964,6 @@
                     }
                 }
 
-                // Criar/Resetar a sala
                 const participantes = {};
                 for (let i = 1; i <= qtdAlunos; i++) {
                     const cartela = gerarCartelaUnica(participantes);
@@ -931,7 +986,7 @@
                     totalAlunos: qtdAlunos,
                     numerosSorteados: [],
                     vencedores: [],
-                    mostrarNumeros: mostrarNumeros, // ⭐ Salva a opção
+                    mostrarNumeros: mostrarNumeros,
                     participantes: participantes
                 };
 
@@ -948,7 +1003,6 @@
                 document.getElementById('totalAlunos').textContent = qtdAlunos;
                 document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
 
-                // Link SEM # e SEM &nome=
                 const baseUrl = window.location.href
                     .split('?')[0]
                     .replace('BProfessor.html', 'BAluno.html')
@@ -966,7 +1020,7 @@
         }
 
         // ============================================
-        // ALTERNAR MOSTRAR NÚMEROS
+        // TOGGLE MOSTRAR NÚMEROS
         // ============================================
         function toggleMostrarNumeros() {
             if (!sessaoAtual) return;
@@ -1043,18 +1097,25 @@
                 return numA - numB;
             });
 
+            // Verificar pseudo-vencedores
+            const pseudoVencedores = identificarPseudoVencedores(participantes);
+
             for (const [alunoId, data] of sorted) {
                 const isWinner = data.venceu;
                 const isOnline = alunosConectados.has(alunoId);
                 const temNome = data.nome && data.nome.trim() !== '';
                 const nomeExibicao = temNome ? data.nome : `💺 Vaga ${alunoId.replace('aluno_', '')}`;
                 const isOcupada = temNome;
+                const isPseudo = pseudoVencedores.includes(alunoId) && !isWinner;
 
                 let badgeClass = 'empty-badge';
                 let badgeText = '💺 Disponível';
                 if (isWinner) {
                     badgeClass = 'winner-badge';
                     badgeText = '🏆 BINGO!';
+                } else if (isPseudo) {
+                    badgeClass = 'pseudo-badge';
+                    badgeText = '🔮 Quase lá!';
                 } else if (isOnline && isOcupada) {
                     badgeClass = 'online-badge';
                     badgeText = '🟢 Online';
@@ -1063,7 +1124,12 @@
                     badgeText = '⚫ Offline';
                 }
 
-                html += `<div class="cartela-card ${isWinner ? 'winner' : ''} ${!isOnline && isOcupada ? 'offline' : ''}">`;
+                let cardClass = 'cartela-card';
+                if (isWinner) cardClass += ' winner';
+                else if (isPseudo) cardClass += ' pseudo-winner';
+                else if (!isOnline && isOcupada) cardClass += ' offline';
+
+                html += `<div class="${cardClass}">`;
                 html += `<div class="cartela-header">`;
                 html += `<span>🧑‍🎓 ${nomeExibicao}</span>`;
                 html += `<span class="badge ${badgeClass}">${badgeText}</span>`;
@@ -1096,6 +1162,152 @@
 
             grid.innerHTML = html;
             document.getElementById('onlineCount').textContent = `🟢 Online: ${alunosConectados.size}`;
+        }
+
+        // ============================================
+        // IDENTIFICAR PSEUDO-VENCEDORES
+        // ============================================
+        function identificarPseudoVencedores(participantes) {
+            const pseudo = [];
+            const sorteados = numerosChamados;
+
+            for (const [alunoId, data] of Object.entries(participantes)) {
+                if (data.venceu) continue;
+                const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                const cartela = data.cartela;
+
+                for (let r = 0; r < 5; r++) {
+                    let linhaMarcada = true;
+                    let faltaSorteio = false;
+                    for (let c = 0; c < 5; c++) {
+                        const val = cartela[r][c];
+                        if (val === 'B') continue;
+                        if (!marcacoes[r][c]) {
+                            linhaMarcada = false;
+                            break;
+                        }
+                        if (!sorteados.includes(val)) {
+                            faltaSorteio = true;
+                        }
+                    }
+                    if (linhaMarcada && faltaSorteio) {
+                        pseudo.push(alunoId);
+                        break;
+                    }
+                }
+            }
+            return pseudo;
+        }
+
+        // ============================================
+        // BENEFICIAR ALUNO
+        // ============================================
+        function beneficiarAluno() {
+            if (!sessaoAtual) return;
+            
+            const sessaoRef = db.ref(`bingo/sessoes/${sessaoAtual}`);
+            sessaoRef.once('value', (snapshot) => {
+                const sessao = snapshot.val();
+                const participantes = sessao.participantes || {};
+                
+                // Encontrar pseudo-vencedores
+                const pseudoVencedores = [];
+                const sorteados = sessao.numerosSorteados || [];
+                
+                for (const [alunoId, data] of Object.entries(participantes)) {
+                    if (data.venceu) continue;
+                    const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                    const cartela = data.cartela;
+                    
+                    for (let r = 0; r < 5; r++) {
+                        let linhaMarcada = true;
+                        let faltaSorteio = false;
+                        let numeroFaltando = null;
+                        
+                        for (let c = 0; c < 5; c++) {
+                            const val = cartela[r][c];
+                            if (val === 'B') continue;
+                            if (!marcacoes[r][c]) {
+                                linhaMarcada = false;
+                                break;
+                            }
+                            if (!sorteados.includes(val)) {
+                                faltaSorteio = true;
+                                numeroFaltando = val;
+                            }
+                        }
+                        
+                        if (linhaMarcada && faltaSorteio) {
+                            pseudoVencedores.push({
+                                alunoId,
+                                nome: data.nome || alunoId,
+                                numeroFaltando,
+                                linha: r
+                            });
+                            break;
+                        }
+                    }
+                }
+                
+                if (pseudoVencedores.length === 0) {
+                    showToast('❌ Nenhum aluno com "comer barriga" identificado.', 'error');
+                    return;
+                }
+                
+                let mensagem = '🔧 Alunos com "comer barriga":\n\n';
+                pseudoVencedores.forEach((p, idx) => {
+                    mensagem += `${idx + 1}. ${p.nome} - Falta sortear: ${p.numeroFaltando}\n`;
+                });
+                mensagem += '\nDigite o número do aluno para beneficiar (ou 0 para cancelar):';
+                
+                const escolha = prompt(mensagem);
+                if (!escolha || escolha === '0') return;
+                
+                const idx = parseInt(escolha) - 1;
+                if (isNaN(idx) || idx < 0 || idx >= pseudoVencedores.length) {
+                    showToast('❌ Opção inválida!', 'error');
+                    return;
+                }
+                
+                const beneficiado = pseudoVencedores[idx];
+                const numeroFaltante = beneficiado.numeroFaltando;
+                
+                if (sessao.numerosSorteados.includes(numeroFaltante)) {
+                    showToast('⚠️ O número já foi sorteado!', 'error');
+                    return;
+                }
+                
+                const letra = getLetterForNumber(numeroFaltante);
+                
+                const novosSorteados = [...sessao.numerosSorteados, numeroFaltante];
+                sessaoRef.update({
+                    numerosSorteados: novosSorteados,
+                    ultimoNumero: numeroFaltante,
+                    ultimaLetra: letra
+                });
+                
+                const alunoData = participantes[beneficiado.alunoId];
+                const marcacoes = alunoData.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                const cartela = alunoData.cartela;
+                
+                if (checkBingo(marcacoes, cartela, novosSorteados)) {
+                    sessaoRef.child(`participantes/${beneficiado.alunoId}`).update({
+                        venceu: true
+                    });
+                    
+                    const vencedoresAtuais = sessao.vencedores || [];
+                    if (!vencedoresAtuais.includes(beneficiado.alunoId)) {
+                        vencedoresAtuais.push(beneficiado.alunoId);
+                        sessaoRef.update({
+                            vencedores: vencedoresAtuais
+                        });
+                    }
+                    
+                    showToast(`🏆 ${beneficiado.nome} foi beneficiado e venceu! 🎉`, 'winner');
+                } else {
+                    showToast(`📌 Número ${letra}${numeroFaltante} sorteado para ${beneficiado.nome}. Aguarde mais sorteios.`, 'info');
+                }
+            });
         }
 
         // ============================================
@@ -1240,7 +1452,19 @@
 
                 for (const [alunoId, data] of Object.entries(participantes)) {
                     const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                    if (checkBingo(marcacoes) && !data.venceu) {
+                    const cartela = data.cartela;
+                    
+                    // Verifica se o aluno já marcou o número
+                    let marcouNumero = false;
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            if (cartela[r][c] === numero && marcacoes[r][c]) {
+                                marcouNumero = true;
+                            }
+                        }
+                    }
+                    
+                    if (marcouNumero && checkBingo(marcacoes, cartela, numerosSorteados) && !data.venceu) {
                         vencedores.push(alunoId);
                         sessaoRef.child(`participantes/${alunoId}`).update({
                             venceu: true
@@ -1346,9 +1570,8 @@
         // ============================================
         console.log('🎲 BINGO - Painel do Professor carregado!');
         console.log('📌 Usando códigos fixos de turma (como no STOP)');
-        console.log('👀 Acompanhe os alunos em tempo real!');
-        console.log('✅ Link gerado: BAluno.html?sala=CODIGO (SEM # e SEM &nome=)');
-        console.log('📊 Opção "Mostrar números" disponível no checkbox');
+        console.log('✅ BINGO só declarado se SORTEIO + MARCAÇÃO');
+        console.log('🔧 Botão "Beneficiar Aluno" disponível para pseudo-vencedores');
     </script>
 </body>
 </html>
