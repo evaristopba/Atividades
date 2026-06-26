@@ -761,19 +761,187 @@
                 padding: 25px;
             }
         }
+
+        /* MODAL PEDAGÓGICO */
+        .pedagogico-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .pedagogico-modal-overlay.active {
+            display: flex;
+        }
+        .pedagogico-modal-box {
+            background: linear-gradient(145deg, #162730, #0a181e);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 650px;
+            width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            position: relative;
+            animation: slideUpModal 0.4s ease-out;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+        .pedagogico-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #d4e3e8;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .pedagogico-close:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .pedagogico-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+        .pedagogico-tab {
+            padding: 10px 16px;
+            color: #8aaab5;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .pedagogico-tab:hover {
+            color: #f2e9d0;
+        }
+        .pedagogico-tab.active {
+            color: #d4a373;
+        }
+        .pedagogico-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #d4a373;
+            border-radius: 2px;
+        }
+        .pedagogico-content {
+            display: none;
+            color: #d4e3e8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .pedagogico-content.active {
+            display: block;
+        }
+        .pedagogico-title {
+            color: #f2e9d0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pedagogico-subtitle {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .bncc-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .bncc-code {
+            display: inline-block;
+            background: rgba(212, 163, 115, 0.15);
+            color: #d4a373;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .bncc-desc {
+            color: #d4e3e8;
+            font-size: 0.9rem;
+        }
+        .como-jogar-step {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 12px;
+        }
+        .como-jogar-step .step-number {
+            background: #d4a373;
+            color: #1a2f3a;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .como-jogar-step .step-text strong {
+            color: #f2e9d0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Voltar</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'" style="margin-bottom: 0;">← Voltar</a>
+                    <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
+                </div>
                 <div class="sync-status">
                     <span class="sync-dot"></span>
                     <span id="statusTexto">online</span>
                 </div>
             </div>
-            <h1>🧑‍🎓 BINGO <small>Aluno</small></h1>
+            <h1 style="margin-top: 15px;">🧑‍🎓 BINGO <small>Aluno</small></h1>
         </div>
 
         <!-- ===== NOME DA SALA ===== -->
@@ -865,6 +1033,96 @@
             <div class="btn-group">
                 <button class="btn btn-cancelar" id="btnInputCancelar">❌ Cancelar</button>
                 <button class="btn btn-confirmar" id="btnInputConfirmar">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PEDAGÓGICO (BNCC & COMO JOGAR) ===== -->
+    <div id="modalPedagogico" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box">
+            <button class="pedagogico-close" onclick="fecharModalPedagogico()">×</button>
+            
+            <div class="pedagogico-title">📖 Guia Pedagógico & Regras</div>
+            <div class="pedagogico-subtitle">BINGO de Matemática - Ensino Fundamental</div>
+
+            <div class="pedagogico-tabs">
+                <button class="pedagogico-tab active" id="tab-comoJogar-btn" onclick="selecionarAbaPedagogica('comoJogar')">🎮 Como Jogar</button>
+                <button class="pedagogico-tab" id="tab-bncc-btn" onclick="selecionarAbaPedagogica('bncc')">📚 Alinhamento BNCC</button>
+            </div>
+
+            <!-- ABA: COMO JOGAR -->
+            <div id="aba-comoJogar" class="pedagogico-content active">
+                <div class="como-jogar-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <strong>Criação da Sessão (Professor)</strong>: O professor cria uma sessão selecionando a sala/turma e configurando a quantidade de alunos/vagas.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <strong>Entrada dos Alunos</strong>: Os alunos entram na sala utilizando seus nomes. Cada aluno recebe automaticamente uma <strong>cartela única e exclusiva</strong> gerada pelo sistema (nenhuma cartela se repete). O espaço central "B" é livre.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <strong>Sorteio & Atenção</strong>: O professor realiza o sorteio de um número de cada vez. Os alunos devem identificar se possuem o número correspondente em sua cartela.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">
+                        <strong>Marcação em Tempo Real</strong>: Os alunos devem clicar para marcar o número na cartela <strong>assim que for sorteado</strong>. O sistema exige atenção ativa: não é possível marcar números sorteados anteriormente por conta própria (salvo ação explícita do professor para beneficiar um aluno atrasado).
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">
+                        <strong>Segurança & Anti-Cheat</strong>: O sistema audita todas as marcações em tempo real. Se um aluno tentar burlar o sistema marcando dezenas não sorteadas, a trapaça é sinalizada ao professor no painel de controle.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">6</div>
+                    <div class="step-text">
+                        <strong>Vitória e Validação</strong>: O primeiro aluno a completar toda a cartela (24 dezenas marcadas + o centro livre) faz o "BINGO". O sistema valida instantaneamente e notifica a sala toda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA: ALINHAMENTO BNCC -->
+            <div id="aba-bncc" class="pedagogico-content">
+                <p style="margin-bottom: 15px; font-weight: 600; color: #ffd93d;">🎯 Unidade Temática: Matemática (Números e Probabilidade)</p>
+                
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA01 (1º Ano)</span>
+                    <div class="bncc-desc">Utilizar números naturais como indicador de quantidade ou de ordem em diferentes situações cotidianas e reconhecer situações em que os números não indicam contagem nem ordem, mas sim código de identificação.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA04 (1º Ano)</span>
+                    <div class="bncc-desc">Contar a quantidade de objetos de coleções de até 100 unidades e apresentar o resultado por registros verbais e simbólicos, para resolver problemas cotidianos.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF02MA01 (2º Ano)</span>
+                    <div class="bncc-desc">Comparar e ordenar números naturais (até a ordem de centenas), pela compreensão de características do sistema de numeração decimal (valor posicional).</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF03MA02 (3º Ano)</span>
+                    <div class="bncc-desc">Identificar características do sistema de numeração decimal, utilizando a composição e a decomposição de número natural de até quatro ordens.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF04MA01 (4º Ano)</span>
+                    <div class="bncc-desc">Ler, escrever e ordenar números naturais até a ordem das dezenas de milhar.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF05MA22 (5º Ano)</span>
+                    <div class="bncc-desc">Apresentar todos os possíveis resultados de um experimento aleatório, estimando se esses resultados são igualmente prováveis ou não (espaço amostral e probabilidade elementar do sorteio).</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1303,6 +1561,36 @@
 
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
+        }
+
+        // ============================================
+        // MODAL PEDAGÓGICO
+        // ============================================
+        function abrirModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.add('active');
+            selecionarAbaPedagogica('comoJogar');
+        }
+
+        function fecharModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.remove('active');
+        }
+
+        function selecionarAbaPedagogica(aba) {
+            // Tabs
+            document.getElementById('tab-comoJogar-btn').classList.remove('active');
+            document.getElementById('tab-bncc-btn').classList.remove('active');
+            
+            // Content
+            document.getElementById('aba-comoJogar').classList.remove('active');
+            document.getElementById('aba-bncc').classList.remove('active');
+
+            if (aba === 'comoJogar') {
+                document.getElementById('tab-comoJogar-btn').classList.add('active');
+                document.getElementById('aba-comoJogar').classList.add('active');
+            } else if (aba === 'bncc') {
+                document.getElementById('tab-bncc-btn').classList.add('active');
+                document.getElementById('aba-bncc').classList.add('active');
+            }
         }
 
         // ============================================
