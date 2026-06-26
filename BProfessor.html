@@ -928,7 +928,86 @@
         }
 
         // ============================================
-        // CRIAR SESSÃO
+        // ⭐ CARREGAR SESSÃO EXISTENTE
+        // ============================================
+        function carregarSessao(codigo, sessao) {
+            sessaoAtual = codigo;
+            numerosChamados = sessao.numerosSorteados || [];
+            mostrarNumeros = sessao.mostrarNumeros !== false;
+            
+            const statusMap = {
+                'aguardando': '⏳ Aguardando alunos...',
+                'ativa': '🟢 Jogo em andamento',
+                'finalizada': '🔴 Finalizada'
+            };
+            
+            document.getElementById('configuracao').style.display = 'none';
+            document.getElementById('sessaoAtiva').style.display = 'block';
+            document.getElementById('salaNome').textContent = sessao.salaNome;
+            document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${sessao.salaNome}</strong>`;
+            document.getElementById('codigoSessao').textContent = codigo;
+            document.getElementById('totalAlunos').textContent = sessao.totalAlunos;
+            document.getElementById('statusSessao').textContent = statusMap[sessao.status] || sessao.status;
+            
+            // Atualizar números chamados
+            if (sessao.numerosSorteados && sessao.numerosSorteados.length > 0) {
+                const ultimo = sessao.numerosSorteados[sessao.numerosSorteados.length - 1];
+                const letra = getLetterForNumber(ultimo);
+                document.getElementById('ultimoSorteio').innerHTML = `🎯 Último: ${letra}${ultimo}`;
+                document.getElementById('totalSorteados').textContent = `${sessao.numerosSorteados.length}/75 sorteados`;
+                
+                const chipsDiv = document.getElementById('numerosChamados');
+                let chipsHtml = '';
+                sessao.numerosSorteados.forEach((num, idx) => {
+                    const cls = idx === sessao.numerosSorteados.length - 1 ? 'chip recent' : 'chip';
+                    chipsHtml += `<span class="${cls}">${num}</span>`;
+                });
+                chipsDiv.innerHTML = chipsHtml;
+            }
+            
+            // Atualizar vencedores
+            if (sessao.vencedores && sessao.vencedores.length > 0) {
+                const nomes = sessao.vencedores.map(id => sessao.participantes[id]?.nome || id).join(', ');
+                document.getElementById('vencedores').innerHTML = `🏆 Vencedor(es): ${nomes} 🎉`;
+            }
+            
+            // Gerar link
+            const baseUrl = window.location.href.split('?')[0].replace('BProfessor.html', 'BAluno.html');
+            const linkAluno = `${baseUrl}?sala=${codigo}`;
+            document.getElementById('linkAluno').value = linkAluno;
+            
+            renderizarCartelas(sessao.participantes);
+            escutarSessao(codigo);
+            atualizarOcupacao(sessao.participantes);
+        }
+
+        // ============================================
+        // ⭐ VERIFICAR SALA EXISTENTE AO CARREGAR
+        // ============================================
+        function verificarSalaExistente() {
+            const salaSelect = document.getElementById('salaSelect');
+            const salaId = salaSelect.value;
+            
+            if (!salaId) {
+                document.getElementById('configuracao').style.display = 'block';
+                document.getElementById('sessaoAtiva').style.display = 'none';
+                return;
+            }
+            
+            const sessaoRef = db.ref(`bingo/sessoes/${salaId}`);
+            sessaoRef.once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const sessao = snapshot.val();
+                    carregarSessao(salaId, sessao);
+                } else {
+                    document.getElementById('configuracao').style.display = 'block';
+                    document.getElementById('sessaoAtiva').style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // ⭐ CRIAR SESSÃO (COM VERIFICAÇÃO)
         // ============================================
         function criarSessao() {
             const salaSelect = document.getElementById('salaSelect');
@@ -956,13 +1035,16 @@
             
             sessaoRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
-                    statusDiv.innerHTML = `<div class="status-criacao warning">⚠️ Sala "${salaNome}" já existe. Resetando...</div>`;
-                    
-                    if (!confirm(`A sala "${salaNome}" já existe.\n\nDeseja resetá-la com ${qtdAlunos} alunos?`)) {
-                        statusDiv.innerHTML = '';
-                        return;
-                    }
+                    // Sala já existe! Carregar em vez de recriar
+                    const sessao = snapshot.val();
+                    statusDiv.innerHTML = `<div class="status-criacao info">📂 Sala "${salaNome}" encontrada! Carregando...</div>`;
+                    carregarSessao(codigo, sessao);
+                    showToast(`📂 Sala "${salaNome}" carregada com sucesso!`, 'info');
+                    return;
                 }
+
+                // Sala não existe → criar nova
+                statusDiv.innerHTML = `<div class="status-criacao info">🆕 Criando sala "${salaNome}"...</div>`;
 
                 const participantes = {};
                 for (let i = 1; i <= qtdAlunos; i++) {
@@ -991,31 +1073,9 @@
                 };
 
                 sessaoRef.set(sessaoData);
-
-                sessaoAtual = codigo;
-                numerosChamados = [];
-
-                document.getElementById('configuracao').style.display = 'none';
-                document.getElementById('sessaoAtiva').style.display = 'block';
-                document.getElementById('salaNome').textContent = salaNome;
-                document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${salaNome}</strong>`;
-                document.getElementById('codigoSessao').textContent = codigo;
-                document.getElementById('totalAlunos').textContent = qtdAlunos;
-                document.getElementById('statusSessao').textContent = '⏳ Aguardando alunos...';
-
-                const baseUrl = window.location.href
-                    .split('?')[0]
-                    .replace('BProfessor.html', 'BAluno.html')
-                    .replace('#', '');
-                const linkAluno = `${baseUrl}?sala=${codigo}`;
-                document.getElementById('linkAluno').value = linkAluno;
-
-                renderizarCartelas(participantes);
-                escutarSessao(codigo);
-                atualizarOcupacao(participantes);
-
-                statusDiv.innerHTML = `<div class="status-criacao info">✅ Sala "${salaNome}" configurada com ${qtdAlunos} alunos!</div>`;
-                showToast(`✅ Sala "${salaNome}" criada/atualizada!`, 'info');
+                carregarSessao(codigo, sessaoData);
+                statusDiv.innerHTML = `<div class="status-criacao info">✅ Sala "${salaNome}" criada com ${qtdAlunos} alunos!</div>`;
+                showToast(`✅ Sala "${salaNome}" criada!`, 'info');
             });
         }
 
@@ -1097,7 +1157,6 @@
                 return numA - numB;
             });
 
-            // Verificar quase-vencedores
             const quaseVencedores = identificarQuaseVencedores(participantes);
 
             for (const [alunoId, data] of sorted) {
@@ -1176,7 +1235,6 @@
                 const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                 const cartela = data.cartela;
 
-                // Verificar linhas
                 for (let r = 0; r < 5; r++) {
                     let marcados = 0;
                     let faltando = null;
@@ -1203,42 +1261,12 @@
                         break;
                     }
                 }
-
-                // Se não encontrou em linhas, verificar colunas
-                if (!quase.includes(alunoId)) {
-                    for (let c = 0; c < 5; c++) {
-                        let marcados = 0;
-                        let faltando = null;
-                        let todosSorteados = true;
-
-                        for (let r = 0; r < 5; r++) {
-                            const val = cartela[r][c];
-                            if (val === 'B') {
-                                marcados++;
-                                continue;
-                            }
-                            if (marcacoes[r][c]) {
-                                marcados++;
-                            } else {
-                                faltando = val;
-                                if (!sorteados.includes(val)) {
-                                    todosSorteados = false;
-                                }
-                            }
-                        }
-
-                        if (marcados === 4 && faltando !== null && todosSorteados) {
-                            quase.push(alunoId);
-                            break;
-                        }
-                    }
-                }
             }
             return quase;
         }
 
         // ============================================
-        // ⭐ BENEFICIAR ALUNO (CORRIGIDO)
+        // BENEFICIAR ALUNO
         // ============================================
         function beneficiarAluno() {
             if (!sessaoAtual) return;
@@ -1249,14 +1277,12 @@
                 const participantes = sessao.participantes || {};
                 const sorteados = sessao.numerosSorteados || [];
                 
-                // 1. Encontrar alunos que estão "quase" (falta apenas 1 número)
                 const quaseVencedores = [];
                 for (const [alunoId, data] of Object.entries(participantes)) {
                     if (data.venceu) continue;
                     const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     const cartela = data.cartela;
                     
-                    // Verificar linhas
                     for (let r = 0; r < 5; r++) {
                         let marcados = 0;
                         let faltando = null;
@@ -1282,47 +1308,9 @@
                             quaseVencedores.push({
                                 alunoId,
                                 nome: data.nome || alunoId,
-                                numeroFaltando: faltando,
-                                tipo: 'linha',
-                                posicao: r
+                                numeroFaltando: faltando
                             });
                             break;
-                        }
-                    }
-                    
-                    // Se não encontrou em linhas, verificar colunas
-                    if (!quaseVencedores.some(a => a.alunoId === alunoId)) {
-                        for (let c = 0; c < 5; c++) {
-                            let marcados = 0;
-                            let faltando = null;
-                            let todosSorteados = true;
-                            
-                            for (let r = 0; r < 5; r++) {
-                                const val = cartela[r][c];
-                                if (val === 'B') {
-                                    marcados++;
-                                    continue;
-                                }
-                                if (marcacoes[r][c]) {
-                                    marcados++;
-                                } else {
-                                    faltando = val;
-                                    if (!sorteados.includes(val)) {
-                                        todosSorteados = false;
-                                    }
-                                }
-                            }
-                            
-                            if (marcados === 4 && faltando !== null && todosSorteados) {
-                                quaseVencedores.push({
-                                    alunoId,
-                                    nome: data.nome || alunoId,
-                                    numeroFaltando: faltando,
-                                    tipo: 'coluna',
-                                    posicao: c
-                                });
-                                break;
-                            }
                         }
                     }
                 }
@@ -1332,10 +1320,9 @@
                     return;
                 }
                 
-                // 2. Mostrar lista para o professor escolher
                 let mensagem = '🔧 Alunos com "quase BINGO":\n\n';
                 quaseVencedores.forEach((a, idx) => {
-                    mensagem += `${idx + 1}. ${a.nome} - Falta marcar: ${a.numeroFaltando} (já foi sorteado)\n`;
+                    mensagem += `${idx + 1}. ${a.nome} - Falta marcar: ${a.numeroFaltando}\n`;
                 });
                 mensagem += '\nDigite o número do aluno para beneficiar (ou 0 para cancelar):';
                 
@@ -1350,7 +1337,6 @@
                 
                 const beneficiado = quaseVencedores[idx];
                 
-                // 3. Sortear um número ALEATÓRIO (qualquer número não sorteado)
                 const disponiveis = [];
                 for (let i = 1; i <= 75; i++) {
                     if (!sorteados.includes(i)) {
@@ -1367,7 +1353,6 @@
                 const numeroSorteado = disponiveis[randomIdx];
                 const letra = getLetterForNumber(numeroSorteado);
                 
-                // 4. Adicionar o número aos sorteados
                 const novosSorteados = [...sorteados, numeroSorteado];
                 sessaoRef.update({
                     numerosSorteados: novosSorteados,
@@ -1375,7 +1360,6 @@
                     ultimaLetra: letra
                 });
                 
-                // 5. Verificar se alguém fez BINGO com este número
                 const vencedores = [];
                 for (const [alunoId, data] of Object.entries(participantes)) {
                     if (data.venceu) continue;
@@ -1388,7 +1372,6 @@
                 }
                 
                 if (vencedores.length > 0) {
-                    // ⚠️ Alguém venceu legitimamente! O aluno NÃO é beneficiado
                     for (const vId of vencedores) {
                         sessaoRef.child(`participantes/${vId}`).update({
                             venceu: true
@@ -1406,12 +1389,10 @@
                     return;
                 }
                 
-                // 6. Ninguém fez BINGO → O aluno é beneficiado!
                 const alunoData = participantes[beneficiado.alunoId];
                 const marcacoes = alunoData.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                 const cartela = alunoData.cartela;
                 
-                // Encontrar a posição do número faltante
                 let posicao = null;
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
@@ -1424,14 +1405,12 @@
                 }
                 
                 if (posicao) {
-                    // Marcar o número faltante
                     marcacoes[posicao.r][posicao.c] = true;
                     
                     sessaoRef.child(`participantes/${beneficiado.alunoId}`).update({
                         marcacoes: marcacoes
                     });
                     
-                    // Verificar se agora ele fez BINGO
                     if (checkBingo(marcacoes, cartela, novosSorteados)) {
                         sessaoRef.child(`participantes/${beneficiado.alunoId}`).update({
                             venceu: true
@@ -1597,7 +1576,6 @@
                     const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                     const cartela = data.cartela;
                     
-                    // Verifica se o aluno já marcou o número
                     let marcouNumero = false;
                     for (let r = 0; r < 5; r++) {
                         for (let c = 0; c < 5; c++) {
@@ -1711,11 +1689,22 @@
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
-        console.log('🎲 BINGO - Painel do Professor carregado!');
-        console.log('📌 Usando códigos fixos de turma (como no STOP)');
-        console.log('✅ BINGO só declarado se SORTEIO + MARCAÇÃO');
-        console.log('🔧 Botão "Beneficiar Aluno" disponível para quase-vencedores');
-        console.log('📋 Regra: Sorteia número aleatório, se ninguém fizer BINGO, aluno é beneficiado');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se há sala selecionada ao carregar
+            const salaSelect = document.getElementById('salaSelect');
+            if (salaSelect.value) {
+                verificarSalaExistente();
+            }
+            
+            // Escutar mudanças no select para verificar sala
+            salaSelect.addEventListener('change', verificarSalaExistente);
+            
+            console.log('🎲 BINGO - Painel do Professor carregado!');
+            console.log('✅ O sistema preserva o estado da sala ao recarregar');
+            console.log('📌 Usando códigos fixos de turma (como no STOP)');
+            console.log('✅ BINGO só declarado se SORTEIO + MARCAÇÃO');
+            console.log('🔧 Botão "Beneficiar Aluno" disponível para quase-vencedores');
+        });
     </script>
 </body>
 </html>
