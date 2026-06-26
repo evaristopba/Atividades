@@ -824,7 +824,7 @@
         }
 
         // ============================================
-        // ⭐ MARCAR NÚMERO - APENAS O ÚLTIMO SORTEADO
+        // MARCAR NÚMERO - APENAS O ÚLTIMO SORTEADO
         // ============================================
         function marcarNumero(r, c, val) {
             // Verifica se há números sorteados
@@ -870,7 +870,7 @@
                 }
             });
 
-            // ⭐ PERMITIDO: Marcar o número atual
+            // PERMITIDO: Marcar o número atual
             minhasMarcacoes[r][c] = true;
             
             db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
