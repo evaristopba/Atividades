@@ -659,17 +659,19 @@
         }
 
         // ============================================
-        // ATRIBUIR CARTELA
+        // ⭐ ATRIBUIR CARTELA - PRIMEIRA DISPONÍVEL (CORRIGIDO)
         // ============================================
         function atribuirCartela(sessao, nome) {
             const participantes = sessao.participantes || {};
             
+            // Verificar se o nome já existe
             for (const [id, data] of Object.entries(participantes)) {
                 if (data.nome === nome) {
                     return { id, data, jaExistia: true };
                 }
             }
 
+            // Procurar cartela disponível (NÃO ocupada)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
                 const isOcupada = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
@@ -682,6 +684,7 @@
                 return null;
             }
 
+            // ⭐⭐⭐ CORREÇÃO: Pegar a PRIMEIRA cartela disponível (índice 0)
             const { id, data } = cartelasDisponiveis[0];
             return { id, data, jaExistia: false };
         }
@@ -1073,6 +1076,7 @@
         console.log('🎲 BINGO - Painel do Aluno carregado!');
         console.log('⚠️ Só pode marcar o número sorteado AGORA (bloqueia "comer barriga")');
         console.log('📌 Verificação: SORTEIO + MARCAÇÃO para declarar BINGO');
+        console.log('✅ Atribuição: PRIMEIRA cartela disponível (corrigido)');
     </script>
 </body>
 </html>
