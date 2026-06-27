@@ -983,7 +983,7 @@
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <a href="#" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0;">← Voltar</a>
+                    <a href="#" id="btnVoltar" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0; display: none;">← Voltar</a>
                     <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
                 </div>
                 <div class="sync-status">
@@ -1710,6 +1710,12 @@
             sessaoId = sala;
             meuNome = nome;
 
+            // Esconder o botão Voltar definitivamente ao começar a jogar
+            const btnVoltar = document.getElementById('btnVoltar');
+            if (btnVoltar) {
+                btnVoltar.style.display = 'none';
+            }
+
             // Inicia o listener de forma dinâmica, que lidará tanto com a entrada
             // inicial quanto com as atualizações em tempo real (como expansão de vagas!)
             iniciarListenerUnico(sala);
@@ -1751,6 +1757,13 @@
 
                 const totalAlunos = sessao.totalAlunos || 0;
 
+                // Se o aluno já tem ID mas por algum motivo não está mais na lista de participantes da sessão,
+                // significa que ele foi limpo ou removido. Resetamos o ID para forçar um novo registro transparente.
+                if (alunoId && sessao.participantes && !sessao.participantes[alunoId]) {
+                    console.log('⚠️ Aluno ID local não encontrado nos participantes do Firebase. Forçando re-registro...');
+                    alunoId = null;
+                }
+
                 // Se o aluno ainda não tem ID associado nesta sessão, tentamos atribuir
                 if (!alunoId) {
                     const resultado = atribuirCartela(sessao, meuNome);
@@ -1775,17 +1788,23 @@
                     const { id: alunoIdEncontrado, data, jaExistia } = resultado;
                     alunoId = alunoIdEncontrado;
 
-                    if (jaExistia) {
+                    if (data && data.cartela) {
+                        // Se o slot já possui uma cartela pré-alocada (caso padrão de pré-geração pelo professor),
+                        // nós a usamos diretamente para evitar re-geração no cliente e inconsistências.
                         minhaCartela = data.cartela;
                         minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                         isWinner = data.venceu || false;
-                        
-                        if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
-                            sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(meuNome);
+
+                        // Atualiza apenas o nome no Firebase de forma transparente para ocupar a vaga
+                        sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(meuNome);
+
+                        if (jaExistia) {
+                            showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
+                        } else {
+                            showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
                         }
-                        
-                        showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
                     } else {
+                        // Caso extremo de contingência: se o slot não tem cartela pré-gerada, criamos uma nova
                         const cartela = gerarCartelaUnica(sessao.participantes || {});
                         const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                         marcacoes[2][2] = true;
@@ -1816,10 +1835,13 @@
                 
                 // --- ATUALIZAR NÚMEROS CHAMADOS ---
                 if (sessao.numerosSorteados) {
-                    numerosChamados = sessao.numerosSorteados;
+                    numerosChamados = [...sessao.numerosSorteados];
                     ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
-                    atualizarNumerosChamados();
+                } else {
+                    numerosChamados = [];
+                    ultimoNumeroSorteado = null;
                 }
+                atualizarNumerosChamados();
 
                 // --- DETECÇÃO DE RESET / NOVA RODADA ---
                 if (novoResetToken !== ultimoResetToken && ultimoResetToken !== null) {
@@ -1857,14 +1879,14 @@
                     }
                 }
                 
-                if (novoResetToken && ultimoResetToken === null) {
+                if (ultimoResetToken === null) {
                     ultimoResetToken = novoResetToken;
                 }
 
                 if (sessao.status === 'aguardando') {
-                    // Restaura o HTML da espera normal se ele foi sobrescrito pela mensagem de sala lotada
+                    // Restaura o HTML da espera normal se ele foi sobrescrito pela mensagem de sala lotada ou finalizada
                     const aguardandoDiv = document.getElementById('aguardando');
-                    if (aguardandoDiv.innerHTML.includes('Sala lotada!') || aguardandoDiv.innerHTML.includes('Jogo finalizado') || aguardandoDiv.innerHTML.includes('Sessão encerrada')) {
+                    if (!aguardandoDiv.innerHTML.includes('Aguardando o professor iniciar')) {
                         aguardandoDiv.innerHTML = `
                             <span class="status-icon">⏳</span>
                             <h2>Aguardando o professor iniciar...</h2>
@@ -1968,6 +1990,7 @@
         // RENDERIZAR CARTELA
         // ============================================
         function renderizarCartela() {
+            if (!minhaCartela || !minhasMarcacoes) return;
             const grid = document.getElementById('cartelaGrid');
             let html = '';
 
@@ -2144,7 +2167,7 @@
                         if (typeof val === 'number') {
                             const cell = document.getElementById(`cell_${r}_${c}`);
                             if (cell) {
-                                const isMarked = minhasMarcacoes[r][c];
+                                const isMarked = minhasMarcacoes ? minhasMarcacoes[r][c] : false;
                                 const isSorteado = numerosChamados.includes(val);
                                 const isUltimo = val === ultimoNumeroSorteado;
                                 
@@ -2372,9 +2395,33 @@
         }
 
         // ============================================
+        // VISIBILIDADE DO BOTÃO VOLTAR POR AMBIENTE
+        // ============================================
+        function configurarBotaoVoltar() {
+            const btnVoltar = document.getElementById('btnVoltar');
+            if (!btnVoltar) return;
+
+            const hostname = window.location.hostname;
+            const isLocal = hostname === 'localhost' || 
+                            hostname === '127.0.0.1' || 
+                            hostname === '' ||
+                            hostname.includes('ais-dev-') || 
+                            hostname.includes('ais-pre-') || 
+                            window.location.protocol === 'file:';
+
+            if (isLocal) {
+                btnVoltar.style.display = 'inline-block';
+            } else {
+                btnVoltar.style.display = 'none';
+            }
+        }
+
+        // ============================================
         // INICIALIZAÇÃO
         // ============================================
         async function init() {
+            configurarBotaoVoltar();
+
             const params = new URLSearchParams(window.location.search);
             let sala = params.get('sala');
 
