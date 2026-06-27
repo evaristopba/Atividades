@@ -983,7 +983,7 @@
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <a href="#" class="back-btn" onclick="window.location.href='BAluno-GM.html'" style="margin-bottom: 0;">← Voltar</a>
+                    <a href="#" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0;">← Voltar</a>
                     <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
                 </div>
                 <div class="sync-status">
@@ -1106,12 +1106,43 @@
             </div>
 
             <div class="input-group" style="margin-bottom: 20px; text-align: left;">
-                <label for="codigoSalaManual" style="display: block; color: #d4e3e8; font-size: 0.85rem; font-weight: 500; margin-bottom: 5px;">Digite o código da sala manualmente:</label>
-                <input type="text" id="codigoSalaManual" placeholder="Ex: sala_1" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #3d6b7a; background: #0d1f26; color: #f2e9d0; font-size: 1rem; outline: none; transition: all 0.3s;">
+                <label for="codigoSalaManual" style="display: block; color: #d4e3e8; font-size: 0.85rem; font-weight: 500; margin-bottom: 5px;">Selecione sua Turma/Sala:</label>
+                <select id="codigoSalaManual" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #3d6b7a; background: #0d1f26; color: #f2e9d0; font-size: 1rem; outline: none; transition: all 0.3s;">
+                    <option value="" disabled selected>-- Escolha sua turma --</option>
+                    <optgroup label="Escola Capitão">
+                        <option value="1a-cp">1º ano A - Manhã</option>
+                        <option value="1b-cp">1º ano B - Manhã</option>
+                        <option value="1c-cp">1º ano C - Manhã</option>
+                        <option value="2a-cp">2º ano A - Manhã</option>
+                        <option value="2b-cp">2º ano B - Manhã</option>
+                        <option value="2c-cp">2º ano C - Manhã</option>
+                        <option value="3a-cp">3º ano A - Manhã</option>
+                        <option value="3b-cp">3º ano B - Manhã</option>
+                        <option value="3c-cp">3º ano C - Manhã</option>
+                        <option value="4a-cp">4º ano A - Manhã</option>
+                        <option value="4b-cp">4º ano B - Tarde</option>
+                        <option value="5a-cp">5º ano A - Manhã</option>
+                        <option value="5b-cp">5º ano B - Manhã</option>
+                        <option value="5c-cp">5º ano C - Tarde</option>
+                    </optgroup>
+                    <optgroup label="Escola Thereza">
+                        <option value="1a-th">1º ano A - Manhã</option>
+                        <option value="1b-th">1º ano B - Tarde</option>
+                        <option value="2a-th">2º ano A - Manhã</option>
+                        <option value="2b-th">2º ano B - Manhã</option>
+                        <option value="3a-th">3º ano A - Manhã</option>
+                        <option value="3b-th">3º ano B - Manhã</option>
+                        <option value="4a-th">4º ano A - Manhã</option>
+                        <option value="4b-th">4º ano B - Manhã</option>
+                        <option value="4c-th">4º ano C - Tarde</option>
+                        <option value="5a-th">5º ano A - Manhã</option>
+                        <option value="5b-th">5º ano B - Tarde</option>
+                    </optgroup>
+                </select>
             </div>
             
             <div class="btn-group" style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-                <button class="btn btn-confirmar" id="btnConfirmarSalaManual" style="min-width: 140px; padding: 12px 28px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s; background: #d4a373; color: #1a2f3a; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">✅ Entrar com Código</button>
+                <button class="btn btn-confirmar" id="btnConfirmarSalaManual" style="min-width: 140px; padding: 12px 28px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s; background: #d4a373; color: #1a2f3a; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">✅ Entrar na Turma</button>
             </div>
         </div>
     </div>
@@ -2208,12 +2239,33 @@
                 const sessoesRef = db.ref('bingo/sessoes');
                 
                 const handleUpdate = (snapshot) => {
+                    const updateDropdownIndicators = (sessoesObj) => {
+                        const options = inputManual.querySelectorAll('option');
+                        options.forEach(opt => {
+                            if (!opt.value) return;
+                            if (!opt.dataset.originalText) {
+                                opt.dataset.originalText = opt.textContent;
+                            }
+                            const code = opt.value;
+                            const isOnline = sessoesObj && sessoesObj[code] && sessoesObj[code].status !== 'finalizada';
+                            if (isOnline) {
+                                opt.textContent = `🟢 ${opt.dataset.originalText} (ONLINE)`;
+                                opt.style.color = '#6bcb77';
+                            } else {
+                                opt.textContent = `🔴 ${opt.dataset.originalText} (Offline)`;
+                                opt.style.color = '#8aaab5';
+                            }
+                        });
+                    };
+
                     if (!snapshot.exists()) {
                         container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                        updateDropdownIndicators(null);
                         return;
                     }
                     
                     const sessoes = snapshot.val();
+                    updateDropdownIndicators(sessoes);
                     let html = '';
                     let encontrouAtiva = false;
                     
@@ -2276,35 +2328,15 @@
                 };
                 
                 const handleManualSubmit = function() {
-                    let cod = inputManual.value.trim();
+                    let cod = inputManual.value;
                     if (!cod) {
-                        showToast('⚠️ Digite o código da sala!', 'error');
+                        showToast('⚠️ Selecione a sua Turma/Sala!', 'error');
                         return;
-                    }
-                    
-                    // Se o usuário colou um link completo, extrair o código da sala
-                    if (cod.includes('sala=')) {
-                        try {
-                            const urlParts = cod.split('sala=');
-                            if (urlParts.length > 1) {
-                                cod = urlParts[1].split('&')[0];
-                            }
-                        } catch (e) {
-                            console.error('Erro ao extrair código do link:', e);
-                        }
-                    } else if (cod.includes('/') || cod.includes('\\')) {
-                        // Se colou um caminho ou link genérico, tentar extrair a última parte
-                        try {
-                            const lastPart = cod.substring(cod.lastIndexOf('/') + 1);
-                            if (lastPart) {
-                                cod = lastPart;
-                            }
-                        } catch (e) {}
                     }
                     
                     db.ref(`bingo/sessoes/${cod}`).once('value', (snapshot) => {
                         if (!snapshot.exists()) {
-                            showToast('❌ Código da sala não encontrado!', 'error');
+                            showToast('❌ Esta turma não está com o Bingo aberto! Aguarde o professor iniciar.', 'error');
                             return;
                         }
                         
@@ -2321,7 +2353,7 @@
                         }
                         
                         if (ocupados >= totalVagas) {
-                            showToast('⚠️ Esta sala está lotada!', 'error');
+                            showToast('⚠️ Esta sala está lotada! Peça para o professor expandir as vagas.', 'error');
                             return;
                         }
                         
@@ -2333,11 +2365,7 @@
                 };
                 
                 btnManual.onclick = handleManualSubmit;
-                inputManual.onkeydown = function(e) {
-                    if (e.key === 'Enter') {
-                        handleManualSubmit();
-                    }
-                };
+                inputManual.onchange = handleManualSubmit;
                 
                 abrirModalSelecaoSalas();
             });
