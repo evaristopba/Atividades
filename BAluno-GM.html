@@ -990,6 +990,7 @@
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <a href="#" id="btnVoltar" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0; display: none;">← Voltar</a>
                     <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
+                    <button id="btnSairSala" onclick="confirmarSairSessao()" style="display: none; padding: 6px 14px; font-size: 0.85rem; background: rgba(220, 53, 69, 0.15); border: 1px solid #e06666; color: #ff8a8a; border-radius: 20px; cursor: pointer; font-weight: 600; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">🚪 Sair da Sala</button>
                 </div>
                 <div class="sync-status">
                     <span class="sync-dot"></span>
@@ -1721,6 +1722,12 @@
                 btnVoltar.style.display = 'none';
             }
 
+            // Exibir o botão de Sair da Sala
+            const btnSairSala = document.getElementById('btnSairSala');
+            if (btnSairSala) {
+                btnSairSala.style.display = 'inline-flex';
+            }
+
             // Inicia o listener de forma dinâmica, que lidará tanto com a entrada
             // inicial quanto com as atualizações em tempo real (como expansão de vagas!)
             iniciarListenerUnico(sala);
@@ -2283,12 +2290,49 @@
         }
 
         // ============================================
+        // CONFIRMAR SAÍDA DA SALA (SAÍDA VOLUNTÁRIA)
+        // ============================================
+        function confirmarSairSessao() {
+            mostrarModalSaida(
+                '🚪',
+                'Sair da Sala?',
+                'Ao sair da sala voluntariamente, sua vaga será liberada e sua cartela poderá ser atribuída a outro colega.',
+                '⚠️ Seus pontos e cartela atuais nesta rodada serão limpos.',
+                async function() {
+                    if (sessaoId && alunoId) {
+                        try {
+                            const numStr = alunoId.replace('aluno_', '');
+                            const cleanMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                            cleanMarcacoes[2][2] = true; // Espaço central BINGO livre
+
+                            // Libera a vaga no Firebase alterando o nome de volta para o padrão de vaga disponível
+                            await db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                                nome: `Aluno ${numStr}`,
+                                marcacoes: cleanMarcacoes,
+                                venceu: false
+                            });
+                        } catch (err) {
+                            console.error("Erro ao liberar vaga no Firebase:", err);
+                        }
+                    }
+                    voltarParaLista();
+                }
+            );
+        }
+
+        // ============================================
         // VOLTAR PARA LISTA
         // ============================================
         function voltarParaLista() {
             if (sessaoListenerRef) {
                 sessaoListenerRef.off();
                 sessaoListenerRef = null;
+            }
+
+            // Esconder o botão de Sair da Sala
+            const btnSairSala = document.getElementById('btnSairSala');
+            if (btnSairSala) {
+                btnSairSala.style.display = 'none';
             }
             
             // Limpa o sessionStorage ao sair voluntariamente
