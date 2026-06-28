@@ -102,6 +102,11 @@
             animation: pulse-text 1s ease-in-out infinite alternate;
         }
 
+        .status-bar .bingo-status.finished {
+            color: #e06666;
+            background: rgba(224, 102, 102, 0.15);
+        }
+
         @keyframes pulse-text {
             from { transform: scale(1); }
             to { transform: scale(1.05); }
@@ -1762,6 +1767,22 @@
                 if (alunoId && sessao.participantes && !sessao.participantes[alunoId]) {
                     console.log('⚠️ Aluno ID local não encontrado nos participantes do Firebase. Forçando re-registro...');
                     alunoId = null;
+                    sessionStorage.removeItem('bingo_aluno_id');
+                }
+
+                // Sincronizar nome no Firebase e carregar cartela local se necessário (evita aluno 'vago' e cartela vazia)
+                if (alunoId && sessao.participantes && sessao.participantes[alunoId]) {
+                    const dataPart = sessao.participantes[alunoId];
+                    if (!dataPart.nome || dataPart.nome.trim() === '' || dataPart.nome !== meuNome) {
+                        console.log('✍️ Sincronizando nome do aluno no Firebase...');
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}/nome`).set(meuNome);
+                    }
+                    if (!minhaCartela && dataPart.cartela) {
+                        minhaCartela = dataPart.cartela;
+                        minhasMarcacoes = dataPart.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        isWinner = dataPart.venceu || false;
+                        renderizarCartela();
+                    }
                 }
 
                 // Se o aluno ainda não tem ID associado nesta sessão, tentamos atribuir
@@ -1787,6 +1808,11 @@
                     // Se encontrou vaga, associa o aluno a ela
                     const { id: alunoIdEncontrado, data, jaExistia } = resultado;
                     alunoId = alunoIdEncontrado;
+
+                    // Salva as credenciais de forma segura no sessionStorage da aba corrente (perfeito para ambiente escolar)
+                    sessionStorage.setItem('bingo_aluno_sala', sala);
+                    sessionStorage.setItem('bingo_aluno_nome', meuNome);
+                    sessionStorage.setItem('bingo_aluno_id', alunoId);
 
                     if (data && data.cartela) {
                         // Se o slot já possui uma cartela pré-alocada (caso padrão de pré-geração pelo professor),
@@ -1883,39 +1909,76 @@
                     ultimoResetToken = novoResetToken;
                 }
 
-                if (sessao.status === 'aguardando') {
-                    // Restaura o HTML da espera normal se ele foi sobrescrito pela mensagem de sala lotada ou finalizada
-                    const aguardandoDiv = document.getElementById('aguardando');
-                    if (!aguardandoDiv.innerHTML.includes('Aguardando o professor iniciar')) {
-                        aguardandoDiv.innerHTML = `
-                            <span class="status-icon">⏳</span>
-                            <h2>Aguardando o professor iniciar...</h2>
-                            <div class="loading-spinner"></div>
-                            <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
-                                Sala: <strong id="aguardandoSala">${salaNome}</strong>
-                            </p>
-                            <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera">👤 ${meuNome}</p>
-                        `;
+                // --- CONTROLE DE VISIBILIDADE DAS TELAS ---
+                if (alunoId && minhaCartela) {
+                    // O aluno já está registrado e tem cartela! Ele deve ver o painel de jogo ativo
+                    document.getElementById('aguardando').style.display = 'none';
+                    document.getElementById('jogoAtivo').style.display = 'block';
+                    
+                    // Atualizar textos e status conforme o estado atual do jogo
+                    const instrucaoEl = document.querySelector('.instrucao');
+                    const ultimoNumeroEl = document.getElementById('ultimoNumero');
+                    
+                    if (sessao.status === 'aguardando') {
+                        if (instrucaoEl) {
+                            instrucaoEl.innerHTML = `⏳ <strong>Nova rodada iniciada!</strong> Aguardando o professor sortear o primeiro número.`;
+                        }
+                        if (ultimoNumeroEl) {
+                            ultimoNumeroEl.innerHTML = '🎯 ---';
+                        }
+                    } else if (sessao.status === 'finalizada') {
+                        if (instrucaoEl) {
+                            instrucaoEl.innerHTML = `🔴 <strong>Jogo finalizado!</strong> O professor encerrou esta rodada.`;
+                        }
+                        if (ultimoNumeroEl) {
+                            ultimoNumeroEl.innerHTML = '⏹️ FIM';
+                        }
+                    } else {
+                        // Ativa
+                        if (instrucaoEl) {
+                            instrucaoEl.innerHTML = `💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!<br><small style="color: #dc3545;">⚠️ Só pode marcar o número sorteado AGORA</small>`;
+                        }
+                        if (ultimoNumeroEl) {
+                            ultimoNumeroEl.innerHTML = `🎯 ${ultimoNumeroSorteado !== null ? ultimoNumeroSorteado : '---'}`;
+                        }
                     }
+                } else {
+                    // Se o aluno ainda não está registrado, mostramos a tela de espera correspondente ao status da sessão
+                    if (sessao.status === 'aguardando') {
+                        const aguardandoDiv = document.getElementById('aguardando');
+                        if (!aguardandoDiv.innerHTML.includes('Aguardando o professor iniciar')) {
+                            aguardandoDiv.innerHTML = `
+                                <span class="status-icon">⏳</span>
+                                <h2>Aguardando o professor iniciar...</h2>
+                                <div class="loading-spinner"></div>
+                                <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                                    Sala: <strong id="aguardandoSala">${salaNome}</strong>
+                                </p>
+                                <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera">👤 ${meuNome}</p>
+                            `;
+                        }
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return;
+                    }
+
+                    if (sessao.status === 'finalizada') {
+                        showToast('🔴 O jogo foi finalizado!', 'error');
+                        document.getElementById('aguardando').innerHTML = `
+                            <span class="status-icon">🔴</span>
+                            <h2>Jogo finalizado</h2>
+                            <p>O professor finalizou esta sessão.</p>
+                        `;
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return;
+                    }
+                    
+                    // Caso o jogo esteja ativo mas o aluno por algum motivo esteja sem registro
                     document.getElementById('aguardando').style.display = 'block';
                     document.getElementById('jogoAtivo').style.display = 'none';
                     return;
                 }
-
-                if (sessao.status === 'finalizada') {
-                    showToast('🔴 O jogo foi finalizado!', 'error');
-                    document.getElementById('aguardando').innerHTML = `
-                        <span class="status-icon">🔴</span>
-                        <h2>Jogo finalizado</h2>
-                        <p>O professor finalizou esta sessão.</p>
-                    `;
-                    document.getElementById('jogoAtivo').style.display = 'none';
-                    document.getElementById('aguardando').style.display = 'block';
-                    return;
-                }
-
-                document.getElementById('aguardando').style.display = 'none';
-                document.getElementById('jogoAtivo').style.display = 'block';
 
                 if (sessao.participantes && sessao.participantes[alunoId]) {
                     const data = sessao.participantes[alunoId];
@@ -1961,7 +2024,9 @@
                         }
                     }
 
-                    if (data.cartela && data.cartela !== minhaCartela) {
+                    const cartelaStrOld = minhaCartela ? minhaCartela.flat().join(',') : '';
+                    const cartelaStrNew = data.cartela ? data.cartela.flat().join(',') : '';
+                    if (data.cartela && cartelaStrNew !== cartelaStrOld) {
                         minhaCartela = data.cartela;
                         renderizarCartela();
                     }
@@ -2011,7 +2076,7 @@
                     
                     const displayVal = isCenter ? 'B' : val;
                     
-                    const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c}, ${val})"`;
+                    const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c})"`;
                     
                     html += `<div class="${cls}" id="cell_${r}_${c}" ${onclick}>${displayVal}</div>`;
                 }
@@ -2031,7 +2096,10 @@
         // ============================================
         // MARCAR NÚMERO COM VALIDACÃO DO ULTIMO SORTEADO
         // ============================================
-        function marcarNumero(r, c, val) {
+        function marcarNumero(r, c) {
+            if (!minhaCartela) return;
+            const val = minhaCartela[r][c];
+
             if (isWinner) {
                 showToast('🏆 Você já venceu! Parabéns! 🎉', 'info');
                 return;
@@ -2193,9 +2261,17 @@
         // ============================================
         function atualizarStatus() {
             const statusEl = document.getElementById('statusBingo');
+            if (!statusEl) return;
+            
             if (isWinner) {
                 statusEl.textContent = '🏆 BINGO! Você venceu! 🎉';
                 statusEl.className = 'bingo-status winner';
+            } else if (jogoFinalizado) {
+                statusEl.textContent = '⏹️ Jogo finalizado';
+                statusEl.className = 'bingo-status finished';
+            } else if (ultimoNumeroSorteado === null && (!numerosChamados || numerosChamados.length === 0)) {
+                statusEl.textContent = '⏳ Aguardando sorteio...';
+                statusEl.className = 'bingo-status';
             } else {
                 let totalMarked = 0;
                 if (minhasMarcacoes) {
@@ -2214,6 +2290,11 @@
                 sessaoListenerRef.off();
                 sessaoListenerRef = null;
             }
+            
+            // Limpa o sessionStorage ao sair voluntariamente
+            sessionStorage.removeItem('bingo_aluno_sala');
+            sessionStorage.removeItem('bingo_aluno_nome');
+            sessionStorage.removeItem('bingo_aluno_id');
             
             sessaoId = null;
             alunoId = null;
@@ -2446,6 +2527,19 @@
             }
 
             configurarDetectorSaida();
+
+            // Tentar recuperar do sessionStorage primeiro (específico desta aba, seguro para laboratório escolar)
+            const cachedSala = sessionStorage.getItem('bingo_aluno_sala');
+            const cachedNome = sessionStorage.getItem('bingo_aluno_nome');
+            const cachedId = sessionStorage.getItem('bingo_aluno_id');
+
+            if (cachedSala === sala && cachedNome) {
+                console.log('⚡ Sessão ativa restaurada via sessionStorage:', cachedNome, cachedId || 'Sem ID salvo');
+                alunoId = cachedId || null;
+                meuNome = cachedNome;
+                inicializar(sala, cachedNome);
+                return;
+            }
 
             const nome = await inputTexto(
                 '🎯 Entrar no BINGO',
