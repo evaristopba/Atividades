@@ -1030,8 +1030,7 @@
             </div>
 
             <div class="instrucao">
-                💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!
-                <br><small style="color: #dc3545;">⚠️ Só pode marcar o número sorteado AGORA</small>
+                💡 <strong>Clique</strong> nos números sorteados para marcá-los na sua cartela!
             </div>
 
             <div class="card-container">
@@ -1280,6 +1279,8 @@
         let ultimoNumeroSorteado = null;
         let ultimoResetToken = null;
         let jogoFinalizado = false;
+        let heartbeatInterval = null;
+        let heartbeatIniciado = false;
 
         // ============================================
         // TOAST
@@ -1741,6 +1742,11 @@
                 sessaoListenerRef.off();
                 sessaoListenerRef = null;
             }
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+            }
+            heartbeatIniciado = false;
 
             const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
             sessaoListenerRef = sessaoRefLocal;
@@ -1769,26 +1775,89 @@
 
                 const totalAlunos = sessao.totalAlunos || 0;
 
-                // Se o aluno já tem ID mas por algum motivo não está mais na lista de participantes da sessão,
+                // Se o aluno já tem ID mas por algum motivo não está mais na lista de participantes della sessão,
                 // significa que ele foi limpo ou removido. Resetamos o ID para forçar um novo registro transparente.
-                if (alunoId && sessao.participantes && !sessao.participantes[alunoId]) {
-                    console.log('⚠️ Aluno ID local não encontrado nos participantes do Firebase. Forçando re-registro...');
-                    alunoId = null;
-                    sessionStorage.removeItem('bingo_aluno_id');
+                if (alunoId && sessao.participantes) {
+                    if (!sessao.participantes[alunoId]) {
+                        console.log('⚠️ Aluno ID local não encontrado nos participantes do Firebase. Forçando re-registro...');
+                        alunoId = null;
+                        sessionStorage.removeItem('bingo_aluno_id');
+                        heartbeatIniciado = false;
+                        if (heartbeatInterval) {
+                            clearInterval(heartbeatInterval);
+                            heartbeatInterval = null;
+                        }
+                    } else {
+                        // Se o slot foi reocupado por outro aluno real, desassocia o ID atual para pegar uma vaga livre
+                        const dataPart = sessao.participantes[alunoId];
+                        const nomeNoFirebase = dataPart.nome || '';
+                        const isVagaDisponivel = !nomeNoFirebase || nomeNoFirebase.trim() === '' || nomeNoFirebase.startsWith('Aluno ');
+                        if (!isVagaDisponivel && nomeNoFirebase !== meuNome) {
+                            console.log('⚠️ Vaga antiga ocupada por outro aluno. Resetando ID para buscar nova vaga...');
+                            alunoId = null;
+                            sessionStorage.removeItem('bingo_aluno_id');
+                            heartbeatIniciado = false;
+                            if (heartbeatInterval) {
+                                clearInterval(heartbeatInterval);
+                                heartbeatInterval = null;
+                            }
+                        }
+                    }
                 }
 
                 // Sincronizar nome no Firebase e carregar cartela local se necessário (evita aluno 'vago' e cartela vazia)
                 if (alunoId && sessao.participantes && sessao.participantes[alunoId]) {
+                    if (!heartbeatIniciado) {
+                        configurarOnDisconnect(alunoId, sessaoId);
+                        iniciarHeartbeat(alunoId, sessaoId);
+                        heartbeatIniciado = true;
+                    }
                     const dataPart = sessao.participantes[alunoId];
-                    if (!dataPart.nome || dataPart.nome.trim() === '' || dataPart.nome !== meuNome) {
+                    const nomeNoFirebase = dataPart.nome || '';
+
+                    // Se o professor removeu este aluno ativamente (flag excluído)
+                    if (dataPart.excluido === true) {
+                        console.log('🚪 O professor liberou esta vaga ativamente. Voltando para a entrada...');
+                        cancelarOnDisconnect(alunoId, sessaoId);
+                        alunoId = null;
+                        sessionStorage.removeItem('bingo_aluno_id');
+                        minhaCartela = null;
+                        minhasMarcacoes = null;
+                        heartbeatIniciado = false;
+                        if (heartbeatInterval) {
+                            clearInterval(heartbeatInterval);
+                            heartbeatInterval = null;
+                        }
+                        showToast('🚪 Sua vaga foi liberada pelo professor!', 'warning');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                        return;
+                    }
+
+                    if (!nomeNoFirebase || nomeNoFirebase.trim() === '' || nomeNoFirebase !== meuNome || dataPart.excluido) {
                         console.log('✍️ Sincronizando nome do aluno no Firebase...');
-                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}/nome`).set(meuNome);
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                            nome: meuNome,
+                            excluido: null
+                        });
                     }
                     if (!minhaCartela && dataPart.cartela) {
                         minhaCartela = dataPart.cartela;
                         minhasMarcacoes = dataPart.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                         isWinner = dataPart.venceu || false;
                         renderizarCartela();
+                    }
+
+                    if (meuNome) {
+                        const nomeAlunoEl = document.getElementById('nomeAluno');
+                        const nomeEsperaEl = document.getElementById('nomeEspera');
+                        if (nomeAlunoEl && nomeAlunoEl.textContent !== meuNome) {
+                            nomeAlunoEl.textContent = meuNome;
+                        }
+                        if (nomeEsperaEl && nomeEsperaEl.textContent !== `👤 ${meuNome}`) {
+                            nomeEsperaEl.textContent = `👤 ${meuNome}`;
+                        }
                     }
                 }
 
@@ -1825,15 +1894,32 @@
                         // Se o slot já possui uma cartela pré-alocada (caso padrão de pré-geração pelo professor),
                         // nós a usamos diretamente para evitar re-geração no cliente e inconsistências.
                         minhaCartela = data.cartela;
-                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                        isWinner = data.venceu || false;
-
-                        // Atualiza apenas o nome no Firebase de forma transparente para ocupar a vaga
-                        sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(meuNome);
 
                         if (jaExistia) {
+                            minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                            isWinner = data.venceu || false;
+
+                            // Atualiza apenas o nome no Firebase de forma transparente para ocupar a vaga e limpa exclusão
+                            sessaoRefLocal.child(`participantes/${alunoId}`).update({
+                                nome: meuNome,
+                                excluido: null
+                            });
                             showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
                         } else {
+                            // É um novo aluno ocupando uma vaga que estava disponível.
+                            // Devemos limpar as marcações antigas para que ele comece do zero!
+                            const cleanMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                            cleanMarcacoes[2][2] = true; // Centro livre
+                            minhasMarcacoes = cleanMarcacoes;
+                            isWinner = false;
+
+                            // Atualiza o nome, as marcações limpas, o vencedor e limpa o status de exclusão no Firebase
+                            sessaoRefLocal.child(`participantes/${alunoId}`).update({
+                                nome: meuNome,
+                                marcacoes: cleanMarcacoes,
+                                venceu: false,
+                                excluido: null
+                            });
                             showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
                         }
                     } else {
@@ -1846,7 +1932,8 @@
                             nome: meuNome,
                             cartela: cartela,
                             marcacoes: marcacoes,
-                            venceu: false
+                            venceu: false,
+                            excluido: null
                         };
 
                         sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
@@ -1855,6 +1942,12 @@
                         isWinner = false;
                         
                         showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                    }
+
+                    if (!heartbeatIniciado) {
+                        configurarOnDisconnect(alunoId, sessaoId);
+                        iniciarHeartbeat(alunoId, sessaoId);
+                        heartbeatIniciado = true;
                     }
 
                     document.getElementById('nomeAluno').textContent = meuNome;
@@ -1894,12 +1987,20 @@
                         const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
                         const updateData = {
                             marcacoes: minhasMarcacoes,
-                            venceu: false
+                            venceu: false,
+                            heartbeat: Date.now()
                         };
                         if (!data.nome || data.nome.trim() === '') {
                             updateData.nome = meuNome;
                         }
                         alunoRef.update(updateData);
+                        
+                        if (meuNome) {
+                            const nomeAlunoEl = document.getElementById('nomeAluno');
+                            const nomeEsperaEl = document.getElementById('nomeEspera');
+                            if (nomeAlunoEl && nomeAlunoEl.textContent !== meuNome) nomeAlunoEl.textContent = meuNome;
+                            if (nomeEsperaEl && nomeEsperaEl.textContent !== `👤 ${meuNome}`) nomeEsperaEl.textContent = `👤 ${meuNome}`;
+                        }
                         
                         renderizarCartela();
                         atualizarStatus();
@@ -1943,7 +2044,7 @@
                     } else {
                         // Ativa
                         if (instrucaoEl) {
-                            instrucaoEl.innerHTML = `💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!<br><small style="color: #dc3545;">⚠️ Só pode marcar o número sorteado AGORA</small>`;
+                            instrucaoEl.innerHTML = `💡 <strong>Clique</strong> nos números sorteados para marcá-los na sua cartela!`;
                         }
                         if (ultimoNumeroEl) {
                             ultimoNumeroEl.innerHTML = `🎯 ${ultimoNumeroSorteado !== null ? ultimoNumeroSorteado : '---'}`;
@@ -2122,11 +2223,9 @@
                 return;
             }
             
-            const ultimoSorteado = numerosChamados[numerosChamados.length - 1];
-            
-            // --- BLOQUEAR TENTATIVAS DE MARCAR NÚMEROS NÃO SORTEADOS OU ANTIGOS ---
-            if (val !== ultimoSorteado) {
-                showToast('⚠️ Você só pode marcar o número sorteado AGORA!', 'error');
+            // --- BLOQUEAR TENTATIVAS DE MARCAR NÚMEROS NÃO SORTEADOS ---
+            if (!numerosChamados.includes(val)) {
+                showToast('⚠️ Este número ainda não foi sorteado!', 'error');
                 
                 for (let r2 = 0; r2 < 5; r2++) {
                     for (let c2 = 0; c2 < 5; c2++) {
@@ -2305,6 +2404,9 @@
                             const cleanMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                             cleanMarcacoes[2][2] = true; // Espaço central BINGO livre
 
+                            // Cancela as ações agendadas para perda de conexão súbita
+                            cancelarOnDisconnect(alunoId, sessaoId);
+
                             // Libera a vaga no Firebase alterando o nome de volta para o padrão de vaga disponível
                             await db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
                                 nome: `Aluno ${numStr}`,
@@ -2321,9 +2423,58 @@
         }
 
         // ============================================
+        // SISTEMA DE PRESENÇA / HEARTBEAT (FIREBASE)
+        // ============================================
+        function configurarOnDisconnect(alunoId, sessaoId) {
+            if (!alunoId || !sessaoId) return;
+            const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+
+            // Mantemos o nome do aluno reservado no Firebase para permitir reconexões seguras. 
+            // Apenas zeramos o heartbeat para indicar que ele está temporariamente offline.
+            alunoRef.child('heartbeat').onDisconnect().set(0);
+        }
+
+        function cancelarOnDisconnect(alunoId, sessaoId) {
+            if (!alunoId || !sessaoId) return;
+            const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+            alunoRef.child('heartbeat').onDisconnect().cancel();
+        }
+
+        function iniciarHeartbeat(alunoId, sessaoId) {
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+            }
+            
+            enviarHeartbeat(alunoId, sessaoId);
+
+            heartbeatInterval = setInterval(() => {
+                enviarHeartbeat(alunoId, sessaoId);
+            }, 5000);
+        }
+
+        function enviarHeartbeat(alunoId, sessaoId) {
+            if (!alunoId || !sessaoId) return;
+            db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}/heartbeat`).set(Date.now());
+        }
+
+        // Heartbeat instantâneo ao retornar o foco/ficar visível para contornar suspensão do navegador
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && alunoId && sessaoId) {
+                console.log('👀 Aba visível! Enviando heartbeat instantâneo de reconexão...');
+                enviarHeartbeat(alunoId, sessaoId);
+            }
+        });
+
+        // ============================================
         // VOLTAR PARA LISTA
         // ============================================
         function voltarParaLista() {
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+            }
+            heartbeatIniciado = false;
+
             if (sessaoListenerRef) {
                 sessaoListenerRef.off();
                 sessaoListenerRef = null;
@@ -2452,10 +2603,15 @@
                         `;
                     }
                     
+                    let novoHtml = '';
                     if (!encontrouAtiva) {
-                        container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                        novoHtml = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
                     } else {
-                        container.innerHTML = html;
+                        novoHtml = html;
+                    }
+                    
+                    if (container.innerHTML !== novoHtml) {
+                        container.innerHTML = novoHtml;
                     }
                 };
                 
