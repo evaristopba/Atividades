@@ -45,6 +45,17 @@
         .score-0 { background-color: #f8d7da; color: #721c24; } /* Vermelho para 0 pontos */
         .score-total { font-weight: bold; background-color: #e2e6ea; } /* Fundo para total */
 
+        /* ESTILOS DE IMPORTAÇÃO E RANKING */
+        #import-area { margin-top: 40px; text-align: left; }
+        .import-box { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+        .ranking-badge { display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 50%; font-weight: bold; color: white; }
+        .badge-1 { background-color: #ffc107; color: #212529; font-size: 1.2em; } /* Ouro */
+        .badge-2 { background-color: #c0c0c0; color: #212529; font-size: 1.1em; } /* Prata */
+        .badge-3 { background-color: #cd7f32; color: white; font-size: 1em; } /* Bronze */
+        .badge-other { background-color: #6c757d; color: white; font-size: 0.9em; }
+        .winner-row { background-color: #fffbeb !important; }
+        .winner-row td { border-color: #ffeeba; }
+
         /* ESTILOS DO MODAL CUSTOMIZADO */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -111,6 +122,7 @@
                 </label>
             </div>
             <button id="connect-button">Conectar à Sala</button>
+
         </div>
         <div id="game-controls">
             <hr>
@@ -139,6 +151,43 @@
                 </table>
             </div>
         </div>
+
+        <!-- Área de Importação e Consolidação de Classificação Geral -->
+        <div id="import-area">
+            <hr style="margin: 30px 0; border: 0; border-top: 2px dashed #ced4da;">
+            <h2>Classificação Geral de Rodadas (Importar XLSX)</h2>
+            <div class="import-box">
+                <p style="margin-top: 0; color: #495057; font-size: 1.1em; line-height: 1.5;">
+                    Arraste ou selecione uma ou mais planilhas (<strong>XLSX</strong>) exportadas nas rodadas anteriores para somar os pontos de cada aluno, classificá-los e apontar o grande vencedor da rodada ou da aula!
+                </p>
+                <input type="file" id="import-excel-input" multiple accept=".xlsx, .xls" style="font-size: 1em; padding: 12px; cursor: pointer; border: 1px dashed #007bff; border-radius: 6px; width: 100%; box-sizing: border-box; background: #e9f5ff; text-align: center;">
+                
+                <!-- Lista de verificação e resumo dos arquivos selecionados -->
+                <div id="import-files-summary" style="margin-top: 15px; text-align: left; background: white; border: 1px solid #ced4da; border-radius: 6px; padding: 15px; display: none;">
+                    <h4 style="margin: 0 0 10px 0; color: #495057;">📋 Arquivos Carregados e Validação:</h4>
+                    <ul id="import-files-list" style="margin: 0; padding-left: 20px; font-size: 0.95em; line-height: 1.6; color: #333;"></ul>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                    <button id="import-process-btn" style="background-color: #007bff; font-size: 1em; padding: 10px 20px;">Calcular Classificação</button>
+                    <button id="import-clear-btn" style="background-color: #6c757d; font-size: 1em; padding: 10px 20px;">Limpar Arquivos</button>
+                </div>
+            </div>
+            
+            <div id="ranking-area" style="display: none;">
+                <h3 style="color: #28a745; margin-top: 20px; font-size: 1.5em; text-align: center;">🏆 Tabela de Classificação Geral</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%; text-align: center;">Posição</th>
+                            <th>Apelido do Aluno</th>
+                            <th style="width: 25%; text-align: left;">Pontos Acumulados</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-tbody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -157,6 +206,33 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         let gameStateRef, answersRef;
+        const MAPA_SALA_NOME = {
+            "1a-cp": "Escola Capitão - 1º ano A - Manhã",
+            "1b-cp": "Escola Capitão - 1º ano B - Manhã",
+            "1c-cp": "Escola Capitão - 1º ano C - Manhã",
+            "2a-cp": "Escola Capitão - 2º ano A - Manhã",
+            "2b-cp": "Escola Capitão - 2º ano B - Manhã",
+            "2c-cp": "Escola Capitão - 2º ano C - Manhã",
+            "3a-cp": "Escola Capitão - 3º ano A - Manhã",
+            "3b-cp": "Escola Capitão - 3º ano B - Manhã",
+            "3c-cp": "Escola Capitão - 3º ano C - Manhã",
+            "4a-cp": "Escola Capitão - 4º ano A - Manhã",
+            "4b-cp": "Escola Capitão - 4º ano B - Tarde",
+            "5a-cp": "Escola Capitão - 5º ano A - Manhã",
+            "5b-cp": "Escola Capitão - 5º ano B - Manhã",
+            "5c-cp": "Escola Capitão - 5º ano C - Tarde",
+            "1a-th": "Escola Thereza - 1º ano A - Manhã",
+            "1b-th": "Escola Thereza - 1º ano B - Tarde",
+            "2a-th": "Escola Thereza - 2º ano A - Manhã",
+            "2b-th": "Escola Thereza - 2º ano B - Manhã",
+            "3a-th": "Escola Thereza - 3º ano A - Manhã",
+            "3b-th": "Escola Thereza - 3º ano B - Manhã",
+            "4a-th": "Escola Thereza - 4º ano A - Manhã",
+            "4b-th": "Escola Thereza - 4º ano B - Manhã",
+            "4c-th": "Escola Thereza - 4º ano C - Tarde",
+            "5a-th": "Escola Thereza - 5º ano A - Manhã",
+            "5b-th": "Escola Thereza - 5º ano B - Tarde"
+        };
         const CATEGORIAS_AVANCADO = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
         const CATEGORIAS_SIMPLES = ["Nome", "Cor", "Animal", "Brinquedo", "Comida"];
         const roomSetupDiv = document.getElementById('room-setup');
@@ -352,6 +428,16 @@
             const letter = document.getElementById('letter-display').textContent;
             const categorias = currentActiveCategories;
 
+            function getExcelColumnLetter(colIndex) {
+                let letter = "";
+                let temp = colIndex;
+                while (temp >= 0) {
+                    letter = String.fromCharCode((temp % 26) + 65) + letter;
+                    temp = Math.floor(temp / 26) - 1;
+                }
+                return letter;
+            }
+
             // Criar o cabeçalho personalizado
             const header = ["Apelido"];
             categorias.forEach(cat => {
@@ -362,6 +448,7 @@
 
             // Montar as linhas de dados
             const rows = [header];
+            let rowIndex = 1; // A primeira linha de dados é a linha 2 no Excel
             for (const nick in ultimDadosScored) {
                 const row = [nick];
                 const student = ultimDadosScored[nick];
@@ -369,8 +456,19 @@
                     row.push(student.answers[cat].palavra || "");
                     row.push(student.answers[cat].pontuacao);
                 });
-                row.push(student.totalPontos);
+                
+                const excelRow = rowIndex + 1;
+                const cellsToSum = [];
+                categorias.forEach((cat, idx) => {
+                    const colLetter = getExcelColumnLetter(2 + 2 * idx);
+                    cellsToSum.push(colLetter + excelRow);
+                });
+                
+                const formula = "SUM(" + cellsToSum.join(",") + ")";
+                row.push({ f: formula, v: student.totalPontos }); // v é o valor inicial padrão, f é a fórmula dinâmica
+                
                 rows.push(row);
+                rowIndex++;
             }
 
             const wb = XLSX.utils.book_new();
@@ -493,6 +591,258 @@
             ultimDadosScored = scoredResults; // SALVA PARA EXPORTAÇÃO
             exportButton.style.display = 'inline-block';
         }
+
+        // LÓGICA DE IMPORTAÇÃO E CLASSIFICAÇÃO DE PLANILHAS XLSX
+        const importExcelInput = document.getElementById('import-excel-input');
+        const importProcessBtn = document.getElementById('import-process-btn');
+        const importClearBtn = document.getElementById('import-clear-btn');
+        const rankingTbody = document.getElementById('ranking-tbody');
+        const rankingArea = document.getElementById('ranking-area');
+        const importFilesSummary = document.getElementById('import-files-summary');
+        const importFilesList = document.getElementById('import-files-list');
+        
+        let consolidatedScores = {};
+
+        // Escuta mudança de arquivo para apresentar sumário/validação
+        importExcelInput.addEventListener('change', () => {
+            const files = importExcelInput.files;
+            if (!files || files.length === 0) {
+                importFilesSummary.style.display = 'none';
+                importFilesList.innerHTML = '';
+                return;
+            }
+            
+            importFilesSummary.style.display = 'block';
+            importFilesList.innerHTML = '';
+            
+            // Pega a sala ativa atual (nome completo) se estiver conectado
+            const currentRoomEl = document.getElementById('current-room-id');
+            const currentActiveRoom = currentRoomEl ? currentRoomEl.textContent.trim() : "";
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileName = file.name;
+                
+                // Tenta extrair a sala e a letra do padrão: STOP_[NOME DA SALA]_Letra_[LETRA].xlsx
+                const regex = /^STOP_(.+)_Letra_(.+)\.xlsx$/i;
+                const match = fileName.match(regex);
+                
+                let detectedRoom = "Desconhecido";
+                let detectedLetter = "Desconhecida";
+                let isValidFormat = false;
+                
+                if (match) {
+                    detectedRoom = match[1].trim();
+                    detectedLetter = match[2].trim();
+                    isValidFormat = true;
+                }
+                
+                const li = document.createElement('li');
+                li.style.marginBottom = '8px';
+                
+                let statusBadge = '';
+                
+                if (!isValidFormat) {
+                    statusBadge = `<span style="background-color: #ffeef0; color: #d73a49; border: 1px solid #f9ced2; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-left: 5px;">⚠️ Formato Diferente</span>`;
+                    li.innerHTML = `📄 <strong>${fileName}</strong> ${statusBadge}<br>` +
+                                   `<span style="font-size: 0.9em; color: #6c757d;">Não foi possível identificar a sala ou a letra por este nome de arquivo.</span>`;
+                } else {
+                    const isSameRoom = currentActiveRoom && (detectedRoom.toLowerCase() === currentActiveRoom.toLowerCase());
+                    if (isSameRoom) {
+                        statusBadge = `<span style="background-color: #e2f5e5; color: #1e7e34; border: 1px solid #c3e6cb; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-left: 5px;">✔️ Mesma Sala</span>`;
+                    } else {
+                        statusBadge = `<span style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-left: 5px;">⚠️ Sala Diferente</span>`;
+                    }
+                    
+                    li.innerHTML = `📄 <strong>${fileName}</strong> ${statusBadge}<br>` +
+                                   `<span style="font-size: 0.9em; color: #555;">Sala: <strong style="color: #0056b3;">${detectedRoom}</strong> | Letra: <strong style="color: #28a745;">${detectedLetter}</strong></span>`;
+                }
+                
+                importFilesList.appendChild(li);
+            }
+        });
+
+        importProcessBtn.onclick = () => {
+            const files = importExcelInput.files;
+            if (!files || files.length === 0) {
+                showCustomModal("Atenção", "Por favor, selecione pelo menos um arquivo do Excel (.xlsx) antes de calcular.");
+                return;
+            }
+            
+            const currentRoomEl = document.getElementById('current-room-id');
+            const currentActiveRoom = currentRoomEl ? currentRoomEl.textContent.trim() : "";
+            let uniqueRoomsInImport = new Set();
+            let hasDifferentRoomWarning = false;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const match = file.name.match(/^STOP_(.+)_Letra_(.+)\.xlsx$/i);
+                if (match) {
+                    const detectedRoom = match[1].trim();
+                    uniqueRoomsInImport.add(detectedRoom.toLowerCase());
+                    if (currentActiveRoom && detectedRoom.toLowerCase() !== currentActiveRoom.toLowerCase()) {
+                        hasDifferentRoomWarning = true;
+                    }
+                } else {
+                    hasDifferentRoomWarning = true;
+                }
+            }
+            
+            // Pergunta confirmação se houver arquivos de múltiplas salas ou sala distinta da ativa
+            if (uniqueRoomsInImport.size > 1 || hasDifferentRoomWarning) {
+                let text = "Você está importando planilhas que pertencem a salas diferentes ";
+                if (currentActiveRoom) {
+                    text += `da sala conectada no momento ("${currentActiveRoom}"). `;
+                } else {
+                    text += "entre si. ";
+                }
+                text += "Deseja consolidar e calcular o vencedor unificando todas as salas mesmo assim?";
+                
+                showCustomModal("Consolidar Salas Diferentes?", text, "confirm", () => {
+                    executeImport(files);
+                });
+            } else {
+                executeImport(files);
+            }
+        };
+
+        function executeImport(files) {
+            consolidatedScores = {}; // Limpa pontuações anteriores para uma nova consolidação
+            let filesRead = 0;
+            const totalFiles = files.length;
+            
+            for (let i = 0; i < totalFiles; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        if (rows.length > 1) {
+                            const headerRow = rows[0];
+                            // Encontra os índices das colunas de forma case-insensitive e flexível
+                            const nicknameColIndex = headerRow.findIndex(cell => cell && cell.toString().trim().toLowerCase() === 'apelido');
+                            const totalColIndex = headerRow.findIndex(cell => cell && cell.toString().trim().toLowerCase() === 'total geral');
+                            
+                            if (nicknameColIndex === -1 || totalColIndex === -1) {
+                                throw new Error(`O arquivo "${file.name}" não possui as colunas obrigatórias ("Apelido" e "Total Geral"). Certifique-se de que é um arquivo gerado por este painel.`);
+                            }
+                            
+                            for (let r = 1; r < rows.length; r++) {
+                                const row = rows[r];
+                                const nickname = row[nicknameColIndex];
+                                const totalPoints = parseFloat(row[totalColIndex]);
+                                
+                                if (nickname !== undefined && nickname !== null && !isNaN(totalPoints)) {
+                                    const nickStr = nickname.toString().trim();
+                                    if (nickStr) {
+                                        if (!consolidatedScores[nickStr]) {
+                                            consolidatedScores[nickStr] = 0;
+                                        }
+                                        consolidatedScores[nickStr] += totalPoints;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        filesRead++;
+                        if (filesRead === totalFiles) {
+                            renderLeaderboard();
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        showCustomModal("Erro ao importar", `Erro ao ler o arquivo "${file.name}": ` + error.message);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        importClearBtn.onclick = () => {
+            importExcelInput.value = '';
+            consolidatedScores = {};
+            rankingTbody.innerHTML = '';
+            rankingArea.style.display = 'none';
+            importFilesSummary.style.display = 'none';
+            importFilesList.innerHTML = '';
+            showCustomModal("Sucesso", "Dados importados e tabela de classificação limpos.");
+        };
+
+        function renderLeaderboard() {
+            rankingTbody.innerHTML = '';
+            
+            // Ordena pelo maior total de pontos
+            const sortedPlayers = Object.entries(consolidatedScores).sort((a, b) => b[1] - a[1]);
+            
+            if (sortedPlayers.length === 0) {
+                rankingArea.style.display = 'none';
+                showCustomModal("Aviso", "Nenhum dado válido de pontuação foi encontrado nos arquivos selecionados.");
+                return;
+            }
+            
+            rankingArea.style.display = 'block';
+            
+            let currentRank = 1;
+            let previousScore = null;
+            
+            sortedPlayers.forEach(([nickname, score], index) => {
+                // Calcula classificação real levando empates em consideração (ex: 1, 1, 3...)
+                if (previousScore !== null && score < previousScore) {
+                    currentRank = index + 1;
+                }
+                previousScore = score;
+                
+                const row = rankingTbody.insertRow();
+                
+                // Destaca todos os vencedores (quem estiver na classificação 1)
+                if (currentRank === 1) {
+                    row.classList.add('winner-row');
+                }
+                
+                // Coluna de Posição com medalhas para o Top 3
+                const posCell = row.insertCell();
+                posCell.style.textAlign = 'center';
+                let badgeClass = 'badge-other';
+                let rankContent = currentRank;
+                if (currentRank === 1) {
+                    badgeClass = 'badge-1';
+                    rankContent = '🥇';
+                } else if (currentRank === 2) {
+                    badgeClass = 'badge-2';
+                    rankContent = '🥈';
+                } else if (currentRank === 3) {
+                    badgeClass = 'badge-3';
+                    rankContent = '🥉';
+                }
+                posCell.innerHTML = `<span class="ranking-badge ${badgeClass}">${rankContent}</span>`;
+                
+                // Coluna do Apelido
+                const nickCell = row.insertCell();
+                if (currentRank === 1) {
+                    nickCell.innerHTML = `<strong style="color: #b58900; font-size: 1.1em;">👑 ${nickname} (Vencedor!)</strong>`;
+                } else {
+                    nickCell.textContent = nickname;
+                }
+                
+                // Coluna de Pontos Totais
+                const scoreCell = row.insertCell();
+                scoreCell.style.fontWeight = 'bold';
+                scoreCell.style.fontSize = currentRank === 1 ? '1.2em' : '1em';
+                scoreCell.style.color = currentRank === 1 ? '#28a745' : '#495057';
+                scoreCell.textContent = `${score} pts`;
+            });
+            
+            // Rola suavemente até o ranking para destaque visual
+            rankingArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
     </script>
 </body>
 </html>
