@@ -130,6 +130,14 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+            transform: none !important;
+        }
+
         .btn:active {
             transform: scale(0.95);
         }
@@ -415,6 +423,28 @@
             to { transform: scale(1.05); }
         }
 
+        .btn-kick-aluno {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.25);
+            color: #dc3545;
+            border-radius: 4px;
+            padding: 0px 4px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .btn-kick-aluno:hover {
+            background: #dc3545;
+            color: #fff;
+            transform: scale(1.15);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+
         .card-letters {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -579,30 +609,8 @@
             50% { opacity: 0.3; }
         }
 
-        .admin-link {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
 
-        .admin-link a {
-            color: #6a8a95;
-            font-size: 0.8rem;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .admin-link a:hover {
-            color: #d4a373;
-        }
-
-        .admin-link .separator {
-            color: #3d6b7a;
-            margin: 0 8px;
-        }
-
-        .toast {
+         .toast {
             position: fixed;
             top: 20px;
             right: 20px;
@@ -1035,13 +1043,181 @@
                 padding: 25px;
             }
         }
+
+        /* MODAL PEDAGÓGICO */
+        .pedagogico-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .pedagogico-modal-overlay.active {
+            display: flex;
+        }
+        .pedagogico-modal-box {
+            background: linear-gradient(145deg, #162730, #0a181e);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 650px;
+            width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            position: relative;
+            animation: slideUpModal 0.4s ease-out;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+        .pedagogico-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #d4e3e8;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .pedagogico-close:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .pedagogico-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+        .pedagogico-tab {
+            padding: 10px 16px;
+            color: #8aaab5;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .pedagogico-tab:hover {
+            color: #f2e9d0;
+        }
+        .pedagogico-tab.active {
+            color: #d4a373;
+        }
+        .pedagogico-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #d4a373;
+            border-radius: 2px;
+        }
+        .pedagogico-content {
+            display: none;
+            color: #d4e3e8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .pedagogico-content.active {
+            display: block;
+        }
+        .pedagogico-title {
+            color: #f2e9d0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pedagogico-subtitle {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .bncc-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .bncc-code {
+            display: inline-block;
+            background: rgba(212, 163, 115, 0.15);
+            color: #d4a373;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .bncc-desc {
+            color: #d4e3e8;
+            font-size: 0.9rem;
+        }
+        .como-jogar-step {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 12px;
+        }
+        .como-jogar-step .step-number {
+            background: #d4a373;
+            color: #1a2f3a;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .como-jogar-step .step-text strong {
+            color: #f2e9d0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div>
-                <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Alunos</a>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+                    <a href="#" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0;">← Voltar</a>
+                    <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">📖 Regras & BNCC</button>
+                </div>
                 <h1>🎲 BINGO <small>Painel do Professor</small></h1>
             </div>
             <div class="sync-status">
@@ -1107,6 +1283,7 @@
             <div id="statusCriacao"></div>
 
             <button class="btn btn-primary" onclick="criarSessao()">🎯 Iniciar Bingo</button>
+            <button class="btn btn-danger" onclick="confirmarLimparSessoes()" style="margin-top: 10px; width: 100%; padding: 14px; font-size: 1.1rem; border-radius: 12px; font-weight: 600;">🧹 Limpar Todas as Salas</button>
         </div>
 
         <!-- ===== SESSÃO ATIVA ===== -->
@@ -1138,9 +1315,10 @@
             </div>
 
             <div class="controles-area">
-                <button class="btn btn-success" onclick="sortearNumero()">🎲 Sortear</button>
-                <button class="btn btn-warning" onclick="resetarJogo()">🔄 Nova Rodada</button>
-                <button class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
+                <button id="btnSortear" class="btn btn-success" onclick="sortearNumero()">🎲 Sortear</button>
+                <button id="btnNovaRodada" class="btn btn-warning" onclick="resetarJogo()">🔄 Nova Rodada</button>
+                <button id="btnFinalizar" class="btn btn-danger" onclick="finalizarJogo()">⏹️ Finalizar</button>
+                <button class="btn btn-danger" onclick="deletarSessaoAtual()" style="background: #dc3545;">🗑️ Excluir Sessão</button>
                 <button class="btn btn-secondary" onclick="expandirVagas()" style="background: #17a2b8;">➕ Expandir Vagas</button>
                 <button class="btn btn-secondary" onclick="toggleMostrarNumeros()" style="background: #6f42c1;">👁️ Alternar Números</button>
                 <button class="btn btn-purple" onclick="beneficiarAluno()">🔧 Beneficiar Aluno</button>
@@ -1153,17 +1331,16 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                <h3 style="color: #d8d2b0;">🧑‍🎓 Cartelas dos Alunos <span style="font-size: 0.8rem; color: #8aaab5;">(🔒 Com Auditoria Anti-Trapaça em Tempo Real)</span></h3>
-                <span style="color: #8aaab5; font-size: 0.85rem;" id="ocupacaoVagas">0/0 ocupadas</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="color: #d8d2b0; margin-bottom: 0;">🧑‍🎓 Cartelas dos Alunos <span style="font-size: 0.8rem; color: #8aaab5;">(🔒 Com Auditoria Anti-Trapaça em Tempo Real)</span></h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary" onclick="imprimirCartelas()" style="background: #28a745; margin: 0; padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: white; border: none; font-weight: 600; transition: all 0.2s;">🖨️ Imprimir Cartelas / PDF</button>
+                    <span style="color: #8aaab5; font-size: 0.85rem;" id="ocupacaoVagas">0/0 ocupadas</span>
+                </div>
             </div>
             <div class="alunos-grid" id="alunosGrid"></div>
 
-            <div class="admin-link">
-                <a href="BAdmin.html">🗑️ Administração</a>
-                <span class="separator">|</span>
-                <a href="BAluno.html" target="_blank">👁️ Ver como aluno</a>
-            </div>
+
         </div>
     </div>
 
@@ -1203,6 +1380,96 @@
         </div>
     </div>
 
+    <!-- ===== MODAL PEDAGÓGICO (BNCC & COMO JOGAR) ===== -->
+    <div id="modalPedagogico" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box">
+            <button class="pedagogico-close" onclick="fecharModalPedagogico()">×</button>
+            
+            <div class="pedagogico-title">📖 Guia Pedagógico & Regras</div>
+            <div class="pedagogico-subtitle">BINGO de Matemática - Ensino Fundamental</div>
+
+            <div class="pedagogico-tabs">
+                <button class="pedagogico-tab active" id="tab-comoJogar-btn" onclick="selecionarAbaPedagogica('comoJogar')">🎮 Como Jogar</button>
+                <button class="pedagogico-tab" id="tab-bncc-btn" onclick="selecionarAbaPedagogica('bncc')">📚 Alinhamento BNCC</button>
+            </div>
+
+            <!-- ABA: COMO JOGAR -->
+            <div id="aba-comoJogar" class="pedagogico-content active">
+                <div class="como-jogar-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <strong>Criação da Sessão (Professor)</strong>: O professor cria uma sessão selecionando a sala/turma e configurando a quantidade de alunos/vagas.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <strong>Entrada dos Alunos</strong>: Os alunos entram na sala utilizando seus nomes. Cada aluno recebe automaticamente uma <strong>cartela única e exclusiva</strong> gerada pelo sistema (nenhuma cartela se repete). O espaço central "B" é livre.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <strong>Sorteio & Atenção</strong>: O professor realiza o sorteio de um número de cada vez. Os alunos devem identificar se possuem o número correspondente em sua cartela.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">
+                        <strong>Marcação em Tempo Real</strong>: Os alunos devem clicar para marcar o número na cartela <strong>assim que for sorteado</strong>. O sistema exige atenção ativa: não é possível marcar números sorteados anteriormente por conta própria (salvo ação explícita do professor para beneficiar um aluno atrasado).
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">
+                        <strong>Segurança & Anti-Cheat</strong>: O sistema audita todas as marcações em tempo real. Se um aluno tentar burlar o sistema marcando dezenas não sorteadas, a trapaça é sinalizada ao professor no painel de controle.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">6</div>
+                    <div class="step-text">
+                        <strong>Vitória e Validação</strong>: O primeiro aluno a completar toda a cartela (24 dezenas marcadas + o centro livre) faz o "BINGO". O sistema valida instantaneamente e notifica a sala toda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA: ALINHAMENTO BNCC -->
+            <div id="aba-bncc" class="pedagogico-content">
+                <p style="margin-bottom: 15px; font-weight: 600; color: #ffd93d;">🎯 Unidade Temática: Matemática (Números e Probabilidade)</p>
+                
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA01 (1º Ano)</span>
+                    <div class="bncc-desc">Utilizar números naturais como indicador de quantidade ou de ordem em diferentes situações cotidianas e reconhecer situações em que os números não indicam contagem nem ordem, mas sim código de identificação.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA04 (1º Ano)</span>
+                    <div class="bncc-desc">Contar a quantidade de objetos de coleções de até 100 unidades e apresentar o resultado por registros verbais e simbólicos, para resolver problemas cotidianos.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF02MA01 (2º Ano)</span>
+                    <div class="bncc-desc">Comparar e ordenar números naturais (até a ordem de centenas), pela compreensão de características do sistema de numeração decimal (valor posicional).</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF03MA02 (3º Ano)</span>
+                    <div class="bncc-desc">Identificar características do sistema de numeração decimal, utilizando a composição e a decomposição de número natural de até quatro ordens.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF04MA01 (4º Ano)</span>
+                    <div class="bncc-desc">Ler, escrever e ordenar números naturais até a ordem das dezenas de milhar.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF05MA22 (5º Ano)</span>
+                    <div class="bncc-desc">Apresentar todos os possíveis resultados de um experimento aleatório, estimando se esses resultados são igualmente prováveis ou não (espaço amostral e probabilidade elementar do sorteio).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== FIREBASE ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -1230,6 +1497,8 @@
         let sessaoAtual = null;
         let numerosChamados = [];
         let alunosConectados = new Set();
+        let dadosParticipantesLocais = null;
+        let offlineCheckInterval = null;
         let mostrarNumeros = true;
         let listenerRef = null;
         let vencedoresList = [];
@@ -1248,6 +1517,55 @@
             toast._timeout = setTimeout(() => {
                 toast.style.display = 'none';
             }, 4000);
+        }
+
+        // ============================================
+        // MAPA DE SALAS E NORMAS
+        // ============================================
+        const MAPA_SALAS = {
+            '1a-cp': 'Escola Capitão - 1º ano A - Manhã',
+            '1b-cp': 'Escola Capitão - 1º ano B - Manhã',
+            '1c-cp': 'Escola Capitão - 1º ano C - Manhã',
+            '2a-cp': 'Escola Capitão - 2º ano A - Manhã',
+            '2b-cp': 'Escola Capitão - 2º ano B - Manhã',
+            '2c-cp': 'Escola Capitão - 2º ano C - Manhã',
+            '3a-cp': 'Escola Capitão - 3º ano A - Manhã',
+            '3b-cp': 'Escola Capitão - 3º ano B - Manhã',
+            '3c-cp': 'Escola Capitão - 3º ano C - Manhã',
+            '4a-cp': 'Escola Capitão - 4º ano A - Manhã',
+            '4b-cp': 'Escola Capitão - 4º ano B - Tarde',
+            '5a-cp': 'Escola Capitão - 5º ano A - Manhã',
+            '5b-cp': 'Escola Capitão - 5º ano B - Manhã',
+            '5c-cp': 'Escola Capitão - 5º ano C - Tarde',
+            '1a-th': 'Escola Thereza - 1º ano A - Manhã',
+            '1b-th': 'Escola Thereza - 1º ano B - Tarde',
+            '2a-th': 'Escola Thereza - 2º ano A - Manhã',
+            '2b-th': 'Escola Thereza - 2º ano B - Manhã',
+            '3a-th': 'Escola Thereza - 3º ano A - Manhã',
+            '3b-th': 'Escola Thereza - 3º ano B - Manhã',
+            '4a-th': 'Escola Thereza - 4º ano A - Manhã',
+            '4b-th': 'Escola Thereza - 4º ano B - Manhã',
+            '4c-th': 'Escola Thereza - 4º ano C - Tarde',
+            '5a-th': 'Escola Thereza - 5º ano A - Manhã',
+            '5b-th': 'Escola Thereza - 5º ano B - Tarde'
+        };
+
+        function obterNomeSala(codigo, salaNomeOriginal) {
+            if (salaNomeOriginal && salaNomeOriginal !== 'undefined' && salaNomeOriginal !== '---' && String(salaNomeOriginal).trim() !== '') {
+                return salaNomeOriginal;
+            }
+            if (codigo && MAPA_SALAS[codigo]) {
+                return MAPA_SALAS[codigo];
+            }
+            const select = document.getElementById('salaSelect');
+            if (select && codigo) {
+                const opt = select.querySelector(`option[value="${codigo}"]`);
+                if (opt) {
+                    const group = opt.parentNode && opt.parentNode.label ? opt.parentNode.label : '';
+                    return group ? `${group} - ${opt.text}` : opt.text;
+                }
+            }
+            return codigo ? `Sala (${codigo})` : 'Turma Sem Nome';
         }
 
         // ============================================
@@ -1333,9 +1651,9 @@
         // ============================================
         function carregarSessao(codigo, sessao) {
             sessaoAtual = codigo;
-            numerosChamados = sessao.numerosSorteados || [];
-            mostrarNumeros = sessao.mostrarNumeros !== false;
-            vencedoresList = sessao.vencedores || [];
+            numerosChamados = sessao ? (sessao.numerosSorteados || []) : [];
+            mostrarNumeros = sessao ? (sessao.mostrarNumeros !== false) : true;
+            vencedoresList = sessao ? (sessao.vencedores || []) : [];
 
             const statusMap = {
                 'aguardando': '⏳ Aguardando alunos...',
@@ -1343,13 +1661,20 @@
                 'finalizada': '🔴 Finalizada'
             };
 
+            const nomeExibicao = obterNomeSala(codigo, sessao ? sessao.salaNome : null);
+            if (sessao && (!sessao.salaNome || sessao.salaNome === 'undefined')) {
+                sessao.salaNome = nomeExibicao;
+                db.ref(`bingo/sessoes/${codigo}`).update({ salaNome: nomeExibicao });
+            }
+
             document.getElementById('configuracao').style.display = 'none';
             document.getElementById('sessaoAtiva').style.display = 'block';
-            document.getElementById('salaNome').textContent = sessao.salaNome;
-            document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${sessao.salaNome}</strong>`;
+            document.getElementById('salaNome').textContent = nomeExibicao;
+            document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${nomeExibicao}</strong>`;
             document.getElementById('codigoSessao').textContent = codigo;
             document.getElementById('totalAlunos').textContent = sessao.totalAlunos;
             document.getElementById('statusSessao').textContent = statusMap[sessao.status] || sessao.status;
+            atualizarBotoesControle(sessao.status);
 
             if (sessao.numerosSorteados && sessao.numerosSorteados.length > 0) {
                 const ultimo = sessao.numerosSorteados[sessao.numerosSorteados.length - 1];
@@ -1368,7 +1693,23 @@
 
             atualizarPainelVencedores(sessao);
 
-            const baseUrl = window.location.href.split('?')[0].replace('BProfessor', 'BAluno');
+            let baseUrl = window.location.href.split('?')[0];
+            const isLocal = baseUrl.startsWith('file:') || 
+                            baseUrl.includes('localhost') || 
+                            baseUrl.includes('127.0.0.1') || 
+                            baseUrl.includes('3000') ||
+                            baseUrl.includes('192.168.') ||
+                            baseUrl.includes('10.') ||
+                            baseUrl.includes('172.');
+            
+            if (isLocal) {
+                // Se o professor estiver abrindo o arquivo local no computador (arquivo ou servidor local),
+                // apontamos o link gerado diretamente para o GitHub Pages hospedado do aluno!
+                baseUrl = 'https://evaristopba.github.io/Atividades/BAluno-GM.html';
+            } else {
+                // Se estiver rodando hospedado, substitui BProfessor por BAluno
+                baseUrl = baseUrl.replace('BProfessor-GM', 'BAluno-GM').replace('BProfessor', 'BAluno');
+            }
             const linkAluno = `${baseUrl}?sala=${codigo}`;
             document.getElementById('linkAluno').value = linkAluno;
 
@@ -1381,6 +1722,7 @@
         // AUDITORIA E ATUALIZAÇÃO DOS VENCEDORES
         // ============================================
         function atualizarPainelVencedores(sessao) {
+            vencedoresList = sessao.vencedores || [];
             if (sessao.vencedores && sessao.vencedores.length > 0) {
                 const nomesValidos = [];
                 let fraudesDetectadas = false;
@@ -1391,7 +1733,9 @@
                         const m = p.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                         const realmenteGanhou = checkBingo(m, p.cartela, numerosChamados);
                         if (realmenteGanhou) {
-                            nomesValidos.push(p.nome || id);
+                            const temNome = p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ');
+                            const nomeDisplay = temNome ? p.nome : `Vaga ${id.replace('aluno_', '')}`;
+                            nomesValidos.push({ id, nome: nomeDisplay });
                         } else {
                             fraudesDetectadas = true;
                         }
@@ -1399,9 +1743,18 @@
                 });
 
                 if (nomesValidos.length > 0) {
-                    let text = `🏆 Vencedor(es) Real(is): ${nomesValidos.join(', ')} 🎉`;
+                    const itensFormatados = nomesValidos.map((v, index) => {
+                        const pos = index + 1;
+                        let medalha = '🏅';
+                        if (pos === 1) medalha = '🥇';
+                        else if (pos === 2) medalha = '🥈';
+                        else if (pos === 3) medalha = '🥉';
+                        return `<span>${medalha} <strong>${pos}º lugar (${pos}ª batida):</strong> ${v.nome}</span>`;
+                    });
+
+                    let text = `🏆 <strong>Vencedores em Ordem de Batida:</strong> ${itensFormatados.join(' <span style="opacity:0.5; margin: 0 4px;">|</span> ')} 🎉`;
                     if (fraudesDetectadas) {
-                        text += ` <span style="color: #ff6b6b; font-size: 0.8rem; font-weight: bold; margin-left: 10px;">⚠️ (Tentativas de trapaça ignoradas!)</span>`;
+                        text += ` <span style="color: #ff6b6b; font-size: 0.8rem; font-weight: bold; margin-left: 10px;">⚠️ (Tentativas ilegais ignoradas!)</span>`;
                     }
                     document.getElementById('vencedores').innerHTML = text;
                 } else {
@@ -1420,6 +1773,17 @@
                 listenerRef.off();
                 listenerRef = null;
             }
+            if (offlineCheckInterval) {
+                clearInterval(offlineCheckInterval);
+                offlineCheckInterval = null;
+            }
+
+            // Inicia verificação periódica local de timeouts (a cada 3s)
+            offlineCheckInterval = setInterval(() => {
+                if (dadosParticipantesLocais) {
+                    recalcularAlunosOnline(dadosParticipantesLocais);
+                }
+            }, 3000);
 
             listenerRef = db.ref(`bingo/sessoes/${codigo}`);
             listenerRef.on('value', (snapshot) => {
@@ -1427,6 +1791,10 @@
                     showToast('⚠️ Sessão foi encerrada!', 'error');
                     document.getElementById('configuracao').style.display = 'block';
                     document.getElementById('sessaoAtiva').style.display = 'none';
+                    if (offlineCheckInterval) {
+                        clearInterval(offlineCheckInterval);
+                        offlineCheckInterval = null;
+                    }
                     return;
                 }
 
@@ -1437,7 +1805,11 @@
                     'finalizada': '🔴 Finalizada'
                 };
 
+                const nomeExibicao = obterNomeSala(codigo, sessao ? sessao.salaNome : null);
+                document.getElementById('salaNome').textContent = nomeExibicao;
+                document.getElementById('salaNomeLink').innerHTML = `📌 Sala: <strong>${nomeExibicao}</strong>`;
                 document.getElementById('statusSessao').textContent = statusMap[sessao.status] || sessao.status;
+                atualizarBotoesControle(sessao.status);
 
                 if (sessao.numerosSorteados) {
                     numerosChamados = sessao.numerosSorteados;
@@ -1469,11 +1841,89 @@
                 atualizarPainelVencedores(sessao);
 
                 if (sessao.participantes) {
-                    alunosConectados = new Set(Object.keys(sessao.participantes));
-                    renderizarCartelas(sessao.participantes);
+                    dadosParticipantesLocais = sessao.participantes;
+                    recalcularAlunosOnline(sessao.participantes);
                     atualizarOcupacao(sessao.participantes);
                 }
             });
+        }
+
+        // ============================================
+        // RECALCULAR ALUNOS ONLINE (HEARTBEAT)
+        // ============================================
+        function recalcularAlunosOnline(participantes) {
+            const onlineIds = [];
+            const agora = Date.now();
+            for (const [id, data] of Object.entries(participantes)) {
+                const temNome = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
+                // O heartbeat expira em 90s se não for atualizado pelo aluno (tolerância ideal para abas em segundo plano)
+                const heartbeatRecente = data.heartbeat && (agora - data.heartbeat < 90000);
+                if (temNome && heartbeatRecente) {
+                    onlineIds.push(id);
+                }
+            }
+            alunosConectados = new Set(onlineIds);
+            renderizarCartelas(participantes);
+        }
+
+        // ============================================
+        // REMOVER ALUNO / LIBERAR VAGA MANUALMENTE
+        // ============================================
+        function confirmarExpulsao(alunoId, nome) {
+            mostrarModalInput({
+                icon: '🚪',
+                titulo: 'Liberar Vaga',
+                subtitulo: `Deseja realmente remover o aluno <strong>${nome}</strong> desta vaga?<br><br>Sua cartela será limpa e a vaga ficará disponível para outro aluno entrar.`,
+                textoBotao: '🚪 Remover',
+                corBotao: 'danger',
+                campos: [],
+                onConfirm: async () => {
+                    if (!sessaoAtual || !alunoId) return true;
+                    try {
+                        const numStr = alunoId.replace('aluno_', '');
+                        const cleanMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        cleanMarcacoes[2][2] = true;
+
+                        await db.ref(`bingo/sessoes/${sessaoAtual}/participantes/${alunoId}`).update({
+                            nome: `Aluno ${numStr}`,
+                            marcacoes: cleanMarcacoes,
+                            venceu: false,
+                            heartbeat: 0,
+                            excluido: true
+                        });
+                        showToast(`🚪 Vaga do Aluno ${numStr} liberada!`);
+                    } catch (err) {
+                        console.error("Erro ao liberar vaga:", err);
+                        showToast("❌ Erro ao liberar vaga!", "error");
+                    }
+                    return true;
+                }
+            });
+        }
+
+        // ============================================
+        // ATUALIZAR BOTÕES DE CONTROLE DE FLUXO
+        // ============================================
+        function atualizarBotoesControle(status) {
+            const btnSortear = document.getElementById('btnSortear');
+            const btnNovaRodada = document.getElementById('btnNovaRodada');
+            const btnFinalizar = document.getElementById('btnFinalizar');
+
+            if (!btnSortear || !btnNovaRodada || !btnFinalizar) return;
+
+            if (status === 'finalizada') {
+                btnSortear.disabled = true;
+                btnNovaRodada.disabled = false;
+                btnFinalizar.disabled = true;
+            } else if (status === 'aguardando') {
+                btnSortear.disabled = false;
+                btnNovaRodada.disabled = true;
+                btnFinalizar.disabled = false;
+            } else if (status === 'ativa') {
+                btnSortear.disabled = false;
+                btnNovaRodada.disabled = true;
+                btnFinalizar.disabled = false;
+            }
         }
 
         // ============================================
@@ -1869,7 +2319,9 @@
                 return;
             }
 
-            const salaNome = salaSelect.options[salaSelect.selectedIndex].text;
+            const salaOption = salaSelect.options[salaSelect.selectedIndex];
+            const optgroupLabel = salaOption.parentNode && salaOption.parentNode.label ? salaOption.parentNode.label : '';
+            const salaNome = optgroupLabel ? `${optgroupLabel} - ${salaOption.text}` : salaOption.text;
             const salaId = salaSelect.value;
             const codigo = salaId;
 
@@ -1928,6 +2380,8 @@
                     const novoResetToken = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
 
                     await sessaoRef.update({
+                        salaNome: salaNome,
+                        salaId: salaId,
                         participantes: novasParticipantes,
                         numerosSorteados: [],
                         vencedores: [],
@@ -1996,6 +2450,96 @@
                 console.error('Erro ao criar sessão:', error);
                 showToast('❌ Erro ao criar sessão!', 'error');
             }
+        }
+
+        // ============================================
+        // LIMPAR TODAS AS SESSÕES (BINGO)
+        // ============================================
+        function confirmarLimparSessoes() {
+            mostrarModalSaida(
+                '🧹',
+                'Limpar todas as Salas?',
+                '⚠️ Isso removerá permanentemente TODAS as salas e sessões ativas do BINGO.',
+                'Todos os alunos serão desconectados do jogo atual.',
+                () => {
+                    const statusDiv = document.getElementById('statusCriacao');
+                    if (statusDiv) {
+                        statusDiv.innerHTML = '<div class="status-criacao info">🔄 Limpando salas...</div>';
+                    }
+                    db.ref('bingo/sessoes').remove()
+                        .then(() => {
+                            showToast('✅ Todas as salas do Bingo foram apagadas!', 'info');
+                            if (statusDiv) {
+                                statusDiv.innerHTML = '<div class="status-criacao info">🧹 Todas as salas foram excluídas com sucesso!</div>';
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Erro ao limpar salas:', err);
+                            showToast('❌ Erro ao limpar salas!', 'error');
+                            if (statusDiv) {
+                                statusDiv.innerHTML = '<div class="status-criacao danger">❌ Falha ao apagar as salas!</div>';
+                            }
+                        });
+                }
+            );
+        }
+
+        // ============================================
+        // EXCLUIR SESSÃO ATUAL
+        // ============================================
+        async function deletarSessaoAtual() {
+            if (!sessaoAtual) return;
+
+            try {
+                await mostrarModalInput({
+                    icon: '🗑️',
+                    titulo: 'Excluir Sessão Atual',
+                    subtitulo: 'Deseja realmente <strong>excluir permanentemente</strong> esta sessão?<br><br>Todos os dados de cartelas, marcações e vencedores desta sala serão apagados, e os alunos serão desconectados.',
+                    textoBotao: '🗑️ Excluir',
+                    corBotao: 'danger',
+                    campos: [{
+                        name: 'confirmar',
+                        label: 'Digite "EXCLUIR" para confirmar:',
+                        type: 'text',
+                        placeholder: 'Digite EXCLUIR',
+                        required: true
+                    }],
+                    onConfirm: (valores) => {
+                        if (valores.confirmar.toUpperCase() !== 'EXCLUIR') {
+                            document.getElementById('inputErro').textContent = '❌ Digite exatamente "EXCLUIR" para confirmar!';
+                            document.getElementById('inputErro').classList.add('active');
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+            } catch (e) {
+                // Usuário cancelou o modal
+                return;
+            }
+
+            // Se o listener da sessão estiver ativo, desligar antes de excluir
+            if (listenerRef) {
+                listenerRef.off();
+                listenerRef = null;
+            }
+
+            // Deletar a sessão no Firebase
+            db.ref(`bingo/sessoes/${sessaoAtual}`).remove()
+                .then(() => {
+                    showToast('🗑️ Sessão excluída com sucesso!', 'info');
+                    // Resetar variáveis de estado locais
+                    sessaoAtual = null;
+                    // Voltar para a tela de configurações
+                    document.getElementById('configuracao').style.display = 'block';
+                    document.getElementById('sessaoAtiva').style.display = 'none';
+                    // Atualizar a verificação
+                    verificarSalaExistente();
+                })
+                .catch(err => {
+                    console.error('Erro ao excluir sessão:', err);
+                    showToast('❌ Erro ao excluir sessão!', 'error');
+                });
         }
 
         // ============================================
@@ -2082,6 +2626,20 @@
 
             const quaseVencedores = identificarQuaseVencedores(participantes);
 
+            // Obter lista de vencedores válidos em ordem de batida (1ª, 2ª, 3ª...)
+            const validosOrdenados = [];
+            if (vencedoresList && vencedoresList.length > 0) {
+                vencedoresList.forEach(id => {
+                    const p = participantes ? participantes[id] : null;
+                    if (p && p.cartela) {
+                        const m = p.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        if (checkBingo(m, p.cartela, numerosChamados)) {
+                            validosOrdenados.push(id);
+                        }
+                    }
+                });
+            }
+
             for (const [alunoId, data] of sorted) {
                 const isWinner = data.venceu;
                 const isOnline = alunosConectados.has(alunoId);
@@ -2113,6 +2671,10 @@
                 const realmenteGanhou = cartela ? checkBingo(marcacoes, cartela, numerosChamados) : false;
                 const falsoBingo = isWinner && !realmenteGanhou;
 
+                // Determinar posição do vencedor em ordem de batida
+                const indexBatida = validosOrdenados.indexOf(alunoId);
+                const posBatida = indexBatida !== -1 ? indexBatida + 1 : -1;
+
                 let badgeClass = 'empty-badge';
                 let badgeText = '💺 Disponível';
 
@@ -2122,6 +2684,14 @@
                 } else if (possuiMarcacaoInvalida) {
                     badgeClass = 'cheat-badge';
                     badgeText = `⚠️ Trapaça (${numerosInvalidos.join(',')})`;
+                } else if (isWinner && realmenteGanhou) {
+                    badgeClass = 'winner-badge';
+                    let medalha = '🏆';
+                    if (posBatida === 1) medalha = '🥇 1º';
+                    else if (posBatida === 2) medalha = '🥈 2º';
+                    else if (posBatida === 3) medalha = '🥉 3º';
+                    else if (posBatida > 3) medalha = `🏅 ${posBatida}º`;
+                    badgeText = `${medalha} BINGO! (${posBatida > 0 ? posBatida + 'ª batida' : 'Vencedor'})`;
                 } else if (isWinner) {
                     badgeClass = 'winner-badge';
                     badgeText = '🏆 BINGO!';
@@ -2150,9 +2720,15 @@
                     cardStyle = 'style="border: 2px dashed #ff6b6b; box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);"';
                 }
 
+                let kickBtn = '';
+                if (temNome) {
+                    const nomeEscaped = nomeExibicao.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    kickBtn = `<button onclick="confirmarExpulsao('${alunoId}', '${nomeEscaped}')" class="btn-kick-aluno" title="Remover aluno e liberar vaga">🚪</button>`;
+                }
+
                 html += `<div class="${cardClass}" ${cardStyle}>`;
                 html += `<div class="cartela-header">`;
-                html += `<span>🧑‍🎓 ${nomeExibicao}</span>`;
+                html += `<span>🧑‍🎓 ${nomeExibicao} ${kickBtn}</span>`;
                 html += `<span class="badge ${badgeClass}">${badgeText}</span>`;
                 html += `</div>`;
                 html += `<div class="card-letters">`;
@@ -2189,6 +2765,340 @@
 
             grid.innerHTML = html;
             document.getElementById('onlineCount').textContent = `🟢 Online: ${alunosConectados.size}`;
+        }
+
+        // ============================================
+        // IMPRIMIR / EXPORTAR PDF DAS CARTELAS (FORMATO A4 - ECONOMIA DE TINTA)
+        // ============================================
+        function imprimirCartelas() {
+            if (!dadosParticipantesLocais || Object.keys(dadosParticipantesLocais).length === 0) {
+                showToast('⚠️ Nenhuma cartela disponível para impressão!', 'error');
+                return;
+            }
+
+            const nomeSalaImp = document.getElementById('salaNome').textContent || 'Turma';
+            const codigoSessaoImp = sessaoAtual || '---';
+
+            const win = window.open('', '_blank');
+            if (!win) {
+                alert('⚠️ O bloqueador de popups impediu a abertura da tela de impressão. Por favor, permita popups para este site.');
+                return;
+            }
+
+            // Filtrar apenas participantes que possuem uma cartela gerada
+            const cardsParaImprimir = Object.entries(dadosParticipantesLocais)
+                .map(([alunoId, data]) => ({ alunoId, data }))
+                .filter(item => item.data && item.data.cartela)
+                .sort((a, b) => {
+                    const numA = parseInt(a.alunoId.replace('aluno_', ''));
+                    const numB = parseInt(b.alunoId.replace('aluno_', ''));
+                    return numA - numB;
+                });
+
+            if (cardsParaImprimir.length === 0) {
+                showToast('⚠️ Nenhuma cartela ativa/gerada nesta sessão para impressão!', 'error');
+                return;
+            }
+
+            let html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Imprimir Cartelas - ${nomeSalaImp}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #fff;
+            color: #000;
+            padding: 5px;
+        }
+
+        .pagina-a4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            page-break-inside: avoid;
+            page-break-after: always;
+            padding: 8px 0;
+            height: 258mm; /* Se ajusta perfeitamente para caber 4 cartelas em uma folha A4 */
+            box-sizing: border-box;
+        }
+
+        .pagina-a4:last-of-type {
+            page-break-after: avoid;
+        }
+
+        .cartela-print-box {
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            position: relative;
+            page-break-inside: avoid;
+        }
+
+        .cartela-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 3px;
+        }
+
+        .cartela-meta .vaga-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            text-align: left;
+        }
+
+        .cartela-meta .vaga {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .cartela-meta .sala-info {
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: #444;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 170px;
+        }
+
+        .cartela-meta .aluno-nome {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #000;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+
+        .cartela-titulo {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 8px;
+            margin-bottom: 4px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1px;
+            font-family: 'Georgia', serif;
+        }
+
+        .cartela-letras-print {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-bottom: 3px;
+        }
+
+        .cartela-letra-print {
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #000;
+        }
+
+        .grid-print {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+        }
+
+        .cell-print {
+            border: 1.5px solid #000;
+            border-radius: 4px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000;
+        }
+
+        .cell-print.free {
+            background-color: #f0f0f0;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .botoes-print {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 10000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-print {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+
+        .btn-print-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-print-primary:hover {
+            background: #218838;
+        }
+
+        .btn-print-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-print-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Configuração de Impressão A4 */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0 !important; /* Remove cabeçalhos e rodapés padrão do navegador (ex: caminho de arquivo 'file:///') */
+            }
+
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            .botoes-print {
+                display: none !important;
+            }
+
+            .pagina-a4 {
+                width: 210mm !important;
+                height: 297mm !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                gap: 12px !important;
+                padding: 12mm 14mm !important; /* Margem de segurança física para as cartelas */
+                margin: 0 auto !important;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-rows: repeat(2, 1fr) !important;
+                box-sizing: border-box !important;
+            }
+
+            .pagina-a4:last-of-type {
+                page-break-after: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="botoes-print">
+        <button class="btn-print btn-print-secondary" onclick="window.close()">❌ Fechar</button>
+        <button class="btn-print btn-print-primary" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    </div>
+`;
+
+            cardsParaImprimir.forEach(({ alunoId, data }, index) => {
+                const numVaga = alunoId.replace('aluno_', '');
+                const temNome = data.nome && data.nome.trim() !== '';
+                const nomeAluno = temNome ? data.nome : '___________________________';
+                const cartela = data.cartela;
+
+                // Inicia uma nova página A4 a cada 4 cartelas
+                if (index % 4 === 0) {
+                    html += `<div class="pagina-a4">`;
+                }
+
+                html += `
+        <div class="cartela-print-box">
+            <div class="cartela-meta">
+                <div class="vaga-info">
+                    <span class="vaga">Cartela nº ${numVaga}</span>
+                    <span class="sala-info">🏫 ${nomeSalaImp} [Cod: ${codigoSessaoImp}]</span>
+                </div>
+                <span class="aluno-nome">👤 ${nomeAluno}</span>
+            </div>
+            
+            <div class="cartela-titulo">BINGO</div>
+            
+            <div class="cartela-letras-print">
+                <div class="cartela-letra-print">B</div>
+                <div class="cartela-letra-print">I</div>
+                <div class="cartela-letra-print">N</div>
+                <div class="cartela-letra-print">G</div>
+                <div class="cartela-letra-print">O</div>
+            </div>
+
+            <div class="grid-print">
+`;
+
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const isCenter = (r === 2 && c === 2);
+                        const val = cartela[r][c];
+
+                        if (isCenter) {
+                            html += `<div class="cell-print free">★ LIVRE ★</div>`;
+                        } else {
+                            html += `<div class="cell-print">${val}</div>`;
+                        }
+                    }
+                }
+
+                html += `
+            </div>
+        </div>
+`;
+
+                // Fecha a página A4 a cada 4 cartelas ou se for a última cartela
+                if (index % 4 === 3 || index === cardsParaImprimir.length - 1) {
+                    html += `</div>`;
+                }
+            });
+
+            html += `
+</body>
+</html>
+`;
+
+            win.document.write(html);
+            win.document.close();
         }
 
         // ============================================
@@ -2341,7 +3251,8 @@
                         nome: nome,
                         cartela: cartela,
                         marcacoes: marcacoes,
-                        venceu: false
+                        venceu: false,
+                        heartbeat: data.heartbeat || 0
                     };
                 }
 
@@ -2529,6 +3440,36 @@
                 }
             }
             document.getElementById('ocupacaoVagas').textContent = `${ocupadas}/${total} ocupadas`;
+        }
+
+        // ============================================
+        // MODAL PEDAGÓGICO
+        // ============================================
+        function abrirModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.add('active');
+            selecionarAbaPedagogica('comoJogar');
+        }
+
+        function fecharModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.remove('active');
+        }
+
+        function selecionarAbaPedagogica(aba) {
+            // Tabs
+            document.getElementById('tab-comoJogar-btn').classList.remove('active');
+            document.getElementById('tab-bncc-btn').classList.remove('active');
+            
+            // Content
+            document.getElementById('aba-comoJogar').classList.remove('active');
+            document.getElementById('aba-bncc').classList.remove('active');
+
+            if (aba === 'comoJogar') {
+                document.getElementById('tab-comoJogar-btn').classList.add('active');
+                document.getElementById('aba-comoJogar').classList.add('active');
+            } else if (aba === 'bncc') {
+                document.getElementById('tab-bncc-btn').classList.add('active');
+                document.getElementById('aba-bncc').classList.add('active');
+            }
         }
 
         // ============================================
