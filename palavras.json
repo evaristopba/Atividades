@@ -7,7 +7,11 @@
             { "word": "TARTARUGA", "hint": "Leva sua casa nas costas." },
             { "word": "LEAO", "hint": "Conhecido como o 'Rei da Selva'." },
             { "word": "TIGRE", "hint": "Um grande felino listrado da Ásia." },
-            { "word": "GOLFINHO", "hint": "Um mamífero muito inteligente que vive no mar." }
+            { "word": "GOLFINHO", "hint": "Um mamífero muito inteligente que vive no mar." },
+            { "word": "TUBARAO", "hint": "Grande predador dos oceanos com dentes afiados e barbatana dorsal." },
+            { "word": "CORUJA", "hint": "Ave noturna conhecida por enxergar bem no escuro." },
+            { "word": "CANGURU", "hint": "Carrega o filhote na bolsa da barriga e se locomove aos pulos." },
+            { "word": "PINGUIM", "hint": "Ave marinha que não voa e vive nas regiões frias." }
         ]
     },
     "frutas": {
@@ -16,7 +20,11 @@
             { "word": "BANANA", "hint": "Amarela, comprida e favorita dos macacos." },
             { "word": "MORANGO", "hint": "Pequena, vermelha e com sementes do lado de fora." },
             { "word": "ABACAXI", "hint": "Tem uma coroa e sua casca é espinhosa." },
-            { "word": "MELANCIA", "hint": "Grande, verde por fora e vermelha por dentro." }
+            { "word": "MELANCIA", "hint": "Grande, verde por fora e vermelha por dentro." },
+            { "word": "UVA", "hint": "Pequena e redonda, cresce em cachos e faz suco." },
+            { "word": "LARANJA", "hint": "Fruta cítrica muito rica em vitamina C que leva o nome de sua cor." },
+            { "word": "MACA", "hint": "Fruta vermelha ou verde, muito crocante e famosa nos contos de fadas." },
+            { "word": "LIMAO", "hint": "Fruta verde e azeda, excelente para limonada." }
         ]
     },
     "objetos": {
@@ -25,7 +33,22 @@
             { "word": "CADEIRA", "hint": "Usado para sentar, geralmente tem quatro pernas." },
             { "word": "TESOURA", "hint": "Serve para cortar papel, tecido e outras coisas." },
             { "word": "COMPUTADOR", "hint": "Máquina usada para trabalhar, estudar e jogar." },
-            { "word": "TELEFONE", "hint": "Usamos para conversar com pessoas que estão longe." }
+            { "word": "TELEFONE", "hint": "Usamos para conversar com pessoas que estão longe." },
+            { "word": "MOCHILA", "hint": "Usada para carregar cadernos e materiais para a escola." },
+            { "word": "RELOGIO", "hint": "Objeto usado para ver as horas e controlar o tempo." },
+            { "word": "OCULOS", "hint": "Usado no rosto para ajudar a enxergar melhor." },
+            { "word": "LUMINARIA", "hint": "Objeto que ilumina a mesa durante a leitura." }
+        ]
+    },
+    "escolar": {
+         "keywords": ["escola", "estudo", "material", "aula", "ferramenta"],
+         "words": [
+             { "word": "CANETA", "hint": "Usada para escrever com tinta no papel." },
+             { "word": "BORRACHA", "hint": "Serve para apagar o que foi escrito a lápis." },
+             { "word": "APONTADOR", "hint": "Ferramenta usada para fazer ponta no lápis." },
+             { "word": "REGUA", "hint": "Objeto reto usado para medir e traçar linhas." },
+             { "word": "LIVRO", "hint": "Contém páginas com histórias, figuras e conhecimentos." },
+             { "word": "CADERNO", "hint": "Lugar onde os alunos escrevem as lições com lápis e caneta." }
         ]
     }
 }
