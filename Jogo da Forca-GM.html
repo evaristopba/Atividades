@@ -33,8 +33,11 @@
         .category-btn:hover, .modal-btn:hover, .local-load-btn:hover { transform: translateY(-2px); }
         .category-btn:active, .modal-btn:active, .local-load-btn:active { transform: translateY(1px); border-bottom-width: 2px; }
         .category-btn { background-color: var(--success-color); display: flex; justify-content: space-between; align-items: center; }
-        .local-load-btn { background-color: var(--secondary-color); margin-top: 10px; }
+        .bottom-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+        .bottom-buttons-row button { flex: 1; margin-top: 0 !important; font-size: 1.1em; padding: 12px 15px; }
+        .local-load-btn { background-color: var(--secondary-color); }
         .modal-btn { background-color: var(--primary-color); }
+        @media (max-width: 600px) { .bottom-buttons-row { flex-direction: column; } }
         .category-btn .info { font-size: 0.8em; font-weight: 400; opacity: 0.9; }
         .super-category-btn { background-color: var(--super-category-color); }
         #game-wrapper { display: none; width: 100%; }
@@ -50,16 +53,15 @@
         .hidden { opacity: 0; }
         #hint-display { font-size: 1.1em; margin: 0; color: #555; background-color: var(--light-bg); padding: 8px 15px; border-radius: 8px; border: 1px dashed var(--secondary-color); width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; }
         
-        /* MODIFICADO: Adicionado 'gap' para o espaçamento */
         #word-display {
             font-size: 2.2em;
             letter-spacing: 10px;
             margin: 10px 0;
             height: auto;
-            display: flex; /* Garante que o display é flex */
-            justify-content: center; /* Centraliza as letras */
-            flex-wrap: wrap; /* Permite quebrar linha em palavras longas */
-            gap: 10px; /* AQUI ESTÁ A MUDANÇA: Cria o espaço entre as letras */
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         #word-display span { display: inline-block; border-bottom: 4px solid #333; width: 40px; text-align: center; }
@@ -136,10 +138,30 @@
             <button class="modal-btn" id="close-general-score-btn">Fechar</button>
         </div>
     </div>
+    <div id="teacher-modal" class="modal-container">
+        <div class="modal-content">
+            <h2 style="color: var(--danger-color); margin-top: 0;">⚠️ Intervenção do Professor Necessária</h2>
+            <p style="font-size: 1.05em; color: #444; text-align: left; line-height: 1.5; margin-bottom: 12px;">
+                Nenhum parâmetro de tempo foi detectado no endereço (URL) desta atividade.
+            </p>
+            <p style="font-size: 0.9em; color: #666; text-align: left; background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 15px;">
+                <strong>Dica de Embedding para o Blog:</strong> O professor pode definir o tempo fixo no link da página anexando <code>?tempo=180</code> (exemplo: 180 para 3 minutos, 300 para 5 minutos ou 0 para sem limite).
+            </p>
+            <div style="margin: 20px 0; text-align: left;">
+                <label for="teacher-time-input" style="font-weight: 600; display: block; margin-bottom: 8px; color: #333;">Ajustar Tempo da Rodada para esta Sessão:</label>
+                <select id="teacher-time-input" style="width: 100%; padding: 12px; font-size: 1.05em; border-radius: 8px; border: 2px solid var(--primary-color); font-family: inherit; font-weight: 600; background: white; color: #0077b6;">
+                    <option value="180" selected>3 minutos (180s - Recomendado para 2º e 3º Ano)</option>
+                    <option value="300">5 minutos (300s - Infantil / Estendido)</option>
+                    <option value="90">1 minuto e meio (90s - Padrão)</option>
+                    <option value="0">Sem Limite de Tempo</option>
+                </select>
+            </div>
+            <button class="modal-btn" id="confirm-teacher-time-btn" style="width: 100%;">Confirmar Tempo e Iniciar Jogo</button>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- SELETORES DE ELEMENTOS ---
         const categorySelection = document.getElementById('category-selection');
         const gameWrapper = document.getElementById('game-wrapper');
         const keyboardContainer = document.getElementById('keyboard-container');
@@ -163,8 +185,32 @@
         const generalScoreTotal = document.getElementById('general-score-total');
         const generalScoreList = document.getElementById('general-score-list');
         const closeGeneralScoreBtn = document.getElementById('close-general-score-btn');
+        const teacherModal = document.getElementById('teacher-modal');
+        const teacherTimeInput = document.getElementById('teacher-time-input');
+        const confirmTeacherTimeBtn = document.getElementById('confirm-teacher-time-btn');
+
         const MAX_WRONG_GUESSES = 6;
-        const BASE_GAME_DURATION = 90;
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasTimeParam = urlParams.has('tempo') || urlParams.has('time') || urlParams.has('duracao');
+        const paramTempo = urlParams.get('tempo') || urlParams.get('time') || urlParams.get('duracao');
+
+        let BASE_GAME_DURATION = 180;
+        let isTimeConfiguredByUrl = false;
+
+        if (hasTimeParam && paramTempo !== null && paramTempo !== '') {
+            const parsed = parseInt(paramTempo, 10);
+            if (!isNaN(parsed) && parsed >= 0) {
+                BASE_GAME_DURATION = parsed;
+                isTimeConfiguredByUrl = true;
+            }
+        }
+
+        const getSuperCategoryTime = (regCount, baseDuration) => {
+            if (baseDuration === 0) return 0;
+            const calculated = Math.round((regCount * baseDuration * 0.25) / 10) * 10;
+            return Math.min(calculated, baseDuration * 2);
+        };
+
         const SUPER_CATEGORY_DISCOUNT_FACTOR = 0.6;
         let wordCategories = {};
         let selectedCategory, selectedWord, gameTimer;
@@ -173,16 +219,22 @@
         let totalWordsInCategory = 0;
         let isFirstRun = true, audioCtx, isTransitioning = false;
         let wordsForCurrentRound = [];
-        let timeBonus = 0;
+        let savedBonusTime = 0;
+        let currentRoundBonusTime = 0;
+        let completedCategories = new Set();
         let sessionStats = {};
 
         const startRound = (category) => {
+            if (completedCategories.has(category)) return;
             selectedCategory = category;
             mainTitle.textContent = `Forca: ${capitalize(category)}`;
             wordsSolved = 0; totalPointsEarned = 0; totalPointsLost = 0;
             totalWordsInCategory = wordCategories[category].originalWords.length;
-            timeLeft = wordCategories[category].time + timeBonus;
-            timeBonus = 0;
+            
+            currentRoundBonusTime = savedBonusTime;
+            const baseTime = wordCategories[category].time;
+            timeLeft = baseTime === 0 ? 0 : baseTime + savedBonusTime;
+
             wordsForCurrentRound = [...wordCategories[category].originalWords].sort(() => Math.random() - 0.5);
             showPanel('game');
             updateProgressDisplay();
@@ -246,25 +298,49 @@
 
         const endRound = (categoryCompleted) => {
             clearInterval(gameTimer);
-            if (timeLeft > 0) { timeBonus = timeLeft; }
             sessionStats[selectedCategory] = { solved: wordsSolved, total: totalWordsInCategory };
             showPanel('none');
+
             if (categoryCompleted) {
-                scoreboardTitle.textContent = "Parabéns, você zerou a categoria!";
+                completedCategories.add(selectedCategory);
+                const extraTimeEarned = BASE_GAME_DURATION === 0 ? 0 : timeLeft;
+                savedBonusTime = extraTimeEarned;
+
+                scoreboardTitle.textContent = "🎉 Parabéns! Você zerou a categoria!";
                 continueBtn.textContent = "Próxima Categoria";
-                continueBtn.onclick = () => { hideModal(scoreboardModal); showPanel('category'); };
+                continueBtn.onclick = () => { 
+                    hideModal(scoreboardModal); 
+                    renderCategoryButtons(); 
+                    showPanel('category'); 
+                };
+
+                let bonusMessage = extraTimeEarned > 0 ? `<li>Bônus Mantido/Disponível: <span class="score-good">+${extraTimeEarned}s</span> para a próxima escolha!</li>` : '';
+
+                scoreboardDetails.innerHTML = `
+                    <li>Palavras Acertadas: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
+                    ${bonusMessage}
+                    <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
+                    <li>Pontos Perdidos (rodada): <span class="score-bad">-${totalPointsLost}</span></li>
+                `;
             } else {
-                scoreboardTitle.textContent = "Tempo Esgotado!";
+                scoreboardTitle.textContent = "⏳ Tempo Esgotado!";
                 continueBtn.textContent = "Tentar Categoria Novamente";
-                continueBtn.onclick = () => { hideModal(scoreboardModal); startRound(selectedCategory); };
+                continueBtn.onclick = () => { 
+                    hideModal(scoreboardModal); 
+                    startRound(selectedCategory); 
+                };
+
+                let bonusRestoredMsg = currentRoundBonusTime > 0 
+                    ? `<li><strong>Sem Penalidade:</strong> Seu bônus de <span class="score-good">${currentRoundBonusTime} segundos</span> ganho em etapas anteriores foi mantido e restaurado!</li>` 
+                    : `<li>Não desanime! Tente novamente ou escolha outra categoria no menu.</li>`;
+
+                scoreboardDetails.innerHTML = `
+                    <li>Palavras Acertadas nesta tentativa: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
+                    ${bonusRestoredMsg}
+                    <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
+                    <li>Pontos Perdidos (rodada): <span class="score-bad">-${totalPointsLost}</span></li>
+                `;
             }
-            let bonusMessage = timeBonus > 0 ? `<li>Bônus de Tempo: <span class="score-good">+${timeBonus} segundos</span> para a próxima rodada!</li>` : '';
-            scoreboardDetails.innerHTML = `
-                <li>Palavras Acertadas (rodada): <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
-                ${bonusMessage}
-                <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
-                <li>Pontos Perdidos (rodada): <span class="score-bad">-${totalPointsLost}</span></li>
-            `;
             finalScoreDisplay.textContent = score; 
             showModal(scoreboardModal);
         };
@@ -274,7 +350,19 @@
             categorySelection.style.display = panelName === 'category' ? 'flex' : 'none';
             gameWrapper.style.display = panelName === 'game' ? 'block' : 'none';
         };
-        const startTimer = () => { if (gameTimer) clearInterval(gameTimer); updateTimerDisplay(); gameTimer = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) { timeLeft = 0; endRound(false); } }, 1000); };
+        const startTimer = () => { 
+            if (gameTimer) clearInterval(gameTimer); 
+            updateTimerDisplay(); 
+            if (timeLeft <= 0 || BASE_GAME_DURATION === 0) return; 
+            gameTimer = setInterval(() => { 
+                timeLeft--; 
+                updateTimerDisplay(); 
+                if (timeLeft <= 0) { 
+                    timeLeft = 0; 
+                    endRound(false); 
+                } 
+            }, 1000); 
+        };
         const updateTimerDisplay = () => timerDisplay.textContent = formatTime(timeLeft);
         const updateScoreDisplay = () => scoreDisplay.textContent = `Pontuação: ${score}`;
         const updateUIForNewWord = (hint) => { hintDisplay.textContent = `Dica: ${hint}`; displayWord(); generateKeyboard(); updateDrawing(); };
@@ -283,7 +371,10 @@
         const generateKeyboard = () => { keyboardContainer.innerHTML = ""; "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => { const button = document.createElement("button"); button.textContent = letter; button.addEventListener("click", () => handleGuess(letter)); keyboardContainer.appendChild(button); }); };
         const updateDrawing = () => { for (let i = 1; i <= MAX_WRONG_GUESSES; i++) { document.getElementById(`petal-${i}`).classList.toggle("hidden", i > wrongGuesses); } };
         const findKeyButton = (letter) => Array.from(keyboardContainer.getElementsByTagName("button")).find(btn => btn.textContent === letter) || null;
-        const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        const formatTime = (seconds) => {
+            if (BASE_GAME_DURATION === 0 || seconds <= 0) return 'Sem Limite';
+            return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        };
         const showModal = (modalElement) => modalElement.classList.add('visible');
         const hideModal = (modalElement) => modalElement.classList.remove('visible');
         const updateProgressDisplay = () => { progressDisplay.textContent = `Progresso: ${wordsSolved} / ${totalWordsInCategory}`; };
@@ -302,44 +393,117 @@
             }
             showModal(generalScoreModal);
         };
-        
-        function processLoadedCategories(data) {
-            wordCategories = {};
-            sessionStats = {};
-            wordCategories = data;
-            const regCatCount = Object.keys(wordCategories).length;
-            for (const catKey in wordCategories) {
-                wordCategories[catKey].time = BASE_GAME_DURATION;
-                wordCategories[catKey].originalWords = [...wordCategories[catKey].words];
-            }
-            if (regCatCount > 1) {
-                const allWords = Object.values(wordCategories).flatMap(cat => cat.originalWords || []);
-                const superTime = Math.round((regCatCount * BASE_GAME_DURATION * SUPER_CATEGORY_DISCOUNT_FACTOR) / 10) * 10;
-                wordCategories['Super Categoria'] = { words: allWords, keywords: [], time: superTime, originalWords: [...allWords] };
-            }
+
+        function renderCategoryButtons() {
             categorySelection.innerHTML = '<h2>Escolha um Modo de Jogo</h2>';
+
+            if (savedBonusTime > 0) {
+                const bonusBanner = document.createElement('div');
+                bonusBanner.style.cssText = 'background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; padding: 10px 15px; border-radius: 10px; font-weight: 600; font-size: 0.95em; margin-bottom: 5px; text-align: center;';
+                bonusBanner.innerHTML = `⏱️ <strong>Bônus de Tempo Mantido/Acumulado:</strong> +${savedBonusTime} segundos para a próxima escolha!`;
+                categorySelection.appendChild(bonusBanner);
+            }
+
             Object.keys(wordCategories).forEach(categoryKey => {
                 const button = document.createElement('button');
                 const catData = wordCategories[categoryKey];
                 button.className = 'category-btn';
-                button.innerHTML = `<span>${capitalize(categoryKey)}</span><span class="info">${catData.words.length} palavras / ${formatTime(catData.time)}</span>`;
                 if (categoryKey === 'Super Categoria') button.classList.add('super-category-btn');
-                button.addEventListener('click', () => { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); startRound(categoryKey); });
+
+                const isCompleted = completedCategories.has(categoryKey);
+
+                if (isCompleted) {
+                    button.disabled = true;
+                    button.style.opacity = '0.6';
+                    button.style.cursor = 'not-allowed';
+                    button.style.borderBottom = 'none';
+                    button.innerHTML = `<span>✓ ${capitalize(categoryKey)}</span><span class="info" style="font-weight:700; color: #dcfce7;">Concluída</span>`;
+                } else {
+                    const baseTime = catData.time;
+                    const effectiveTime = baseTime === 0 ? 0 : baseTime + savedBonusTime;
+                    const timeText = baseTime === 0 ? 'Sem Limite' : `${formatTime(effectiveTime)}${savedBonusTime > 0 ? ` (+${savedBonusTime}s)` : ''}`;
+                    button.innerHTML = `<span>${capitalize(categoryKey)}</span><span class="info">${catData.words.length} palavras / ${timeText}</span>`;
+                    button.addEventListener('click', () => { 
+                        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+                        startRound(categoryKey); 
+                    });
+                }
                 categorySelection.appendChild(button);
             });
+
+            const bottomRow = document.createElement('div');
+            bottomRow.className = 'bottom-buttons-row';
+
             const localLoadBtn = document.createElement('button');
             localLoadBtn.className = 'local-load-btn';
             localLoadBtn.textContent = 'Carregar Arquivo Local';
             localLoadBtn.onclick = () => localFileInput.click();
-            categorySelection.appendChild(localLoadBtn);
+            bottomRow.appendChild(localLoadBtn);
+
             const generalScoreBtn = document.createElement('button');
             generalScoreBtn.className = 'modal-btn';
             generalScoreBtn.style.backgroundColor = 'var(--secondary-color)';
             generalScoreBtn.textContent = 'Ver Placar Geral';
             generalScoreBtn.onclick = showGeneralScore;
-            categorySelection.appendChild(generalScoreBtn);
-            if (isFirstRun) showModal(instructionsModal);
-            else showPanel('category');
+            bottomRow.appendChild(generalScoreBtn);
+
+            categorySelection.appendChild(bottomRow);
+        }
+        
+        function processLoadedCategories(data) {
+            // Merge loaded data with DEFAULT_WORD_CATEGORIES to enrich words and preserve custom categories like 'escolar'
+            const mergedCategories = JSON.parse(JSON.stringify(DEFAULT_WORD_CATEGORIES));
+            
+            for (const catKey in data) {
+                if (!mergedCategories[catKey]) {
+                    mergedCategories[catKey] = data[catKey];
+                } else {
+                    const existingWordUpper = new Set((mergedCategories[catKey].words || []).map(w => w.word.toUpperCase()));
+                    (data[catKey].words || []).forEach(w => {
+                        if (w && w.word && !existingWordUpper.has(w.word.toUpperCase())) {
+                            mergedCategories[catKey].words.push(w);
+                            existingWordUpper.add(w.word.toUpperCase());
+                        }
+                    });
+                    if (data[catKey].keywords) {
+                        mergedCategories[catKey].keywords = Array.from(new Set([
+                            ...(mergedCategories[catKey].keywords || []),
+                            ...data[catKey].keywords
+                        ]));
+                    }
+                }
+            }
+
+            wordCategories = mergedCategories;
+            completedCategories = new Set();
+            savedBonusTime = 0;
+            currentRoundBonusTime = 0;
+            sessionStats = {};
+            score = 0;
+
+            const regCatKeys = Object.keys(wordCategories).filter(k => k !== 'Super Categoria');
+            const regCatCount = regCatKeys.length;
+
+            for (const catKey of regCatKeys) {
+                wordCategories[catKey].time = BASE_GAME_DURATION;
+                wordCategories[catKey].originalWords = [...wordCategories[catKey].words];
+            }
+
+            if (regCatCount > 1) {
+                const allWords = regCatKeys.flatMap(catKey => wordCategories[catKey].originalWords || []);
+                const superTime = getSuperCategoryTime(regCatCount, BASE_GAME_DURATION);
+                wordCategories['Super Categoria'] = { words: allWords, keywords: [], time: superTime, originalWords: [...allWords] };
+            }
+
+            renderCategoryButtons();
+
+            if (!isTimeConfiguredByUrl && isFirstRun) {
+                showModal(teacherModal);
+            } else if (isFirstRun) {
+                showModal(instructionsModal);
+            } else {
+                showPanel('category');
+            }
         }
 
         function handleFileSelect(event) {
@@ -357,6 +521,61 @@
             reader.readAsText(file);
         }
 
+        const DEFAULT_WORD_CATEGORIES = {
+            "animais": {
+                "keywords": ["animal", "mamífero", "inseto", "ave", "réptil", "peixe", "anfíbio"],
+                "words": [
+                    { "word": "GIRAFA", "hint": "Animal com um pescoço muito longo." },
+                    { "word": "ELEFANTE", "hint": "O maior animal terrestre, com uma tromba." },
+                    { "word": "TARTARUGA", "hint": "Leva sua casa nas costas." },
+                    { "word": "LEAO", "hint": "Conhecido como o 'Rei da Selva'." },
+                    { "word": "TIGRE", "hint": "Um grande felino listrado da Ásia." },
+                    { "word": "GOLFINHO", "hint": "Um mamífero muito inteligente que vive no mar." },
+                    { "word": "TUBARAO", "hint": "Grande predador dos oceanos com dentes afiados e barbatana dorsal." },
+                    { "word": "CORUJA", "hint": "Ave noturna conhecida por enxergar bem no escuro." },
+                    { "word": "CANGURU", "hint": "Carrega o filhote na bolsa da barriga e se locomove aos pulos." },
+                    { "word": "PINGUIM", "hint": "Ave marinha que não voa e vive nas regiões frias." }
+                ]
+            },
+            "frutas": {
+                "keywords": ["fruta", "fruto", "comestível", "doce", "semente", "árvore"],
+                "words": [
+                    { "word": "BANANA", "hint": "Amarela, comprida e favorita dos macacos." },
+                    { "word": "MORANGO", "hint": "Pequena, vermelha e com sementes do lado de fora." },
+                    { "word": "ABACAXI", "hint": "Tem uma coroa e sua casca é espinhosa." },
+                    { "word": "MELANCIA", "hint": "Grande, verde por fora e vermelha por dentro." },
+                    { "word": "UVA", "hint": "Pequena e redonda, cresce em cachos e faz suco." },
+                    { "word": "LARANJA", "hint": "Fruta cítrica muito rica em vitamina C que leva o nome de sua cor." },
+                    { "word": "MACA", "hint": "Fruta vermelha ou verde, muito crocante e famosa nos contos de fadas." },
+                    { "word": "LIMAO", "hint": "Fruta verde e azeda, excelente para limonada." }
+                ]
+            },
+            "objetos": {
+                "keywords": ["objeto", "utensílio", "ferramenta", "instrumento", "artefato", "coisa"],
+                "words": [
+                    { "word": "CADEIRA", "hint": "Usado para sentar, geralmente tem quatro pernas." },
+                    { "word": "TESOURA", "hint": "Serve para cortar papel, tecido e outras coisas." },
+                    { "word": "COMPUTADOR", "hint": "Máquina usada para trabalhar, estudar e jogar." },
+                    { "word": "TELEFONE", "hint": "Usamos para conversar com pessoas que estão longe." },
+                    { "word": "MOCHILA", "hint": "Usada para carregar cadernos e materiais para a escola." },
+                    { "word": "RELOGIO", "hint": "Objeto usado para ver as horas e controlar o tempo." },
+                    { "word": "OCULOS", "hint": "Usado no rosto para ajudar a enxergar melhor." },
+                    { "word": "LUMINARIA", "hint": "Objeto que ilumina a mesa durante a leitura." }
+                ]
+            },
+            "escolar": {
+                "keywords": ["escola", "estudo", "material", "aula", "ferramenta"],
+                "words": [
+                    { "word": "CANETA", "hint": "Usada para escrever com tinta no papel." },
+                    { "word": "BORRACHA", "hint": "Serve para apagar o que foi escrito a lápis." },
+                    { "word": "APONTADOR", "hint": "Ferramenta usada para fazer ponta no lápis." },
+                    { "word": "REGUA", "hint": "Objeto reto usado para medir e traçar linhas." },
+                    { "word": "LIVRO", "hint": "Contém páginas com histórias, figuras e conhecimentos." },
+                    { "word": "CADERNO", "hint": "Lugar onde os alunos escrevem as lições com lápis e caneta." }
+                ]
+            }
+        };
+
         async function init() {
             try {
                 const response = await fetch('https://raw.githubusercontent.com/evaristopba/Atividades/main/palavras.json' + `?v=${new Date().getTime()}`);
@@ -364,32 +583,45 @@
                 const data = await response.json();
                 processLoadedCategories(data);
             } catch (error) {
-                console.error('Erro:', error);
-                categorySelection.innerHTML = `<h2>Erro ao carregar o jogo online.</h2><p>${error.message}</p><p>Você pode tentar carregar um arquivo local.</p>`;
-                const localLoadBtn = document.createElement('button');
-                localLoadBtn.className = 'local-load-btn';
-                localLoadBtn.textContent = 'Carregar Arquivo Local';
-                localLoadBtn.onclick = () => localFileInput.click();
-                categorySelection.appendChild(localLoadBtn);
-                showPanel('category');
+                console.warn('Usando banco de palavras padrão de contingência:', error);
+                processLoadedCategories(DEFAULT_WORD_CATEGORIES);
             }
+            confirmTeacherTimeBtn.addEventListener('click', () => {
+                BASE_GAME_DURATION = parseInt(teacherTimeInput.value, 10);
+                if (isNaN(BASE_GAME_DURATION) || BASE_GAME_DURATION < 0) BASE_GAME_DURATION = 180;
+                
+                const regCatCount = Object.keys(wordCategories).filter(k => k !== 'Super Categoria').length;
+                for (const catKey in wordCategories) {
+                    if (catKey === 'Super Categoria') {
+                        wordCategories[catKey].time = getSuperCategoryTime(regCatCount, BASE_GAME_DURATION);
+                    } else {
+                        wordCategories[catKey].time = BASE_GAME_DURATION;
+                    }
+                }
+                
+                renderCategoryButtons();
+
+                hideModal(teacherModal);
+                if (isFirstRun) {
+                    showModal(instructionsModal);
+                } else {
+                    showPanel('category');
+                }
+            });
+
             closeHelpBtn.addEventListener('click', () => { hideModal(instructionsModal); if (isFirstRun) { showPanel('category'); isFirstRun = false; } });
             showHelpBtn.addEventListener('click', () => showModal(instructionsModal));
             
             backToMenuBtn.addEventListener('click', () => { 
-                if (confirm('Tem certeza que deseja voltar ao menu? Todo o seu progresso (pontuação e bônus) será perdido.')) {
-                    hideModal(scoreboardModal); 
-                    showPanel('category'); 
-                    mainTitle.textContent = 'Jogo da Forca Educativo'; 
-                    timeBonus = 0; 
-                    score = 0;
-                    sessionStats = {};
-                }
+                hideModal(scoreboardModal); 
+                renderCategoryButtons();
+                showPanel('category'); 
+                mainTitle.textContent = 'Jogo da Forca Educativo'; 
             });
 
             localFileInput.addEventListener('change', handleFileSelect);
             closeGeneralScoreBtn.addEventListener('click', () => hideModal(generalScoreModal));
-            document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
+            document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
         }
         init();
     });
