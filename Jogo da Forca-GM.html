@@ -20,11 +20,13 @@
             color: #333; text-align: center; padding: 20px; margin: 0;
         }
         #main-wrapper { width: 100%; max-width: 700px; }
-        #title-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
-        h1 { color: var(--primary-color); margin: 0; font-size: 2.5em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        #title-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        h1 { color: var(--primary-color); margin: 0; font-size: 2.3em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
         h2 { color: var(--primary-color); }
-        #show-help-btn { font-size: 1.5em; font-weight: bold; color: var(--primary-color); background-color: white; border: 2px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.2s ease; }
+        #show-help-btn { font-size: 1.4em; font-weight: bold; color: var(--primary-color); background-color: white; border: 2px solid var(--primary-color); border-radius: 50%; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.2s ease; }
         #show-help-btn:hover { transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        #show-bncc-btn { font-size: 0.9em; font-weight: 700; color: white; background-color: var(--super-category-color); border: none; border-radius: 20px; padding: 6px 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: all 0.2s ease; }
+        #show-bncc-btn:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         #api-status { padding: 6px 12px; font-size: 0.8em; margin-bottom: 10px; border-radius: 20px; font-weight: 600; color: white; transition: all 0.5s ease; opacity: 0; max-height: 0; overflow: hidden; }
         #api-status.visible { opacity: 1; max-height: 50px; }
         .game-panel { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; }
@@ -86,7 +88,7 @@
 </head>
 <body>
     <div id="main-wrapper">
-        <div id="title-wrapper"><h1 id="main-title">Jogo da Forca Educativo</h1><button id="show-help-btn">?</button></div>
+        <div id="title-wrapper"><h1 id="main-title">Jogo da Forca Educativo</h1><button id="show-help-btn" title="Como Jogar">?</button><button id="show-bncc-btn" title="Fundamentação BNCC">🎓 BNCC</button></div>
         <p id="api-status"></p>
         <div id="category-selection" class="game-panel"><h2>Carregando...</h2></div>
         <input type="file" id="local-file-input" style="display: none;" accept=".json,application/json">
@@ -127,6 +129,48 @@
                 <li>O tempo que sobrar ao final de uma categoria vira bônus para a próxima!</li>
             </ul>
             <button class="modal-btn" id="close-help-btn">Entendi, vamos jogar!</button>
+        </div>
+    </div>
+    <div id="bncc-modal" class="modal-container">
+        <div class="modal-content" style="max-width: 620px; text-align: left; max-height: 88vh; overflow-y: auto;">
+            <h2 style="color: var(--super-category-color); margin-top: 0; text-align: center;">🎓 Guia Pedagógico Completo (BNCC)</h2>
+            <p style="font-size: 0.95em; color: #444; line-height: 1.5; margin-bottom: 15px;">
+                O <strong>Jogo da Forca Educativo</strong> foi concebido para o Ensino Fundamental I (1º ao 5º Ano), promovendo alfabetização, consolidação ortográfica e raciocínio analítico.
+            </p>
+
+            <h3 style="color: var(--primary-color); margin-bottom: 6px; font-size: 1.05em;">📌 Detalhamento de Habilidades por Ano (1º ao 5º Ano)</h3>
+            <div style="font-size: 0.88em; color: #333; line-height: 1.5; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 12px;">
+                <p style="margin: 0 0 8px 0;"><strong>• 1º Ano (Alfabetização Inicial):</strong><br>
+                <code>EF01LP02</code>: Escrever palavras de forma alfabética.<br>
+                <code>EF01LP05</code>: Reconhecer o sistema alfabético e a correspondência grafema-fonema.</p>
+
+                <p style="margin: 0 0 8px 0;"><strong>• 2º Ano (Fixação e Léxico):</strong><br>
+                <code>EF02LP01</code>: Utilizar grafia correta de palavras com correspondências fonema-grafema diretas.<br>
+                <code>EF02LP04</code>: Reconhecer sílabas e estruturas silábicas na formação de palavras.</p>
+
+                <p style="margin: 0 0 8px 0;"><strong>• 3º Ano (Aprimoramento Ortográfico):</strong><br>
+                <code>EF03LP01</code>: Ler e escrever palavras com correspondências regulares contextuais.<br>
+                <code>EF03LP03</code>: Identificar a tonicidade e os padrões ortográficos da língua.</p>
+
+                <p style="margin: 0;"><strong>• 4º e 5º Ano (Inferência e Leitura Analítica):</strong><br>
+                <code>EF35LP05</code>: Inferir o sentido de palavras a partir de pistas contextuais e lógicas da dica.<br>
+                <code>EF35LP12</code>: Recorrer a estratégias de antecipação e seleção de hipóteses na leitura.</p>
+            </div>
+
+            <h3 style="color: var(--primary-color); margin-bottom: 6px; font-size: 1.05em;">🌿 Interdisciplinaridade & Áreas do Conhecimento</h3>
+            <ul style="font-size: 0.9em; padding-left: 18px; line-height: 1.5; margin-top: 0; margin-bottom: 12px;">
+                <li><strong>Língua Portuguesa:</strong> Ortografia, vocabulário e interpretação leitora.</li>
+                <li><strong>Ciências da Natureza (<code>EF02CI04</code>, <code>EF03CI04</code>):</strong> Categoria <em>Animais</em> aborda diversidade biológica, características físicas e habitats.</li>
+                <li><strong>Geografia e Sociedade (<code>EF01GE02</code>):</strong> Categorias <em>Objetos</em> e <em>Escolar</em> contextualizam o cotidiano e o ambiente escolar.</li>
+            </ul>
+
+            <h3 style="color: var(--primary-color); margin-bottom: 6px; font-size: 1.05em;">💡 Competências Gerais da Educação Básica</h3>
+            <ul style="font-size: 0.9em; padding-left: 18px; line-height: 1.5; margin-top: 0;">
+                <li><strong>Competência 2 (Pensamento Científico e Crítico):</strong> Levantamento e testagem de hipóteses ortográficas a cada tentativa.</li>
+                <li><strong>Competência 5 (Cultura Digital):</strong> Uso pedagógico e intencional de tecnologia gamificada na sala de aula.</li>
+            </ul>
+
+            <button class="modal-btn" id="close-bncc-btn" style="width: 100%; margin-top: 15px; background-color: var(--super-category-color);">Fechar Guia BNCC</button>
         </div>
     </div>
     <div id="general-score-modal" class="modal-container">
@@ -188,6 +232,9 @@
         const teacherModal = document.getElementById('teacher-modal');
         const teacherTimeInput = document.getElementById('teacher-time-input');
         const confirmTeacherTimeBtn = document.getElementById('confirm-teacher-time-btn');
+        const bnccModal = document.getElementById('bncc-modal');
+        const showBnccBtn = document.getElementById('show-bncc-btn');
+        const closeBnccBtn = document.getElementById('close-bncc-btn');
 
         const MAX_WRONG_GUESSES = 6;
         const urlParams = new URLSearchParams(window.location.search);
@@ -447,6 +494,13 @@
             generalScoreBtn.onclick = showGeneralScore;
             bottomRow.appendChild(generalScoreBtn);
 
+            const bnccGuideBtn = document.createElement('button');
+            bnccGuideBtn.className = 'modal-btn';
+            bnccGuideBtn.style.backgroundColor = 'var(--super-category-color)';
+            bnccGuideBtn.textContent = '🎓 Guia BNCC';
+            bnccGuideBtn.onclick = () => showModal(bnccModal);
+            bottomRow.appendChild(bnccGuideBtn);
+
             categorySelection.appendChild(bottomRow);
         }
         
@@ -612,6 +666,9 @@
             closeHelpBtn.addEventListener('click', () => { hideModal(instructionsModal); if (isFirstRun) { showPanel('category'); isFirstRun = false; } });
             showHelpBtn.addEventListener('click', () => showModal(instructionsModal));
             
+            showBnccBtn.addEventListener('click', () => showModal(bnccModal));
+            closeBnccBtn.addEventListener('click', () => hideModal(bnccModal));
+            
             backToMenuBtn.addEventListener('click', () => { 
                 hideModal(scoreboardModal); 
                 renderCategoryButtons();
@@ -621,7 +678,7 @@
 
             localFileInput.addEventListener('change', handleFileSelect);
             closeGeneralScoreBtn.addEventListener('click', () => hideModal(generalScoreModal));
-            document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
+            document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible') || bnccModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
         }
         init();
     });
