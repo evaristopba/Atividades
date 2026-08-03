@@ -30,13 +30,13 @@
         #api-status { padding: 6px 12px; font-size: 0.8em; margin-bottom: 10px; border-radius: 20px; font-weight: 600; color: white; transition: all 0.5s ease; opacity: 0; max-height: 0; overflow: hidden; }
         #api-status.visible { opacity: 1; max-height: 50px; }
         .game-panel { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; }
-        #category-selection { display: none; flex-direction: column; gap: 15px; max-height: 70vh; overflow-y: auto; }
-        .category-btn, .modal-btn, .local-load-btn { font-size: 1.3em; font-weight: 600; padding: 15px 20px; border-radius: 12px; border: none; border-bottom: 4px solid rgba(0,0,0,0.2); color: white; cursor: pointer; transition: all 0.1s ease-in-out; }
+        #category-selection { display: none; flex-direction: column; gap: 12px; }
+        .category-btn, .modal-btn, .local-load-btn { font-size: 1.25em; font-weight: 600; padding: 14px 18px; border-radius: 12px; border: none; border-bottom: 4px solid rgba(0,0,0,0.2); color: white; cursor: pointer; transition: all 0.1s ease-in-out; }
         .category-btn:hover, .modal-btn:hover, .local-load-btn:hover { transform: translateY(-2px); }
         .category-btn:active, .modal-btn:active, .local-load-btn:active { transform: translateY(1px); border-bottom-width: 2px; }
         .category-btn { background-color: var(--success-color); display: flex; justify-content: space-between; align-items: center; }
-        .bottom-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
-        .bottom-buttons-row button { flex: 1; margin-top: 0 !important; font-size: 1.1em; padding: 12px 15px; }
+        .bottom-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 5px; flex-wrap: wrap; }
+        .bottom-buttons-row button { flex: 1; min-width: 140px; margin-top: 0 !important; font-size: 0.95em; padding: 12px 10px; }
         .local-load-btn { background-color: var(--secondary-color); }
         .modal-btn { background-color: var(--primary-color); }
         @media (max-width: 600px) { .bottom-buttons-row { flex-direction: column; } }
@@ -92,6 +92,7 @@
         <p id="api-status"></p>
         <div id="category-selection" class="game-panel"><h2>Carregando...</h2></div>
         <input type="file" id="local-file-input" style="display: none;" accept=".json,application/json">
+        <input type="file" id="progress-file-input" style="display: none;" accept=".txt,.json,text/plain">
         <div id="game-wrapper">
             <div id="game-container" class="game-panel">
                 <div id="game-info">
@@ -179,7 +180,33 @@
             <p><strong>Pontuação Total Acumulada: <span id="general-score-total">0</span></strong></p>
             <h3>Desempenho por Categoria:</h3>
             <ul id="general-score-list"></ul>
-            <button class="modal-btn" id="close-general-score-btn">Fechar</button>
+            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                <button class="modal-btn" id="modal-save-progress-btn" style="flex: 1; background-color: var(--primary-color);">💾 Salvar TXT</button>
+                <button class="modal-btn" id="close-general-score-btn" style="flex: 1; background-color: var(--secondary-color);">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <div id="save-progress-modal" class="modal-container">
+        <div class="modal-content" style="max-width: 460px;">
+            <h2 style="color: var(--primary-color); margin-top: 0; font-size: 1.5em;">💾 Salvar Progresso do Aluno</h2>
+            <p style="font-size: 0.95em; color: #555; margin-bottom: 15px; text-align: left; line-height: 1.4;">
+                Digite o nome do aluno para identificar o arquivo de progresso salvável (.TXT em Base64):
+            </p>
+            <div style="margin-bottom: 20px; text-align: left;">
+                <label for="save-student-name-input" style="font-weight: 700; color: #334155; font-size: 0.95em; display: block; margin-bottom: 6px;">Nome do Aluno(a):</label>
+                <input type="text" id="save-student-name-input" placeholder="Digite o nome do aluno..." style="width: 100%; padding: 12px 14px; font-size: 1em; border: 2px solid var(--primary-color); border-radius: 10px; outline: none; font-family: inherit; font-weight: 600; color: #0284c7;" />
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="modal-btn" id="confirm-save-progress-btn" style="flex: 1; background-color: var(--primary-color); font-size: 1.05em; padding: 12px;">💾 Baixar TXT</button>
+                <button class="modal-btn" id="cancel-save-progress-btn" style="flex: 1; background-color: var(--secondary-color); font-size: 1.05em; padding: 12px;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <div id="custom-alert-modal" class="modal-container">
+        <div class="modal-content" style="max-width: 460px;">
+            <h2 id="custom-alert-title" style="color: var(--primary-color); margin-top: 0; font-size: 1.4em;">📢 Mensagem</h2>
+            <div id="custom-alert-body" style="font-size: 0.98em; color: #444; margin-bottom: 20px; text-align: left; line-height: 1.5;"></div>
+            <button class="modal-btn" id="custom-alert-ok-btn" style="width: 100%; padding: 12px; font-size: 1.05em; background-color: var(--primary-color);">Entendido</button>
         </div>
     </div>
     <div id="teacher-modal" class="modal-container">
@@ -225,10 +252,17 @@
         const closeHelpBtn = document.getElementById('close-help-btn');
         const progressDisplay = document.getElementById('progress-display');
         const localFileInput = document.getElementById('local-file-input');
+        const progressFileInput = document.getElementById('progress-file-input');
+        const apiStatus = document.getElementById('api-status');
         const generalScoreModal = document.getElementById('general-score-modal');
         const generalScoreTotal = document.getElementById('general-score-total');
         const generalScoreList = document.getElementById('general-score-list');
         const closeGeneralScoreBtn = document.getElementById('close-general-score-btn');
+        const modalSaveProgressBtn = document.getElementById('modal-save-progress-btn');
+        const saveProgressModal = document.getElementById('save-progress-modal');
+        const saveStudentNameInput = document.getElementById('save-student-name-input');
+        const confirmSaveProgressBtn = document.getElementById('confirm-save-progress-btn');
+        const cancelSaveProgressBtn = document.getElementById('cancel-save-progress-btn');
         const teacherModal = document.getElementById('teacher-modal');
         const teacherTimeInput = document.getElementById('teacher-time-input');
         const confirmTeacherTimeBtn = document.getElementById('confirm-teacher-time-btn');
@@ -271,6 +305,149 @@
         let currentRoundBonusTime = 0;
         let completedCategories = new Set();
         let sessionStats = {};
+        let studentName = '';
+
+        const customAlertModal = document.getElementById('custom-alert-modal');
+        const customAlertTitle = document.getElementById('custom-alert-title');
+        const customAlertBody = document.getElementById('custom-alert-body');
+        const customAlertOkBtn = document.getElementById('custom-alert-ok-btn');
+        let onAlertCloseCallback = null;
+
+        const customAlert = (title, messageHtml, callback) => {
+            if (customAlertTitle) customAlertTitle.innerHTML = title;
+            if (customAlertBody) customAlertBody.innerHTML = messageHtml;
+            onAlertCloseCallback = callback || null;
+            showModal(customAlertModal);
+        };
+
+        const showStatus = (message, isError = false) => {
+            if (!apiStatus) return;
+            apiStatus.textContent = message;
+            apiStatus.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--success-color)';
+            apiStatus.classList.add('visible');
+            setTimeout(() => {
+                apiStatus.classList.remove('visible');
+            }, 4500);
+        };
+
+        const saveProgressToFile = () => {
+            if (saveStudentNameInput) {
+                saveStudentNameInput.value = studentName || '';
+            }
+            showModal(saveProgressModal);
+            setTimeout(() => {
+                if (saveStudentNameInput) saveStudentNameInput.focus();
+            }, 100);
+        };
+
+        const confirmSaveProgress = () => {
+            if (saveStudentNameInput && saveStudentNameInput.value.trim()) {
+                studentName = saveStudentNameInput.value.trim();
+            } else if (!studentName) {
+                studentName = 'Aluno';
+            }
+
+            const progressData = {
+                app: "JogoDaForcaEducativo",
+                version: "1.0",
+                studentName: studentName,
+                score: score,
+                completedCategories: Array.from(completedCategories),
+                sessionStats: sessionStats,
+                savedBonusTime: savedBonusTime,
+                baseGameDuration: BASE_GAME_DURATION,
+                savedAt: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR')
+            };
+
+            try {
+                const jsonStr = JSON.stringify(progressData, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+                
+                const sanitizedName = studentName.toLowerCase().replace(/[^a-z0-9_áàâãéèêíóôõúç]/g, '_');
+                const fileName = `progresso_forca_${sanitizedName}.txt`;
+                
+                const blob = new Blob([base64Content], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                hideModal(saveProgressModal);
+                hideModal(generalScoreModal);
+                showStatus(`💾 Progresso de "${studentName}" salvo com sucesso em TXT!`, false);
+                updateScoreDisplay();
+                renderCategoryButtons();
+            } catch (err) {
+                console.error('Erro ao salvar progresso:', err);
+                customAlert('❌ Erro de Salvamento', 'Não foi possível gerar o arquivo de progresso. Tente novamente.');
+            }
+        };
+
+        const handleProgressFileSelect = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result.trim();
+                let progressData;
+                try {
+                    const decodedStr = decodeURIComponent(escape(atob(content)));
+                    progressData = JSON.parse(decodedStr);
+                } catch (e1) {
+                    try {
+                        progressData = JSON.parse(content);
+                    } catch (e2) {
+                        customAlert('⚠️ Arquivo Inválido', 'O arquivo selecionado de progresso está corrompido ou é inválido. Por favor, selecione um arquivo TXT gerado pelo jogo.');
+                        event.target.value = '';
+                        return;
+                    }
+                }
+
+                if (!progressData || typeof progressData !== 'object' || (progressData.score === undefined && !progressData.completedCategories)) {
+                    customAlert('⚠️ Formato Incompatível', 'O arquivo selecionado não contém dados de progresso válidos do jogo.');
+                    event.target.value = '';
+                    return;
+                }
+
+                if (progressData.studentName) {
+                    studentName = progressData.studentName;
+                }
+                if (typeof progressData.score === 'number') {
+                    score = progressData.score;
+                }
+                if (Array.isArray(progressData.completedCategories)) {
+                    completedCategories = new Set(progressData.completedCategories);
+                }
+                if (progressData.sessionStats && typeof progressData.sessionStats === 'object') {
+                    sessionStats = progressData.sessionStats;
+                }
+                if (typeof progressData.savedBonusTime === 'number') {
+                    savedBonusTime = progressData.savedBonusTime;
+                }
+                if (typeof progressData.baseGameDuration === 'number') {
+                    BASE_GAME_DURATION = progressData.baseGameDuration;
+                }
+
+                renderCategoryButtons();
+                updateScoreDisplay();
+                showStatus(`✅ Progresso de "${studentName || 'Aluno'}" restaurado com sucesso!`, false);
+                
+                customAlert(
+                    '🎉 Progresso Restaurado com Sucesso!',
+                    `<div style="background: #f0f9ff; padding: 14px; border-radius: 10px; border: 1.5px solid #7dd3fc;">
+                        <p style="margin: 0 0 8px 0; font-size: 1.05em; font-weight: 700; color: #0284c7;">👤 Aluno(a): <span>${studentName || 'Não informado'}</span></p>
+                        <p style="margin: 0 0 6px 0;"><strong>⭐ Pontuação Total:</strong> ${score} pontos</p>
+                        <p style="margin: 0 0 6px 0;"><strong>📚 Categorias Concluídas:</strong> ${completedCategories.size}</p>
+                        <p style="margin: 0;"><strong>📅 Data de Salvamento:</strong> ${progressData.savedAt || 'Anterior'}</p>
+                    </div>`
+                );
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        };
 
         const startRound = (category) => {
             if (completedCategories.has(category)) return;
@@ -359,6 +536,8 @@
             sessionStats[selectedCategory] = { solved: wordsSolved, total: totalWordsInCategory };
             showPanel('none');
 
+            let studentInfoHtml = studentName ? `<li>Aluno(a): <span>${studentName}</span></li>` : '';
+
             if (categoryCompleted) {
                 completedCategories.add(selectedCategory);
                 const extraTimeEarned = BASE_GAME_DURATION === 0 ? 0 : timeLeft;
@@ -375,6 +554,7 @@
                 let bonusMessage = extraTimeEarned > 0 ? `<li>Bônus Mantido/Disponível: <span class="score-good">+${extraTimeEarned}s</span> para a próxima escolha!</li>` : '';
 
                 scoreboardDetails.innerHTML = `
+                    ${studentInfoHtml}
                     <li>Palavras Acertadas: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
                     ${bonusMessage}
                     <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
@@ -393,6 +573,7 @@
                     : `<li>Não desanime! Tente novamente ou escolha outra categoria no menu.</li>`;
 
                 scoreboardDetails.innerHTML = `
+                    ${studentInfoHtml}
                     <li>Palavras Acertadas nesta tentativa: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
                     ${bonusRestoredMsg}
                     <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
@@ -422,7 +603,9 @@
             }, 1000); 
         };
         const updateTimerDisplay = () => timerDisplay.textContent = formatTime(timeLeft);
-        const updateScoreDisplay = () => scoreDisplay.textContent = `Pontuação: ${score}`;
+        const updateScoreDisplay = () => {
+            scoreDisplay.textContent = studentName ? `Aluno: ${studentName} | Pontuação: ${score}` : `Pontuação: ${score}`;
+        };
         const updateUIForNewWord = (hint) => { hintDisplay.textContent = `Dica: ${hint}`; displayWord(); generateKeyboard(); updateDrawing(); };
         const displayWord = () => { if (!selectedWord) return; wordDisplay.innerHTML = selectedWord.split("").map(letter => `<span>${correctLetters.includes(letter) ? letter : ' '}</span>`).join(""); };
         const displayWordFull = (word) => { wordDisplay.innerHTML = word.split("").map(letter => `<span style="color: var(--danger-color);">${letter}</span>`).join(""); };
@@ -437,6 +620,10 @@
         const hideModal = (modalElement) => modalElement.classList.remove('visible');
         const updateProgressDisplay = () => { progressDisplay.textContent = `Progresso: ${wordsSolved} / ${totalWordsInCategory}`; };
         const showGeneralScore = () => {
+            const generalScoreTitle = document.querySelector('#general-score-modal h2');
+            if (generalScoreTitle) {
+                generalScoreTitle.textContent = studentName ? `Placar Geral - ${studentName}` : `Placar Geral da Sessão`;
+            }
             generalScoreTotal.textContent = score;
             generalScoreList.innerHTML = '';
             if (Object.keys(sessionStats).length === 0) {
@@ -454,6 +641,13 @@
 
         function renderCategoryButtons() {
             categorySelection.innerHTML = '<h2>Escolha um Modo de Jogo</h2>';
+
+            if (studentName) {
+                const studentTag = document.createElement('div');
+                studentTag.style.cssText = 'background: #f0f9ff; border: 1.5px solid #7dd3fc; color: #0284c7; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.95em; display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin: 0 auto 5px auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05);';
+                studentTag.innerHTML = `👤 Aluno(a): <span>${studentName}</span>`;
+                categorySelection.appendChild(studentTag);
+            }
 
             if (savedBonusTime > 0) {
                 const bonusBanner = document.createElement('div');
@@ -489,30 +683,52 @@
                 categorySelection.appendChild(button);
             });
 
-            const bottomRow = document.createElement('div');
-            bottomRow.className = 'bottom-buttons-row';
+            const progressRow = document.createElement('div');
+            progressRow.className = 'bottom-buttons-row';
+            progressRow.style.marginTop = '10px';
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'modal-btn';
+            saveBtn.style.backgroundColor = 'var(--primary-color)';
+            saveBtn.style.fontSize = '1.05em';
+            saveBtn.innerHTML = '💾 Salvar Progresso';
+            saveBtn.onclick = saveProgressToFile;
+            progressRow.appendChild(saveBtn);
+
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'modal-btn';
+            restoreBtn.style.backgroundColor = '#0284c7';
+            restoreBtn.style.fontSize = '1.05em';
+            restoreBtn.innerHTML = '📂 Restaurar Progresso';
+            restoreBtn.onclick = () => progressFileInput.click();
+            progressRow.appendChild(restoreBtn);
+
+            categorySelection.appendChild(progressRow);
+
+            const toolsRow = document.createElement('div');
+            toolsRow.className = 'bottom-buttons-row';
 
             const localLoadBtn = document.createElement('button');
             localLoadBtn.className = 'local-load-btn';
             localLoadBtn.textContent = 'Carregar Arquivo Local';
             localLoadBtn.onclick = () => localFileInput.click();
-            bottomRow.appendChild(localLoadBtn);
+            toolsRow.appendChild(localLoadBtn);
 
             const generalScoreBtn = document.createElement('button');
             generalScoreBtn.className = 'modal-btn';
             generalScoreBtn.style.backgroundColor = 'var(--secondary-color)';
-            generalScoreBtn.textContent = 'Ver Placar Geral';
+            generalScoreBtn.textContent = '🏆 Placar Geral';
             generalScoreBtn.onclick = showGeneralScore;
-            bottomRow.appendChild(generalScoreBtn);
+            toolsRow.appendChild(generalScoreBtn);
 
             const bnccGuideBtn = document.createElement('button');
             bnccGuideBtn.className = 'modal-btn';
             bnccGuideBtn.style.backgroundColor = 'var(--super-category-color)';
             bnccGuideBtn.textContent = '🎓 Guia BNCC';
             bnccGuideBtn.onclick = () => showModal(bnccModal);
-            bottomRow.appendChild(bnccGuideBtn);
+            toolsRow.appendChild(bnccGuideBtn);
 
-            categorySelection.appendChild(bottomRow);
+            categorySelection.appendChild(toolsRow);
         }
         
         function processLoadedCategories(data) {
@@ -580,7 +796,7 @@
                     const data = JSON.parse(e.target.result);
                     processLoadedCategories(data);
                 } catch (err) {
-                    alert('Erro ao ler o arquivo JSON. Verifique o formato do arquivo.');
+                    customAlert('❌ Erro de Leitura', 'Erro ao ler o arquivo JSON. Verifique se o formato do arquivo é um JSON válido.');
                 }
             };
             reader.readAsText(file);
@@ -688,9 +904,28 @@
             });
 
             localFileInput.addEventListener('change', handleFileSelect);
+            if (customAlertOkBtn) {
+                customAlertOkBtn.addEventListener('click', () => {
+                    hideModal(customAlertModal);
+                    if (onAlertCloseCallback) {
+                        const cb = onAlertCloseCallback;
+                        onAlertCloseCallback = null;
+                        cb();
+                    }
+                });
+            }
+            if (progressFileInput) progressFileInput.addEventListener('change', handleProgressFileSelect);
+            if (modalSaveProgressBtn) modalSaveProgressBtn.addEventListener('click', saveProgressToFile);
+            if (confirmSaveProgressBtn) confirmSaveProgressBtn.addEventListener('click', confirmSaveProgress);
+            if (cancelSaveProgressBtn) cancelSaveProgressBtn.addEventListener('click', () => hideModal(saveProgressModal));
+            if (saveStudentNameInput) {
+                saveStudentNameInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') confirmSaveProgress();
+                });
+            }
             closeGeneralScoreBtn.addEventListener('click', () => hideModal(generalScoreModal));
             document.addEventListener('keydown', (event) => { 
-                if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible') || bnccModal.classList.contains('visible')) return; 
+                if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible') || bnccModal.classList.contains('visible') || (saveProgressModal && saveProgressModal.classList.contains('visible')) || (customAlertModal && customAlertModal.classList.contains('visible'))) return; 
                 if (event.repeat) return;
                 const letter = event.key.toUpperCase(); 
                 if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); 
