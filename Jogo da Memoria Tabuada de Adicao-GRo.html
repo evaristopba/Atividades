@@ -186,7 +186,6 @@
     <div id="info">Aluno: — | Tabuada: 1 | Pares: 0/10 | Pontuação: 0</div>
     <div id="tabuleiro"></div>
 
-    <!-- Modal de Instruções -->
     <div id="instrucoesModal" class="modal">
         <div class="modal-content">
             <h2>Jogo da Memória da Tabuada</h2>
@@ -206,7 +205,6 @@
         </div>
     </div>
 
-    <!-- Modal Nome do Aluno -->
     <div id="nomeModal" class="modal">
         <div class="modal-content">
             <h2>Nome do Aluno</h2>
@@ -219,7 +217,6 @@
         </div>
     </div>
 
-    <!-- Modal de Mensagem -->
     <div id="mensagemModal" class="modal">
         <div class="modal-content">
             <h2 id="mensagemTitulo">Aviso</h2>
@@ -230,7 +227,6 @@
         </div>
     </div>
 
-    <!-- Modal Confirmação de Reinício -->
     <div id="confirmarReinicioModal" class="modal">
         <div class="modal-content">
             <h2>Reiniciar Jogo?</h2>
@@ -242,7 +238,6 @@
         </div>
     </div>
 
-    <!-- Modal Game Over -->
     <div id="gameOverModal" class="modal">
         <div class="modal-content">
             <h2>Parabéns!</h2>
@@ -288,6 +283,7 @@
         let cartasViradas = [];
         let bloqueado = false;
         const maxTabuada = 10;
+        const TIPO_JOGO = 'adicao';
 
         function mostrarMensagem(titulo, texto) {
             mensagemTitulo.innerText = titulo;
@@ -435,6 +431,7 @@
 
         function executarSalvar() {
             const status = {
+                tipo: TIPO_JOGO,
                 nomeAluno: nomeAluno,
                 currentTabuada: currentTabuada,
                 paresEncontrados: paresEncontrados,
@@ -455,7 +452,7 @@
                 .replace(/[^a-zA-Z0-9]/g, '_')
                 .substring(0, 20) || 'aluno';
 
-            a.download = `progresso_${nomeArquivo}_tab${currentTabuada}.txt`;
+            a.download = `progresso_adicao_${nomeArquivo}_tab${currentTabuada}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -480,6 +477,15 @@
                     const base64 = e.target.result.trim();
                     const json = decodeURIComponent(escape(atob(base64)));
                     const status = JSON.parse(json);
+
+                    // Compatível com formato antigo (sem "tipo")
+                    if (status.tipo && status.tipo !== TIPO_JOGO) {
+                        mostrarMensagem(
+                            'Arquivo Incorreto',
+                            'Este arquivo não é de progresso do jogo de <strong>Adição</strong>.<br><br>Use um arquivo salvo neste jogo.'
+                        );
+                        return;
+                    }
 
                     nomeAluno = status.nomeAluno || '';
                     currentTabuada = status.currentTabuada || 1;
@@ -517,7 +523,6 @@
             inputArquivo.value = '';
         }
 
-        // Eventos
         mostrarInstrucoes.addEventListener('click', () => {
             instrucoesModal.style.display = 'flex';
         });
@@ -525,7 +530,6 @@
         iniciarJogo.addEventListener('click', iniciarJogoAgora);
         proximaTabuada.addEventListener('click', avancarTabuada);
 
-        // Confirmação de reinício
         reiniciarTabuada.addEventListener('click', () => {
             confirmarReinicioModal.style.display = 'flex';
         });
