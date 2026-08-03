@@ -265,6 +265,7 @@
         let wordsSolved = 0;
         let totalWordsInCategory = 0;
         let isFirstRun = true, audioCtx, isTransitioning = false;
+        let lastGuessTime = 0;
         let wordsForCurrentRound = [];
         let savedBonusTime = 0;
         let currentRoundBonusTime = 0;
@@ -301,13 +302,23 @@
             correctLetters = [];
             wrongGuesses = 0;
             updateUIForNewWord(wordData.hint);
-            isTransitioning = false;
+            
+            // Pausa de proteção para evitar que digitações rápidas da palavra anterior afetem a nova palavra
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 500);
         };
 
         const handleGuess = (letter) => {
             if (isTransitioning || !selectedWord) return;
+            
+            const now = Date.now();
+            if (now - lastGuessTime < 150) return; // Limita a frequência de palpites (máx. 1 a cada 150ms)
+            
             const button = findKeyButton(letter);
             if (!button || button.disabled) return;
+            
+            lastGuessTime = now;
             button.disabled = true;
             if (selectedWord.includes(letter)) {
                 const points = 10 * (selectedWord.split(letter).length - 1);
@@ -678,7 +689,12 @@
 
             localFileInput.addEventListener('change', handleFileSelect);
             closeGeneralScoreBtn.addEventListener('click', () => hideModal(generalScoreModal));
-            document.addEventListener('keydown', (event) => { if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible') || bnccModal.classList.contains('visible')) return; const letter = event.key.toUpperCase(); if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); });
+            document.addEventListener('keydown', (event) => { 
+                if (gameWrapper.style.display === 'none' || scoreboardModal.classList.contains('visible') || instructionsModal.classList.contains('visible') || generalScoreModal.classList.contains('visible') || teacherModal.classList.contains('visible') || bnccModal.classList.contains('visible')) return; 
+                if (event.repeat) return;
+                const letter = event.key.toUpperCase(); 
+                if (letter.length === 1 && letter >= 'A' && letter <= 'Z') handleGuess(letter); 
+            });
         }
         init();
     });
