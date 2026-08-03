@@ -95,7 +95,6 @@
             background-color: #d35400;
         }
 
-        /* ===== MODAIS ===== */
         .modal {
             display: none;
             position: fixed;
@@ -187,7 +186,7 @@
     <div id="info">Aluno: — | Tabuada: 1 | Pares: 0/10 | Pontuação: 0</div>
     <div id="tabuleiro"></div>
 
-    <!-- Modal de Instruções (texto original restaurado) -->
+    <!-- Modal de Instruções -->
     <div id="instrucoesModal" class="modal">
         <div class="modal-content">
             <h2>Jogo da Memória da Tabuada</h2>
@@ -207,7 +206,7 @@
         </div>
     </div>
 
-    <!-- Modal Nome do Aluno (só ao salvar) -->
+    <!-- Modal Nome do Aluno -->
     <div id="nomeModal" class="modal">
         <div class="modal-content">
             <h2>Nome do Aluno</h2>
@@ -231,6 +230,18 @@
         </div>
     </div>
 
+    <!-- Modal Confirmação de Reinício -->
+    <div id="confirmarReinicioModal" class="modal">
+        <div class="modal-content">
+            <h2>Reiniciar Jogo?</h2>
+            <p>Tem certeza que deseja reiniciar?<br>O progresso atual será perdido.</p>
+            <div class="modal-botoes">
+                <button id="confirmarReinicio" class="btn-vermelho">Sim, reiniciar</button>
+                <button id="cancelarReinicio" class="btn-cinza">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Game Over -->
     <div id="gameOverModal" class="modal">
         <div class="modal-content">
@@ -243,7 +254,6 @@
     </div>
 
     <script>
-        // Elementos
         const tabuleiro = document.getElementById('tabuleiro');
         const mostrarInstrucoes = document.getElementById('mostrarInstrucoes');
         const iniciarJogo = document.getElementById('iniciarJogo');
@@ -254,10 +264,10 @@
         const inputArquivo = document.getElementById('inputArquivo');
         const info = document.getElementById('info');
 
-        // Modais
         const instrucoesModal = document.getElementById('instrucoesModal');
         const nomeModal = document.getElementById('nomeModal');
         const mensagemModal = document.getElementById('mensagemModal');
+        const confirmarReinicioModal = document.getElementById('confirmarReinicioModal');
         const gameOverModal = document.getElementById('gameOverModal');
         const gameOverMessage = document.getElementById('gameOverMessage');
         const gameOverButton = document.getElementById('gameOverButton');
@@ -267,8 +277,9 @@
         const mensagemTitulo = document.getElementById('mensagemTitulo');
         const mensagemTexto = document.getElementById('mensagemTexto');
         const fecharMensagem = document.getElementById('fecharMensagem');
+        const confirmarReinicio = document.getElementById('confirmarReinicio');
+        const cancelarReinicio = document.getElementById('cancelarReinicio');
 
-        // Estado do jogo
         let nomeAluno = '';
         let currentTabuada = 1;
         let paresEncontrados = 0;
@@ -278,7 +289,6 @@
         let bloqueado = false;
         const maxTabuada = 10;
 
-        // ===== FUNÇÕES DE MODAL =====
         function mostrarMensagem(titulo, texto) {
             mensagemTitulo.innerText = titulo;
             mensagemTexto.innerHTML = texto;
@@ -299,7 +309,6 @@
             nomeModal.style.display = 'none';
         }
 
-        // ===== JOGO =====
         function gerarCartas() {
             cartas = [];
             for (let i = 1; i <= 10; i++) {
@@ -377,7 +386,6 @@
             gameOverModal.style.display = 'flex';
         }
 
-        // Inicia o jogo (sem pedir nome)
         function iniciarJogoAgora() {
             currentTabuada = 1;
             paresEncontrados = 0;
@@ -387,10 +395,7 @@
             proximaTabuada.disabled = true;
             gameOverModal.style.display = 'none';
             instrucoesModal.style.display = 'none';
-
-            // Desativa o botão "Iniciar Jogo" para não perder o progresso
             mostrarInstrucoes.disabled = true;
-
             gerarCartas();
             renderizarTabuleiro();
             atualizarHUD();
@@ -409,7 +414,6 @@
             }
         }
 
-        // Reinicia tudo e volta a permitir "Iniciar Jogo"
         function reiniciar() {
             currentTabuada = 1;
             paresEncontrados = 0;
@@ -418,15 +422,14 @@
             cartasViradas = [];
             bloqueado = false;
             proximaTabuada.disabled = true;
-            mostrarInstrucoes.disabled = false; // reativa
+            mostrarInstrucoes.disabled = false;
             gameOverModal.style.display = 'none';
+            confirmarReinicioModal.style.display = 'none';
             instrucoesModal.style.display = 'flex';
             atualizarHUD();
         }
 
-        // ===== SALVAR / CARREGAR =====
         function salvarStatus() {
-            // Só pede o nome na hora de salvar
             abrirModalNome();
         }
 
@@ -486,8 +489,6 @@
                     bloqueado = false;
 
                     proximaTabuada.disabled = paresEncontrados < 10 || currentTabuada >= maxTabuada;
-
-                    // Desativa o botão "Iniciar Jogo" para proteger o progresso carregado
                     mostrarInstrucoes.disabled = true;
 
                     gerarCartas();
@@ -516,21 +517,29 @@
             inputArquivo.value = '';
         }
 
-        // ===== EVENTOS =====
+        // Eventos
         mostrarInstrucoes.addEventListener('click', () => {
             instrucoesModal.style.display = 'flex';
         });
 
         iniciarJogo.addEventListener('click', iniciarJogoAgora);
         proximaTabuada.addEventListener('click', avancarTabuada);
-        reiniciarTabuada.addEventListener('click', reiniciar);
+
+        // Confirmação de reinício
+        reiniciarTabuada.addEventListener('click', () => {
+            confirmarReinicioModal.style.display = 'flex';
+        });
+        confirmarReinicio.addEventListener('click', reiniciar);
+        cancelarReinicio.addEventListener('click', () => {
+            confirmarReinicioModal.style.display = 'none';
+        });
+
         gameOverButton.addEventListener('click', reiniciar);
 
         salvarProgresso.addEventListener('click', salvarStatus);
         carregarProgresso.addEventListener('click', () => inputArquivo.click());
         inputArquivo.addEventListener('change', carregarStatus);
 
-        // Modal de nome (só usado no salvar)
         confirmarNome.addEventListener('click', () => {
             const nome = inputNome.value.trim();
             if (!nome) {
@@ -553,7 +562,6 @@
 
         fecharMensagem.addEventListener('click', fecharMensagemModal);
 
-        // Inicia com o modal de instruções
         instrucoesModal.style.display = 'flex';
         atualizarHUD();
     </script>
