@@ -343,7 +343,7 @@
         let bloqueado = false;
         const maxTabuada = 10;
         const totalParesPorTabuada = 10;
-        const TIPO_JOGO = 'subtracao'; // Identificador do jogo
+        const TIPO_JOGO = 'subtracao';
 
         function mostrarMensagem(titulo, texto) {
             mensagemTitulo.innerText = titulo;
@@ -574,8 +574,8 @@
                     const json = decodeURIComponent(escape(atob(base64)));
                     const status = JSON.parse(json);
 
-                    // Verifica se o arquivo é do tipo correto
-                    if (status.tipo !== TIPO_JOGO) {
+                    // Compatível com formato antigo (sem "tipo")
+                    if (status.tipo && status.tipo !== TIPO_JOGO) {
                         mostrarMensagem(
                             'Arquivo Incorreto',
                             'Este arquivo não é de progresso do jogo de <strong>Subtração</strong>.<br><br>Use um arquivo salvo neste jogo.'
