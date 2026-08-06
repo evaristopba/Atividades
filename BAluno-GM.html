@@ -265,6 +265,14 @@
             font-size: 0.75rem;
         }
 
+        .numeros-chamados .chip.anterior {
+            opacity: 0.45;
+            background: rgba(255, 255, 255, 0.03);
+            color: #8aaab5;
+            text-decoration: line-through;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
         .numeros-chamados .chip.recent {
             background: #d4a373;
             color: #fcf3e0;
@@ -1281,6 +1289,13 @@
         let jogoFinalizado = false;
         let heartbeatInterval = null;
         let heartbeatIniciado = false;
+        let entradaSorteadosIndex = 0; // Quantidade de pedras já sorteadas no momento de entrada do aluno
+
+        function getNumerosPermitidos() {
+            if (!numerosChamados || numerosChamados.length === 0) return [];
+            if (!entradaSorteadosIndex || entradaSorteadosIndex <= 0) return numerosChamados;
+            return numerosChamados.slice(entradaSorteadosIndex);
+        }
 
         // ============================================
         // TOAST
@@ -1856,6 +1871,17 @@
                     const dataPart = sessao.participantes[alunoId];
                     const nomeNoFirebase = dataPart.nome || '';
 
+                    // Carregar ou sincronizar o índice de pedras sorteadas no momento em que o aluno entrou na sala
+                    if (dataPart.entradaSorteadosIndex !== undefined && dataPart.entradaSorteadosIndex !== null) {
+                        entradaSorteadosIndex = dataPart.entradaSorteadosIndex;
+                    } else {
+                        const idxActual = (sessao.status === 'aguardando' || !sessao.numerosSorteados) ? 0 : sessao.numerosSorteados.length;
+                        entradaSorteadosIndex = idxActual;
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                            entradaSorteadosIndex: idxActual
+                        });
+                    }
+
                     // Se o professor removeu este aluno ativamente (flag excluído)
                     if (dataPart.excluido === true) {
                         console.log('🚪 O professor liberou esta vaga ativamente. Voltando para a entrada...');
@@ -1865,6 +1891,7 @@
                         minhaCartela = null;
                         minhasMarcacoes = null;
                         heartbeatIniciado = false;
+                        entradaSorteadosIndex = 0;
                         if (heartbeatInterval) {
                             clearInterval(heartbeatInterval);
                             heartbeatInterval = null;
@@ -1926,6 +1953,10 @@
                     const { id: alunoIdEncontrado, data, jaExistia } = resultado;
                     alunoId = alunoIdEncontrado;
 
+                    // Calcular índice de pedras sorteadas no momento da entrada
+                    const idxEntrada = (sessao.status === 'aguardando' || !sessao.numerosSorteados) ? 0 : sessao.numerosSorteados.length;
+                    entradaSorteadosIndex = (data && data.entradaSorteadosIndex !== undefined) ? data.entradaSorteadosIndex : idxEntrada;
+
                     // Salva as credenciais de forma segura no sessionStorage da aba corrente (perfeito para ambiente escolar)
                     sessionStorage.setItem('bingo_aluno_sala', sala);
                     sessionStorage.setItem('bingo_aluno_nome', meuNome);
@@ -1940,11 +1971,16 @@
                             minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                             isWinner = data.venceu || false;
 
-                            // Atualiza apenas o nome no Firebase de forma transparente para ocupar a vaga e limpa exclusão
-                            sessaoRefLocal.child(`participantes/${alunoId}`).update({
+                            const updateObj = {
                                 nome: meuNome,
                                 excluido: null
-                            });
+                            };
+                            if (data.entradaSorteadosIndex === undefined) {
+                                updateObj.entradaSorteadosIndex = entradaSorteadosIndex;
+                            }
+
+                            // Atualiza apenas o nome no Firebase de forma transparente para ocupar a vaga e limpa exclusão
+                            sessaoRefLocal.child(`participantes/${alunoId}`).update(updateObj);
                             showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
                         } else {
                             // É um novo aluno ocupando uma vaga que estava disponível.
@@ -1959,9 +1995,15 @@
                                 nome: meuNome,
                                 marcacoes: cleanMarcacoes,
                                 venceu: false,
-                                excluido: null
+                                excluido: null,
+                                entradaSorteadosIndex: entradaSorteadosIndex
                             });
-                            showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+
+                            if (entradaSorteadosIndex > 0) {
+                                showToast(`⚠️ Você entrou com ${entradaSorteadosIndex} pedras já sorteadas. Só poderá marcar pedras sorteadas a partir de agora!`, 'warning', 6000);
+                            } else {
+                                showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                            }
                         }
                     } else {
                         // Caso extremo de contingência: se o slot não tem cartela pré-gerada, criamos uma nova
@@ -1974,7 +2016,8 @@
                             cartela: cartela,
                             marcacoes: marcacoes,
                             venceu: false,
-                            excluido: null
+                            excluido: null,
+                            entradaSorteadosIndex: entradaSorteadosIndex
                         };
 
                         sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
@@ -1982,7 +2025,11 @@
                         minhasMarcacoes = marcacoes;
                         isWinner = false;
                         
-                        showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                        if (entradaSorteadosIndex > 0) {
+                            showToast(`⚠️ Você entrou com ${entradaSorteadosIndex} pedras já sorteadas. Só poderá marcar pedras sorteadas a partir de agora!`, 'warning', 6000);
+                        } else {
+                            showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                        }
                     }
 
                     if (!heartbeatIniciado) {
@@ -2138,11 +2185,12 @@
 
                     // --- ANTI-TRAPAÇA: DETECTAR E REVERTER MARCAÇÕES DE CONSOLE/DEVTOOLS EM TEMPO REAL ---
                     if (dataCartela && dataMarcacoes) {
+                        const numerosPermitidos = getNumerosPermitidos();
                         for (let r = 0; r < 5; r++) {
                             for (let c = 0; c < 5; c++) {
                                 const val = dataCartela[r][c];
-                                if (val !== 'B' && dataMarcacoes[r][c] && !numerosChamados.includes(val)) {
-                                    // O aluno marcou um número que NÃO foi sorteado! Reverter imediatamente.
+                                if (val !== 'B' && dataMarcacoes[r][c] && !numerosPermitidos.includes(val)) {
+                                    // O aluno marcou um número que NÃO era permitido (não sorteado ou sorteado antes da sua entrada)! Reverter imediatamente.
                                     dataMarcacoes[r][c] = false;
                                     corrigido = true;
                                 }
@@ -2207,14 +2255,15 @@
             if (!minhaCartela || !minhasMarcacoes) return;
             const grid = document.getElementById('cartelaGrid');
             let html = '';
+            const numerosPermitidos = getNumerosPermitidos();
 
             for (let r = 0; r < 5; r++) {
                 for (let c = 0; c < 5; c++) {
                     const val = minhaCartela[r][c];
                     const isMarked = minhasMarcacoes[r][c];
                     const isCenter = (r === 2 && c === 2);
-                    const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
-                    const isUltimo = typeof val === 'number' && val === ultimoNumeroSorteado;
+                    const isSorteado = typeof val === 'number' && numerosPermitidos.includes(val);
+                    const isUltimo = typeof val === 'number' && val === ultimoNumeroSorteado && numerosPermitidos.includes(val);
                     
                     let cls = 'cell';
                     if (isMarked) cls += ' marked';
@@ -2264,9 +2313,29 @@
                 return;
             }
             
+            const numerosPermitidos = getNumerosPermitidos();
+
             // --- BLOQUEAR TENTATIVAS DE MARCAR NÚMEROS NÃO SORTEADOS ---
             if (!numerosChamados.includes(val)) {
                 showToast('⚠️ Este número ainda não foi sorteado!', 'error');
+                
+                for (let r2 = 0; r2 < 5; r2++) {
+                    for (let c2 = 0; c2 < 5; c2++) {
+                        if (minhaCartela[r2][c2] === val) {
+                            const cell = document.getElementById(`cell_${r2}_${c2}`);
+                            if (cell) {
+                                cell.classList.add('bloqueado');
+                                setTimeout(() => cell.classList.remove('bloqueado'), 2000);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            // --- BLOQUEAR TENTATIVAS DE MARCAR NÚMEROS SORTEADOS ANTES DA ENTRADA DO ALUNO ---
+            if (!numerosPermitidos.includes(val)) {
+                showToast('⚠️ Este número foi sorteado ANTES da sua entrada no jogo! Você só pode marcar pedras sorteadas a partir da sua chegada.', 'error', 5000);
                 
                 for (let r2 = 0; r2 < 5; r2++) {
                     for (let c2 = 0; c2 < 5; c2++) {
@@ -2357,10 +2426,19 @@
             }
 
             let html = '';
+            if (entradaSorteadosIndex > 0) {
+                html += `<div style="width: 100%; font-size: 0.78rem; color: #ffc107; margin-bottom: 6px; font-weight: 600;">⚠️ Entrou com ${entradaSorteadosIndex} pedras já sorteadas (somente pedras sorteadas após sua chegada podem ser marcadas).</div>`;
+            }
             const ultimos = numerosChamados.slice(-20);
+            const startIdxInAll = Math.max(0, numerosChamados.length - 20);
+
             ultimos.forEach((num, idx) => {
-                const cls = idx === ultimos.length - 1 ? 'chip recent' : 'chip';
-                html += `<span class="${cls}">${num}</span>`;
+                const actualIdx = startIdxInAll + idx;
+                const eAnteriorAEntrada = entradaSorteadosIndex > 0 && actualIdx < entradaSorteadosIndex;
+                let cls = idx === ultimos.length - 1 ? 'chip recent' : 'chip';
+                if (eAnteriorAEntrada) cls += ' anterior';
+                const titleAttr = eAnteriorAEntrada ? 'title="Sorteado antes de você entrar no jogo"' : '';
+                html += `<span class="${cls}" ${titleAttr}>${num}${eAnteriorAEntrada ? ' 🔒' : ''}</span>`;
             });
             container.innerHTML = html;
 
@@ -2376,6 +2454,7 @@
             }
 
             if (minhaCartela) {
+                const numerosPermitidos = getNumerosPermitidos();
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
                         const val = minhaCartela[r][c];
@@ -2383,8 +2462,8 @@
                             const cell = document.getElementById(`cell_${r}_${c}`);
                             if (cell) {
                                 const isMarked = minhasMarcacoes ? minhasMarcacoes[r][c] : false;
-                                const isSorteado = numerosChamados.includes(val);
-                                const isUltimo = val === ultimoNumeroSorteado;
+                                const isSorteado = numerosPermitidos.includes(val);
+                                const isUltimo = val === ultimoNumeroSorteado && isSorteado;
                                 
                                 if (isMarked) {
                                     cell.classList.add('marked');
