@@ -306,6 +306,10 @@
         let completedCategories = new Set();
         let sessionStats = {};
         let studentName = '';
+        let originalStudentName = '';
+        let originalCreatedAt = '';
+        let restorationLogs = [];
+        let isRestoredSession = false;
         let roundStartTime = 0;
 
         const customAlertModal = document.getElementById('custom-alert-modal');
@@ -348,10 +352,17 @@
                 studentName = 'Aluno';
             }
 
+            if (!originalStudentName) originalStudentName = studentName;
+            if (!originalCreatedAt) originalCreatedAt = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR');
+
             const progressData = {
                 app: "JogoDaForcaEducativo",
-                version: "1.0",
+                version: "1.1",
                 studentName: studentName,
+                originalStudentName: originalStudentName,
+                originalCreatedAt: originalCreatedAt,
+                isRestoredSession: isRestoredSession,
+                restorationLogs: restorationLogs,
                 score: score,
                 completedCategories: Array.from(completedCategories),
                 sessionStats: sessionStats,
@@ -413,8 +424,26 @@
                     return;
                 }
 
-                if (progressData.studentName) {
-                    studentName = progressData.studentName;
+                const loadedOriginalOwner = progressData.originalStudentName || progressData.studentName || 'Aluno Original';
+                const loadedStudentName = progressData.studentName || loadedOriginalOwner;
+                const loadedSavedAt = progressData.savedAt || 'Anterior';
+
+                originalStudentName = loadedOriginalOwner;
+                originalCreatedAt = progressData.originalCreatedAt || loadedSavedAt;
+                isRestoredSession = true;
+                
+                if (Array.isArray(progressData.restorationLogs)) {
+                    restorationLogs = progressData.restorationLogs;
+                }
+                const nowStr = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                restorationLogs.push({
+                    restoredAt: nowStr,
+                    restoredBy: studentName || loadedStudentName,
+                    originalOwner: loadedOriginalOwner
+                });
+
+                if (loadedStudentName) {
+                    studentName = loadedStudentName;
                 }
                 if (typeof progressData.score === 'number') {
                     score = progressData.score;
@@ -435,14 +464,44 @@
                 renderCategoryButtons();
                 updateScoreDisplay();
                 showStatus(`✅ Progresso de "${studentName || 'Aluno'}" restaurado com sucesso!`, false);
+
+                let completedDetailsHtml = '';
+                if (sessionStats && Object.keys(sessionStats).length > 0) {
+                    completedDetailsHtml += '<div style="margin-top: 10px; border-top: 1px dashed #7dd3fc; padding-top: 8px; text-align: left; max-height: 160px; overflow-y: auto;">';
+                    completedDetailsHtml += '<strong style="font-size: 0.9em; color: #0369a1; display: block; margin-bottom: 4px;">📌 Status e Autoria das Categorias:</strong>';
+                    for (const catKey in sessionStats) {
+                        const stats = sessionStats[catKey];
+                        const timeSpentStr = (stats && typeof stats.timeSpent === 'number') ? ` (${formatMmSs(stats.timeSpent)})` : '';
+                        const completedAtStr = (stats && stats.completedAt) ? ` - 📅 ${stats.completedAt}` : '';
+                        const ownerStr = stats.completedBy ? ` [👤 ${stats.completedBy}]` : '';
+                        completedDetailsHtml += `<div style="font-size: 0.85em; color: #334155; margin-bottom: 4px;">• <strong>${capitalize(catKey)}:</strong> ${stats.solved}/${stats.total} acertos${timeSpentStr}${completedAtStr}${ownerStr}</div>`;
+                    }
+                    completedDetailsHtml += '</div>';
+                }
+
+                let auditAlertNotice = '';
+                if (loadedOriginalOwner && loadedOriginalOwner !== studentName) {
+                    auditAlertNotice = `<div style="background: #fff7ed; border: 1.5px solid #fdba74; padding: 10px; border-radius: 8px; font-size: 0.85em; color: #9a3412; margin-top: 10px;">
+                        ⚠️ <strong>Registro de Transparência do Professor:</strong><br>
+                        Este arquivo foi criado originalmente por <strong>${loadedOriginalOwner}</strong>.<br>
+                        O histórico de autoria de cada categoria é mantido e auditável para evitar cópias não autorizadas.
+                    </div>`;
+                } else {
+                    auditAlertNotice = `<div style="background: #f0fdf4; border: 1.5px solid #86efac; padding: 8px 10px; border-radius: 8px; font-size: 0.82em; color: #166534; margin-top: 10px;">
+                        🛡️ <strong>Rastreabilidade de Integridade Ativa:</strong> Todas as categorias possuem registro individual de data, hora e autoria do aluno.
+                    </div>`;
+                }
                 
                 customAlert(
                     '🎉 Progresso Restaurado com Sucesso!',
                     `<div style="background: #f0f9ff; padding: 14px; border-radius: 10px; border: 1.5px solid #7dd3fc;">
-                        <p style="margin: 0 0 8px 0; font-size: 1.05em; font-weight: 700; color: #0284c7;">👤 Aluno(a): <span>${studentName || 'Não informado'}</span></p>
+                        <p style="margin: 0 0 6px 0; font-size: 1.05em; font-weight: 700; color: #0284c7;">👤 Aluno(a) Atual: <span>${studentName || 'Não informado'}</span></p>
+                        <p style="margin: 0 0 6px 0; font-size: 0.95em; color: #0369a1;">🆔 Criador Original do Arquivo: <strong>${loadedOriginalOwner}</strong></p>
                         <p style="margin: 0 0 6px 0;"><strong>⭐ Pontuação Total:</strong> ${score} pontos</p>
                         <p style="margin: 0 0 6px 0;"><strong>📚 Categorias Concluídas:</strong> ${completedCategories.size}</p>
-                        <p style="margin: 0;"><strong>📅 Data de Salvamento:</strong> ${progressData.savedAt || 'Anterior'}</p>
+                        <p style="margin: 0 0 4px 0;"><strong>📅 Data do Arquivo:</strong> ${loadedSavedAt}</p>
+                        ${auditAlertNotice}
+                        ${completedDetailsHtml}
                     </div>`
                 );
                 event.target.value = '';
@@ -542,8 +601,21 @@
 
         const endRound = (categoryCompleted) => {
             clearInterval(gameTimer);
+            const now = new Date();
+            const completionTimestamp = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const roundDuration = roundStartTime > 0 ? Math.max(0, Math.round((Date.now() - roundStartTime) / 1000)) : 0;
-            sessionStats[selectedCategory] = { solved: wordsSolved, total: totalWordsInCategory, timeSpent: roundDuration };
+            
+            if (!originalStudentName) originalStudentName = studentName || 'Aluno';
+
+            sessionStats[selectedCategory] = { 
+                solved: wordsSolved, 
+                total: totalWordsInCategory, 
+                timeSpent: roundDuration,
+                completedAt: completionTimestamp,
+                completedBy: studentName || 'Aluno',
+                originalOwner: originalStudentName || studentName || 'Aluno',
+                wasRestored: isRestoredSession
+            };
             showPanel('none');
 
             let studentInfoHtml = studentName ? `<li>Aluno(a): <span>${studentName}</span></li>` : '';
@@ -567,6 +639,7 @@
                     ${studentInfoHtml}
                     <li>Palavras Acertadas: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
                     <li>Tempo Gasto: <span>${formatMmSs(roundDuration)}</span></li>
+                    <li>Data/Hora de Término: <span>${completionTimestamp}</span></li>
                     ${bonusMessage}
                     <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
                     <li>Pontos Perdidos (rodada): <span class="score-bad">-${totalPointsLost}</span></li>
@@ -587,6 +660,7 @@
                     ${studentInfoHtml}
                     <li>Palavras Acertadas nesta tentativa: <span>${wordsSolved} de ${totalWordsInCategory}</span></li>
                     <li>Tempo Decorrido: <span>${formatMmSs(roundDuration)}</span></li>
+                    <li>Data/Hora de Término: <span>${completionTimestamp}</span></li>
                     ${bonusRestoredMsg}
                     <li>Pontos Ganhos (rodada): <span class="score-good">+${totalPointsEarned}</span></li>
                     <li>Pontos Perdidos (rodada): <span class="score-bad">-${totalPointsLost}</span></li>
@@ -644,9 +718,38 @@
                 for(const category in sessionStats) {
                     const stats = sessionStats[category];
                     const li = document.createElement('li');
+                    li.style.marginBottom = '10px';
+                    li.style.padding = '8px 12px';
+                    li.style.background = '#f8fafc';
+                    li.style.borderRadius = '8px';
+                    li.style.border = '1px solid #e2e8f0';
+
                     const timeSpentStr = (stats && typeof stats.timeSpent === 'number') ? ` (${formatMmSs(stats.timeSpent)})` : '';
-                    li.textContent = `${capitalize(category)}: ${stats.solved} de ${stats.total} palavras acertadas${timeSpentStr}.`;
+                    const completedAtStr = (stats && stats.completedAt) ? `<div style="color: #475569; font-size: 0.82em; margin-top: 2px;">📅 <strong>Término:</strong> ${stats.completedAt}</div>` : '';
+                    
+                    let auditTag = '';
+                    if (stats.completedBy) {
+                        auditTag = `<div style="color: #0284c7; font-size: 0.82em; font-weight: 600; margin-top: 2px;">👤 <strong>Aluno que concluiu:</strong> ${stats.completedBy}`;
+                        if (stats.originalOwner && stats.originalOwner !== stats.completedBy) {
+                            auditTag += ` <span style="color: #c2410c;">(⚠️ Origem Arquivo: ${stats.originalOwner})</span>`;
+                        } else if (stats.wasRestored) {
+                            auditTag += ` <span style="color: #0284c7;">(📂 Restaurado)</span>`;
+                        }
+                        auditTag += `</div>`;
+                    }
+
+                    li.innerHTML = `<div style="font-size: 0.95em;"><strong>${capitalize(category)}:</strong> ${stats.solved} de ${stats.total} palavras acertadas${timeSpentStr}</div>${completedAtStr}${auditTag}`;
                     generalScoreList.appendChild(li);
+                }
+
+                if (originalStudentName || isRestoredSession) {
+                    const auditBox = document.createElement('div');
+                    auditBox.style.cssText = 'margin-top: 15px; background: #fffbe3; border: 1.5px solid #fde047; padding: 10px 12px; border-radius: 8px; font-size: 0.82em; color: #854d0e; text-align: left;';
+                    auditBox.innerHTML = `🛡️ <strong>Relatório de Integridade e Autoria para o Professor:</strong><br>` +
+                        `• <strong>Aluno Atual:</strong> ${studentName || 'Não informado'}<br>` +
+                        `• <strong>Criador Original:</strong> ${originalStudentName || studentName || 'Aluno'}<br>` +
+                        `• <strong>Sessão Restaurada:</strong> ${isRestoredSession ? 'SIM (Arquivo Importado)' : 'NÃO (Sessão Direta)'}`;
+                    generalScoreList.appendChild(auditBox);
                 }
             }
             showModal(generalScoreModal);
@@ -660,6 +763,13 @@
                 studentTag.style.cssText = 'background: #f0f9ff; border: 1.5px solid #7dd3fc; color: #0284c7; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.95em; display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin: 0 auto 5px auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05);';
                 studentTag.innerHTML = `👤 Aluno(a): <span>${studentName}</span>`;
                 categorySelection.appendChild(studentTag);
+            }
+
+            if (originalStudentName && (originalStudentName !== studentName || isRestoredSession)) {
+                const auditBanner = document.createElement('div');
+                auditBanner.style.cssText = 'background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: 8px 12px; border-radius: 8px; font-size: 0.85em; margin-bottom: 8px; text-align: center; font-weight: 600;';
+                auditBanner.innerHTML = `🛡️ <strong>Aviso de Autoria:</strong> Arquivo original de <u>${originalStudentName}</u> ${studentName !== originalStudentName ? `| Aluno Atual: <u>${studentName}</u>` : ''}`;
+                categorySelection.appendChild(auditBanner);
             }
 
             if (savedBonusTime > 0) {
@@ -679,12 +789,21 @@
 
                 if (isCompleted) {
                     button.disabled = true;
-                    button.style.opacity = '0.6';
+                    button.style.opacity = '0.75';
                     button.style.cursor = 'not-allowed';
                     button.style.borderBottom = 'none';
                     const stats = sessionStats[categoryKey];
                     const timeSpentStr = (stats && typeof stats.timeSpent === 'number') ? ` (${formatMmSs(stats.timeSpent)})` : '';
-                    button.innerHTML = `<span>✓ ${capitalize(categoryKey)}</span><span class="info" style="font-weight:700; color: #dcfce7;">Concluída${timeSpentStr}</span>`;
+                    const completedAtStr = (stats && stats.completedAt) ? `<div style="font-size: 0.72em; opacity: 0.95; font-weight: 500; margin-top: 3px; color: #f0fdf4;">📅 Concluída em ${stats.completedAt}</div>` : '';
+                    const ownerBadge = (stats && stats.completedBy) ? `<div style="font-size: 0.7em; color: #e0e7ff; font-weight: 500;">👤 Concluída por: ${stats.completedBy}${stats.originalOwner && stats.originalOwner !== stats.completedBy ? ` (Origem: ${stats.originalOwner})` : ''}</div>` : '';
+                    button.innerHTML = `<div style="display: flex; flex-direction: column; width: 100%; text-align: left;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span>✓ ${capitalize(categoryKey)}</span>
+                            <span class="info" style="font-weight:700; color: #dcfce7;">Concluída${timeSpentStr}</span>
+                        </div>
+                        ${completedAtStr}
+                        ${ownerBadge}
+                    </div>`;
                 } else {
                     const baseTime = catData.time;
                     const effectiveTime = baseTime === 0 ? 0 : baseTime + savedBonusTime;
