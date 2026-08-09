@@ -2781,7 +2781,7 @@
 
             const win = window.open('', '_blank');
             if (!win) {
-                alert('⚠️ O bloqueador de popups impediu a abertura da tela de impressão. Por favor, permita popups para este site.');
+                showToast('⚠️ O bloqueador de popups impediu a abertura da tela de impressão. Por favor, permita popups para este site.', 'error', 6000);
                 return;
             }
 
@@ -3310,20 +3310,24 @@
                 const marcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
                 if (!cartela) continue;
 
-                // Identificar quais números da cartela deste aluno já foram sorteados, mas o aluno esqueceu de marcar
+                const entradaIdx = data.entradaSorteadosIndex || 0;
+
+                // Identificar quais números da cartela deste aluno já foram sorteados no jogo, mas não estão marcados (seja por ter comido barriga ou por ter entrado após o sorteio)
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
                         const val = cartela[r][c];
                         if (val === 'B') continue;
                         
-                        // Se o número foi sorteado, mas o aluno NÃO marcou, ele "comeu barriga"
+                        // Se o número foi sorteado no jogo, mas o aluno NÃO marcou
                         if (sorteados.includes(val) && !marcacoes[r][c]) {
+                            const eraAntesDaEntrada = entradaIdx > 0 && sorteados.indexOf(val) < entradaIdx;
                             esquecidos.push({
                                 alunoId,
                                 nome: data.nome || alunoId,
                                 numero: val,
                                 r,
-                                c
+                                c,
+                                eraAntesDaEntrada
                             });
                         }
                     }
@@ -3331,14 +3335,17 @@
             }
 
             if (esquecidos.length === 0) {
-                showToast('❌ Nenhum aluno "comeu barriga" (todos marcaram todos os números sorteados até agora!).', 'error');
+                showToast('❌ Nenhum aluno pendente de marcação (todos marcaram todos os números sorteados até agora!).', 'error');
                 return;
             }
 
-            const opcoes = esquecidos.map((item, idx) => ({
-                valor: idx.toString(),
-                texto: `${item.nome} - Esqueceu de marcar: ${item.numero}`
-            }));
+            const opcoes = esquecidos.map((item, idx) => {
+                const motivo = item.eraAntesDaEntrada ? 'Sorteado antes da entrada' : 'Esqueceu de marcar (comer barriga)';
+                return {
+                    valor: idx.toString(),
+                    texto: `${item.nome} - ${motivo}: ${item.numero}`
+                };
+            });
 
             const escolha = await inputSelecao(
                 '🔧 Beneficiar Aluno (Comer Barriga)',
