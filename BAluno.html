@@ -102,6 +102,11 @@
             animation: pulse-text 1s ease-in-out infinite alternate;
         }
 
+        .status-bar .bingo-status.finished {
+            color: #e06666;
+            background: rgba(224, 102, 102, 0.15);
+        }
+
         @keyframes pulse-text {
             from { transform: scale(1); }
             to { transform: scale(1.05); }
@@ -258,6 +263,14 @@
             border-radius: 14px;
             color: #d4e3e8;
             font-size: 0.75rem;
+        }
+
+        .numeros-chamados .chip.anterior {
+            opacity: 0.45;
+            background: rgba(255, 255, 255, 0.03);
+            color: #8aaab5;
+            text-decoration: line-through;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
         }
 
         .numeros-chamados .chip.recent {
@@ -440,6 +453,307 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
+        /* ===== MODAL DE CONFIRMAÇÃO DE SAÍDA ===== */
+        .saida-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .saida-modal-overlay.active {
+            display: flex;
+        }
+
+        .saida-modal-box {
+            background: linear-gradient(145deg, #1a2f3a, #0d1f26);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid rgba(212, 163, 115, 0.3);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        .saida-modal-box .modal-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .saida-modal-box h2 {
+            color: #f2e9d0;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .saida-modal-box p {
+            color: #d4e3e8;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .saida-modal-box .detalhes {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .saida-modal-box .detalhes span {
+            color: #ffd93d;
+            font-weight: 600;
+        }
+
+        .saida-modal-box .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .saida-modal-box .btn-group .btn {
+            min-width: 140px;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .saida-modal-box .btn-group .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .saida-modal-box .btn-group .btn-cancelar {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+
+        .saida-modal-box .btn-group .btn-cancelar:hover {
+            background: #4d7b8a;
+        }
+
+        .saida-modal-box .btn-group .btn-sair {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .saida-modal-box .btn-group .btn-sair:hover {
+            background: #e74c5c;
+        }
+
+        /* ===== MODAL DE ENTRADA DE DADOS ===== */
+        .modal-input-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-input-overlay.active {
+            display: flex;
+        }
+
+        .modal-input-box {
+            background: linear-gradient(145deg, #1a2f3a, #0d1f26);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 480px;
+            width: 92%;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        .modal-input-box .modal-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .modal-input-box h2 {
+            color: #f2e9d0;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .modal-input-box .subtitulo {
+            color: #8aaab5;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-input-box .subtitulo strong {
+            color: #ffd93d;
+        }
+
+        .modal-input-box .input-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-input-box .input-group label {
+            display: block;
+            color: #d4e3e8;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .modal-input-box .input-group input,
+        .modal-input-box .input-group select,
+        .modal-input-box .input-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #3d6b7a;
+            background: #0d1f26;
+            color: #f2e9d0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .modal-input-box .input-group input:focus,
+        .modal-input-box .input-group select:focus,
+        .modal-input-box .input-group textarea:focus {
+            border-color: #d4a373;
+            box-shadow: 0 0 20px rgba(212, 163, 115, 0.1);
+        }
+
+        .modal-input-box .input-group input::placeholder {
+            color: #6a8a95;
+        }
+
+        .modal-input-box .input-group .hint {
+            color: #6a8a95;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .modal-input-box .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal-input-box .btn-group .btn {
+            min-width: 120px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-input-box .btn-group .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-input-box .btn-group .btn-cancelar {
+            background: #3d6b7a;
+            color: #f2f0e0;
+        }
+
+        .modal-input-box .btn-group .btn-cancelar:hover {
+            background: #4d7b8a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar {
+            background: #d4a373;
+            color: #1a2f3a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar:hover {
+            background: #e1b87a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.success {
+            background: #5a8f6c;
+            color: #fff;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.success:hover {
+            background: #6a9f7c;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.danger:hover {
+            background: #e74c5c;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.warning {
+            background: #ffc107;
+            color: #1a2f3a;
+        }
+
+        .modal-input-box .btn-group .btn-confirmar.warning:hover {
+            background: #ffd93d;
+        }
+
+        .modal-input-box .erro {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        .modal-input-box .erro.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 15px;
@@ -456,20 +770,242 @@
             .header h1 {
                 font-size: 1.3rem;
             }
+            .modal-input-box {
+                padding: 25px;
+            }
+        }
+
+        /* MODAL PEDAGÓGICO */
+        .pedagogico-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .pedagogico-modal-overlay.active {
+            display: flex;
+        }
+        .pedagogico-modal-box {
+            background: linear-gradient(145deg, #162730, #0a181e);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 650px;
+            width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid rgba(212, 163, 115, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            position: relative;
+            animation: slideUpModal 0.4s ease-out;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .pedagogico-modal-box::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+        .pedagogico-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #d4e3e8;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .pedagogico-close:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .pedagogico-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+        .pedagogico-tab {
+            padding: 10px 16px;
+            color: #8aaab5;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .pedagogico-tab:hover {
+            color: #f2e9d0;
+        }
+        .pedagogico-tab.active {
+            color: #d4a373;
+        }
+        .pedagogico-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #d4a373;
+            border-radius: 2px;
+        }
+        .pedagogico-content {
+            display: none;
+            color: #d4e3e8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .pedagogico-content.active {
+            display: block;
+        }
+        .pedagogico-title {
+            color: #f2e9d0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pedagogico-subtitle {
+            color: #8aaab5;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .bncc-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .bncc-code {
+            display: inline-block;
+            background: rgba(212, 163, 115, 0.15);
+            color: #d4a373;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .bncc-desc {
+            color: #d4e3e8;
+            font-size: 0.9rem;
+        }
+        .como-jogar-step {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 12px;
+        }
+        .como-jogar-step .step-number {
+            background: #d4a373;
+            color: #1a2f3a;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .como-jogar-step .step-text strong {
+            color: #f2e9d0;
+        }
+
+        /* ESTILOS DA SELEÇÃO DE SALAS */
+        .sala-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 163, 115, 0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease-in-out;
+            text-align: left;
+            width: 100%;
+        }
+        .sala-item:hover {
+            background: rgba(212, 163, 115, 0.15);
+            border-color: #d4a373;
+            transform: translateY(-2px);
+        }
+        .sala-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sala-item-nome {
+            color: #f2e9d0;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .sala-item-detalhe {
+            color: #8aaab5;
+            font-size: 0.8rem;
+        }
+        .sala-item-vagas {
+            background: rgba(90, 143, 108, 0.2);
+            color: #6bcb77;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(107, 203, 119, 0.3);
+            white-space: nowrap;
+        }
+        .sala-item-vagas.cheia {
+            background: rgba(220, 53, 69, 0.15);
+            color: #ff6b6b;
+            border-color: rgba(220, 53, 69, 0.3);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <a href="#" class="back-btn" onclick="window.location.href='BAluno.html'">← Voltar</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="#" id="btnVoltar" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0; display: none;">← Voltar</a>
+                    <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
+                    <button id="btnSairSala" onclick="confirmarSairSessao()" style="display: none; padding: 6px 14px; font-size: 0.85rem; background: rgba(220, 53, 69, 0.15); border: 1px solid #e06666; color: #ff8a8a; border-radius: 20px; cursor: pointer; font-weight: 600; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">🚪 Sair da Sala</button>
+                </div>
                 <div class="sync-status">
                     <span class="sync-dot"></span>
                     <span id="statusTexto">online</span>
                 </div>
             </div>
-            <h1>🧑‍🎓 BINGO <small>Aluno</small></h1>
+            <h1 style="margin-top: 15px;">🧑‍🎓 BINGO <small>Aluno</small></h1>
         </div>
 
         <!-- ===== NOME DA SALA ===== -->
@@ -497,13 +1033,12 @@
 
             <div class="status-bar">
                 <span class="last-call" id="ultimoNumero">🎯 ---</span>
-                <span class="count" id="marcadosCount">📌 0/25 marcados</span>
-                <span class="bingo-status" id="statusBingo">⏳ 0/25 marcados</span>
+                <span class="count" id="marcadosCount">📌 1/25 marcados</span>
+                <span class="bingo-status" id="statusBingo">⏳ 1/25 marcados</span>
             </div>
 
             <div class="instrucao">
-                💡 <strong>Clique</strong> no número da sua cartela quando ele for sorteado!
-                <br><small style="color: #dc3545;">⚠️ Só pode marcar o número sorteado AGORA</small>
+                💡 <strong>Clique</strong> nos números sorteados para marcá-los na sua cartela!
             </div>
 
             <div class="card-container">
@@ -530,6 +1065,190 @@
 
     <!-- Toast de notificação -->
     <div id="toast" class="toast"></div>
+
+    <!-- ===== MODAL DE CONFIRMAÇÃO DE SAÍDA ===== -->
+    <div id="modalSaida" class="saida-modal-overlay">
+        <div class="saida-modal-box">
+            <span class="modal-icon" id="saidaIcon">⚠️</span>
+            <h2 id="saidaTitulo">Deseja sair?</h2>
+            <p id="saidaTexto">Você está prestes a sair do jogo.</p>
+            <div class="detalhes" id="saidaDetalhes">
+                📌 <span id="saidaInfo">Seus dados estão sendo salvos automaticamente</span>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancelar" id="btnCancelarSaida">❌ Cancelar</button>
+                <button class="btn btn-sair" id="btnConfirmarSaida">🚪 Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE ENTRADA DE DADOS ===== -->
+    <div id="modalInput" class="modal-input-overlay">
+        <div class="modal-input-box">
+            <span class="modal-icon" id="inputIcon">✏️</span>
+            <h2 id="inputTitulo">Digite os dados</h2>
+            <div class="subtitulo" id="inputSubtitulo">Preencha as informações abaixo</div>
+            
+            <div id="inputCampos"></div>
+            
+            <div id="inputErro" class="erro">❌ Campo obrigatório!</div>
+            
+            <div class="btn-group">
+                <button class="btn btn-cancelar" id="btnInputCancelar">❌ Cancelar</button>
+                <button class="btn btn-confirmar" id="btnInputConfirmar">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE SELEÇÃO DE SALA ===== -->
+    <div id="modalSelecaoSalas" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box" style="max-width: 500px;">
+            <div class="pedagogico-title">🏫 Escolha sua Sala</div>
+            <div class="pedagogico-subtitle">Selecione uma das salas abertas pelo professor para começar a jogar!</div>
+            
+            <div id="listaSalasContainer" style="margin: 20px 0; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <!-- As salas serão inseridas aqui dinamicamente -->
+                <div class="loading-spinner-container" style="text-align: center; padding: 20px 0;">
+                    <div class="loading-spinner" style="width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="color: #8aaab5; font-size: 0.9rem; margin-top: 10px;">Buscando salas abertas...</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="color: #8aaab5; font-size: 0.85rem;">— OU —</span>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px; text-align: left;">
+                <label for="codigoSalaManual" style="display: block; color: #d4e3e8; font-size: 0.85rem; font-weight: 500; margin-bottom: 5px;">Selecione sua Turma/Sala:</label>
+                <select id="codigoSalaManual" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #3d6b7a; background: #0d1f26; color: #f2e9d0; font-size: 1rem; outline: none; transition: all 0.3s;">
+                    <option value="" disabled selected>-- Escolha sua turma --</option>
+                    <optgroup label="Escola Capitão">
+                        <option value="1a-cp">1º ano A - Manhã</option>
+                        <option value="1b-cp">1º ano B - Manhã</option>
+                        <option value="1c-cp">1º ano C - Manhã</option>
+                        <option value="2a-cp">2º ano A - Manhã</option>
+                        <option value="2b-cp">2º ano B - Manhã</option>
+                        <option value="2c-cp">2º ano C - Manhã</option>
+                        <option value="3a-cp">3º ano A - Manhã</option>
+                        <option value="3b-cp">3º ano B - Manhã</option>
+                        <option value="3c-cp">3º ano C - Manhã</option>
+                        <option value="4a-cp">4º ano A - Manhã</option>
+                        <option value="4b-cp">4º ano B - Tarde</option>
+                        <option value="5a-cp">5º ano A - Manhã</option>
+                        <option value="5b-cp">5º ano B - Manhã</option>
+                        <option value="5c-cp">5º ano C - Tarde</option>
+                    </optgroup>
+                    <optgroup label="Escola Thereza">
+                        <option value="1a-th">1º ano A - Manhã</option>
+                        <option value="1b-th">1º ano B - Tarde</option>
+                        <option value="2a-th">2º ano A - Manhã</option>
+                        <option value="2b-th">2º ano B - Manhã</option>
+                        <option value="3a-th">3º ano A - Manhã</option>
+                        <option value="3b-th">3º ano B - Manhã</option>
+                        <option value="4a-th">4º ano A - Manhã</option>
+                        <option value="4b-th">4º ano B - Manhã</option>
+                        <option value="4c-th">4º ano C - Tarde</option>
+                        <option value="5a-th">5º ano A - Manhã</option>
+                        <option value="5b-th">5º ano B - Tarde</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="btn-group" style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-confirmar" id="btnConfirmarSalaManual" style="min-width: 140px; padding: 12px 28px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s; background: #d4a373; color: #1a2f3a; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">✅ Entrar na Turma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PEDAGÓGICO (BNCC & COMO JOGAR) ===== -->
+    <div id="modalPedagogico" class="pedagogico-modal-overlay">
+        <div class="pedagogico-modal-box">
+            <button class="pedagogico-close" onclick="fecharModalPedagogico()">×</button>
+            
+            <div class="pedagogico-title">📖 Guia Pedagógico & Regras</div>
+            <div class="pedagogico-subtitle">BINGO de Matemática - Ensino Fundamental</div>
+
+            <div class="pedagogico-tabs">
+                <button class="pedagogico-tab active" id="tab-comoJogar-btn" onclick="selecionarAbaPedagogica('comoJogar')">🎮 Como Jogar</button>
+                <button class="pedagogico-tab" id="tab-bncc-btn" onclick="selecionarAbaPedagogica('bncc')">📚 Alinhamento BNCC</button>
+            </div>
+
+            <!-- ABA: COMO JOGAR -->
+            <div id="aba-comoJogar" class="pedagogico-content active">
+                <div class="como-jogar-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <strong>Criação da Sessão (Professor)</strong>: O professor cria uma sessão selecionando a sala/turma e configurando a quantidade de alunos/vagas.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <strong>Entrada dos Alunos</strong>: Os alunos entram na sala utilizando seus nomes. Cada aluno recebe automaticamente uma <strong>cartela única e exclusiva</strong> gerada pelo sistema (nenhuma cartela se repete). O espaço central "B" é livre.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <strong>Sorteio & Atenção</strong>: O professor realiza o sorteio de um número de cada vez. Os alunos devem identificar se possuem o número correspondente em sua cartela.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">
+                        <strong>Marcação em Tempo Real</strong>: Os alunos devem clicar para marcar o número na cartela <strong>assim que for sorteado</strong>. O sistema exige atenção ativa: não é possível marcar números sorteados anteriormente por conta própria (salvo ação explícita do professor para beneficiar um aluno atrasado).
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">
+                        <strong>Segurança & Anti-Cheat</strong>: O sistema audita todas as marcações em tempo real. Se um aluno tentar burlar o sistema marcando dezenas não sorteadas, a trapaça é sinalizada ao professor no painel de controle.
+                    </div>
+                </div>
+                <div class="como-jogar-step">
+                    <div class="step-number">6</div>
+                    <div class="step-text">
+                        <strong>Vitória e Validação</strong>: O primeiro aluno a completar toda a cartela (24 dezenas marcadas + o centro livre) faz o "BINGO". O sistema valida instantaneamente e notifica a sala toda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA: ALINHAMENTO BNCC -->
+            <div id="aba-bncc" class="pedagogico-content">
+                <p style="margin-bottom: 15px; font-weight: 600; color: #ffd93d;">🎯 Unidade Temática: Matemática (Números e Probabilidade)</p>
+                
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA01 (1º Ano)</span>
+                    <div class="bncc-desc">Utilizar números naturais como indicador de quantidade ou de ordem em diferentes situações cotidianas e reconhecer situações em que os números não indicam contagem nem ordem, mas sim código de identificação.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF01MA04 (1º Ano)</span>
+                    <div class="bncc-desc">Contar a quantidade de objetos de coleções de até 100 unidades e apresentar o resultado por registros verbais e simbólicos, para resolver problemas cotidianos.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF02MA01 (2º Ano)</span>
+                    <div class="bncc-desc">Comparar e ordenar números naturais (até a ordem de centenas), pela compreensão de características do sistema de numeração decimal (valor posicional).</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF03MA02 (3º Ano)</span>
+                    <div class="bncc-desc">Identificar características do sistema de numeração decimal, utilizando a composição e a decomposição de número natural de até quatro ordens.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF04MA01 (4º Ano)</span>
+                    <div class="bncc-desc">Ler, escrever e ordenar números naturais até a ordem das dezenas de milhar.</div>
+                </div>
+
+                <div class="bncc-item">
+                    <span class="bncc-code">EF05MA22 (5º Ano)</span>
+                    <div class="bncc-desc">Apresentar todos os possíveis resultados de um experimento aleatório, estimando se esses resultados são igualmente prováveis ou não (espaço amostral e probabilidade elementar do sorteio).</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== FIREBASE ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -568,6 +1287,15 @@
         let ultimoNumeroSorteado = null;
         let ultimoResetToken = null;
         let jogoFinalizado = false;
+        let heartbeatInterval = null;
+        let heartbeatIniciado = false;
+        let entradaSorteadosIndex = 0; // Quantidade de pedras já sorteadas no momento de entrada do aluno
+
+        function getNumerosPermitidos() {
+            if (!numerosChamados || numerosChamados.length === 0) return [];
+            if (!entradaSorteadosIndex || entradaSorteadosIndex <= 0) return numerosChamados;
+            return numerosChamados.slice(entradaSorteadosIndex);
+        }
 
         // ============================================
         // TOAST
@@ -611,6 +1339,47 @@
             setTimeout(() => {
                 container.remove();
             }, 5000);
+        }
+
+        // ============================================
+        // MAPA DE SALAS E NORMAS
+        // ============================================
+        const MAPA_SALAS = {
+            '1a-cp': 'Escola Capitão - 1º ano A - Manhã',
+            '1b-cp': 'Escola Capitão - 1º ano B - Manhã',
+            '1c-cp': 'Escola Capitão - 1º ano C - Manhã',
+            '2a-cp': 'Escola Capitão - 2º ano A - Manhã',
+            '2b-cp': 'Escola Capitão - 2º ano B - Manhã',
+            '2c-cp': 'Escola Capitão - 2º ano C - Manhã',
+            '3a-cp': 'Escola Capitão - 3º ano A - Manhã',
+            '3b-cp': 'Escola Capitão - 3º ano B - Manhã',
+            '3c-cp': 'Escola Capitão - 3º ano C - Manhã',
+            '4a-cp': 'Escola Capitão - 4º ano A - Manhã',
+            '4b-cp': 'Escola Capitão - 4º ano B - Tarde',
+            '5a-cp': 'Escola Capitão - 5º ano A - Manhã',
+            '5b-cp': 'Escola Capitão - 5º ano B - Manhã',
+            '5c-cp': 'Escola Capitão - 5º ano C - Tarde',
+            '1a-th': 'Escola Thereza - 1º ano A - Manhã',
+            '1b-th': 'Escola Thereza - 1º ano B - Tarde',
+            '2a-th': 'Escola Thereza - 2º ano A - Manhã',
+            '2b-th': 'Escola Thereza - 2º ano B - Manhã',
+            '3a-th': 'Escola Thereza - 3º ano A - Manhã',
+            '3b-th': 'Escola Thereza - 3º ano B - Manhã',
+            '4a-th': 'Escola Thereza - 4º ano A - Manhã',
+            '4b-th': 'Escola Thereza - 4º ano B - Manhã',
+            '4c-th': 'Escola Thereza - 4º ano C - Tarde',
+            '5a-th': 'Escola Thereza - 5º ano A - Manhã',
+            '5b-th': 'Escola Thereza - 5º ano B - Tarde'
+        };
+
+        function obterNomeSala(codigo, salaNomeOriginal) {
+            if (salaNomeOriginal && salaNomeOriginal !== 'undefined' && salaNomeOriginal !== '---' && String(salaNomeOriginal).trim() !== '') {
+                return salaNomeOriginal;
+            }
+            if (codigo && MAPA_SALAS[codigo]) {
+                return MAPA_SALAS[codigo];
+            }
+            return codigo ? `Sala (${codigo})` : 'Turma Sem Nome';
         }
 
         // ============================================
@@ -682,62 +1451,20 @@
         }
 
         // ============================================
-        // VERIFICAÇÃO DE BINGO
+        // VERIFICAÇÃO DE BINGO (CARTELA CHEIA)
         // ============================================
         function checkBingo(marcacoes, cartela, sorteados) {
-            // Verificar LINHAS
+            if (!cartela || !marcacoes) return false;
             for (let r = 0; r < 5; r++) {
-                let linhaCompleta = true;
                 for (let c = 0; c < 5; c++) {
                     const val = cartela[r][c];
                     if (val === 'B') continue;
-                    if (!sorteados.includes(val) || !marcacoes[r][c]) {
-                        linhaCompleta = false;
-                        break;
+                    if (!marcacoes[r][c] || !sorteados.includes(val)) {
+                        return false;
                     }
                 }
-                if (linhaCompleta) return true;
             }
-
-            // Verificar COLUNAS
-            for (let c = 0; c < 5; c++) {
-                let colunaCompleta = true;
-                for (let r = 0; r < 5; r++) {
-                    const val = cartela[r][c];
-                    if (val === 'B') continue;
-                    if (!sorteados.includes(val) || !marcacoes[r][c]) {
-                        colunaCompleta = false;
-                        break;
-                    }
-                }
-                if (colunaCompleta) return true;
-            }
-
-            // Verificar DIAGONAL PRINCIPAL
-            let diag1Completa = true;
-            for (let i = 0; i < 5; i++) {
-                const val = cartela[i][i];
-                if (val === 'B') continue;
-                if (!sorteados.includes(val) || !marcacoes[i][i]) {
-                    diag1Completa = false;
-                    break;
-                }
-            }
-            if (diag1Completa) return true;
-
-            // Verificar DIAGONAL SECUNDÁRIA
-            let diag2Completa = true;
-            for (let i = 0; i < 5; i++) {
-                const val = cartela[i][4 - i];
-                if (val === 'B') continue;
-                if (!sorteados.includes(val) || !marcacoes[i][4 - i]) {
-                    diag2Completa = false;
-                    break;
-                }
-            }
-            if (diag2Completa) return true;
-
-            return false;
+            return true;
         }
 
         // ============================================
@@ -759,19 +1486,234 @@
         }
 
         // ============================================
+        // SISTEMA DE MODAL DE ENTRADA DE DADOS
+        // ============================================
+        function mostrarModalInput(config) {
+            return new Promise((resolve, reject) => {
+                const modal = document.getElementById('modalInput');
+                const camposDiv = document.getElementById('inputCampos');
+                const erroDiv = document.getElementById('inputErro');
+                
+                document.getElementById('inputIcon').textContent = config.icon || '✏️';
+                document.getElementById('inputTitulo').textContent = config.titulo || 'Digite os dados';
+                document.getElementById('inputSubtitulo').innerHTML = config.subtitulo || 'Preencha as informações abaixo';
+                
+                let html = '';
+                
+                if (config.campos && config.campos.length > 0) {
+                    config.campos.forEach((campo, index) => {
+                        html += `<div class="input-group">`;
+                        html += `<label for="input_${index}">${campo.label}</label>`;
+                        html += `<input type="${campo.type || 'text'}" id="input_${index}" placeholder="${campo.placeholder || ''}" value="${campo.valor || ''}" ${campo.required ? 'required' : ''}>`;
+                        if (campo.hint) {
+                            html += `<div class="hint">${campo.hint}</div>`;
+                        }
+                        html += `</div>`;
+                    });
+                }
+                
+                camposDiv.innerHTML = html;
+                erroDiv.classList.remove('active');
+                
+                const btnConfirmar = document.getElementById('btnInputConfirmar');
+                const btnCancelar = document.getElementById('btnInputCancelar');
+                
+                btnConfirmar.className = 'btn btn-confirmar';
+                if (config.corBotao) {
+                    btnConfirmar.classList.add(config.corBotao);
+                }
+                btnConfirmar.textContent = config.textoBotao || '✅ Confirmar';
+                
+                const newBtnConfirmar = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(newBtnConfirmar, btnConfirmar);
+                
+                const newBtnCancelar = btnCancelar.cloneNode(true);
+                btnCancelar.parentNode.replaceChild(newBtnCancelar, btnCancelar);
+                
+                document.getElementById('btnInputConfirmar').addEventListener('click', function() {
+                    const valores = {};
+                    let valido = true;
+                    
+                    if (config.campos) {
+                        config.campos.forEach((campo, index) => {
+                            const el = document.getElementById(`input_${index}`);
+                            if (el) {
+                                const valor = el.value.trim();
+                                valores[campo.nome] = valor;
+                                
+                                if (campo.required && !valor) {
+                                    valido = false;
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (!valido) {
+                        erroDiv.textContent = '❌ Todos os campos obrigatórios devem ser preenchidos!';
+                        erroDiv.classList.add('active');
+                        return;
+                    }
+                    
+                    erroDiv.classList.remove('active');
+                    fecharModalInput();
+                    
+                    if (config.onConfirm) {
+                        const resultado = config.onConfirm(valores);
+                        if (resultado !== false) {
+                            resolve(resultado);
+                        }
+                    } else {
+                        resolve(valores);
+                    }
+                });
+                
+                document.getElementById('btnInputCancelar').addEventListener('click', function() {
+                    fecharModalInput();
+                    reject(new Error('Cancelado pelo usuário'));
+                });
+                
+                modal.classList.add('active');
+                
+                setTimeout(() => {
+                    const primeiroInput = camposDiv.querySelector('input, select, textarea');
+                    if (primeiroInput) {
+                        primeiroInput.focus();
+                        if (typeof primeiroInput.select === 'function') {
+                            primeiroInput.select();
+                        }
+                    }
+                }, 100);
+
+                const primeiroInput = camposDiv.querySelector('input, select, textarea');
+                if (primeiroInput) {
+                    primeiroInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            document.getElementById('btnInputConfirmar').click();
+                        }
+                    });
+                }
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        fecharModalInput();
+                        reject(new Error('Cancelado pelo usuário'));
+                    }
+                });
+            });
+        }
+
+        function fecharModalInput() {
+            document.getElementById('modalInput').classList.remove('active');
+        }
+
+        async function inputTexto(titulo, subtitulo, placeholder, valorPadrao = '') {
+            try {
+                const resultado = await mostrarModalInput({
+                    icon: '✏️',
+                    titulo: titulo,
+                    subtitulo: subtitulo,
+                    textoBotao: '✅ Confirmar',
+                    campos: [{
+                        nome: 'valor',
+                        label: '',
+                        type: 'text',
+                        placeholder: placeholder,
+                        valor: valorPadrao,
+                        required: true
+                    }],
+                    onConfirm: (valores) => {
+                        return valores.valor;
+                    }
+                });
+                return resultado;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE CONFIRMAÇÃO DE SAÍDA
+        // ============================================
+        let saidaPendente = false;
+
+        function mostrarModalSaida(icone, titulo, texto, info, aoConfirmar) {
+            const modal = document.getElementById('modalSaida');
+            document.getElementById('saidaIcon').textContent = icone;
+            document.getElementById('saidaTitulo').textContent = titulo;
+            document.getElementById('saidaTexto').textContent = texto;
+            document.getElementById('saidaInfo').textContent = info;
+            
+            const btnConfirmar = document.getElementById('btnConfirmarSaida');
+            btnConfirmar.onclick = function() {
+                fecharModalSaida();
+                if (aoConfirmar) aoConfirmar();
+            };
+            
+            document.getElementById('btnCancelarSaida').onclick = function() {
+                fecharModalSaida();
+                saidaPendente = false;
+            };
+            
+            modal.classList.add('active');
+        }
+
+        function fecharModalSaida() {
+            document.getElementById('modalSaida').classList.remove('active');
+            saidaPendente = false;
+        }
+
+        function configurarDetectorSaida() {
+            window.addEventListener('beforeunload', function(e) {
+                if (!saidaPendente) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    saidaPendente = true;
+                    
+                    mostrarModalSaida(
+                        '🚪',
+                        'Sair do BINGO?',
+                        'Você está prestes a sair do jogo.',
+                        'Seus dados estão sendo salvos automaticamente.',
+                        function() {
+                            saidaPendente = false;
+                            window.removeEventListener('beforeunload', this);
+                            window.close();
+                        }
+                    );
+                    return '';
+                }
+            });
+
+            window.addEventListener('popstate', function(e) {
+                if (!saidaPendente) {
+                    e.preventDefault();
+                    saidaPendente = true;
+                    mostrarModalSaida(
+                        '⬅️',
+                        'Voltar na página?',
+                        'Você está prestes a voltar na navegação.',
+                        'Voltar pode interromper o jogo atual.',
+                        function() {
+                            saidaPendente = false;
+                            history.back();
+                        }
+                    );
+                }
+            });
+        }
+
+        // ============================================
         // ATRIBUIR CARTELA
         // ============================================
         function atribuirCartela(sessao, nome) {
             const participantes = sessao.participantes || {};
             
-            // 1. Verificar se o nome já existe
             for (const [id, data] of Object.entries(participantes)) {
                 if (data.nome === nome) {
                     return { id, data, jaExistia: true };
                 }
             }
 
-            // 2. Procurar cartela disponível (NÃO ocupada)
             const cartelasDisponiveis = [];
             for (const [id, data] of Object.entries(participantes)) {
                 const isOcupada = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
@@ -784,7 +1726,6 @@
                 return null;
             }
 
-            // 3. Ordenar e pegar a PRIMEIRA disponível
             cartelasDisponiveis.sort((a, b) => {
                 const numA = parseInt(a.id.replace('aluno_', ''));
                 const numB = parseInt(b.id.replace('aluno_', ''));
@@ -796,111 +1737,75 @@
         }
 
         // ============================================
-        // INICIALIZAR
+        // MODAL PEDAGÓGICO
         // ============================================
-        function inicializar(sala, nome) {
-            sessaoId = sala;
-            meuNome = nome;
+        function abrirModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.add('active');
+            selecionarAbaPedagogica('comoJogar');
+        }
 
-            const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
+        function fecharModalPedagogico() {
+            document.getElementById('modalPedagogico').classList.remove('active');
+        }
 
-            sessaoRefLocal.once('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    document.getElementById('aguardando').innerHTML = `
-                        <span class="status-icon">❌</span>
-                        <h2>Sala não encontrada!</h2>
-                        <p>Verifique o link e tente novamente.</p>
-                    `;
-                    return;
-                }
+        function selecionarAbaPedagogica(aba) {
+            // Tabs
+            document.getElementById('tab-comoJogar-btn').classList.remove('active');
+            document.getElementById('tab-bncc-btn').classList.remove('active');
+            
+            // Content
+            document.getElementById('aba-comoJogar').classList.remove('active');
+            document.getElementById('aba-bncc').classList.remove('active');
 
-                const sessao = snapshot.val();
-                const totalAlunos = sessao.totalAlunos || 0;
-
-                salaNome = sessao.salaNome || 'Sala sem nome';
-                document.getElementById('salaNomeTexto').textContent = salaNome;
-                document.getElementById('salaCodigoTexto').textContent = sala;
-                document.getElementById('aguardandoSala').textContent = salaNome;
-
-                mostrarNumeros = sessao.mostrarNumeros !== false;
-
-                const resultado = atribuirCartela(sessao, nome);
-
-                if (!resultado) {
-                    document.getElementById('aguardando').innerHTML = `
-                        <span class="status-icon">🚫</span>
-                        <h2>Sala lotada!</h2>
-                        <p>Todas as ${totalAlunos} cartelas já estão ocupadas.</p>
-                    `;
-                    return;
-                }
-
-                const { id: alunoIdEncontrado, data, jaExistia } = resultado;
-                alunoId = alunoIdEncontrado;
-
-                if (jaExistia) {
-                    minhaCartela = data.cartela;
-                    minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                    isWinner = data.venceu || false;
-                    
-                    if (!data.nome || data.nome === '' || data.nome.startsWith('Aluno ')) {
-                        sessaoRefLocal.child(`participantes/${alunoId}/nome`).set(nome);
-                    }
-                    
-                    showToast(`👋 Bem-vindo de volta, ${nome}!`, 'info');
-                } else {
-                    const cartela = gerarCartelaUnica(sessao.participantes || {});
-                    const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
-                    marcacoes[2][2] = true;
-
-                    const novoParticipante = {
-                        nome: nome,
-                        cartela: cartela,
-                        marcacoes: marcacoes,
-                        venceu: false
-                    };
-
-                    sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
-                    minhaCartela = cartela;
-                    minhasMarcacoes = marcacoes;
-                    isWinner = false;
-                    
-                    showToast(`🎯 Bem-vindo, ${nome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
-                }
-
-                document.getElementById('nomeAluno').textContent = nome;
-                document.getElementById('nomeEspera').textContent = `👤 ${nome}`;
-
-                renderizarCartela();
-                iniciarListenerUnico(sala);
-
-                if (sessao.status === 'ativa' || sessao.status === 'finalizada') {
-                    document.getElementById('aguardando').style.display = 'none';
-                    document.getElementById('jogoAtivo').style.display = 'block';
-
-                    if (sessao.numerosSorteados) {
-                        numerosChamados = sessao.numerosSorteados;
-                        ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
-                        atualizarNumerosChamados();
-                        atualizarStatus();
-                    }
-                } else {
-                    document.getElementById('aguardando').style.display = 'block';
-                    document.getElementById('jogoAtivo').style.display = 'none';
-                }
-            });
+            if (aba === 'comoJogar') {
+                document.getElementById('tab-comoJogar-btn').classList.add('active');
+                document.getElementById('aba-comoJogar').classList.add('active');
+            } else if (aba === 'bncc') {
+                document.getElementById('tab-bncc-btn').classList.add('active');
+                document.getElementById('aba-bncc').classList.add('active');
+            }
         }
 
         // ============================================
-        // LISTENER COM DETECÇÃO DE RESET
+        // INICIALIZAR
+        // ============================================
+        async function inicializar(sala, nome) {
+            sessaoId = sala;
+            meuNome = nome;
+
+            // Esconder o botão Voltar definitivamente ao começar a jogar
+            const btnVoltar = document.getElementById('btnVoltar');
+            if (btnVoltar) {
+                btnVoltar.style.display = 'none';
+            }
+
+            // Exibir o botão de Sair da Sala
+            const btnSairSala = document.getElementById('btnSairSala');
+            if (btnSairSala) {
+                btnSairSala.style.display = 'inline-flex';
+            }
+
+            // Inicia o listener de forma dinâmica, que lidará tanto com a entrada
+            // inicial quanto com as atualizações em tempo real (como expansão de vagas!)
+            iniciarListenerUnico(sala);
+        }
+
+        // ============================================
+        // LISTENER COM DETECÇÃO DE RESET E ANTI-TRAPAÇA
         // ============================================
         function iniciarListenerUnico(sala) {
             if (sessaoListenerRef) {
                 sessaoListenerRef.off();
                 sessaoListenerRef = null;
             }
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+            }
+            heartbeatIniciado = false;
 
-            sessaoListenerRef = db.ref(`bingo/sessoes/${sala}`);
+            const sessaoRefLocal = db.ref(`bingo/sessoes/${sala}`);
+            sessaoListenerRef = sessaoRefLocal;
 
             sessaoListenerRef.on('value', (snapshot) => {
                 if (!snapshot.exists()) {
@@ -917,36 +1822,274 @@
 
                 const sessao = snapshot.val();
                 jogoFinalizado = sessao.status === 'finalizada';
+                mostrarNumeros = sessao.mostrarNumeros !== false;
+                salaNome = obterNomeSala(sala, sessao.salaNome);
 
-                // DETECTAR NOVA RODADA (resetToken mudou)
+                document.getElementById('salaNomeTexto').textContent = salaNome;
+                document.getElementById('salaCodigoTexto').textContent = sala;
+                document.getElementById('aguardandoSala').textContent = salaNome;
+
+                const totalAlunos = sessao.totalAlunos || 0;
+
+                // Se o aluno já tem ID mas por algum motivo não está mais na lista de participantes della sessão,
+                // significa que ele foi limpo ou removido. Resetamos o ID para forçar um novo registro transparente.
+                if (alunoId && sessao.participantes) {
+                    if (!sessao.participantes[alunoId]) {
+                        console.log('⚠️ Aluno ID local não encontrado nos participantes do Firebase. Forçando re-registro...');
+                        alunoId = null;
+                        sessionStorage.removeItem('bingo_aluno_id');
+                        heartbeatIniciado = false;
+                        if (heartbeatInterval) {
+                            clearInterval(heartbeatInterval);
+                            heartbeatInterval = null;
+                        }
+                    } else {
+                        // Se o slot foi reocupado por outro aluno real, desassocia o ID atual para pegar uma vaga livre
+                        const dataPart = sessao.participantes[alunoId];
+                        const nomeNoFirebase = dataPart.nome || '';
+                        const isVagaDisponivel = !nomeNoFirebase || nomeNoFirebase.trim() === '' || nomeNoFirebase.startsWith('Aluno ');
+                        if (!isVagaDisponivel && nomeNoFirebase !== meuNome) {
+                            console.log('⚠️ Vaga antiga ocupada por outro aluno. Resetando ID para buscar nova vaga...');
+                            alunoId = null;
+                            sessionStorage.removeItem('bingo_aluno_id');
+                            heartbeatIniciado = false;
+                            if (heartbeatInterval) {
+                                clearInterval(heartbeatInterval);
+                                heartbeatInterval = null;
+                            }
+                        }
+                    }
+                }
+
+                // Sincronizar nome no Firebase e carregar cartela local se necessário (evita aluno 'vago' e cartela vazia)
+                if (alunoId && sessao.participantes && sessao.participantes[alunoId]) {
+                    if (!heartbeatIniciado) {
+                        configurarOnDisconnect(alunoId, sessaoId);
+                        iniciarHeartbeat(alunoId, sessaoId);
+                        heartbeatIniciado = true;
+                    }
+                    const dataPart = sessao.participantes[alunoId];
+                    const nomeNoFirebase = dataPart.nome || '';
+
+                    // Carregar ou sincronizar o índice de pedras sorteadas no momento em que o aluno entrou na sala
+                    if (dataPart.entradaSorteadosIndex !== undefined && dataPart.entradaSorteadosIndex !== null) {
+                        entradaSorteadosIndex = dataPart.entradaSorteadosIndex;
+                    } else {
+                        const idxActual = (sessao.status === 'aguardando' || !sessao.numerosSorteados) ? 0 : sessao.numerosSorteados.length;
+                        entradaSorteadosIndex = idxActual;
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                            entradaSorteadosIndex: idxActual
+                        });
+                    }
+
+                    // Se o professor removeu este aluno ativamente (flag excluído)
+                    if (dataPart.excluido === true) {
+                        console.log('🚪 O professor liberou esta vaga ativamente. Voltando para a entrada...');
+                        cancelarOnDisconnect(alunoId, sessaoId);
+                        alunoId = null;
+                        sessionStorage.removeItem('bingo_aluno_id');
+                        minhaCartela = null;
+                        minhasMarcacoes = null;
+                        heartbeatIniciado = false;
+                        entradaSorteadosIndex = 0;
+                        if (heartbeatInterval) {
+                            clearInterval(heartbeatInterval);
+                            heartbeatInterval = null;
+                        }
+                        showToast('🚪 Sua vaga foi liberada pelo professor!', 'warning');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                        return;
+                    }
+
+                    if (!nomeNoFirebase || nomeNoFirebase.trim() === '' || nomeNoFirebase !== meuNome || dataPart.excluido) {
+                        console.log('✍️ Sincronizando nome do aluno no Firebase...');
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                            nome: meuNome,
+                            excluido: null
+                        });
+                    }
+                    if (!minhaCartela && dataPart.cartela) {
+                        minhaCartela = dataPart.cartela;
+                        minhasMarcacoes = dataPart.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        isWinner = dataPart.venceu || false;
+                        renderizarCartela();
+                    }
+
+                    if (meuNome) {
+                        const nomeAlunoEl = document.getElementById('nomeAluno');
+                        const nomeEsperaEl = document.getElementById('nomeEspera');
+                        if (nomeAlunoEl && nomeAlunoEl.textContent !== meuNome) {
+                            nomeAlunoEl.textContent = meuNome;
+                        }
+                        if (nomeEsperaEl && nomeEsperaEl.textContent !== `👤 ${meuNome}`) {
+                            nomeEsperaEl.textContent = `👤 ${meuNome}`;
+                        }
+                    }
+                }
+
+                // Se o aluno ainda não tem ID associado nesta sessão, tentamos atribuir
+                if (!alunoId) {
+                    const resultado = atribuirCartela(sessao, meuNome);
+
+                    if (!resultado) {
+                        // Se não tem vaga, mostra a mensagem de sala lotada de forma elegante e amigável
+                        document.getElementById('aguardando').innerHTML = `
+                            <span class="status-icon">🚫</span>
+                            <h2>Sala lotada!</h2>
+                            <p>Todas as ${totalAlunos} vagas de cartelas já estão ocupadas.</p>
+                            <div class="loading-spinner" style="margin-top: 15px; width: 30px; height: 30px;"></div>
+                            <p style="font-size: 0.9rem; color: #8aaab5; margin-top: 10px;">
+                                ⏳ Aguardando o professor liberar novas vagas...
+                            </p>
+                        `;
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return; // Retorna neste ciclo, mas mantém o listener ativo!
+                    }
+
+                    // Se encontrou vaga, associa o aluno a ela
+                    const { id: alunoIdEncontrado, data, jaExistia } = resultado;
+                    alunoId = alunoIdEncontrado;
+
+                    // Calcular índice de pedras sorteadas no momento da entrada
+                    const idxEntrada = (sessao.status === 'aguardando' || !sessao.numerosSorteados) ? 0 : sessao.numerosSorteados.length;
+                    entradaSorteadosIndex = (data && data.entradaSorteadosIndex !== undefined) ? data.entradaSorteadosIndex : idxEntrada;
+
+                    // Salva as credenciais de forma segura no sessionStorage da aba corrente (perfeito para ambiente escolar)
+                    sessionStorage.setItem('bingo_aluno_sala', sala);
+                    sessionStorage.setItem('bingo_aluno_nome', meuNome);
+                    sessionStorage.setItem('bingo_aluno_id', alunoId);
+
+                    if (data && data.cartela) {
+                        // Se o slot já possui uma cartela pré-alocada (caso padrão de pré-geração pelo professor),
+                        // nós a usamos diretamente para evitar re-geração no cliente e inconsistências.
+                        minhaCartela = data.cartela;
+
+                        if (jaExistia) {
+                            minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                            isWinner = data.venceu || false;
+
+                            const updateObj = {
+                                nome: meuNome,
+                                excluido: null
+                            };
+                            if (data.entradaSorteadosIndex === undefined) {
+                                updateObj.entradaSorteadosIndex = entradaSorteadosIndex;
+                            }
+
+                            // Atualiza apenas o nome no Firebase de forma transparente para ocupar a vaga e limpa exclusão
+                            sessaoRefLocal.child(`participantes/${alunoId}`).update(updateObj);
+                            showToast(`👋 Bem-vindo de volta, ${meuNome}!`, 'info');
+                        } else {
+                            // É um novo aluno ocupando uma vaga que estava disponível.
+                            // Devemos limpar as marcações antigas para que ele comece do zero!
+                            const cleanMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                            cleanMarcacoes[2][2] = true; // Centro livre
+                            minhasMarcacoes = cleanMarcacoes;
+                            isWinner = false;
+
+                            // Atualiza o nome, as marcações limpas, o vencedor e limpa o status de exclusão no Firebase
+                            sessaoRefLocal.child(`participantes/${alunoId}`).update({
+                                nome: meuNome,
+                                marcacoes: cleanMarcacoes,
+                                venceu: false,
+                                excluido: null,
+                                entradaSorteadosIndex: entradaSorteadosIndex
+                            });
+
+                            if (entradaSorteadosIndex > 0) {
+                                showToast(`⚠️ Você entrou com ${entradaSorteadosIndex} pedras já sorteadas. Só poderá marcar pedras sorteadas a partir de agora!`, 'warning', 6000);
+                            } else {
+                                showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                            }
+                        }
+                    } else {
+                        // Caso extremo de contingência: se o slot não tem cartela pré-gerada, criamos uma nova
+                        const cartela = gerarCartelaUnica(sessao.participantes || {});
+                        const marcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                        marcacoes[2][2] = true;
+
+                        const novoParticipante = {
+                            nome: meuNome,
+                            cartela: cartela,
+                            marcacoes: marcacoes,
+                            venceu: false,
+                            excluido: null,
+                            entradaSorteadosIndex: entradaSorteadosIndex
+                        };
+
+                        sessaoRefLocal.child(`participantes/${alunoId}`).set(novoParticipante);
+                        minhaCartela = cartela;
+                        minhasMarcacoes = marcacoes;
+                        isWinner = false;
+                        
+                        if (entradaSorteadosIndex > 0) {
+                            showToast(`⚠️ Você entrou com ${entradaSorteadosIndex} pedras já sorteadas. Só poderá marcar pedras sorteadas a partir de agora!`, 'warning', 6000);
+                        } else {
+                            showToast(`🎯 Bem-vindo, ${meuNome}! Você é o aluno ${alunoId.replace('aluno_', '')}`, 'info');
+                        }
+                    }
+
+                    if (!heartbeatIniciado) {
+                        configurarOnDisconnect(alunoId, sessaoId);
+                        iniciarHeartbeat(alunoId, sessaoId);
+                        heartbeatIniciado = true;
+                    }
+
+                    document.getElementById('nomeAluno').textContent = meuNome;
+                    document.getElementById('nomeEspera').textContent = `👤 ${meuNome}`;
+
+                    renderizarCartela();
+                }
+
+                // A partir daqui, o aluno está registrado!
                 const novoResetToken = sessao.resetToken || '';
+                
+                // --- ATUALIZAR NÚMEROS CHAMADOS ---
+                if (sessao.numerosSorteados) {
+                    numerosChamados = [...sessao.numerosSorteados];
+                    ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
+                } else {
+                    numerosChamados = [];
+                    ultimoNumeroSorteado = null;
+                }
+                atualizarNumerosChamados();
+
+                // --- DETECÇÃO DE RESET / NOVA RODADA ---
                 if (novoResetToken !== ultimoResetToken && ultimoResetToken !== null) {
                     console.log('🔄 NOVA RODADA DETECTADA! Resetando tudo...');
                     
                     if (sessao.participantes && sessao.participantes[alunoId]) {
                         const data = sessao.participantes[alunoId];
                         
-                        // CARREGAR NOVA CARTELA
                         minhaCartela = data.cartela;
-                        
-                        // RESETAR MARCAÇÕES (apenas espaço livre)
                         minhasMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
                         minhasMarcacoes[2][2] = true;
-                        
-                        // RESETAR STATUS
                         isWinner = false;
                         numerosChamados = [];
                         ultimoNumeroSorteado = null;
                         ultimoResetToken = novoResetToken;
                         
-                        // ATUALIZAR NO FIREBASE
                         const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
-                        alunoRef.update({
+                        const updateData = {
                             marcacoes: minhasMarcacoes,
-                            venceu: false
-                        });
+                            venceu: false,
+                            heartbeat: Date.now()
+                        };
+                        if (!data.nome || data.nome.trim() === '') {
+                            updateData.nome = meuNome;
+                        }
+                        alunoRef.update(updateData);
                         
-                        // ATUALIZAR UI
+                        if (meuNome) {
+                            const nomeAlunoEl = document.getElementById('nomeAluno');
+                            const nomeEsperaEl = document.getElementById('nomeEspera');
+                            if (nomeAlunoEl && nomeAlunoEl.textContent !== meuNome) nomeAlunoEl.textContent = meuNome;
+                            if (nomeEsperaEl && nomeEsperaEl.textContent !== `👤 ${meuNome}`) nomeEsperaEl.textContent = `👤 ${meuNome}`;
+                        }
+                        
                         renderizarCartela();
                         atualizarStatus();
                         document.getElementById('numerosChamadosAluno').innerHTML = 
@@ -956,54 +2099,132 @@
                         
                         showToast('🔄 Nova rodada! Nova cartela carregada.', 'info');
                     }
-                    return;
                 }
                 
-                // Atualizar o reset token se for a primeira vez
-                if (novoResetToken && ultimoResetToken === null) {
+                if (ultimoResetToken === null) {
                     ultimoResetToken = novoResetToken;
                 }
 
-                if (sessao.status === 'aguardando') {
+                // --- CONTROLE DE VISIBILIDADE DAS TELAS ---
+                if (alunoId && minhaCartela) {
+                    // O aluno já está registrado e tem cartela! Ele deve ver o painel de jogo ativo
+                    document.getElementById('aguardando').style.display = 'none';
+                    document.getElementById('jogoAtivo').style.display = 'block';
+                    
+                    // Atualizar textos e status conforme o estado atual do jogo
+                    const instrucaoEl = document.querySelector('.instrucao');
+                    const ultimoNumeroEl = document.getElementById('ultimoNumero');
+                    
+                    if (sessao.status === 'aguardando') {
+                        if (instrucaoEl) {
+                            instrucaoEl.innerHTML = `⏳ <strong>Nova rodada iniciada!</strong> Aguardando o professor sortear o primeiro número.`;
+                        }
+                        if (ultimoNumeroEl) {
+                            ultimoNumeroEl.innerHTML = '🎯 ---';
+                        }
+                    } else if (sessao.status === 'finalizada') {
+                        if (instrucaoEl) {
+                            instrucaoEl.innerHTML = `🔴 <strong>Jogo finalizado!</strong> O professor encerrou esta rodada.`;
+                        }
+                        if (ultimoNumeroEl) {
+                            ultimoNumeroEl.innerHTML = '⏹️ FIM';
+                        }
+                    } else {
+                        // Ativa
+                        if (instrucaoEl) {
+                            instrucaoEl.innerHTML = `💡 <strong>Clique</strong> nos números sorteados para marcá-los na sua cartela!`;
+                        }
+                        if (ultimoNumeroEl) {
+                            ultimoNumeroEl.innerHTML = `🎯 ${ultimoNumeroSorteado !== null ? ultimoNumeroSorteado : '---'}`;
+                        }
+                    }
+                } else {
+                    // Se o aluno ainda não está registrado, mostramos a tela de espera correspondente ao status da sessão
+                    if (sessao.status === 'aguardando') {
+                        const aguardandoDiv = document.getElementById('aguardando');
+                        if (!aguardandoDiv.innerHTML.includes('Aguardando o professor iniciar')) {
+                            aguardandoDiv.innerHTML = `
+                                <span class="status-icon">⏳</span>
+                                <h2>Aguardando o professor iniciar...</h2>
+                                <div class="loading-spinner"></div>
+                                <p style="margin-top: 15px; color: #6a8a95; font-size: 0.9rem;">
+                                    Sala: <strong id="aguardandoSala">${salaNome}</strong>
+                                </p>
+                                <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera">👤 ${meuNome}</p>
+                            `;
+                        }
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return;
+                    }
+
+                    if (sessao.status === 'finalizada') {
+                        showToast('🔴 O jogo foi finalizado!', 'error');
+                        document.getElementById('aguardando').innerHTML = `
+                            <span class="status-icon">🔴</span>
+                            <h2>Jogo finalizado</h2>
+                            <p>O professor finalizou esta sessão.</p>
+                        `;
+                        document.getElementById('aguardando').style.display = 'block';
+                        document.getElementById('jogoAtivo').style.display = 'none';
+                        return;
+                    }
+                    
+                    // Caso o jogo esteja ativo mas o aluno por algum motivo esteja sem registro
                     document.getElementById('aguardando').style.display = 'block';
                     document.getElementById('jogoAtivo').style.display = 'none';
                     return;
                 }
 
-                if (sessao.status === 'finalizada') {
-                    showToast('🔴 O jogo foi finalizado!', 'error');
-                    document.getElementById('aguardando').innerHTML = `
-                        <span class="status-icon">🔴</span>
-                        <h2>Jogo finalizado</h2>
-                        <p>O professor finalizou esta sessão.</p>
-                    `;
-                    document.getElementById('jogoAtivo').style.display = 'none';
-                    document.getElementById('aguardando').style.display = 'block';
-                    return;
-                }
-
-                document.getElementById('aguardando').style.display = 'none';
-                document.getElementById('jogoAtivo').style.display = 'block';
-
-                // Atualizar números sorteados
-                if (sessao.numerosSorteados) {
-                    numerosChamados = sessao.numerosSorteados;
-                    ultimoNumeroSorteado = numerosChamados[numerosChamados.length - 1] || null;
-                    atualizarNumerosChamados();
-                }
-
-                // Atualizar dados do aluno
                 if (sessao.participantes && sessao.participantes[alunoId]) {
                     const data = sessao.participantes[alunoId];
                     
-                    if (data.cartela && data.cartela !== minhaCartela) {
-                        minhaCartela = data.cartela;
-                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                        isWinner = data.venceu || false;
-                        renderizarCartela();
+                    let dataMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                    let dataCartela = data.cartela || minhaCartela;
+                    let corrigido = false;
+
+                    // --- ANTI-TRAPAÇA: DETECTAR E REVERTER MARCAÇÕES DE CONSOLE/DEVTOOLS EM TEMPO REAL ---
+                    if (dataCartela && dataMarcacoes) {
+                        for (let r = 0; r < 5; r++) {
+                            for (let c = 0; c < 5; c++) {
+                                const val = dataCartela[r][c];
+                                if (val !== 'B' && dataMarcacoes[r][c] && !numerosChamados.includes(val)) {
+                                    // O aluno marcou um número que NÃO foi sorteado no jogo! Reverter imediatamente.
+                                    dataMarcacoes[r][c] = false;
+                                    corrigido = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (corrigido) {
+                        showToast('⚠️ Tentativa de marcação inválida corrigida automaticamente pelo sistema anti-cheat!', 'error');
+                        db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                            marcacoes: dataMarcacoes,
+                            venceu: false
+                        });
+                        minhasMarcacoes = dataMarcacoes;
+                        isWinner = false;
                     } else {
-                        minhasMarcacoes = data.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+                        const jaEraVencedor = isWinner;
+                        minhasMarcacoes = dataMarcacoes;
                         isWinner = data.venceu || false;
+
+                        if (isWinner && !jaEraVencedor) {
+                            showToast(`🏆 BINGO! Você VENCEU! 🎉🎉🎉`, 'winner', 6000);
+                            dispararConfetti();
+                            try {
+                                const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+                                audio.play().catch(() => {});
+                            } catch(e) {}
+                        }
+                    }
+
+                    const cartelaStrOld = minhaCartela ? minhaCartela.flat().join(',') : '';
+                    const cartelaStrNew = data.cartela ? data.cartela.flat().join(',') : '';
+                    if (data.cartela && cartelaStrNew !== cartelaStrOld) {
+                        minhaCartela = data.cartela;
+                        renderizarCartela();
                     }
                     
                     atualizarContador();
@@ -1030,27 +2251,29 @@
         // RENDERIZAR CARTELA
         // ============================================
         function renderizarCartela() {
+            if (!minhaCartela || !minhasMarcacoes) return;
             const grid = document.getElementById('cartelaGrid');
             let html = '';
+            const numerosPermitidos = getNumerosPermitidos();
 
             for (let r = 0; r < 5; r++) {
                 for (let c = 0; c < 5; c++) {
                     const val = minhaCartela[r][c];
                     const isMarked = minhasMarcacoes[r][c];
                     const isCenter = (r === 2 && c === 2);
-                    const isSorteado = typeof val === 'number' && numerosChamados.includes(val);
-                    const isUltimo = typeof val === 'number' && val === ultimoNumeroSorteado;
+                    const isSorteado = typeof val === 'number' && numerosPermitidos.includes(val);
+                    const isUltimo = typeof val === 'number' && val === ultimoNumeroSorteado && numerosPermitidos.includes(val);
                     
                     let cls = 'cell';
                     if (isMarked) cls += ' marked';
                     if (isCenter) cls += ' free';
                     if (isWinner) cls += ' winner-cell';
-                    if (isSorteado && !isMarked && !isCenter) cls += ' sorteado';
-                    if (isUltimo && !isMarked && !isCenter) cls += ' sorteado';
+                    if (isSorteado && !isMarked && !isCenter && mostrarNumeros) cls += ' sorteado';
+                    if (isUltimo && !isMarked && !isCenter && mostrarNumeros) cls += ' sorteado';
                     
                     const displayVal = isCenter ? 'B' : val;
                     
-                    const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c}, ${val})"`;
+                    const onclick = isCenter ? '' : `onclick="marcarNumero(${r}, ${c})"`;
                     
                     html += `<div class="${cls}" id="cell_${r}_${c}" ${onclick}>${displayVal}</div>`;
                 }
@@ -1068,9 +2291,12 @@
         }
 
         // ============================================
-        // MARCAR NÚMERO COM BINGO AUTOMÁTICO
+        // MARCAR NÚMERO COM VALIDACÃO DO ULTIMO SORTEADO
         // ============================================
-        function marcarNumero(r, c, val) {
+        function marcarNumero(r, c) {
+            if (!minhaCartela) return;
+            const val = minhaCartela[r][c];
+
             if (isWinner) {
                 showToast('🏆 Você já venceu! Parabéns! 🎉', 'info');
                 return;
@@ -1086,10 +2312,35 @@
                 return;
             }
             
-            const ultimoSorteado = numerosChamados[numerosChamados.length - 1];
-            
+            const numerosPermitidos = getNumerosPermitidos();
+
+            // --- RESTRIÇÃO ESTRITA: O ALUNO SÓ PODE MARCAR A ÚLTIMA PEDRA SORTEADA ---
+            const ultimoSorteado = ultimoNumeroSorteado || (numerosChamados.length > 0 ? numerosChamados[numerosChamados.length - 1] : null);
+
             if (val !== ultimoSorteado) {
-                showToast('⚠️ Você só pode marcar o número sorteado AGORA!', 'error');
+                if (numerosChamados.includes(val)) {
+                    showToast('⚠️ Você só pode marcar a ÚLTIMA pedra sorteada no momento! Pedras passadas só podem ser liberadas pelo professor.', 'error', 5000);
+                } else {
+                    showToast('⚠️ Este número ainda não foi sorteado!', 'error');
+                }
+                
+                for (let r2 = 0; r2 < 5; r2++) {
+                    for (let c2 = 0; c2 < 5; c2++) {
+                        if (minhaCartela[r2][c2] === val) {
+                            const cell = document.getElementById(`cell_${r2}_${c2}`);
+                            if (cell) {
+                                cell.classList.add('bloqueado');
+                                setTimeout(() => cell.classList.remove('bloqueado'), 2000);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            // --- BLOQUEAR TENTATIVAS DE MARCAR NÚMEROS SORTEADOS ANTES DA ENTRADA DO ALUNO ---
+            if (!numerosPermitidos.includes(val)) {
+                showToast('⚠️ Este número foi sorteado ANTES da sua entrada no jogo! Você só pode marcar pedras sorteadas a partir da sua chegada.', 'error', 5000);
                 
                 for (let r2 = 0; r2 < 5; r2++) {
                     for (let c2 = 0; c2 < 5; c2++) {
@@ -1110,7 +2361,6 @@
                 return;
             }
 
-            // MARCAR O NÚMERO
             minhasMarcacoes[r][c] = true;
             
             db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
@@ -1125,10 +2375,8 @@
             
             atualizarContador();
 
-            // VERIFICAR BINGO AUTOMATICAMENTE
             if (isCartelaCompleta()) {
                 if (checkBingo(minhasMarcacoes, minhaCartela, numerosChamados)) {
-                    // DECLARAR BINGO AUTOMATICAMENTE!
                     isWinner = true;
                     
                     const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
@@ -1164,7 +2412,7 @@
         }
 
         // ============================================
-        // ATUALIZAR CONTADOR (CORRIGIDO)
+        // ATUALIZAR CONTADOR
         // ============================================
         function atualizarContador() {
             if (!minhasMarcacoes) return;
@@ -1183,10 +2431,19 @@
             }
 
             let html = '';
+            if (entradaSorteadosIndex > 0) {
+                html += `<div style="width: 100%; font-size: 0.78rem; color: #ffc107; margin-bottom: 6px; font-weight: 600;">⚠️ Entrou com ${entradaSorteadosIndex} pedras já sorteadas (somente pedras sorteadas após sua chegada podem ser marcadas).</div>`;
+            }
             const ultimos = numerosChamados.slice(-20);
+            const startIdxInAll = Math.max(0, numerosChamados.length - 20);
+
             ultimos.forEach((num, idx) => {
-                const cls = idx === ultimos.length - 1 ? 'chip recent' : 'chip';
-                html += `<span class="${cls}">${num}</span>`;
+                const actualIdx = startIdxInAll + idx;
+                const eAnteriorAEntrada = entradaSorteadosIndex > 0 && actualIdx < entradaSorteadosIndex;
+                let cls = idx === ultimos.length - 1 ? 'chip recent' : 'chip';
+                if (eAnteriorAEntrada) cls += ' anterior';
+                const titleAttr = eAnteriorAEntrada ? 'title="Sorteado antes de você entrar no jogo"' : '';
+                html += `<span class="${cls}" ${titleAttr}>${num}${eAnteriorAEntrada ? ' 🔒' : ''}</span>`;
             });
             container.innerHTML = html;
 
@@ -1194,26 +2451,31 @@
                 const ultimo = numerosChamados[numerosChamados.length - 1];
                 ultimoNumeroSorteado = ultimo;
                 const letra = getLetterForNumber(ultimo);
-                document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
+                if (mostrarNumeros) {
+                    document.getElementById('ultimoNumero').innerHTML = `🎯 ${letra}${ultimo}`;
+                } else {
+                    document.getElementById('ultimoNumero').innerHTML = `🎯 Voz (Ouvir)`;
+                }
             }
 
             if (minhaCartela) {
+                const numerosPermitidos = getNumerosPermitidos();
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
                         const val = minhaCartela[r][c];
                         if (typeof val === 'number') {
                             const cell = document.getElementById(`cell_${r}_${c}`);
                             if (cell) {
-                                const isMarked = minhasMarcacoes[r][c];
-                                const isSorteado = numerosChamados.includes(val);
-                                const isUltimo = val === ultimoNumeroSorteado;
+                                const isMarked = minhasMarcacoes ? minhasMarcacoes[r][c] : false;
+                                const isSorteado = numerosPermitidos.includes(val);
+                                const isUltimo = val === ultimoNumeroSorteado && isSorteado;
                                 
                                 if (isMarked) {
                                     cell.classList.add('marked');
                                     cell.classList.remove('sorteado');
-                                } else if (isSorteado && !isUltimo) {
+                                } else if (isSorteado && !isUltimo && mostrarNumeros) {
                                     cell.classList.add('sorteado');
-                                } else if (isUltimo) {
+                                } else if (isUltimo && mostrarNumeros) {
                                     cell.classList.add('sorteado');
                                 } else {
                                     cell.classList.remove('sorteado');
@@ -1226,13 +2488,21 @@
         }
 
         // ============================================
-        // ATUALIZAR STATUS (CORRIGIDO)
+        // ATUALIZAR STATUS
         // ============================================
         function atualizarStatus() {
             const statusEl = document.getElementById('statusBingo');
+            if (!statusEl) return;
+            
             if (isWinner) {
                 statusEl.textContent = '🏆 BINGO! Você venceu! 🎉';
                 statusEl.className = 'bingo-status winner';
+            } else if (jogoFinalizado) {
+                statusEl.textContent = '⏹️ Jogo finalizado';
+                statusEl.className = 'bingo-status finished';
+            } else if (ultimoNumeroSorteado === null && (!numerosChamados || numerosChamados.length === 0)) {
+                statusEl.textContent = '⏳ Aguardando sorteio...';
+                statusEl.className = 'bingo-status';
             } else {
                 let totalMarked = 0;
                 if (minhasMarcacoes) {
@@ -1244,13 +2514,107 @@
         }
 
         // ============================================
+        // CONFIRMAR SAÍDA DA SALA (SAÍDA VOLUNTÁRIA)
+        // ============================================
+        function confirmarSairSessao() {
+            mostrarModalSaida(
+                '🚪',
+                'Sair da Sala?',
+                'Ao sair da sala voluntariamente, sua vaga será liberada e sua cartela poderá ser atribuída a outro colega.',
+                '⚠️ Seus pontos e cartela atuais nesta rodada serão limpos.',
+                async function() {
+                    if (sessaoId && alunoId) {
+                        try {
+                            const numStr = alunoId.replace('aluno_', '');
+                            const cleanMarcacoes = Array.from({ length: 5 }, () => Array(5).fill(false));
+                            cleanMarcacoes[2][2] = true; // Espaço central BINGO livre
+
+                            // Cancela as ações agendadas para perda de conexão súbita
+                            cancelarOnDisconnect(alunoId, sessaoId);
+
+                            // Libera a vaga no Firebase alterando o nome de volta para o padrão de vaga disponível
+                            await db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`).update({
+                                nome: `Aluno ${numStr}`,
+                                marcacoes: cleanMarcacoes,
+                                venceu: false
+                            });
+                        } catch (err) {
+                            console.error("Erro ao liberar vaga no Firebase:", err);
+                        }
+                    }
+                    voltarParaLista();
+                }
+            );
+        }
+
+        // ============================================
+        // SISTEMA DE PRESENÇA / HEARTBEAT (FIREBASE)
+        // ============================================
+        function configurarOnDisconnect(alunoId, sessaoId) {
+            if (!alunoId || !sessaoId) return;
+            const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+
+            // Mantemos o nome do aluno reservado no Firebase para permitir reconexões seguras. 
+            // Apenas zeramos o heartbeat para indicar que ele está temporariamente offline.
+            alunoRef.child('heartbeat').onDisconnect().set(0);
+        }
+
+        function cancelarOnDisconnect(alunoId, sessaoId) {
+            if (!alunoId || !sessaoId) return;
+            const alunoRef = db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}`);
+            alunoRef.child('heartbeat').onDisconnect().cancel();
+        }
+
+        function iniciarHeartbeat(alunoId, sessaoId) {
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+            }
+            
+            enviarHeartbeat(alunoId, sessaoId);
+
+            heartbeatInterval = setInterval(() => {
+                enviarHeartbeat(alunoId, sessaoId);
+            }, 5000);
+        }
+
+        function enviarHeartbeat(alunoId, sessaoId) {
+            if (!alunoId || !sessaoId) return;
+            db.ref(`bingo/sessoes/${sessaoId}/participantes/${alunoId}/heartbeat`).set(Date.now());
+        }
+
+        // Heartbeat instantâneo ao retornar o foco/ficar visível para contornar suspensão do navegador
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && alunoId && sessaoId) {
+                console.log('👀 Aba visível! Enviando heartbeat instantâneo de reconexão...');
+                enviarHeartbeat(alunoId, sessaoId);
+            }
+        });
+
+        // ============================================
         // VOLTAR PARA LISTA
         // ============================================
         function voltarParaLista() {
+            if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+            }
+            heartbeatIniciado = false;
+
             if (sessaoListenerRef) {
                 sessaoListenerRef.off();
                 sessaoListenerRef = null;
             }
+
+            // Esconder o botão de Sair da Sala
+            const btnSairSala = document.getElementById('btnSairSala');
+            if (btnSairSala) {
+                btnSairSala.style.display = 'none';
+            }
+            
+            // Limpa o sessionStorage ao sair voluntariamente
+            sessionStorage.removeItem('bingo_aluno_sala');
+            sessionStorage.removeItem('bingo_aluno_nome');
+            sessionStorage.removeItem('bingo_aluno_id');
             
             sessaoId = null;
             alunoId = null;
@@ -1265,26 +2629,249 @@
             document.getElementById('aguardando').style.display = 'block';
             document.getElementById('aguardandoSala').textContent = '---';
             
-            window.location.href = 'BAluno.html';
+            window.location.href = 'BAluno-GM.html';
+        }
+
+        // ============================================
+        // MODAL DE SELEÇÃO DE SALA DINÂMICA
+        // ============================================
+        function abrirModalSelecaoSalas() {
+            document.getElementById('modalSelecaoSalas').classList.add('active');
+        }
+
+        function fecharModalSelecaoSalas() {
+            document.getElementById('modalSelecaoSalas').classList.remove('active');
+        }
+
+        function selecionarSalaModal() {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modalSelecaoSalas');
+                const container = document.getElementById('listaSalasContainer');
+                const inputManual = document.getElementById('codigoSalaManual');
+                const btnManual = document.getElementById('btnConfirmarSalaManual');
+                
+                inputManual.value = '';
+                
+                // Mostrar spinner de carregamento inicial
+                container.innerHTML = `
+                    <div class="loading-spinner-container" style="text-align: center; padding: 20px 0;">
+                        <div class="loading-spinner" style="width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #d4a373; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #8aaab5; font-size: 0.9rem; margin-top: 10px;">Buscando salas abertas...</p>
+                    </div>
+                `;
+                
+                const sessoesRef = db.ref('bingo/sessoes');
+                
+                const handleUpdate = (snapshot) => {
+                    const updateDropdownIndicators = (sessoesObj) => {
+                        const options = inputManual.querySelectorAll('option');
+                        options.forEach(opt => {
+                            if (!opt.value) return;
+                            if (!opt.dataset.originalText) {
+                                opt.dataset.originalText = opt.textContent;
+                            }
+                            const code = opt.value;
+                            const isOnline = sessoesObj && sessoesObj[code] && sessoesObj[code].status !== 'finalizada';
+                            if (isOnline) {
+                                opt.textContent = `🟢 ${opt.dataset.originalText} (ONLINE)`;
+                                opt.style.color = '#6bcb77';
+                            } else {
+                                opt.textContent = `🔴 ${opt.dataset.originalText} (Offline)`;
+                                opt.style.color = '#8aaab5';
+                            }
+                        });
+                    };
+
+                    if (!snapshot.exists()) {
+                        container.innerHTML = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                        updateDropdownIndicators(null);
+                        return;
+                    }
+                    
+                    const sessoes = snapshot.val();
+                    updateDropdownIndicators(sessoes);
+                    let html = '';
+                    let encontrouAtiva = false;
+                    
+                    // Ordenar salas para estabilidade na visualização
+                    const sortedSessoes = Object.entries(sessoes).sort((a, b) => b[0].localeCompare(a[0]));
+                    
+                    for (const [id, sessao] of sortedSessoes) {
+                        if (sessao.status === 'finalizada') continue;
+                        
+                        encontrouAtiva = true;
+                        
+                        let totalVagas = sessao.totalAlunos || 0;
+                        let ocupados = 0;
+                        if (sessao.participantes) {
+                            ocupados = Object.values(sessao.participantes).filter(p => p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ')).length;
+                        }
+                        
+                        const statusTexto = sessao.status === 'ativa' ? 'Em Andamento' : 'Aguardando';
+                        const badgeClasse = sessao.status === 'ativa' ? 'style="background: rgba(77, 150, 255, 0.15); color: #4d96ff; border: 1px solid rgba(77, 150, 255, 0.3);"' : 'style="background: rgba(212, 163, 115, 0.15); color: #d4a373; border: 1px solid rgba(212, 163, 115, 0.3);"';
+                        
+                        const isCheia = ocupados >= totalVagas;
+                        const vagasTexto = isCheia ? 'Cheia' : `${ocupados}/${totalVagas} Alunos`;
+                        const vagasClasse = isCheia ? 'sala-item-vagas cheia' : 'sala-item-vagas';
+                        
+                        html += `
+                            <div class="sala-item" onclick="selecionarSalaDaLista('${id}', ${isCheia})">
+                                <div class="sala-item-info">
+                                    <span class="sala-item-nome">🏫 ${sessao.salaNome || 'Sem Nome'}</span>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;">
+                                        <span class="sala-item-detalhe" style="font-family: monospace;">Cód: ${id}</span>
+                                        <span class="sala-item-detalhe" ${badgeClasse} style="font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 600;">${statusTexto}</span>
+                                    </div>
+                                </div>
+                                <span class="${vagasClasse}">${vagasTexto}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    let novoHtml = '';
+                    if (!encontrouAtiva) {
+                        novoHtml = `<p style="color: #8aaab5; text-align: center; font-style: italic; padding: 15px 0;">Nenhuma sala aberta no momento.</p>`;
+                    } else {
+                        novoHtml = html;
+                    }
+                    
+                    if (container.innerHTML !== novoHtml) {
+                        container.innerHTML = novoHtml;
+                    }
+                };
+                
+                sessoesRef.on('value', handleUpdate);
+                
+                const finalizeSelection = (id) => {
+                    sessoesRef.off('value', handleUpdate);
+                    fecharModalSelecaoSalas();
+                    resolve(id);
+                };
+                
+                window.selecionarSalaDaLista = function(id, isCheia) {
+                    if (isCheia) {
+                        showToast('⚠️ Esta sala está lotada! Peça para o professor expandir as vagas.', 'error');
+                        return;
+                    }
+                    finalizeSelection(id);
+                };
+                
+                const handleManualSubmit = function() {
+                    let cod = inputManual.value;
+                    if (!cod) {
+                        showToast('⚠️ Selecione a sua Turma/Sala!', 'error');
+                        return;
+                    }
+                    
+                    db.ref(`bingo/sessoes/${cod}`).once('value', (snapshot) => {
+                        if (!snapshot.exists()) {
+                            showToast('❌ Esta turma não está com o Bingo aberto! Aguarde o professor iniciar.', 'error');
+                            return;
+                        }
+                        
+                        const sessao = snapshot.val();
+                        if (sessao.status === 'finalizada') {
+                            showToast('🔴 Esta sala já foi encerrada pelo professor!', 'error');
+                            return;
+                        }
+                        
+                        let totalVagas = sessao.totalAlunos || 0;
+                        let ocupados = 0;
+                        if (sessao.participantes) {
+                            ocupados = Object.values(sessao.participantes).filter(p => p.nome && p.nome.trim() !== '' && !p.nome.startsWith('Aluno ')).length;
+                        }
+                        
+                        if (ocupados >= totalVagas) {
+                            showToast('⚠️ Esta sala está lotada! Peça para o professor expandir as vagas.', 'error');
+                            return;
+                        }
+                        
+                        finalizeSelection(cod);
+                    }).catch(err => {
+                        console.error(err);
+                        showToast('❌ Erro ao conectar!', 'error');
+                    });
+                };
+                
+                btnManual.onclick = handleManualSubmit;
+                inputManual.onchange = handleManualSubmit;
+                
+                abrirModalSelecaoSalas();
+            });
+        }
+
+        // ============================================
+        // VISIBILIDADE DO BOTÃO VOLTAR POR AMBIENTE
+        // ============================================
+        function configurarBotaoVoltar() {
+            const btnVoltar = document.getElementById('btnVoltar');
+            if (!btnVoltar) return;
+
+            const hostname = window.location.hostname;
+            const isLocal = hostname === 'localhost' || 
+                            hostname === '127.0.0.1' || 
+                            hostname === '' ||
+                            hostname.includes('ais-dev-') || 
+                            hostname.includes('ais-pre-') || 
+                            window.location.protocol === 'file:';
+
+            if (isLocal) {
+                btnVoltar.style.display = 'inline-block';
+            } else {
+                btnVoltar.style.display = 'none';
+            }
         }
 
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
-        function init() {
-            const params = new URLSearchParams(window.location.search);
-            const sala = params.get('sala');
+        async function init() {
+            configurarBotaoVoltar();
 
-            if (!sala) {
-                document.getElementById('aguardando').innerHTML = `
-                    <span class="status-icon">❌</span>
-                    <h2>Link inválido!</h2>
-                    <p>Não foi possível identificar a sala.</p>
-                `;
+            const params = new URLSearchParams(window.location.search);
+            let sala = params.get('sala');
+
+            if (!sala || sala.trim() === '') {
+                try {
+                    sala = await selecionarSalaModal();
+                } catch (e) {
+                    console.log('Seleção cancelada ou falhou, recarregando...');
+                    window.location.reload();
+                    return;
+                }
+                
+                if (!sala || sala.trim() === '') {
+                    document.getElementById('aguardando').innerHTML = `
+                        <span class="status-icon">❌</span>
+                        <h2>Código Inválido</h2>
+                        <p>Você precisa do código da sala para poder jogar.</p>
+                        <button onclick="window.location.reload()" class="back-btn" style="margin-top: 15px;">Tentar Novamente</button>
+                    `;
+                    return;
+                }
+            }
+
+            configurarDetectorSaida();
+
+            // Tentar recuperar do sessionStorage primeiro (específico desta aba, seguro para laboratório escolar)
+            const cachedSala = sessionStorage.getItem('bingo_aluno_sala');
+            const cachedNome = sessionStorage.getItem('bingo_aluno_nome');
+            const cachedId = sessionStorage.getItem('bingo_aluno_id');
+
+            if (cachedSala === sala && cachedNome) {
+                console.log('⚡ Sessão ativa restaurada via sessionStorage:', cachedNome, cachedId || 'Sem ID salvo');
+                alunoId = cachedId || null;
+                meuNome = cachedNome;
+                inicializar(sala, cachedNome);
                 return;
             }
 
-            let nome = prompt('🎯 Digite seu nome ou apelido para jogar:');
+            const nome = await inputTexto(
+                '🎯 Entrar no BINGO',
+                'Digite seu <strong>nome</strong> ou <strong>apelido</strong> para jogar:',
+                'Ex: João, Maria, Pedrinho...'
+            );
+
             if (!nome || nome.trim() === '') {
                 const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
                 inicializar(sala, nomeAleatorio);
@@ -1295,12 +2882,7 @@
 
         init();
 
-        console.log('✅ BINGO - Painel do Aluno CORRIGIDO!');
-        console.log('✅ Total: 25 células (24 números + 1 espaço livre)');
-        console.log('✅ BINGO declarado AUTOMATICAMENTE ao marcar o último número');
-        console.log('✅ Nova rodada: detecta resetToken e reseta tudo');
-        console.log('✅ Números antigos NÃO ficam marcados');
-        console.log('✅ Só pode marcar o número sorteado AGORA');
+        console.log('✅ BINGO - Painel do Aluno protegido com rollback anti-cheat!');
     </script>
 </body>
 </html>
