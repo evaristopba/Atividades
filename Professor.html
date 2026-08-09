@@ -311,7 +311,10 @@
             resetUI();
         });
 
+        let isConnectedToRoom = false;
+
         function connectToRoom(roomId) {
+            isConnectedToRoom = true;
             gameStateRef = database.ref('salas/' + roomId);
             answersRef = database.ref('salas/' + roomId + '/respostas');
             const selectedOption = roomSelect.options[roomSelect.selectedIndex];
@@ -327,12 +330,8 @@
             document.getElementById('current-room-id').textContent = fullDisplayName;
             
             // Gera o link correto para o aluno apontando para aluno.html
-            let studentPage = 'aluno.html';
             const currentHref = window.location.href;
-            if (/SProfessor-GM\.html/i.test(currentHref)) {
-                studentPage = 'SAluno-GM.html';
-            }
-            const baseUrlWithoutPage = currentHref.split('?')[0].replace(/SProfessor-GM\.html|professor\.html/i, studentPage);
+            const baseUrlWithoutPage = currentHref.split('?')[0].replace(/professor\.html/i, 'aluno.html');
             const studentUrl = `${baseUrlWithoutPage}?sala=${roomId}&modo=${gameMode}`;
             document.getElementById('student-link').textContent = studentUrl;
             renderTableHeader(currentActiveCategories);
@@ -359,6 +358,7 @@
         }
 
         function disconnectFromRoom() {
+            isConnectedToRoom = false;
             if (gameStateRef) gameStateRef.off();
             if (answersRef) answersRef.off();
         }
@@ -398,7 +398,14 @@
             const letterDisplay = document.getElementById('letter-display');
             gameStateRef.on('value', (snapshot) => {
                 let state = snapshot.val();
-                if (!state || !state.status) {
+                if (!state || !state.status || state.status === 'ENCERRADA') {
+                    if (isConnectedToRoom) {
+                        isConnectedToRoom = false;
+                        showCustomModal('Sessão Encerrada', 'A sessão desta sala foi encerrada pelo Administrador.', 'alert', () => {
+                            disconnectFromRoom();
+                            resetUI();
+                        });
+                    }
                     return;
                 }
                 statusText.textContent = state.status;
