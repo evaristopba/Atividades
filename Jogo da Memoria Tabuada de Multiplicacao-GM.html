@@ -4,257 +4,622 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Memória da Tabuada de Multiplicação</title>
-    <!-- Font Awesome para ícones (adicionado para futuras melhorias visuais) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Google Fonts: Poppins e Nunito (adicionado para futuras melhorias visuais) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Nunito:wght@700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN para Estilização de Alta Qualidade -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos Globais - Baseados no seu blog educativo */
-        :root {
-            --primary-color: #3498db; /* Azul */
-            --secondary-color: #2ecc71; /* Verde */
-            --accent-color: #f39c12; /* Laranja */
-            --highlight-color: #e74c3c; /* Vermelho para destaque/erros */
-            --text-dark: #333;
-            --text-light: #f4f4f4;
-            --bg-light: #e0f7fa; /* Fundo azul claro */
-            --card-back: #95a5a6; /* Cinza para o verso da carta */
-            --card-front: #3498db; /* Azul para a frente da carta */
-            --card-matched: #2ecc71; /* Verde para cartas combinadas */
-            --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.2);
-            --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.3);
+        /* CSS 3D Dedicado para o Efeito de Virar a Carta */
+        .card-3d-wrapper {
+            perspective: 1000px;
+            -webkit-perspective: 1000px;
         }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: var(--bg-light);
-            font-family: 'Comic Sans MS', Arial, sans-serif; /* Mantido o Comic Sans MS conforme o original */
-            color: var(--text-dark);
-        }
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: var(--shadow-light);
-        }
-        #tabuleiro {
-            display: grid;
-            grid-template-columns: repeat(5, 80px);
-            gap: 10px;
-            margin: 20px;
-        }
-        .carta {
-            width: 80px;
-            height: 80px;
+        .card-3d-inner {
             position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s;
-            cursor: pointer;
-            border-radius: 5px;
-            box-shadow: var(--shadow-light);
-        }
-        .carta.virada {
-            transform: rotateY(180deg);
-        }
-        .carta.combinada {
-            transform: rotateY(180deg);
-            cursor: default;
-        }
-        .carta .frente, .carta .verso {
-            position: absolute;
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            border-radius: 5px;
-            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+            transition: transform 0.55s cubic-bezier(0.34, 1.35, 0.64, 1);
+            border-radius: 1rem;
         }
-        .carta .frente {
-            background-color: var(--card-front);
+        .card-3d-inner.flipped {
             transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
         }
-        .carta.combinada .frente {
-            background-color: var(--card-matched);
-        }
-        .carta .verso {
-            background-color: var(--card-back);
-        }
-        #info {
-            margin: 10px;
-            font-size: 1.4em;
-            color: var(--text-dark);
-            background-color: var(--accent-color);
-            padding: 10px 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow-light);
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 1.2em;
-            cursor: pointer;
-            background-color: var(--primary-color);
-            color: var(--text-light);
-            border: none;
-            border-radius: 5px;
-            box-shadow: var(--shadow-light);
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-        button:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-        #instrucoesModal, #gameOverModal {
-            display: none;
-            position: fixed;
+        .card-face {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            justify-content: center;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            z-index: 1000;
+            justify-content: center;
         }
-        #instrucoesContent, #gameOverContent {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            max-width: 400px;
-            box-shadow: var(--shadow-hover);
-            color: var(--text-dark);
+        .card-face-back {
+            transform: rotateY(0deg) !important;
+            -webkit-transform: rotateY(0deg) !important;
         }
-        #instrucoesContent h2, #gameOverContent h2 {
-            color: var(--highlight-color);
-            margin-top: 0;
-        }
-        #instrucoesContent p, #gameOverContent p {
-            font-size: 1.2em;
-            margin: 10px 0;
-            line-height: 1.5;
-        }
-        #iniciarJogo, #gameOverButton {
-            background-color: var(--secondary-color);
-        }
-        #iniciarJogo:hover, #gameOverButton:hover {
-            background-color: #27ae60;
+        .card-face-front {
+            transform: rotateY(180deg) !important;
+            -webkit-transform: rotateY(180deg) !important;
         }
 
-        /* Responsividade */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-            button {
-                padding: 10px 20px;
-                font-size: 1em;
-            }
-            #info {
-                font-size: 1.1em;
-            }
-            #tabuleiro {
-                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Ajusta colunas dinamicamente */
-                gap: 8px;
-            }
-            .carta {
-                width: 70px;
-                height: 70px;
-            }
-            .carta .frente, .carta .verso {
-                font-size: 18px;
-            }
-            #instrucoesContent, #gameOverContent {
-                padding: 15px;
-                max-width: 90%;
-            }
+        /* Classes de gradiente fixo para as frentes das cartas da Multiplicação */
+        .card-unmatched-style {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+            color: #ffffff !important;
+            border: 2px solid #7dd3fc !important;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3) !important;
         }
 
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8em;
+        .card-matched-style {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+            color: #ffffff !important;
+            border: 2px solid #6ee7b7 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        /* Animação suave para aparecimento de modais */
+        @keyframes modalScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(6px);
             }
-            button {
-                font-size: 0.9em;
-                padding: 8px 15px;
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
             }
-            #info {
-                font-size: 1em;
-                padding: 8px 15px;
-            }
-            #tabuleiro {
-                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-                gap: 5px;
-            }
-            .carta {
-                width: 60px;
-                height: 60px;
-            }
-            .carta .frente, .carta .verso {
-                font-size: 16px;
-            }
+        }
+        .animate-modal {
+            animation: modalScale 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
-<body>
-    <h1>Jogo da Memória da Tabuada de Multiplicação</h1>
-    <div>
-        <button id="mostrarInstrucoes">Iniciar Jogo</button>
-        <button id="proximaTabuada" disabled>Próxima Tabuada</button>
-        <button id="reiniciarTabuada">Reiniciar Jogo</button>
-    </div>
-    <div id="info">Tabuada: 1 | Pares Encontrados: 0/10 | Pontuação: 0</div>
-    <div id="tabuleiro"></div>
-    <div id="instrucoesModal">
-        <div id="instrucoesContent">
-            <h2>Jogo da Memória da Tabuada de Multiplicação</h2>
-            <p><strong>Objetivo:</strong> Combine pares de cartas com expressões de multiplicação (ex.: 5 x 2) e seus resultados (ex.: 10) para aprender as tabuadas de 1 a 10.</p>
-            <p><strong>Controles:</strong><br>
-               - Clique em uma carta para virá-la.<br>
-               - Combine duas cartas que formem um par correto.</p>
-            <p><strong>Mecânicas:</strong><br>
-               - Cada tabuada tem 10 pares únicos (expressão e resultado).<br>
-               - Acertar um par dá 10 pontos.<br>
-               - Complete 10 pares para avançar à próxima tabuada.<br>
-               - O jogo termina após a tabuada 10.</p>
-            <p><strong>Pontuação:</strong> Ganhe 10 pontos por par encontrado. Tente fazer 100 pontos por tabuada e 1000 pontos no total!</p>
-            <button id="iniciarJogo">Jogar</button>
+<body class="min-h-screen bg-gradient-to-b from-cyan-50 via-sky-50 to-indigo-50 text-slate-800 font-sans pb-10 flex flex-col justify-between selection:bg-cyan-200">
+
+    <main class="w-full">
+        <!-- HEADER TOP BAR -->
+        <header class="w-full max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-cyan-200/60 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-cyan-600 text-white rounded-2xl shadow-md shadow-cyan-600/20">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                        Jogo da Memória
+                    </h1>
+                    <p class="text-xs sm:text-sm font-semibold text-cyan-700">
+                        Tabuada de Multiplicação • Ensino Fundamental 1
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="btnBNCC" class="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors cursor-pointer shadow-xs">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <span>Habilidades BNCC</span>
+                </button>
+
+                <button id="toggleSom" class="flex items-center gap-1.5 p-2 bg-cyan-50 border border-cyan-300 text-cyan-700 hover:bg-cyan-100 rounded-xl transition-colors cursor-pointer" title="Alternar Som">
+                    <svg id="iconSomOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    </svg>
+                    <svg id="iconSomOff" class="w-5 h-5 hidden text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- HUD DE ESTATÍSTICAS -->
+        <div class="w-full max-w-4xl mx-auto px-4 mb-5">
+            <div class="bg-white/90 backdrop-blur-xs border border-cyan-100 rounded-2xl p-3 sm:p-4 shadow-md shadow-cyan-900/5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700">
+                <div class="flex items-center gap-2.5 bg-cyan-50/70 p-2.5 rounded-xl border border-cyan-100/80">
+                    <svg class="w-5 h-5 text-cyan-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <div class="min-w-0">
+                        <span class="block text-[11px] font-semibold text-cyan-800 uppercase tracking-wider">Aluno</span>
+                        <span id="hudAluno" class="block text-sm font-bold text-slate-800 truncate">—</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-100/80">
+                    <svg class="w-5 h-5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <div>
+                        <span class="block text-[11px] font-semibold text-indigo-800 uppercase tracking-wider">Tabuada</span>
+                        <span id="hudTabuada" class="block text-sm font-bold text-slate-800">Multiplicação de 1</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100/80">
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <span class="block text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">Pares</span>
+                        <span id="hudPares" class="block text-sm font-bold text-slate-800">0 / 10</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100/80">
+                    <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                    <div>
+                        <span class="block text-[11px] font-semibold text-amber-800 uppercase tracking-wider">Pontuação</span>
+                        <span id="hudScore" class="block text-sm font-bold text-amber-900">0 pts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAINEL DE CONTROLES -->
+        <div class="w-full max-w-4xl mx-auto px-4 mb-6">
+            <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 bg-slate-50/80 p-3 rounded-2xl border border-slate-200 shadow-xs">
+                <button id="mostrarInstrucoes" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M4 4l12 6-12 6V4z"/>
+                    </svg>
+                    <span>Iniciar Jogo</span>
+                </button>
+
+                <button id="proximaTabuada" disabled class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed">
+                    <span>Próxima Tabuada</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
+
+                <button id="reiniciarTabuada" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 active:scale-95 rounded-xl transition-all cursor-pointer shadow-xs">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Reiniciar Tabuada</span>
+                </button>
+
+                <button id="salvarProgresso" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span>Salvar Progresso</span>
+                </button>
+
+                <button id="carregarProgresso" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>Carregar Progresso</span>
+                </button>
+
+                <input type="file" id="inputArquivo" accept=".txt" class="hidden">
+            </div>
+        </div>
+
+        <!-- TABULEIRO DE CARTAS DA MEMÓRIA -->
+        <div class="w-full max-w-4xl mx-auto px-4 mb-5">
+            <div id="tabuleiro" class="grid grid-cols-4 sm:grid-cols-5 gap-2.5 sm:gap-4 justify-items-center"></div>
+        </div>
+
+        <!-- PAINEL DE PARES ENCONTRADOS E MARCADOS -->
+        <div id="painelPares" class="w-full max-w-4xl mx-auto px-4 mb-8">
+            <div class="bg-white/95 backdrop-blur-xs border border-emerald-200/90 rounded-2xl p-3.5 sm:p-4 shadow-sm shadow-emerald-950/5">
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
+                            ✓
+                        </div>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
+                            Pares Combinados & Marcados
+                        </h3>
+                    </div>
+                    <span id="badgeContadorPares" class="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full shrink-0">
+                        0 / 10 pares
+                    </span>
+                </div>
+                
+                <div id="listaParesCombinados" class="flex flex-wrap gap-2 items-center min-h-[38px] p-2 bg-slate-50/70 border border-slate-200/60 rounded-xl">
+                    <!-- Badges de pares encontrados aparecem aqui dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center text-xs text-slate-500 py-3 px-4 border-t border-slate-200/60 mt-auto">
+        Jogo da Memória Pedagógico — Tabuada de Multiplicação • Alinhado à BNCC (EF02MA06, EF03MA03, EF04MA02)
+    </footer>
+
+    <!-- MODAIS DO SISTEMA -->
+
+    <!-- MODAL 1: INSTRUÇÕES -->
+    <div id="instrucoesModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                    <path d="M4 4l12 6-12 6V4z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">Jogo da Memória da Tabuada</h2>
+            <div class="text-sm text-slate-600 space-y-2 text-left mb-6 leading-relaxed">
+                <p><strong>Objetivo:</strong> Combine pares de cartas com expressões de multiplicação (ex: 5 x 2) e seus resultados (ex: 10) para aprender as tabuadas de 1 a 10.</p>
+                <p><strong>Controles:</strong> Clique em duas cartas para virá-las. Encontre o par correto correspondente!</p>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1 text-xs">
+                    <p class="font-bold text-slate-700">Mecânicas do Jogo:</p>
+                    <p>• Cada tabuada possui 10 pares de cartas.</p>
+                    <p>• Acertar um par soma 10 pontos.</p>
+                    <p>• Complete todos os 10 pares para avançar à próxima tabuada.</p>
+                    <p>• O jogo termina ao concluir a tabuada 10.</p>
+                </div>
+            </div>
+            <button id="iniciarJogo" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2">
+                <span>Jogar Agora</span>
+            </button>
         </div>
     </div>
-    <div id="gameOverModal">
-        <div id="gameOverContent">
-            <h2>Parabéns!</h2>
-            <p id="gameOverMessage">Você terminou todas as tabuadas!</p>
-            <button id="gameOverButton">Ok</button>
+
+    <!-- MODAL 2: NOME (SALVAMENTO) -->
+    <div id="nomeModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Nome do Aluno</h2>
+            <p class="text-sm text-slate-600 mb-4">Digite o nome do aluno para identificar o arquivo de progresso:</p>
+            <input type="text" id="inputNome" placeholder="Ex: João Silva" maxlength="40" autocomplete="off" class="w-full px-4 py-3 border-2 border-purple-200 focus:border-purple-500 focus:outline-none rounded-xl text-center text-lg font-semibold text-slate-800 mb-5 transition-colors">
+            <div class="flex gap-3">
+                <button id="cancelarNome" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
+                    Cancelar
+                </button>
+                <button id="confirmarNome" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
+                    Salvar
+                </button>
+            </div>
         </div>
     </div>
+
+    <!-- MODAL 3: MENSAGEM -->
+    <div id="mensagemModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 id="mensagemTitulo" class="text-xl font-bold text-slate-800 mb-2">Aviso</h2>
+            <div id="mensagemTexto" class="text-sm text-slate-600 mb-6 leading-relaxed"></div>
+            <button id="fecharMensagem" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CONFIRMAR REINÍCIO (EXPLICATIVO) -->
+    <div id="confirmarReinicioModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Atenção ao Reiniciar!</h2>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                Confira seu progresso atual para evitar perder dados de aprendizagem:
+            </p>
+
+            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs space-y-2 mb-4 text-left">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Aluno:</span>
+                    <strong id="restartAluno" class="text-slate-800 font-bold">Não informado</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Tabuada Atual:</span>
+                    <strong id="restartTabuada" class="text-slate-800 font-bold">Multiplicação de 1</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Pares na Tabuada:</span>
+                    <strong id="restartPares" class="text-slate-800 font-bold">0 / 10</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Pontuação Total:</span>
+                    <strong id="restartScore" class="text-amber-600 font-bold">0 pts</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2.5">
+                <button id="btnRestartSalvar" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span>Salvar Progresso em Arquivo</span>
+                </button>
+
+                <div class="flex gap-2">
+                    <button id="btnReiniciarEstaTabuada" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer leading-tight">
+                        Reiniciar Só Esta Tabuada
+                    </button>
+                    <button id="btnReiniciarTodoJogo" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer leading-tight">
+                        Reiniciar Todo o Jogo
+                    </button>
+                </div>
+
+                <button id="cancelarReinicio" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+                    Cancelar (Continuar Jogando)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: GAME OVER / FIM DO JOGO -->
+    <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3 ring-8 ring-amber-50">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-800 mb-1">Parabéns! 🎉</h2>
+            <p id="gameOverMessage" class="text-base text-slate-600 mb-2 font-medium">Você concluiu todas as 10 tabuadas!</p>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6">
+                <span class="block text-xs uppercase font-bold text-amber-800 tracking-wider">Pontuação Final</span>
+                <span id="gameOverScoreText" class="text-3xl font-black text-amber-900">0 Pontos</span>
+            </div>
+            <div class="flex flex-col gap-2.5">
+                <button id="salvarGameOver" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2">
+                    <span>Salvar Progresso Final</span>
+                </button>
+                <button id="gameOverButton" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2">
+                    <span>Jogar Novamente</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: BNCC -->
+    <div id="bnccModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] animate-modal">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-white/10 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">Habilidades da BNCC Trabalhadas</h2>
+                        <p class="text-xs text-emerald-100">Base Nacional Comum Curricular • Matemática</p>
+                    </div>
+                </div>
+                <button id="fecharBNCC" class="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-4 text-slate-700">
+                <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-sm">
+                    <span class="font-bold text-emerald-900 block mb-1">Área do Conhecimento:</span>
+                    <span>Matemática • Anos Iniciais do Ensino Fundamental (1º ao 5º ano)</span>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md shrink-0">
+                                EF02MA06
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Construir e utilizar fatos básicos da adição e da multiplicação para o cálculo mental ou escrito.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Trabalha a introdução às ideias de adição de parcelas iguais e agrupamentos multiplicativos.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-teal-100 text-teal-800 rounded-md shrink-0">
+                                EF03MA03
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Construir e utilizar fatos básicos da adição e da multiplicação para o cálculo mental ou escrito.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Consolida o domínio da tabuada de multiplicação de 1 a 10 no cálculo mental rápido.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-800 rounded-md shrink-0">
+                                EF04MA02
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Mostrar por meio de estratégias diversas a eficácia dos cálculos de multiplicação e divisão.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Reforça a automatização e a memorização dos produtos da tabuada.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnFecharBNCCBottom" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors cursor-pointer">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT TUDO NO MESMO ARQUIVO (HTML/CSS/JS) -->
     <script>
+        // 1. ÁUDIO SINTETIZADO (WEB AUDIO API)
+        class AudioFX {
+            constructor() {
+                this.ctx = null;
+                this.mutado = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playFlip() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+
+            playMatch() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+                osc.frequency.setValueAtTime(783.99, now + 0.16);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playMismatch() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(180, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.22);
+            }
+
+            playVictory() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notas = [523.25, 659.25, 783.99, 1046.50];
+                notas.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.18, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.3);
+                });
+            }
+        }
+
+        const audioFx = new AudioFX();
+
+        // 2. REFERÊNCIAS DOM
         const tabuleiro = document.getElementById('tabuleiro');
+        const hudAluno = document.getElementById('hudAluno');
+        const hudTabuada = document.getElementById('hudTabuada');
+        const hudPares = document.getElementById('hudPares');
+        const hudScore = document.getElementById('hudScore');
+
         const mostrarInstrucoes = document.getElementById('mostrarInstrucoes');
-        const iniciarJogo = document.getElementById('iniciarJogo');
         const proximaTabuada = document.getElementById('proximaTabuada');
         const reiniciarTabuada = document.getElementById('reiniciarTabuada');
-        const info = document.getElementById('info');
-        const instrucoesModal = document.getElementById('instrucoesModal');
-        const gameOverModal = document.getElementById('gameOverModal');
-        const gameOverMessage = document.getElementById('gameOverMessage');
-        const gameOverButton = document.getElementById('gameOverButton');
+        const salvarProgresso = document.getElementById('salvarProgresso');
+        const carregarProgresso = document.getElementById('carregarProgresso');
+        const inputArquivo = document.getElementById('inputArquivo');
+        const btnBNCC = document.getElementById('btnBNCC');
+        const toggleSom = document.getElementById('toggleSom');
+        const iconSomOn = document.getElementById('iconSomOn');
+        const iconSomOff = document.getElementById('iconSomOff');
 
+        // Modais
+        const instrucoesModal = document.getElementById('instrucoesModal');
+        const nomeModal = document.getElementById('nomeModal');
+        const mensagemModal = document.getElementById('mensagemModal');
+        const confirmarReinicioModal = document.getElementById('confirmarReinicioModal');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const bnccModal = document.getElementById('bnccModal');
+
+        const iniciarJogo = document.getElementById('iniciarJogo');
+        const inputNome = document.getElementById('inputNome');
+        const confirmarNome = document.getElementById('confirmarNome');
+        const cancelarNome = document.getElementById('cancelarNome');
+
+        const mensagemTitulo = document.getElementById('mensagemTitulo');
+        const mensagemTexto = document.getElementById('mensagemTexto');
+        const fecharMensagem = document.getElementById('fecharMensagem');
+
+        // Modal de Reinício Explicativo
+        const btnRestartSalvar = document.getElementById('btnRestartSalvar');
+        const btnReiniciarEstaTabuada = document.getElementById('btnReiniciarEstaTabuada');
+        const btnReiniciarTodoJogo = document.getElementById('btnReiniciarTodoJogo');
+        const cancelarReinicio = document.getElementById('cancelarReinicio');
+
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const gameOverScoreText = document.getElementById('gameOverScoreText');
+        const salvarGameOver = document.getElementById('salvarGameOver');
+        const gameOverButton = document.getElementById('gameOverButton');
+        const fecharBNCC = document.getElementById('fecharBNCC');
+        const btnFecharBNCCBottom = document.getElementById('btnFecharBNCCBottom');
+
+        // 3. ESTADO DO JOGO
+        let nomeAluno = '';
         let currentTabuada = 1;
         let paresEncontrados = 0;
         let score = 0;
@@ -262,7 +627,52 @@
         let cartasViradas = [];
         let bloqueado = false;
         const maxTabuada = 10;
-        const totalParesPorTabuada = 10;
+        const TIPO_JOGO = 'multiplicacao';
+
+        let modalOrigem = null;
+
+        function temProgressoEmAndamento() {
+            return (paresEncontrados > 0 || score > 0 || currentTabuada > 1);
+        }
+
+        // 4. CONTROLE DE MODAIS
+        function fecharTodosModais() {
+            [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, bnccModal].forEach(m => {
+                if (m) {
+                    m.classList.remove('flex');
+                    m.classList.add('hidden');
+                }
+            });
+        }
+
+        function abrirModal(modalElem) {
+            fecharTodosModais();
+            if (modalElem) {
+                modalElem.classList.remove('hidden');
+                modalElem.classList.add('flex');
+            }
+        }
+
+        function mostrarMensagem(titulo, texto, deOndeVim = null) {
+            modalOrigem = deOndeVim;
+            if (mensagemTitulo) mensagemTitulo.innerText = titulo;
+            if (mensagemTexto) mensagemTexto.innerHTML = texto;
+            abrirModal(mensagemModal);
+        }
+
+        function abrirModalConfirmarReinicio() {
+            const elAluno = document.getElementById('restartAluno');
+            const elTabuada = document.getElementById('restartTabuada');
+            const elPares = document.getElementById('restartPares');
+            const elScore = document.getElementById('restartScore');
+
+            if (elAluno) elAluno.innerText = nomeAluno || 'Não informado';
+            if (elTabuada) elTabuada.innerText = `Multiplicação de ${currentTabuada}`;
+            if (elPares) elPares.innerText = `${paresEncontrados} / 10`;
+            if (elScore) elScore.innerText = `${score} pts`;
+
+            abrirModal(confirmarReinicioModal);
+        }
 
         // Verificar se pares estão distantes (mínimo 2 posições na grade 4x5)
         function paresEstaoDistantes(cartasArray) {
@@ -271,199 +681,565 @@
                 y: Math.floor(index / 5)
             }));
 
-            for (let i = 0; i < cartasArray.length; i += 2) {
+            for (let i = 0; i < cartasArray.length; i++) {
                 const resultadoPar = cartasArray[i].result;
-                const index1 = i;
                 const index2 = cartasArray.findIndex((c, idx) => idx !== i && c.result === resultadoPar);
 
-                if (index2 === -1) continue; 
+                if (index2 === -1) continue;
 
-                const pos1 = posicoes[index1];
+                const pos1 = posicoes[i];
                 const pos2 = posicoes[index2];
 
                 const distancia = Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
                 
-                if (distancia <= 1) { 
-                    console.log(`Par ${resultadoPar} está muito próximo: (${pos1.x},${pos1.y}) e (${pos2.x},${pos2.y})`);
+                if (distancia <= 1) {
                     return false;
                 }
             }
             return true;
         }
 
-        // Gerar cartas para a tabuada atual (adaptado para multiplicação)
+        // 5. LÓGICA DO TABULEIRO E RENDERIZAÇÃO
         function gerarCartas() {
             cartas = [];
-            // Para a tabuada de multiplicação 'N', geramos pares como N x i = Resultado
-            // Onde i varia de 1 a 10.
-            for (let i = 1; i <= totalParesPorTabuada; i++) {
-                const fator1 = currentTabuada; 
-                const fator2 = i;   
-                const resultado = fator1 * fator2;                 
-
-                cartas.push({ id: `expr_${fator1}x${fator2}`, value: `${fator1} x ${fator2}`, result: resultado });
-                cartas.push({ id: `res_${resultado}`, value: `${resultado}`, result: resultado });
+            for (let i = 1; i <= 10; i++) {
+                const fator1 = currentTabuada;
+                const fator2 = i;
+                const resultado = fator1 * fator2;
+                cartas.push({ id: `expr_${fator1}x${fator2}`, value: `${fator1} x ${fator2}`, result: resultado, fator2: fator2, virada: false, combinada: false });
+                cartas.push({ id: `res_${resultado}_${i}`, value: `${resultado}`, result: resultado, fator2: fator2, virada: false, combinada: false });
             }
 
             let shuffledCartas;
             let attempts = 0;
-            const maxAttempts = 100; 
+            const maxAttempts = 100;
             do {
-                shuffledCartas = [...cartas]; 
+                shuffledCartas = [...cartas];
                 for (let i = shuffledCartas.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [shuffledCartas[i], shuffledCartas[j]] = [shuffledCartas[j], shuffledCartas[i]];
                 }
                 attempts++;
-                if (attempts > maxAttempts) {
-                    console.warn("Máximo de tentativas de embaralhamento atingido. Pares podem estar próximos.");
-                    break;
-                }
+                if (attempts > maxAttempts) break;
             } while (!paresEstaoDistantes(shuffledCartas));
-            
-            cartas = shuffledCartas; 
-            console.log('Cartas embaralhadas:', cartas.map(c => c.value));
+
+            cartas = shuffledCartas;
         }
 
-        // Renderizar tabuleiro
-        function renderizarTabuleiro() {
+        function renderizarTabuleiroCompleto() {
+            if (!tabuleiro) return;
             tabuleiro.innerHTML = '';
             cartas.forEach((carta, index) => {
-                const div = document.createElement('div');
-                div.classList.add('carta');
-                div.dataset.index = index; 
-                div.dataset.result = carta.result;
-                div.innerHTML = `
-                    <div class="frente">${carta.value}</div>
-                    <div class="verso"></div>
+                const isFlipped = carta.virada || carta.combinada;
+
+                const wrapper = document.createElement('div');
+                wrapper.id = `card-wrapper-${index}`;
+                wrapper.className = 'card-3d-wrapper w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 cursor-pointer select-none group transition-all duration-300';
+
+                const cardInner = document.createElement('div');
+                cardInner.id = `card-inner-${index}`;
+                cardInner.className = `card-3d-inner ${isFlipped ? 'flipped' : ''}`;
+
+                // Verso da carta
+                const back = document.createElement('div');
+                back.className = 'card-face card-face-back bg-gradient-to-br from-indigo-500 via-sky-600 to-cyan-600 border-2 border-indigo-200/80 text-white shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-200';
+                back.innerHTML = `
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/30 flex items-center justify-center bg-white/10 group-hover:bg-white/20 transition-colors">
+                        <svg class="w-6 h-6 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
                 `;
-                div.addEventListener('click', () => virarCarta(div));
-                tabuleiro.appendChild(div);
+
+                // Frente da carta
+                const front = document.createElement('div');
+                front.id = `card-front-${index}`;
+                const frontStyleClass = carta.combinada ? 'card-matched-style' : 'card-unmatched-style';
+
+                front.className = `card-face card-face-front ${frontStyleClass} font-bold text-lg sm:text-2xl p-1 text-center`;
+                front.innerHTML = `
+                    <span>${carta.value}</span>
+                    <span class="badge-check ${carta.combinada ? '' : 'hidden'} mt-1 p-0.5 bg-white/20 rounded-full">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </span>
+                `;
+
+                cardInner.appendChild(back);
+                cardInner.appendChild(front);
+                wrapper.appendChild(cardInner);
+
+                wrapper.addEventListener('click', () => virarCarta(index));
+                tabuleiro.appendChild(wrapper);
             });
         }
 
-        // Virar carta
-        function virarCarta(div) {
-            const index = parseInt(div.dataset.index);
-            if (bloqueado || div.classList.contains('virada') || div.classList.contains('combinada')) return;
-            
-            div.classList.add('virada');
-            cartasViradas.push(div);
-            console.log(`Carta virada: ${div.dataset.id} | Valor: ${div.querySelector('.frente').innerText}`);
-            
+        function virarCarta(index) {
+            if (bloqueado || cartas[index].virada || cartas[index].combinada) return;
+
+            audioFx.playFlip();
+            cartas[index].virada = true;
+            cartasViradas.push(index);
+
+            const cardInner = document.getElementById(`card-inner-${index}`);
+            if (cardInner) {
+                cardInner.classList.add('flipped');
+            }
+
             if (cartasViradas.length === 2) {
                 bloqueado = true;
-                // A verificação ocorre instantaneamente
-                verificarPar(); 
+                const [i1, i2] = cartasViradas;
+                const c1 = cartas[i1];
+                const c2 = cartas[i2];
+
+                if (c1.result === c2.result) {
+                    // ACERTO
+                    setTimeout(() => {
+                        audioFx.playMatch();
+                        cartas[i1].combinada = true;
+                        cartas[i2].combinada = true;
+
+                        [i1, i2].forEach(idx => {
+                            const frontEl = document.getElementById(`card-front-${idx}`);
+                            if (frontEl) {
+                                frontEl.className = 'card-face card-face-front card-matched-style font-bold text-lg sm:text-2xl p-1 text-center transition-all duration-300';
+                                const badge = frontEl.querySelector('.badge-check');
+                                if (badge) {
+                                    badge.classList.remove('hidden');
+                                    badge.className = 'badge-check mt-1 p-0.5 bg-white/20 rounded-full';
+                                }
+                            }
+                        });
+
+                        paresEncontrados++;
+                        score += 10;
+                        cartasViradas = [];
+                        bloqueado = false;
+                        atualizarHUD();
+
+                        if (paresEncontrados === 10) {
+                            if (proximaTabuada) proximaTabuada.disabled = currentTabuada >= maxTabuada;
+                            if (currentTabuada >= maxTabuada) {
+                                setTimeout(() => {
+                                    audioFx.playVictory();
+                                    mostrarGameOver();
+                                }, 400);
+                            }
+                        }
+                    }, 350);
+                } else {
+                    // ERRO - DESVIRA
+                    setTimeout(() => {
+                        audioFx.playMismatch();
+                        cartas[i1].virada = false;
+                        cartas[i2].virada = false;
+
+                        const inner1 = document.getElementById(`card-inner-${i1}`);
+                        const inner2 = document.getElementById(`card-inner-${i2}`);
+                        if (inner1) inner1.classList.remove('flipped');
+                        if (inner2) inner2.classList.remove('flipped');
+
+                        cartasViradas = [];
+                        bloqueado = false;
+                    }, 850);
+                }
             }
         }
 
-        // Verificar par
-        function verificarPar() {
-            const [carta1Element, carta2Element] = cartasViradas;
-            const carta1Result = parseInt(carta1Element.dataset.result);
-            const carta2Result = parseInt(carta2Element.dataset.result);
+        function atualizarHUD() {
+            if (hudAluno) hudAluno.innerText = nomeAluno || '—';
+            if (hudTabuada) hudTabuada.innerText = `Multiplicação de ${currentTabuada}`;
+            if (hudPares) hudPares.innerText = `${paresEncontrados} / 10`;
+            if (hudScore) hudScore.innerText = `${score} pts`;
 
-            console.log(`Verificando match: ${carta1Element.querySelector('.frente').innerText} (Resultado: ${carta1Result}) vs ${carta2Element.querySelector('.frente').innerText} (Resultado: ${carta2Result})`);
+            atualizarPainelPares();
 
-            if (carta1Result === carta2Result) {
-                console.log('Par encontrado!');
-                carta1Element.classList.add('combinada');
-                carta2Element.classList.add('combinada');
-                
-                paresEncontrados++;
-                score += 10;
-                console.log(`Pares: ${paresEncontrados}/${totalParesPorTabuada} | Pontuação: ${score}`);
-                atualizarHUD();
+            const podeAvancar = paresEncontrados === 10 && currentTabuada < maxTabuada;
+            if (proximaTabuada) {
+                proximaTabuada.disabled = !podeAvancar;
+                if (podeAvancar) {
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer';
+                } else {
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed';
+                }
+            }
+        }
 
-                if (paresEncontrados === totalParesPorTabuada) {
-                    if (currentTabuada < maxTabuada) {
-                        proximaTabuada.disabled = false;
-                    } else {
-                        mostrarGameOver();
+        function atualizarPainelPares() {
+            const lista = document.getElementById('listaParesCombinados');
+            const badgeContador = document.getElementById('badgeContadorPares');
+            if (!lista) return;
+
+            if (badgeContador) badgeContador.innerText = `${paresEncontrados} / 10 pares`;
+
+            const fatoresCombinados = [];
+            for (let i = 1; i <= 10; i++) {
+                const cartasPar = cartas.filter(c => c.fator2 === i && c.combinada);
+                if (cartasPar.length === 2) {
+                    fatoresCombinados.push(i);
+                }
+            }
+
+            if (fatoresCombinados.length === 0) {
+                lista.innerHTML = `
+                    <span class="text-xs text-slate-400 italic">
+                        Nenhum par encontrado ainda. Vire duas cartas correspondentes para formar um par!
+                    </span>
+                `;
+                return;
+            }
+
+            lista.innerHTML = '';
+            fatoresCombinados.forEach(fator2 => {
+                const resultado = currentTabuada * fator2;
+                const chip = document.createElement('div');
+                chip.className = 'flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all hover:scale-105 cursor-pointer select-none';
+                chip.title = `Passe o mouse para destacar as cartas do par ${currentTabuada} × ${fator2} = ${resultado}`;
+                chip.innerHTML = `
+                    <svg class="w-3.5 h-3.5 text-emerald-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>${currentTabuada} × ${fator2} = ${resultado}</span>
+                `;
+
+                chip.addEventListener('mouseenter', () => destacarCartasDoPar(fator2, true));
+                chip.addEventListener('mouseleave', () => destacarCartasDoPar(fator2, false));
+
+                lista.appendChild(chip);
+            });
+        }
+
+        function destacarCartasDoPar(fator2, destacar) {
+            cartas.forEach((c, idx) => {
+                if (c.fator2 === fator2) {
+                    const wrap = document.getElementById(`card-wrapper-${idx}`);
+                    if (wrap) {
+                        if (destacar) {
+                            wrap.classList.add('ring-4', 'ring-emerald-400', 'scale-110', 'z-20');
+                        } else {
+                            wrap.classList.remove('ring-4', 'ring-emerald-400', 'scale-110', 'z-20');
+                        }
                     }
                 }
-                cartasViradas = [];
-                bloqueado = false;
-            } else {
-                console.log('Não é um par. Virando de volta...');
-                setTimeout(() => {
-                    carta1Element.classList.remove('virada');
-                    carta2Element.classList.remove('virada');
-                    cartasViradas = [];
-                    bloqueado = false;
-                }, 1000);
-            }
+            });
         }
 
-        // Atualizar HUD
-        function atualizarHUD() {
-            info.innerText = `Tabuada: ${currentTabuada} | Pares Encontrados: ${paresEncontrados}/${totalParesPorTabuada} | Pontuação: ${score}`;
-        }
-
-        // Mostrar modal de game over
         function mostrarGameOver() {
-            gameOverMessage.innerText = `Você terminou todas as tabuadas! Pontuação: ${score}`;
-            gameOverModal.style.display = 'flex';
+            if (gameOverMessage) {
+                gameOverMessage.innerText = nomeAluno
+                    ? `${nomeAluno}, você concluiu todas as 10 tabuadas!`
+                    : 'Você concluiu todas as 10 tabuadas!';
+            }
+            if (gameOverScoreText) gameOverScoreText.innerText = `${score} Pontos`;
+            abrirModal(gameOverModal);
         }
 
-        // Iniciar jogo
-        function iniciar() {
-            instrucoesModal.style.display = 'none';
-            console.log('Modal de instruções fechado');
+        function iniciarNovoJogo() {
             currentTabuada = 1;
             paresEncontrados = 0;
             score = 0;
             cartasViradas = [];
             bloqueado = false;
-            proximaTabuada.disabled = true;
-            gameOverModal.style.display = 'none';
+            fecharTodosModais();
             gerarCartas();
-            renderizarTabuleiro();
+            renderizarTabuleiroCompleto();
             atualizarHUD();
-            console.log('Jogo iniciado');
         }
 
-        // Próxima tabuada
         function avancarTabuada() {
-            if (currentTabuada < maxTabuada) {
+            if (paresEncontrados >= 10 && currentTabuada < maxTabuada) {
                 currentTabuada++;
                 paresEncontrados = 0;
                 cartasViradas = [];
                 bloqueado = false;
-                proximaTabuada.disabled = true;
                 gerarCartas();
-                renderizarTabuleiro();
+                renderizarTabuleiroCompleto();
                 atualizarHUD();
-                console.log(`Avançou para tabuada: ${currentTabuada}`);
             }
         }
 
-        // Reiniciar jogo
-        function reiniciar() {
-            console.log('Jogo reiniciado');
+        function reiniciarEstaTabuada() {
+            score = Math.max(0, score - (paresEncontrados * 10));
+            paresEncontrados = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            gerarCartas();
+            renderizarTabuleiroCompleto();
+            atualizarHUD();
+            fecharTodosModais();
+        }
+
+        function reiniciarTodoJogo() {
             currentTabuada = 1;
             paresEncontrados = 0;
             score = 0;
             cartasViradas = [];
             bloqueado = false;
-            proximaTabuada.disabled = true;
-            gameOverModal.style.display = 'none';
-            instrucoesModal.style.display = 'flex';
+            gerarCartas();
+            renderizarTabuleiroCompleto();
+            atualizarHUD();
+            fecharTodosModais();
         }
 
-        // Eventos
-        mostrarInstrucoes.addEventListener('click', () => {
-            instrucoesModal.style.display = 'flex';
-            console.log('Modal de instruções aberto');
-        });
-        iniciarJogo.addEventListener('click', iniciar);
-        proximaTabuada.addEventListener('click', avancarTabuada);
-        reiniciarTabuada.addEventListener('click', reiniciar);
-        gameOverButton.addEventListener('click', reiniciar);
+        function abrirModalSalvar(origem = null) {
+            modalOrigem = origem;
+            if (inputNome) inputNome.value = nomeAluno || '';
+            abrirModal(nomeModal);
+            setTimeout(() => inputNome && inputNome.focus(), 100);
+        }
 
-        // Mostrar modal de instruções ao carregar
-        instrucoesModal.style.display = 'flex';
+        function executarSalvar() {
+            const status = {
+                tipo: TIPO_JOGO,
+                nomeAluno: nomeAluno,
+                currentTabuada: currentTabuada,
+                paresEncontrados: paresEncontrados,
+                score: score,
+                cartas: cartas.map(c => ({
+                    id: c.id,
+                    value: c.value,
+                    result: c.result,
+                    fator2: c.fator2,
+                    combinada: c.combinada,
+                    virada: c.virada
+                })),
+                data: new Date().toLocaleString('pt-BR')
+            };
+
+            try {
+                const jsonStr = JSON.stringify(status);
+                const base64Str = btoa(unescape(encodeURIComponent(jsonStr)));
+
+                const blob = new Blob([base64Str], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                const nomeLimpo = nomeAluno
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-zA-Z0-9]/g, '_')
+                    .substring(0, 20) || 'aluno';
+
+                a.download = `progresso_multiplicacao_${nomeLimpo}_tab${currentTabuada}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                mostrarMensagem(
+                    'Progresso Salvo!',
+                    `O progresso de <strong>${nomeAluno || 'Aluno'}</strong> foi salvo com sucesso.<br/><br/>
+                     Tabuada: Multiplicação de ${currentTabuada}<br/>
+                     Pares: ${paresEncontrados}/10<br/>
+                     Pontuação: ${score} pts`,
+                    modalOrigem
+                );
+            } catch (err) {
+                console.error(err);
+                mostrarMensagem('Erro ao Salvar', 'Ocorreu um erro ao gerar o arquivo de salvamento.', modalOrigem);
+            }
+        }
+
+        function carregarStatus(event) {
+            const arquivo = event.target && event.target.files && event.target.files[0];
+            if (!arquivo) return;
+
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                try {
+                    const base64Str = (e.target.result || '').trim();
+                    const jsonStr = decodeURIComponent(escape(atob(base64Str)));
+                    const status = JSON.parse(jsonStr);
+
+                    if (status.tipo && status.tipo !== TIPO_JOGO) {
+                        mostrarMensagem('Arquivo Incorreto', 'Este arquivo não pertence ao jogo de <strong>Multiplicação</strong>.');
+                        return;
+                    }
+
+                    nomeAluno = status.nomeAluno || '';
+                    currentTabuada = status.currentTabuada || 1;
+                    paresEncontrados = status.paresEncontrados || 0;
+                    score = status.score || 0;
+                    cartasViradas = [];
+                    bloqueado = false;
+
+                    if (status.cartas && Array.isArray(status.cartas) && status.cartas.length === 20) {
+                        cartas = status.cartas;
+                    } else {
+                        gerarCartas();
+                        for (let i = 1; i <= Math.min(paresEncontrados, 10); i++) {
+                            cartas.forEach(c => {
+                                if (c.fator2 === i) c.combinada = true;
+                            });
+                        }
+                    }
+
+                    renderizarTabuleiroCompleto();
+                    atualizarHUD();
+
+                    mostrarMensagem(
+                        'Progresso Carregado!',
+                        `Bem-vindo de volta${nomeAluno ? ', <strong>' + nomeAluno + '</strong>' : ''}!<br/><br/>
+                         Tabuada: Multiplicação de ${currentTabuada}<br/>
+                         Pares: ${paresEncontrados}/10<br/>
+                         Pontuação: ${score} pts`
+                    );
+                } catch (erro) {
+                    console.error(erro);
+                    mostrarMensagem('Erro ao Carregar', 'Não foi possível ler o arquivo enviado.');
+                }
+            };
+            leitor.readAsText(arquivo);
+            if (inputArquivo) inputArquivo.value = '';
+        }
+
+        // LISTENERS
+        if (iniciarJogo) {
+            iniciarJogo.addEventListener('click', () => {
+                if (temProgressoEmAndamento()) {
+                    abrirModalConfirmarReinicio();
+                } else {
+                    iniciarNovoJogo();
+                }
+            });
+        }
+
+        if (mostrarInstrucoes) {
+            mostrarInstrucoes.addEventListener('click', () => {
+                if (temProgressoEmAndamento()) {
+                    abrirModalConfirmarReinicio();
+                } else {
+                    abrirModal(instrucoesModal);
+                }
+            });
+        }
+
+        if (proximaTabuada) proximaTabuada.addEventListener('click', avancarTabuada);
+
+        if (reiniciarTabuada) {
+            reiniciarTabuada.addEventListener('click', () => {
+                abrirModalConfirmarReinicio();
+            });
+        }
+
+        if (btnRestartSalvar) {
+            btnRestartSalvar.addEventListener('click', () => {
+                abrirModalSalvar('reinicio');
+            });
+        }
+
+        if (btnReiniciarEstaTabuada) {
+            btnReiniciarEstaTabuada.addEventListener('click', () => {
+                reiniciarEstaTabuada();
+            });
+        }
+
+        if (btnReiniciarTodoJogo) {
+            btnReiniciarTodoJogo.addEventListener('click', () => {
+                reiniciarTodoJogo();
+            });
+        }
+
+        if (cancelarReinicio) {
+            cancelarReinicio.addEventListener('click', () => {
+                fecharTodosModais();
+            });
+        }
+
+        if (salvarProgresso) salvarProgresso.addEventListener('click', () => abrirModalSalvar(null));
+
+        if (carregarProgresso) {
+            carregarProgresso.addEventListener('click', () => {
+                if (temProgressoEmAndamento()) {
+                    abrirModalConfirmarReinicio();
+                } else {
+                    if (inputArquivo) inputArquivo.click();
+                }
+            });
+        }
+
+        if (inputArquivo) inputArquivo.addEventListener('change', carregarStatus);
+
+        if (btnBNCC) btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
+        if (fecharBNCC) fecharBNCC.addEventListener('click', fecharTodosModais);
+        if (btnFecharBNCCBottom) btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
+
+        if (toggleSom) {
+            toggleSom.addEventListener('click', () => {
+                audioFx.mutado = !audioFx.mutado;
+                if (audioFx.mutado) {
+                    if (iconSomOn) iconSomOn.classList.add('hidden');
+                    if (iconSomOff) iconSomOff.classList.remove('hidden');
+                } else {
+                    if (iconSomOn) iconSomOn.classList.remove('hidden');
+                    if (iconSomOff) iconSomOff.classList.add('hidden');
+                }
+            });
+        }
+
+        if (confirmarNome) {
+            confirmarNome.addEventListener('click', () => {
+                const nome = inputNome ? inputNome.value.trim() : '';
+                if (!nome) {
+                    if (inputNome) inputNome.focus();
+                    return;
+                }
+                nomeAluno = nome;
+                atualizarHUD();
+                executarSalvar();
+            });
+        }
+
+        if (cancelarNome) {
+            cancelarNome.addEventListener('click', () => {
+                if (modalOrigem === 'gameOver') {
+                    abrirModal(gameOverModal);
+                    modalOrigem = null;
+                } else {
+                    fecharTodosModais();
+                }
+            });
+        }
+
+        if (inputNome) {
+            inputNome.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') if (confirmarNome) confirmarNome.click();
+            });
+        }
+
+        if (fecharMensagem) {
+            fecharMensagem.addEventListener('click', () => {
+                if (modalOrigem === 'gameOver') {
+                    abrirModal(gameOverModal);
+                    modalOrigem = null;
+                } else {
+                    fecharTodosModais();
+                }
+            });
+        }
+
+        if (gameOverButton) {
+            gameOverButton.addEventListener('click', () => {
+                iniciarNovoJogo();
+            });
+        }
+
+        if (salvarGameOver) salvarGameOver.addEventListener('click', () => abrirModalSalvar('gameOver'));
+
+        window.addEventListener('beforeunload', (e) => {
+            if (temProgressoEmAndamento()) {
+                e.preventDefault();
+                e.returnValue = 'Você tem um jogo em andamento. Se sair agora, seu progresso não salvo será perdido.';
+                return e.returnValue;
+            }
+        });
+
+        // INICIALIZAÇÃO
+        gerarCartas();
+        renderizarTabuleiroCompleto();
+        atualizarHUD();
+        abrirModal(instrucoesModal);
     </script>
 </body>
 </html>
