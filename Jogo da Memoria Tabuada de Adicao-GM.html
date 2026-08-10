@@ -48,6 +48,21 @@
             -webkit-transform: rotateY(180deg);
         }
 
+        /* Classes de gradiente fixo para as frentes das cartas */
+        .card-unmatched-style {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+            color: #ffffff !important;
+            border: 2px solid #7dd3fc !important;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3) !important;
+        }
+
+        .card-matched-style {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+            color: #ffffff !important;
+            border: 2px solid #6ee7b7 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+        }
+
         /* Animação suave para aparecimento de modais */
         @keyframes modalScale {
             from {
@@ -268,25 +283,57 @@
         </div>
     </div>
 
-    <!-- MODAL 4: CONFIRMAR REINÍCIO -->
+    <!-- MODAL 4: CONFIRMAR REINÍCIO (EXPLICATIVO) -->
     <div id="confirmarReinicioModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
-            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-2">Reiniciar Jogo?</h2>
-            <p class="text-sm text-slate-600 mb-6">
-                Tem certeza que deseja reiniciar o jogo?<br>
-                O progresso atual não salvo será perdido.
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Atenção ao Reiniciar!</h2>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                Confira seu progresso atual para evitar perder dados de aprendizagem:
             </p>
-            <div class="flex gap-3">
-                <button id="cancelarReinicio" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
-                    Cancelar
+
+            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs space-y-2 mb-4 text-left">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Aluno:</span>
+                    <strong id="restartAluno" class="text-slate-800 font-bold">Não informado</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Tabuada Atual:</span>
+                    <strong id="restartTabuada" class="text-slate-800 font-bold">Adição de 1</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Pares na Tabuada:</span>
+                    <strong id="restartPares" class="text-slate-800 font-bold">0 / 10</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Pontuação Total:</span>
+                    <strong id="restartScore" class="text-amber-600 font-bold">0 pts</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2.5">
+                <button id="btnRestartSalvar" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span>Salvar Progresso em Arquivo</span>
                 </button>
-                <button id="confirmarReinicio" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
-                    Sim, reiniciar
+
+                <div class="flex gap-2">
+                    <button id="btnReiniciarEstaTabuada" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer leading-tight">
+                        Reiniciar Só Esta Tabuada
+                    </button>
+                    <button id="btnReiniciarTodoJogo" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer leading-tight">
+                        Reiniciar Todo o Jogo
+                    </button>
+                </div>
+
+                <button id="cancelarReinicio" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+                    Cancelar (Continuar Jogando)
                 </button>
             </div>
         </div>
@@ -404,7 +451,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE INTERAÇÃO -->
+    <!-- SCRIPT TUDO NO MESMO ARQUIVO (HTML/CSS/JS) -->
     <script>
         // 1. ÁUDIO SINTETIZADO (WEB AUDIO API)
         class AudioFX {
@@ -535,7 +582,10 @@
         const mensagemTexto = document.getElementById('mensagemTexto');
         const fecharMensagem = document.getElementById('fecharMensagem');
 
-        const confirmarReinicio = document.getElementById('confirmarReinicio');
+        // Modal de Reinício Explicativo
+        const btnRestartSalvar = document.getElementById('btnRestartSalvar');
+        const btnReiniciarEstaTabuada = document.getElementById('btnReiniciarEstaTabuada');
+        const btnReiniciarTodoJogo = document.getElementById('btnReiniciarTodoJogo');
         const cancelarReinicio = document.getElementById('cancelarReinicio');
 
         const gameOverMessage = document.getElementById('gameOverMessage');
@@ -545,7 +595,7 @@
         const fecharBNCC = document.getElementById('fecharBNCC');
         const btnFecharBNCCBottom = document.getElementById('btnFecharBNCCBottom');
 
-        // 3. ESTADO
+        // 3. ESTADO DO JOGO
         let nomeAluno = '';
         let currentTabuada = 1;
         let paresEncontrados = 0;
@@ -556,9 +606,13 @@
         const maxTabuada = 10;
         const TIPO_JOGO = 'adicao';
 
-        // 4. CONTROLE DE MODAIS
         let modalOrigem = null;
 
+        function temProgressoEmAndamento() {
+            return (paresEncontrados > 0 || score > 0 || currentTabuada > 1);
+        }
+
+        // 4. CONTROLE DE MODAIS
         function fecharTodosModais() {
             [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, bnccModal].forEach(m => {
                 if (m) {
@@ -578,9 +632,23 @@
 
         function mostrarMensagem(titulo, texto, deOndeVim = null) {
             modalOrigem = deOndeVim;
-            mensagemTitulo.innerText = titulo;
-            mensagemTexto.innerHTML = texto;
+            if (mensagemTitulo) mensagemTitulo.innerText = titulo;
+            if (mensagemTexto) mensagemTexto.innerHTML = texto;
             abrirModal(mensagemModal);
+        }
+
+        function abrirModalConfirmarReinicio() {
+            const elAluno = document.getElementById('restartAluno');
+            const elTabuada = document.getElementById('restartTabuada');
+            const elPares = document.getElementById('restartPares');
+            const elScore = document.getElementById('restartScore');
+
+            if (elAluno) elAluno.innerText = nomeAluno || 'Não informado';
+            if (elTabuada) elTabuada.innerText = `Adição de ${currentTabuada}`;
+            if (elPares) elPares.innerText = `${paresEncontrados} / 10`;
+            if (elScore) elScore.innerText = `${score} pts`;
+
+            abrirModal(confirmarReinicioModal);
         }
 
         // 5. LÓGICA DO TABULEIRO E RENDERIZAÇÃO
@@ -598,6 +666,7 @@
         }
 
         function renderizarTabuleiroCompleto() {
+            if (!tabuleiro) return;
             tabuleiro.innerHTML = '';
             cartas.forEach((carta, index) => {
                 const isFlipped = carta.virada || carta.combinada;
@@ -610,7 +679,7 @@
                 cardInner.id = `card-inner-${index}`;
                 cardInner.className = `card-3d-inner ${isFlipped ? 'flipped' : ''}`;
 
-                // Costas da carta (Face Back - visível inicialmente)
+                // Verso da carta
                 const back = document.createElement('div');
                 back.className = 'card-face card-face-back bg-gradient-to-br from-indigo-500 via-sky-600 to-cyan-600 border-2 border-indigo-200/80 text-white shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-200';
                 back.innerHTML = `
@@ -621,14 +690,12 @@
                     </div>
                 `;
 
-                // Frente da carta (Face Front - expressão ou resultado)
+                // Frente da carta
                 const front = document.createElement('div');
                 front.id = `card-front-${index}`;
-                const frontBg = carta.combinada
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-lg'
-                    : 'bg-gradient-to-br from-sky-500 to-blue-600 text-white border-sky-300 shadow-md';
+                const frontStyleClass = carta.combinada ? 'card-matched-style' : 'card-unmatched-style';
 
-                front.className = `card-face card-face-front border-2 ${frontBg} font-bold text-lg sm:text-2xl p-1 text-center`;
+                front.className = `card-face card-face-front ${frontStyleClass} font-bold text-lg sm:text-2xl p-1 text-center`;
                 front.innerHTML = `
                     <span>${carta.value}</span>
                     <span class="badge-check ${carta.combinada ? '' : 'hidden'} mt-1 p-0.5 bg-white/20 rounded-full">
@@ -654,7 +721,6 @@
             cartas[index].virada = true;
             cartasViradas.push(index);
 
-            // Animação 3D imediata acionada por alteração suave de classe no elemento do DOM
             const cardInner = document.getElementById(`card-inner-${index}`);
             if (cardInner) {
                 cardInner.classList.add('flipped');
@@ -667,17 +733,16 @@
                 const c2 = cartas[i2];
 
                 if (c1.result === c2.result) {
-                    // ACERTO - PAR ENCONTRADO
+                    // ACERTO
                     setTimeout(() => {
                         audioFx.playMatch();
                         cartas[i1].combinada = true;
                         cartas[i2].combinada = true;
 
-                        // Estilização das cartas combinadas
                         [i1, i2].forEach(idx => {
                             const frontEl = document.getElementById(`card-front-${idx}`);
                             if (frontEl) {
-                                frontEl.className = 'card-face card-face-front border-2 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-lg font-bold text-lg sm:text-2xl p-1 text-center scale-105 transition-all duration-300';
+                                frontEl.className = 'card-face card-face-front card-matched-style font-bold text-lg sm:text-2xl p-1 text-center scale-105 transition-all duration-300';
                                 const badge = frontEl.querySelector('.badge-check');
                                 if (badge) badge.classList.remove('hidden');
                             }
@@ -690,7 +755,7 @@
                         atualizarHUD();
 
                         if (paresEncontrados === 10) {
-                            proximaTabuada.disabled = currentTabuada >= maxTabuada;
+                            if (proximaTabuada) proximaTabuada.disabled = currentTabuada >= maxTabuada;
                             if (currentTabuada >= maxTabuada) {
                                 setTimeout(() => {
                                     audioFx.playVictory();
@@ -700,7 +765,7 @@
                         }
                     }, 350);
                 } else {
-                    // ERRO - DESVIRA AS CARTAS COM A TRANSIÇÃO 3D
+                    // ERRO - DESVIRA
                     setTimeout(() => {
                         audioFx.playMismatch();
                         cartas[i1].virada = false;
@@ -719,25 +784,29 @@
         }
 
         function atualizarHUD() {
-            hudAluno.innerText = nomeAluno || '—';
-            hudTabuada.innerText = `Adição de ${currentTabuada}`;
-            hudPares.innerText = `${paresEncontrados} / 10`;
-            hudScore.innerText = `${score} pts`;
+            if (hudAluno) hudAluno.innerText = nomeAluno || '—';
+            if (hudTabuada) hudTabuada.innerText = `Adição de ${currentTabuada}`;
+            if (hudPares) hudPares.innerText = `${paresEncontrados} / 10`;
+            if (hudScore) hudScore.innerText = `${score} pts`;
 
             const podeAvancar = paresEncontrados === 10 && currentTabuada < maxTabuada;
-            proximaTabuada.disabled = !podeAvancar;
-            if (podeAvancar) {
-                proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer';
-            } else {
-                proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed';
+            if (proximaTabuada) {
+                proximaTabuada.disabled = !podeAvancar;
+                if (podeAvancar) {
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer';
+                } else {
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed';
+                }
             }
         }
 
         function mostrarGameOver() {
-            gameOverMessage.innerText = nomeAluno
-                ? `${nomeAluno}, você concluiu todas as 10 tabuadas!`
-                : 'Você concluiu todas as 10 tabuadas!';
-            gameOverScoreText.innerText = `${score} Pontos`;
+            if (gameOverMessage) {
+                gameOverMessage.innerText = nomeAluno
+                    ? `${nomeAluno}, você concluiu todas as 10 tabuadas!`
+                    : 'Você concluiu todas as 10 tabuadas!';
+            }
+            if (gameOverScoreText) gameOverScoreText.innerText = `${score} Pontos`;
             abrirModal(gameOverModal);
         }
 
@@ -765,24 +834,39 @@
             }
         }
 
-        function reiniciar() {
-            currentTabuada = 1;
+        function reiniciarEstaTabuada() {
+            score = Math.max(0, score - (paresEncontrados * 10));
             paresEncontrados = 0;
-            score = 0;
-            nomeAluno = '';
             cartasViradas = [];
             bloqueado = false;
             gerarCartas();
             renderizarTabuleiroCompleto();
             atualizarHUD();
+            fecharTodosModais();
+        }
+
+        function reiniciarTodoJogo() {
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            gerarCartas();
+            renderizarTabuleiroCompleto();
+            atualizarHUD();
+            fecharTodosModais();
+        }
+
+        function reiniciar() {
+            reiniciarTodoJogo();
             abrirModal(instrucoesModal);
         }
 
         function abrirModalSalvar(origem = null) {
             modalOrigem = origem;
-            inputNome.value = nomeAluno || '';
+            if (inputNome) inputNome.value = nomeAluno || '';
             abrirModal(nomeModal);
-            setTimeout(() => inputNome.focus(), 100);
+            setTimeout(() => inputNome && inputNome.focus(), 100);
         }
 
         function executarSalvar() {
@@ -817,7 +901,7 @@
 
                 mostrarMensagem(
                     'Progresso Salvo!',
-                    `O progresso de <strong>${nomeAluno}</strong> foi salvo com sucesso.<br/><br/>
+                    `O progresso de <strong>${nomeAluno || 'Aluno'}</strong> foi salvo com sucesso.<br/><br/>
                      Tabuada: ${currentTabuada}<br/>
                      Pares: ${paresEncontrados}/10<br/>
                      Pontuação: ${score} pts`,
@@ -830,13 +914,13 @@
         }
 
         function carregarStatus(event) {
-            const arquivo = event.target.files[0];
+            const arquivo = event.target && event.target.files && event.target.files[0];
             if (!arquivo) return;
 
             const leitor = new FileReader();
             leitor.onload = function(e) {
                 try {
-                    const base64Str = e.target.result.trim();
+                    const base64Str = (e.target.result || '').trim();
                     const jsonStr = decodeURIComponent(escape(atob(base64Str)));
                     const status = JSON.parse(jsonStr);
 
@@ -864,76 +948,154 @@
                          Pontuação: ${score} pts`
                     );
                 } catch (erro) {
+                    console.error(erro);
                     mostrarMensagem('Erro ao Carregar', 'Não foi possível ler o arquivo enviado.');
                 }
             };
             leitor.readAsText(arquivo);
-            inputArquivo.value = '';
+            if (inputArquivo) inputArquivo.value = '';
         }
 
         // LISTENERS
-        iniciarJogo.addEventListener('click', iniciarNovoJogo);
-        mostrarInstrucoes.addEventListener('click', () => abrirModal(instrucoesModal));
-        proximaTabuada.addEventListener('click', avancarTabuada);
+        if (iniciarJogo) {
+            iniciarJogo.addEventListener('click', () => {
+                if (temProgressoEmAndamento()) {
+                    abrirModalConfirmarReinicio();
+                } else {
+                    iniciarNovoJogo();
+                }
+            });
+        }
 
-        reiniciarTabuada.addEventListener('click', () => abrirModal(confirmarReinicioModal));
-        confirmarReinicio.addEventListener('click', reiniciar);
-        cancelarReinicio.addEventListener('click', fecharTodosModais);
+        if (mostrarInstrucoes) {
+            mostrarInstrucoes.addEventListener('click', () => {
+                if (temProgressoEmAndamento()) {
+                    abrirModalConfirmarReinicio();
+                } else {
+                    abrirModal(instrucoesModal);
+                }
+            });
+        }
 
-        salvarProgresso.addEventListener('click', () => abrirModalSalvar());
-        carregarProgresso.addEventListener('click', () => inputArquivo.click());
-        inputArquivo.addEventListener('change', carregarStatus);
+        if (proximaTabuada) proximaTabuada.addEventListener('click', avancarTabuada);
 
-        btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
-        fecharBNCC.addEventListener('click', fecharTodosModais);
-        btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
+        if (reiniciarTabuada) {
+            reiniciarTabuada.addEventListener('click', () => {
+                abrirModalConfirmarReinicio();
+            });
+        }
 
-        toggleSom.addEventListener('click', () => {
-            audioFx.mutado = !audioFx.mutado;
-            if (audioFx.mutado) {
-                iconSomOn.classList.add('hidden');
-                iconSomOff.classList.remove('hidden');
-            } else {
-                iconSomOn.classList.remove('hidden');
-                iconSomOff.classList.add('hidden');
-            }
-        });
+        if (btnRestartSalvar) {
+            btnRestartSalvar.addEventListener('click', () => {
+                abrirModalSalvar('reinicio');
+            });
+        }
 
-        confirmarNome.addEventListener('click', () => {
-            const nome = inputNome.value.trim();
-            if (!nome) {
-                inputNome.focus();
-                return;
-            }
-            nomeAluno = nome;
-            atualizarHUD();
-            executarSalvar();
-        });
+        if (btnReiniciarEstaTabuada) {
+            btnReiniciarEstaTabuada.addEventListener('click', () => {
+                reiniciarEstaTabuada();
+            });
+        }
 
-        cancelarNome.addEventListener('click', () => {
-            if (modalOrigem === 'gameOver') {
-                abrirModal(gameOverModal);
-                modalOrigem = null;
-            } else {
+        if (btnReiniciarTodoJogo) {
+            btnReiniciarTodoJogo.addEventListener('click', () => {
+                reiniciarTodoJogo();
+            });
+        }
+
+        if (cancelarReinicio) {
+            cancelarReinicio.addEventListener('click', () => {
                 fecharTodosModais();
+            });
+        }
+
+        if (salvarProgresso) salvarProgresso.addEventListener('click', () => abrirModalSalvar(null));
+
+        if (carregarProgresso) {
+            carregarProgresso.addEventListener('click', () => {
+                if (temProgressoEmAndamento()) {
+                    abrirModalConfirmarReinicio();
+                } else {
+                    if (inputArquivo) inputArquivo.click();
+                }
+            });
+        }
+
+        if (inputArquivo) inputArquivo.addEventListener('change', carregarStatus);
+
+        if (btnBNCC) btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
+        if (fecharBNCC) fecharBNCC.addEventListener('click', fecharTodosModais);
+        if (btnFecharBNCCBottom) btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
+
+        if (toggleSom) {
+            toggleSom.addEventListener('click', () => {
+                audioFx.mutado = !audioFx.mutado;
+                if (audioFx.mutado) {
+                    if (iconSomOn) iconSomOn.classList.add('hidden');
+                    if (iconSomOff) iconSomOff.classList.remove('hidden');
+                } else {
+                    if (iconSomOn) iconSomOn.classList.remove('hidden');
+                    if (iconSomOff) iconSomOff.classList.add('hidden');
+                }
+            });
+        }
+
+        if (confirmarNome) {
+            confirmarNome.addEventListener('click', () => {
+                const nome = inputNome ? inputNome.value.trim() : '';
+                if (!nome) {
+                    if (inputNome) inputNome.focus();
+                    return;
+                }
+                nomeAluno = nome;
+                atualizarHUD();
+                executarSalvar();
+            });
+        }
+
+        if (cancelarNome) {
+            cancelarNome.addEventListener('click', () => {
+                if (modalOrigem === 'gameOver') {
+                    abrirModal(gameOverModal);
+                    modalOrigem = null;
+                } else {
+                    fecharTodosModais();
+                }
+            });
+        }
+
+        if (inputNome) {
+            inputNome.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') if (confirmarNome) confirmarNome.click();
+            });
+        }
+
+        if (fecharMensagem) {
+            fecharMensagem.addEventListener('click', () => {
+                if (modalOrigem === 'gameOver') {
+                    abrirModal(gameOverModal);
+                    modalOrigem = null;
+                } else {
+                    fecharTodosModais();
+                }
+            });
+        }
+
+        if (gameOverButton) {
+            gameOverButton.addEventListener('click', () => {
+                iniciarNovoJogo();
+            });
+        }
+
+        if (salvarGameOver) salvarGameOver.addEventListener('click', () => abrirModalSalvar('gameOver'));
+
+        window.addEventListener('beforeunload', (e) => {
+            if (temProgressoEmAndamento()) {
+                e.preventDefault();
+                e.returnValue = 'Você tem um jogo em andamento. Se sair agora, seu progresso não salvo será perdido.';
+                return e.returnValue;
             }
         });
-
-        inputNome.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') confirmarNome.click();
-        });
-
-        fecharMensagem.addEventListener('click', () => {
-            if (modalOrigem === 'gameOver') {
-                abrirModal(gameOverModal);
-                modalOrigem = null;
-            } else {
-                fecharTodosModais();
-            }
-        });
-
-        gameOverButton.addEventListener('click', reiniciar);
-        salvarGameOver.addEventListener('click', () => abrirModalSalvar('gameOver'));
 
         // INICIALIZAÇÃO
         gerarCartas();
@@ -941,5 +1103,6 @@
         atualizarHUD();
         abrirModal(instrucoesModal);
     </script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
