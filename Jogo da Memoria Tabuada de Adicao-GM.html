@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória da Tabuada de Adição</title>
+    <!-- Tailwind CSS CDN para Estilização de Alta Qualidade -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS 3D Dedicado para o Efeito de Virar a Carta */
+        .card-3d-wrapper {
+            perspective: 1000px;
+            -webkit-perspective: 1000px;
+        }
+        .card-3d-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+            transition: transform 0.55s cubic-bezier(0.34, 1.35, 0.64, 1);
+            border-radius: 1rem;
+        }
+        .card-3d-inner.flipped {
+            transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-face-back {
+            transform: rotateY(0deg);
+            -webkit-transform: rotateY(0deg);
+        }
+        .card-face-front {
+            transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+        }
+
+        /* Animação suave para aparecimento de modais */
+        @keyframes modalScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .animate-modal {
+            animation: modalScale 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-cyan-50 via-sky-50 to-indigo-50 text-slate-800 font-sans pb-10 flex flex-col justify-between selection:bg-cyan-200">
+
+    <main class="w-full">
+        <!-- HEADER TOP BAR -->
+        <header class="w-full max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-cyan-200/60 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-cyan-600 text-white rounded-2xl shadow-md shadow-cyan-600/20">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                        Jogo da Memória
+                    </h1>
+                    <p class="text-xs sm:text-sm font-semibold text-cyan-700">
+                        Tabuada de Adição • Ensino Fundamental 1
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="btnBNCC" class="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors cursor-pointer shadow-xs">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <span>Habilidades BNCC</span>
+                </button>
+
+                <button id="toggleSom" class="flex items-center gap-1.5 p-2 bg-cyan-50 border border-cyan-300 text-cyan-700 hover:bg-cyan-100 rounded-xl transition-colors cursor-pointer" title="Alternar Som">
+                    <svg id="iconSomOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    </svg>
+                    <svg id="iconSomOff" class="w-5 h-5 hidden text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- HUD DE ESTATÍSTICAS -->
+        <div class="w-full max-w-4xl mx-auto px-4 mb-5">
+            <div class="bg-white/90 backdrop-blur-sm border border-cyan-100 rounded-2xl p-3 sm:p-4 shadow-md shadow-cyan-900/5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700">
+                <div class="flex items-center gap-2.5 bg-cyan-50/70 p-2.5 rounded-xl border border-cyan-100/80">
+                    <svg class="w-5 h-5 text-cyan-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <div class="min-w-0">
+                        <span class="block text-[11px] font-semibold text-cyan-800 uppercase tracking-wider">Aluno</span>
+                        <span id="hudAluno" class="block text-sm font-bold text-slate-800 truncate">—</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-100/80">
+                    <svg class="w-5 h-5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <div>
+                        <span class="block text-[11px] font-semibold text-indigo-800 uppercase tracking-wider">Tabuada</span>
+                        <span id="hudTabuada" class="block text-sm font-bold text-slate-800">Adição de 1</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100/80">
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <span class="block text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">Pares</span>
+                        <span id="hudPares" class="block text-sm font-bold text-slate-800">0 / 10</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100/80">
+                    <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                    <div>
+                        <span class="block text-[11px] font-semibold text-amber-800 uppercase tracking-wider">Pontuação</span>
+                        <span id="hudScore" class="block text-sm font-bold text-amber-900">0 pts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAINEL DE CONTROLES -->
+        <div class="w-full max-w-4xl mx-auto px-4 mb-6">
+            <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 bg-slate-50/80 p-3 rounded-2xl border border-slate-200 shadow-xs">
+                <button id="mostrarInstrucoes" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M4 4l12 6-12 6V4z"/>
+                    </svg>
+                    <span>Iniciar Jogo</span>
+                </button>
+
+                <button id="proximaTabuada" disabled class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed">
+                    <span>Próxima Tabuada</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
+
+                <button id="reiniciarTabuada" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 active:scale-95 rounded-xl transition-all cursor-pointer shadow-xs">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Reiniciar Tabuada</span>
+                </button>
+
+                <button id="salvarProgresso" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span>Salvar Progresso</span>
+                </button>
+
+                <button id="carregarProgresso" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>Carregar Progresso</span>
+                </button>
+
+                <input type="file" id="inputArquivo" accept=".txt" class="hidden">
+            </div>
+        </div>
+
+        <!-- TABULEIRO DE CARTAS DA MEMÓRIA -->
+        <div class="w-full max-w-4xl mx-auto px-4 mb-8">
+            <div id="tabuleiro" class="grid grid-cols-4 sm:grid-cols-5 gap-2.5 sm:gap-4 justify-items-center"></div>
+        </div>
+    </main>
+
+    <footer class="text-center text-xs text-slate-500 py-3 px-4 border-t border-slate-200/60 mt-auto">
+        Jogo da Memória Pedagógico — Tabuada de Adição • Alinhado à BNCC (EF01MA06, EF02MA05, EF03MA03)
+    </footer>
+
+    <!-- MODAIS DO SISTEMA -->
+
+    <!-- MODAL 1: INSTRUÇÕES -->
+    <div id="instrucoesModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                    <path d="M4 4l12 6-12 6V4z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">Jogo da Memória da Tabuada</h2>
+            <div class="text-sm text-slate-600 space-y-2 text-left mb-6 leading-relaxed">
+                <p><strong>Objetivo:</strong> Combine pares de cartas com expressões de adição (ex: 2+3) e seus resultados (ex: 5) para aprender as tabuadas de 1 a 10.</p>
+                <p><strong>Controles:</strong> Clique em duas cartas para virá-las. Encontre o par correto correspondente!</p>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1 text-xs">
+                    <p class="font-bold text-slate-700">Mecânicas do Jogo:</p>
+                    <p>• Cada tabuada possui 10 pares de cartas.</p>
+                    <p>• Acertar um par soma 10 pontos.</p>
+                    <p>• Complete todos os 10 pares para avançar à próxima tabuada.</p>
+                    <p>• O jogo termina ao concluir a tabuada 10.</p>
+                </div>
+            </div>
+            <button id="iniciarJogo" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2">
+                <span>Jogar Agora</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: NOME (SALVAMENTO) -->
+    <div id="nomeModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Nome do Aluno</h2>
+            <p class="text-sm text-slate-600 mb-4">Digite o nome do aluno para identificar o arquivo de progresso:</p>
+            <input type="text" id="inputNome" placeholder="Ex: Maria Silva" maxlength="40" autocomplete="off" class="w-full px-4 py-3 border-2 border-purple-200 focus:border-purple-500 focus:outline-none rounded-xl text-center text-lg font-semibold text-slate-800 mb-5 transition-colors">
+            <div class="flex gap-3">
+                <button id="cancelarNome" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
+                    Cancelar
+                </button>
+                <button id="confirmarNome" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: MENSAGEM -->
+    <div id="mensagemModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 id="mensagemTitulo" class="text-xl font-bold text-slate-800 mb-2">Aviso</h2>
+            <div id="mensagemTexto" class="text-sm text-slate-600 mb-6 leading-relaxed"></div>
+            <button id="fecharMensagem" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CONFIRMAR REINÍCIO -->
+    <div id="confirmarReinicioModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">Reiniciar Jogo?</h2>
+            <p class="text-sm text-slate-600 mb-6">
+                Tem certeza que deseja reiniciar o jogo?<br>
+                O progresso atual não salvo será perdido.
+            </p>
+            <div class="flex gap-3">
+                <button id="cancelarReinicio" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
+                    Cancelar
+                </button>
+                <button id="confirmarReinicio" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
+                    Sim, reiniciar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: GAME OVER / FIM DO JOGO -->
+    <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3 ring-8 ring-amber-50">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-800 mb-1">Parabéns! 🎉</h2>
+            <p id="gameOverMessage" class="text-base text-slate-600 mb-2 font-medium">Você concluiu todas as 10 tabuadas!</p>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6">
+                <span class="block text-xs uppercase font-bold text-amber-800 tracking-wider">Pontuação Final</span>
+                <span id="gameOverScoreText" class="text-3xl font-black text-amber-900">0 Pontos</span>
+            </div>
+            <div class="flex flex-col gap-2.5">
+                <button id="salvarGameOver" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2">
+                    <span>Salvar Progresso Final</span>
+                </button>
+                <button id="gameOverButton" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2">
+                    <span>Jogar Novamente</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: BNCC -->
+    <div id="bnccModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] animate-modal">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-white/10 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">Habilidades da BNCC Trabalhadas</h2>
+                        <p class="text-xs text-emerald-100">Base Nacional Comum Curricular • Matemática</p>
+                    </div>
+                </div>
+                <button id="fecharBNCC" class="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-4 text-slate-700">
+                <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-sm">
+                    <span class="font-bold text-emerald-900 block mb-1">Área do Conhecimento:</span>
+                    <span>Matemática • Anos Iniciais do Ensino Fundamental (1º ao 5º ano)</span>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md shrink-0">
+                                EF01MA06
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Construir fatos básicos da adição e utilizá-los no cálculo mental ou escrito.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Trabalha o reconhecimento imediato dos resultados das somas simples da tabuada.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-teal-100 text-teal-800 rounded-md shrink-0">
+                                EF02MA05
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Construir fatos básicos da adição e subtração e utilizá-los no cálculo mental ou escrito.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Desenvolve a agilidade no cálculo mental progressivo do 1 ao 10.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-800 rounded-md shrink-0">
+                                EF03MA03
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Construir e utilizar fatos básicos da adição e da multiplicação para o cálculo mental ou escrito.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Reforça a automatização do repertório aditivo para consolidação do cálculo mental.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button id="btnFecharBNCCBottom" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors cursor-pointer">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE INTERAÇÃO -->
+    <script>
+        // 1. ÁUDIO SINTETIZADO (WEB AUDIO API)
+        class AudioFX {
+            constructor() {
+                this.ctx = null;
+                this.mutado = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playFlip() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+
+            playMatch() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+                osc.frequency.setValueAtTime(783.99, now + 0.16);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playMismatch() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(180, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.22);
+            }
+
+            playVictory() {
+                if (this.mutado) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notas = [523.25, 659.25, 783.99, 1046.50];
+                notas.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.18, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.3);
+                });
+            }
+        }
+
+        const audioFx = new AudioFX();
+
+        // 2. REFERÊNCIAS DOM
+        const tabuleiro = document.getElementById('tabuleiro');
+        const hudAluno = document.getElementById('hudAluno');
+        const hudTabuada = document.getElementById('hudTabuada');
+        const hudPares = document.getElementById('hudPares');
+        const hudScore = document.getElementById('hudScore');
+
+        const mostrarInstrucoes = document.getElementById('mostrarInstrucoes');
+        const proximaTabuada = document.getElementById('proximaTabuada');
+        const reiniciarTabuada = document.getElementById('reiniciarTabuada');
+        const salvarProgresso = document.getElementById('salvarProgresso');
+        const carregarProgresso = document.getElementById('carregarProgresso');
+        const inputArquivo = document.getElementById('inputArquivo');
+        const btnBNCC = document.getElementById('btnBNCC');
+        const toggleSom = document.getElementById('toggleSom');
+        const iconSomOn = document.getElementById('iconSomOn');
+        const iconSomOff = document.getElementById('iconSomOff');
+
+        // Modais
+        const instrucoesModal = document.getElementById('instrucoesModal');
+        const nomeModal = document.getElementById('nomeModal');
+        const mensagemModal = document.getElementById('mensagemModal');
+        const confirmarReinicioModal = document.getElementById('confirmarReinicioModal');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const bnccModal = document.getElementById('bnccModal');
+
+        const iniciarJogo = document.getElementById('iniciarJogo');
+        const inputNome = document.getElementById('inputNome');
+        const confirmarNome = document.getElementById('confirmarNome');
+        const cancelarNome = document.getElementById('cancelarNome');
+
+        const mensagemTitulo = document.getElementById('mensagemTitulo');
+        const mensagemTexto = document.getElementById('mensagemTexto');
+        const fecharMensagem = document.getElementById('fecharMensagem');
+
+        const confirmarReinicio = document.getElementById('confirmarReinicio');
+        const cancelarReinicio = document.getElementById('cancelarReinicio');
+
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const gameOverScoreText = document.getElementById('gameOverScoreText');
+        const salvarGameOver = document.getElementById('salvarGameOver');
+        const gameOverButton = document.getElementById('gameOverButton');
+        const fecharBNCC = document.getElementById('fecharBNCC');
+        const btnFecharBNCCBottom = document.getElementById('btnFecharBNCCBottom');
+
+        // 3. ESTADO
+        let nomeAluno = '';
+        let currentTabuada = 1;
+        let paresEncontrados = 0;
+        let score = 0;
+        let cartas = [];
+        let cartasViradas = [];
+        let bloqueado = false;
+        const maxTabuada = 10;
+        const TIPO_JOGO = 'adicao';
+
+        // 4. CONTROLE DE MODAIS
+        let modalOrigem = null;
+
+        function fecharTodosModais() {
+            [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, bnccModal].forEach(m => {
+                if (m) {
+                    m.classList.remove('flex');
+                    m.classList.add('hidden');
+                }
+            });
+        }
+
+        function abrirModal(modalElem) {
+            fecharTodosModais();
+            if (modalElem) {
+                modalElem.classList.remove('hidden');
+                modalElem.classList.add('flex');
+            }
+        }
+
+        function mostrarMensagem(titulo, texto, deOndeVim = null) {
+            modalOrigem = deOndeVim;
+            mensagemTitulo.innerText = titulo;
+            mensagemTexto.innerHTML = texto;
+            abrirModal(mensagemModal);
+        }
+
+        // 5. LÓGICA DO TABULEIRO E RENDERIZAÇÃO
+        function gerarCartas() {
+            cartas = [];
+            for (let i = 1; i <= 10; i++) {
+                cartas.push({ id: `expr_${i}`, value: `${currentTabuada}+${i}`, result: currentTabuada + i, virada: false, combinada: false });
+                cartas.push({ id: `res_${i}`, value: `${currentTabuada + i}`, result: currentTabuada + i, virada: false, combinada: false });
+            }
+            // Embaralhar
+            for (let i = cartas.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cartas[i], cartas[j]] = [cartas[j], cartas[i]];
+            }
+        }
+
+        function renderizarTabuleiroCompleto() {
+            tabuleiro.innerHTML = '';
+            cartas.forEach((carta, index) => {
+                const isFlipped = carta.virada || carta.combinada;
+
+                const wrapper = document.createElement('div');
+                wrapper.id = `card-wrapper-${index}`;
+                wrapper.className = 'card-3d-wrapper w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 cursor-pointer select-none group';
+
+                const cardInner = document.createElement('div');
+                cardInner.id = `card-inner-${index}`;
+                cardInner.className = `card-3d-inner ${isFlipped ? 'flipped' : ''}`;
+
+                // Costas da carta (Face Back - visível inicialmente)
+                const back = document.createElement('div');
+                back.className = 'card-face card-face-back bg-gradient-to-br from-indigo-500 via-sky-600 to-cyan-600 border-2 border-indigo-200/80 text-white shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-200';
+                back.innerHTML = `
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/30 flex items-center justify-center bg-white/10 group-hover:bg-white/20 transition-colors">
+                        <svg class="w-6 h-6 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                `;
+
+                // Frente da carta (Face Front - expressão ou resultado)
+                const front = document.createElement('div');
+                front.id = `card-front-${index}`;
+                const frontBg = carta.combinada
+                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-lg'
+                    : 'bg-gradient-to-br from-sky-500 to-blue-600 text-white border-sky-300 shadow-md';
+
+                front.className = `card-face card-face-front border-2 ${frontBg} font-bold text-lg sm:text-2xl p-1 text-center`;
+                front.innerHTML = `
+                    <span>${carta.value}</span>
+                    <span class="badge-check ${carta.combinada ? '' : 'hidden'} mt-1 p-0.5 bg-white/20 rounded-full">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </span>
+                `;
+
+                cardInner.appendChild(back);
+                cardInner.appendChild(front);
+                wrapper.appendChild(cardInner);
+
+                wrapper.addEventListener('click', () => virarCarta(index));
+                tabuleiro.appendChild(wrapper);
+            });
+        }
+
+        function virarCarta(index) {
+            if (bloqueado || cartas[index].virada || cartas[index].combinada) return;
+
+            audioFx.playFlip();
+            cartas[index].virada = true;
+            cartasViradas.push(index);
+
+            // Animação 3D imediata acionada por alteração suave de classe no elemento do DOM
+            const cardInner = document.getElementById(`card-inner-${index}`);
+            if (cardInner) {
+                cardInner.classList.add('flipped');
+            }
+
+            if (cartasViradas.length === 2) {
+                bloqueado = true;
+                const [i1, i2] = cartasViradas;
+                const c1 = cartas[i1];
+                const c2 = cartas[i2];
+
+                if (c1.result === c2.result) {
+                    // ACERTO - PAR ENCONTRADO
+                    setTimeout(() => {
+                        audioFx.playMatch();
+                        cartas[i1].combinada = true;
+                        cartas[i2].combinada = true;
+
+                        // Estilização das cartas combinadas
+                        [i1, i2].forEach(idx => {
+                            const frontEl = document.getElementById(`card-front-${idx}`);
+                            if (frontEl) {
+                                frontEl.className = 'card-face card-face-front border-2 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-lg font-bold text-lg sm:text-2xl p-1 text-center scale-105 transition-all duration-300';
+                                const badge = frontEl.querySelector('.badge-check');
+                                if (badge) badge.classList.remove('hidden');
+                            }
+                        });
+
+                        paresEncontrados++;
+                        score += 10;
+                        cartasViradas = [];
+                        bloqueado = false;
+                        atualizarHUD();
+
+                        if (paresEncontrados === 10) {
+                            proximaTabuada.disabled = currentTabuada >= maxTabuada;
+                            if (currentTabuada >= maxTabuada) {
+                                setTimeout(() => {
+                                    audioFx.playVictory();
+                                    mostrarGameOver();
+                                }, 400);
+                            }
+                        }
+                    }, 350);
+                } else {
+                    // ERRO - DESVIRA AS CARTAS COM A TRANSIÇÃO 3D
+                    setTimeout(() => {
+                        audioFx.playMismatch();
+                        cartas[i1].virada = false;
+                        cartas[i2].virada = false;
+
+                        const inner1 = document.getElementById(`card-inner-${i1}`);
+                        const inner2 = document.getElementById(`card-inner-${i2}`);
+                        if (inner1) inner1.classList.remove('flipped');
+                        if (inner2) inner2.classList.remove('flipped');
+
+                        cartasViradas = [];
+                        bloqueado = false;
+                    }, 850);
+                }
+            }
+        }
+
+        function atualizarHUD() {
+            hudAluno.innerText = nomeAluno || '—';
+            hudTabuada.innerText = `Adição de ${currentTabuada}`;
+            hudPares.innerText = `${paresEncontrados} / 10`;
+            hudScore.innerText = `${score} pts`;
+
+            const podeAvancar = paresEncontrados === 10 && currentTabuada < maxTabuada;
+            proximaTabuada.disabled = !podeAvancar;
+            if (podeAvancar) {
+                proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer';
+            } else {
+                proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed';
+            }
+        }
+
+        function mostrarGameOver() {
+            gameOverMessage.innerText = nomeAluno
+                ? `${nomeAluno}, você concluiu todas as 10 tabuadas!`
+                : 'Você concluiu todas as 10 tabuadas!';
+            gameOverScoreText.innerText = `${score} Pontos`;
+            abrirModal(gameOverModal);
+        }
+
+        function iniciarNovoJogo() {
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            fecharTodosModais();
+            gerarCartas();
+            renderizarTabuleiroCompleto();
+            atualizarHUD();
+        }
+
+        function avancarTabuada() {
+            if (paresEncontrados >= 10 && currentTabuada < maxTabuada) {
+                currentTabuada++;
+                paresEncontrados = 0;
+                cartasViradas = [];
+                bloqueado = false;
+                gerarCartas();
+                renderizarTabuleiroCompleto();
+                atualizarHUD();
+            }
+        }
+
+        function reiniciar() {
+            currentTabuada = 1;
+            paresEncontrados = 0;
+            score = 0;
+            nomeAluno = '';
+            cartasViradas = [];
+            bloqueado = false;
+            gerarCartas();
+            renderizarTabuleiroCompleto();
+            atualizarHUD();
+            abrirModal(instrucoesModal);
+        }
+
+        function abrirModalSalvar(origem = null) {
+            modalOrigem = origem;
+            inputNome.value = nomeAluno || '';
+            abrirModal(nomeModal);
+            setTimeout(() => inputNome.focus(), 100);
+        }
+
+        function executarSalvar() {
+            const status = {
+                tipo: TIPO_JOGO,
+                nomeAluno: nomeAluno,
+                currentTabuada: currentTabuada,
+                paresEncontrados: paresEncontrados,
+                score: score,
+                data: new Date().toLocaleString('pt-BR')
+            };
+
+            try {
+                const jsonStr = JSON.stringify(status);
+                const base64Str = btoa(unescape(encodeURIComponent(jsonStr)));
+
+                const blob = new Blob([base64Str], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                const nomeLimpo = nomeAluno
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-zA-Z0-9]/g, '_')
+                    .substring(0, 20) || 'aluno';
+
+                a.download = `progresso_adicao_${nomeLimpo}_tab${currentTabuada}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                mostrarMensagem(
+                    'Progresso Salvo!',
+                    `O progresso de <strong>${nomeAluno}</strong> foi salvo com sucesso.<br/><br/>
+                     Tabuada: ${currentTabuada}<br/>
+                     Pares: ${paresEncontrados}/10<br/>
+                     Pontuação: ${score} pts`,
+                    modalOrigem
+                );
+            } catch (err) {
+                console.error(err);
+                mostrarMensagem('Erro ao Salvar', 'Ocorreu um erro ao gerar o arquivo de salvamento.', modalOrigem);
+            }
+        }
+
+        function carregarStatus(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                try {
+                    const base64Str = e.target.result.trim();
+                    const jsonStr = decodeURIComponent(escape(atob(base64Str)));
+                    const status = JSON.parse(jsonStr);
+
+                    if (status.tipo && status.tipo !== TIPO_JOGO) {
+                        mostrarMensagem('Arquivo Incorreto', 'Este arquivo não pertence ao jogo de <strong>Adição</strong>.');
+                        return;
+                    }
+
+                    nomeAluno = status.nomeAluno || '';
+                    currentTabuada = status.currentTabuada || 1;
+                    paresEncontrados = status.paresEncontrados || 0;
+                    score = status.score || 0;
+                    cartasViradas = [];
+                    bloqueado = false;
+
+                    gerarCartas();
+                    renderizarTabuleiroCompleto();
+                    atualizarHUD();
+
+                    mostrarMensagem(
+                        'Progresso Carregado!',
+                        `Bem-vindo de volta${nomeAluno ? ', <strong>' + nomeAluno + '</strong>' : ''}!<br/><br/>
+                         Tabuada: ${currentTabuada}<br/>
+                         Pares: ${paresEncontrados}/10<br/>
+                         Pontuação: ${score} pts`
+                    );
+                } catch (erro) {
+                    mostrarMensagem('Erro ao Carregar', 'Não foi possível ler o arquivo enviado.');
+                }
+            };
+            leitor.readAsText(arquivo);
+            inputArquivo.value = '';
+        }
+
+        // LISTENERS
+        iniciarJogo.addEventListener('click', iniciarNovoJogo);
+        mostrarInstrucoes.addEventListener('click', () => abrirModal(instrucoesModal));
+        proximaTabuada.addEventListener('click', avancarTabuada);
+
+        reiniciarTabuada.addEventListener('click', () => abrirModal(confirmarReinicioModal));
+        confirmarReinicio.addEventListener('click', reiniciar);
+        cancelarReinicio.addEventListener('click', fecharTodosModais);
+
+        salvarProgresso.addEventListener('click', () => abrirModalSalvar());
+        carregarProgresso.addEventListener('click', () => inputArquivo.click());
+        inputArquivo.addEventListener('change', carregarStatus);
+
+        btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
+        fecharBNCC.addEventListener('click', fecharTodosModais);
+        btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
+
+        toggleSom.addEventListener('click', () => {
+            audioFx.mutado = !audioFx.mutado;
+            if (audioFx.mutado) {
+                iconSomOn.classList.add('hidden');
+                iconSomOff.classList.remove('hidden');
+            } else {
+                iconSomOn.classList.remove('hidden');
+                iconSomOff.classList.add('hidden');
+            }
+        });
+
+        confirmarNome.addEventListener('click', () => {
+            const nome = inputNome.value.trim();
+            if (!nome) {
+                inputNome.focus();
+                return;
+            }
+            nomeAluno = nome;
+            atualizarHUD();
+            executarSalvar();
+        });
+
+        cancelarNome.addEventListener('click', () => {
+            if (modalOrigem === 'gameOver') {
+                abrirModal(gameOverModal);
+                modalOrigem = null;
+            } else {
+                fecharTodosModais();
+            }
+        });
+
+        inputNome.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') confirmarNome.click();
+        });
+
+        fecharMensagem.addEventListener('click', () => {
+            if (modalOrigem === 'gameOver') {
+                abrirModal(gameOverModal);
+                modalOrigem = null;
+            } else {
+                fecharTodosModais();
+            }
+        });
+
+        gameOverButton.addEventListener('click', reiniciar);
+        salvarGameOver.addEventListener('click', () => abrirModalSalvar('gameOver'));
+
+        // INICIALIZAÇÃO
+        gerarCartas();
+        renderizarTabuleiroCompleto();
+        atualizarHUD();
+        abrirModal(instrucoesModal);
+    </script>
+</body>
+</html>
