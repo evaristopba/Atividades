@@ -171,6 +171,12 @@
         .btn-cinza:hover {
             background-color: #7f8c8d !important;
         }
+        .btn-roxo {
+            background-color: #9b59b6 !important;
+        }
+        .btn-roxo:hover {
+            background-color: #8e44ad !important;
+        }
     </style>
 </head>
 <body>
@@ -243,7 +249,8 @@
             <h2>Parabéns!</h2>
             <p id="gameOverMessage">Você terminou todas as tabuadas!</p>
             <div class="modal-botoes">
-                <button id="gameOverButton" class="btn-verde">OK</button>
+                <button id="salvarGameOver" class="btn-roxo">Salvar Progresso</button>
+                <button id="gameOverButton" class="btn-verde">Reiniciar</button>
             </div>
         </div>
     </div>
@@ -266,6 +273,7 @@
         const gameOverModal = document.getElementById('gameOverModal');
         const gameOverMessage = document.getElementById('gameOverMessage');
         const gameOverButton = document.getElementById('gameOverButton');
+        const salvarGameOver = document.getElementById('salvarGameOver');
         const inputNome = document.getElementById('inputNome');
         const confirmarNome = document.getElementById('confirmarNome');
         const cancelarNome = document.getElementById('cancelarNome');
@@ -478,7 +486,6 @@
                     const json = decodeURIComponent(escape(atob(base64)));
                     const status = JSON.parse(json);
 
-                    // Compatível com formato antigo (sem "tipo")
                     if (status.tipo && status.tipo !== TIPO_JOGO) {
                         mostrarMensagem(
                             'Arquivo Incorreto',
@@ -539,6 +546,7 @@
         });
 
         gameOverButton.addEventListener('click', reiniciar);
+        salvarGameOver.addEventListener('click', salvarStatus);
 
         salvarProgresso.addEventListener('click', salvarStatus);
         carregarProgresso.addEventListener('click', () => inputArquivo.click());
