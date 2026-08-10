@@ -72,7 +72,7 @@
             <div class="flex items-center gap-3">
                 <div class="p-2.5 bg-rose-600 text-white rounded-2xl shadow-md shadow-rose-600/20">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/>
                     </svg>
                 </div>
                 <div>
@@ -267,25 +267,59 @@
         </div>
     </div>
 
-    <!-- MODAL 4: CONFIRMAR REINÍCIO -->
+    <!-- MODAL 4: CONFIRMAR REINÍCIO E PROTEÇÃO DE PROGRESSO -->
     <div id="confirmarReinicioModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
-            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-2">Reiniciar Jogo?</h2>
-            <p class="text-sm text-slate-600 mb-6">
-                Tem certeza que deseja reiniciar o jogo?<br>
-                O progresso atual não salvo será perdido.
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Atenção ao Reiniciar!</h2>
+            <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                Confira seu progresso atual para evitar perder dados de aprendizagem:
             </p>
-            <div class="flex gap-3">
-                <button id="cancelarReinicio" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
-                    Cancelar
+
+            <!-- Card de resumo do progresso atual -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 text-left space-y-1.5 text-xs sm:text-sm text-slate-700">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500">Aluno:</span>
+                    <span id="reinicioAluno" class="font-bold text-slate-800 truncate max-w-[180px]">—</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500">Tabuada Atual:</span>
+                    <span id="reinicioTabuada" class="font-bold text-slate-800">Subtração de 1</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500">Pares na Tabuada:</span>
+                    <span id="reinicioPares" class="font-bold text-slate-800">0 / 10</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500">Pontuação Total:</span>
+                    <span id="reinicioPontos" class="font-bold text-amber-800">0 pts</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button id="salvarAntesReinicio" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2 text-xs sm:text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span>Salvar Progresso em Arquivo</span>
                 </button>
-                <button id="confirmarReinicio" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer">
-                    Sim, reiniciar
+
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <button id="confirmarReinicioSoTabuada" class="py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer text-xs leading-tight p-2">
+                        Reiniciar Só Esta Tabuada
+                    </button>
+
+                    <button id="confirmarReinicioJogoTodo" class="py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer text-xs leading-tight p-2">
+                        Reiniciar Todo o Jogo
+                    </button>
+                </div>
+
+                <button id="cancelarReinicio" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer text-xs sm:text-sm mt-1">
+                    Cancelar (Continuar Jogando)
                 </button>
             </div>
         </div>
@@ -534,7 +568,14 @@
         const mensagemTexto = document.getElementById('mensagemTexto');
         const fecharMensagem = document.getElementById('fecharMensagem');
 
-        const confirmarReinicio = document.getElementById('confirmarReinicio');
+        const reinicioAluno = document.getElementById('reinicioAluno');
+        const reinicioTabuada = document.getElementById('reinicioTabuada');
+        const reinicioPares = document.getElementById('reinicioPares');
+        const reinicioPontos = document.getElementById('reinicioPontos');
+
+        const salvarAntesReinicio = document.getElementById('salvarAntesReinicio');
+        const confirmarReinicioSoTabuada = document.getElementById('confirmarReinicioSoTabuada');
+        const confirmarReinicioJogoTodo = document.getElementById('confirmarReinicioJogoTodo');
         const cancelarReinicio = document.getElementById('cancelarReinicio');
 
         const gameOverMessage = document.getElementById('gameOverMessage');
@@ -634,10 +675,11 @@
             tabuleiro.innerHTML = '';
             cartas.forEach((carta, index) => {
                 const isFlipped = carta.virada || carta.combinada;
+                const isMatched = carta.combinada;
 
                 const wrapper = document.createElement('div');
                 wrapper.id = `card-wrapper-${index}`;
-                wrapper.className = 'card-3d-wrapper w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 cursor-pointer select-none group';
+                wrapper.className = `card-3d-wrapper w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 select-none group ${isMatched ? 'pointer-events-none' : 'cursor-pointer'}`;
 
                 const cardInner = document.createElement('div');
                 cardInner.id = `card-inner-${index}`;
@@ -649,7 +691,7 @@
                 back.innerHTML = `
                     <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/30 flex items-center justify-center bg-white/10 group-hover:bg-white/20 transition-colors">
                         <svg class="w-6 h-6 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/>
                         </svg>
                     </div>
                 `;
@@ -658,7 +700,7 @@
                 const front = document.createElement('div');
                 front.id = `card-front-${index}`;
                 const frontBg = carta.combinada
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-lg'
+                    ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg'
                     : 'bg-gradient-to-br from-rose-500 to-rose-600 text-white border-rose-300 shadow-md';
 
                 front.className = `card-face card-face-front border-2 ${frontBg} font-bold text-lg sm:text-2xl p-1 text-center`;
@@ -706,13 +748,17 @@
                         cartas[i1].combinada = true;
                         cartas[i2].combinada = true;
 
-                        // Estilização das cartas combinadas
+                        // Estilização das cartas combinadas (marcar permanentemente em verde na tela)
                         [i1, i2].forEach(idx => {
                             const frontEl = document.getElementById(`card-front-${idx}`);
+                            const wrapperEl = document.getElementById(`card-wrapper-${idx}`);
                             if (frontEl) {
-                                frontEl.className = 'card-face card-face-front border-2 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-lg font-bold text-lg sm:text-2xl p-1 text-center scale-105 transition-all duration-300';
+                                frontEl.className = 'card-face card-face-front border-2 bg-emerald-500 border-emerald-400 text-white shadow-lg font-bold text-lg sm:text-2xl p-1 text-center transition-all duration-300';
                                 const badge = frontEl.querySelector('.badge-check');
                                 if (badge) badge.classList.remove('hidden');
+                            }
+                            if (wrapperEl) {
+                                wrapperEl.classList.add('pointer-events-none');
                             }
                         });
 
@@ -774,6 +820,26 @@
             abrirModal(gameOverModal);
         }
 
+        function temProgressoAtivo() {
+            return paresEncontrados > 0 || score > 0 || currentTabuada > 1;
+        }
+
+        function acaoIniciarJogoMenu() {
+            if (temProgressoAtivo()) {
+                abrirModalConfirmarReinicio();
+            } else {
+                abrirModal(instrucoesModal);
+            }
+        }
+
+        function acaoJogarAgoraModal() {
+            if (temProgressoAtivo()) {
+                abrirModalConfirmarReinicio();
+            } else {
+                fecharTodosModais();
+            }
+        }
+
         function iniciarNovoJogo() {
             currentTabuada = 1;
             paresEncontrados = 0;
@@ -798,13 +864,34 @@
             }
         }
 
-        function reiniciar() {
+        function abrirModalConfirmarReinicio() {
+            if (reinicioAluno) reinicioAluno.innerText = nomeAluno || 'Não informado';
+            if (reinicioTabuada) reinicioTabuada.innerText = `Subtração de ${currentTabuada}`;
+            if (reinicioPares) reinicioPares.innerText = `${paresEncontrados} / ${totalParesPorTabuada}`;
+            if (reinicioPontos) reinicioPontos.innerText = `${score} pts`;
+            abrirModal(confirmarReinicioModal);
+        }
+
+        function reiniciarApenasTabuada() {
+            const pontosTabuadasAnteriores = (currentTabuada - 1) * totalParesPorTabuada * 10;
+            score = pontosTabuadasAnteriores;
+            paresEncontrados = 0;
+            cartasViradas = [];
+            bloqueado = false;
+            fecharTodosModais();
+            gerarCartas();
+            renderizarTabuleiroCompleto();
+            atualizarHUD();
+        }
+
+        function reiniciarJogoTodo() {
             currentTabuada = 1;
             paresEncontrados = 0;
             score = 0;
             nomeAluno = '';
             cartasViradas = [];
             bloqueado = false;
+            fecharTodosModais();
             gerarCartas();
             renderizarTabuleiroCompleto();
             atualizarHUD();
@@ -905,12 +992,14 @@
         }
 
         // LISTENERS
-        iniciarJogo.addEventListener('click', iniciarNovoJogo);
-        mostrarInstrucoes.addEventListener('click', () => abrirModal(instrucoesModal));
+        iniciarJogo.addEventListener('click', acaoJogarAgoraModal);
+        mostrarInstrucoes.addEventListener('click', acaoIniciarJogoMenu);
         proximaTabuada.addEventListener('click', avancarTabuada);
 
-        reiniciarTabuada.addEventListener('click', () => abrirModal(confirmarReinicioModal));
-        confirmarReinicio.addEventListener('click', reiniciar);
+        reiniciarTabuada.addEventListener('click', abrirModalConfirmarReinicio);
+        if (salvarAntesReinicio) salvarAntesReinicio.addEventListener('click', () => abrirModalSalvar('reinicio'));
+        if (confirmarReinicioSoTabuada) confirmarReinicioSoTabuada.addEventListener('click', reiniciarApenasTabuada);
+        if (confirmarReinicioJogoTodo) confirmarReinicioJogoTodo.addEventListener('click', reiniciarJogoTodo);
         cancelarReinicio.addEventListener('click', fecharTodosModais);
 
         salvarProgresso.addEventListener('click', () => abrirModalSalvar());
@@ -920,9 +1009,6 @@
         btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
         fecharBNCC.addEventListener('click', fecharTodosModais);
         btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
-
-        salvarGameOver.addEventListener('click', () => abrirModalSalvar('gameOver'));
-        gameOverButton.addEventListener('click', reiniciar);
 
         toggleSom.addEventListener('click', () => {
             audioFx.mutado = !audioFx.mutado;
@@ -950,6 +1036,9 @@
             if (modalOrigem === 'gameOver') {
                 abrirModal(gameOverModal);
                 modalOrigem = null;
+            } else if (modalOrigem === 'reinicio') {
+                abrirModalConfirmarReinicio();
+                modalOrigem = null;
             } else {
                 fecharTodosModais();
             }
@@ -963,16 +1052,22 @@
             if (modalOrigem === 'gameOver') {
                 abrirModal(gameOverModal);
                 modalOrigem = null;
+            } else if (modalOrigem === 'reinicio') {
+                abrirModalConfirmarReinicio();
+                modalOrigem = null;
             } else {
                 fecharTodosModais();
             }
         });
 
-        // INICIALIZAÇÃO
-        abrirModal(instrucoesModal);
+        salvarGameOver.addEventListener('click', () => abrirModalSalvar('gameOver'));
+        gameOverButton.addEventListener('click', reiniciarJogoTodo);
+
+        // INICIALIZAÇÃO AUTOMÁTICA DO TABULEIRO
         gerarCartas();
         renderizarTabuleiroCompleto();
         atualizarHUD();
+        abrirModal(instrucoesModal);
     </script>
 </body>
 </html>
