@@ -46,21 +46,24 @@
         .card-face-front {
             transform: rotateY(180deg);
             -webkit-transform: rotateY(180deg);
+            background-color: #0284c7;
         }
 
         /* Classes de gradiente fixo para as frentes das cartas */
         .card-unmatched-style {
+            background-color: #0284c7 !important;
             background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
             color: #ffffff !important;
-            border: 2px solid #7dd3fc !important;
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3) !important;
+            border: 3px solid #7dd3fc !important;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35) !important;
         }
 
         .card-matched-style {
+            background-color: #059669 !important;
             background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
             color: #ffffff !important;
-            border: 2px solid #6ee7b7 !important;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+            border: 3px solid #6ee7b7 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
         }
 
         /* Animação suave para aparecimento de modais */
@@ -696,8 +699,10 @@
                 const frontStyleClass = carta.combinada ? 'card-matched-style' : 'card-unmatched-style';
 
                 front.className = `card-face card-face-front ${frontStyleClass} font-bold text-lg sm:text-2xl p-1 text-center`;
+                front.style.backgroundColor = carta.combinada ? '#059669' : '#0284c7';
+                front.style.color = '#ffffff';
                 front.innerHTML = `
-                    <span>${carta.value}</span>
+                    <span class="drop-shadow-xs">${carta.value}</span>
                     <span class="badge-check ${carta.combinada ? '' : 'hidden'} mt-1 p-0.5 bg-white/20 rounded-full">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -743,6 +748,8 @@
                             const frontEl = document.getElementById(`card-front-${idx}`);
                             if (frontEl) {
                                 frontEl.className = 'card-face card-face-front card-matched-style font-bold text-lg sm:text-2xl p-1 text-center scale-105 transition-all duration-300';
+                                frontEl.style.backgroundColor = '#059669';
+                                frontEl.style.color = '#ffffff';
                                 const badge = frontEl.querySelector('.badge-check');
                                 if (badge) badge.classList.remove('hidden');
                             }
