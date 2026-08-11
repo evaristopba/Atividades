@@ -18,7 +18,7 @@
             height: 100%;
             transform-style: preserve-3d;
             -webkit-transform-style: preserve-3d;
-            transition: transform 0.55s cubic-bezier(0.34, 1.35, 0.64, 1);
+            transition: transform 0.5s cubic-bezier(0.34, 1.35, 0.64, 1);
             border-radius: 1rem;
         }
         .card-3d-inner.flipped {
@@ -27,8 +27,7 @@
         }
         .card-face {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
@@ -38,29 +37,43 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            box-sizing: border-box;
+            overflow: hidden;
         }
         .card-face-back {
-            transform: rotateY(0deg) !important;
-            -webkit-transform: rotateY(0deg) !important;
+            transform: rotateY(0deg) translateZ(1px);
+            -webkit-transform: rotateY(0deg) translateZ(1px);
         }
         .card-face-front {
-            transform: rotateY(180deg) !important;
-            -webkit-transform: rotateY(180deg) !important;
+            transform: rotateY(180deg) translateZ(1px) !important;
+            -webkit-transform: rotateY(180deg) translateZ(1px) !important;
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
         }
 
-        /* Classes de gradiente fixo para as frentes das cartas da Divisão */
+        /* Classes de gradiente fixo para as frentes das cartas */
         .card-unmatched-style {
+            background-color: #0284c7 !important;
             background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
             color: #ffffff !important;
-            border: 2px solid #7dd3fc !important;
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3) !important;
+            border: 3px solid #7dd3fc !important;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35) !important;
+            transform: rotateY(180deg) translateZ(1px) !important;
+            -webkit-transform: rotateY(180deg) translateZ(1px) !important;
         }
 
         .card-matched-style {
+            background-color: #059669 !important;
             background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
             color: #ffffff !important;
-            border: 2px solid #6ee7b7 !important;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+            border: 3px solid #6ee7b7 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
+            transform: rotateY(180deg) translateZ(1px) scale(1.02) !important;
+            -webkit-transform: rotateY(180deg) translateZ(1px) scale(1.02) !important;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         /* Animação suave para aparecimento de modais */
@@ -122,7 +135,7 @@
 
         <!-- HUD DE ESTATÍSTICAS -->
         <div class="w-full max-w-4xl mx-auto px-4 mb-5">
-            <div class="bg-white/90 backdrop-blur-xs border border-cyan-100 rounded-2xl p-3 sm:p-4 shadow-md shadow-cyan-900/5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700">
+            <div class="bg-white/90 backdrop-blur-sm border border-cyan-100 rounded-2xl p-3 sm:p-4 shadow-md shadow-cyan-900/5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700">
                 <div class="flex items-center gap-2.5 bg-cyan-50/70 p-2.5 rounded-xl border border-cyan-100/80">
                     <svg class="w-5 h-5 text-cyan-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -140,6 +153,7 @@
                     <div>
                         <span class="block text-[11px] font-semibold text-indigo-800 uppercase tracking-wider">Tabuada</span>
                         <span id="hudTabuada" class="block text-sm font-bold text-slate-800">Divisão de 1</span>
+                        <span id="hudBNCC" class="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-100/90 hover:bg-emerald-200 px-1.5 py-0.5 rounded-md mt-0.5 cursor-pointer transition-colors" title="Clique para ver os detalhes da BNCC">BNCC: EF02MA05 (2º Ano)</span>
                     </div>
                 </div>
 
@@ -208,13 +222,13 @@
         </div>
 
         <!-- TABULEIRO DE CARTAS DA MEMÓRIA -->
-        <div class="w-full max-w-4xl mx-auto px-4 mb-5">
+        <div class="w-full max-w-4xl mx-auto px-4 mb-8">
             <div id="tabuleiro" class="grid grid-cols-4 sm:grid-cols-5 gap-2.5 sm:gap-4 justify-items-center"></div>
         </div>
     </main>
 
     <footer class="text-center text-xs text-slate-500 py-3 px-4 border-t border-slate-200/60 mt-auto">
-        Jogo da Memória Pedagógico — Tabuada de Divisão • Alinhado à BNCC (EF02MA08, EF03MA04, EF04MA03)
+        Jogo da Memória Pedagógico — Tabuada de Divisão • Alinhado à BNCC (EF02MA05, EF03MA03, EF04MA03, EF05MA07)
     </footer>
 
     <!-- MODAIS DO SISTEMA -->
@@ -227,7 +241,7 @@
                     <path d="M4 4l12 6-12 6V4z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-2">Jogo da Memória da Tabuada de Divisão</h2>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">Jogo da Memória da Tabuada</h2>
             <div class="text-sm text-slate-600 space-y-2 text-left mb-6 leading-relaxed">
                 <p><strong>Objetivo:</strong> Combine pares de cartas com expressões de divisão (ex: 10 ÷ 2) e seus resultados (ex: 5) para aprender as tabuadas de 1 a 10.</p>
                 <p><strong>Controles:</strong> Clique em duas cartas para virá-las. Encontre o par correto correspondente!</p>
@@ -255,7 +269,7 @@
             </div>
             <h2 class="text-xl font-bold text-slate-800 mb-1">Nome do Aluno</h2>
             <p class="text-sm text-slate-600 mb-4">Digite o nome do aluno para identificar o arquivo de progresso:</p>
-            <input type="text" id="inputNome" placeholder="Ex: João Silva" maxlength="40" autocomplete="off" class="w-full px-4 py-3 border-2 border-purple-200 focus:border-purple-500 focus:outline-none rounded-xl text-center text-lg font-semibold text-slate-800 mb-5 transition-colors">
+            <input type="text" id="inputNome" placeholder="Ex: Maria Silva" maxlength="40" autocomplete="off" class="w-full px-4 py-3 border-2 border-purple-200 focus:border-purple-500 focus:outline-none rounded-xl text-center text-lg font-semibold text-slate-800 mb-5 transition-colors">
             <div class="flex gap-3">
                 <button id="cancelarNome" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
                     Cancelar
@@ -348,7 +362,7 @@
                 </svg>
             </div>
             <h2 class="text-2xl font-extrabold text-slate-800 mb-1">Parabéns! 🎉</h2>
-            <p id="gameOverMessage" class="text-base text-slate-600 mb-2 font-medium">Você concluiu todas as 10 tabuadas de divisão!</p>
+            <p id="gameOverMessage" class="text-base text-slate-600 mb-2 font-medium">Você concluiu todas as 10 tabuadas!</p>
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6">
                 <span class="block text-xs uppercase font-bold text-amber-800 tracking-wider">Pontuação Final</span>
                 <span id="gameOverScoreText" class="text-3xl font-black text-amber-900">0 Pontos</span>
@@ -364,7 +378,45 @@
         </div>
     </div>
 
-    <!-- MODAL 6: BNCC -->
+    <!-- MODAL 6: TABUADA / NÍVEL CONCLUÍDO -->
+    <div id="nivelConcluidoModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 ring-8 ring-emerald-50">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h2 id="nivelTitulo" class="text-2xl font-extrabold text-slate-800 mb-1">Tabuada Concluída! 🎉</h2>
+            <p id="nivelMensagem" class="text-sm text-slate-600 mb-4 font-medium">Você encontrou todos os 10 pares com sucesso!</p>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-5 text-left text-xs space-y-1.5 text-slate-700">
+                <div class="flex justify-between">
+                    <span class="font-medium text-slate-500">Tabuada Concluída:</span>
+                    <strong id="nivelTabuadaAtual" class="font-bold text-slate-800">Divisão de 1</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-slate-500">Próxima Tabuada:</span>
+                    <strong id="nivelProximaTabuada" class="font-bold text-emerald-700">Divisão de 2</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-slate-500">Pontuação Atual:</span>
+                    <strong id="nivelPontuacao" class="font-bold text-amber-600">100 pts</strong>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2.5">
+                <button id="btnIrProximaTabuada" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <span>Avançar para a Próxima Tabuada</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
+                <button id="btnFecharNivelModal" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+                    Ver Tabuleiro Completo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: BNCC -->
     <div id="bnccModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] animate-modal">
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 flex items-center justify-between">
@@ -396,14 +448,14 @@
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
                         <div class="flex items-start gap-2.5">
                             <span class="inline-block px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md shrink-0">
-                                EF02MA08
+                                EF02MA05 (2º Ano)
                             </span>
                             <div>
                                 <p class="text-sm text-slate-800 font-medium">
-                                    Construir e utilizar fatos básicos da adição e da subtração e associar a ideias da divisão e multiplicação.
+                                    Construir e utilizar fatos básicos da adição e da subtração para o cálculo mental ou escrito, e associar às ideias da multiplicação e divisão (repartir em partes iguais e metade).
                                 </p>
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Trabalha a introdução às ideias de repartir em partes iguais e cálculo mental de divisão.
+                                    <strong>Aplicação (Tabuadas 1 e 2):</strong> Introdução às ideias iniciais de divisão, metades e repartição em partes iguais.
                                 </p>
                             </div>
                         </div>
@@ -412,14 +464,14 @@
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
                         <div class="flex items-start gap-2.5">
                             <span class="inline-block px-2 py-0.5 text-xs font-bold bg-teal-100 text-teal-800 rounded-md shrink-0">
-                                EF03MA04
+                                EF03MA03 (3º Ano)
                             </span>
                             <div>
                                 <p class="text-sm text-slate-800 font-medium">
-                                    Construir e utilizar fatos básicos da adição, subtração, multiplicação e divisão para o cálculo mental ou escrito.
+                                    Construir e utilizar fatos básicos da adição, multiplicação e divisão para o cálculo mental ou escrito.
                                 </p>
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Consolida o domínio da tabuada de divisão de 1 a 10 no cálculo mental rápido.
+                                    <strong>Aplicação (Tabuadas 3 e 4):</strong> Consolidação e agilidade no cálculo mental dos fatos fundamentais da divisão.
                                 </p>
                             </div>
                         </div>
@@ -428,14 +480,30 @@
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
                         <div class="flex items-start gap-2.5">
                             <span class="inline-block px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-800 rounded-md shrink-0">
-                                EF04MA03
+                                EF04MA03 (4º Ano)
                             </span>
                             <div>
                                 <p class="text-sm text-slate-800 font-medium">
-                                    Mostrar por meio de estratégias diversas a eficácia dos cálculos de multiplicação e divisão.
+                                    Resolver e elaborar problemas com números naturais envolvendo adição, subtração, multiplicação e divisão, utilizando estratégias diversas.
                                 </p>
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Reforça a automatização e a memorização dos quocientes da tabuada de divisão.
+                                    <strong>Aplicação (Tabuadas 5, 6 e 7):</strong> Automatização e reconhecimento imediato dos quocientes da tabuada de divisão.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-800 rounded-md shrink-0">
+                                EF05MA07 (5º Ano)
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Resolver e elaborar problemas de adição, subtração, multiplicação e divisão com números naturais e com números racionais.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    <strong>Aplicação (Tabuadas 8, 9 e 10):</strong> Domínio completo, verificação de operações inversas e raciocínio lógico-matemático.
                                 </p>
                             </div>
                         </div>
@@ -571,7 +639,11 @@
         const mensagemModal = document.getElementById('mensagemModal');
         const confirmarReinicioModal = document.getElementById('confirmarReinicioModal');
         const gameOverModal = document.getElementById('gameOverModal');
+        const nivelConcluidoModal = document.getElementById('nivelConcluidoModal');
         const bnccModal = document.getElementById('bnccModal');
+
+        const btnIrProximaTabuada = document.getElementById('btnIrProximaTabuada');
+        const btnFecharNivelModal = document.getElementById('btnFecharNivelModal');
 
         const iniciarJogo = document.getElementById('iniciarJogo');
         const inputNome = document.getElementById('inputNome');
@@ -612,9 +684,37 @@
             return (paresEncontrados > 0 || score > 0 || currentTabuada > 1);
         }
 
+        function getBNCCInfo(tabuada) {
+            if (tabuada <= 2) {
+                return {
+                    codigo: 'EF02MA05',
+                    ano: '2º Ano',
+                    descricao: 'Fatos básicos de adição/subtração e associação à divisão (repartir em partes iguais e metades).'
+                };
+            } else if (tabuada <= 4) {
+                return {
+                    codigo: 'EF03MA03',
+                    ano: '3º Ano',
+                    descricao: 'Fatos básicos da divisão para o cálculo mental ou escrito.'
+                };
+            } else if (tabuada <= 7) {
+                return {
+                    codigo: 'EF04MA03',
+                    ano: '4º Ano',
+                    descricao: 'Consolidação e resolução de problemas de divisão com estratégias diversas.'
+                };
+            } else {
+                return {
+                    codigo: 'EF05MA07',
+                    ano: '5º Ano',
+                    descricao: 'Operações de divisão com números naturais, verificação de operações inversas e raciocínio lógico.'
+                };
+            }
+        }
+
         // 4. CONTROLE DE MODAIS
         function fecharTodosModais() {
-            [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, bnccModal].forEach(m => {
+            [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, nivelConcluidoModal, bnccModal].forEach(m => {
                 if (m) {
                     m.classList.remove('flex');
                     m.classList.add('hidden');
@@ -645,7 +745,7 @@
 
             if (elAluno) elAluno.innerText = nomeAluno || 'Não informado';
             if (elTabuada) elTabuada.innerText = `Divisão de ${currentTabuada}`;
-            if (elPares) elPares.innerText = `${paresEncontrados} / 10`;
+            if (elPares) elPares.innerText = `${Math.min(10, paresEncontrados)} / 10`;
             if (elScore) elScore.innerText = `${score} pts`;
 
             abrirModal(confirmarReinicioModal);
@@ -679,24 +779,21 @@
         // 5. LÓGICA DO TABULEIRO E RENDERIZAÇÃO
         function gerarCartas() {
             cartas = [];
-            // Para a tabuada de divisão 'N', geramos pares como (N * i) ÷ N = i
             for (let i = 1; i <= 10; i++) {
                 const divisor = currentTabuada;
                 const quociente = i;
                 const dividendo = divisor * quociente;
                 cartas.push({
-                    id: `expr_${dividendo}÷${divisor}`,
+                    id: `expr_${i}`,
                     value: `${dividendo} ÷ ${divisor}`,
                     result: quociente,
-                    fator2: quociente,
                     virada: false,
                     combinada: false
                 });
                 cartas.push({
-                    id: `res_${quociente}_${i}`,
+                    id: `res_${i}`,
                     value: `${quociente}`,
                     result: quociente,
-                    fator2: quociente,
                     virada: false,
                     combinada: false
                 });
@@ -726,7 +823,7 @@
 
                 const wrapper = document.createElement('div');
                 wrapper.id = `card-wrapper-${index}`;
-                wrapper.className = 'card-3d-wrapper w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 cursor-pointer select-none group transition-all duration-300';
+                wrapper.className = 'card-3d-wrapper w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 cursor-pointer select-none group';
 
                 const cardInner = document.createElement('div');
                 cardInner.id = `card-inner-${index}`;
@@ -749,8 +846,10 @@
                 const frontStyleClass = carta.combinada ? 'card-matched-style' : 'card-unmatched-style';
 
                 front.className = `card-face card-face-front ${frontStyleClass} font-bold text-lg sm:text-2xl p-1 text-center`;
+                front.style.backgroundColor = carta.combinada ? '#059669' : '#0284c7';
+                front.style.color = '#ffffff';
                 front.innerHTML = `
-                    <span>${carta.value}</span>
+                    <span class="drop-shadow-xs">${carta.value}</span>
                     <span class="badge-check ${carta.combinada ? '' : 'hidden'} mt-1 p-0.5 bg-white/20 rounded-full">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -796,11 +895,10 @@
                             const frontEl = document.getElementById(`card-front-${idx}`);
                             if (frontEl) {
                                 frontEl.className = 'card-face card-face-front card-matched-style font-bold text-lg sm:text-2xl p-1 text-center transition-all duration-300';
+                                frontEl.style.backgroundColor = '#059669';
+                                frontEl.style.color = '#ffffff';
                                 const badge = frontEl.querySelector('.badge-check');
-                                if (badge) {
-                                    badge.classList.remove('hidden');
-                                    badge.className = 'badge-check mt-1 p-0.5 bg-white/20 rounded-full';
-                                }
+                                if (badge) badge.classList.remove('hidden');
                             }
                         });
 
@@ -810,12 +908,17 @@
                         bloqueado = false;
                         atualizarHUD();
 
-                        if (paresEncontrados === 10) {
+                        if (paresEncontrados >= 10) {
                             if (proximaTabuada) proximaTabuada.disabled = currentTabuada >= maxTabuada;
                             if (currentTabuada >= maxTabuada) {
                                 setTimeout(() => {
                                     audioFx.playVictory();
                                     mostrarGameOver();
+                                }, 400);
+                            } else {
+                                setTimeout(() => {
+                                    audioFx.playVictory();
+                                    mostrarNivelConcluido();
                                 }, 400);
                             }
                         }
@@ -842,25 +945,51 @@
         function atualizarHUD() {
             if (hudAluno) hudAluno.innerText = nomeAluno || '—';
             if (hudTabuada) hudTabuada.innerText = `Divisão de ${currentTabuada}`;
-            if (hudPares) hudPares.innerText = `${paresEncontrados} / 10`;
+            if (hudPares) hudPares.innerText = `${Math.min(10, paresEncontrados)} / 10`;
             if (hudScore) hudScore.innerText = `${score} pts`;
 
-            const podeAvancar = paresEncontrados === 10 && currentTabuada < maxTabuada;
+            const bnccCurrent = getBNCCInfo(currentTabuada);
+            const elHudBNCC = document.getElementById('hudBNCC');
+            if (elHudBNCC) {
+                elHudBNCC.innerText = `BNCC ${bnccCurrent.ano}: ${bnccCurrent.codigo}`;
+            }
+
+            const podeAvancar = paresEncontrados >= 10 && currentTabuada < maxTabuada;
             if (proximaTabuada) {
                 proximaTabuada.disabled = !podeAvancar;
                 if (podeAvancar) {
-                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer';
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-md transition-all cursor-pointer ring-2 ring-emerald-400 ring-offset-1 animate-pulse';
                 } else {
-                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed';
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed opacity-60';
                 }
             }
+        }
+
+        function mostrarNivelConcluido() {
+            const elTitulo = document.getElementById('nivelTitulo');
+            const elMensagem = document.getElementById('nivelMensagem');
+            const elTabuadaAtual = document.getElementById('nivelTabuadaAtual');
+            const elProximaTabuada = document.getElementById('nivelProximaTabuada');
+            const elPontuacao = document.getElementById('nivelPontuacao');
+
+            if (elTitulo) elTitulo.innerText = `Tabuada de Divisão por ${currentTabuada} Concluída! 🎉`;
+            if (elMensagem) {
+                elMensagem.innerText = nomeAluno
+                    ? `Muito bem, ${nomeAluno}! Você encontrou todos os 10 pares com sucesso!`
+                    : 'Muito bem! Você encontrou todos os 10 pares com sucesso!';
+            }
+            if (elTabuadaAtual) elTabuadaAtual.innerText = `Divisão de ${currentTabuada}`;
+            if (elProximaTabuada) elProximaTabuada.innerText = `Divisão de ${currentTabuada + 1}`;
+            if (elPontuacao) elPontuacao.innerText = `${score} pts`;
+
+            abrirModal(nivelConcluidoModal);
         }
 
         function mostrarGameOver() {
             if (gameOverMessage) {
                 gameOverMessage.innerText = nomeAluno
-                    ? `${nomeAluno}, você concluiu todas as 10 tabuadas de divisão!`
-                    : 'Você concluiu todas as 10 tabuadas de divisão!';
+                    ? `${nomeAluno}, você concluiu todas as 10 tabuadas!`
+                    : 'Você concluiu todas as 10 tabuadas!';
             }
             if (gameOverScoreText) gameOverScoreText.innerText = `${score} Pontos`;
             abrirModal(gameOverModal);
@@ -884,6 +1013,7 @@
                 paresEncontrados = 0;
                 cartasViradas = [];
                 bloqueado = false;
+                fecharTodosModais();
                 gerarCartas();
                 renderizarTabuleiroCompleto();
                 atualizarHUD();
@@ -927,14 +1057,6 @@
                 currentTabuada: currentTabuada,
                 paresEncontrados: paresEncontrados,
                 score: score,
-                cartas: cartas.map(c => ({
-                    id: c.id,
-                    value: c.value,
-                    result: c.result,
-                    fator2: c.fator2,
-                    combinada: c.combinada,
-                    virada: c.virada
-                })),
                 data: new Date().toLocaleString('pt-BR')
             };
 
@@ -961,8 +1083,8 @@
                 mostrarMensagem(
                     'Progresso Salvo!',
                     `O progresso de <strong>${nomeAluno || 'Aluno'}</strong> foi salvo com sucesso.<br/><br/>
-                     Tabuada: Divisão de ${currentTabuada}<br/>
-                     Pares: ${paresEncontrados}/10<br/>
+                     Tabuada: ${currentTabuada}<br/>
+                     Pares: ${Math.min(10, paresEncontrados)}/10<br/>
                      Pontuação: ${score} pts`,
                     modalOrigem
                 );
@@ -979,46 +1101,68 @@
             const leitor = new FileReader();
             leitor.onload = function(e) {
                 try {
-                    const base64Str = (e.target.result || '').trim();
-                    const jsonStr = decodeURIComponent(escape(atob(base64Str)));
+                    const rawContent = (e.target.result || '').trim();
+                    let jsonStr = '';
+
+                    // Tenta decodificar Base64; se falhar, tenta usar o texto diretamente
+                    try {
+                        jsonStr = decodeURIComponent(escape(atob(rawContent)));
+                    } catch (errBase64) {
+                        jsonStr = rawContent;
+                    }
+
                     const status = JSON.parse(jsonStr);
 
+                    if (!status || typeof status !== 'object') {
+                        throw new Error('Conteúdo do arquivo inválido');
+                    }
+
                     if (status.tipo && status.tipo !== TIPO_JOGO) {
-                        mostrarMensagem('Arquivo Incorreto', 'Este arquivo não pertence ao jogo de <strong>Divisão</strong>.');
+                        mostrarMensagem('Arquivo Incorreto', 'Este arquivo de progresso pertence a outro jogo.');
                         return;
                     }
 
-                    nomeAluno = status.nomeAluno || '';
-                    currentTabuada = status.currentTabuada || 1;
-                    paresEncontrados = status.paresEncontrados || 0;
-                    score = status.score || 0;
+                    // Sanitização e autocorreção contra dados defeituosos ou corrompidos
+                    nomeAluno = typeof status.nomeAluno === 'string' ? status.nomeAluno.trim().substring(0, 30) : '';
+
+                    const rawTabuada = parseInt(status.currentTabuada, 10);
+                    currentTabuada = isNaN(rawTabuada) ? 1 : Math.max(1, Math.min(10, rawTabuada));
+
+                    const rawPares = parseInt(status.paresEncontrados, 10);
+                    // Ajusta e limita estritamente entre 0 e 10
+                    paresEncontrados = isNaN(rawPares) ? 0 : Math.max(0, Math.min(10, rawPares));
+
+                    const rawScore = parseInt(status.score, 10);
+                    score = isNaN(rawScore) ? 0 : Math.max(0, rawScore);
+
                     cartasViradas = [];
                     bloqueado = false;
 
-                    if (status.cartas && Array.isArray(status.cartas) && status.cartas.length === 20) {
-                        cartas = status.cartas;
-                    } else {
-                        gerarCartas();
-                        for (let i = 1; i <= Math.min(paresEncontrados, 10); i++) {
-                            cartas.forEach(c => {
-                                if (c.fator2 === i) c.combinada = true;
-                            });
-                        }
-                    }
-
+                    gerarCartas();
                     renderizarTabuleiroCompleto();
                     atualizarHUD();
 
-                    mostrarMensagem(
-                        'Progresso Carregado!',
-                        `Bem-vindo de volta${nomeAluno ? ', <strong>' + nomeAluno + '</strong>' : ''}!<br/><br/>
-                         Tabuada: Divisão de ${currentTabuada}<br/>
-                         Pares: ${paresEncontrados}/10<br/>
-                         Pontuação: ${score} pts`
-                    );
+                    if (paresEncontrados >= 10) {
+                        if (currentTabuada < maxTabuada) {
+                            mostrarNivelConcluido();
+                        } else {
+                            mostrarGameOver();
+                        }
+                    } else {
+                        mostrarMensagem(
+                            'Progresso Carregado!',
+                            `Bem-vindo de volta${nomeAluno ? ', <strong>' + nomeAluno + '</strong>' : ''}!<br/><br/>
+                             Tabuada: Divisão por ${currentTabuada}<br/>
+                             Pares: ${paresEncontrados}/10<br/>
+                             Pontuação: ${score} pts`
+                        );
+                    }
                 } catch (erro) {
-                    console.error(erro);
-                    mostrarMensagem('Erro ao Carregar', 'Não foi possível ler o arquivo enviado.');
+                    console.error('Erro no carregamento de progresso:', erro);
+                    mostrarMensagem(
+                        'Arquivo Inválido ou Danificado',
+                        'Não foi possível interpretar o arquivo enviado. Verifique se o arquivo não foi alterado ou danificado.'
+                    );
                 }
             };
             leitor.readAsText(arquivo);
@@ -1092,7 +1236,21 @@
 
         if (inputArquivo) inputArquivo.addEventListener('change', carregarStatus);
 
+        if (btnIrProximaTabuada) {
+            btnIrProximaTabuada.addEventListener('click', () => {
+                avancarTabuada();
+            });
+        }
+
+        if (btnFecharNivelModal) {
+            btnFecharNivelModal.addEventListener('click', () => {
+                fecharTodosModais();
+            });
+        }
+
         if (btnBNCC) btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
+        const elHudBNCC = document.getElementById('hudBNCC');
+        if (elHudBNCC) elHudBNCC.addEventListener('click', () => abrirModal(bnccModal));
         if (fecharBNCC) fecharBNCC.addEventListener('click', fecharTodosModais);
         if (btnFecharBNCCBottom) btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
 
