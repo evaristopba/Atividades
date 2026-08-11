@@ -227,7 +227,7 @@
     </main>
 
     <footer class="text-center text-xs text-slate-500 py-3 px-4 border-t border-slate-200/60 mt-auto">
-        Jogo da Memória Pedagógico — Tabuada de Adição • Alinhado à BNCC (EF01MA06, EF02MA05, EF03MA03)
+        Jogo da Memória Pedagógico — Tabuada de Adição • Alinhado à BNCC (EF01MA08, EF02MA05, EF03MA03, EF04MA03, EF05MA07)
     </footer>
 
     <!-- MODAIS DO SISTEMA -->
@@ -377,7 +377,45 @@
         </div>
     </div>
 
-    <!-- MODAL 6: BNCC -->
+    <!-- MODAL 6: TABUADA / NÍVEL CONCLUÍDO -->
+    <div id="nivelConcluidoModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-modal">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 ring-8 ring-emerald-50">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h2 id="nivelTitulo" class="text-2xl font-extrabold text-slate-800 mb-1">Tabuada Concluída! 🎉</h2>
+            <p id="nivelMensagem" class="text-sm text-slate-600 mb-4 font-medium">Você encontrou todos os 10 pares com sucesso!</p>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-5 text-left text-xs space-y-1.5 text-slate-700">
+                <div class="flex justify-between">
+                    <span class="font-medium text-slate-500">Tabuada Concluída:</span>
+                    <strong id="nivelTabuadaAtual" class="font-bold text-slate-800">Adição de 1</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-slate-500">Próxima Tabuada:</span>
+                    <strong id="nivelProximaTabuada" class="font-bold text-emerald-700">Adição de 2</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-slate-500">Pontuação Atual:</span>
+                    <strong id="nivelPontuacao" class="font-bold text-amber-600">100 pts</strong>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2.5">
+                <button id="btnIrProximaTabuada" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <span>Avançar para a Próxima Tabuada</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
+                <button id="btnFecharNivelModal" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+                    Ver Tabuleiro Completo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: BNCC -->
     <div id="bnccModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] animate-modal">
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 flex items-center justify-between">
@@ -409,14 +447,14 @@
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
                         <div class="flex items-start gap-2.5">
                             <span class="inline-block px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md shrink-0">
-                                EF01MA06
+                                EF01MA08
                             </span>
                             <div>
                                 <p class="text-sm text-slate-800 font-medium">
-                                    Construir fatos básicos da adição e utilizá-los no cálculo mental ou escrito.
+                                    Resolver e elaborar problemas de adição envolvendo números naturais com significados de juntar e acrescentar.
                                 </p>
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Trabalha o reconhecimento imediato dos resultados das somas simples da tabuada.
+                                    Trabalha a construção e o reconhecimento dos fatos básicos da adição no 1º ano.
                                 </p>
                             </div>
                         </div>
@@ -449,6 +487,38 @@
                                 </p>
                                 <p class="text-xs text-slate-500 mt-1">
                                     Reforça a automatização do repertório aditivo para consolidação do cálculo mental.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-800 rounded-md shrink-0">
+                                EF04MA03
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Resolver e elaborar problemas com números naturais envolvendo adição e subtração, utilizando estratégias diversas.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    A fluência nos fatos básicos da adição atua como suporte essencial para agilidade no cálculo mental e resolução de problemas no 4º ano.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <span class="inline-block px-2 py-0.5 text-xs font-bold bg-rose-100 text-rose-800 rounded-md shrink-0">
+                                EF05MA07
+                            </span>
+                            <div>
+                                <p class="text-sm text-slate-800 font-medium">
+                                    Resolver e elaborar problemas de adição e subtração com números naturais e racionais.
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    A automatização das somas fundamentais garante a base necessária para operações complexas, estimativas e cálculo mental no 5º ano.
                                 </p>
                             </div>
                         </div>
@@ -584,7 +654,11 @@
         const mensagemModal = document.getElementById('mensagemModal');
         const confirmarReinicioModal = document.getElementById('confirmarReinicioModal');
         const gameOverModal = document.getElementById('gameOverModal');
+        const nivelConcluidoModal = document.getElementById('nivelConcluidoModal');
         const bnccModal = document.getElementById('bnccModal');
+
+        const btnIrProximaTabuada = document.getElementById('btnIrProximaTabuada');
+        const btnFecharNivelModal = document.getElementById('btnFecharNivelModal');
 
         const iniciarJogo = document.getElementById('iniciarJogo');
         const inputNome = document.getElementById('inputNome');
@@ -627,7 +701,7 @@
 
         // 4. CONTROLE DE MODAIS
         function fecharTodosModais() {
-            [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, bnccModal].forEach(m => {
+            [instrucoesModal, nomeModal, mensagemModal, confirmarReinicioModal, gameOverModal, nivelConcluidoModal, bnccModal].forEach(m => {
                 if (m) {
                     m.classList.remove('flex');
                     m.classList.add('hidden');
@@ -658,7 +732,7 @@
 
             if (elAluno) elAluno.innerText = nomeAluno || 'Não informado';
             if (elTabuada) elTabuada.innerText = `Adição de ${currentTabuada}`;
-            if (elPares) elPares.innerText = `${paresEncontrados} / 10`;
+            if (elPares) elPares.innerText = `${Math.min(10, paresEncontrados)} / 10`;
             if (elScore) elScore.innerText = `${score} pts`;
 
             abrirModal(confirmarReinicioModal);
@@ -771,12 +845,17 @@
                         bloqueado = false;
                         atualizarHUD();
 
-                        if (paresEncontrados === 10) {
+                        if (paresEncontrados >= 10) {
                             if (proximaTabuada) proximaTabuada.disabled = currentTabuada >= maxTabuada;
                             if (currentTabuada >= maxTabuada) {
                                 setTimeout(() => {
                                     audioFx.playVictory();
                                     mostrarGameOver();
+                                }, 400);
+                            } else {
+                                setTimeout(() => {
+                                    audioFx.playVictory();
+                                    mostrarNivelConcluido();
                                 }, 400);
                             }
                         }
@@ -803,18 +882,38 @@
         function atualizarHUD() {
             if (hudAluno) hudAluno.innerText = nomeAluno || '—';
             if (hudTabuada) hudTabuada.innerText = `Adição de ${currentTabuada}`;
-            if (hudPares) hudPares.innerText = `${paresEncontrados} / 10`;
+            if (hudPares) hudPares.innerText = `${Math.min(10, paresEncontrados)} / 10`;
             if (hudScore) hudScore.innerText = `${score} pts`;
 
-            const podeAvancar = paresEncontrados === 10 && currentTabuada < maxTabuada;
+            const podeAvancar = paresEncontrados >= 10 && currentTabuada < maxTabuada;
             if (proximaTabuada) {
                 proximaTabuada.disabled = !podeAvancar;
                 if (podeAvancar) {
-                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-xs transition-all cursor-pointer';
+                    proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-md transition-all cursor-pointer animate-pulse';
                 } else {
                     proximaTabuada.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-slate-300 rounded-xl transition-all cursor-not-allowed';
                 }
             }
+        }
+
+        function mostrarNivelConcluido() {
+            const elTitulo = document.getElementById('nivelTitulo');
+            const elMensagem = document.getElementById('nivelMensagem');
+            const elTabuadaAtual = document.getElementById('nivelTabuadaAtual');
+            const elProximaTabuada = document.getElementById('nivelProximaTabuada');
+            const elPontuacao = document.getElementById('nivelPontuacao');
+
+            if (elTitulo) elTitulo.innerText = `Tabuada de ${currentTabuada} Concluída! 🎉`;
+            if (elMensagem) {
+                elMensagem.innerText = nomeAluno
+                    ? `Muito bem, ${nomeAluno}! Você encontrou todos os 10 pares com sucesso!`
+                    : 'Muito bem! Você encontrou todos os 10 pares com sucesso!';
+            }
+            if (elTabuadaAtual) elTabuadaAtual.innerText = `Adição de ${currentTabuada}`;
+            if (elProximaTabuada) elProximaTabuada.innerText = `Adição de ${currentTabuada + 1}`;
+            if (elPontuacao) elPontuacao.innerText = `${score} pts`;
+
+            abrirModal(nivelConcluidoModal);
         }
 
         function mostrarGameOver() {
@@ -845,6 +944,7 @@
                 paresEncontrados = 0;
                 cartasViradas = [];
                 bloqueado = false;
+                fecharTodosModais();
                 gerarCartas();
                 renderizarTabuleiroCompleto();
                 atualizarHUD();
@@ -920,7 +1020,7 @@
                     'Progresso Salvo!',
                     `O progresso de <strong>${nomeAluno || 'Aluno'}</strong> foi salvo com sucesso.<br/><br/>
                      Tabuada: ${currentTabuada}<br/>
-                     Pares: ${paresEncontrados}/10<br/>
+                     Pares: ${Math.min(10, paresEncontrados)}/10<br/>
                      Pontuação: ${score} pts`,
                     modalOrigem
                 );
@@ -937,19 +1037,40 @@
             const leitor = new FileReader();
             leitor.onload = function(e) {
                 try {
-                    const base64Str = (e.target.result || '').trim();
-                    const jsonStr = decodeURIComponent(escape(atob(base64Str)));
+                    const rawContent = (e.target.result || '').trim();
+                    let jsonStr = '';
+
+                    // Tenta decodificar Base64; se falhar, tenta usar o texto diretamente
+                    try {
+                        jsonStr = decodeURIComponent(escape(atob(rawContent)));
+                    } catch (errBase64) {
+                        jsonStr = rawContent;
+                    }
+
                     const status = JSON.parse(jsonStr);
 
+                    if (!status || typeof status !== 'object') {
+                        throw new Error('Conteúdo do arquivo inválido');
+                    }
+
                     if (status.tipo && status.tipo !== TIPO_JOGO) {
-                        mostrarMensagem('Arquivo Incorreto', 'Este arquivo não pertence ao jogo de <strong>Adição</strong>.');
+                        mostrarMensagem('Arquivo Incorreto', 'Este arquivo de progresso pertence a outro jogo.');
                         return;
                     }
 
-                    nomeAluno = status.nomeAluno || '';
-                    currentTabuada = status.currentTabuada || 1;
-                    paresEncontrados = status.paresEncontrados || 0;
-                    score = status.score || 0;
+                    // Sanitização e autocorreção contra dados defeituosos ou corrompidos
+                    nomeAluno = typeof status.nomeAluno === 'string' ? status.nomeAluno.trim().substring(0, 30) : '';
+
+                    const rawTabuada = parseInt(status.currentTabuada, 10);
+                    currentTabuada = isNaN(rawTabuada) ? 1 : Math.max(1, Math.min(10, rawTabuada));
+
+                    const rawPares = parseInt(status.paresEncontrados, 10);
+                    // Ajusta e limita estritamente entre 0 e 10
+                    paresEncontrados = isNaN(rawPares) ? 0 : Math.max(0, Math.min(10, rawPares));
+
+                    const rawScore = parseInt(status.score, 10);
+                    score = isNaN(rawScore) ? 0 : Math.max(0, rawScore);
+
                     cartasViradas = [];
                     bloqueado = false;
 
@@ -957,16 +1078,27 @@
                     renderizarTabuleiroCompleto();
                     atualizarHUD();
 
-                    mostrarMensagem(
-                        'Progresso Carregado!',
-                        `Bem-vindo de volta${nomeAluno ? ', <strong>' + nomeAluno + '</strong>' : ''}!<br/><br/>
-                         Tabuada: ${currentTabuada}<br/>
-                         Pares: ${paresEncontrados}/10<br/>
-                         Pontuação: ${score} pts`
-                    );
+                    if (paresEncontrados >= 10) {
+                        if (currentTabuada < maxTabuada) {
+                            mostrarNivelConcluido();
+                        } else {
+                            mostrarGameOver();
+                        }
+                    } else {
+                        mostrarMensagem(
+                            'Progresso Carregado!',
+                            `Bem-vindo de volta${nomeAluno ? ', <strong>' + nomeAluno + '</strong>' : ''}!<br/><br/>
+                             Tabuada: ${currentTabuada}<br/>
+                             Pares: ${paresEncontrados}/10<br/>
+                             Pontuação: ${score} pts`
+                        );
+                    }
                 } catch (erro) {
-                    console.error(erro);
-                    mostrarMensagem('Erro ao Carregar', 'Não foi possível ler o arquivo enviado.');
+                    console.error('Erro no carregamento de progresso:', erro);
+                    mostrarMensagem(
+                        'Arquivo Inválido ou Danificado',
+                        'Não foi possível interpretar o arquivo enviado. Verifique se o arquivo não foi alterado ou danificado.'
+                    );
                 }
             };
             leitor.readAsText(arquivo);
@@ -1043,6 +1175,18 @@
         if (btnBNCC) btnBNCC.addEventListener('click', () => abrirModal(bnccModal));
         if (fecharBNCC) fecharBNCC.addEventListener('click', fecharTodosModais);
         if (btnFecharBNCCBottom) btnFecharBNCCBottom.addEventListener('click', fecharTodosModais);
+
+        if (btnIrProximaTabuada) {
+            btnIrProximaTabuada.addEventListener('click', () => {
+                avancarTabuada();
+            });
+        }
+
+        if (btnFecharNivelModal) {
+            btnFecharNivelModal.addEventListener('click', () => {
+                fecharTodosModais();
+            });
+        }
 
         if (toggleSom) {
             toggleSom.addEventListener('click', () => {
