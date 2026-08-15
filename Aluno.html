@@ -5,48 +5,45 @@
     <title>Jogo STOP - Aluno</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 15px; box-sizing: border-box; }
-        #game-container { background: white; padding: 25px 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 800px; }
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #dee2e6; padding-bottom: 10px; }
-        .btn-nav { background-color: #6c757d; color: white; padding: 6px 12px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 0.85em; transition: background 0.2s; }
-        .btn-nav:hover { background-color: #5a6268; }
-        #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 53, 69, 0.85); color: white; font-size: 6em; font-weight: bold; display: flex; justify-content: center; align-items: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
-        #room-id-display { font-size: 1.5em; font-weight: bold; color: #6c757d; margin-bottom: 10px; }
-        #letter-display { font-size: 8em; font-weight: bold; color: #007BFF; margin: 10px 0 20px 0; }
-        input { font-size: 1.1em; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
-        input:disabled { background-color: #e9ecef; cursor: not-allowed; }
-        #categories-container.modo-avancado { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; text-align: left; }
-        #categories-container.modo-simples { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 400px; margin: 0 auto; text-align: left; }
-        .category-item label { display: block; font-size: 1.2em; font-weight: bold; color: #343a40; margin-bottom: 5px; }
-        .category-item input { width: 100%; }
-        #nickname-input { width: 50%; margin-bottom: 20px; }
-        #submit-button { width: 100%; padding: 15px; margin-top: 30px; font-size: 1.3em; font-weight: bold; color: white; background-color: #28a745; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
-        #submit-button:hover:not(:disabled) { opacity: 0.85; }
-        #submit-button:disabled { background-color: #ced4da; }
-
-        /* ESTILOS DO MODAL CUSTOMIZADO (DEMANDA VISUAL) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { margin-top: 0; color: #343a40; }
-        .modal-box p { color: #666; font-size: 1.1em; line-height: 1.4; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f1f5f9; margin: 0; padding: 15px; }
+        #game-container { background: white; padding: 25px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 100%; max-width: 820px; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        .btn-nav { background-color: #475569; color: white; padding: 6px 12px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 0.85em; transition: background 0.2s; }
+        .btn-nav:hover { background-color: #334155; }
+        #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 38, 38, 0.9); color: white; font-size: 5em; font-weight: 900; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #status-overlay span.subtext { font-size: 0.25em; font-weight: 500; margin-top: 10px; opacity: 0.9; }
+        #room-id-display { font-size: 1.2em; font-weight: 700; color: #64748b; margin-bottom: 5px; }
+        #letter-display { font-size: 6.5em; font-weight: 900; color: #2563eb; margin: 0; line-height: 1; text-shadow: 0 2px 10px rgba(37,99,235,0.15); }
+        input { font-size: 1.05em; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; width: 100%; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        input:disabled { background-color: #f8fafc; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        #categories-container.modo-avancado { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px 20px; text-align: left; margin-top: 15px; }
+        #categories-container.modo-simples { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 420px; margin: 15px auto 0 auto; text-align: left; }
+        .category-item label { display: block; font-size: 0.95em; font-weight: 700; color: #334155; margin-bottom: 5px; }
+        #nickname-wrapper { max-width: 360px; margin: 10px auto 20px auto; text-align: left; }
+        #nickname-wrapper label { font-size: 0.9em; font-weight: 700; color: #475569; }
+        #submit-button { width: 100%; padding: 14px; margin-top: 25px; font-size: 1.15em; font-weight: 700; color: white; background-color: #16a34a; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        #submit-button:hover:not(:disabled) { background-color: #15803d; }
+        #submit-button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
         .modal-footer { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
-        #modal-ok { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        #modal-cancel { background: #dc3545; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #modal-ok { background: #16a34a; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        #modal-cancel { background: #64748b; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; }
     </style>
 </head>
 <body>
-    <!-- Estrutura do Modal Customizado -->
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal-box">
-            <h3 id="modal-title">Aviso</h3>
-            <p id="modal-text"></p>
+            <h3 id="modal-title" style="margin-top: 0; color: #1e293b;">Aviso</h3>
+            <p id="modal-text" style="color: #64748b; font-size: 0.95em;"></p>
             <div class="modal-footer">
                 <button id="modal-cancel" style="display: none;">Revisar</button>
                 <button id="modal-ok">OK</button>
             </div>
         </div>
     </div>
-
     <div id="game-container">
         <h1>Carregando sala...</h1>
     </div>
@@ -60,10 +57,8 @@
             projectId: "meu-super-jogo-stop",
             storageBucket: "meu-super-jogo-stop.firebasestorage.app",
             messagingSenderId: "958593186721",
-            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0",
-            measurementId: "G-WGRJWRVBEN"
+            appId: "1:958593186721:web:29fd0897255ccb8e44a9e0"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const gameContainer = document.getElementById('game-container');
@@ -71,187 +66,131 @@
         const roomId = urlParams.get('sala');
         const gameMode = urlParams.get('modo') || 'avancado';
         const friendlyNameFromUrl = urlParams.get('nome');
-        let answersRef;
 
-        const CATEGORIAS_AVANCADO = ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
-        const CATEGORIAS_SIMPLES = ["Nome", "Cor", "Animal", "Brinquedo", "Comida"];
+        // Guardado em localStorage (sobrevive a fechar aba/navegador) e escopado
+        // por sala: se o aluno reconectar na mesma sala, reaproveita o mesmo ID
+        // em vez de virar um "aluno fantasma" duplicado na tabela do professor.
+        let studentUid = roomId ? localStorage.getItem('stop_student_uid_' + roomId) : null;
+        if (!studentUid) {
+            studentUid = 'aluno_' + Math.random().toString(36).substring(2, 9);
+            if (roomId) localStorage.setItem('stop_student_uid_' + roomId, studentUid);
+        }
 
-        // FUNÇÃO APOIO AO MODAL CUSTOMIZADO
+        const CATEGORIAS_PADRAO = gameMode === 'simples' 
+            ? ["Nome", "Cor", "Animal", "Brinquedo", "Comida"]
+            : ["Nome", "Cor", "Animal", "Fruta", "Objeto", "Profissão", "País ou Cidade", "Comida", "Marca Famosa", "Filme ou Série"];
+
         function showCustomModal(title, text, type = 'alert', onConfirm = null) {
             const overlay = document.getElementById('modal-overlay');
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-text').textContent = text;
             const btnCancel = document.getElementById('modal-cancel');
             const btnOk = document.getElementById('modal-ok');
-            
             btnCancel.style.display = (type === 'confirm') ? 'inline-block' : 'none';
             btnOk.textContent = (type === 'confirm') ? 'Sim, Enviar!' : 'OK';
             overlay.style.display = 'flex';
-
             btnOk.onclick = () => { overlay.style.display = 'none'; if(onConfirm) onConfirm(); };
             btnCancel.onclick = () => { overlay.style.display = 'none'; };
         }
 
         if (!roomId) {
-            gameContainer.innerHTML = `
-                <div class="top-nav">
-                    <a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub STOP</a>
-                </div>
-                <h1>ERRO: Link inválido. Peça o link correto ao seu professor.</h1>
-            `;
+            gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div><h2 style="color: #dc2626;">Link inválido. Peça o link da sala ao professor.</h2>';
         } else {
-            const initialDisplayName = friendlyNameFromUrl ? decodeURIComponent(friendlyNameFromUrl) : `sala "${roomId}"`;
-            gameContainer.innerHTML = `
-                <div class="top-nav">
-                    <a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub STOP</a>
-                </div>
-                <h1>Aguardando o professor iniciar o jogo na sala:<br><span style="color: #007bff;">${initialDisplayName}</span></h1>
-            `;
-
+            const initialDisplayName = friendlyNameFromUrl ? decodeURIComponent(friendlyNameFromUrl) : 'Sala: ' + roomId;
+            gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div><h2 style="color: #475569;">Aguardando o professor iniciar na sala:<br><span style="color: #2563eb;">' + initialDisplayName + '</span></h2>';
             const gameStateRef = database.ref('salas/' + roomId);
-            answersRef = database.ref('salas/' + roomId + '/respostas');
-            
-            let isStudentActiveInRoom = false;
-            let hasShownClosedNotice = false;
-
-            function handleRoomClosed() {
-                if (hasShownClosedNotice) return;
-                hasShownClosedNotice = true;
-                const initialDisplayName = friendlyNameFromUrl ? decodeURIComponent(friendlyNameFromUrl) : `sala "${roomId}"`;
-                
-                gameContainer.innerHTML = `
-                    <div class="top-nav">
-                        <a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub STOP</a>
-                    </div>
-                    <div style="padding: 30px 10px; text-align: center;">
-                        <h1 style="color: #dc3545; margin-bottom: 15px;">🚫 Sessão Encerrada</h1>
-                        <p style="font-size: 1.2em; color: #495057; line-height: 1.5; margin-bottom: 25px;">
-                            A sessão para a <strong>${initialDisplayName}</strong> foi encerrada pelo Administrador ou Professor.
-                        </p>
-                        <a href="HUBStop-GM.html" class="btn-nav" style="background-color: #007bff; font-size: 1.1em; padding: 12px 24px; display: inline-block;">
-                            ⬅ Voltar ao Hub STOP
-                        </a>
-                    </div>
-                `;
-                showCustomModal("Sessão Encerrada", "A sala foi encerrada pelo Administrador ou Professor.", "alert");
-            }
+            let previousStatus = 'AGUARDANDO';
 
             gameStateRef.on('value', (snapshot) => {
                 const state = snapshot.val();
-                if (!state || !state.status || state.status === 'ENCERRADA') {
-                    if (isStudentActiveInRoom || document.getElementById('letter-display')) {
-                        handleRoomClosed();
-                    }
+                if (!state || state.status === 'ENCERRADA') {
+                    gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div><h2 style="color: #dc2626;">Sessão Encerrada</h2><p style="color: #64748b;">Esta sala foi encerrada pelo professor.</p>';
                     return;
                 }
-                
-                isStudentActiveInRoom = true;
-                hasShownClosedNotice = false;
-                const currentDisplayName = state.displayName || initialDisplayName;
-                
+                const currentCategories = state.categorias || CATEGORIAS_PADRAO;
                 if (!document.getElementById('letter-display')) {
-                    renderGameStructure(currentDisplayName, gameMode);
-                    setupSubmitListener();
+                    renderGameStructure(state.displayName || initialDisplayName, currentCategories);
                     setupNicknamePersistence();
+                    setupSubmitListener();
                 }
+                if (previousStatus === 'JOGANDO' && state.status !== 'JOGANDO') {
+                    autoSaveAnswers();
+                }
+                previousStatus = state.status;
                 updateGameState(state);
             });
         }
 
-        function updateGameState(state) {
-            const displayName = state.displayName || friendlyNameFromUrl || `Sala: ${roomId}`;
-            document.getElementById('room-id-display').textContent = displayName;
-            document.getElementById('letter-display').textContent = state.letter;
-            const overlay = document.querySelector('#status-overlay');
-            const elementsToToggle = document.querySelectorAll('input, #submit-button');
-            const isPlaying = state.status === 'JOGANDO';
+        function renderGameStructure(displayName, categorias) {
+            let categoriesHTML = '';
+            categorias.forEach((cat, index) => {
+                const idCat = 'cat_' + index;
+                categoriesHTML += '<div class="category-item"><label for="' + idCat + '">' + cat + ':</label><input type="text" id="' + idCat + '" class="game-input" data-category="' + cat + '" autocomplete="off"></div>';
+            });
+            gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div>' +
+                '<div id="room-id-display">' + displayName + '</div><div id="letter-display">?</div>' +
+                '<div id="nickname-wrapper"><label for="nickname-input">Seu Nome / Apelido:</label><input type="text" id="nickname-input" placeholder="Digite seu nome completo ou apelido"></div>' +
+                '<div id="categories-container" class="' + (gameMode === 'simples' ? 'modo-simples' : 'modo-avancado') + '">' + categoriesHTML + '</div>' +
+                '<button id="submit-button">ENVIAR RESPOSTAS</button>' +
+                '<div id="status-overlay" style="display: none;">STOP!<span class="subtext">Respostas travadas e enviadas ao professor</span></div>';
 
+            const inputs = document.querySelectorAll('.game-input');
+            inputs.forEach((input, idx) => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (idx + 1 < inputs.length) inputs[idx + 1].focus();
+                        else document.getElementById('submit-button').click();
+                    }
+                });
+            });
+        }
+
+        function updateGameState(state) {
+            document.getElementById('letter-display').textContent = state.letter || '?';
+            const overlay = document.querySelector('#status-overlay');
+            const elementsToToggle = document.querySelectorAll('.game-input, #submit-button');
+            const isPlaying = state.status === 'JOGANDO';
             overlay.style.display = isPlaying ? 'none' : 'flex';
             elementsToToggle.forEach(el => el.disabled = !isPlaying);
-
-            // REGRA EXTRA DE SEGURANÇA PARA O APELIDO:
-            const nicknameInput = document.getElementById('nickname-input');
-            if (nicknameInput && state.status !== 'AGUARDANDO') {
-                // Se o jogo já começou ou parou, e tem texto no apelido, ele fica travado.
-                if (nicknameInput.value.trim() !== "") {
-                    nicknameInput.disabled = true;
-                }
-            }
-
+            const nickInput = document.getElementById('nickname-input');
+            if (nickInput) nickInput.disabled = isPlaying;
             if (state.status === 'AGUARDANDO') {
-                const categoryInputs = document.querySelectorAll('.game-input');
-                categoryInputs.forEach(input => {
-                    input.value = '';
-                });
-                // No modo aguardando, garante que o apelido possa ser editado
-                if (nicknameInput) nicknameInput.disabled = false;
+                document.querySelectorAll('.game-input').forEach(input => input.value = '');
             }
         }
 
-        function renderGameStructure(displayName, mode) {
-            const categorias = mode === 'simples' ? CATEGORIAS_SIMPLES : CATEGORIAS_AVANCADO;
-            let categoriesHTML = '';
-            categorias.forEach(categoria => {
-                const idCategoria = categoria.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                categoriesHTML += `<div class="category-item"><label for="${idCategoria}">${categoria}:</label><input type="text" id="${idCategoria}" class="game-input" data-category="${categoria}"></div>`;
+        function getAnswersPayload() {
+            const nickname = (document.getElementById('nickname-input')?.value || '').trim() || 'Anônimo';
+            const answers = {};
+            document.querySelectorAll('.game-input').forEach(input => {
+                answers[input.dataset.category] = input.value.trim();
             });
-            const roomNameForDisplay = displayName;
-            const containerClass = mode === 'simples' ? 'modo-simples' : 'modo-avancado';
-            gameContainer.innerHTML = `
-                <div class="top-nav">
-                    <a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub STOP</a>
-                </div>
-                <div id="room-id-display">${roomNameForDisplay}</div>
-                <div id="letter-display">?</div>
-                <hr>
-                <label for="nickname-input" style="font-weight: bold; font-size: 1.2em;">Seu Apelido:</label><br>
-                <input type="text" id="nickname-input" placeholder="Apelido único">
-                <div id="categories-container" class="${containerClass}">${categoriesHTML}</div>
-                <button id="submit-button">ENVIAR RESPOSTAS</button>
-                <div id="status-overlay" style="display: none;">STOP!</div>
-            `;
+            return { studentUid: studentUid, nickname: nickname, respostas: answers, timestamp: Date.now() };
+        }
+
+        function autoSaveAnswers() {
+            database.ref('salas/' + roomId + '/respostas/' + studentUid).set(getAnswersPayload());
         }
 
         function setupNicknamePersistence() {
-            const nicknameInput = document.getElementById('nickname-input');
-            const storageKey = `stopGameNickname_${roomId}`;
-            const savedNickname = sessionStorage.getItem(storageKey);
-            if (savedNickname) {
-                nicknameInput.value = savedNickname;
-            }
-            nicknameInput.addEventListener('input', () => {
-                sessionStorage.setItem(storageKey, nicknameInput.value);
+            const nickInput = document.getElementById('nickname-input');
+            const saved = sessionStorage.getItem('stop_nick_' + roomId) || localStorage.getItem('stop_global_nickname');
+            if (saved && nickInput) nickInput.value = saved;
+            nickInput?.addEventListener('input', () => {
+                sessionStorage.setItem('stop_nick_' + roomId, nickInput.value);
+                localStorage.setItem('stop_global_nickname', nickInput.value);
             });
         }
 
         function setupSubmitListener() {
-            const submitButton = document.getElementById('submit-button');
-            submitButton.addEventListener('click', () => {
+            document.getElementById('submit-button')?.addEventListener('click', () => {
                 const nickname = document.getElementById('nickname-input').value.trim();
-                
-                if (!nickname) { 
-                    showCustomModal("Atenção", "Por favor, preencha seu apelido antes de enviar!"); 
-                    return; 
-                }
-
-                // USO DO MODAL PARA CONFIRMAÇÃO (DEMANDA ATUAL)
-                showCustomModal("Confirmar Envio", "Você deseja enviar suas respostas agora?", "confirm", () => {
-                    const answers = {};
-                    const categoryInputs = document.querySelectorAll('.game-input');
-                    categoryInputs.forEach(input => {
-                        const categoryName = input.dataset.category;
-                        answers[categoryName] = input.value.trim();
-                    });
-
-                    // Engine original de envio preservada
-                    answersRef.child(nickname).set(answers)
-                        .then(() => { 
-                            showCustomModal("Sucesso!", "Suas respostas foram enviadas/atualizadas com sucesso!"); 
-                        })
-                        .catch((error) => { 
-                            console.error('Erro ao enviar respostas:', error); 
-                            showCustomModal("Erro", "Ocorreu um erro ao enviar suas respostas."); 
-                        });
+                if (!nickname) return showCustomModal("Atenção", "Por favor, digite seu nome/apelido!");
+                showCustomModal("Confirmar Envio", "Deseja enviar suas respostas agora?", "confirm", () => {
+                    database.ref('salas/' + roomId + '/respostas/' + studentUid).set(getAnswersPayload())
+                        .then(() => showCustomModal("Sucesso!", "Respostas registradas com sucesso!"))
+                        .catch(err => showCustomModal("Erro", "Falha ao enviar: " + err.message));
                 });
             });
         }
