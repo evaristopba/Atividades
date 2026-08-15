@@ -380,12 +380,14 @@
                 answersTbody.innerHTML = '';
                 const allAnswers = snapshot.val();
                 if (allAnswers) {
-                    for (const nickname in allAnswers) {
-                        const studentData = allAnswers[nickname];
+                    for (const studentId in allAnswers) {
+                        const studentData = allAnswers[studentId];
+                        const displayNickname = (studentData.nickname || '').trim() || 'Anônimo';
+                        const respostas = studentData.respostas || {};
                         const row = answersTbody.insertRow();
-                        row.insertCell().textContent = nickname;
+                        row.insertCell().textContent = displayNickname;
                         categorias.forEach(categoria => {
-                            const answer = studentData[categoria] || '—';
+                            const answer = respostas[categoria] || '—';
                             row.insertCell().textContent = answer;
                         });
                     }
@@ -471,8 +473,8 @@
             const rows = [header];
             let rowIndex = 1; // A primeira linha de dados é a linha 2 no Excel
             for (const nick in ultimDadosScored) {
-                const row = [nick];
                 const student = ultimDadosScored[nick];
+                const row = [student.nickname];
                 categorias.forEach(cat => {
                     row.push(student.answers[cat].palavra || "");
                     row.push(student.answers[cat].pontuacao);
@@ -521,15 +523,17 @@
             categorias.forEach(cat => categoryWordCounts[cat] = {});
 
             // PRIMEIRA PASSAGEM: Coletar palavras E suas versões NORMALIZADAS para identificar unicidade
-            for (const nickname in allAnswers) {
-                const studentData = allAnswers[nickname];
-                scoredResults[nickname] = { totalPontos: 0, answers: {} };
+            for (const studentId in allAnswers) {
+                const studentData = allAnswers[studentId];
+                const displayNickname = (studentData.nickname || '').trim() || 'Anônimo';
+                const respostas = studentData.respostas || {};
+                scoredResults[studentId] = { nickname: displayNickname, totalPontos: 0, answers: {} };
 
                 for (const categoria of categorias) {
-                    const originalWord = (studentData[categoria] || '').trim();
+                    const originalWord = (respostas[categoria] || '').trim();
                     const normalizedWord = normalizeWord(originalWord);
 
-                    scoredResults[nickname].answers[categoria] = {
+                    scoredResults[studentId].answers[categoria] = {
                         palavra: originalWord,
                         normalized: normalizedWord,
                         pontuacao: 0,
@@ -540,15 +544,15 @@
                         if (!categoryWordCounts[categoria][normalizedWord]) {
                             categoryWordCounts[categoria][normalizedWord] = [];
                         }
-                        categoryWordCounts[categoria][normalizedWord].push(nickname);
+                        categoryWordCounts[categoria][normalizedWord].push(studentId);
                     }
                 }
             }
 
             // SEGUNDA PASSAGEM: Atribuir pontuação
-            for (const nickname in allAnswers) {
+            for (const studentId in allAnswers) {
                 for (const categoria of categorias) {
-                    const result = scoredResults[nickname].answers[categoria];
+                    const result = scoredResults[studentId].answers[categoria];
                     const originalWord = result.palavra;
                     const normalizedWord = result.normalized;
 
@@ -577,7 +581,7 @@
                         result.feedback.push('correta', 'única');
                     }
 
-                    scoredResults[nickname].totalPontos += result.pontuacao;
+                    scoredResults[studentId].totalPontos += result.pontuacao;
                 }
             }
 
@@ -586,10 +590,10 @@
             renderTableHeader(categorias, true);
             answersTbody.innerHTML = '';
 
-            for (const nickname in scoredResults) {
-                const studentScoreData = scoredResults[nickname];
+            for (const studentId in scoredResults) {
+                const studentScoreData = scoredResults[studentId];
                 const row = answersTbody.insertRow();
-                row.insertCell().textContent = nickname;
+                row.insertCell().textContent = studentScoreData.nickname;
 
                 categorias.forEach(categoria => {
                     const cell = row.insertCell();
