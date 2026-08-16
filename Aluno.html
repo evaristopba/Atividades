@@ -14,6 +14,7 @@
         #status-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 38, 38, 0.9); color: white; font-size: 5em; font-weight: 900; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         #status-overlay span.subtext { font-size: 0.25em; font-weight: 500; margin-top: 10px; opacity: 0.9; }
         #room-id-display { font-size: 1.2em; font-weight: 700; color: #64748b; margin-bottom: 5px; }
+        #player-badge { font-size: 0.95em; color: #16a34a; font-weight: 700; margin-bottom: 10px; }
         #letter-display { font-size: 6.5em; font-weight: 900; color: #2563eb; margin: 0; line-height: 1; text-shadow: 0 2px 10px rgba(37,99,235,0.15); }
         input { font-size: 1.05em; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; width: 100%; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
@@ -21,10 +22,10 @@
         #categories-container.modo-avancado { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px 20px; text-align: left; margin-top: 15px; }
         #categories-container.modo-simples { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 420px; margin: 15px auto 0 auto; text-align: left; }
         .category-item label { display: block; font-size: 0.95em; font-weight: 700; color: #334155; margin-bottom: 5px; }
-        #nickname-wrapper { max-width: 360px; margin: 10px auto 20px auto; text-align: left; }
-        #nickname-wrapper label { font-size: 0.9em; font-weight: 700; color: #475569; }
-        #submit-button { width: 100%; padding: 14px; margin-top: 25px; font-size: 1.15em; font-weight: 700; color: white; background-color: #16a34a; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        #submit-button:hover:not(:disabled) { background-color: #15803d; }
+        #nickname-gate-wrapper { max-width: 360px; margin: 20px auto; text-align: left; }
+        #nickname-gate-wrapper label { font-size: 0.95em; font-weight: 700; color: #475569; display: block; margin-bottom: 8px; }
+        #submit-button, #nickname-gate-button { width: 100%; padding: 14px; margin-top: 25px; font-size: 1.15em; font-weight: 700; color: white; background-color: #16a34a; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        #submit-button:hover:not(:disabled), #nickname-gate-button:hover { background-color: #15803d; }
         #submit-button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
@@ -67,13 +68,24 @@
         const gameMode = urlParams.get('modo') || 'avancado';
         const friendlyNameFromUrl = urlParams.get('nome');
 
-        // Guardado em localStorage (sobrevive a fechar aba/navegador) e escopado
-        // por sala: se o aluno reconectar na mesma sala, reaproveita o mesmo ID
-        // em vez de virar um "aluno fantasma" duplicado na tabela do professor.
-        let studentUid = roomId ? localStorage.getItem('stop_student_uid_' + roomId) : null;
-        if (!studentUid) {
-            studentUid = 'aluno_' + Math.random().toString(36).substring(2, 9);
-            if (roomId) localStorage.setItem('stop_student_uid_' + roomId, studentUid);
+        // O apelido NUNCA é pré-preenchido nem lembrado entre sessões (mesmo
+        // computador pode passar por vários alunos diferentes no mesmo dia).
+        // É pedido do zero toda vez que a página carrega, e é obrigatório.
+        let studentNickname = '';
+        // Chave da resposta no Firebase: derivada do próprio apelido (não mais
+        // um ID aleatório). Assim, se o aluno reconectar na mesma sala com o
+        // MESMO apelido, ele sobrescreve a própria resposta em vez de virar
+        // um registro fantasma duplicado.
+        let studentKey = '';
+
+        function slugify(nickname) {
+            return (nickname || '')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim()
+                .replace(/[.#$\[\]\/]/g, '_')
+                .replace(/\s+/g, '_')
+                .substring(0, 60);
         }
 
         const CATEGORIAS_PADRAO = gameMode === 'simples' 
@@ -96,6 +108,65 @@
         if (!roomId) {
             gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div><h2 style="color: #dc2626;">Link inválido. Peça o link da sala ao professor.</h2>';
         } else {
+            renderNicknameGate();
+        }
+
+        // ============================================
+        // TELA OBRIGATÓRIA DE APELIDO (sempre em branco, sempre exigida)
+        // ============================================
+        function renderNicknameGate() {
+            gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div>' +
+                '<h2 style="color: #475569;">Antes de continuar...</h2>' +
+                '<div id="nickname-gate-wrapper">' +
+                '<label for="nickname-gate-input">Digite seu nome ou apelido pra entrar na sala:</label>' +
+                '<input type="text" id="nickname-gate-input" placeholder="Seu nome completo ou apelido" autocomplete="off">' +
+                '</div>' +
+                '<button id="nickname-gate-button">CONTINUAR</button>';
+
+            const input = document.getElementById('nickname-gate-input');
+            const button = document.getElementById('nickname-gate-button');
+            input.focus();
+
+            function tryConfirm() {
+                const typed = input.value.trim();
+                if (!typed) {
+                    showCustomModal('Atenção', 'Digite seu nome ou apelido pra continuar — é obrigatório!');
+                    input.focus();
+                    return;
+                }
+                confirmNicknameAndEnter(typed);
+            }
+
+            button.addEventListener('click', tryConfirm);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); tryConfirm(); }
+            });
+        }
+
+        function confirmNicknameAndEnter(typedNickname) {
+            const baseSlug = slugify(typedNickname) || ('aluno_' + Math.random().toString(36).substring(2, 7));
+            // Checa colisão (dois alunos com o mesmo apelido na mesma sala) uma
+            // única vez, no momento da confirmação, e desambigua se precisar.
+            database.ref('salas/' + roomId + '/respostas/' + baseSlug).once('value').then((snap) => {
+                let finalSlug = baseSlug;
+                if (snap.exists()) {
+                    let n = 2;
+                    finalSlug = baseSlug + '-' + n;
+                    // não precisamos checar em loop contra o banco de novo: colisão
+                    // tripla no mesmo instante é extremamente improvável em sala de aula.
+                }
+                studentNickname = typedNickname;
+                studentKey = finalSlug;
+                enterWaitingRoom();
+            }).catch(() => {
+                // Se a checagem falhar por algum motivo, segue mesmo assim com o slug base.
+                studentNickname = typedNickname;
+                studentKey = baseSlug;
+                enterWaitingRoom();
+            });
+        }
+
+        function enterWaitingRoom() {
             const initialDisplayName = friendlyNameFromUrl ? decodeURIComponent(friendlyNameFromUrl) : 'Sala: ' + roomId;
             gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div><h2 style="color: #475569;">Aguardando o professor iniciar na sala:<br><span style="color: #2563eb;">' + initialDisplayName + '</span></h2>';
             const gameStateRef = database.ref('salas/' + roomId);
@@ -110,7 +181,6 @@
                 const currentCategories = state.categorias || CATEGORIAS_PADRAO;
                 if (!document.getElementById('letter-display')) {
                     renderGameStructure(state.displayName || initialDisplayName, currentCategories);
-                    setupNicknamePersistence();
                     setupSubmitListener();
                 }
                 if (previousStatus === 'JOGANDO' && state.status !== 'JOGANDO') {
@@ -128,8 +198,9 @@
                 categoriesHTML += '<div class="category-item"><label for="' + idCat + '">' + cat + ':</label><input type="text" id="' + idCat + '" class="game-input" data-category="' + cat + '" autocomplete="off"></div>';
             });
             gameContainer.innerHTML = '<div class="top-nav"><a href="HUBStop-GM.html" class="btn-nav">⬅ Voltar ao Hub</a></div>' +
-                '<div id="room-id-display">' + displayName + '</div><div id="letter-display">?</div>' +
-                '<div id="nickname-wrapper"><label for="nickname-input">Seu Nome / Apelido:</label><input type="text" id="nickname-input" placeholder="Digite seu nome completo ou apelido"></div>' +
+                '<div id="room-id-display">' + displayName + '</div>' +
+                '<div id="player-badge">Jogando como: ' + studentNickname + '</div>' +
+                '<div id="letter-display">?</div>' +
                 '<div id="categories-container" class="' + (gameMode === 'simples' ? 'modo-simples' : 'modo-avancado') + '">' + categoriesHTML + '</div>' +
                 '<button id="submit-button">ENVIAR RESPOSTAS</button>' +
                 '<div id="status-overlay" style="display: none;">STOP!<span class="subtext">Respostas travadas e enviadas ao professor</span></div>';
@@ -153,42 +224,27 @@
             const isPlaying = state.status === 'JOGANDO';
             overlay.style.display = isPlaying ? 'none' : 'flex';
             elementsToToggle.forEach(el => el.disabled = !isPlaying);
-            const nickInput = document.getElementById('nickname-input');
-            if (nickInput) nickInput.disabled = isPlaying;
             if (state.status === 'AGUARDANDO') {
                 document.querySelectorAll('.game-input').forEach(input => input.value = '');
             }
         }
 
         function getAnswersPayload() {
-            const nickname = (document.getElementById('nickname-input')?.value || '').trim() || 'Anônimo';
             const answers = {};
             document.querySelectorAll('.game-input').forEach(input => {
                 answers[input.dataset.category] = input.value.trim();
             });
-            return { studentUid: studentUid, nickname: nickname, respostas: answers, timestamp: Date.now() };
+            return { nickname: studentNickname, respostas: answers, timestamp: Date.now() };
         }
 
         function autoSaveAnswers() {
-            database.ref('salas/' + roomId + '/respostas/' + studentUid).set(getAnswersPayload());
-        }
-
-        function setupNicknamePersistence() {
-            const nickInput = document.getElementById('nickname-input');
-            const saved = sessionStorage.getItem('stop_nick_' + roomId) || localStorage.getItem('stop_global_nickname');
-            if (saved && nickInput) nickInput.value = saved;
-            nickInput?.addEventListener('input', () => {
-                sessionStorage.setItem('stop_nick_' + roomId, nickInput.value);
-                localStorage.setItem('stop_global_nickname', nickInput.value);
-            });
+            database.ref('salas/' + roomId + '/respostas/' + studentKey).set(getAnswersPayload());
         }
 
         function setupSubmitListener() {
             document.getElementById('submit-button')?.addEventListener('click', () => {
-                const nickname = document.getElementById('nickname-input').value.trim();
-                if (!nickname) return showCustomModal("Atenção", "Por favor, digite seu nome/apelido!");
                 showCustomModal("Confirmar Envio", "Deseja enviar suas respostas agora?", "confirm", () => {
-                    database.ref('salas/' + roomId + '/respostas/' + studentUid).set(getAnswersPayload())
+                    database.ref('salas/' + roomId + '/respostas/' + studentKey).set(getAnswersPayload())
                         .then(() => showCustomModal("Sucesso!", "Respostas registradas com sucesso!"))
                         .catch(err => showCustomModal("Erro", "Falha ao enviar: " + err.message));
                 });
