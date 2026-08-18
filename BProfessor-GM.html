@@ -1008,6 +1008,51 @@
             font-weight: 700;
         }
 
+        /* Seleção múltipla (checkboxes) - usado em beneficiarAluno */
+        .modal-input-box .opcao-marcar-todos {
+            font-weight: 700;
+            color: #ffd93d;
+            background: rgba(255, 217, 61, 0.08);
+            margin-bottom: 8px;
+        }
+
+        .modal-input-box .opcao-marcar-todos:hover {
+            background: rgba(255, 217, 61, 0.18);
+        }
+
+        .modal-input-box .opcao-check .checkbox-visual {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #8aaab5;
+            border-radius: 4px;
+            margin-right: 10px;
+            vertical-align: middle;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .modal-input-box .opcao-check.selecionado .checkbox-visual {
+            background: #5a8f6c;
+            border-color: #5a8f6c;
+        }
+
+        .modal-input-box .opcao-check.selecionado .checkbox-visual::after {
+            content: "✓";
+            position: absolute;
+            left: 2px;
+            top: -2px;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* opcao-check já ganha "✓" à direita do CSS .selecionado::after original;
+           para checkboxes o indicador fica só no quadradinho à esquerda */
+        .modal-input-box .opcao-check.selecionado::after {
+            content: "";
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -1492,6 +1537,17 @@
         const db = firebase.database();
 
         // ============================================
+        // HORÁRIO DO SERVIDOR (evita divergência de relógio local do PC/tablet)
+        // ============================================
+        let serverTimeOffset = 0;
+        db.ref('.info/serverTimeOffset').on('value', (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
+        function agoraServidor() {
+            return Date.now() + serverTimeOffset;
+        }
+
+        // ============================================
         // ESTADO
         // ============================================
         let sessaoAtual = null;
@@ -1551,7 +1607,12 @@
         };
 
         function obterNomeSala(codigo, salaNomeOriginal) {
-            if (salaNomeOriginal && salaNomeOriginal !== 'undefined' && salaNomeOriginal !== '---' && String(salaNomeOriginal).trim() !== '') {
+            if (salaNomeOriginal && 
+                salaNomeOriginal !== 'undefined' && 
+                salaNomeOriginal !== '---' && 
+                String(salaNomeOriginal).trim() !== '' && 
+                String(salaNomeOriginal).trim().toLowerCase() !== 'sem nome' && 
+                String(salaNomeOriginal).trim().toLowerCase() !== 'sala sem nome') {
                 return salaNomeOriginal;
             }
             if (codigo && MAPA_SALAS[codigo]) {
@@ -1849,11 +1910,11 @@
         }
 
         // ============================================
-        // RECALCULAR ALUNOS ONLINE (HEARTBEAT)
+        // RECALCULAR ALUNO ONLINE (HEARTBEAT)
         // ============================================
         function recalcularAlunosOnline(participantes) {
             const onlineIds = [];
-            const agora = Date.now();
+            const agora = agoraServidor();
             for (const [id, data] of Object.entries(participantes)) {
                 const temNome = data.nome && data.nome.trim() !== '' && !data.nome.startsWith('Aluno ');
                 // O heartbeat expira em 90s se não for atualizado pelo aluno (tolerância ideal para abas em segundo plano)
@@ -2224,6 +2285,106 @@
                     });
                 });
                 
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Variante de inputSelecao com checkboxes (seleção múltipla). Retorna um array
+        // de op.valor selecionados, ou null se cancelado. Usada em beneficiarAluno()
+        // para aplicar várias correções de marcação de uma só vez.
+        async function inputSelecaoMultipla(titulo, subtitulo, opcoes, textoBotao = '✅ Confirmar') {
+            try {
+                let opcoesHtml = `
+                    <div class="opcao-item opcao-marcar-todos" data-role="marcar-todos">
+                        <span>☑️ Selecionar todos (${opcoes.length})</span>
+                    </div>
+                    <div class="opcoes-list">
+                `;
+                opcoes.forEach((op, idx) => {
+                    opcoesHtml += `
+                        <div class="opcao-item opcao-check" data-index="${idx}" data-valor="${op.valor}">
+                            <span><span class="checkbox-visual"></span>${op.texto}</span>
+                            <span class="num">#${idx + 1}</span>
+                        </div>
+                    `;
+                });
+                opcoesHtml += '</div>';
+
+                const camposDiv = document.getElementById('inputCampos');
+                camposDiv.innerHTML = opcoesHtml;
+
+                document.getElementById('inputIcon').textContent = '📋';
+                document.getElementById('inputTitulo').textContent = titulo;
+                document.getElementById('inputSubtitulo').innerHTML = subtitulo;
+                document.getElementById('inputErro').classList.remove('active');
+
+                const btnConfirmar = document.getElementById('btnInputConfirmar');
+                const btnCancelar = document.getElementById('btnInputCancelar');
+
+                const textoBase = textoBotao;
+                btnConfirmar.className = 'btn btn-confirmar';
+                btnConfirmar.textContent = textoBase;
+
+                const newBtnConfirmar = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(newBtnConfirmar, btnConfirmar);
+
+                const newBtnCancelar = btnCancelar.cloneNode(true);
+                btnCancelar.parentNode.replaceChild(newBtnCancelar, btnCancelar);
+
+                function atualizarTextoBotao() {
+                    const total = document.querySelectorAll('.opcao-check.selecionado').length;
+                    document.getElementById('btnInputConfirmar').textContent = total > 0
+                        ? `${textoBase} (${total})`
+                        : textoBase;
+                }
+
+                document.querySelectorAll('.opcao-check').forEach(item => {
+                    item.addEventListener('click', function() {
+                        this.classList.toggle('selecionado');
+                        document.getElementById('inputErro').classList.remove('active');
+                        atualizarTextoBotao();
+                    });
+                });
+
+                const btnTodos = document.querySelector('.opcao-marcar-todos');
+                let todosMarcados = false;
+                btnTodos.addEventListener('click', function() {
+                    todosMarcados = !todosMarcados;
+                    document.querySelectorAll('.opcao-check').forEach(el => {
+                        el.classList.toggle('selecionado', todosMarcados);
+                    });
+                    atualizarTextoBotao();
+                });
+
+                document.getElementById('modalInput').classList.add('active');
+
+                return new Promise((resolve, reject) => {
+                    document.getElementById('btnInputConfirmar').addEventListener('click', function() {
+                        const selecionados = Array.from(document.querySelectorAll('.opcao-check.selecionado'))
+                            .map(el => el.dataset.valor);
+                        if (selecionados.length === 0) {
+                            document.getElementById('inputErro').textContent = '❌ Selecione ao menos uma opção!';
+                            document.getElementById('inputErro').classList.add('active');
+                            return;
+                        }
+                        fecharModalInput();
+                        resolve(selecionados);
+                    });
+
+                    document.getElementById('btnInputCancelar').addEventListener('click', function() {
+                        fecharModalInput();
+                        reject(new Error('Cancelado pelo usuário'));
+                    });
+
+                    document.getElementById('modalInput').addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            fecharModalInput();
+                            reject(new Error('Cancelado pelo usuário'));
+                        }
+                    });
+                });
+
             } catch (e) {
                 return null;
             }
@@ -3289,9 +3450,6 @@
         }
 
         // ============================================
-        // BENEFICIAR ALUNO
-        // ============================================
-        // ============================================
         // BENEFICIAR ALUNO (CORRIGIR "COMER BARRIGA")
         // ============================================
         async function beneficiarAluno() {
@@ -3347,50 +3505,73 @@
                 };
             });
 
-            const escolha = await inputSelecao(
-                '🔧 Beneficiar Aluno (Comer Barriga)',
-                'Selecione o aluno que deseja beneficiar. O sistema permitirá que ele marque retroativamente o número sorteado que ele esqueceu de anotar:',
-                opcoes,
-                '🎯 Permitir Marcar'
-            );
+            let escolhas;
+            try {
+                escolhas = await inputSelecaoMultipla(
+                    '🔧 Beneficiar Aluno (Comer Barriga)',
+                    'Selecione todas as pendências que deseja liberar. O sistema permitirá marcar retroativamente os números sorteados que os alunos esqueceram de anotar:',
+                    opcoes,
+                    '🎯 Permitir Marcar'
+                );
+            } catch (e) {
+                return; // cancelado pelo usuário
+            }
 
-            if (escolha === null) return;
-            const idx = parseInt(escolha);
-            const beneficiado = esquecidos[idx];
+            if (!escolhas || escolhas.length === 0) return;
 
-            const alunoRef = db.ref(`bingo/sessoes/${sessaoAtual}/participantes/${beneficiado.alunoId}`);
-            alunoRef.transaction((alunoData) => {
-                if (!alunoData) return alunoData;
-                const marcacoes = alunoData.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
-                
-                // Marcar o número esquecido
-                marcacoes[beneficiado.r][beneficiado.c] = true;
-                alunoData.marcacoes = marcacoes;
+            const beneficiados = escolhas.map(v => esquecidos[parseInt(v)]);
 
-                // Verificar se com essa marcação ele ganhou
-                if (checkBingo(marcacoes, alunoData.cartela, sorteados)) {
-                    alunoData.venceu = true;
-                }
-                return alunoData;
-            }, (err, committed, snap) => {
-                if (err || !committed) {
-                    showToast('❌ Erro ao beneficiar o aluno.', 'error');
-                    return;
-                }
+            // Agrupar por aluno para aplicar todas as marcações dele numa única transação,
+            // evitando retries desnecessários quando o mesmo aluno tem várias pendências.
+            const porAluno = {};
+            for (const item of beneficiados) {
+                if (!porAluno[item.alunoId]) porAluno[item.alunoId] = [];
+                porAluno[item.alunoId].push(item);
+            }
 
-                const alunoData = snap.val();
-                if (alunoData && alunoData.venceu) {
-                    // Adicionar à lista de vencedores da sessão
-                    const vencedoresAtuais = sessao.vencedores || [];
-                    if (!vencedoresAtuais.includes(beneficiado.alunoId)) {
-                        vencedoresAtuais.push(beneficiado.alunoId);
-                        db.ref(`bingo/sessoes/${sessaoAtual}/vencedores`).set(vencedoresAtuais);
+            let totalSucesso = 0;
+            let totalVencedores = [];
+            const promessas = Object.entries(porAluno).map(([alunoId, itens]) => {
+                const alunoRef = db.ref(`bingo/sessoes/${sessaoAtual}/participantes/${alunoId}`);
+                return alunoRef.transaction((alunoData) => {
+                    if (!alunoData) return alunoData;
+                    const marcacoes = alunoData.marcacoes || Array.from({ length: 5 }, () => Array(5).fill(false));
+
+                    for (const item of itens) {
+                        marcacoes[item.r][item.c] = true;
                     }
-                    showToast(`🏆 ${beneficiado.nome} recuperou o número ${beneficiado.numero} e venceu o BINGO! 🎉`, 'winner');
-                } else {
-                    showToast(`📌 ${beneficiado.nome} recuperou o número ${beneficiado.numero} com sucesso!`, 'info');
-                }
+                    alunoData.marcacoes = marcacoes;
+
+                    if (checkBingo(marcacoes, alunoData.cartela, sorteados)) {
+                        alunoData.venceu = true;
+                    }
+                    return alunoData;
+                }).then(({ committed, snapshot }) => {
+                    if (!committed) return;
+                    totalSucesso += itens.length;
+                    const alunoData = snapshot.val();
+                    const nome = itens[0].nome;
+                    if (alunoData && alunoData.venceu) {
+                        totalVencedores.push({ alunoId, nome });
+                    }
+                }).catch(() => {
+                    showToast(`❌ Erro ao beneficiar ${itens[0].nome}.`, 'error');
+                });
             });
+
+            await Promise.all(promessas);
+
+            if (totalVencedores.length > 0) {
+                const vencedoresAtuais = sessao.vencedores || [];
+                for (const v of totalVencedores) {
+                    if (!vencedoresAtuais.includes(v.alunoId)) vencedoresAtuais.push(v.alunoId);
+                }
+                await db.ref(`bingo/sessoes/${sessaoAtual}/vencedores`).set(vencedoresAtuais);
+                const nomes = totalVencedores.map(v => v.nome).join(', ');
+                showToast(`🏆 ${nomes} recuperaram número(s) e venceram o BINGO! 🎉`, 'winner');
+            } else if (totalSucesso > 0) {
+                showToast(`📌 ${totalSucesso} número(s) recuperado(s) com sucesso para ${Object.keys(porAluno).length} aluno(s)!`, 'info');
+            }
         }
 
         // ============================================
