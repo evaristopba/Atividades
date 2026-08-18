@@ -996,7 +996,7 @@
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <a href="#" id="btnVoltar" class="back-btn" onclick="window.location.href='HUBBingo-GM.html'" style="margin-bottom: 0; display: none;">← Voltar</a>
+                    <a href="HUBBingo-GM.html" id="btnVoltar" class="back-btn" style="margin-bottom: 0; display: inline-flex; align-items: center; gap: 5px;">← Voltar ao Hub</a>
                     <button onclick="abrirModalPedagogico()" style="padding: 6px 14px; font-size: 0.85rem; background: rgba(212, 163, 115, 0.15); border: 1px solid #d4a373; color: #f2e9d0; border-radius: 20px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">📖 Regras & BNCC</button>
                     <button id="btnSairSala" onclick="confirmarSairSessao()" style="display: none; padding: 6px 14px; font-size: 0.85rem; background: rgba(220, 53, 69, 0.15); border: 1px solid #e06666; color: #ff8a8a; border-radius: 20px; cursor: pointer; font-weight: 600; align-items: center; gap: 5px; transition: all 0.2s; border-style: solid;">🚪 Sair da Sala</button>
                 </div>
@@ -1023,6 +1023,10 @@
                 Sala: <strong id="aguardandoSala">---</strong>
             </p>
             <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera"></p>
+            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a href="HUBBingo-GM.html" class="btn-nav" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">⬅ Voltar ao Hub</a>
+                <button onclick="voltarParaLista()" style="background: rgba(255,255,255,0.1); color: #f2e9d0; border: 1px solid rgba(255,255,255,0.2); padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer;">🔄 Trocar de Sala</button>
+            </div>
         </div>
 
         <!-- ===== JOGO ATIVO ===== -->
@@ -1373,7 +1377,12 @@
         };
 
         function obterNomeSala(codigo, salaNomeOriginal) {
-            if (salaNomeOriginal && salaNomeOriginal !== 'undefined' && salaNomeOriginal !== '---' && String(salaNomeOriginal).trim() !== '') {
+            if (salaNomeOriginal && 
+                salaNomeOriginal !== 'undefined' && 
+                salaNomeOriginal !== '---' && 
+                String(salaNomeOriginal).trim() !== '' && 
+                String(salaNomeOriginal).trim().toLowerCase() !== 'sem nome' && 
+                String(salaNomeOriginal).trim().toLowerCase() !== 'sala sem nome') {
                 return salaNomeOriginal;
             }
             if (codigo && MAPA_SALAS[codigo]) {
@@ -1773,13 +1782,12 @@
             sessaoId = sala;
             meuNome = nome;
 
-            // Esconder o botão Voltar definitivamente ao começar a jogar
+            // Garantir que os botões de navegação e saída estejam visíveis
             const btnVoltar = document.getElementById('btnVoltar');
             if (btnVoltar) {
-                btnVoltar.style.display = 'none';
+                btnVoltar.style.display = 'inline-flex';
             }
 
-            // Exibir o botão de Sair da Sala
             const btnSairSala = document.getElementById('btnSairSala');
             if (btnSairSala) {
                 btnSairSala.style.display = 'inline-flex';
@@ -1814,9 +1822,17 @@
                         <span class="status-icon">🔴</span>
                         <h2>Sessão encerrada</h2>
                         <p>O professor finalizou esta sessão.</p>
+                        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                            <a href="HUBBingo-GM.html" class="btn-nav" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">⬅ Voltar ao Hub</a>
+                            <button onclick="voltarParaLista()" style="background: rgba(255,255,255,0.1); color: #f2e9d0; border: 1px solid rgba(255,255,255,0.2); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">🔄 Trocar de Sala</button>
+                        </div>
                     `;
                     document.getElementById('jogoAtivo').style.display = 'none';
                     document.getElementById('aguardando').style.display = 'block';
+                    const btnVoltar = document.getElementById('btnVoltar');
+                    if (btnVoltar) btnVoltar.style.display = 'inline-flex';
+                    const btnSair = document.getElementById('btnSairSala');
+                    if (btnSair) btnSair.style.display = 'none';
                     return;
                 }
 
@@ -1943,6 +1959,10 @@
                             <p style="font-size: 0.9rem; color: #8aaab5; margin-top: 10px;">
                                 ⏳ Aguardando o professor liberar novas vagas...
                             </p>
+                            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                                <a href="HUBBingo-GM.html" class="btn-nav" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">⬅ Voltar ao Hub</a>
+                                <button onclick="voltarParaLista()" style="background: rgba(255,255,255,0.1); color: #f2e9d0; border: 1px solid rgba(255,255,255,0.2); padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer;">🔄 Trocar de Sala</button>
+                            </div>
                         `;
                         document.getElementById('aguardando').style.display = 'block';
                         document.getElementById('jogoAtivo').style.display = 'none';
@@ -2151,6 +2171,10 @@
                                     Sala: <strong id="aguardandoSala">${salaNome}</strong>
                                 </p>
                                 <p style="color: #6a8a95; font-size: 0.85rem; margin-top: 5px;" id="nomeEspera">👤 ${meuNome}</p>
+                                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                                    <a href="HUBBingo-GM.html" class="btn-nav" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">⬅ Voltar ao Hub</a>
+                                    <button onclick="voltarParaLista()" style="background: rgba(255,255,255,0.1); color: #f2e9d0; border: 1px solid rgba(255,255,255,0.2); padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer;">🔄 Trocar de Sala</button>
+                                </div>
                             `;
                         }
                         document.getElementById('aguardando').style.display = 'block';
@@ -2164,6 +2188,10 @@
                             <span class="status-icon">🔴</span>
                             <h2>Jogo finalizado</h2>
                             <p>O professor finalizou esta sessão.</p>
+                            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                                <a href="HUBBingo-GM.html" class="btn-nav" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">⬅ Voltar ao Hub</a>
+                                <button onclick="voltarParaLista()" style="background: rgba(255,255,255,0.1); color: #f2e9d0; border: 1px solid rgba(255,255,255,0.2); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">🔄 Trocar de Sala</button>
+                            </div>
                         `;
                         document.getElementById('aguardando').style.display = 'block';
                         document.getElementById('jogoAtivo').style.display = 'none';
@@ -2714,10 +2742,11 @@
                         const vagasTexto = isCheia ? 'Cheia' : `${ocupados}/${totalVagas} Alunos`;
                         const vagasClasse = isCheia ? 'sala-item-vagas cheia' : 'sala-item-vagas';
                         
+                        const nomeExibicao = obterNomeSala(id, sessao.salaNome);
                         html += `
                             <div class="sala-item" onclick="selecionarSalaDaLista('${id}', ${isCheia})">
                                 <div class="sala-item-info">
-                                    <span class="sala-item-nome">🏫 ${sessao.salaNome || 'Sem Nome'}</span>
+                                    <span class="sala-item-nome">🏫 ${nomeExibicao}</span>
                                     <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;">
                                         <span class="sala-item-detalhe" style="font-family: monospace;">Cód: ${id}</span>
                                         <span class="sala-item-detalhe" ${badgeClasse} style="font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 600;">${statusTexto}</span>
@@ -2806,20 +2835,7 @@
         function configurarBotaoVoltar() {
             const btnVoltar = document.getElementById('btnVoltar');
             if (!btnVoltar) return;
-
-            const hostname = window.location.hostname;
-            const isLocal = hostname === 'localhost' || 
-                            hostname === '127.0.0.1' || 
-                            hostname === '' ||
-                            hostname.includes('ais-dev-') || 
-                            hostname.includes('ais-pre-') || 
-                            window.location.protocol === 'file:';
-
-            if (isLocal) {
-                btnVoltar.style.display = 'inline-block';
-            } else {
-                btnVoltar.style.display = 'none';
-            }
+            btnVoltar.style.display = 'inline-block';
         }
 
         // ============================================
@@ -2866,18 +2882,27 @@
                 return;
             }
 
-            const nome = await inputTexto(
-                '🎯 Entrar no BINGO',
-                'Digite seu <strong>nome</strong> ou <strong>apelido</strong> para jogar:',
-                'Ex: João, Maria, Pedrinho...'
-            );
-
-            if (!nome || nome.trim() === '') {
-                const nomeAleatorio = `Aluno_${Math.floor(Math.random() * 1000)}`;
-                inicializar(sala, nomeAleatorio);
-            } else {
-                inicializar(sala, nome.trim());
+            let nome = null;
+            while (!nome || nome.trim() === '') {
+                try {
+                    nome = await inputTexto(
+                        '🎯 Entrar no BINGO',
+                        'Digite seu <strong>nome completo ou apelido</strong> para entrar na sala:<br><small style="color: #e06666; font-weight: bold;">(Obrigatório para identificação pelo professor)</small>',
+                        'Ex: Ana Carolina, João Pedro, Maria...'
+                    );
+                    if (!nome || nome.trim() === '') {
+                        // Se o modal fechou sem preencher
+                        window.location.href = 'HUBBingo-GM.html';
+                        return;
+                    }
+                } catch (e) {
+                    // Se o aluno clicou em Cancelar ou fechou o modal
+                    window.location.href = 'HUBBingo-GM.html';
+                    return;
+                }
             }
+
+            inicializar(sala, nome.trim());
         }
 
         init();
