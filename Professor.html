@@ -329,9 +329,9 @@
             gameControlsDiv.style.display = 'block';
             document.getElementById('current-room-id').textContent = fullDisplayName;
             
-            // Gera o link correto para o aluno apontando para Aluno.html
+            // Gera o link correto para o aluno apontando para aluno.html
             const currentHref = window.location.href;
-            const baseUrlWithoutPage = currentHref.split('?')[0].replace(/professor\.html/i, 'Aluno.html');
+            const baseUrlWithoutPage = currentHref.split('?')[0].replace(/professor\.html/i, 'aluno.html').replace(/Professor-GM\.html/i, 'aluno.html');
             const studentUrl = `${baseUrlWithoutPage}?sala=${roomId}&modo=${gameMode}`;
             document.getElementById('student-link').textContent = studentUrl;
             renderTableHeader(currentActiveCategories);
