@@ -529,33 +529,156 @@
             padding: 20px;
             border-radius: 12px;
             border: 3px solid var(--secondary-color);
-            max-width: 500px;
+            max-width: 640px;
+            width: 95%;
             text-align: center;
-            font-size: 1.4em;
+            font-size: 1.2em;
             color: var(--secondary-color);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-content h2 {
-            margin: 0 0 15px;
+            margin: 0 0 12px;
             color: #FF69B4;
-            font-size: 2em;
+            font-size: 1.7em;
         }
         .modal-content p {
-            margin: 10px 0;
-            line-height: 1.5;
+            margin: 8px 0;
+            line-height: 1.45;
         }
         .modal-content button {
             background-color: #32CD32;
             color: #000;
             border: none;
-            padding: 12px 25px;
-            font-size: 1.5em;
+            padding: 12px 22px;
+            font-size: 1.3em;
             font-weight: bold;
             border-radius: 10px;
             cursor: pointer;
-            margin-top: 15px;
+            margin: 8px 6px;
         }
-        .modal-content button:hover {
-            background-color: #228B22;
+        .modal-content button:hover { background-color: #228B22; }
+        .modal-content .btn-secondary {
+            background-color: #4682B4;
+            color: #fff;
+        }
+        .modal-content .btn-secondary:hover { background-color: #2F4F7F; }
+        .modal-content input[type="text"],
+        .modal-content input[type="file"] {
+            width: 90%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            text-align: center;
+            margin: 12px 0;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 9px 14px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            background: #E8F5E9;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 0.95em;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: #000;
+            border-color: #FFA500;
+        }
+        .tab-content { display: none; text-align: left; }
+        .tab-content.active { display: block; }
+        .bncc-skill, .pc-pillar {
+            background: #FFF;
+            border-left: 5px solid #FF69B4;
+            padding: 9px 12px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.92em;
+        }
+        .pc-pillar { border-left-color: #2196F3; }
+        .bncc-skill strong, .pc-pillar strong {
+            color: #C71585;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .pc-pillar strong { color: #1565C0; }
+        .bncc-year {
+            font-size: 1.1em;
+            color: #4682B4;
+            margin: 14px 0 6px;
+            border-bottom: 2px dashed #87CEEB;
+            padding-bottom: 3px;
+        }
+        .bncc-intro {
+            background: #FFFACD;
+            padding: 11px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.92em;
+            border: 2px solid #FFD700;
+        }
+        .save-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .save-buttons button {
+            background: #9c27b0;
+            color: white;
+            border: 2px solid #7b1fa2;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .save-buttons button:hover { background: #7b1fa2; }
+        #restore-btn { background: #2196f3; border-color: #1565c0; }
+        #restore-btn:hover { background: #1565c0; }
+        .level-btn.completed {
+            background-color: #BDBDBD !important;
+            color: #666 !important;
+            border-color: #9E9E9E !important;
+            cursor: not-allowed !important;
+            text-decoration: line-through;
+        }
+        .app-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.15em;
+            z-index: 3000;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            animation: toastIn 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+        .app-toast.success { background: #2e7d32; }
+        .app-toast.error { background: #c62828; }
+        .app-toast.info { background: #1565c0; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .app-feedback-modal .modal-content {
+            max-width: 480px;
         }
 
         .credits-footer {
@@ -634,6 +757,10 @@
             </div>
             <button id="instructions-btn">Instruções</button>
             <button id="high-contrast-btn">Alto Contraste</button>
+            <div class="save-buttons">
+                <button id="save-progress-btn">💾 Salvar Progresso</button>
+                <button id="restore-btn">📂 Abrir Arquivo</button>
+            </div>
         </div>
         
         <div class="game-wrapper">
@@ -664,14 +791,76 @@
         
         <div id="instructions-modal" class="modal">
             <div class="modal-content">
-                <h2>🤖 Bem-vindo ao Robô das Sílabas! 🎉</h2>
-                <p>Ajude o robô 🤖 a encontrar a sílaba certa para completar a palavra!</p>
-                <p>1. Veja a palavra com uma sílaba faltando (___) e a imagem de dica.</p>
-                <p>2. Use as setas ➡️⬅️⬆️⬇️ para guiar o robô até a sílaba certa.</p>
-                <p>3. Cuidado com as bombas 💣 e sílabas erradas!</p>
-                <p>4. Clique em "Verificar" ou aperte Enter para o robô andar.</p>
-                <p>5. Se achar que não tem caminho, aperte "H" para tentar outra vez!</p>
+                <h2>🤖 Robô das Sílabas</h2>
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="como-jogar">Como Jogar</button>
+                    <button class="tab-btn" data-tab="lingua">Língua Portuguesa</button>
+                    <button class="tab-btn" data-tab="computacao">Pensamento Computacional</button>
+                </div>
+                <div id="tab-como-jogar" class="tab-content active">
+                    <p style="text-align:center;"><strong>Ajude o robô 🤖 a encontrar a sílaba certa!</strong></p>
+                    <p>1. Veja a palavra com uma sílaba faltando (___) e a imagem de dica.</p>
+                    <p>2. Use as setas ➡️⬅️⬆️⬇️ para programar o caminho do robô.</p>
+                    <p>3. Cuidado com as bombas 💣 e sílabas erradas!</p>
+                    <p>4. Clique em <strong>Verificar</strong> ou aperte <strong>Enter</strong>.</p>
+                    <p>5. Tecla <strong>H</strong> = novo desafio | Tecla <strong>C</strong> = limpar.</p>
+                    <p>6. <strong>Salvar Progresso</strong>: digite seu nome e baixe o arquivo.</p>
+                    <p>7. <strong>Abrir Arquivo</strong>: selecione o .txt salvo para continuar.</p>
+                    <p>8. Níveis já concluídos ficam bloqueados (não dá para voltar neles).</p>
+                </div>
+                <div id="tab-lingua" class="tab-content">
+                    <div class="bncc-intro">Este jogo desenvolve a <strong>consciência fonológica</strong> (BNCC – Língua Portuguesa, 1º e 2º anos).</div>
+                    <div class="bncc-year">📘 1º Ano</div>
+                    <div class="bncc-skill"><strong>(EF01LP06)</strong> Segmentar oralmente palavras em sílabas.</div>
+                    <div class="bncc-skill"><strong>(EF01LP07)</strong> Identificar fonemas e sua representação por letras.</div>
+                    <div class="bncc-skill"><strong>(EF01LP08)</strong> Relacionar elementos sonoros (sílabas, fonemas, partes de palavras) com sua representação escrita.</div>
+                    <div class="bncc-skill"><strong>(EF01LP09)</strong> Comparar palavras, identificando semelhanças e diferenças entre sons de sílabas iniciais.</div>
+                    <div class="bncc-year">📗 2º Ano</div>
+                    <div class="bncc-skill"><strong>(EF02LP02)</strong> Segmentar palavras em sílabas e remover e substituir sílabas iniciais, mediais ou finais para criar novas palavras.</div>
+                    <div class="bncc-skill"><strong>(EF02LP04)</strong> Ler e escrever corretamente palavras com sílabas CV, V, CVC, CCV, identificando que existem vogais em todas as sílabas.</div>
+                </div>
+                <div id="tab-computacao" class="tab-content">
+                    <div class="bncc-intro">O jogo trabalha o <strong>Pensamento Computacional</strong> (BNCC Computação).</div>
+                    <div class="bncc-year">💻 1º Ano</div>
+                    <div class="pc-pillar"><strong>(EF01CO02)</strong> Identificar e seguir sequências de passos aplicados no dia a dia para resolver problemas.</div>
+                    <div class="pc-pillar"><strong>(EF01CO03)</strong> Reorganizar e criar sequências de passos em meios físicos ou digitais, relacionando essas sequências à palavra “Algoritmos”.</div>
+                    <div class="bncc-year">💻 2º Ano</div>
+                    <div class="pc-pillar"><strong>(EF02CO02)</strong> Criar e simular algoritmos representados em linguagem oral, escrita ou pictográfica, construídos como sequências com repetições simples.</div>
+                    <div class="bncc-year">🧩 Pilares no jogo</div>
+                    <div class="pc-pillar"><strong>Algoritmo</strong> Montar a sequência de setas.</div>
+                    <div class="pc-pillar"><strong>Decomposição</strong> Dividir o caminho em movimentos menores.</div>
+                    <div class="pc-pillar"><strong>Depuração</strong> Analisar o erro e tentar de novo.</div>
+                    <div class="pc-pillar"><strong>Padrões</strong> Observar a grade e planejar a rota.</div>
+                </div>
                 <button id="close-modal">Começar!</button>
+            </div>
+        </div>
+
+        <div id="save-modal" class="modal">
+            <div class="modal-content">
+                <h2>💾 Salvar Progresso</h2>
+                <p>Digite o nome do aluno. O arquivo será baixado com esse nome.</p>
+                <input type="text" id="aluno-nome-input" placeholder="Ex: MARIA_SILVA" maxlength="40" style="text-transform:uppercase">
+                <button id="download-progress-btn">📥 Baixar Arquivo</button>
+                <button id="close-save-modal" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="restore-modal" class="modal">
+            <div class="modal-content">
+                <h2>📂 Abrir Arquivo de Progresso</h2>
+                <p>Selecione o arquivo .txt que foi salvo com o nome do aluno:</p>
+                <input type="file" id="restore-file-input" accept=".txt,text/plain">
+                <button id="do-restore-btn">📂 Carregar e Recuperar</button>
+                <button id="close-restore-modal" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="feedback-modal" class="modal app-feedback-modal">
+            <div class="modal-content">
+                <h2 id="feedback-title">Mensagem</h2>
+                <p id="feedback-message"></p>
+                <button id="feedback-ok-btn">OK</button>
             </div>
         </div>
     </div>
@@ -719,6 +908,20 @@
             "SA-PA-TO": "https://i.postimg.cc/8cD2N7P3/sapato.jpg",
             "TE-CLA-DO": "https://i.postimg.cc/3RjqS3CZ/teclado.jpg",
             "VI-DRO": "https://i.postimg.cc/vZDpYFbQ/vidro.jpg",
+            "A-BA-CA-TE": "https://i.postimg.cc/MH7bjsrf/abacate.jpg",
+            "A-VI-ÃO": "https://i.postimg.cc/3N5FNM9H/aviao.jpg",
+            "BA-NA-NA": "https://i.postimg.cc/W3J7spGn/banana.jpg",
+            "BA-TA-TA": "https://i.postimg.cc/cJzmqtnC/batata.jpg",
+            "BO-NE-CA": "https://i.postimg.cc/HLn2P9jF/boneca.jpg",
+            "CA-BE-LO": "https://i.postimg.cc/SxDdrvQW/cabelo.jpg",
+            "CA-MI-SA": "https://i.postimg.cc/SxyVch4S/camisa.jpg",
+            "CO-E-LHO": "https://i.postimg.cc/CLCmZKWr/coelho.jpg",
+            "FA-RI-NHA": "https://i.postimg.cc/Pfw6jyKj/farinha.jpg",
+            "GA-LI-NHA": "https://i.postimg.cc/sXtwWGjq/galinha.jpg",
+            "PA-TO": "https://i.postimg.cc/66nhS356/pato.jpg",
+            "PEI-XE": "https://i.postimg.cc/yYCLYRrS/peixe.jpg",
+            "PI-PO-CA": "https://i.postimg.cc/Y0Y8z2j9/pipoca.jpg",
+            "TE-LE-FO-NE": "https://i.postimg.cc/FRfT1V40/telefone.png",
             "default": "https://i.postimg.cc/76P4KvhC/default.png"
         };
 
@@ -756,6 +959,155 @@
         let currentTargetIndex = 0;
         let unlockedLevels = [1];
 
+        // ========== Mensagens (sem alert nativo) ==========
+        let toastTimeout = null;
+        function showToast(text, type = 'info') {
+            const old = document.querySelector('.app-toast');
+            if (old) old.remove();
+            const el = document.createElement('div');
+            el.className = 'app-toast ' + type;
+            el.textContent = text;
+            document.body.appendChild(el);
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => { if (el.parentNode) el.remove(); }, 4500);
+        }
+
+        function showFeedback(title, message, onClose) {
+            document.getElementById('feedback-title').textContent = title;
+            document.getElementById('feedback-message').textContent = message;
+            const modal = document.getElementById('feedback-modal');
+            modal.style.display = 'flex';
+            const btn = document.getElementById('feedback-ok-btn');
+            const handler = () => {
+                modal.style.display = 'none';
+                btn.removeEventListener('click', handler);
+                if (onClose) onClose();
+            };
+            btn.addEventListener('click', handler);
+        }
+
+        // ========== BASE62 – Progresso ==========
+        const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        function toBase62(num) {
+            if (num === 0n) return "0";
+            let s = "";
+            let n = BigInt(num);
+            while (n > 0n) {
+                s = BASE62[Number(n % 62n)] + s;
+                n = n / 62n;
+            }
+            return s;
+        }
+
+        function fromBase62(str) {
+            let n = 0n;
+            for (const c of str) {
+                let v;
+                if (c >= '0' && c <= '9') v = BigInt(c.charCodeAt(0) - 48);
+                else if (c >= 'A' && c <= 'Z') v = BigInt(c.charCodeAt(0) - 55);
+                else v = BigInt(c.charCodeAt(0) - 61);
+                n = n * 62n + v;
+            }
+            return n;
+        }
+
+        function gerarCodigoProgresso() {
+            const maxReached = Math.max(...unlockedLevels, currentLevel);
+            let n = 0n;
+            n = (n << 3n) | BigInt(maxReached & 7);
+            n = (n << 3n) | BigInt(currentLevel & 7);
+            n = (n << 2n) | BigInt(lives & 3);
+            n = (n << 4n) | BigInt(correctAttempts & 15);
+            n = (n << 14n) | BigInt(Math.min(score, 16383) & 16383);
+            n = (n << 14n) | BigInt(Math.min(levelStartScore, 16383) & 16383);
+            return toBase62(n);
+        }
+
+        function recuperarDoCodigo(codigo) {
+            try {
+                let n = fromBase62(codigo.trim());
+                const levelStartScoreR = Number(n & 16383n); n >>= 14n;
+                const scoreR = Number(n & 16383n); n >>= 14n;
+                const correctAttemptsR = Number(n & 15n); n >>= 4n;
+                const livesR = Number(n & 3n); n >>= 2n;
+                const currentLevelR = Number(n & 7n); n >>= 3n;
+                const maxReachedR = Number(n & 7n);
+                if (maxReachedR < 1 || maxReachedR > 5 || currentLevelR < 1 || currentLevelR > 5) return null;
+                if (currentLevelR > maxReachedR) return null;
+                return {
+                    maxReached: maxReachedR,
+                    currentLevel: currentLevelR,
+                    lives: Math.max(1, Math.min(3, livesR || TOTAL_LIVES)),
+                    correctAttempts: Math.min(correctAttemptsR, CHALLENGES_PER_LEVEL - 1),
+                    score: scoreR,
+                    levelStartScore: levelStartScoreR
+                };
+            } catch (e) { return null; }
+        }
+
+        function aplicarProgresso(dados) {
+            // Só o nível atual fica acessível; níveis vencidos permanecem bloqueados
+            unlockedLevels = [dados.currentLevel];
+            currentLevel = dados.currentLevel;
+            lives = dados.lives;
+            correctAttempts = dados.correctAttempts;
+            score = dados.score;
+            levelStartScore = dados.levelStartScore;
+            availableWords[currentLevel] = [...(allWords[currentLevel] || [])];
+            updateUI();
+            newChallenge();
+        }
+
+        function baixarArquivoProgresso(nomeAluno) {
+            const codigo = gerarCodigoProgresso();
+            const data = new Date();
+            const conteudo = `========================================
+CÓDIGO DE PROGRESSO - ROBÔ DAS SÍLABAS
+========================================
+Nome do Aluno: ${nomeAluno}
+Data: ${data.toLocaleDateString('pt-BR')}
+Horário: ${data.toLocaleTimeString('pt-BR')}
+Nível atual: ${currentLevel}
+Desafios no nível: ${correctAttempts} de ${CHALLENGES_PER_LEVEL}
+Pontuação: ${score}
+Vidas: ${lives}
+
+CÓDIGO COMPLETO:
+${codigo}
+
+========================================
+INSTRUÇÕES:
+1. Guarde este arquivo
+2. No jogo, clique em "Abrir Arquivo" e selecione este arquivo
+3. Níveis já concluídos permanecem bloqueados
+========================================`;
+            const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${nomeAluno}_robo_silabas.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        function extrairCodigoDoArquivo(texto) {
+            const linhas = texto.split(/\r?\n/);
+            for (let i = 0; i < linhas.length; i++) {
+                if (linhas[i].includes('CÓDIGO COMPLETO:')) {
+                    const mesma = linhas[i].replace('CÓDIGO COMPLETO:', '').trim();
+                    if (mesma && /^[0-9A-Za-z]+$/.test(mesma)) return mesma;
+                    if (i + 1 < linhas.length) {
+                        const prox = linhas[i + 1].trim();
+                        if (/^[0-9A-Za-z]+$/.test(prox)) return prox;
+                    }
+                }
+            }
+            const match = texto.match(/[A-Za-z0-9]{6,}/);
+            return match ? match[0] : null;
+        }
+
         const levelSettings = {
             1: { bombs: 4, decoys: 2, syllables: 2 },
             2: { bombs: 6, decoys: 3, syllables: 3 },
@@ -767,7 +1119,7 @@
         const internalWordList = {
             "1": [
                 "BA-LA", "BE-BÊ", "BI-CO", "BO-LO", "BU-LE", "CA-BO", "CO-CA", "CU-BO", 
-                "DA-MA", "DI-CA", "CO-PO", "PI-PA", "FO-CA", "GA-TO", "LU-VA", "MA-TO", "SO-FÁ"
+                "DA-MA", "DI-CA", "CO-PO", "PI-PA", "FO-CA", "GA-TO", "LU-VA", "PA-TO", "SO-FÁ"
             ],
             "2": [
                 "CA-NE-TA", "CE-BO-LA", "CI-DA-DE", "CO-RU-JA", "MO-NI-TOR", "TE-CLA-DO", 
@@ -792,7 +1144,29 @@
             ]
         };
 
+        // Função para pré-carregar imagens
+        async function preloadImages() {
+            console.log("Iniciando preload de imagens...");
+            const promises = Object.values(imageMap).map(url => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = url;
+                    img.onload = () => {
+                        console.log(`Imagem carregada com sucesso: ${url}`);
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        console.warn(`Falha ao pré-carregar imagem: ${url}`);
+                        resolve(); // Resolve mesmo em erro para não travar o jogo
+                    };
+                });
+            });
+            await Promise.all(promises);
+            console.log("Preload de imagens concluído.");
+        }
+
         async function init() {
+            await preloadImages(); // Pré-carrega todas as imagens
             await loadWords();
             loadGameStateFromURL();
             createGrid();
@@ -817,33 +1191,17 @@
         function loadGameStateFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const levelFromUrl = parseInt(urlParams.get('level'));
-
-            // Define os níveis desbloqueados com base no parâmetro da URL
             if (!isNaN(levelFromUrl) && levelFromUrl >= 1 && levelFromUrl <= 5) {
-                // Desbloqueia apenas os níveis de 1 até levelFromUrl
-                unlockedLevels = [];
-                for (let i = 1; i <= levelFromUrl; i++) {
-                    unlockedLevels.push(i);
-                }
                 currentLevel = levelFromUrl;
             } else {
-                // Sem parâmetro ou inválido, inicia no Nível 1, com apenas Nível 1 desbloqueado
-                unlockedLevels = [1];
                 currentLevel = 1;
             }
-
-            // Reseta variáveis para o nível atual
+            unlockedLevels = [currentLevel];
             score = 0;
             levelStartScore = 0;
             correctAttempts = 0;
             lives = TOTAL_LIVES;
             availableWords[currentLevel] = [...allWords[currentLevel]];
-
-            // Salva unlockedLevels no localStorage
-            localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
-            console.log(`loadGameStateFromURL: currentLevel=${currentLevel}, unlockedLevels=${unlockedLevels}`);
-
-            // Atualiza UI e inicia novo desafio
             updateUI();
             newChallenge();
         }
@@ -1043,30 +1401,36 @@
                     const levelScore = Math.max(100 - (commandQueue.length * 5), 10);
                     score += levelScore;
                     correctAttempts++;
-                    alert(`Boa! Você acertou a palavra ${currentSyllables.join('-')} (${currentWord})!`);
+                    showToast(`Boa! Acertou: ${currentSyllables.join('-')} (${currentWord})`, 'success');
                     
                     setTimeout(() => {
                         if (correctAttempts >= CHALLENGES_PER_LEVEL && currentLevel < 5) {
                             currentLevel++;
-                            if (!unlockedLevels.includes(currentLevel)) {
-                                unlockedLevels.push(currentLevel);
-                                localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
-                            }
+                            unlockedLevels = [currentLevel]; // níveis vencidos ficam bloqueados
                             correctAttempts = 0;
                             lives = TOTAL_LIVES;
                             levelStartScore = score;
                             availableWords[currentLevel] = [...allWords[currentLevel]];
-                            alert(`Parabéns! Você passou para o Nível ${currentLevel}!`);
+                            showFeedback('Nível concluído!', `Parabéns! Você passou para o Nível ${currentLevel}. O nível anterior ficou bloqueado.`, () => {
+                                updateUI();
+                                newChallenge();
+                            });
+                        } else if (correctAttempts >= CHALLENGES_PER_LEVEL && currentLevel === 5) {
+                            showFeedback('Fim do jogo!', 'Parabéns! Você concluiu todos os níveis!', () => {
+                                updateUI();
+                                newChallenge();
+                            });
+                        } else {
+                            updateUI();
+                            newChallenge();
                         }
-                        updateUI();
-                        newChallenge();
-                    }, 2000);
+                    }, 1800);
                 } else {
                     handleError("Ops! Você não chegou ao alvo correto!", path);
                 }
             } catch (error) {
                 console.error(`Erro em checkResult: ${error.message}`);
-                alert(`Ocorreu um erro interno. Por favor, tente novamente.`);
+                showToast('Erro interno. Tentando de novo...', 'error');
                 newChallenge();
             }
         }
@@ -1077,28 +1441,25 @@
                 lives--;
                 drawPath(path, false);
                 player.classList.add('exploded');
-                const feedbackMessage = `\nA palavra era: ${currentSyllables.join('-')} (${currentWord})`;
+                const feedbackMessage = ` A palavra era: ${currentSyllables.join('-')} (${currentWord})`;
                 
                 displayCompletedWord();
                 if (lives <= 0) {
-                    alert(`Fim de Jogo! A palavra era ${currentSyllables.join('-')} (${currentWord}). Vamos tentar de novo!`);
-                    lives = TOTAL_LIVES;
-                    correctAttempts = 0;
-                    score = levelStartScore;
-                    availableWords[currentLevel] = [...allWords[currentLevel]];
-                    updateUI();
-                    setTimeout(() => {
+                    showFeedback('Fim de Jogo!', `A palavra era ${currentSyllables.join('-')} (${currentWord}). Vamos tentar de novo neste nível!`, () => {
+                        lives = TOTAL_LIVES;
+                        correctAttempts = 0;
+                        score = levelStartScore;
+                        availableWords[currentLevel] = [...allWords[currentLevel]];
+                        updateUI();
                         newChallenge();
-                    }, 2000);
+                    });
                 } else {
-                    alert(message + feedbackMessage);
-                    setTimeout(() => {
-                        newChallenge();
-                    }, 2000);
+                    showToast(message + feedbackMessage, 'error');
+                    setTimeout(() => { newChallenge(); }, 2000);
                 }
             } catch (error) {
                 console.error(`Erro em handleError: ${error.message}`);
-                alert(`Ocorreu um erro interno. Por favor, tente novamente.`);
+                showToast('Erro interno. Tentando de novo...', 'error');
                 newChallenge();
             }
         }
@@ -1134,11 +1495,8 @@
             document.querySelectorAll(".level-btn").forEach(button => {
                 button.addEventListener("click", () => {
                     const level = parseInt(button.dataset.level);
-                    if (unlockedLevels.includes(level)) {
-                        currentLevel = level;
-                        correctAttempts = 0;
-                        lives = TOTAL_LIVES;
-                        levelStartScore = score;
+                    // Só o nível atual é jogável; vencidos e futuros ficam bloqueados
+                    if (level === currentLevel && !button.disabled) {
                         availableWords[currentLevel] = [...allWords[currentLevel]];
                         updateUI();
                         newChallenge();
@@ -1163,6 +1521,71 @@
             
             document.getElementById("close-modal").addEventListener("click", () => {
                 document.getElementById('instructions-modal').style.display = 'none';
+            });
+
+            // Abas
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    const target = document.getElementById('tab-' + tabId);
+                    if (target) target.classList.add('active');
+                });
+            });
+
+            // Salvar: pede nome e baixa arquivo
+            document.getElementById("save-progress-btn").addEventListener("click", () => {
+                document.getElementById('aluno-nome-input').value = '';
+                document.getElementById('save-modal').style.display = 'flex';
+            });
+            document.getElementById("download-progress-btn").addEventListener("click", () => {
+                const nome = document.getElementById('aluno-nome-input').value.trim().toUpperCase().replace(/\s+/g, '_');
+                if (!nome) {
+                    showToast('Digite o nome do aluno.', 'error');
+                    return;
+                }
+                baixarArquivoProgresso(nome);
+                document.getElementById('save-modal').style.display = 'none';
+                showToast(`Arquivo "${nome}_robo_silabas.txt" baixado!`, 'success');
+            });
+            document.getElementById("close-save-modal").addEventListener("click", () => {
+                document.getElementById('save-modal').style.display = 'none';
+            });
+
+            // Recuperar: abre o arquivo .txt
+            document.getElementById("restore-btn").addEventListener("click", () => {
+                document.getElementById('restore-file-input').value = '';
+                document.getElementById('restore-modal').style.display = 'flex';
+            });
+            document.getElementById("do-restore-btn").addEventListener("click", () => {
+                const fileInput = document.getElementById('restore-file-input');
+                const file = fileInput.files[0];
+                if (!file) {
+                    showToast('Selecione um arquivo .txt', 'error');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const codigo = extrairCodigoDoArquivo(e.target.result);
+                    if (!codigo) {
+                        showFeedback('Erro', 'Não foi possível encontrar o código no arquivo.');
+                        return;
+                    }
+                    const dados = recuperarDoCodigo(codigo);
+                    if (!dados) {
+                        showFeedback('Erro', 'Código inválido no arquivo. Verifique se é o arquivo correto.');
+                        return;
+                    }
+                    aplicarProgresso(dados);
+                    document.getElementById('restore-modal').style.display = 'none';
+                    showFeedback('Progresso recuperado!', `Nível atual: ${dados.currentLevel}\nPontuação: ${dados.score}\nNíveis anteriores permanecem bloqueados.`);
+                };
+                reader.readAsText(file, 'UTF-8');
+            });
+            document.getElementById("close-restore-modal").addEventListener("click", () => {
+                document.getElementById('restore-modal').style.display = 'none';
             });
             
             document.getElementById("btn-right").addEventListener("click", () => addCommand("➡️"));
@@ -1192,9 +1615,9 @@
                 else if (e.key.toLowerCase() === 'h') {
                     const allObstacles = [...bombPositions, ...decoyPositions];
                     if (isPathPossible(startPos, targetPos, allObstacles)) {
-                        alert("Confirmamos que existe um caminho possível.");
+                        showToast('Confirmamos que existe um caminho possível.', 'info');
                     } else {
-                        alert("Você estava certo! Gerando um novo desafio.");
+                        showToast('Você estava certo! Gerando um novo desafio.', 'info');
                         newChallenge();
                     }
                 }
@@ -1209,8 +1632,16 @@
             
             document.querySelectorAll('.level-btn').forEach(button => {
                 const level = parseInt(button.dataset.level);
-                button.classList.toggle('active', level === currentLevel);
-                button.disabled = !unlockedLevels.includes(level);
+                button.classList.remove('active', 'completed');
+                if (level < currentLevel) {
+                    button.classList.add('completed');
+                    button.disabled = true;
+                } else if (level === currentLevel) {
+                    button.classList.add('active');
+                    button.disabled = false;
+                } else {
+                    button.disabled = true;
+                }
             });
         }
 
