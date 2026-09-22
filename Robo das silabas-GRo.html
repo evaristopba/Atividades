@@ -191,18 +191,75 @@
         }
 
         #word-image {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 120px;
+            max-height: 120px;
             margin: 10px auto;
             border-radius: 8px;
             border: 2px solid var(--secondary-color);
+            cursor: zoom-in;
+            transition: transform 0.15s ease;
+            background: #fff;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #word-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         #word-image img {
             width: 100%;
             height: 100%;
+            max-width: 120px;
+            max-height: 120px;
             object-fit: contain;
             border-radius: 6px;
-            onerror="this.src='https://i.postimg.cc/76P4KvhC/default.png'; console.log('Imagem falhou: ' + this.getAttribute('src'));"
+            display: block;
+        }
+        /* Ampliar imagem — só a figura, sem revelar a palavra */
+        #image-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 2500;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: zoom-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #image-lightbox.open { display: flex; }
+        #image-lightbox img {
+            max-width: min(90vw, 480px);
+            max-height: min(75vh, 480px);
+            object-fit: contain;
+            border-radius: 12px;
+            border: 4px solid #fff;
+            background: #fff;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        #image-lightbox .lightbox-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: #FF69B4;
+            color: #fff;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 1.6em;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        #image-lightbox .lightbox-hint {
+            color: #ccc;
+            font-size: 1em;
+            margin-top: 14px;
         }
         
         #score, #challenge-progress, #lives-display { 
@@ -865,6 +922,12 @@
         </div>
     </div>
 
+    <div id="image-lightbox" role="dialog" aria-label="Imagem ampliada">
+        <button type="button" class="lightbox-close" id="lightbox-close-btn" title="Fechar">×</button>
+        <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-hint">Toque ou clique para fechar</div>
+    </div>
+
     <footer class="credits-footer">
         <p>Inspirado no jogo <a href="https://www.coquinhos.com/programacao-para-criancas/play/" target="_blank">Programação para Crianças</a> do Coquinhos.</p>
     </footer>
@@ -1308,10 +1371,44 @@ INSTRUÇÕES:
             targetSyllable = currentSyllables[currentTargetIndex];
             
             const imagePath = imageMap[randomWordWithHyphen] || imageMap.default;
-            wordImageEl.innerHTML = `<img src="${imagePath}" alt="${currentWord}" onerror="this.src='${imageMap.default}'; console.log('Imagem falhou: ' + this.getAttribute('src'));">`;
+            setWordImage(imagePath);
             
             console.log(`generateSyllableChallenge: currentWord=${currentWord}, currentSyllables=${currentSyllables.join('-')}, imagePath=${imagePath}`);
             displayWordWithMissingSyllable(currentSyllables, currentTargetIndex);
+        }
+
+        // Só a imagem de dica — sem revelar a palavra (alt vazio, lightbox sem legenda)
+        function setWordImage(imagePath) {
+            const defaultUrl = imageMap.default;
+            wordImageEl.innerHTML = '';
+            const img = document.createElement('img');
+            img.alt = '';
+            img.loading = 'eager';
+            let triedDefault = false;
+            img.onerror = function () {
+                if (!triedDefault && img.src !== defaultUrl) {
+                    triedDefault = true;
+                    img.src = defaultUrl;
+                }
+            };
+            img.src = imagePath || defaultUrl;
+            wordImageEl.appendChild(img);
+            wordImageEl.title = 'Clique para ver a imagem maior';
+            wordImageEl.dataset.fullSrc = imagePath || defaultUrl;
+        }
+
+        function openImageLightbox() {
+            const src = wordImageEl.dataset.fullSrc;
+            if (!src) return;
+            const lbImg = document.getElementById('lightbox-img');
+            lbImg.alt = '';
+            lbImg.onerror = function () { lbImg.src = imageMap.default; };
+            lbImg.src = src;
+            document.getElementById('image-lightbox').classList.add('open');
+        }
+
+        function closeImageLightbox() {
+            document.getElementById('image-lightbox').classList.remove('open');
         }
 
         function displayWordWithMissingSyllable(syllables, targetIndex) {
@@ -1533,6 +1630,22 @@ INSTRUÇÕES:
                     const target = document.getElementById('tab-' + tabId);
                     if (target) target.classList.add('active');
                 });
+            });
+
+            // Ampliar imagem (só a figura — sem mostrar a palavra)
+            wordImageEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openImageLightbox();
+            });
+            document.getElementById('lightbox-close-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeImageLightbox();
+            });
+            document.getElementById('image-lightbox').addEventListener('click', () => {
+                closeImageLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeImageLightbox();
             });
 
             // Salvar: pede nome e baixa arquivo
