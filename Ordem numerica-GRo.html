@@ -52,6 +52,35 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         
+        .student-info {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .student-info label {
+            font-weight: bold;
+            color: #2575fc;
+        }
+        
+        .student-info input {
+            padding: 8px 15px;
+            border: 2px solid #2196f3;
+            border-radius: 20px;
+            font-size: 1rem;
+            width: 200px;
+            text-align: center;
+        }
+        
+        .student-info input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+        }
+        
         .challenge-info {
             background-color: #fff8e1;
             padding: 10px;
@@ -171,52 +200,35 @@
         .controls {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 12px;
             margin-bottom: 25px;
+            flex-wrap: wrap;
         }
         
         button {
-            padding: 15px 30px;
+            padding: 14px 22px;
             border: none;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
         }
         
-        #check-btn {
-            background-color: #4caf50;
-            color: white;
-        }
+        #check-btn { background-color: #4caf50; color: white; }
+        #check-btn:hover { background-color: #388e3c; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        #check-btn:hover {
-            background-color: #388e3c;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
+        #reset-btn { background-color: #f44336; color: white; }
+        #reset-btn:hover { background-color: #d32f2f; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        #reset-btn {
-            background-color: #f44336;
-            color: white;
-        }
+        #help-btn { background-color: #2196f3; color: white; }
+        #help-btn:hover { background-color: #1976d2; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        #reset-btn:hover {
-            background-color: #d32f2f;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
+        #save-btn { background-color: #9c27b0; color: white; }
+        #save-btn:hover { background-color: #7b1fa2; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        #help-btn {
-            background-color: #2196f3;
-            color: white;
-        }
-        
-        #help-btn:hover {
-            background-color: #1976d2;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
+        #restore-btn { background-color: #ff5722; color: white; }
+        #restore-btn:hover { background-color: #e64a19; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
         .feedback {
             padding: 20px;
@@ -239,6 +251,7 @@
             display: block;
         }
         
+        /* ========== MODAIS ELEGANTES ========== */
         .modal {
             display: none;
             position: fixed;
@@ -246,31 +259,46 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.65);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        
+        .modal.show {
+            display: flex;
+            opacity: 1;
         }
         
         .modal-content {
             background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
+            padding: 28px 32px;
+            border-radius: 18px;
+            max-width: 640px;
+            width: 92%;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
             position: relative;
+            transform: scale(0.92);
+            transition: transform 0.25s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: scale(1);
         }
         
         .close-modal {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
+            top: 14px;
+            right: 18px;
+            font-size: 26px;
             cursor: pointer;
-            color: #777;
+            color: #888;
+            line-height: 1;
+            transition: color 0.2s;
         }
         
         .close-modal:hover {
@@ -279,13 +307,164 @@
         
         .modal-title {
             color: #2575fc;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             text-align: center;
+            font-size: 1.5rem;
         }
         
         .modal-text {
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             line-height: 1.6;
+            text-align: left;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+        
+        .modal-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            color: white;
+        }
+        
+        .modal-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 117, 252, 0.4);
+        }
+        
+        .modal-btn.secondary {
+            background: #e0e0e0;
+            color: #444;
+        }
+        
+        .modal-btn.secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .modal-btn.danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .modal-btn.danger:hover {
+            background: #d32f2f;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #bbdefb;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            margin: 12px 0 6px;
+            text-align: center;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+        
+        /* Tabs no modal de ajuda */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e3f2fd;
+            margin-bottom: 20px;
+            gap: 4px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px 10px;
+            background: transparent;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover {
+            background: #f5f5f5;
+            color: #2575fc;
+        }
+        
+        .tab-btn.active {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-bottom: 3px solid #2196f3;
+        }
+        
+        .tab-panel {
+            display: none;
+            text-align: left;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        /* Painel de habilidades */
+        .skill-card {
+            background: #f8faff;
+            border: 1px solid #bbdefb;
+            border-left: 5px solid #2196f3;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        
+        .skill-code {
+            display: inline-block;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        
+        .skill-desc {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .skill-anos {
+            font-size: 0.82rem;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .series-badge {
+            display: inline-block;
+            background: #fff3e0;
+            color: #e65100;
+            font-size: 0.78rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 4px;
         }
         
         .level-complete {
@@ -297,6 +476,42 @@
             display: none;
             z-index: 1000;
             position: relative;
+        }
+        
+        .code-box {
+            background: #f5f5f5;
+            border: 2px dashed #9c27b0;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.95rem;
+            user-select: all;
+            text-align: left;
+        }
+        
+        .copy-btn {
+            background-color: #9c27b0;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .section-title {
+            color: #1976d2;
+            font-size: 1.1rem;
+            margin: 18px 0 10px;
+            border-bottom: 1px solid #e3f2fd;
+            padding-bottom: 4px;
         }
         
         @media (max-width: 768px) {
@@ -319,8 +534,8 @@
             }
             
             button {
-                padding: 12px 20px;
-                font-size: 1rem;
+                padding: 11px 16px;
+                font-size: 0.9rem;
             }
             
             .score-display {
@@ -330,29 +545,187 @@
                 margin-bottom: 15px;
                 display: inline-block;
             }
+            
+            .student-info input {
+                width: 160px;
+            }
+            
+            .tab-btn {
+                font-size: 0.85rem;
+                padding: 10px 6px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="modal" id="instructions-modal">
+    <!-- Modal principal: Como Jogar + Habilidades (com abas) -->
+    <div class="modal" id="help-modal">
         <div class="modal-content">
-            <span class="close-modal" id="close-modal">&times;</span>
-            <h2 class="modal-title">Como Jogar</h2>
-            <p class="modal-text">Complete a sequência numérica em formato de Z arrastando os números da bancada para os espaços vazios.</p>
-            <p class="modal-text">O jogo possui 4 níveis de dificuldade:</p>
-            <ul>
-                <li><strong>Nível 1:</strong> Números de 1 a 20, com 12 números já preenchidos</li>
-                <li><strong>Nível 2:</strong> Números de 1 a 50, com 5 números já preenchidos</li>
-                <li><strong>Nível 3:</strong> Números de 1 a 100, com 3 números já preenchidos</li>
-                <li><strong>Nível 4:</strong> Números de 1 a 200, com 2 números já preenchidos</li>
-            </ul>
-            <p class="modal-text">Cada nível possui 15 desafios. Complete todos para se tornar um mestre da sequência Z!</p>
-            <p class="modal-text">Você ganha pontos por cada desafio concluído. Quanto mais rápido completar, mais pontos ganha!</p>
-            <p class="modal-text">Os números na bancada estão fora de ordem para aumentar o desafio!</p>
-            <p class="modal-text">Para remover um número da grade, clique sobre ele.</p>
-            <p class="modal-text">Boa sorte!</p>
+            <span class="close-modal" data-close="help-modal">&times;</span>
+            <h2 class="modal-title">Ajuda &amp; BNCC</h2>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="tab-instrucoes">Como Jogar</button>
+                <button class="tab-btn" data-tab="tab-habilidades">Habilidades BNCC</button>
+            </div>
+            
+            <div id="tab-instrucoes" class="tab-panel active">
+                <p class="modal-text">Complete a sequência numérica em formato de <strong>Z</strong> arrastando os números da bancada para os espaços vazios.</p>
+                <p class="modal-text">O jogo possui 4 níveis de dificuldade:</p>
+                <ul style="margin: 0 0 14px 20px; line-height: 1.7;">
+                    <li><strong>Nível 1:</strong> Números de 1 a 20, com 12 números já preenchidos</li>
+                    <li><strong>Nível 2:</strong> Números de 1 a 50, com 5 números já preenchidos</li>
+                    <li><strong>Nível 3:</strong> Números de 1 a 100, com 3 números já preenchidos</li>
+                    <li><strong>Nível 4:</strong> Números de 1 a 200, com 2 números já preenchidos</li>
+                </ul>
+                <p class="modal-text">Cada nível possui 15 desafios. Complete todos para se tornar um mestre da sequência Z!</p>
+                <p class="modal-text">Você ganha pontos por cada desafio concluído. Quanto mais rápido completar, mais pontos ganha!</p>
+                <p class="modal-text">Os números na bancada estão fora de ordem para aumentar o desafio. Para remover um número da grade, clique sobre ele.</p>
+                <p class="modal-text"><strong>Salvar / Restaurar:</strong> Use “Salvar Progresso” para baixar um arquivo TXT com o código Base62 do progresso. Use “Restaurar Progresso” e selecione esse arquivo para continuar de onde parou. O sistema verifica se o arquivo está íntegro ou corrompido.</p>
+                <p class="modal-text">Boa sorte!</p>
+            </div>
+            
+            <div id="tab-habilidades" class="tab-panel">
+                <p class="modal-text">Esta atividade atende principalmente aos <strong>Anos Iniciais do Ensino Fundamental (1º ao 5º ano)</strong>, com ênfase em sequências numéricas, ordenação e pensamento algébrico inicial.</p>
+                
+                <h3 class="section-title">Unidade Temática: Álgebra</h3>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF01MA10</span>
+                    <p class="skill-desc">Descrever, após o reconhecimento e a explicitação de um padrão (ou regularidade), os elementos ausentes em sequências recursivas de números naturais, objetos ou figuras.</p>
+                    <p class="skill-anos"><span class="series-badge">1º ano</span> Sequências recursivas</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF02MA09</span>
+                    <p class="skill-desc">Construir sequências de números naturais em ordem crescente ou decrescente a partir de um número qualquer, utilizando uma regularidade estabelecida.</p>
+                    <p class="skill-anos"><span class="series-badge">2º ano</span> Construção de sequências</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF02MA10</span>
+                    <p class="skill-desc">Descrever um padrão (ou regularidade) de sequências repetitivas e de sequências recursivas, por meio de palavras, símbolos ou desenhos.</p>
+                    <p class="skill-anos"><span class="series-badge">2º ano</span> Identificação de padrões</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF02MA11</span>
+                    <p class="skill-desc">Descrever os elementos ausentes em sequências repetitivas e em sequências recursivas de números naturais, objetos ou figuras.</p>
+                    <p class="skill-anos"><span class="series-badge">2º ano</span> Elementos ausentes</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF03MA10</span>
+                    <p class="skill-desc">Identificar regularidades em sequências ordenadas de números naturais, resultantes da realização de adições ou subtrações sucessivas, por um mesmo número, descrever uma regra de formação da sequência e determinar elementos faltantes ou seguintes.</p>
+                    <p class="skill-anos"><span class="series-badge">3º ano</span> Regularidades e termos faltantes</p>
+                </div>
+                
+                <h3 class="section-title">Unidade Temática: Números</h3>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF01MA01</span>
+                    <p class="skill-desc">Utilizar números naturais como indicador de quantidade ou de ordem em diferentes situações cotidianas e reconhecer situações em que os números não indicam contagem nem ordem, mas sim código de identificação.</p>
+                    <p class="skill-anos"><span class="series-badge">1º ano</span> Número como ordem</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF01MA05</span>
+                    <p class="skill-desc">Comparar números naturais de até duas ordens em situações cotidianas, com e sem suporte da reta numérica.</p>
+                    <p class="skill-anos"><span class="series-badge">1º ano</span> Comparação e ordenação</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF02MA01</span>
+                    <p class="skill-desc">Comparar e ordenar números naturais (até a ordem de centenas) pela compreensão de características do sistema de numeração decimal (valor posicional e função do zero).</p>
+                    <p class="skill-anos"><span class="series-badge">2º ano</span> Ordenação até centenas</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF03MA01</span>
+                    <p class="skill-desc">Ler, escrever e comparar números naturais de até a ordem de unidade de milhar, estabelecendo relações entre os registros numéricos e em língua materna.</p>
+                    <p class="skill-anos"><span class="series-badge">3º ano</span> Comparação até milhar</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF04MA01</span>
+                    <p class="skill-desc">Ler, escrever e ordenar números naturais até a ordem de dezenas de milhar.</p>
+                    <p class="skill-anos"><span class="series-badge">4º ano</span> Ordenação até dezenas de milhar (níveis 3 e 4)</p>
+                </div>
+                
+                <div class="skill-card">
+                    <span class="skill-code">EF05MA01</span>
+                    <p class="skill-desc">Ler, escrever e ordenar números naturais até a ordem das centenas de milhar com compreensão das principais características do sistema de numeração decimal.</p>
+                    <p class="skill-anos"><span class="series-badge">5º ano</span> Ordenação até centenas de milhar (níveis 3 e 4)</p>
+                </div>
+                
+                <p class="modal-text" style="margin-top:16px; font-size:0.9rem; color:#555;">
+                    <strong>Séries mais indicadas:</strong> 1º, 2º e 3º anos do Ensino Fundamental (sequências e ordenação básica).<br>
+                    <strong>Extensão:</strong> níveis 3 e 4 (números até 200) também atendem 4º e 5º anos pelas habilidades de ordenação de números naturais (EF04MA01 e EF05MA01).
+                </p>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn primary" data-close="help-modal">Entendi!</button>
+            </div>
         </div>
     </div>
+
+    <!-- Modal de confirmação genérico -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content" style="max-width: 420px;">
+            <h2 class="modal-title" id="confirm-title">Confirmar</h2>
+            <p class="modal-text" id="confirm-message" style="text-align:center;"></p>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="confirm-cancel">Cancelar</button>
+                <button class="modal-btn primary" id="confirm-ok">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de alerta / informação -->
+    <div class="modal" id="alert-modal">
+        <div class="modal-content" style="max-width: 420px;">
+            <h2 class="modal-title" id="alert-title">Aviso</h2>
+            <p class="modal-text" id="alert-message" style="text-align:center;"></p>
+            <div class="modal-actions">
+                <button class="modal-btn primary" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de input (prompt) -->
+    <div class="modal" id="prompt-modal">
+        <div class="modal-content" style="max-width: 440px;">
+            <h2 class="modal-title" id="prompt-title">Informe</h2>
+            <p class="modal-text" id="prompt-message" style="text-align:center;"></p>
+            <input type="text" class="modal-input" id="prompt-input" autocomplete="off">
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="prompt-cancel">Cancelar</button>
+                <button class="modal-btn primary" id="prompt-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Salvar Progresso -->
+    <div class="modal" id="save-modal">
+        <div class="modal-content">
+            <span class="close-modal" data-close="save-modal">&times;</span>
+            <h2 class="modal-title">Progresso Salvo</h2>
+            <p class="modal-text">O arquivo <strong>TXT Base62</strong> foi baixado. Guarde-o com segurança. Use “Restaurar Progresso” e selecione esse arquivo para continuar de onde parou.</p>
+            <div class="code-box" id="save-code-display"></div>
+            <div class="modal-actions">
+                <button class="modal-btn primary" id="copy-code-btn">Copiar Código</button>
+                <button class="modal-btn primary" id="download-again-btn">Baixar Novamente</button>
+                <button class="modal-btn secondary" data-close="save-modal">Fechar</button>
+            </div>
+            <p class="modal-text" style="margin-top:14px; font-size:0.88rem; color:#666; text-align:center;">
+                O arquivo contém: nome, pontuação, nível, desafio e níveis desbloqueados (codificados em Base62).
+            </p>
+        </div>
+    </div>
+    
+    <!-- Input oculto para restaurar arquivo -->
+    <input type="file" id="restore-file-input" accept=".txt,text/plain" style="display:none;">
 
     <div class="container">
         <div class="score-display" id="score-display">
@@ -360,6 +733,11 @@
         </div>
         
         <h1>Complete a Sequência em Z</h1>
+        
+        <div class="student-info">
+            <label for="student-name">Aluno:</label>
+            <input type="text" id="student-name" placeholder="Digite seu nome" maxlength="40" autocomplete="name">
+        </div>
         
         <div class="challenge-info" id="challenge-info">
             Desafio 1 de 15
@@ -373,23 +751,21 @@
         </div>
         
         <div class="game-area">
-            <div class="z-grid" id="z-grid">
-            </div>
-            
-            <div class="numbers-bank" id="numbers-bank">
-            </div>
+            <div class="z-grid" id="z-grid"></div>
+            <div class="numbers-bank" id="numbers-bank"></div>
         </div>
         
         <div class="controls">
             <button id="check-btn">Verificar</button>
             <button id="reset-btn">Reiniciar</button>
             <button id="help-btn">Como Jogar</button>
+            <button id="save-btn">Salvar Progresso</button>
+            <button id="restore-btn">Restaurar Progresso</button>
         </div>
         
         <div class="feedback" id="feedback"></div>
         
-        <div class="level-complete" id="level-complete">
-        </div>
+        <div class="level-complete" id="level-complete"></div>
     </div>
 
     <script>
@@ -399,13 +775,16 @@
             const checkBtn = document.getElementById('check-btn');
             const resetBtn = document.getElementById('reset-btn');
             const helpBtn = document.getElementById('help-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const restoreBtn = document.getElementById('restore-btn');
             const feedback = document.getElementById('feedback');
             const levelButtons = document.querySelectorAll('.level-btn');
             const challengeInfo = document.getElementById('challenge-info');
             const scoreDisplay = document.getElementById('score-display');
-            const instructionsModal = document.getElementById('instructions-modal');
-            const closeModal = document.getElementById('close-modal');
+            const studentNameInput = document.getElementById('student-name');
             const levelComplete = document.getElementById('level-complete');
+            const saveCodeDisplay = document.getElementById('save-code-display');
+            const copyCodeBtn = document.getElementById('copy-code-btn');
             
             const gridCols = 6;
             const gridRows = 5;
@@ -421,6 +800,367 @@
             let unlockedLevels = new Set(['1']);
             let urlSelectedLevel = null;
             
+            // ========== Sistema de Modais Elegantes ==========
+            function openModal(id) {
+                const m = document.getElementById(id);
+                m.classList.add('show');
+            }
+            
+            function closeModal(id) {
+                const m = document.getElementById(id);
+                m.classList.remove('show');
+            }
+            
+            document.querySelectorAll('[data-close]').forEach(el => {
+                el.addEventListener('click', function() {
+                    closeModal(this.getAttribute('data-close'));
+                });
+            });
+            
+            // Fechar ao clicar no fundo
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('show');
+                    }
+                });
+            });
+            
+            // Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Confirm elegante (retorna Promise)
+            function showConfirm(message, title = 'Confirmar') {
+                return new Promise(resolve => {
+                    document.getElementById('confirm-title').textContent = title;
+                    document.getElementById('confirm-message').textContent = message;
+                    openModal('confirm-modal');
+                    
+                    const okBtn = document.getElementById('confirm-ok');
+                    const cancelBtn = document.getElementById('confirm-cancel');
+                    
+                    function cleanup(result) {
+                        closeModal('confirm-modal');
+                        okBtn.removeEventListener('click', onOk);
+                        cancelBtn.removeEventListener('click', onCancel);
+                        resolve(result);
+                    }
+                    
+                    function onOk() { cleanup(true); }
+                    function onCancel() { cleanup(false); }
+                    
+                    okBtn.addEventListener('click', onOk);
+                    cancelBtn.addEventListener('click', onCancel);
+                });
+            }
+            
+            // Alert elegante
+            function showAlert(message, title = 'Aviso') {
+                return new Promise(resolve => {
+                    document.getElementById('alert-title').textContent = title;
+                    document.getElementById('alert-message').textContent = message;
+                    openModal('alert-modal');
+                    
+                    const okBtn = document.getElementById('alert-ok');
+                    function onOk() {
+                        closeModal('alert-modal');
+                        okBtn.removeEventListener('click', onOk);
+                        resolve();
+                    }
+                    okBtn.addEventListener('click', onOk);
+                });
+            }
+            
+            // Prompt elegante
+            function showPrompt(message, defaultValue = '', title = 'Informe') {
+                return new Promise(resolve => {
+                    document.getElementById('prompt-title').textContent = title;
+                    document.getElementById('prompt-message').textContent = message;
+                    const input = document.getElementById('prompt-input');
+                    input.value = defaultValue;
+                    openModal('prompt-modal');
+                    setTimeout(() => input.focus(), 100);
+                    
+                    const okBtn = document.getElementById('prompt-ok');
+                    const cancelBtn = document.getElementById('prompt-cancel');
+                    
+                    function cleanup(result) {
+                        closeModal('prompt-modal');
+                        okBtn.removeEventListener('click', onOk);
+                        cancelBtn.removeEventListener('click', onCancel);
+                        input.removeEventListener('keydown', onKey);
+                        resolve(result);
+                    }
+                    
+                    function onOk() { cleanup(input.value); }
+                    function onCancel() { cleanup(null); }
+                    function onKey(e) {
+                        if (e.key === 'Enter') onOk();
+                        if (e.key === 'Escape') onCancel();
+                    }
+                    
+                    okBtn.addEventListener('click', onOk);
+                    cancelBtn.addEventListener('click', onCancel);
+                    input.addEventListener('keydown', onKey);
+                });
+            }
+            
+            // ========== Base62 ==========
+            const BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            
+            function encodeBase62(str) {
+                if (!str) return '0';
+                const bytes = new TextEncoder().encode(str);
+                let num = 0n;
+                for (let i = 0; i < bytes.length; i++) {
+                    num = (num << 8n) | BigInt(bytes[i]);
+                }
+                if (num === 0n) return '0';
+                let result = '';
+                while (num > 0n) {
+                    result = BASE62[Number(num % 62n)] + result;
+                    num = num / 62n;
+                }
+                return result;
+            }
+            
+            function decodeBase62(str) {
+                if (!str || str === '0') return '';
+                let num = 0n;
+                for (let i = 0; i < str.length; i++) {
+                    const idx = BASE62.indexOf(str[i]);
+                    if (idx === -1) throw new Error('Caractere inválido no código Base62');
+                    num = num * 62n + BigInt(idx);
+                }
+                const bytes = [];
+                while (num > 0n) {
+                    bytes.unshift(Number(num % 256n));
+                    num = num / 256n;
+                }
+                return new TextDecoder().decode(new Uint8Array(bytes));
+            }
+            
+            function getStudentName() {
+                return (studentNameInput.value || '').trim() || 'Aluno';
+            }
+            
+            function collectState() {
+                return {
+                    n: getStudentName(),
+                    s: score,
+                    l: currentLevel,
+                    c: currentChallenge,
+                    u: Array.from(unlockedLevels)
+                };
+            }
+            
+            function applyState(state) {
+                if (!state || typeof state !== 'object') {
+                    throw new Error('Estado inválido');
+                }
+                studentNameInput.value = state.n || 'Aluno';
+                score = Math.max(0, parseInt(state.s) || 0);
+                currentLevel = String(state.l || '1');
+                if (!['1','2','3','4'].includes(currentLevel)) currentLevel = '1';
+                currentChallenge = Math.max(1, Math.min(totalChallenges, parseInt(state.c) || 1));
+                unlockedLevels = new Set(Array.isArray(state.u) ? state.u.map(String) : ['1']);
+                if (!unlockedLevels.has(currentLevel)) {
+                    unlockedLevels.add(currentLevel);
+                }
+                for (let i = 1; i <= parseInt(currentLevel); i++) {
+                    unlockedLevels.add(String(i));
+                }
+                urlSelectedLevel = null;
+                updateScore();
+                updateChallengeInfo();
+                updateLevelButtonsState();
+                initGame();
+            }
+            
+            function downloadStatusFile(code, studentName) {
+                const safeName = (studentName || 'Aluno').replace(/[^a-zA-Z0-9À-ÿ_\- ]/g, '').trim().replace(/\s+/g, '_') || 'Aluno';
+                const dateStr = new Date().toISOString().slice(0, 10);
+                const filename = `progresso_seqZ_${safeName}_${dateStr}.txt`;
+                
+                // Cabeçalho legível + código Base62 puro
+                const content = [
+                    '=== Progresso Sequência Numérica em Z ===',
+                    `Aluno: ${studentName || 'Aluno'}`,
+                    `Data: ${new Date().toLocaleString('pt-BR')}`,
+                    'Formato: Base62',
+                    '--- NÃO EDITE O CÓDIGO ABAIXO ---',
+                    code,
+                    '--- FIM ---'
+                ].join('\n');
+                
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                return filename;
+            }
+            
+            function extractBase62FromFileContent(text) {
+                if (!text || typeof text !== 'string') return '';
+                // Tenta extrair o código entre os marcadores; se não houver, usa a linha mais longa que parecer Base62
+                const match = text.match(/--- NÃO EDITE O CÓDIGO ABAIXO ---\s*([\s\S]*?)\s*--- FIM ---/i);
+                if (match && match[1]) {
+                    return match[1].trim().replace(/\s+/g, '');
+                }
+                // Fallback: pega a maior linha composta só por caracteres Base62
+                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                let best = '';
+                const base62Re = /^[0-9A-Za-z]+$/;
+                for (const line of lines) {
+                    if (base62Re.test(line) && line.length > best.length) {
+                        best = line;
+                    }
+                }
+                return best;
+            }
+            
+            function validateState(state) {
+                if (!state || typeof state !== 'object') {
+                    throw new Error('Estrutura de dados inválida.');
+                }
+                if (typeof state.n !== 'string' && state.n != null) {
+                    throw new Error('Campo "nome" inválido.');
+                }
+                if (state.s == null || isNaN(parseInt(state.s))) {
+                    throw new Error('Campo "pontuação" inválido ou ausente.');
+                }
+                if (!['1','2','3','4'].includes(String(state.l))) {
+                    throw new Error('Campo "nível" inválido ou ausente.');
+                }
+                if (state.c == null || isNaN(parseInt(state.c)) || parseInt(state.c) < 1) {
+                    throw new Error('Campo "desafio" inválido ou ausente.');
+                }
+                if (!Array.isArray(state.u)) {
+                    throw new Error('Campo "níveis desbloqueados" inválido ou ausente.');
+                }
+                return true;
+            }
+            
+            async function saveStatus() {
+                if (!studentNameInput.value.trim()) {
+                    const asked = await showPrompt('Digite o nome do aluno para salvar o progresso:', getStudentName(), 'Nome do Aluno');
+                    if (asked === null) return;
+                    studentNameInput.value = asked.trim() || 'Aluno';
+                }
+                
+                try {
+                    const state = collectState();
+                    const json = JSON.stringify(state);
+                    const code = encodeBase62(json);
+                    
+                    const filename = downloadStatusFile(code, getStudentName());
+                    saveCodeDisplay.textContent = code;
+                    openModal('save-modal');
+                    
+                    // Guarda o último código para "Baixar Novamente"
+                    window._lastStatusCode = code;
+                    window._lastStatusName = getStudentName();
+                } catch (err) {
+                    await showAlert('Erro ao salvar progresso: ' + err.message, 'Erro');
+                }
+            }
+            
+            async function restoreStatus() {
+                const fileInput = document.getElementById('restore-file-input');
+                fileInput.value = ''; // permite selecionar o mesmo arquivo de novo
+                
+                fileInput.onchange = async function() {
+                    const file = fileInput.files && fileInput.files[0];
+                    if (!file) return;
+                    
+                    if (!file.name.toLowerCase().endsWith('.txt') && file.type !== 'text/plain') {
+                        await showAlert('Selecione um arquivo de texto (.txt) gerado pelo jogo.', 'Arquivo inválido');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        try {
+                            const text = e.target.result || '';
+                            if (!text.trim()) {
+                                await showAlert('O arquivo está vazio. Não é possível restaurar.', 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            const code = extractBase62FromFileContent(text);
+                            if (!code || code.length < 8) {
+                                await showAlert('Não foi encontrado um código Base62 válido no arquivo. O arquivo pode estar corrompido ou não ser um progresso do jogo.', 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            // Validação Base62 (caracteres)
+                            if (!/^[0-9A-Za-z]+$/.test(code)) {
+                                await showAlert('O código encontrado contém caracteres inválidos. O arquivo está corrompido.', 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            let json;
+                            try {
+                                json = decodeBase62(code);
+                            } catch (decErr) {
+                                await showAlert('Falha ao decodificar o Base62. O arquivo está corrompido ou foi alterado.\n\nDetalhe: ' + decErr.message, 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            if (!json || !json.trim()) {
+                                await showAlert('O conteúdo decodificado está vazio. O arquivo está corrompido.', 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            let state;
+                            try {
+                                state = JSON.parse(json);
+                            } catch (parseErr) {
+                                await showAlert('Os dados internos estão danificados (JSON inválido). O arquivo está corrompido.\n\nDetalhe: ' + parseErr.message, 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            try {
+                                validateState(state);
+                            } catch (valErr) {
+                                await showAlert('O arquivo foi lido, mas os dados estão incompletos ou inconsistentes.\n\n' + valErr.message, 'Arquivo corrompido');
+                                return;
+                            }
+                            
+                            // Tudo ok
+                            applyState(state);
+                            feedback.textContent = `Progresso restaurado com sucesso! Bem-vindo(a), ${getStudentName()}!`;
+                            feedback.className = 'feedback success';
+                            setTimeout(() => { feedback.className = 'feedback'; }, 3500);
+                            
+                        } catch (err) {
+                            await showAlert('Erro inesperado ao ler o arquivo.\n\n' + err.message, 'Erro');
+                        }
+                    };
+                    
+                    reader.onerror = async function() {
+                        await showAlert('Não foi possível ler o arquivo. Tente novamente.', 'Erro de leitura');
+                    };
+                    
+                    reader.readAsText(file, 'UTF-8');
+                };
+                
+                fileInput.click();
+            }
+            
+            // ========== Jogo ==========
             const zPositions = [
                 0, 1, 2, 3, 4, 5,
                 11,
@@ -444,7 +1184,6 @@
                     } else {
                         btn.classList.add('locked');
                     }
-                    
                     if (btn.dataset.level === currentLevel) {
                         btn.classList.add('active');
                     } else {
@@ -456,29 +1195,64 @@
             if (!levelParam) {
                 window.addEventListener('load', function() {
                     setTimeout(function() {
-                        instructionsModal.style.display = 'flex';
-                    }, 500);
+                        openModal('help-modal');
+                    }, 400);
                 });
             }
             
-            closeModal.addEventListener('click', function() {
-                instructionsModal.style.display = 'none';
+            helpBtn.addEventListener('click', function() {
+                // Garante aba de instruções ativa
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.querySelector('[data-tab="tab-instrucoes"]').classList.add('active');
+                document.getElementById('tab-instrucoes').classList.add('active');
+                openModal('help-modal');
             });
             
-            window.addEventListener('click', function(event) {
-                if (event.target === instructionsModal) {
-                    instructionsModal.style.display = 'none';
+            saveBtn.addEventListener('click', saveStatus);
+            restoreBtn.addEventListener('click', restoreStatus);
+            
+            copyCodeBtn.addEventListener('click', function() {
+                const code = saveCodeDisplay.textContent;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        copyCodeBtn.textContent = 'Copiado!';
+                        setTimeout(() => { copyCodeBtn.textContent = 'Copiar Código'; }, 2000);
+                    }).catch(() => fallbackCopy(code));
+                } else {
+                    fallbackCopy(code);
                 }
             });
             
-            helpBtn.addEventListener('click', function() {
-                instructionsModal.style.display = 'flex';
-            });
+            const downloadAgainBtn = document.getElementById('download-again-btn');
+            if (downloadAgainBtn) {
+                downloadAgainBtn.addEventListener('click', function() {
+                    const code = window._lastStatusCode || saveCodeDisplay.textContent;
+                    const name = window._lastStatusName || getStudentName();
+                    if (code) {
+                        downloadStatusFile(code, name);
+                    }
+                });
+            }
+            
+            function fallbackCopy(text) {
+                const range = document.createRange();
+                range.selectNode(saveCodeDisplay);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                try {
+                    document.execCommand('copy');
+                    copyCodeBtn.textContent = 'Copiado!';
+                    setTimeout(() => { copyCodeBtn.textContent = 'Copiar Código'; }, 2000);
+                } catch (e) {
+                    showAlert('Selecione e copie o código manualmente.');
+                }
+            }
             
             initGame();
             
             levelButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', async function() {
                     if (this.classList.contains('locked')) return;
                     
                     const targetLevel = this.dataset.level;
@@ -489,7 +1263,7 @@
                             confirmMessage = `Voltar para o Nível ${targetLevel} resultará em uma penalidade de 50 pontos. Deseja continuar?`;
                         }
                         
-                        const confirmChange = confirm(confirmMessage);
+                        const confirmChange = await showConfirm(confirmMessage, 'Trocar de Nível');
                         if (confirmChange) {
                             if (isPreviousLevel && score > 0) {
                                 score = Math.max(0, score - 50);
@@ -525,26 +1299,17 @@
                 let min, max;
                 
                 if (currentLevel === '1') {
-                    min = 1;
-                    max = 20;
-                    fixedCount = 12;
+                    min = 1; max = 20; fixedCount = 12;
                 } else if (currentLevel === '2') {
-                    min = 1;
-                    max = 50;
-                    fixedCount = 5;
+                    min = 1; max = 50; fixedCount = 5;
                 } else if (currentLevel === '3') {
-                    min = 1;
-                    max = 100;
-                    fixedCount = 3;
+                    min = 1; max = 100; fixedCount = 3;
                 } else {
-                    min = 1;
-                    max = 200;
-                    fixedCount = 2;
+                    min = 1; max = 200; fixedCount = 2;
                 }
                 
                 numbersToAdd = generateSequentialNumbers(20, min, max);
                 fullZSequence = [...numbersToAdd];
-                
                 correctSequence = createZSequence(numbersToAdd, fixedCount);
                 
                 for (let i = 0; i < totalCells; i++) {
@@ -586,7 +1351,6 @@
                     numberElement.draggable = true;
                     numberElement.addEventListener('dragstart', handleDragStart);
                     numberElement.addEventListener('dragend', handleDragEnd);
-                    
                     numbersBank.appendChild(numberElement);
                 });
             }
@@ -613,7 +1377,6 @@
                 if (this.classList.contains('empty')) {
                     this.textContent = number;
                     this.classList.remove('empty');
-                    
                     if (draggedNumber) {
                         draggedNumber.remove();
                     }
@@ -648,16 +1411,12 @@
             function calculatePoints() {
                 const endTime = new Date();
                 const timeTaken = (endTime - startTime) / 1000;
-                
                 let points = 100;
-                
                 if (currentLevel === '2') points += 50;
                 if (currentLevel === '3') points += 100;
                 if (currentLevel === '4') points += 200;
-                
                 const timeBonus = Math.max(0, 300 - timeTaken);
                 points += timeBonus;
-                
                 return Math.round(points);
             }
             
@@ -665,17 +1424,14 @@
                 const numbers = [];
                 const maxStart = max - count + 1;
                 const start = Math.floor(Math.random() * maxStart) + 1;
-                
                 for (let i = 0; i < count; i++) {
                     numbers.push(start + i);
                 }
-                
                 return numbers;
             }
             
             function createZSequence(numbers, fixedCount) {
                 const sequence = Array(totalCells).fill(0);
-                
                 for (let i = 0; i < zPositions.length; i++) {
                     if (i < numbers.length) {
                         sequence[zPositions[i]] = numbers[i];
@@ -684,14 +1440,12 @@
                 
                 const availablePositions = [...zPositions];
                 const positionsToKeep = [];
-                
                 positionsToKeep.push(availablePositions[0]);
                 positionsToKeep.push(availablePositions[availablePositions.length - 1]);
                 
                 while (positionsToKeep.length < fixedCount && availablePositions.length > 0) {
                     const randomIndex = Math.floor(Math.random() * availablePositions.length);
                     const position = availablePositions[randomIndex];
-                    
                     if (!positionsToKeep.includes(position)) {
                         positionsToKeep.push(position);
                     }
@@ -702,19 +1456,16 @@
                 for (let i = 0; i < positionsToKeep.length; i++) {
                     finalSequence[positionsToKeep[i]] = sequence[positionsToKeep[i]];
                 }
-                
                 return finalSequence;
             }
             
             function findMissingNumbers(allNumbers, sequence) {
                 const sequenceNumbers = [];
-                
                 for (let i = 0; i < sequence.length; i++) {
                     if (zPositions.includes(i) && sequence[i] !== 0) {
                         sequenceNumbers.push(sequence[i]);
                     }
                 }
-                
                 return allNumbers.filter(num => !sequenceNumbers.includes(num));
             }
             
@@ -725,7 +1476,6 @@
                 numberElement.draggable = true;
                 numberElement.addEventListener('dragstart', handleDragStart);
                 numberElement.addEventListener('dragend', handleDragEnd);
-                
                 numbersBank.appendChild(numberElement);
             }
             
@@ -741,7 +1491,6 @@
                     } else if (!cell.classList.contains('fixed')) {
                         const expected = parseInt(cell.dataset.expected);
                         const actual = parseInt(cell.textContent);
-                        
                         if (actual === expected) {
                             cell.classList.remove('incorrect');
                             cell.classList.add('correct');
@@ -780,15 +1529,10 @@
                             if (parseInt(currentLevel) < 4) {
                                 const nextLevel = parseInt(currentLevel) + 1;
                                 unlockedLevels.add(nextLevel.toString());
-                                
-                                levelComplete.innerHTML += `
-                                    <p>Avançando para o próximo nível...</p>
-                                `;
-                                console.log('Exibindo mensagem de nível concluído para Nível', currentLevel);
+                                levelComplete.innerHTML += `<p>Avançando para o próximo nível...</p>`;
                                 levelComplete.style.display = 'block';
                                 
                                 setTimeout(() => {
-                                    console.log('Avançando para o Nível', nextLevel);
                                     currentLevel = nextLevel.toString();
                                     currentChallenge = 1;
                                     urlSelectedLevel = null;
@@ -799,7 +1543,7 @@
                             } else {
                                 levelComplete.innerHTML += `
                                     <p>Parabéns! Você completou todos os níveis do jogo!</p>
-                                    <button id="restart-game-btn" style="margin-top: 15px;">Jogar Novamente</button>
+                                    <button id="restart-game-btn" style="margin-top: 15px; padding: 12px 24px; border:none; border-radius:25px; background:#fff; color:#4caf50; font-weight:bold; cursor:pointer;">Jogar Novamente</button>
                                 `;
                                 levelComplete.style.display = 'block';
                                 
