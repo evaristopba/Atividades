@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo de Flexibilidade Cognitiva</title>
+<style>
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #eef6ff 0%, #f8f5ff 100%);
+    margin: 0;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #243247;
+}
+
+#game-container {
+    background: rgba(255,255,255,0.98);
+    border: 1px solid rgba(226,232,240,0.9);
+    border-radius: 24px;
+    padding: 18px 26px;
+    box-shadow: 0 18px 50px rgba(42,67,101,0.12);
+    width: 100%;
+    max-width: 1100px;
+    height: calc(100dvh - 32px);
+    max-height: 920px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    overflow: hidden;
+}
+
+.game-header { flex: 0 0 auto; margin-bottom: 8px; position: relative; padding: 0 46px; }
+.game-title { margin: 0 0 2px; font-size: clamp(20px, 2.6vw, 28px); font-weight: 800; color: #243b5a; letter-spacing: -0.5px; }
+.game-subtitle { margin: 0; color: #718096; font-size: 13px; }
+
+#btn-mute, #btn-teacher {
+    position: absolute; top: 0; right: 0; width: 38px; height: 38px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    font-size: 18px; cursor: pointer; line-height: 1;
+}
+#btn-teacher { right: auto; left: 0; }
+#btn-mute:hover, #btn-teacher:hover { background: #edf2f7; }
+
+.screen { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+
+/* ===== Tela inicial / professor ===== */
+#screen-start, #screen-teacher { overflow-y: auto; }
+.start-inner { margin: auto; width: 100%; max-width: 460px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 0; }
+.start-emoji { font-size: 46px; line-height: 1; }
+.start-inner h2 { margin: 0; color: #243b5a; font-size: 22px; }
+.text-input {
+    width: 100%; padding: 13px 16px; font-size: 17px; border: 2px solid #cbd5e0; border-radius: 12px;
+    text-align: center; outline: none; font-family: inherit; color: #243247;
+}
+.text-input:focus { border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+.field-error { color: #e53e3e; font-size: 13px; font-weight: 700; min-height: 18px; }
+.rules-box {
+    width: 100%; text-align: left; background: #fffaf0; border: 1px solid #fbd38d; color: #7b341e;
+    border-radius: 12px; padding: 10px 14px; font-size: 13px; line-height: 1.6;
+}
+.rules-box ul { margin: 4px 0 0; padding-left: 18px; }
+.link-btn { background: none; border: none; color: #718096; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 6px; font-family: inherit; }
+.link-btn:hover { color: #2b6cb0; }
+
+/* ===== Jogo ===== */
+#screen-game .rule-note {
+    flex: 0 0 auto; background: #fffaf0; border: 1px solid #fbd38d; color: #7b341e;
+    border-radius: 12px; padding: 7px 12px; font-size: 13px; font-weight: 600; margin-bottom: 8px;
+}
+
+#hud { flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 8px; }
+.hud-card {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 6px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.hud-label { color: #718096; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+.hud-value { color: #2b6cb0; font-size: 18px; font-weight: 800; line-height: 1.2; }
+
+.progress-area { flex: 0 0 auto; margin-bottom: 8px; text-align: left; }
+.progress-top { display: flex; justify-content: space-between; margin-bottom: 4px; color: #718096; font-size: 11px; font-weight: 700; }
+.progress-track { width: 100%; height: 7px; background: #edf2f7; border-radius: 99px; overflow: hidden; }
+#progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #3182ce, #667eea); border-radius: 99px; transition: width 0.35s ease; }
+
+.question-section { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin-bottom: 8px; position: relative; }
+.question-heading, .answers-heading { flex: 0 0 auto; margin: 0 0 6px; color: #344767; font-size: 15px; font-weight: 800; }
+.question-container {
+    flex: 1 1 0; min-height: 0; width: 100%; padding: 8px 14px;
+    background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.question-img {
+    display: block; max-width: 100%; max-height: 100%; width: auto; height: auto;
+    object-fit: contain; border-radius: 10px; animation: questionIn 0.3s ease;
+}
+@keyframes questionIn { from { opacity: 0; transform: scale(0.985); } to { opacity: 1; transform: scale(1); } }
+
+/* Aviso flutuante: não altera a altura do layout */
+#feedback {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    width: max-content; max-width: 94%; display: none; z-index: 6;
+    border-radius: 12px; padding: 9px 16px; font-size: 14px; font-weight: 700;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15); pointer-events: none;
+    animation: popIn 0.25s ease;
+}
+#feedback.ok  { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+#feedback.bad { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+@keyframes popIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.answers-wrap { flex: 0 0 auto; }
+.options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; height: clamp(110px, 22dvh, 200px); }
+.option-card {
+    position: relative; background: white; border: 2px solid #e2e8f0; border-radius: 16px;
+    padding: 8px; min-height: 0; cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.option-card:hover { transform: translateY(-4px); border-color: #3182ce; box-shadow: 0 12px 25px rgba(49,130,206,0.15); background: #fafdff; }
+.option-card:active { transform: translateY(-1px) scale(0.99); }
+.option-letter {
+    position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; border-radius: 50%;
+    background: #edf2f7; color: #4a5568; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; z-index: 2;
+}
+.option-img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 8px; display: block; }
+.option-card:hover .option-letter { background: #3182ce; color: white; }
+
+/* Feedback nos cards */
+#screen-game.locked .option-card { pointer-events: none; }
+.option-card.correct {
+    border-color: #38a169; background: #f0fff4; box-shadow: 0 0 0 4px rgba(56,161,105,0.22);
+    animation: pop 0.4s ease;
+}
+.option-card.correct .option-letter { background: #38a169; color: #fff; }
+.option-card.wrong {
+    border-color: #e53e3e; background: #fff5f5; box-shadow: 0 0 0 4px rgba(229,62,62,0.18);
+    animation: cardShake 0.4s ease;
+}
+.option-card.wrong .option-letter { background: #e53e3e; color: #fff; }
+@keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes cardShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-7px); } 40%,80% { transform: translateX(7px); } }
+
+/* ===== Resultado ===== */
+#screen-result { overflow-y: auto; }
+.result-inner { margin: auto; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 6px 0; }
+.result-icon { font-size: 52px; margin-bottom: 5px; }
+.error-title, .success-title { font-size: clamp(24px, 4vw, 32px); margin: 0 0 8px; }
+.error-title { color: #e53e3e; }
+.success-title { color: #38a169; }
+.result-details {
+    background: #f8fafc; padding: 16px 20px; border-radius: 16px; margin: 12px 0;
+    font-size: 16px; line-height: 1.6; color: #4a5568; border: 1px solid #e2e8f0; max-width: 640px; width: 100%;
+}
+.code-box { margin-top: 10px; padding: 8px 12px; background: #ebf8ff; border: 1px dashed #63b3ed; border-radius: 10px; font-size: 15px; color: #2a4365; }
+.code-box strong { letter-spacing: 3px; font-size: 18px; }
+.warn-box { margin-top: 10px; padding: 8px 12px; background: #fffaf0; border: 1px solid #fbd38d; border-radius: 10px; font-size: 14px; color: #7b341e; font-weight: 600; }
+.saved-ok { margin-top: 8px; font-size: 13px; color: #276749; font-weight: 600; }
+.action-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+.btn {
+    background: linear-gradient(135deg, #38a169, #2f855a); color: white; border: none;
+    padding: 13px 30px; font-size: 16px; border-radius: 12px; cursor: pointer; font-weight: 800;
+    font-family: inherit; transition: transform 0.15s ease, box-shadow 0.2s ease; box-shadow: 0 6px 15px rgba(56,161,105,0.2);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn.blue { background: linear-gradient(135deg, #3182ce, #2b6cb0); box-shadow: 0 6px 15px rgba(49,130,206,0.2); }
+.btn.red  { background: linear-gradient(135deg, #e53e3e, #c53030); box-shadow: 0 6px 15px rgba(229,62,62,0.2); }
+.btn.gray { background: linear-gradient(135deg, #718096, #4a5568); box-shadow: 0 6px 15px rgba(74,85,104,0.2); }
+.btn.small { padding: 9px 16px; font-size: 14px; }
+
+/* ===== Professor ===== */
+#teacher-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+#teacher-panel h2 { margin: 0 0 4px; color: #243b5a; font-size: 20px; }
+#teacher-summary { color: #718096; font-size: 13px; margin-bottom: 8px; }
+.table-wrap { flex: 1 1 auto; min-height: 120px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 12px; }
+.table-wrap table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.table-wrap th { position: sticky; top: 0; background: #edf2f7; color: #4a5568; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.table-wrap td { padding: 8px 10px; border-top: 1px solid #edf2f7; white-space: nowrap; }
+.table-wrap tr:nth-child(even) td { background: #fafcff; }
+.teacher-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+
+.kbd-hint { font-weight: 600; color: #718096; font-size: 12px; }
+@media (hover: none) { .kbd-hint { display: none; } }
+.teacher-hint { margin: 0 0 8px; color: #718096; font-size: 13px; }
+#teacher-status { min-height: 4px; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+#teacher-status .st-ok { color: #276749; }
+#teacher-status .st-warn { color: #c05621; }
+.paste-input {
+    width: 100%; height: 80px; margin-bottom: 6px; padding: 8px 10px; border: 2px solid #cbd5e0;
+    border-radius: 10px; font-family: monospace; font-size: 12px; resize: vertical; outline: none; word-break: break-all;
+}
+.paste-input:focus { border-color: #3182ce; }
+.table-wrap tr.invalid td { background: #fff5f5; }
+
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(36,50,71,0.55); display: none;
+    align-items: center; justify-content: center; padding: 16px; z-index: 100;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+    background: #fff; border-radius: 18px; padding: 22px; max-width: 460px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; animation: modalIn 0.2s ease;
+}
+.modal h3 { margin: 0 0 8px; color: #243b5a; font-size: 19px; }
+#modal-body { color: #4a5568; font-size: 15px; line-height: 1.5; margin-bottom: 14px; }
+#modal-body textarea {
+    width: 100%; height: 110px; margin-top: 8px; padding: 8px; font-family: monospace; font-size: 12px;
+    border: 1px solid #cbd5e0; border-radius: 10px; resize: none; word-break: break-all;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
+
+@media (max-height: 700px) {
+    .game-subtitle { display: none; }
+    .progress-area { display: none; }
+    .hud-card { padding: 4px 6px; }
+    .hud-value { font-size: 16px; }
+}
+@media (max-width: 900px) {
+    body { padding: 10px; }
+    #game-container { padding: 14px; border-radius: 20px; height: calc(100dvh - 20px); }
+    .options-grid { gap: 10px; }
+}
+@media (max-width: 600px) {
+    body { padding: 6px; }
+    #game-container { padding: 10px; border-radius: 16px; height: calc(100dvh - 12px); }
+    .game-header { padding: 0 42px; }
+    #hud { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .hud-card { flex-direction: row; gap: 8px; }
+    .hud-label { margin: 0; }
+    #screen-game .rule-note { font-size: 12px; padding: 5px 8px; }
+    .options-grid { gap: 6px; height: clamp(90px, 17dvh, 150px); }
+    .option-card { padding: 4px; border-radius: 12px; }
+    .option-letter { top: 4px; left: 4px; width: 22px; height: 22px; font-size: 11px; }
+    .btn { padding: 12px 20px; font-size: 15px; }
+}
+</style>
+</head>
+
+<body>
+<canvas id="confetti"></canvas>
+
+<div id="game-container">
+
+    <div class="game-header">
+        <h1 class="game-title">🧠 Flexibilidade Cognitiva</h1>
+        <p id="game-subtitle" class="game-subtitle">Observe com atenção e escolha a alternativa correta.</p>
+        <button id="btn-teacher" onclick="openTeacher()" aria-label="Abrir painel do professor" title="Painel do professor">🧑‍🏫</button>
+        <button id="btn-mute" onclick="toggleMute()" aria-label="Ativar ou desativar sons" title="Sons">🔊</button>
+    </div>
+
+    <!-- TELA INICIAL -->
+    <div id="screen-start" class="screen">
+        <div class="start-inner">
+            <div class="start-emoji">👋</div>
+            <h2>Olá! Qual é o seu nome?</h2>
+            <input id="student-name" class="text-input" type="text" maxlength="40"
+                   placeholder="Digite seu nome completo" autocomplete="off">
+            <div id="name-error" class="field-error"></div>
+            <div class="rules-box">
+                <strong>Como funciona:</strong>
+                <ul>
+                    <li>Você tem <strong>3 vidas</strong> ❤️❤️❤️</li>
+                    <li>Se errar, perde 1 vida e a questão vai para o <strong>final</strong> da fila</li>
+                    <li>Sem vidas, o jogo <strong>reinicia</strong></li>
+                    <li>O tempo só começa a contar na sua <strong>primeira resposta</strong></li>
+                    <li>Você também pode responder com as teclas <strong>A</strong>, <strong>B</strong> ou <strong>C</strong></li>
+                    <li>Ao terminar, baixe o <strong>arquivo do resultado</strong> e entregue ao professor</li>
+                </ul>
+            </div>
+            <button class="btn" onclick="onStart()">Começar</button>
+            <button class="link-btn" onclick="openTeacher()">Área do professor</button>
+        </div>
+    </div>
+
+    <!-- TELA DO JOGO -->
+    <div id="screen-game" class="screen">
+        <div class="rule-note">
+            ⚠️ Você tem 3 vidas. Se errar, perde 1 vida e a questão vai para o <strong>final</strong> da fila. Sem vidas, o jogo reinicia.
+        </div>
+
+        <div id="hud">
+            <div class="hud-card"><div class="hud-label">Questão</div><div id="progress" class="hud-value">1 / 25</div></div>
+            <div class="hud-card"><div class="hud-label">Tempo</div><div id="timer" class="hud-value">—</div></div>
+            <div class="hud-card"><div class="hud-label">Acertos</div><div id="hits" class="hud-value">0</div></div>
+            <div class="hud-card"><div class="hud-label">Vidas</div><div id="lives" class="hud-value">❤️❤️❤️</div></div>
+        </div>
+
+        <div class="progress-area">
+            <div class="progress-top"><span>Progresso da atividade</span><span id="progress-percent">0%</span></div>
+            <div class="progress-track"><div id="progress-bar"></div></div>
+        </div>
+
+        <div class="question-section">
+            <h2 class="question-heading">Observe a pergunta</h2>
+            <div id="feedback" role="alert"></div>
+            <div class="question-container">
+                <img id="question-image" src="" alt="Pergunta" class="question-img">
+            </div>
+        </div>
+
+        <div class="answers-wrap">
+            <h2 class="answers-heading">Escolha uma resposta <span class="kbd-hint">(ou tecle A, B ou C)</span></h2>
+            <div class="options-grid">
+                <div class="option-card" onclick="selectOption(0)" role="button" tabindex="0">
+                    <div class="option-letter">A</div><img id="opt-img-0" src="" class="option-img" alt="Opção A">
+                </div>
+                <div class="option-card" onclick="selectOption(1)" role="button" tabindex="0">
+                    <div class="option-letter">B</div><img id="opt-img-1" src="" class="option-img" alt="Opção B">
+                </div>
+                <div class="option-card" onclick="selectOption(2)" role="button" tabindex="0">
+                    <div class="option-letter">C</div><img id="opt-img-2" src="" class="option-img" alt="Opção C">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE RESULTADO -->
+    <div id="screen-result" class="screen">
+        <div class="result-inner">
+            <div id="result-icon" class="result-icon">🏆</div>
+            <h1 id="result-title" class="success-title">Fim de Jogo</h1>
+            <div id="result-text" class="result-details"></div>
+            <div id="result-action" class="action-row"></div>
+        </div>
+    </div>
+
+    <!-- PAINEL DO PROFESSOR -->
+    <div id="screen-teacher" class="screen">
+        <div id="teacher-panel">
+            <h2>Painel do professor</h2>
+            <p class="teacher-hint">Abra os arquivos <strong>.txt</strong> de resultado enviados pelos alunos (pode selecionar vários de uma vez).</p>
+            <div class="teacher-actions" style="margin:0 0 8px">
+                <button class="btn blue small" onclick="document.getElementById('file-input').click()">📂 Abrir arquivo(s) .txt</button>
+                <button class="btn gray small" onclick="togglePaste()">📋 Colar códigos</button>
+                <input id="file-input" type="file" accept=".txt,text/plain" multiple hidden>
+            </div>
+            <div id="paste-area" style="display:none">
+                <textarea id="paste-input" class="paste-input" placeholder="Cole aqui os códigos (um por linha), começando com FC1."></textarea>
+                <button class="btn small" onclick="readPasted()">Ler códigos</button>
+            </div>
+            <div id="teacher-status"></div>
+            <div id="teacher-summary"></div>
+            <div class="table-wrap"><table id="records-table"></table></div>
+            <div class="teacher-actions">
+                <button class="btn blue small" onclick="exportCSV()">Exportar CSV</button>
+                <button class="btn red small" onclick="clearPanel()">Limpar painel</button>
+                <button class="btn gray small" onclick="closeTeacher()">Voltar</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL PERSONALIZADO -->
+<div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h3 id="modal-title"></h3>
+        <div id="modal-body"></div>
+        <div id="modal-actions" class="action-row"></div>
+    </div>
+</div>
+
+<script>
+    // MATRIZ DE PERGUNTAS (mantida do arquivo original)
+    // correctIndex: 0 = A, 1 = B, 2 = C
+    const originalQuestions = [
+        { questionImg: "P01.png", optionsImgs: ["R01-A.png", "R01-B.png", "R01-C.png"], correctIndex: 0 },
+        { questionImg: "P02.png", optionsImgs: ["R02-A.png", "R02-B.png", "R02-C.png"], correctIndex: 1 },
+        { questionImg: "P03.png", optionsImgs: ["R03-A.png", "R03-B.png", "R03-C.png"], correctIndex: 1 },
+        { questionImg: "P04.png", optionsImgs: ["R04-A.png", "R04-B.png", "R04-C.png"], correctIndex: 2 },
+        { questionImg: "P05.png", optionsImgs: ["R05-A.png", "R05-B.png", "R05-C.png"], correctIndex: 0 },
+        { questionImg: "P06.png", optionsImgs: ["R06-A.png", "R06-B.png", "R06-C.png"], correctIndex: 2 },
+        { questionImg: "P07.png", optionsImgs: ["R07-A.png", "R07-B.png", "R07-C.png"], correctIndex: 1 },
+        { questionImg: "P08.png", optionsImgs: ["R08-A.png", "R08-B.png", "R08-C.png"], correctIndex: 1 },
+        { questionImg: "P09.png", optionsImgs: ["R09-A.png", "R09-B.png", "R09-C.png"], correctIndex: 2 },
+        { questionImg: "P10.png", optionsImgs: ["R10-A.png", "R10-B.png", "R10-C.png"], correctIndex: 0 },
+        { questionImg: "P11.png", optionsImgs: ["R11-A.png", "R11-B.png", "R11-C.png"], correctIndex: 1 },
+        { questionImg: "P12.png", optionsImgs: ["R12-A.png", "R12-B.png", "R12-C.png"], correctIndex: 1 },
+        { questionImg: "P13.png", optionsImgs: ["R13-A.png", "R13-B.png", "R13-C.png"], correctIndex: 0 },
+        { questionImg: "P14.png", optionsImgs: ["R14-A.png", "R14-B.png", "R14-C.png"], correctIndex: 1 },
+        { questionImg: "P15.png", optionsImgs: ["R15-A.png", "R15-B.png", "R15-C.png"], correctIndex: 1 },
+        { questionImg: "P16.png", optionsImgs: ["R16-A.png", "R16-B.png", "R16-C.png"], correctIndex: 1 },
+        { questionImg: "P17.png", optionsImgs: ["R17-A.png", "R17-B.png", "R17-C.png"], correctIndex: 1 },
+        { questionImg: "P18.png", optionsImgs: ["R18-A.png", "R18-B.png", "R18-C.png"], correctIndex: 0 },
+        { questionImg: "P19.png", optionsImgs: ["R19-A.png", "R19-B.png", "R19-C.png"], correctIndex: 1 },
+        { questionImg: "P20.png", optionsImgs: ["R20-A.png", "R20-B.png", "R20-C.png"], correctIndex: 0 },
+        { questionImg: "P21.png", optionsImgs: ["R21-A.png", "R21-B.png", "R21-C.png"], correctIndex: 2 },
+        { questionImg: "P22.png", optionsImgs: ["R22-A.png", "R22-B.png", "R22-C.png"], correctIndex: 0 },
+        { questionImg: "P23.png", optionsImgs: ["R23-A.png", "R23-B.png", "R23-C.png"], correctIndex: 1 },
+        { questionImg: "P24.png", optionsImgs: ["R24-A.png", "R24-B.png", "R24-C.png"], correctIndex: 2 },
+        { questionImg: "P25.png", optionsImgs: ["R25-A.png", "R25-B.png", "R25-C.png"], correctIndex: 2 }
+    ];
+
+    // ENDEREÇOS DAS IMAGENS (PostImage). Chave = nome do arquivo sem ".png".
+    // Imagem sem endereço aqui continua sendo lida pelo nome do arquivo (mesma pasta do HTML).
+    const IMAGE_URLS = {
+        P01: 'https://i.postimg.cc/Wz5hm07H/P01.png',
+        P02: 'https://i.postimg.cc/Y0dhNQxy/P02.png',
+        P03: 'https://i.postimg.cc/D0x8Q1cH/P03.png',
+        P04: 'https://i.postimg.cc/FzT7b0xq/P04.png',
+        P05: 'https://i.postimg.cc/prspQKBg/P05.png',
+        P06: 'https://i.postimg.cc/sxTvP5Jb/P06.png',
+        P07: 'https://i.postimg.cc/j2ML6yhp/P07.png',
+        P08: 'https://i.postimg.cc/sgpTVXDD/P08.png',
+        P09: 'https://i.postimg.cc/QMh0V3H3/P09.png',
+        P10: 'https://i.postimg.cc/hGcphBfn/P10.png',
+        P11: 'https://i.postimg.cc/vmb3DscM/P11.png',
+        P12: 'https://i.postimg.cc/hGcphBft/P12.png',
+        P13: 'https://i.postimg.cc/CKSmdgzZ/P13.png',
+        P14: 'https://i.postimg.cc/1zsJ4QfN/P14.png',
+        P15: 'https://i.postimg.cc/KYxJ42R3/P15.png',
+        P16: 'https://i.postimg.cc/PqT2NjP1/P16.png',
+        P17: 'https://i.postimg.cc/YSR8WsWY/P17.png',
+        P18: 'https://i.postimg.cc/d06nyxy2/P18.png',
+        P19: 'https://i.postimg.cc/GpKzy5yx/P19.png',
+        P20: 'https://i.postimg.cc/rpjgrPrP/P20.png',
+        P21: 'https://i.postimg.cc/xd5gz4mr/P21.png',
+        P22: 'https://i.postimg.cc/3Rw1CFXS/P22.png',
+        P23: 'https://i.postimg.cc/SKdVMv9p/P23.png',
+        P24: 'https://i.postimg.cc/ydNjXymr/P24.png',
+        P25: 'https://i.postimg.cc/HxLz49wf/P25.png',
+        // respostas (R)
+        'R01-A': 'https://i.postimg.cc/Tww8Lmp9/R01-A.png',
+        'R01-B': 'https://i.postimg.cc/Sss028JG/R01-B.png',
+        'R01-C': 'https://i.postimg.cc/Sss028Jf/R01-C.png',
+        'R02-A': 'https://i.postimg.cc/pTTNh8pY/R02-A.png',
+        'R02-B': 'https://i.postimg.cc/rmm60WKg/R02-B.png',
+        'R02-C': 'https://i.postimg.cc/QttL95H0/R02-C.png',
+        'R03-A': 'https://i.postimg.cc/j5kpz57N/R03-A.png',
+        'R03-B': 'https://i.postimg.cc/50khw0CL/R03-B.png',
+        'R03-C': 'https://i.postimg.cc/vBSJWBVL/R03-C.png',
+        'R04-A': 'https://i.postimg.cc/j5kpz57y/R04-A.png',
+        'R04-B': 'https://i.postimg.cc/V6Hxj6C9/R04-B.png',
+        'R04-C': 'https://i.postimg.cc/qRZP8R3x/R04-C.png',
+        'R05-A': 'https://i.postimg.cc/Y9y519W8/R05-A.png',
+        'R05-B': 'https://i.postimg.cc/631kd3vY/R05-B.png',
+        'R05-C': 'https://i.postimg.cc/MTrCyTQs/R05-C.png',
+        'R06-A': 'https://i.postimg.cc/sDS2gFkb/R06-A.png',
+        'R06-B': 'https://i.postimg.cc/vH9mZRJj/R06-B.png',
+        'R06-C': 'https://i.postimg.cc/X7FvYMRm/R06-C.png',
+        'R07-A': 'https://i.postimg.cc/yY9N8qMw/R07-A.png',
+        'R07-B': 'https://i.postimg.cc/BQDvn9Wf/R07-B.png',
+        'R07-C': 'https://i.postimg.cc/Hs5LkDGG/R07-C.png',
+        'R08-A': 'https://i.postimg.cc/3JpwxMss/R08-A.png',
+        'R08-B': 'https://i.postimg.cc/28v5SRpR/R08-B.png',
+        'R08-C': 'https://i.postimg.cc/rFWpwX6k/R08-C.png',
+        'R09-A': 'https://i.postimg.cc/hPxGtWFn/R09-A.png',
+        'R09-B': 'https://i.postimg.cc/rFWpwX6M/R09-B.png',
+        'R09-C': 'https://i.postimg.cc/02mNyRgk/R09-C.png',
+        'R10-A': 'https://i.postimg.cc/jdNjS0VR/R10-A.png',
+        'R10-B': 'https://i.postimg.cc/02mNyRg5/R10-B.png',
+        'R10-C': 'https://i.postimg.cc/3Jpwx5MJ/R10-C.png',
+        'R11-A': 'https://i.postimg.cc/2y7N1Bvz/R11-A.png',
+        'R11-B': 'https://i.postimg.cc/Xqk6ryF7/R11-B.png',
+        'R11-C': 'https://i.postimg.cc/cCBGv8Yx/R11-C.png',
+        'R12-A': 'https://i.postimg.cc/sgrgB6yz/R12-A.png',
+        'R12-B': 'https://i.postimg.cc/SN8KxF0j/R12-B.png',
+        'R12-C': 'https://i.postimg.cc/JzLzy6mM/R12-C.png',
+        'R13-A': 'https://i.postimg.cc/Xqk6ryFY/R13-A.png',
+        'R13-B': 'https://i.postimg.cc/DwTwWjFy/R13-B.png',
+        'R13-C': 'https://i.postimg.cc/fRNR32ZL/R13-C.png',
+        'R14-A': 'https://i.postimg.cc/6pXp7jwq/R14-A.png',
+        'R14-B': 'https://i.postimg.cc/sgrgB6y1/R14-B.png',
+        'R14-C': 'https://i.postimg.cc/RC7Bs2YJ/R14-C.png',
+        'R15-A': 'https://i.postimg.cc/bv6yBqn0/R15-A.png',
+        'R15-B': 'https://i.postimg.cc/cJDxbd3M/R15-B.png',
+        'R15-C': 'https://i.postimg.cc/vmPYNGnh/R15-C.png',
+        'R16-A': 'https://i.postimg.cc/pd0W6PjJ/R16-A.png',
+        'R16-B': 'https://i.postimg.cc/vmPYNGn3/R16-B.png',
+        'R16-C': 'https://i.postimg.cc/FKPrBhST/R16-C.png',
+        'R17-A': 'https://i.postimg.cc/cJDxbd3D/R17-A.png',
+        'R17-B': 'https://i.postimg.cc/fbHzrMd2/R17-B.png',
+        'R17-C': 'https://i.postimg.cc/B6XSWR55/R17-C.png',
+        'R18-A': 'https://i.postimg.cc/wv7qKn5V/R18-A.png',
+        'R18-B': 'https://i.postimg.cc/fLJz417C/R18-B.png',
+        'R18-C': 'https://i.postimg.cc/fLJz4175/R18-C.png',
+        'R19-A': 'https://i.postimg.cc/JnGrwS3T/R19-A.png',
+        'R19-B': 'https://i.postimg.cc/QNQ34vzW/R19-B.png',
+        'R19-C': 'https://i.postimg.cc/sXvjFbPH/R19-C.png',
+        'R20-A': 'https://i.postimg.cc/tTYq08dS/R20-A.png',
+        'R20-B': 'https://i.postimg.cc/qRzJfWcZ/R20-B.png',
+        'R20-C': 'https://i.postimg.cc/3Rd8Mzjc/R20-C.png',
+        'R21-A': 'https://i.postimg.cc/KzRGXC7W/R21-A.png',
+        'R21-B': 'https://i.postimg.cc/d1LsMgRX/R21-B.png',
+        'R21-C': 'https://i.postimg.cc/vBcYRC7p/R21-C.png',
+        'R22-A': 'https://i.postimg.cc/qRzJfWXf/R22-A.png',
+        'R22-B': 'https://i.postimg.cc/C1zhy9HT/R22-B.png',
+        'R22-C': 'https://i.postimg.cc/1tfmxbcy/R22-C.png',
+        'R23-A': 'https://i.postimg.cc/63yWsFLK/R23-A.png',
+        'R23-B': 'https://i.postimg.cc/bJsyX4H8/R23-B.png',
+        'R23-C': 'https://i.postimg.cc/DZ8vVRd2/R23-C.png',
+        'R24-A': 'https://i.postimg.cc/3Rd8MzCY/R24-A.png',
+        'R24-B': 'https://i.postimg.cc/wvZ69FFn/R24-B.png',
+        'R24-C': 'https://i.postimg.cc/MTv6kgb6/R24-C.png',
+        'R25-A': 'https://i.postimg.cc/Jnv1RKK9/R25-A.png',
+        'R25-B': 'https://i.postimg.cc/Px9tdK2G/R25-B.png',
+        'R25-C': 'https://i.postimg.cc/C1XFwJJ3/R25-C.png'
+    };
+    // Imagens repetidas: a chave da esquerda usa o endereço da chave da direita
+    const IMAGE_ALIASES = {};  // ex.: { 'R20-A': 'R19-A' } para reaproveitar o endereço de outra imagem
+    function imgSrc(file) {
+        let key = file.replace(/\.png$/i, '');
+        key = IMAGE_ALIASES[key] || key;
+        return IMAGE_URLS[key] || file;
+    }
+
+    // Só entram no jogo as perguntas com gabarito definido
+    const QUESTIONS = originalQuestions.filter(q => q.correctIndex !== null);
+
+    // ================= CONFIGURAÇÃO =================
+    const MAX_LIVES = 3;
+    const TOTAL = QUESTIONS.length;
+    const B62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const PRAISES = ['Muito bem! 🎉', 'Isso mesmo! 👏', 'Acertou! 🌟', 'Boa! Continue assim! 💪', 'Excelente! ✨'];
+    const ENCOURAGE = ['Quase! Observe com calma.', 'Não desanime, você consegue!', 'Respire e observe de novo.', 'Errar faz parte de aprender!'];
+
+    // ================= ESTADO (somente em memória) =================
+    let studentName = '';
+    let queue = [];
+    let hits = 0, errors = 0, lives = MAX_LIVES, timeSpent = 0;
+    let startedAt = null;
+    let attempts = 0;
+    let timerInterval, feedbackTimeout;
+    let locked = false;
+    let inGame = false;
+    let pendingDownload = false;
+    let lastResult = null;
+    let muted = false;
+    let panelRecords = [];
+    let timerStarted = false;
+    let currentScreen = 'start';
+    let returnScreen = 'start';
+
+    // ================= UTILITÁRIOS =================
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function fmtTime(s) {
+        const m = Math.floor(s / 60), r = s % 60;
+        return m > 0 ? m + 'min ' + String(r).padStart(2, '0') + 's' : r + 's';
+    }
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+    function makeCode(str) {
+        let h = 5381;
+        for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+        return h.toString(36).toUpperCase().padStart(6, '0').slice(-6);
+    }
+    function slug(s) {
+        return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').toLowerCase() || 'aluno';
+    }
+    function shuffleArray(array) {
+        const s = [...array];
+        for (let i = s.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [s[i], s[j]] = [s[j], s[i]];
+        }
+        return s;
+    }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function showScreen(name) {
+        const ids = { start: 'screen-start', game: 'screen-game', result: 'screen-result', teacher: 'screen-teacher' };
+        Object.keys(ids).forEach(k => {
+            document.getElementById(ids[k]).style.display = (k === name) ? 'flex' : 'none';
+        });
+        currentScreen = name;
+        document.getElementById('btn-teacher').style.display = (name === 'teacher') ? 'none' : 'block';
+        document.getElementById('game-subtitle').style.display = (name === 'teacher') ? 'none' : '';
+    }
+
+    // Navega para uma tela; se o painel do professor estiver aberto, só registra para onde voltar
+    function goTo(name) {
+        if (currentScreen === 'teacher') returnScreen = name;
+        else showScreen(name);
+    }
+
+    // ================= BASE62 =================
+    function b62encode(str) {
+        const bytes = new TextEncoder().encode(str);
+        let n = 0n;
+        for (const b of bytes) n = (n << 8n) | BigInt(b);
+        let out = '';
+        while (n > 0n) { out = B62[Number(n % 62n)] + out; n = n / 62n; }
+        return out || '0';
+    }
+    function b62decode(s) {
+        let n = 0n;
+        for (const ch of s) {
+            const i = B62.indexOf(ch);
+            if (i < 0) throw new Error('caractere inválido');
+            n = n * 62n + BigInt(i);
+        }
+        const bytes = [];
+        while (n > 0n) { bytes.unshift(Number(n & 255n)); n = n >> 8n; }
+        return new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes));
+    }
+
+    // Resultado -> texto "FC1.<base62>"
+    function checkString(r) {
+        return [r.nome, r.fim, r.tempo, r.erros, r.acertos, r.tentativas].join('|');
+    }
+    function encodeResult(r) {
+        const payload = { v: 1, n: r.nome, i: r.inicio, f: r.fim, t: r.tempo, a: r.acertos, e: r.erros, l: r.vidas, k: r.tentativas, c: r.codigo };
+        return 'FC1.' + b62encode(JSON.stringify(payload));
+    }
+    function parseToken(line) {
+        try {
+            if (!line.startsWith('FC1.')) return null;
+            const o = JSON.parse(b62decode(line.slice(4)));
+            if (!o || o.v !== 1 || typeof o.n !== 'string' || typeof o.c !== 'string') return null;
+            for (const k of ['t', 'a', 'e', 'l', 'k']) {
+                if (typeof o[k] !== 'number' || !isFinite(o[k])) return null;
+            }
+            if (isNaN(Date.parse(o.f))) return null;
+            const rec = {
+                nome: o.n.slice(0, 60), inicio: o.i || '', fim: o.f, tempo: o.t, acertos: o.a,
+                erros: o.e, vidas: o.l, tentativas: o.k, codigo: o.c, token: line
+            };
+            rec.valido = makeCode(checkString(rec)) === rec.codigo;
+            return rec;
+        } catch (e) { return null; }
+    }
+
+    // ================= MODAL PERSONALIZADO =================
+    let modalPrevFocus = null;
+    function openModal(title, bodyHtml, actions) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = bodyHtml;
+        const box = document.getElementById('modal-actions');
+        box.innerHTML = '';
+        actions.forEach(a => {
+            const b = document.createElement('button');
+            b.className = 'btn small ' + (a.cls || '');
+            b.textContent = a.label;
+            b.addEventListener('click', () => { closeModal(); if (a.onClick) a.onClick(); });
+            box.appendChild(b);
+        });
+        modalPrevFocus = document.activeElement;
+        const ov = document.getElementById('modal-overlay');
+        ov.classList.add('open');
+        ov.setAttribute('aria-hidden', 'false');
+        const first = box.querySelector('button');
+        if (first) first.focus();
+    }
+    function closeModal() {
+        const ov = document.getElementById('modal-overlay');
+        ov.classList.remove('open');
+        ov.setAttribute('aria-hidden', 'true');
+        if (modalPrevFocus && modalPrevFocus.focus) modalPrevFocus.focus();
+    }
+    function isModalOpen() { return document.getElementById('modal-overlay').classList.contains('open'); }
+
+    // ================= SONS =================
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) {
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function tone(freq, start, dur, type, vol) {
+        if (!audioCtx || muted) return;
+        const t = audioCtx.currentTime + start;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type || 'sine';
+        o.frequency.setValueAtTime(freq, t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol || 0.15, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t + dur + 0.05);
+    }
+    function playSound(kind) {
+        initAudio();
+        if (kind === 'ok') { tone(660, 0, 0.12); tone(880, 0.1, 0.18); }
+        else if (kind === 'err') { tone(220, 0, 0.18, 'triangle', 0.18); tone(165, 0.16, 0.28, 'triangle', 0.18); }
+        else if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.14, 0.28)); }
+        else if (kind === 'over') { [330, 262, 196].forEach((f, i) => tone(f, i * 0.2, 0.3, 'triangle', 0.18)); }
+    }
+    function updateMuteButton() {
+        const b = document.getElementById('btn-mute');
+        b.innerText = muted ? '🔇' : '🔊';
+        b.title = muted ? 'Sons desativados' : 'Sons ativados';
+    }
+    function toggleMute() {
+        muted = !muted;
+        updateMuteButton();
+        if (!muted) playSound('ok');
+    }
+
+    // ================= CONFETE =================
+    function launchConfetti() {
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const cv = document.getElementById('confetti');
+        const ctx = cv.getContext('2d');
+        cv.width = window.innerWidth;
+        cv.height = window.innerHeight;
+        cv.style.display = 'block';
+        const colors = ['#3182ce', '#667eea', '#38a169', '#ecc94b', '#ed64a6', '#ed8936'];
+        const parts = Array.from({ length: 150 }, () => ({
+            x: Math.random() * cv.width,
+            y: -20 - Math.random() * cv.height * 0.5,
+            w: 6 + Math.random() * 6,
+            h: 8 + Math.random() * 8,
+            vx: -2 + Math.random() * 4,
+            vy: 2 + Math.random() * 4,
+            rot: Math.random() * 6,
+            vr: -0.2 + Math.random() * 0.4,
+            c: colors[Math.floor(Math.random() * colors.length)]
+        }));
+        const end = performance.now() + 4500;
+        (function frame(t) {
+            ctx.clearRect(0, 0, cv.width, cv.height);
+            parts.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.rot += p.vr;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot);
+                ctx.fillStyle = p.c;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            });
+            if (t < end) requestAnimationFrame(frame);
+            else { ctx.clearRect(0, 0, cv.width, cv.height); cv.style.display = 'none'; }
+        })(performance.now());
+    }
+
+    // Único aviso nativo do navegador (não é personalizável): fechar a aba no meio da atividade
+    // ou antes de baixar o arquivo do resultado.
+    window.addEventListener('beforeunload', (e) => {
+        if (inGame || pendingDownload) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    // ================= FLUXO: INÍCIO =================
+    function openStart() {
+        document.getElementById('student-name').value = '';
+        document.getElementById('name-error').innerText = '';
+        document.getElementById('game-subtitle').innerText = 'Observe com atenção e escolha a alternativa correta.';
+        showScreen('start');
+    }
+
+    function onStart() {
+        const name = document.getElementById('student-name').value.trim().replace(/\s+/g, ' ');
+        if (name.length < 2) {
+            document.getElementById('name-error').innerText = 'Digite seu nome para começar.';
+            document.getElementById('student-name').focus();
+            return;
+        }
+        studentName = name;
+        attempts = 0;
+        initAudio();
+        startGame();
+    }
+
+    function backToStart() {
+        inGame = false;
+        pendingDownload = false;
+        openStart();
+    }
+
+    // Se o resultado ainda não foi baixado, pergunta (modal próprio) antes de sair da tela final
+    function guardResult(next) {
+        if (!pendingDownload) { next(); return; }
+        openModal(
+            'Resultado ainda não baixado',
+            'Se você sair agora, o professor não conseguirá confirmar que você concluiu a atividade.',
+            [
+                { label: '📥 Baixar agora', cls: 'blue', onClick: downloadResult },
+                { label: 'Continuar sem baixar', cls: 'gray', onClick: () => { pendingDownload = false; next(); } }
+            ]
+        );
+    }
+    function playAgain() { guardResult(startGame); }
+    function changeStudent() { guardResult(backToStart); }
+
+    function startGame() {
+        attempts++;
+        queue = shuffleArray(QUESTIONS);
+        hits = 0; errors = 0; lives = MAX_LIVES; timeSpent = 0;
+        locked = false;
+        inGame = true;
+        pendingDownload = false;
+        startedAt = null;
+        timerStarted = false;
+        clearInterval(timerInterval);
+
+        document.getElementById('timer').innerText = '—';
+        document.getElementById('game-subtitle').innerText = 'Aluno(a): ' + studentName;
+        document.getElementById('screen-game').classList.remove('locked');
+        hideFeedback();
+        showScreen('game');
+
+        updateHud();
+        loadQuestion();
+    }
+
+    // O tempo só começa a contar no clique da primeira resposta
+    function runTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeSpent++;
+            document.getElementById('timer').innerText = timeSpent + 's';
+        }, 1000);
+    }
+    function startTimer() {
+        if (timerStarted) return;
+        timerStarted = true;
+        startedAt = new Date().toISOString();
+        document.getElementById('timer').innerText = timeSpent + 's';
+        runTimer();
+    }
+
+    // ================= FLUXO: JOGO =================
+    function loadQuestion() {
+        const q = queue[0];
+        const current = Math.min(hits + 1, TOTAL);
+        const percentage = Math.round((hits / TOTAL) * 100);
+
+        document.getElementById('progress').innerText = current + ' / ' + TOTAL;
+        document.getElementById('progress-percent').innerText = percentage + '%';
+        document.getElementById('progress-bar').style.width = percentage + '%';
+
+        const qi = document.getElementById('question-image');
+        qi.src = imgSrc(q.questionImg);
+        for (let i = 0; i < 3; i++) document.getElementById('opt-img-' + i).src = imgSrc(q.optionsImgs[i]);
+
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('correct', 'wrong'));
+        document.getElementById('screen-game').classList.remove('locked');
+
+        qi.style.animation = 'none';
+        void qi.offsetWidth;
+        qi.style.animation = 'questionIn 0.3s ease';
+    }
+
+    function updateHud() {
+        document.getElementById('hits').innerText = hits;
+        const el = document.getElementById('lives');
+        el.innerText = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
+        el.setAttribute('aria-label', lives + (lives === 1 ? ' vida' : ' vidas'));
+    }
+
+    function showFeedback(html, type, ms) {
+        const fb = document.getElementById('feedback');
+        fb.className = type;
+        fb.innerHTML = html;
+        fb.style.display = 'block';
+        fb.style.animation = 'none';
+        void fb.offsetWidth;
+        fb.style.animation = 'popIn 0.25s ease';
+        clearTimeout(feedbackTimeout);
+        feedbackTimeout = setTimeout(hideFeedback, ms);
+    }
+    function hideFeedback() {
+        clearTimeout(feedbackTimeout);
+        document.getElementById('feedback').style.display = 'none';
+    }
+
+    function selectOption(index) {
+        if (locked || !queue.length || isModalOpen()) return;
+        locked = true;
+        startTimer();
+
+        const q = queue[0];
+        const cards = document.querySelectorAll('.option-card');
+        document.getElementById('screen-game').classList.add('locked');
+
+        if (index === q.correctIndex) {
+            cards[index].classList.add('correct');
+            playSound('ok');
+            showFeedback(pick(PRAISES), 'ok', 900);
+
+            hits++;
+            queue.shift();
+            updateHud();
+
+            setTimeout(() => {
+                locked = false;
+                if (queue.length > 0) { hideFeedback(); loadQuestion(); }
+                else endGame(false);
+            }, 900);
+
+        } else {
+            errors++;
+            lives--;
+            cards[index].classList.add('wrong'); // não revela a resposta correta
+            playSound('err');
+            updateHud();
+
+            if (lives <= 0) {
+                showFeedback('💔 Suas vidas acabaram. Vamos reiniciar!', 'bad', 1800);
+                setTimeout(() => { locked = false; endGame(true); }, 1800);
+                return;
+            }
+
+            queue.push(queue.shift()); // questão errada vai para o final
+
+            const vidasTxt = lives === 1 ? '⚠️ Última vida!' : lives + ' vidas restantes.';
+            showFeedback('❌ ' + pick(ENCOURAGE) + ' Essa questão foi movida para o <strong>final</strong>. ' + vidasTxt, 'bad', 2400);
+
+            setTimeout(() => { locked = false; hideFeedback(); loadQuestion(); }, 2400);
+        }
+    }
+
+    // ================= FLUXO: FIM =================
+    function endGame(failed) {
+        clearInterval(timerInterval);
+        hideFeedback();
+        inGame = false;
+        goTo('result');
+
+        const title = document.getElementById('result-title');
+        const text = document.getElementById('result-text');
+        const action = document.getElementById('result-action');
+        const icon = document.getElementById('result-icon');
+
+        if (failed) {
+            playSound('over');
+            icon.innerText = '💔';
+            title.innerText = 'Suas 3 vidas acabaram!';
+            title.className = 'error-title';
+            text.innerHTML =
+                'Não desanime, <strong>' + esc(studentName) + '</strong>! Você acertou <strong>' + hits + '</strong> de ' + TOTAL + ' questões.<br><br>' +
+                'Agora é necessário <strong>reiniciar o jogo</strong>. As perguntas virão em uma nova ordem!';
+            action.innerHTML =
+                '<button class="btn red" onclick="startGame()">Reiniciar o Jogo</button>' +
+                '<button class="btn gray" onclick="openTeacher()">🧑‍🏫 Painel do professor</button>';
+            return;
+        }
+
+        const r = {
+            nome: studentName, inicio: startedAt, fim: new Date().toISOString(),
+            tempo: timeSpent, acertos: hits, erros: errors, vidas: lives, tentativas: attempts
+        };
+        r.codigo = makeCode(checkString(r));
+        r.token = encodeResult(r);
+        lastResult = r;
+        pendingDownload = true;
+
+        playSound('win');
+        launchConfetti();
+        icon.innerText = '🏆';
+        title.innerText = 'Parabéns! Atividade concluída!';
+        title.className = 'success-title';
+        text.innerHTML =
+            'Muito bem, <strong>' + esc(r.nome) + '</strong>! Você concluiu as <strong>' + TOTAL + '</strong> perguntas.<br>' +
+            '<strong>Tempo:</strong> ' + fmtTime(r.tempo) + ' &nbsp;•&nbsp; ' +
+            '<strong>Erros:</strong> ' + r.erros + ' &nbsp;•&nbsp; ' +
+            '<strong>Vidas restantes:</strong> ' + r.vidas +
+            (r.tentativas > 1 ? ' &nbsp;•&nbsp; <strong>Tentativa:</strong> ' + r.tentativas : '') +
+            '<div class="code-box">Código de conferência: <strong>' + r.codigo + '</strong></div>' +
+            '<div class="warn-box">⚠️ Baixe o arquivo do resultado e entregue ao professor. Se fechar esta tela antes, o resultado se perde.</div>' +
+            '<div id="download-status" class="saved-ok"></div>';
+        action.innerHTML =
+            '<button class="btn blue" onclick="downloadResult()">📥 Baixar resultado (.txt)</button>' +
+            '<button class="btn gray" onclick="copyToken(this)">📋 Copiar código</button>' +
+            '<button class="btn" onclick="playAgain()">Jogar novamente</button>' +
+            '<button class="link-btn" onclick="changeStudent()">Trocar aluno</button>';
+    }
+
+    // ================= ARQUIVO DE RESULTADO (.txt em base62) =================
+    function downloadResult() {
+        const r = lastResult;
+        if (!r) return;
+        const d = new Date(r.fim);
+        const pad = n => String(n).padStart(2, '0');
+        const stamp = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(new Blob([r.token + '\n'], { type: 'text/plain;charset=utf-8' }));
+        a.href = url;
+        a.download = 'resultado_' + slug(r.nome) + '_' + stamp + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        pendingDownload = false;
+        const st = document.getElementById('download-status');
+        if (st) st.innerText = '✅ Arquivo baixado. Entregue-o ao professor.';
+    }
+
+    function copyToken(btn) {
+        const r = lastResult;
+        if (!r) return;
+        const done = () => {
+            pendingDownload = false;
+            const old = btn.innerText;
+            btn.innerText = '✅ Copiado!';
+            setTimeout(() => { btn.innerText = old; }, 1800);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(r.token).then(done).catch(() => manualCopy(r.token));
+        } else {
+            manualCopy(r.token);
+        }
+    }
+    function manualCopy(txt) {
+        openModal(
+            'Copie o código',
+            'Não foi possível copiar automaticamente. Selecione e copie o código abaixo:<textarea id="manual-copy" readonly>' + esc(txt) + '</textarea>',
+            [{ label: 'Fechar', cls: 'gray', onClick: () => { pendingDownload = false; } }]
+        );
+        const ta = document.getElementById('manual-copy');
+        if (ta) { ta.focus(); ta.select(); }
+    }
+
+    // ================= PAINEL DO PROFESSOR =================
+    function openTeacher() {
+        if (currentScreen === 'teacher') return;
+        returnScreen = currentScreen;
+        clearInterval(timerInterval); // pausa o tempo enquanto o painel está aberto
+        document.getElementById('paste-area').style.display = 'none';
+        showScreen('teacher');
+        setStatus('');
+        renderRecords();
+    }
+
+    function closeTeacher() {
+        const back = returnScreen || 'start';
+        showScreen(back);
+        if (back === 'game' && inGame && timerStarted) runTimer(); // retoma o tempo
+    }
+
+    function togglePaste() {
+        const p = document.getElementById('paste-area');
+        p.style.display = (p.style.display === 'none') ? 'block' : 'none';
+        if (p.style.display === 'block') document.getElementById('paste-input').focus();
+    }
+
+    function setStatus(html) { document.getElementById('teacher-status').innerHTML = html; }
+
+    function ingest(text) {
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const res = { added: 0, dup: 0, bad: 0 };
+        lines.forEach(line => {
+            const rec = parseToken(line);
+            if (!rec) { res.bad++; return; }
+            if (panelRecords.some(p => p.token === rec.token)) { res.dup++; return; }
+            panelRecords.push(rec);
+            res.added++;
+        });
+        return res;
+    }
+
+    function reportIngest(total, badNames) {
+        const parts = [];
+        if (total.added) parts.push('<span class="st-ok">✅ ' + total.added + ' resultado(s) adicionado(s).</span>');
+        if (total.dup) parts.push('<span class="st-ok">' + total.dup + ' já estava(m) no painel.</span>');
+        if (badNames.length) parts.push('<span class="st-warn">⚠️ Não foi possível ler: ' + badNames.map(esc).join(', ') + '</span>');
+        if (!parts.length) parts.push('<span class="st-warn">Nenhum resultado encontrado.</span>');
+        setStatus(parts.join(' '));
+        renderRecords();
+    }
+
+    async function loadFiles(files) {
+        const total = { added: 0, dup: 0, bad: 0 };
+        const badNames = [];
+        for (const f of files) {
+            let txt;
+            try { txt = await f.text(); } catch (e) { badNames.push(f.name); continue; }
+            const r = ingest(txt);
+            total.added += r.added; total.dup += r.dup;
+            if (r.bad) badNames.push(f.name + (r.bad > 1 ? ' (' + r.bad + ' linhas)' : ''));
+        }
+        reportIngest(total, badNames);
+    }
+
+    function readPasted() {
+        const ta = document.getElementById('paste-input');
+        const r = ingest(ta.value);
+        reportIngest({ added: r.added, dup: r.dup }, r.bad ? ['texto colado (' + r.bad + ' linha(s) inválida(s))'] : []);
+        if (r.added) ta.value = '';
+    }
+
+    function renderRecords() {
+        const list = panelRecords.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        const ok = list.filter(r => r.valido).length;
+        document.getElementById('teacher-summary').innerText =
+            list.length ? (list.length + ' resultado(s) • ' + ok + ' com código conferido' + (list.length - ok ? ' • ' + (list.length - ok) + ' com código divergente' : '')) : '';
+
+        const t = document.getElementById('records-table');
+        if (!list.length) {
+            t.innerHTML = '<tr><td style="padding:22px;text-align:center;color:#718096;white-space:normal">Nenhum resultado carregado. Abra os arquivos .txt dos alunos para ver o painel.</td></tr>';
+            return;
+        }
+        t.innerHTML =
+            '<thead><tr><th>Aluno</th><th>Concluído em</th><th>Tempo</th><th>Acertos</th><th>Erros</th><th>Vidas</th><th>Tentativa</th><th>Código</th><th>Conferência</th></tr></thead><tbody>' +
+            list.map(r =>
+                '<tr class="' + (r.valido ? '' : 'invalid') + '"><td>' + esc(r.nome) + '</td><td>' + fmtDate(r.fim) +
+                '</td><td>' + fmtTime(r.tempo) + '</td><td>' + r.acertos + '/' + TOTAL + '</td><td>' + r.erros +
+                '</td><td>' + r.vidas + '</td><td>' + r.tentativas + '</td><td><strong>' + esc(r.codigo) + '</strong></td><td>' +
+                (r.valido ? '✅ Confere' : '⚠️ Divergente') + '</td></tr>'
+            ).join('') + '</tbody>';
+    }
+
+    function exportCSV() {
+        if (!panelRecords.length) {
+            openModal('Nada para exportar', 'Carregue ao menos um resultado no painel antes de exportar.', [{ label: 'Ok', cls: 'blue' }]);
+            return;
+        }
+        const cell = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+        const list = panelRecords.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        const rows = [['Aluno', 'Início', 'Concluído em', 'Tempo (s)', 'Acertos', 'Erros', 'Vidas restantes', 'Tentativa', 'Código', 'Conferência']]
+            .concat(list.map(r => [r.nome, fmtDate(r.inicio), fmtDate(r.fim), r.tempo, r.acertos, r.erros, r.vidas, r.tentativas, r.codigo, r.valido ? 'Confere' : 'Divergente']));
+        const csv = '\uFEFF' + rows.map(r => r.map(cell).join(';')).join('\r\n');
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        a.href = url;
+        a.download = 'resultados_flexibilidade_cognitiva.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
+    function clearPanel() {
+        if (!panelRecords.length) return;
+        openModal(
+            'Limpar painel?',
+            'Os resultados carregados serão removidos da tela. Os arquivos .txt originais não são afetados.',
+            [
+                { label: 'Limpar', cls: 'red', onClick: () => { panelRecords = []; setStatus(''); renderRecords(); } },
+                { label: 'Cancelar', cls: 'gray' }
+            ]
+        );
+    }
+
+    // ================= EVENTOS / INÍCIO =================
+    document.querySelectorAll('.option-card').forEach((card, index) => {
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectOption(index);
+            }
+        });
+    });
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const tag = (e.target && e.target.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (!inGame || currentScreen !== 'game' || locked || isModalOpen()) return;
+        const byCode = { KeyA: 0, KeyB: 1, KeyC: 2, Digit1: 0, Digit2: 1, Digit3: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2 };
+        const byKey = { a: 0, b: 1, c: 2, '1': 0, '2': 1, '3': 2 };
+        let idx = byCode[e.code];
+        if (idx === undefined) idx = byKey[(e.key || '').toLowerCase()];
+        if (idx === undefined) return;
+        e.preventDefault();
+        if (e.repeat) return;
+        selectOption(idx);
+    });
+    document.getElementById('student-name').addEventListener('keydown', e => { if (e.key === 'Enter') onStart(); });
+    document.getElementById('file-input').addEventListener('change', e => {
+        const files = Array.from(e.target.files);
+        e.target.value = '';
+        if (files.length) loadFiles(files);
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isModalOpen()) closeModal(); });
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+        if (e.target.id === 'modal-overlay') closeModal();
+    });
+
+    window.onload = function () {
+        updateMuteButton();
+        openStart();
+    };
+</script>
+</body>
+</html>
