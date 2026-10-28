@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atividades: Qual é o valor? & Troco</title>
+<style>
+  :root{
+    --verde:#2e7d32; --verde-claro:#e8f5e9; --vermelho:#c62828;
+    --cinza:#f5f5f5; --texto:#212121; --amarelo:#f9a825;
+    --azul:#1565c0; --azul-claro:#e3f2fd;
+    --sombra:0 10px 30px rgba(0,0,0,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:linear-gradient(135deg,#e8f5e9,#e3f2fd);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:16px;color:var(--texto);
+  }
+  .card{
+    background:#fff;border-radius:20px;box-shadow:var(--sombra);
+    max-width:760px;width:100%;padding:clamp(16px,4vw,32px);
+    position:relative;
+  }
+
+  /* ---- BOTÃO "i" ---- */
+  .btn-info{
+    position:absolute;top:12px;right:12px;width:38px;height:38px;
+    border-radius:50%;border:2px solid var(--verde);background:#fff;
+    color:var(--verde);font-size:1.1rem;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s;z-index:10;
+  }
+  .btn-info:hover{background:var(--verde-claro);}
+
+  h1{font-size:clamp(1.2rem,3.5vw,1.5rem);color:var(--verde);text-align:center;margin-bottom:8px;padding-right:44px;}
+  .sub{text-align:center;color:#666;margin-bottom:24px;font-size:clamp(.85rem,2.5vw,.95rem);}
+
+  /* ---- MENU INICIAL ---- */
+  #tela-menu{text-align:center;}
+  .menu-botoes{display:flex;flex-direction:column;gap:14px;max-width:420px;margin:0 auto;}
+  .btn-atividade{
+    background:var(--verde);color:#fff;border:none;border-radius:14px;
+    padding:20px 24px;font-size:clamp(.95rem,2.8vw,1.1rem);cursor:pointer;font-weight:600;
+    transition:transform .15s, box-shadow .15s;
+    display:flex;align-items:center;gap:14px;text-align:left;
+    box-shadow:0 4px 12px rgba(46,125,50,.25);
+  }
+  .btn-atividade.azul{background:var(--azul);box-shadow:0 4px 12px rgba(21,101,192,.25);}
+  .btn-atividade:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2);}
+  .btn-atividade .icone{font-size:1.8rem;flex-shrink:0;}
+  .btn-atividade .texto{display:flex;flex-direction:column;gap:2px;}
+  .btn-atividade .texto strong{font-size:1.05em;}
+  .btn-atividade .texto small{font-weight:400;opacity:.85;font-size:.8em;line-height:1.3;}
+
+  .btn-secundario{
+    background:#fff;color:var(--verde);border:2px solid var(--verde);
+    border-radius:12px;padding:10px 20px;font-size:clamp(.85rem,2.5vw,.95rem);cursor:pointer;
+    font-weight:600;transition:all .15s;margin-top:12px;
+  }
+  .btn-secundario:hover{background:var(--verde-claro);}
+
+  /* ---- TELAS DE JOGO (compartilhado) ---- */
+  #tela-jogo, #tela-troco{display:none;}
+  .topo{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:12px;gap:8px;flex-wrap:wrap;
+    padding-right:44px;
+  }
+  .progresso{font-size:clamp(.8rem,2.3vw,.9rem);color:#555;font-weight:600;}
+  .vidas{font-size:clamp(.95rem,2.8vw,1.1rem);letter-spacing:2px;white-space:nowrap;}
+  .vidas .viva{color:var(--vermelho);}
+  .vidas .perdida{color:#ccc;}
+  .barra{height:8px;background:var(--cinza);border-radius:99px;overflow:hidden;margin-bottom:20px;}
+  .barra-fill{height:100%;background:var(--verde);width:0;transition:width .4s;}
+  .barra-fill.azul{background:var(--azul);}
+  .pergunta{font-size:clamp(1rem,2.8vw,1.15rem);font-weight:700;text-align:center;margin-bottom:18px;}
+  .imagem-box{
+    background:var(--cinza);border:2px dashed #bbb;border-radius:14px;
+    height:clamp(140px,30vw,200px);display:flex;align-items:center;justify-content:center;
+    margin-bottom:14px;overflow:hidden;padding:10px;
+  }
+  .imagem-box img{max-width:100%;max-height:100%;object-fit:contain;}
+  .placeholder-txt{color:#999;font-size:clamp(.85rem,2.5vw,1rem);text-align:center;padding:8px;}
+
+  /* Caixa de contexto do troco (quanto foi pago) */
+  .contexto-pagamento{
+    background:var(--azul-claro);border:2px solid var(--azul);border-radius:12px;
+    padding:10px 14px;margin-bottom:18px;
+    display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    font-size:clamp(.8rem,2.3vw,.92rem);color:var(--texto);
+  }
+  .contexto-pagamento strong{color:var(--azul);}
+  .contexto-pagamento img{
+    height:clamp(28px,7vw,42px);width:auto;border-radius:5px;
+    box-shadow:0 2px 5px rgba(0,0,0,.25);background:#fff;object-fit:contain;
+  }
+  .contexto-pagamento img.moeda{border-radius:50%;}
+
+  /* ---- OPÇÕES ---- */
+  .opcoes{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:clamp(8px,2vw,14px);
+  }
+  .opcao{
+    border:2px solid var(--verde);border-radius:14px;
+    padding:clamp(8px,2vw,14px);
+    min-height:clamp(70px,15vw,90px);
+    background:#fff;cursor:pointer;transition:all .15s;
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:clamp(3px,1vw,6px);
+    position:relative;
+  }
+  .opcao.azul{border-color:var(--azul);}
+  .opcao:hover:not(:disabled){background:var(--verde-claro);transform:translateY(-2px);}
+  .opcao.azul:hover:not(:disabled){background:var(--azul-claro);}
+  .opcao:disabled{cursor:default;}
+  .opcao img{
+    height:clamp(32px,8vw,52px);
+    width:auto;border-radius:6px;
+    box-shadow:0 2px 5px rgba(0,0,0,.25);
+    background:#fff;object-fit:contain;
+    transition:height .2s;
+  }
+  .opcao img.moeda{border-radius:50%;}
+  .opcao .chip-sem-img{
+    background:#eceff1;border:1px dashed #90a4ae;border-radius:8px;
+    padding:clamp(4px,1vw,8px) clamp(6px,1.5vw,10px);
+    font-size:clamp(.65rem,1.8vw,.8rem);font-weight:600;color:#546e7a;
+  }
+  .opcao.correta{background:var(--verde);border-color:var(--verde);}
+  .opcao.errada{background:var(--vermelho);border-color:var(--vermelho);}
+  .opcao.correta img, .opcao.errada img{box-shadow:0 2px 6px rgba(0,0,0,.4);}
+
+  .feedback{text-align:center;margin-top:16px;font-weight:700;min-height:1.4em;
+    font-size:clamp(.85rem,2.5vw,.95rem);}
+  .feedback.ok{color:var(--verde);}
+  .feedback.nao{color:var(--vermelho);}
+  .centro{text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+
+  /* ---- BOTÕES ---- */
+  .btn{
+    background:var(--verde);color:#fff;border:none;border-radius:12px;
+    padding:14px 32px;font-size:clamp(.95rem,2.8vw,1.05rem);cursor:pointer;font-weight:600;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(46,125,50,.35);}
+  .btn.azul{background:var(--azul);}
+  .btn.azul:hover{box-shadow:0 6px 16px rgba(21,101,192,.35);}
+  .btn.secundario{background:#fff;color:var(--verde);border:2px solid var(--verde);}
+  .btn.secundario:hover{background:var(--verde-claro);box-shadow:none;}
+  .btn.secundario.azul{color:var(--azul);border-color:var(--azul);}
+  .btn.secundario.azul:hover{background:var(--azul-claro);}
+
+  /* ---- TELA FINAL ---- */
+  #tela-fim, #tela-fim-troco{display:none;text-align:center;}
+  #tela-fim .nota, #tela-fim-troco .nota{font-size:clamp(2.2rem,8vw,3.2rem);font-weight:800;color:var(--verde);margin:12px 0;}
+  #tela-fim-troco .nota{color:var(--azul);}
+  #tela-fim .nota.derrota, #tela-fim-troco .nota.derrota{color:var(--vermelho);}
+  .revisao{margin-top:18px;text-align:left;}
+  .revisao h3{margin-bottom:10px;color:#555;font-size:clamp(.9rem,2.5vw,1rem);}
+  .rev-item{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;
+    margin-bottom:6px;background:var(--cinza);font-size:clamp(.8rem,2.3vw,.95rem);
+    flex-wrap:wrap;
+  }
+  .rev-item .mini{width:44px;height:44px;border-radius:8px;background:#fff;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+  .rev-item .mini img{width:100%;height:100%;object-fit:contain;}
+  .rev-dinheiro{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
+  .rev-dinheiro img{height:20px;border-radius:3px;background:#fff;}
+  .rev-dinheiro img.moeda{border-radius:50%;}
+  .rev-ok{color:var(--verde);font-weight:700;}
+
+  /* ---- ABA INFORMATIVA ---- */
+  #tela-info{display:none;}
+  #tela-info h1{margin-bottom:16px;padding-right:0;}
+  .info-secao{
+    background:var(--cinza);border-radius:14px;padding:clamp(14px,3vw,18px) clamp(14px,3.5vw,20px);
+    margin-bottom:14px;text-align:left;
+  }
+  .info-secao h2{
+    font-size:clamp(.95rem,2.7vw,1.05rem);color:var(--verde);margin-bottom:8px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .info-secao.azul h2{color:var(--azul);}
+  .info-secao p, .info-secao li{
+    font-size:clamp(.82rem,2.4vw,.92rem);color:#444;line-height:1.55;
+  }
+  .info-secao ol, .info-secao ul{padding-left:20px;margin-top:6px;}
+  .info-secao li{margin-bottom:4px;}
+  .serie-badge{
+    display:inline-block;background:var(--verde);color:#fff;
+    border-radius:99px;padding:2px 12px;font-size:clamp(.7rem,2vw,.8rem);font-weight:700;
+    margin:2px 4px 2px 0;
+  }
+  .serie-badge.destaque{background:var(--amarelo);color:#212121;}
+  .serie-badge.azul{background:var(--azul);}
+  .hab-item{
+    background:#fff;border-left:4px solid var(--verde);border-radius:6px;
+    padding:8px 12px;margin-bottom:8px;
+  }
+  .hab-item.azul{border-left-color:var(--azul);}
+  .hab-item .codigo{font-weight:800;color:var(--verde);font-size:clamp(.82rem,2.3vw,.9rem);}
+  .hab-item.azul .codigo{color:var(--azul);}
+  .hab-item .serie-tag{
+    display:inline-block;background:var(--verde-claro);color:var(--verde);
+    border-radius:99px;padding:1px 10px;font-size:clamp(.65rem,1.8vw,.72rem);
+    font-weight:700;margin-left:6px;vertical-align:middle;
+  }
+  .hab-item.azul .serie-tag{background:var(--azul-claro);color:var(--azul);}
+  .hab-item .nivel{
+    display:inline-block;border-radius:99px;padding:1px 10px;
+    font-size:clamp(.65rem,1.8vw,.72rem);font-weight:700;margin-left:4px;vertical-align:middle;
+  }
+  .hab-item .nivel.parcial{background:#fff3e0;color:#e65100;border:1px solid #ffb74d;}
+  .hab-item .nivel.plena{background:#e8f5e9;color:var(--verde);border:1px solid #81c784;}
+  .hab-item .desc{font-size:clamp(.8rem,2.3vw,.88rem);color:#444;margin-top:2px;}
+  .hab-item .corresp{font-size:clamp(.72rem,2vw,.8rem);color:#666;font-style:italic;margin-top:4px;}
+  .dica{
+    background:#fff8e1;border-left:4px solid var(--amarelo);
+    border-radius:6px;padding:10px 14px;font-size:clamp(.8rem,2.3vw,.88rem);color:#5d4037;
+    margin-top:8px;
+  }
+  .tabs{
+    display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #e0e0e0;
+  }
+  .tab-btn{
+    background:none;border:none;padding:10px 16px;cursor:pointer;
+    font-size:clamp(.82rem,2.3vw,.92rem);font-weight:700;color:#888;
+    border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;
+  }
+  .tab-btn.active{color:var(--verde);border-bottom-color:var(--verde);}
+  .tab-conteudo{display:none;}
+  .tab-conteudo.active{display:block;}
+
+  /* ---- RESPONSIVIDADE ---- */
+  @media (max-width: 520px){
+    body{padding:8px;}
+    .card{border-radius:16px;padding:16px;padding-top:56px;}
+    .btn-info{position:absolute;top:10px;right:10px;}
+    h1{padding-right:0;}
+    .topo{padding-right:0;}
+    .opcoes{grid-template-columns:1fr 1fr;gap:8px;}
+    .opcao{min-height:64px;padding:8px;border-radius:12px;}
+    .opcao img{height:clamp(28px,9vw,38px);}
+    .imagem-box{height:clamp(120px,35vw,170px);}
+    .topo{gap:4px;}
+    .rev-item{gap:6px;padding:6px 8px;}
+    .rev-item .mini{width:36px;height:36px;}
+    .rev-dinheiro img{height:16px;}
+    .btn-atividade{padding:16px 18px;gap:10px;}
+    .btn-atividade .icone{font-size:1.5rem;}
+    .contexto-pagamento img{height:30px;}
+  }
+  @media (min-width: 900px){
+    .card{max-width:820px;}
+    .opcao img{height:56px;}
+    .imagem-box{height:230px;}
+  }
+  @media (max-width: 340px){
+    .opcoes{grid-template-columns:1fr 1fr;gap:6px;}
+    .opcao{min-height:58px;padding:6px;}
+    .opcao img{height:26px;}
+    .vidas{letter-spacing:0;}
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="card">
+  <button class="btn-info" id="btn-info" title="Instruções, séries e habilidades">i</button>
+
+  <!-- ============================================================
+       MENU INICIAL
+       ============================================================ -->
+  <div id="tela-menu">
+    <h1>🎓 Atividades de Educação Financeira</h1>
+    <p class="sub">Escolha uma atividade para começar.</p>
+    <div class="menu-botoes">
+      <button class="btn-atividade" id="btn-ir-valor">
+        <span class="icone">🛒</span>
+        <span class="texto">
+          <strong>Qual é o valor?</strong>
+          <small>Reconheça cédulas e moedas e encontre a combinação que soma o preço do produto.</small>
+        </span>
+      </button>
+      <button class="btn-atividade azul" id="btn-ir-troco">
+        <span class="icone">💰</span>
+        <span class="texto">
+          <strong>Calculando o troco</strong>
+          <small>Descubra quanto de troco deve receber quem pagou com uma cédula ou moeda.</small>
+        </span>
+      </button>
+    </div>
+    <br>
+    <button class="btn-secundario" id="btn-info-menu">ℹ️ Instruções, séries e habilidades</button>
+  </div>
+
+  <!-- ============================================================
+       ATIVIDADE 1 — QUAL É O VALOR?
+       ============================================================ -->
+  <div id="tela-jogo">
+    <div class="topo">
+      <span class="progresso" id="progresso-valor"></span>
+      <span class="vidas" id="vidas-valor"></span>
+    </div>
+    <div class="barra"><div class="barra-fill" id="barra-valor"></div></div>
+
+    <p class="pergunta">Qual das opções abaixo é a correta?</p>
+
+    <div class="imagem-box" id="imagem-box-valor">
+      <span class="placeholder-txt">Imagem do produto</span>
+    </div>
+
+    <div class="opcoes" id="opcoes-valor"></div>
+    <p class="feedback" id="feedback-valor"></p>
+    <div class="centro">
+      <button class="btn" id="btn-proxima-valor" style="display:none;">Próxima</button>
+      <button class="btn secundario" id="btn-menu-valor" style="display:none;">Menu</button>
+    </div>
+  </div>
+
+  <!-- Tela final da atividade 1 -->
+  <div id="tela-fim">
+    <h1 id="titulo-fim">Atividade concluída! 🎉</h1>
+    <p class="sub" id="sub-fim">Você acertou todas as questões!</p>
+    <div class="nota" id="nota-final"></div>
+    <div class="revisao" id="revisao"></div>
+    <br>
+    <div class="centro">
+      <button class="btn" id="btn-recomecar">Jogar de novo</button>
+      <button class="btn secundario" id="btn-menu-fim">Voltar ao menu</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ATIVIDADE 2 — CALCULANDO O TROCO
+       ============================================================ -->
+  <div id="tela-troco">
+    <div class="topo">
+      <span class="progresso" id="progresso-troco"></span>
+      <span class="vidas" id="vidas-troco"></span>
+    </div>
+    <div class="barra"><div class="barra-fill azul" id="barra-troco"></div></div>
+
+    <p class="pergunta">Quanto de troco deve receber?</p>
+
+    <div class="imagem-box" id="imagem-box-troco">
+      <span class="placeholder-txt">Imagem do produto</span>
+    </div>
+
+    <div class="contexto-pagamento" id="contexto-troco"></div>
+
+    <div class="opcoes" id="opcoes-troco"></div>
+    <p class="feedback" id="feedback-troco"></p>
+    <div class="centro">
+      <button class="btn azul" id="btn-proxima-troco" style="display:none;">Próxima</button>
+      <button class="btn secundario azul" id="btn-menu-troco" style="display:none;">Menu</button>
+    </div>
+  </div>
+
+  <!-- Tela final da atividade 2 -->
+  <div id="tela-fim-troco">
+    <h1 id="titulo-fim-troco">Atividade concluída! 🎉</h1>
+    <p class="sub" id="sub-fim-troco">Você acertou todos os trocos!</p>
+    <div class="nota" id="nota-final-troco"></div>
+    <div class="revisao" id="revisao-troco"></div>
+    <br>
+    <div class="centro">
+      <button class="btn azul" id="btn-recomecar-troco">Jogar de novo</button>
+      <button class="btn secundario azul" id="btn-menu-fim-troco">Voltar ao menu</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ABA INFORMATIVA (com abas internas)
+       ============================================================ -->
+  <div id="tela-info">
+    <h1>ℹ️ Sobre as atividades</h1>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tab-jogar">🎮 Como jogar</button>
+      <button class="tab-btn" data-tab="tab-series">🎓 Séries</button>
+      <button class="tab-btn" data-tab="tab-hab">📖 Habilidades</button>
+    </div>
+
+    <!-- ABA: COMO JOGAR -->
+    <div class="tab-conteudo active" id="tab-jogar">
+      <div class="info-secao">
+        <h2>🛒 Atividade "Qual é o valor?"</h2>
+        <ol>
+          <li>Observe a <b>imagem do produto</b> e o preço que ele representa.</li>
+          <li>Analise as <b>4 opções</b>: cada uma mostra cédulas e moedas do real.</li>
+          <li>Clique na opção cuja soma <b>equivale exatamente</b> ao preço do produto.</li>
+          <li>Você começa com <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
+          <li>Se errar, a pergunta <b>volta ao final da fila</b> e será mostrada novamente.</li>
+          <li>O objetivo é <b>acertar todos os produtos</b> antes de perder as 5 vidas.</li>
+        </ol>
+        <div class="dica">💡 <b>Dica:</b> comece pelas cédulas de maior valor e depois some as moedas.</div>
+      </div>
+
+      <div class="info-secao azul">
+        <h2>💰 Atividade "Calculando o troco"</h2>
+        <ol>
+          <li>Observe o <b>produto</b>, seu preço e a <b>cédula/moeda usada no pagamento</b>.</li>
+          <li>Calcule mentalmente: <b>troco = valor pago − preço do produto</b>.</li>
+          <li>Analise as <b>4 opções</b> de troco (cédulas e moedas) e clique na correta.</li>
+          <li>Você também tem <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
+          <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
+          <li>O objetivo é <b>acertar todos os trocos</b> antes de perder as 5 vidas.</li>
+        </ol>
+        <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2. Confira a decomposição do troco nas opções.</div>
+      </div>
+    </div>
+
+    <!-- ABA: SÉRIES -->
+    <div class="tab-conteudo" id="tab-series">
+      <div class="info-secao">
+        <h2>🎓 Ensino Fundamental I</h2>
+        <p>
+          <span class="serie-badge">1º ano</span> (introdutório, com adaptações)
+          <span class="serie-badge destaque">2º ano</span>
+          <span class="serie-badge destaque">3º ano</span>
+        </p>
+        <ul>
+          <li><b>1º ano:</b> reconhecimento visual de cédulas e moedas, preferencialmente com valores inteiros e sem centavos.</li>
+          <li><b>2º ano:</b> reconhecimento e equivalências entre cédulas e moedas.</li>
+          <li><b>3º ano:</b> problemas de compra, venda, comparação de valores e <b>cálculo de troco</b> — nível mais próximo das duas atividades completas.</li>
+        </ul>
+      </div>
+      <div class="info-secao azul">
+        <h2>💰 Sobre a atividade de troco</h2>
+        <p>A atividade de troco é indicada principalmente para o <b>3º ano</b>, pois exige cálculo mental de subtração com valores monetários. No <b>2º ano</b>, pode ser usada como desafio após o domínio das equivalências.</p>
+      </div>
+    </div>
+
+    <!-- ABA: HABILIDADES -->
+    <div class="tab-conteudo" id="tab-hab">
+      <div class="info-secao">
+        <h2>📖 Habilidades — "Qual é o valor?"</h2>
+        <p style="margin-bottom:10px;font-size:clamp(.78rem,2.2vw,.85rem);color:#666;">
+          Em <b>ordem de série</b>, com indicação do nível de correspondência.
+        </p>
+
+        <div class="hab-item">
+          <div class="codigo">EF01MA19
+            <span class="serie-tag">1º ano</span>
+            <span class="nivel parcial">Parcial</span>
+          </div>
+          <div class="desc">Reconhecer e relacionar valores de moedas e cédulas do sistema monetário brasileiro para resolver situações simples do cotidiano.</div>
+          <div class="corresp">→ <b>Parcialmente</b>: há reconhecimento visual, mas a atividade exige soma — nível acima do 1º ano. Recomenda-se adaptar para valores inteiros.</div>
+        </div>
+
+        <div class="hab-item">
+          <div class="codigo">EF02MA20
+            <span class="serie-tag">2º ano</span>
+            <span class="nivel plena">Plena</span>
+          </div>
+          <div class="desc">Estabelecer a equivalência de valores entre moedas e cédulas do sistema monetário brasileiro para resolver situações do cotidiano.</div>
+          <div class="corresp">→ <b>Plenamente</b>: o jogador identifica qual combinação de cédulas e moedas equivale ao preço do produto.</div>
+        </div>
+
+        <div class="hab-item">
+          <div class="codigo">EF03MA24
+            <span class="serie-tag">3º ano</span>
+            <span class="nivel plena">Plena</span>
+          </div>
+          <div class="desc">Resolver e elaborar problemas envolvendo comparação e equivalência de valores monetários do sistema brasileiro em situações de compra, venda e troca.</div>
+          <div class="corresp">→ <b>Plenamente</b>: cada questão simula uma compra — escolher a forma de pagamento correta.</div>
+        </div>
+      </div>
+
+      <div class="info-secao azul">
+        <h2>💰 Habilidades — "Calculando o troco"</h2>
+        <p style="margin-bottom:10px;font-size:clamp(.78rem,2.2vw,.85rem);color:#666;">
+          Em <b>ordem de série</b>, com indicação do nível de correspondência.
+        </p>
+
+        <div class="hab-item azul">
+          <div class="codigo">EF02MA20
+            <span class="serie-tag">2º ano</span>
+            <span class="nivel parcial">Parcial</span>
+          </div>
+          <div class="desc">Estabelecer a equivalência de valores entre moedas e cédulas do sistema monetário brasileiro para resolver situações do cotidiano.</div>
+          <div class="corresp">→ <b>Parcialmente</b>: a atividade exige a equivalência do troco, mas o foco principal é a subtração — não só a equivalência.</div>
+        </div>
+
+        <div class="hab-item azul">
+          <div class="codigo">EF03MA24
+            <span class="serie-tag">3º ano</span>
+            <span class="nivel plena">Plena</span>
+          </div>
+          <div class="desc">Resolver e elaborar problemas envolvendo comparação e equivalência de valores monetários do sistema brasileiro em situações de compra, venda e troca.</div>
+          <div class="corresp">→ <b>Plenamente</b>: cada questão é um problema de troco em situação de compra.</div>
+        </div>
+
+        <div class="hab-item azul">
+          <div class="codigo">EF03MA06
+            <span class="serie-tag">3º ano</span>
+            <span class="nivel plena">Plena</span>
+          </div>
+          <div class="desc">Resolver e elaborar problemas de adição e subtração com os significados de juntar, acrescentar, separar, retirar, comparar e completar quantidades, utilizando diferentes estratégias de cálculo.</div>
+          <div class="corresp">→ <b>Plenamente</b>: o cálculo do troco é uma subtração (valor pago − preço) com significado de "retirar/completar".</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="centro">
+      <button class="btn" id="btn-voltar-info">Voltar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   ★★★  CONFIGURAÇÃO — PRODUTOS  ★★★
+   ===================================================================== */
+const PRODUTOS = [
+  { nome: "Arroz",      preco: 18, img: "https://i.postimg.cc/pr5rW7vc/Arroz.png" },
+  { nome: "Azeite",     preco: 12, img: "https://i.postimg.cc/76Wby4FG/Azeite.png" },
+  { nome: "Batata",     preco: 15, img: "https://i.postimg.cc/XJzX0WRC/Batata.png" },
+  { nome: "Chocolate",  preco: 6,  img: "https://i.postimg.cc/QCKC8PDn/Chocolate.png" },
+  { nome: "Copacol",    preco: 22, img: "https://i.postimg.cc/V6V5cwxW/Copacol.png" },
+  { nome: "Feijão",     preco: 7,  img: "https://i.postimg.cc/7hJhHc4X/Feijao.png" },
+  { nome: "Friboi",     preco: 26, img: "https://i.postimg.cc/j5FCrTpL/Friboi.png" },
+  { nome: "Guaraná",    preco: 5,  img: "https://i.postimg.cc/PJvJXcHR/Guarana.png" },
+  { nome: "Iogurte",    preco: 11, img: "https://i.postimg.cc/ZRM0hmGW/Iogurte.png" },
+  { nome: "Italac",     preco: 30, img: "https://i.postimg.cc/mk1kLq4j/Italac.png" },
+  { nome: "Margarina",  preco: 5,  img: "https://i.postimg.cc/hj5hqnkY/Margarina.png" },
+  { nome: "Napolitano", preco: 22, img: "https://i.postimg.cc/ZRM0hmGw/Napolitano.png" },
+  { nome: "Ovos",       preco: 8,  img: "https://i.postimg.cc/RFDqzmkj/Ovos.png" },
+  { nome: "Pampers",    preco: 50, img: "https://i.postimg.cc/RFDqzmkR/Pampers.png" },
+  { nome: "Prestígio",  preco: 3,  img: "https://i.postimg.cc/kGRGJZCH/Prestigio.png" },
+];
+
+/* =====================================================================
+   ★★★  CONFIGURAÇÃO — IMAGENS DAS CÉDULAS E MOEDAS  ★★★
+   ===================================================================== */
+const CEDULAS = [200, 100, 50, 20, 10, 5, 2];
+const MOEDAS  = [1, 0.5, 0.25, 0.1, 0.05, 0.01];
+
+const IMG_DINHEIRO = {
+  200:  "https://i.postimg.cc/dtf7VYyJ/cedula-de-200-reais.jpg",
+  100:  "https://i.postimg.cc/qMFtvT30/cedula-de-100-reais.jpg",
+  50:   "https://i.postimg.cc/vHK1ZsVb/cedula-de-50-reais.jpg",
+  20:   "https://i.postimg.cc/qMFtvT3T/cedula-de-20-reais.jpg",
+  10:   "https://i.postimg.cc/65P7pXvx/cedula-de-10-reais.jpg",
+  5:    "https://i.postimg.cc/Pr7L5jwG/cedula-de-5-reais.jpg",
+  2:    "https://i.postimg.cc/tCc14jVK/cedula-de-2-reais.jpg",
+  1:    "https://i.postimg.cc/hGQDm9Lw/Moeda-de-1-real.jpg",
+  0.5:  "https://i.postimg.cc/Kj0Swz77/Moeda-de-50-centavos.jpg",
+  0.25: "https://i.postimg.cc/zBS1wpV6/Moeda-de-25-centavos.jpg",
+  0.1:  "https://i.postimg.cc/ZqNmnJmf/Moeda-de-10-centavos.jpg",
+  0.05: "https://i.postimg.cc/90bC2127/Moeda-de-5-centavos.jpg",
+  0.01: "https://i.postimg.cc/7L7d1nVS/Moeda-de-1-centavo.jpg",
+};
+/* ====================== FIM DA CONFIGURAÇÃO ========================== */
+
+const MAX_VIDAS = 5;
+const fmt = v => v.toFixed(2).replace(".", ",");
+
+function embaralhar(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function decompor(valor){
+  let resto = Math.round(valor * 100);
+  const partes = [];
+  for(const v of [...CEDULAS, ...MOEDAS]){
+    const cents = Math.round(v * 100);
+    while(resto >= cents){ partes.push(v); resto -= cents; }
+    if(resto === 0) break;
+  }
+  return partes;
+}
+
+function criarItemDinheiro(valor){
+  const url = IMG_DINHEIRO[valor];
+  if(url){
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "R$ " + fmt(valor);
+    if(valor < 2) img.classList.add("moeda");
+    img.onerror = () => {
+      const chip = document.createElement("span");
+      chip.className = "chip-sem-img";
+      chip.textContent = (valor >= 2 ? "Nota" : "Moeda") + " R$ " + fmt(valor);
+      img.replaceWith(chip);
+    };
+    return img;
+  }
+  const chip = document.createElement("span");
+  chip.className = "chip-sem-img";
+  chip.textContent = (valor >= 2 ? "Nota" : "Moeda") + " R$ " + fmt(valor);
+  return chip;
+}
+
+/* ---------- Gerador de distratores para "Qual é o valor?" ---------- */
+function gerarErrados(preco){
+  const cands = new Set();
+  CEDULAS.forEach(v => { if(v !== preco) cands.add(v); });
+  MOEDAS.forEach(v => { if(v < preco) cands.add(v); });
+  [preco + 1, preco - 1, preco + 2, preco - 2, preco + 0.5, preco - 0.5,
+   preco + 1.5, preco - 1.5, Math.floor(preco), Math.ceil(preco)]
+    .forEach(v => { if(v > 0 && v <= 200) cands.add(Math.round(v * 100) / 100); });
+  cands.delete(preco);
+  return embaralhar([...cands]).slice(0, 3);
+}
+
+function montarAlternativas(preco){
+  return embaralhar([preco, ...gerarErrados(preco)]);
+}
+
+/* ---------- Gerador de distratores para "Troco" ---------- */
+function gerarErradosTroco(troco){
+  const cands = new Set();
+  [troco + 1, troco - 1, troco + 2, troco - 2,
+   troco + 0.5, troco - 0.5, troco + 0.25, troco - 0.25,
+   troco * 2, troco / 2, troco + 5, troco + 10]
+    .forEach(v => { if(v > 0 && v <= 200) cands.add(Math.round(v * 100) / 100); });
+  cands.delete(troco);
+  return embaralhar([...cands]).slice(0, 3);
+}
+
+function montarAlternativasTroco(troco){
+  return embaralhar([troco, ...gerarErradosTroco(troco)]);
+}
+
+/* ---------- Escolhe a cédula/moeda de pagamento para o troco ---------- */
+function escolherPagamento(preco){
+  // Pagamento deve ser maior que o preço e preferencialmente uma cédula
+  // ou moeda única, para o cálculo ficar claro.
+  const opcoes = [];
+  // Cédulas e moedas maiores que o preço
+  [...CEDULAS, ...MOEDAS].forEach(v => {
+    if(v > preco){
+      // Pagamento não deve ser absurdamente maior (limita a 100)
+      if(v - preco <= 100) opcoes.push(v);
+    }
+  });
+  // Se não houver opção (preço muito alto), usa a próxima cédula maior
+  if(opcoes.length === 0){
+    const maior = [...CEDULAS].find(c => c > preco);
+    if(maior) return maior;
+    return Math.ceil(preco / 10) * 10;
+  }
+  // Prefere pagamentos que gerem troco "redondo" (sem centavos)
+  const semCentavos = opcoes.filter(v => Math.abs((v - preco) % 1) < 0.001);
+  if(semCentavos.length > 0) return embaralhar(semCentavos)[0];
+  return embaralhar(opcoes)[0];
+}
+
+const $ = id => document.getElementById(id);
+
+/* =====================================================================
+   ESTADO — ATIVIDADE 1 (QUAL É O VALOR?)
+   ===================================================================== */
+let filaValor, indiceValor, vidasValor, respostasValor, totalValor;
+
+function atualizarVidas(elId, vidas){
+  const el = $(elId);
+  el.innerHTML = "";
+  for(let i = 0; i < MAX_VIDAS; i++){
+    const span = document.createElement("span");
+    span.className = i < vidas ? "viva" : "perdida";
+    span.textContent = "❤";
+    el.appendChild(span);
+  }
+}
+
+function iniciarValor(){
+  filaValor = embaralhar(PRODUTOS);
+  totalValor = PRODUTOS.length;
+  indiceValor = 0;
+  vidasValor = MAX_VIDAS;
+  respostasValor = [];
+  esconderTudo();
+  $("tela-jogo").style.display = "block";
+  $("titulo-fim").textContent = "Atividade concluída! 🎉";
+  $("sub-fim").textContent = "Você acertou todas as questões!";
+  $("nota-final").className = "nota";
+  mostrarQuestaoValor();
+}
+
+function mostrarQuestaoValor(){
+  const produto = filaValor[indiceValor];
+  $("progresso-valor").textContent = `Acertos: ${respostasValor.length} de ${totalValor}`;
+  $("barra-valor").style.width = `${(respostasValor.length / totalValor) * 100}%`;
+  atualizarVidas("vidas-valor", vidasValor);
+  $("feedback-valor").textContent = "";
+  $("feedback-valor").className = "feedback";
+  $("btn-proxima-valor").style.display = "none";
+  $("btn-menu-valor").style.display = "none";
+
+  const box = $("imagem-box-valor");
+  box.innerHTML = "";
+  if(produto.img){
+    const img = document.createElement("img");
+    img.src = produto.img;
+    img.alt = produto.nome;
+    img.onerror = () => {
+      box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
+    };
+    box.appendChild(img);
+  } else {
+    box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
+  }
+
+  const opcoesEl = $("opcoes-valor");
+  opcoesEl.innerHTML = "";
+  montarAlternativas(produto.preco).forEach(valor => {
+    const btn = document.createElement("button");
+    btn.className = "opcao";
+    btn.dataset.valor = valor;
+    decompor(valor).forEach(v => btn.appendChild(criarItemDinheiro(v)));
+    btn.onclick = () => responderValor(btn, valor, produto);
+    opcoesEl.appendChild(btn);
+  });
+}
+
+function responderValor(botao, valor, produto){
+  const correta = Math.abs(valor - produto.preco) < 0.001;
+  document.querySelectorAll("#opcoes-valor .opcao").forEach(b => {
+    b.disabled = true;
+    if(Math.abs(Number(b.dataset.valor) - produto.preco) < 0.001) b.classList.add("correta");
+    else if(b === botao) b.classList.add("errada");
+  });
+
+  if(correta){
+    respostasValor.push({ produto, correta: true });
+    $("feedback-valor").textContent = `✅ Muito bem! As notas e moedas somam R$ ${fmt(produto.preco)}.`;
+    $("feedback-valor").classList.add("ok");
+  } else {
+    vidasValor--;
+    $("feedback-valor").textContent = `❌ Errou! O correto era R$ ${fmt(produto.preco)}. Esta pergunta voltará ao final.`;
+    $("feedback-valor").classList.add("nao");
+    filaValor.push(produto);
+  }
+
+  atualizarVidas("vidas-valor", vidasValor);
+  $("progresso-valor").textContent = `Acertos: ${respostasValor.length} de ${totalValor}`;
+  $("barra-valor").style.width = `${(respostasValor.length / totalValor) * 100}%`;
+
+  if(vidasValor <= 0){
+    $("btn-proxima-valor").style.display = "inline-block";
+    $("btn-proxima-valor").textContent = "Ver resultado";
+    $("btn-proxima-valor").onclick = () => finalizarValor(false);
+    return;
+  }
+
+  $("btn-proxima-valor").style.display = "inline-block";
+  $("btn-proxima-valor").textContent = (respostasValor.length === totalValor) ? "Ver resultado" : "Próxima";
+  $("btn-proxima-valor").onclick = proximaValor;
+}
+
+function proximaValor(){
+  indiceValor++;
+  if(respostasValor.length >= totalValor){ finalizarValor(true); return; }
+  if(indiceValor >= filaValor.length){
+    if(respostasValor.length < totalValor){
+      const faltam = PRODUTOS.filter(p => !respostasValor.some(r => r.produto.nome === p.nome));
+      filaValor = embaralhar(faltam);
+      indiceValor = 0;
+    } else { finalizarValor(true); return; }
+  }
+  mostrarQuestaoValor();
+}
+
+function finalizarValor(vitoria){
+  esconderTudo();
+  $("tela-fim").style.display = "block";
+
+  if(vitoria){
+    $("titulo-fim").textContent = "Atividade concluída! 🎉";
+    $("sub-fim").textContent = "Você acertou todas as questões!";
+    $("nota-final").className = "nota";
+    $("nota-final").textContent = `${respostasValor.length} / ${totalValor}`;
+  } else {
+    $("titulo-fim").textContent = "Suas vidas acabaram! 💔";
+    $("sub-fim").textContent = "Não foi dessa vez. Tente novamente!";
+    $("nota-final").className = "nota derrota";
+    $("nota-final").textContent = `${respostasValor.length} / ${totalValor}`;
+  }
+
+  $("revisao").innerHTML = "<h3>Revisão (valor correto de cada produto):</h3>" + respostasValor.map(r => `
+    <div class="rev-item">
+      <span class="mini">${r.produto.img ? `<img src="${r.produto.img}" onerror="this.remove()">` : ""}</span>
+      <span style="flex:1">${r.produto.nome}<br><b>R$ ${fmt(r.produto.preco)}</b></span>
+      <span class="rev-dinheiro">${decompor(r.produto.preco).map(v => {
+        const url = IMG_DINHEIRO[v];
+        return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
+      }).join("")}</span>
+      <span class="rev-ok">✔</span>
+    </div>`).join("");
+
+  if(!vitoria){
+    $("revisao").innerHTML += `<p style="margin-top:12px;color:#c62828;font-weight:700;text-align:center;">
+      Faltaram ${totalValor - respostasValor.length} produto(s) para completar.</p>`;
+  }
+}
+
+/* =====================================================================
+   ESTADO — ATIVIDADE 2 (TROCO)
+   ===================================================================== */
+let filaTroco, indiceTroco, vidasTroco, respostasTroco, totalTroco;
+
+function iniciarTroco(){
+  filaTroco = embaralhar(PRODUTOS).map(p => ({
+    produto: p,
+    pagamento: escolherPagamento(p.preco)
+  }));
+  totalTroco = PRODUTOS.length;
+  indiceTroco = 0;
+  vidasTroco = MAX_VIDAS;
+  respostasTroco = [];
+  esconderTudo();
+  $("tela-troco").style.display = "block";
+  $("titulo-fim-troco").textContent = "Atividade concluída! 🎉";
+  $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
+  $("nota-final-troco").className = "nota";
+  mostrarQuestaoTroco();
+}
+
+function mostrarQuestaoTroco(){
+  const item = filaTroco[indiceTroco];
+  const produto = item.produto;
+  const pagamento = item.pagamento;
+  const troco = Math.round((pagamento - produto.preco) * 100) / 100;
+
+  $("progresso-troco").textContent = `Acertos: ${respostasTroco.length} de ${totalTroco}`;
+  $("barra-troco").style.width = `${(respostasTroco.length / totalTroco) * 100}%`;
+  atualizarVidas("vidas-troco", vidasTroco);
+  $("feedback-troco").textContent = "";
+  $("feedback-troco").className = "feedback";
+  $("btn-proxima-troco").style.display = "none";
+  $("btn-menu-troco").style.display = "none";
+
+  // Imagem do produto
+  const box = $("imagem-box-troco");
+  box.innerHTML = "";
+  if(produto.img){
+    const img = document.createElement("img");
+    img.src = produto.img;
+    img.alt = produto.nome;
+    img.onerror = () => {
+      box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
+    };
+    box.appendChild(img);
+  } else {
+    box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
+  }
+
+  // Contexto: preço + pagamento
+  const ctx = $("contexto-troco");
+  ctx.innerHTML = `<span>${produto.nome} custa <strong>R$ ${fmt(produto.preco)}</strong> e foi pago com:</span>`;
+  const imgPag = criarItemDinheiro(pagamento);
+  // Se for chip (sem imagem), aplica estilo de chip já existente
+  ctx.appendChild(imgPag);
+  const spanValor = document.createElement("strong");
+  spanValor.textContent = `R$ ${fmt(pagamento)}`;
+  ctx.appendChild(spanValor);
+
+  // Opções
+  const opcoesEl = $("opcoes-troco");
+  opcoesEl.innerHTML = "";
+  montarAlternativasTroco(troco).forEach(valor => {
+    const btn = document.createElement("button");
+    btn.className = "opcao azul";
+    btn.dataset.valor = valor;
+    if(valor === 0){
+      // Troco zero: mostra chip especial
+      const chip = document.createElement("span");
+      chip.className = "chip-sem-img";
+      chip.textContent = "Sem troco";
+      btn.appendChild(chip);
+    } else {
+      decompor(valor).forEach(v => btn.appendChild(criarItemDinheiro(v)));
+    }
+    btn.onclick = () => responderTroco(btn, valor, item, troco);
+    opcoesEl.appendChild(btn);
+  });
+}
+
+function responderTroco(botao, valor, item, trocoCorreto){
+  const correta = Math.abs(valor - trocoCorreto) < 0.001;
+  document.querySelectorAll("#opcoes-troco .opcao").forEach(b => {
+    b.disabled = true;
+    if(Math.abs(Number(b.dataset.valor) - trocoCorreto) < 0.001) b.classList.add("correta");
+    else if(b === botao) b.classList.add("errada");
+  });
+
+  if(correta){
+    respostasTroco.push({ item, correta: true });
+    $("feedback-troco").textContent = `✅ Isso! O troco é R$ ${fmt(trocoCorreto)}.`;
+    $("feedback-troco").classList.add("ok");
+  } else {
+    vidasTroco--;
+    $("feedback-troco").textContent = `❌ Errou! O troco correto era R$ ${fmt(trocoCorreto)}. Esta pergunta voltará ao final.`;
+    $("feedback-troco").classList.add("nao");
+    filaTroco.push(item);
+  }
+
+  atualizarVidas("vidas-troco", vidasTroco);
+  $("progresso-troco").textContent = `Acertos: ${respostasTroco.length} de ${totalTroco}`;
+  $("barra-troco").style.width = `${(respostasTroco.length / totalTroco) * 100}%`;
+
+  if(vidasTroco <= 0){
+    $("btn-proxima-troco").style.display = "inline-block";
+    $("btn-proxima-troco").textContent = "Ver resultado";
+    $("btn-proxima-troco").onclick = () => finalizarTroco(false);
+    return;
+  }
+
+  $("btn-proxima-troco").style.display = "inline-block";
+  $("btn-proxima-troco").textContent = (respostasTroco.length === totalTroco) ? "Ver resultado" : "Próxima";
+  $("btn-proxima-troco").onclick = proximaTroco;
+}
+
+function proximaTroco(){
+  indiceTroco++;
+  if(respostasTroco.length >= totalTroco){ finalizarTroco(true); return; }
+  if(indiceTroco >= filaTroco.length){
+    if(respostasTroco.length < totalTroco){
+      // Regera a fila com os produtos que faltam (novo pagamento sorteado)
+      const faltam = PRODUTOS.filter(p => !respostasTroco.some(r => r.item.produto.nome === p.nome));
+      filaTroco = embaralhar(faltam).map(p => ({
+        produto: p,
+        pagamento: escolherPagamento(p.preco)
+      }));
+      indiceTroco = 0;
+    } else { finalizarTroco(true); return; }
+  }
+  mostrarQuestaoTroco();
+}
+
+function finalizarTroco(vitoria){
+  esconderTudo();
+  $("tela-fim-troco").style.display = "block";
+
+  if(vitoria){
+    $("titulo-fim-troco").textContent = "Atividade concluída! 🎉";
+    $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
+    $("nota-final-troco").className = "nota";
+    $("nota-final-troco").textContent = `${respostasTroco.length} / ${totalTroco}`;
+  } else {
+    $("titulo-fim-troco").textContent = "Suas vidas acabaram! 💔";
+    $("sub-fim-troco").textContent = "Não foi dessa vez. Tente novamente!";
+    $("nota-final-troco").className = "nota derrota";
+    $("nota-final-troco").textContent = `${respostasTroco.length} / ${totalTroco}`;
+  }
+
+  $("revisao-troco").innerHTML = "<h3>Revisão (troco correto de cada produto):</h3>" + respostasTroco.map(r => {
+    const p = r.item.produto;
+    const pag = r.item.pagamento;
+    const troco = Math.round((pag - p.preco) * 100) / 100;
+    return `
+    <div class="rev-item">
+      <span class="mini">${p.img ? `<img src="${p.img}" onerror="this.remove()">` : ""}</span>
+      <span style="flex:1">${p.nome}<br>
+        <b>R$ ${fmt(p.preco)}</b> · pago com R$ ${fmt(pag)}<br>
+        <b style="color:var(--azul)">Troco: R$ ${fmt(troco)}</b>
+      </span>
+      <span class="rev-dinheiro">${troco > 0 ? decompor(troco).map(v => {
+        const url = IMG_DINHEIRO[v];
+        return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
+      }).join("") : '<span class="chip-sem-img">Sem troco</span>'}</span>
+      <span class="rev-ok">✔</span>
+    </div>`;
+  }).join("");
+
+  if(!vitoria){
+    $("revisao-troco").innerHTML += `<p style="margin-top:12px;color:#c62828;font-weight:700;text-align:center;">
+      Faltaram ${totalTroco - respostasTroco.length} produto(s) para completar.</p>`;
+  }
+}
+
+/* =====================================================================
+   NAVEGAÇÃO GERAL
+   ===================================================================== */
+function esconderTudo(){
+  ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco","tela-info"].forEach(id => {
+    const el = $(id);
+    if(el) el.style.display = "none";
+  });
+}
+
+let telaAnteriorInfo = "menu";
+
+function abrirInfo(){
+  if($("tela-jogo").style.display === "block") telaAnteriorInfo = "jogo";
+  else if($("tela-troco").style.display === "block") telaAnteriorInfo = "troco";
+  else if($("tela-fim").style.display === "block") telaAnteriorInfo = "fim";
+  else if($("tela-fim-troco").style.display === "block") telaAnteriorInfo = "fim-troco";
+  else telaAnteriorInfo = "menu";
+
+  esconderTudo();
+  $("tela-info").style.display = "block";
+}
+
+function voltarInfo(){
+  esconderTudo();
+  if(telaAnteriorInfo === "jogo") $("tela-jogo").style.display = "block";
+  else if(telaAnteriorInfo === "troco") $("tela-troco").style.display = "block";
+  else if(telaAnteriorInfo === "fim") $("tela-fim").style.display = "block";
+  else if(telaAnteriorInfo === "fim-troco") $("tela-fim-troco").style.display = "block";
+  else $("tela-menu").style.display = "block";
+}
+
+/* ---- Abas internas da tela informativa ---- */
+function configurarTabs(){
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-conteudo").forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      const alvo = $(btn.dataset.tab);
+      if(alvo) alvo.classList.add("active");
+    };
+  });
+}
+
+/* ---- Handlers ---- */
+$("btn-ir-valor").onclick = iniciarValor;
+$("btn-ir-troco").onclick = iniciarTroco;
+$("btn-recomecar").onclick = iniciarValor;
+$("btn-recomecar-troco").onclick = iniciarTroco;
+$("btn-menu-valor").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
+$("btn-menu-troco").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
+$("btn-menu-fim").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
+$("btn-menu-fim-troco").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
+$("btn-info").onclick = abrirInfo;
+$("btn-info-menu").onclick = abrirInfo;
+$("btn-voltar-info").onclick = voltarInfo;
+
+configurarTabs();
+</script>
+
+</body>
+</html>
