@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atividades: Qual é o valor? & Troco</title>
+<title>Atividades: Qual é o valor? & Troco & Compras em quantidade</title>
 <style>
   :root{
     --verde:#2e7d32; --verde-claro:#e8f5e9; --vermelho:#c62828;
     --cinza:#f5f5f5; --texto:#212121; --amarelo:#f9a825;
     --azul:#1565c0; --azul-claro:#e3f2fd;
     --roxo:#6a1b9a; --roxo-claro:#f3e5f5;
+    --laranja:#e65100; --laranja-claro:#fff3e0;
     --sombra:0 10px 30px rgba(0,0,0,.12);
   }
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
@@ -21,7 +22,7 @@
   }
   .card{
     background:#fff;border-radius:20px;box-shadow:var(--sombra);
-    max-width:760px;width:100%;padding:clamp(12px,2.5vw,24px);
+    max-width:780px;width:100%;padding:clamp(12px,2.5vw,24px);
     position:relative;
   }
   .btn-info{
@@ -35,7 +36,7 @@
   h1{font-size:clamp(1.1rem,3.2vw,1.4rem);color:var(--verde);text-align:center;margin-bottom:6px;padding-right:40px;}
   .sub{text-align:center;color:#666;margin-bottom:16px;font-size:clamp(.82rem,2.3vw,.9rem);}
   #tela-menu{text-align:center;}
-  .menu-botoes{display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto;}
+  .menu-botoes{display:flex;flex-direction:column;gap:10px;max-width:440px;margin:0 auto;}
   .btn-atividade{
     background:var(--verde);color:#fff;border:none;border-radius:14px;
     padding:14px 18px;font-size:clamp(.9rem,2.6vw,1.05rem);cursor:pointer;font-weight:600;
@@ -45,6 +46,7 @@
   }
   .btn-atividade.azul{background:var(--azul);box-shadow:0 4px 12px rgba(21,101,192,.25);}
   .btn-atividade.roxo{background:var(--roxo);box-shadow:0 4px 12px rgba(106,27,154,.25);}
+  .btn-atividade.laranja{background:var(--laranja);box-shadow:0 4px 12px rgba(230,81,0,.25);}
   .btn-atividade:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2);}
   .btn-atividade .icone{font-size:1.6rem;flex-shrink:0;}
   .btn-atividade .texto{display:flex;flex-direction:column;gap:2px;}
@@ -56,13 +58,18 @@
     font-weight:600;transition:all .15s;margin-top:10px;
   }
   .btn-secundario:hover{background:var(--verde-claro);}
-  #tela-jogo, #tela-troco, #tela-compra{display:none;}
+  #tela-jogo, #tela-troco, #tela-compra, #tela-multi{display:none;}
   .topo{
     display:flex;justify-content:space-between;align-items:center;
     margin-bottom:6px;gap:6px;flex-wrap:wrap;
     padding-right:40px;
   }
   .progresso{font-size:clamp(.75rem,2.1vw,.85rem);color:#555;font-weight:600;}
+  .fase-tag{
+    display:inline-block;background:var(--laranja-claro);color:var(--laranja);
+    border-radius:99px;padding:2px 10px;font-size:clamp(.7rem,1.9vw,.78rem);
+    font-weight:700;margin-right:6px;
+  }
   .vidas{font-size:clamp(.9rem,2.5vw,1rem);letter-spacing:2px;white-space:nowrap;}
   .vidas .viva{color:var(--vermelho);}
   .vidas .perdida{color:#ccc;}
@@ -70,20 +77,82 @@
   .barra-fill{height:100%;background:var(--verde);width:0;transition:width .4s;}
   .barra-fill.azul{background:var(--azul);}
   .barra-fill.roxo{background:var(--roxo);}
+  .barra-fill.laranja{background:var(--laranja);}
   .pergunta{font-size:clamp(.95rem,2.6vw,1.1rem);font-weight:700;text-align:center;margin-bottom:10px;}
+
+  /* ---- IMAGEM-BOX (genérica e segura) ---- */
   .imagem-box{
     background:var(--cinza);border:2px dashed #bbb;border-radius:12px;
-    height:clamp(90px, 22vw, 150px);
+    height:clamp(100px, 24vw, 160px);
     display:flex;align-items:center;justify-content:center;
-    gap:10px;margin-bottom:10px;overflow:hidden;padding:6px;
+    gap:10px;margin-bottom:10px;overflow:hidden;padding:8px;
+    position:relative; /* Necessário para o badge absoluto */
   }
   .imagem-box img{max-width:100%;max-height:100%;object-fit:contain;}
   .placeholder-txt{color:#999;font-size:clamp(.8rem,2.2vw,.95rem);text-align:center;padding:4px;}
-  .imagem-box.dupla{
-    height:clamp(100px, 24vw, 160px);
-    gap: clamp(6px, 1.5vw, 12px);
+  
+  /* Layout específico para compra dupla */
+  .imagem-box.dupla{ gap: clamp(6px, 1.5vw, 12px); }
+  .imagem-box.dupla img{ max-width: 45%; }
+
+  /* ---- LAYOUT DA ATIVIDADE "COMPRAS EM QUANTIDADE" ---- */
+  .multi-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
   }
-  .imagem-box.dupla img{max-width: 45%; max-height: 100%;}
+  .multi-produto-bloco {
+    background: var(--cinza);
+    border: 2px dashed #bbb;
+    border-radius: 12px;
+    height: clamp(100px, 24vw, 160px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px 10px 10px; /* espaço extra na direita para o badge */
+    position: relative;
+  }
+  .multi-produto-bloco img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .multi-preco-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .multi-preco {
+    font-size: clamp(.9rem, 2.5vw, 1.1rem);
+    font-weight: 700;
+    color: var(--laranja);
+  }
+  /* Badge sobreposto no canto superior direito do bloco da imagem */
+  .multi-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--laranja);
+    color: #fff;
+    border-radius: 50%;
+    min-width: clamp(30px, 8vw, 38px);
+    min-height: clamp(30px, 8vw, 38px);
+    padding: 0 clamp(4px, 1vw, 6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1rem, 3.2vw, 1.3rem);
+    font-weight: 800;
+    box-shadow: 0 3px 8px rgba(230, 81, 0, 0.45);
+    border: 2px solid #fff;
+    line-height: 1;
+    z-index: 2;
+  }
+
+  /* Contexto de pagamento (troco / compra) */
   .contexto-pagamento{
     background:var(--azul-claro);border:2px solid var(--azul);border-radius:10px;
     padding:8px 10px;margin-bottom:10px;
@@ -99,11 +168,21 @@
   .contexto-pagamento img.moeda{border-radius:50%;}
   .contexto-pagamento.roxo{
     background:var(--roxo-claro);border-color:var(--roxo);
-    padding: 6px 10px;
-    line-height: 1.5;
+    padding: 6px 10px; line-height: 1.5;
   }
   .contexto-pagamento.roxo strong{color:var(--roxo);}
   .contexto-pagamento.roxo b{color:var(--texto);}
+
+  /* Enunciado narrativo (Compras em quantidade) */
+  .enunciado-multi{
+    background:var(--laranja-claro);border:2px solid var(--laranja);border-radius:10px;
+    padding:10px 14px;margin-bottom:10px;
+    font-size:clamp(.85rem,2.4vw,.98rem);line-height:1.55;color:var(--texto);
+    text-align:center;
+  }
+  .enunciado-multi strong{color:var(--laranja);font-weight:800;}
+  .enunciado-multi b{color:var(--texto);}
+
   .opcoes{
     display:grid;
     grid-template-columns:repeat(2, 1fr);
@@ -120,9 +199,11 @@
   }
   .opcao.azul{border-color:var(--azul);}
   .opcao.roxo{border-color:var(--roxo);}
+  .opcao.laranja{border-color:var(--laranja);}
   .opcao:hover:not(:disabled){background:var(--verde-claro);transform:translateY(-2px);}
   .opcao.azul:hover:not(:disabled){background:var(--azul-claro);}
   .opcao.roxo:hover:not(:disabled){background:var(--roxo-claro);}
+  .opcao.laranja:hover:not(:disabled){background:var(--laranja-claro);}
   .opcao:disabled{cursor:default;}
   .opcao img{
     height:clamp(24px,6vw,38px);
@@ -160,19 +241,39 @@
   .btn.azul:hover{box-shadow:0 6px 16px rgba(21,101,192,.35);}
   .btn.roxo{background:var(--roxo);}
   .btn.roxo:hover{box-shadow:0 6px 16px rgba(106,27,154,.35);}
+  .btn.laranja{background:var(--laranja);}
+  .btn.laranja:hover{box-shadow:0 6px 16px rgba(230,81,0,.35);}
   .btn.secundario{background:#fff;color:var(--verde);border:2px solid var(--verde);}
   .btn.secundario:hover{background:var(--verde-claro);box-shadow:none;}
   .btn.secundario.azul{color:var(--azul);border-color:var(--azul);}
   .btn.secundario.azul:hover{background:var(--azul-claro);}
   .btn.secundario.roxo{color:var(--roxo);border-color:var(--roxo);}
   .btn.secundario.roxo:hover{background:var(--roxo-claro);}
-  #tela-fim, #tela-fim-troco, #tela-fim-compra{display:none;text-align:center;}
-  #tela-fim .nota, #tela-fim-troco .nota, #tela-fim-compra .nota{
+  .btn.secundario.laranja{color:var(--laranja);border-color:var(--laranja);}
+  .btn.secundario.laranja:hover{background:var(--laranja-claro);}
+
+  /* Tela de resultado por fase (transição) */
+  #tela-transicao{display:none;text-align:center;padding:10px 4px;}
+  #tela-transicao .emoji{font-size:3rem;margin-bottom:8px;}
+  #tela-transicao h2{color:var(--laranja);font-size:clamp(1.1rem,3.2vw,1.3rem);margin-bottom:8px;}
+  #tela-transicao p{color:#555;font-size:clamp(.85rem,2.4vw,.95rem);line-height:1.5;margin-bottom:6px;}
+  #tela-transicao .nota-fase{
+    font-size:clamp(2rem,7vw,2.8rem);font-weight:800;color:var(--laranja);margin:8px 0;
+  }
+  #tela-transicao .nota-fase.derrota{color:var(--vermelho);}
+  #tela-transicao .fase-info{
+    background:var(--laranja-claro);border-radius:10px;padding:10px 14px;
+    margin:10px 0;font-size:clamp(.82rem,2.3vw,.92rem);color:#5d4037;text-align:left;
+  }
+
+  #tela-fim, #tela-fim-troco, #tela-fim-compra, #tela-fim-multi{display:none;text-align:center;}
+  #tela-fim .nota, #tela-fim-troco .nota, #tela-fim-compra .nota, #tela-fim-multi .nota{
     font-size:clamp(2rem,7vw,2.8rem);font-weight:800;color:var(--verde);margin:8px 0;
   }
   #tela-fim-troco .nota{color:var(--azul);}
   #tela-fim-compra .nota{color:var(--roxo);}
-  #tela-fim .nota.derrota, #tela-fim-troco .nota.derrota, #tela-fim-compra .nota.derrota{color:var(--vermelho);}
+  #tela-fim-multi .nota{color:var(--laranja);}
+  #tela-fim .nota.derrota, #tela-fim-troco .nota.derrota, #tela-fim-compra .nota.derrota, #tela-fim-multi .nota.derrota{color:var(--vermelho);}
   .revisao{margin-top:14px;text-align:left;max-height:40vh;overflow-y:auto;padding-right:4px;}
   .revisao h3{margin-bottom:8px;color:#555;font-size:clamp(.88rem,2.4vw,.95rem);}
   .rev-item{
@@ -187,6 +288,7 @@
   .rev-dinheiro img{height:18px;border-radius:3px;background:#fff;}
   .rev-dinheiro img.moeda{border-radius:50%;}
   .rev-ok{color:var(--verde);font-weight:700;}
+
   #tela-info{display:none;}
   #tela-info h1{margin-bottom:12px;padding-right:0;}
   .info-secao{
@@ -199,6 +301,7 @@
   }
   .info-secao.azul h2{color:var(--azul);}
   .info-secao.roxo h2{color:var(--roxo);}
+  .info-secao.laranja h2{color:var(--laranja);}
   .info-secao p, .info-secao li{
     font-size:clamp(.8rem,2.2vw,.9rem);color:#444;line-height:1.5;
   }
@@ -212,15 +315,18 @@
   .serie-badge.destaque{background:var(--amarelo);color:#212121;}
   .serie-badge.azul{background:var(--azul);}
   .serie-badge.roxo{background:var(--roxo);}
+  .serie-badge.laranja{background:var(--laranja);}
   .hab-item{
     background:#fff;border-left:4px solid var(--verde);border-radius:6px;
     padding:6px 10px;margin-bottom:6px;
   }
   .hab-item.azul{border-left-color:var(--azul);}
   .hab-item.roxo{border-left-color:var(--roxo);}
+  .hab-item.laranja{border-left-color:var(--laranja);}
   .hab-item .codigo{font-weight:800;color:var(--verde);font-size:clamp(.8rem,2.2vw,.88rem);}
   .hab-item.azul .codigo{color:var(--azul);}
   .hab-item.roxo .codigo{color:var(--roxo);}
+  .hab-item.laranja .codigo{color:var(--laranja);}
   .hab-item .serie-tag{
     display:inline-block;background:var(--verde-claro);color:var(--verde);
     border-radius:99px;padding:1px 8px;font-size:clamp(.62rem,1.7vw,.7rem);
@@ -228,6 +334,7 @@
   }
   .hab-item.azul .serie-tag{background:var(--azul-claro);color:var(--azul);}
   .hab-item.roxo .serie-tag{background:var(--roxo-claro);color:var(--roxo);}
+  .hab-item.laranja .serie-tag{background:var(--laranja-claro);color:var(--laranja);}
   .hab-item .nivel{
     display:inline-block;border-radius:99px;padding:1px 8px;
     font-size:clamp(.62rem,1.7vw,.7rem);font-weight:700;margin-left:3px;vertical-align:middle;
@@ -265,7 +372,7 @@
     .opcao{min-height:52px;padding:6px;border-radius:10px;}
     .opcao img{height:clamp(22px,7vw,30px);}
     .imagem-box{height:clamp(80px, 24vw, 120px);}
-    .imagem-box.dupla{height:clamp(90px, 26vw, 130px);}
+    .multi-produto-bloco { height: clamp(80px, 24vw, 120px); }
     .pergunta{font-size:clamp(.9rem,2.8vw,1rem);margin-bottom:8px;}
     .feedback{font-size:clamp(.75rem,2.4vw,.85rem);}
     .rev-item{gap:5px;padding:5px 6px;}
@@ -276,12 +383,13 @@
     .contexto-pagamento img{height:24px;}
     .btn{padding:9px 20px;font-size:.88rem;}
     .info-secao{padding:10px 12px;}
+    .enunciado-multi{font-size:clamp(.78rem,2.6vw,.9rem);padding:8px 10px;}
   }
   @media (min-width: 900px){
-    .card{max-width:800px;}
+    .card{max-width:820px;}
     .opcao img{height:42px;}
     .imagem-box{height:160px;}
-    .imagem-box.dupla{height:180px;}
+    .multi-produto-bloco { height: 180px; }
   }
   @media (max-width: 340px){
     .opcoes{gap:5px;}
@@ -292,16 +400,17 @@
   }
   @media (max-height: 700px){
     .imagem-box{height:clamp(70px, 18vh, 110px);margin-bottom:8px;}
-    .imagem-box.dupla{height:clamp(80px, 20vh, 120px);margin-bottom:8px;}
+    .multi-produto-bloco { height: clamp(70px, 18vh, 110px); }
     .pergunta{margin-bottom:6px;}
     .contexto-pagamento{margin-bottom:8px;padding:6px 10px;min-height:36px;}
+    .enunciado-multi{margin-bottom:8px;padding:8px 10px;}
     .barra{margin-bottom:8px;}
     .feedback{margin-top:6px;}
     .centro{margin-top:8px;}
   }
   @media (max-height: 620px){
     .imagem-box{height:clamp(60px, 14vh, 90px);}
-    .imagem-box.dupla{height:clamp(70px, 16vh, 100px);}
+    .multi-produto-bloco { height: clamp(60px, 14vh, 90px); }
     .opcao{min-height:48px;}
     .opcao img{height:clamp(20px, 5vw, 28px);}
   }
@@ -313,7 +422,7 @@
 <div class="card">
   <button class="btn-info" id="btn-info" title="Instruções, séries e habilidades">i</button>
 
-  <!-- MENU INICIAL -->
+  <!-- MENU -->
   <div id="tela-menu">
     <h1>🎓 Atividades de Educação Financeira</h1>
     <p class="sub">Escolha uma atividade para começar.</p>
@@ -339,12 +448,19 @@
           <small>Descubra o total de dois produtos e o troco do pagamento.</small>
         </span>
       </button>
+      <button class="btn-atividade laranja" id="btn-ir-multi">
+        <span class="icone">🛍️</span>
+        <span class="texto">
+          <strong>Compras em quantidade</strong>
+          <small>Comprei várias unidades de um produto. Quanto paguei ao todo? E o troco?</small>
+        </span>
+      </button>
     </div>
     <br>
     <button class="btn-secundario" id="btn-info-menu">ℹ️ Instruções, séries e habilidades</button>
   </div>
 
-  <!-- ATIVIDADE 1 — QUAL É O VALOR? -->
+  <!-- ATIVIDADE 1 -->
   <div id="tela-jogo">
     <div class="topo">
       <span class="progresso" id="progresso-valor"></span>
@@ -352,16 +468,11 @@
     </div>
     <div class="barra"><div class="barra-fill" id="barra-valor"></div></div>
     <p class="pergunta">Qual das opções abaixo é a correta?</p>
-    <div class="imagem-box" id="imagem-box-valor">
-      <span class="placeholder-txt">Imagem do produto</span>
-    </div>
+    <div class="imagem-box" id="imagem-box-valor"><span class="placeholder-txt">Imagem do produto</span></div>
     <div class="opcoes" id="opcoes-valor"></div>
     <p class="feedback" id="feedback-valor"></p>
-    <div class="centro">
-      <button class="btn" id="btn-proxima-valor" style="display:none;">Próxima</button>
-    </div>
+    <div class="centro"><button class="btn" id="btn-proxima-valor" style="display:none;">Próxima</button></div>
   </div>
-
   <div id="tela-fim">
     <h1 id="titulo-fim">Atividade concluída! 🎉</h1>
     <p class="sub" id="sub-fim">Você acertou todas as questões!</p>
@@ -373,7 +484,7 @@
     </div>
   </div>
 
-  <!-- ATIVIDADE 2 — CALCULANDO O TROCO -->
+  <!-- ATIVIDADE 2 -->
   <div id="tela-troco">
     <div class="topo">
       <span class="progresso" id="progresso-troco"></span>
@@ -381,17 +492,12 @@
     </div>
     <div class="barra"><div class="barra-fill azul" id="barra-troco"></div></div>
     <p class="pergunta">Quanto de troco deve receber?</p>
-    <div class="imagem-box" id="imagem-box-troco">
-      <span class="placeholder-txt">Imagem do produto</span>
-    </div>
+    <div class="imagem-box" id="imagem-box-troco"><span class="placeholder-txt">Imagem do produto</span></div>
     <div class="contexto-pagamento" id="contexto-troco"></div>
     <div class="opcoes" id="opcoes-troco"></div>
     <p class="feedback" id="feedback-troco"></p>
-    <div class="centro">
-      <button class="btn azul" id="btn-proxima-troco" style="display:none;">Próxima</button>
-    </div>
+    <div class="centro"><button class="btn azul" id="btn-proxima-troco" style="display:none;">Próxima</button></div>
   </div>
-
   <div id="tela-fim-troco">
     <h1 id="titulo-fim-troco">Atividade concluída! 🎉</h1>
     <p class="sub" id="sub-fim-troco">Você acertou todos os trocos!</p>
@@ -403,7 +509,7 @@
     </div>
   </div>
 
-  <!-- ATIVIDADE 3 — COMPRA DUPLA -->
+  <!-- ATIVIDADE 3 -->
   <div id="tela-compra">
     <div class="topo">
       <span class="progresso" id="progresso-compra"></span>
@@ -411,17 +517,12 @@
     </div>
     <div class="barra"><div class="barra-fill roxo" id="barra-compra"></div></div>
     <p class="pergunta">Quanto de troco deve receber?</p>
-    <div class="imagem-box dupla" id="imagem-box-compra">
-      <span class="placeholder-txt">Imagens dos dois produtos</span>
-    </div>
+    <div class="imagem-box dupla" id="imagem-box-compra"><span class="placeholder-txt">Imagens dos dois produtos</span></div>
     <div class="contexto-pagamento roxo" id="contexto-compra"></div>
     <div class="opcoes" id="opcoes-compra"></div>
     <p class="feedback" id="feedback-compra"></p>
-    <div class="centro">
-      <button class="btn roxo" id="btn-proxima-compra" style="display:none;">Próxima</button>
-    </div>
+    <div class="centro"><button class="btn roxo" id="btn-proxima-compra" style="display:none;">Próxima</button></div>
   </div>
-
   <div id="tela-fim-compra">
     <h1 id="titulo-fim-compra">Atividade concluída! 🎉</h1>
     <p class="sub" id="sub-fim-compra">Você acertou todos os cálculos!</p>
@@ -433,7 +534,59 @@
     </div>
   </div>
 
-  <!-- ABA INFORMATIVA -->
+  <!-- ATIVIDADE 4 — COMPRAS EM QUANTIDADE -->
+  <div id="tela-multi">
+    <div class="topo">
+      <span class="progresso">
+        <span class="fase-tag" id="fase-tag-multi">Fase 1 de 3</span>
+        <span id="progresso-multi"></span>
+      </span>
+      <span class="vidas" id="vidas-multi"></span>
+    </div>
+    <div class="barra"><div class="barra-fill laranja" id="barra-multi"></div></div>
+    <p class="pergunta" id="pergunta-multi">Quanto paguei ao todo?</p>
+
+    <div class="multi-container">
+      <div class="multi-produto-bloco" id="imagem-box-multi">
+        <img id="multi-img-produto" src="" alt="">
+        <div class="multi-badge" id="multi-badge" aria-label="quantidade">1</div>
+      </div>
+      <div class="multi-preco-badge">
+        <span class="multi-preco" id="multi-preco"></span>
+      </div>
+    </div>
+
+    <div class="enunciado-multi" id="enunciado-multi"></div>
+    <div class="opcoes" id="opcoes-multi"></div>
+    <p class="feedback" id="feedback-multi"></p>
+    <div class="centro"><button class="btn laranja" id="btn-proxima-multi" style="display:none;">Próxima</button></div>
+  </div>
+
+  <!-- TELA DE RESULTADO POR FASE -->
+  <div id="tela-transicao">
+    <div class="emoji" id="emoji-transicao">🎉</div>
+    <h2 id="titulo-transicao">Fase 1 concluída!</h2>
+    <p id="texto-transicao"></p>
+    <div class="nota-fase" id="nota-transicao"></div>
+    <div class="revisao" id="revisao-transicao"></div>
+    <div class="fase-info" id="info-transicao"></div>
+    <div class="centro">
+      <button class="btn laranja" id="btn-continuar-fase">Continuar</button>
+    </div>
+  </div>
+
+  <div id="tela-fim-multi">
+    <h1 id="titulo-fim-multi">Atividade concluída! 🎉</h1>
+    <p class="sub" id="sub-fim-multi">Você acertou todos os cálculos!</p>
+    <div class="nota" id="nota-final-multi"></div>
+    <div class="revisao" id="revisao-multi"></div>
+    <div class="centro">
+      <button class="btn laranja" id="btn-recomecar-multi">Jogar de novo</button>
+      <button class="btn secundario laranja" id="btn-menu-fim-multi">Voltar ao menu</button>
+    </div>
+  </div>
+
+  <!-- INFO -->
   <div id="tela-info">
     <h1>ℹ️ Sobre as atividades</h1>
     <div class="tabs">
@@ -442,7 +595,6 @@
       <button class="tab-btn" data-tab="tab-hab">📖 Habilidades</button>
     </div>
 
-    <!-- ABA: COMO JOGAR -->
     <div class="tab-conteudo active" id="tab-jogar">
       <div class="info-secao">
         <h2>🛒 Atividade "Qual é o valor?"</h2>
@@ -468,7 +620,7 @@
           <li>O objetivo é <b>acertar todos os trocos</b> antes de perder as 5 vidas.</li>
           <li>Ao acertar todos, você poderá <b>voltar ao menu</b>. Se errar e perder as 5 vidas, será preciso <b>jogar de novo</b>.</li>
         </ol>
-        <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2. Confira a decomposição do troco nas opções.</div>
+        <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2.</div>
       </div>
       <div class="info-secao roxo">
         <h2>🧾 Atividade "Compra dupla"</h2>
@@ -481,139 +633,99 @@
           <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
           <li>O objetivo é <b>acertar todos os pares</b> antes de perder as 5 vidas.</li>
         </ol>
-        <div class="dica">💡 <b>Dica:</b> primeiro descubra o total da compra (ex.: R$ 18 e R$ 7 dão R$ 25) e só depois calcule o troco (R$ 50 − R$ 25 = R$ 25).</div>
+        <div class="dica">💡 <b>Dica:</b> primeiro descubra o total da compra e só depois calcule o troco.</div>
+      </div>
+      <div class="info-secao laranja">
+        <h2>🛍️ Atividade "Compras em quantidade" (3 fases)</h2>
+        <p><b>Fase 1 — Compras simples</b></p>
+        <ol>
+          <li>A tela mostra a <b>imagem do produto</b>, um <b>badge com a quantidade</b> e o <b>preço unitário</b> ("R$ 5,00 cada").</li>
+          <li>Leia o enunciado: <i>"Comprei N unidades... Quanto paguei ao todo?"</i></li>
+          <li>Descubra o total (o aluno infere que precisa multiplicar ou somar o preço N vezes).</li>
+          <li>Clique na opção com o valor total correto.</li>
+        </ol>
+        <p style="margin-top:6px"><b>Fase 2 — Compras com troco pequeno</b></p>
+        <ol>
+          <li>Mesmo formato da Fase 1, com <b>quantidade 2 ou 3</b>.</li>
+          <li>O enunciado informa também o <b>valor pago</b>.</li>
+          <li>Descubra o total e subtraia do valor pago para achar o troco.</li>
+        </ol>
+        <p style="margin-top:6px"><b>Fase 3 — Compras com troco maior</b></p>
+        <ol>
+          <li>Mesmo raciocínio da Fase 2, com <b>quantidade de 3 a 5</b>.</li>
+          <li>Atenção: o total pode ser alto e o pagamento usa notas maiores.</li>
+        </ol>
+        <div class="dica">💡 <b>Dica:</b> o badge mostra a quantidade, mas não há sinal de multiplicação na tela. O aluno precisa <b>interpretar o enunciado</b> e perceber que é uma compra de várias unidades iguais. Ao final de <b>cada fase</b>, você verá sua nota e a revisão dos exercícios daquela fase.</div>
       </div>
     </div>
 
-    <!-- ABA: SÉRIES (ATUALIZADA COM 4º E 5º ANO) -->
     <div class="tab-conteudo" id="tab-series">
       <div class="info-secao">
         <h2>🎓 Ensino Fundamental I — 1º ao 5º ano</h2>
         <p>
-          <span class="serie-badge">1º ano</span> (introdutório, com adaptações)
+          <span class="serie-badge">1º ano</span> (introdutório)
           <span class="serie-badge destaque">2º ano</span>
           <span class="serie-badge destaque">3º ano</span>
           <span class="serie-badge destaque">4º ano</span>
           <span class="serie-badge destaque">5º ano</span>
         </p>
         <ul>
-          <li><b>1º ano:</b> reconhecimento visual de cédulas e moedas, preferencialmente com valores inteiros e sem centavos.</li>
-          <li><b>2º ano:</b> reconhecimento e equivalências entre cédulas e moedas.</li>
-          <li><b>3º ano:</b> problemas de compra, venda, comparação de valores e <b>cálculo de troco</b> — nível mais próximo das duas atividades completas.</li>
-          <li><b>4º ano:</b> aprofundamento em situações de compra e venda, com cálculo de troco e total de compras (adição e subtração com valores monetários). A atividade "Compra dupla" é especialmente adequada.</li>
-          <li><b>5º ano:</b> consolidação do sistema monetário em contextos de compra e planejamento de gastos, com cálculo mental e algoritmos. As atividades "Troco" e "Compra dupla" são plenamente indicadas.</li>
+          <li><b>1º ano:</b> reconhecimento visual de cédulas e moedas (adaptar).</li>
+          <li><b>2º ano:</b> equivalências entre cédulas e moedas.</li>
+          <li><b>3º ano:</b> compra, venda, comparação e <b>cálculo de troco</b>; início da multiplicação como adição de parcelas iguais.</li>
+          <li><b>4º ano:</b> compra e venda com troco; <b>multiplicação</b> por números naturais; divisão como operação inversa.</li>
+          <li><b>5º ano:</b> consolidação do sistema monetário; multiplicação e divisão com naturais; problemas de compra e planejamento de gastos.</li>
         </ul>
       </div>
       <div class="info-secao azul">
-        <h2>💰 Sobre a atividade de troco</h2>
-        <p>Indicada para o <b>3º ano</b> (cálculo mental de subtração) e plenamente adequada ao <b>4º e 5º ano</b>, pois trabalha situações reais de compra e venda com troco. No <b>2º ano</b>, pode ser usada como desafio após o domínio das equivalências.</p>
+        <h2>💰 Sobre "Calculando o troco"</h2>
+        <p>Indicada para o <b>3º ano</b> e plenamente adequada ao <b>4º e 5º ano</b>.</p>
       </div>
       <div class="info-secao roxo">
-        <h2>🧾 Sobre a atividade de compra dupla</h2>
-        <p>Indicada principalmente para o <b>3º ano</b> (duas etapas: adição + subtração) e <b>plenamente adequada ao 4º e 5º ano</b>, pois exige calcular o total de dois produtos e o troco — habilidade prevista na BNCC para essas séries. Pode ser usada como desafio no <b>2º ano</b> após o domínio das equivalências e do troco simples.</p>
+        <h2>🧾 Sobre "Compra dupla"</h2>
+        <p>Indicada para o <b>3º ano</b> e plenamente adequada ao <b>4º e 5º ano</b> (adição + subtração em contexto de compra).</p>
+      </div>
+      <div class="info-secao laranja">
+        <h2>🛍️ Sobre "Compras em quantidade" (3 fases)</h2>
+        <p>Indicada principalmente para o <b>4º e 5º ano</b>. A Fase 1 consolida a multiplicação como adição de parcelas iguais (também útil no 3º ano). As Fases 2 e 3 unem multiplicação e troco, trabalhando cálculo mental e resolução de problemas em contexto financeiro real. No <b>5º ano</b>, a atividade dialoga com a multiplicação e divisão com naturais e com o sistema monetário. <b>Importante:</b> em nenhuma fase o aluno vê o sinal "×" — ele precisa <b>interpretar o enunciado</b> e perceber sozinho a operação.</p>
       </div>
     </div>
 
-    <!-- ABA: HABILIDADES (ATUALIZADA COM 4º E 5º ANO) -->
     <div class="tab-conteudo" id="tab-hab">
       <div class="info-secao">
         <h2>📖 Habilidades — "Qual é o valor?"</h2>
-        <p style="margin-bottom:8px;font-size:clamp(.75rem,2vw,.82rem);color:#666;">Em <b>ordem de série</b>, com indicação do nível de correspondência.</p>
-        <div class="hab-item">
-          <div class="codigo">EF01MA19<span class="serie-tag">1º ano</span><span class="nivel parcial">Parcial</span></div>
-          <div class="desc">Reconhecer e relacionar valores de moedas e cédulas do sistema monetário brasileiro para resolver situações simples do cotidiano.</div>
-          <div class="corresp">→ <b>Parcialmente</b>: há reconhecimento visual, mas a atividade exige soma — nível acima do 1º ano. Recomenda-se adaptar para valores inteiros.</div>
-        </div>
-        <div class="hab-item">
-          <div class="codigo">EF02MA20<span class="serie-tag">2º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Estabelecer a equivalência de valores entre moedas e cédulas do sistema monetário brasileiro para resolver situações do cotidiano.</div>
-          <div class="corresp">→ <b>Plenamente</b>: o jogador identifica qual combinação de cédulas e moedas equivale ao preço do produto.</div>
-        </div>
-        <div class="hab-item">
-          <div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas envolvendo comparação e equivalência de valores monetários do sistema brasileiro em situações de compra, venda e troca.</div>
-          <div class="corresp">→ <b>Plenamente</b>: cada questão simula uma compra — escolher a forma de pagamento correta.</div>
-        </div>
-        <div class="hab-item">
-          <div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel parcial">Parcial</span></div>
-          <div class="desc">Resolver e elaborar problemas que envolvam situações de compra e venda e formas de pagamento, utilizando termos como troco, desconto, acréscimo, lucro e prejuízo.</div>
-          <div class="corresp">→ <b>Parcialmente</b>: a atividade trabalha equivalência e pagamento, mas não explora desconto, acréscimo, lucro ou prejuízo.</div>
-        </div>
-        <div class="hab-item">
-          <div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div>
-          <div class="desc">Resolver e elaborar problemas que envolvam o sistema monetário brasileiro em contextos de compra, venda e planejamento de gastos, utilizando cálculo mental ou algoritmos.</div>
-          <div class="corresp">→ <b>Parcialmente</b>: a atividade foca no reconhecimento e na equivalência, mas não aborda planejamento de gastos.</div>
-        </div>
+        <div class="hab-item"><div class="codigo">EF01MA19<span class="serie-tag">1º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Reconhecer e relacionar valores de moedas e cédulas.</div><div class="corresp">→ Parcial: há reconhecimento, mas exige soma.</div></div>
+        <div class="hab-item"><div class="codigo">EF02MA20<span class="serie-tag">2º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Equivalência entre moedas e cédulas.</div><div class="corresp">→ Plena: identifica a combinação equivalente.</div></div>
+        <div class="hab-item"><div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Problemas de compra, venda e troca.</div><div class="corresp">→ Plena: cada questão simula uma compra.</div></div>
+        <div class="hab-item"><div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Compra e venda com troco, desconto, acréscimo, lucro, prejuízo.</div><div class="corresp">→ Parcial: não explora desconto/lucro/prejuízo.</div></div>
+        <div class="hab-item"><div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Sistema monetário em compra, venda e planejamento de gastos.</div><div class="corresp">→ Parcial: foca em equivalência.</div></div>
       </div>
-
       <div class="info-secao azul">
         <h2>💰 Habilidades — "Calculando o troco"</h2>
-        <p style="margin-bottom:8px;font-size:clamp(.75rem,2vw,.82rem);color:#666;">Em <b>ordem de série</b>, com indicação do nível de correspondência.</p>
-        <div class="hab-item azul">
-          <div class="codigo">EF02MA20<span class="serie-tag">2º ano</span><span class="nivel parcial">Parcial</span></div>
-          <div class="desc">Estabelecer a equivalência de valores entre moedas e cédulas do sistema monetário brasileiro para resolver situações do cotidiano.</div>
-          <div class="corresp">→ <b>Parcialmente</b>: a atividade exige a equivalência do troco, mas o foco principal é a subtração — não só a equivalência.</div>
-        </div>
-        <div class="hab-item azul">
-          <div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas envolvendo comparação e equivalência de valores monetários do sistema brasileiro em situações de compra, venda e troca.</div>
-          <div class="corresp">→ <b>Plenamente</b>: cada questão é um problema de troco em situação de compra.</div>
-        </div>
-        <div class="hab-item azul">
-          <div class="codigo">EF03MA06<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas de adição e subtração com os significados de juntar, acrescentar, separar, retirar, comparar e completar quantidades, utilizando diferentes estratégias de cálculo.</div>
-          <div class="corresp">→ <b>Plenamente</b>: o cálculo do troco é uma subtração (valor pago − preço) com significado de "retirar/completar".</div>
-        </div>
-        <div class="hab-item azul">
-          <div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas que envolvam situações de compra e venda e formas de pagamento, utilizando termos como troco, desconto, acréscimo, lucro e prejuízo.</div>
-          <div class="corresp">→ <b>Plenamente</b>: cada questão é uma situação de compra com cálculo de troco, um dos termos centrais da habilidade.</div>
-        </div>
-        <div class="hab-item azul">
-          <div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas que envolvam o sistema monetário brasileiro em contextos de compra, venda e planejamento de gastos, utilizando cálculo mental ou algoritmos.</div>
-          <div class="corresp">→ <b>Plenamente</b>: a atividade exige cálculo mental do troco em situações de compra.</div>
-        </div>
-        <div class="hab-item azul">
-          <div class="codigo">EF05MA07<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div>
-          <div class="desc">Resolver e elaborar problemas de adição e subtração com números naturais e com números racionais, cuja representação decimal seja finita, utilizando estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.</div>
-          <div class="corresp">→ <b>Parcialmente</b>: o cálculo do troco envolve subtração com decimais, mas a atividade não explora estimativa nem algoritmos formais.</div>
-        </div>
+        <div class="hab-item azul"><div class="codigo">EF02MA20<span class="serie-tag">2º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Equivalência entre moedas e cédulas.</div><div class="corresp">→ Parcial: foco é subtração.</div></div>
+        <div class="hab-item azul"><div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Problemas de compra, venda e troca.</div><div class="corresp">→ Plena: cada questão é um problema de troco.</div></div>
+        <div class="hab-item azul"><div class="codigo">EF03MA06<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Adição e subtração com diferentes significados.</div><div class="corresp">→ Plena: troco = subtração.</div></div>
+        <div class="hab-item azul"><div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Compra e venda com troco.</div><div class="corresp">→ Plena: situação de compra com troco.</div></div>
+        <div class="hab-item azul"><div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Sistema monetário em compra/venda com cálculo mental.</div><div class="corresp">→ Plena: cálculo mental do troco.</div></div>
+        <div class="hab-item azul"><div class="codigo">EF05MA07<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Adição e subtração com decimais finitos.</div><div class="corresp">→ Parcial: subtração com decimais.</div></div>
       </div>
-
       <div class="info-secao roxo">
         <h2>🧾 Habilidades — "Compra dupla"</h2>
-        <p style="margin-bottom:8px;font-size:clamp(.75rem,2vw,.82rem);color:#666;">Em <b>ordem de série</b>, com indicação do nível de correspondência.</p>
-        <div class="hab-item roxo">
-          <div class="codigo">EF03MA06<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas de adição e subtração com os significados de juntar, acrescentar, separar, retirar, comparar e completar quantidades, utilizando diferentes estratégias de cálculo.</div>
-          <div class="corresp">→ <b>Plenamente</b>: o aluno precisa <b>juntar</b> os dois preços (adição) e <b>retirar</b> do valor pago (subtração).</div>
-        </div>
-        <div class="hab-item roxo">
-          <div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas envolvendo comparação e equivalência de valores monetários do sistema brasileiro em situações de compra, venda e troca.</div>
-          <div class="corresp">→ <b>Plenamente</b>: situação de compra com dois itens, pagamento e troco.</div>
-        </div>
-        <div class="hab-item roxo">
-          <div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas que envolvam situações de compra e venda e formas de pagamento, utilizando termos como troco, desconto, acréscimo, lucro e prejuízo.</div>
-          <div class="corresp">→ <b>Plenamente</b>: a atividade simula a compra de dois produtos com pagamento e cálculo de troco — situação central da habilidade.</div>
-        </div>
-        <div class="hab-item roxo">
-          <div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas que envolvam o sistema monetário brasileiro em contextos de compra, venda e planejamento de gastos, utilizando cálculo mental ou algoritmos.</div>
-          <div class="corresp">→ <b>Plenamente</b>: o aluno precisa calcular mentalmente o total e o troco em contexto de compra.</div>
-        </div>
-        <div class="hab-item roxo">
-          <div class="codigo">EF05MA07<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div>
-          <div class="desc">Resolver e elaborar problemas de adição e subtração com números naturais e com números racionais, cuja representação decimal seja finita, utilizando estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.</div>
-          <div class="corresp">→ <b>Plenamente</b>: a atividade exige adição (total) e subtração (troco) com valores decimais em contexto monetário.</div>
-        </div>
-        <div class="hab-item roxo">
-          <div class="codigo">EF05MA08<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div>
-          <div class="desc">Resolver e elaborar problemas de multiplicação e divisão com números naturais e com números racionais cuja representação decimal é finita (com multiplicador natural e divisor natural e diferente de zero), utilizando estratégias diversas.</div>
-          <div class="corresp">→ <b>Parcialmente</b>: a atividade não explora multiplicação nem divisão; apenas adição e subtração.</div>
-        </div>
+        <div class="hab-item roxo"><div class="codigo">EF03MA06<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Adição e subtração.</div><div class="corresp">→ Plena: juntar preços + retirar do pago.</div></div>
+        <div class="hab-item roxo"><div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Compra, venda e troca.</div><div class="corresp">→ Plena: compra com dois itens + troco.</div></div>
+        <div class="hab-item roxo"><div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Compra e venda com troco.</div><div class="corresp">→ Plena: compra de dois produtos com troco.</div></div>
+        <div class="hab-item roxo"><div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Sistema monetário em compra/venda com cálculo mental.</div><div class="corresp">→ Plena: cálculo mental do total e do troco.</div></div>
+        <div class="hab-item roxo"><div class="codigo">EF05MA07<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Adição e subtração com decimais finitos.</div><div class="corresp">→ Plena: total + troco com decimais.</div></div>
+        <div class="hab-item roxo"><div class="codigo">EF05MA08<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Multiplicação e divisão com naturais/decimais.</div><div class="corresp">→ Parcial: não explora multiplicação/divisão.</div></div>
+      </div>
+      <div class="info-secao laranja">
+        <h2>🛍️ Habilidades — "Compras em quantidade" (operação: multiplicação)</h2>
+        <p style="margin-bottom:8px;font-size:clamp(.75rem,2vw,.82rem);color:#666;">Em <b>ordem de série</b>, com indicação do nível de correspondência. Apesar do nome "Compras em quantidade" não revelar a operação, a habilidade matemática trabalhada é a <b>multiplicação</b>.</p>
+        <div class="hab-item laranja"><div class="codigo">EF03MA07<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Multiplicação (por 2, 3, 4, 5) com ideia de adição de parcelas iguais.</div><div class="corresp">→ Plena: Fase 1 trabalha essa ideia.</div></div>
+        <div class="hab-item laranja"><div class="codigo">EF04MA07<span class="serie-tag">4º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Multiplicação por números naturais.</div><div class="corresp">→ Plena: Fases 1, 2 e 3 exigem multiplicação por naturais.</div></div>
+        <div class="hab-item laranja"><div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Compra e venda com formas de pagamento e troco.</div><div class="corresp">→ Plena: Fases 2 e 3 simulam compra com troco.</div></div>
+        <div class="hab-item laranja"><div class="codigo">EF05MA08<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Multiplicação (e divisão) com naturais e decimais finitos.</div><div class="corresp">→ Plena: multiplicação com valores monetários.</div></div>
+        <div class="hab-item laranja"><div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Sistema monetário em compra/venda com cálculo mental.</div><div class="corresp">→ Plena: cálculo mental de total e troco.</div></div>
       </div>
     </div>
 
@@ -621,10 +733,10 @@
       <button class="btn" id="btn-voltar-info">Voltar</button>
     </div>
   </div>
-
 </div>
 
 <script>
+/* ================== CONFIGURAÇÃO ================== */
 const PRODUTOS = [
   { nome: "Arroz",      preco: 18, img: "https://i.postimg.cc/pr5rW7vc/Arroz.png" },
   { nome: "Azeite",     preco: 12, img: "https://i.postimg.cc/76Wby4FG/Azeite.png" },
@@ -663,6 +775,7 @@ const IMG_DINHEIRO = {
 };
 
 const MAX_VIDAS = 5;
+const EXERCICIOS_POR_FASE_MULTI = 10;
 const fmt = v => v.toFixed(2).replace(".", ",");
 
 function embaralhar(arr){
@@ -716,10 +829,7 @@ function gerarErrados(preco){
   cands.delete(preco);
   return embaralhar([...cands]).slice(0, 3);
 }
-
-function montarAlternativas(preco){
-  return embaralhar([preco, ...gerarErrados(preco)]);
-}
+function montarAlternativas(preco){ return embaralhar([preco, ...gerarErrados(preco)]); }
 
 function gerarErradosTroco(troco){
   const cands = new Set();
@@ -730,17 +840,12 @@ function gerarErradosTroco(troco){
   cands.delete(troco);
   return embaralhar([...cands]).slice(0, 3);
 }
-
-function montarAlternativasTroco(troco){
-  return embaralhar([troco, ...gerarErradosTroco(troco)]);
-}
+function montarAlternativasTroco(troco){ return embaralhar([troco, ...gerarErradosTroco(troco)]); }
 
 function escolherPagamento(preco){
   const opcoes = [];
   [...CEDULAS, ...MOEDAS].forEach(v => {
-    if(v > preco){
-      if(v - preco <= 100) opcoes.push(v);
-    }
+    if(v > preco && v - preco <= 100) opcoes.push(v);
   });
   if(opcoes.length === 0){
     const maior = [...CEDULAS].find(c => c > preco);
@@ -752,10 +857,16 @@ function escolherPagamento(preco){
   return embaralhar(opcoes)[0];
 }
 
-const $ = id => document.getElementById(id);
+function escolherPagamentoFase3(total){
+  const opcoes = [...CEDULAS].filter(v => v > total && v - total <= 100);
+  if(opcoes.length > 0){
+    const grandes = opcoes.filter(v => v === 50 || v === 100);
+    return embaralhar(grandes.length ? grandes : opcoes)[0];
+  }
+  return escolherPagamento(total);
+}
 
-/* ---------- ATIVIDADE 1 — QUAL É O VALOR? ---------- */
-let filaValor, indiceValor, vidasValor, respostasValor, totalValor;
+const $ = id => document.getElementById(id);
 
 function atualizarVidas(elId, vidas){
   const el = $(elId);
@@ -768,12 +879,22 @@ function atualizarVidas(elId, vidas){
   }
 }
 
+function esconderTudo(){
+  ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco",
+   "tela-compra","tela-fim-compra","tela-multi","tela-fim-multi",
+   "tela-transicao","tela-info"].forEach(id => {
+    const el = $(id);
+    if(el) el.style.display = "none";
+  });
+}
+
+/* ============= ATIVIDADE 1 ============= */
+let filaValor, indiceValor, vidasValor, respostasValor, totalValor;
+
 function iniciarValor(){
   filaValor = embaralhar(PRODUTOS);
   totalValor = PRODUTOS.length;
-  indiceValor = 0;
-  vidasValor = MAX_VIDAS;
-  respostasValor = [];
+  indiceValor = 0; vidasValor = MAX_VIDAS; respostasValor = [];
   esconderTudo();
   $("tela-jogo").style.display = "block";
   $("titulo-fim").textContent = "Atividade concluída! 🎉";
@@ -784,7 +905,7 @@ function iniciarValor(){
 
 function mostrarQuestaoValor(){
   const produto = filaValor[indiceValor];
-  $("progresso-valor").textContent = `Acertos: ${respostasValor.length} de ${totalValor}`;
+  $("progresso-valor").textContent = `Pergunta ${Math.min(respostasValor.length + 1, totalValor)} de ${totalValor}`;
   $("barra-valor").style.width = `${(respostasValor.length / totalValor) * 100}%`;
   atualizarVidas("vidas-valor", vidasValor);
   $("feedback-valor").textContent = "";
@@ -795,11 +916,8 @@ function mostrarQuestaoValor(){
   box.innerHTML = "";
   if(produto.img){
     const img = document.createElement("img");
-    img.src = produto.img;
-    img.alt = produto.nome;
-    img.onerror = () => {
-      box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
-    };
+    img.src = produto.img; img.alt = produto.nome;
+    img.onerror = () => { box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`; };
     box.appendChild(img);
   } else {
     box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
@@ -835,7 +953,7 @@ function responderValor(botao, valor, produto){
     filaValor.push(produto);
   }
   atualizarVidas("vidas-valor", vidasValor);
-  $("progresso-valor").textContent = `Acertos: ${respostasValor.length} de ${totalValor}`;
+  $("progresso-valor").textContent = `Pergunta ${Math.min(respostasValor.length + 1, totalValor)} de ${totalValor}`;
   $("barra-valor").style.width = `${(respostasValor.length / totalValor) * 100}%`;
   if(vidasValor <= 0){
     $("btn-proxima-valor").style.display = "inline-block";
@@ -853,17 +971,16 @@ function proximaValor(){
   if(respostasValor.length >= totalValor){ finalizarValor(true); return; }
   if(indiceValor >= filaValor.length){
     if(respostasValor.length < totalValor){
-      const faltam = PRODUTOS.filter(p => !respostasValor.some(r => r.produto.nome === p.nome));
-      filaValor = embaralhar(faltam);
-      indiceValor = 0;
+      // Se a fila acabou mas ainda faltam acertos, significa que as questões erradas
+      // já estão no final da fila (pois foram empurradas). Basta voltar ao início.
+      indiceValor = 0; 
     } else { finalizarValor(true); return; }
   }
   mostrarQuestaoValor();
 }
 
 function finalizarValor(vitoria){
-  esconderTudo();
-  $("tela-fim").style.display = "block";
+  esconderTudo(); $("tela-fim").style.display = "block";
   if(vitoria){
     $("titulo-fim").textContent = "Atividade concluída! 🎉";
     $("sub-fim").textContent = "Você acertou todas as questões!";
@@ -879,7 +996,7 @@ function finalizarValor(vitoria){
     $("btn-menu-fim").style.display = "none";
     $("btn-recomecar").style.display = "inline-block";
   }
-  $("revisao").innerHTML = "<h3>Revisão (valor correto de cada produto):</h3>" + respostasValor.map(r => `
+  $("revisao").innerHTML = "<h3>Revisão:</h3>" + respostasValor.map(r => `
     <div class="rev-item">
       <span class="mini">${r.produto.img ? `<img src="${r.produto.img}" onerror="this.remove()">` : ""}</span>
       <span style="flex:1">${r.produto.nome}<br><b>R$ ${fmt(r.produto.preco)}</b></span>
@@ -890,24 +1007,18 @@ function finalizarValor(vitoria){
       <span class="rev-ok">✔</span>
     </div>`).join("");
   if(!vitoria){
-    $("revisao").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalValor - respostasValor.length} produto(s) para completar.</p>`;
+    $("revisao").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalValor - respostasValor.length} produto(s).</p>`;
   }
 }
 
-/* ---------- ATIVIDADE 2 — TROCO ---------- */
+/* ============= ATIVIDADE 2 ============= */
 let filaTroco, indiceTroco, vidasTroco, respostasTroco, totalTroco;
 
 function iniciarTroco(){
-  filaTroco = embaralhar(PRODUTOS).map(p => ({
-    produto: p,
-    pagamento: escolherPagamento(p.preco)
-  }));
+  filaTroco = embaralhar(PRODUTOS).map(p => ({ produto: p, pagamento: escolherPagamento(p.preco) }));
   totalTroco = PRODUTOS.length;
-  indiceTroco = 0;
-  vidasTroco = MAX_VIDAS;
-  respostasTroco = [];
-  esconderTudo();
-  $("tela-troco").style.display = "block";
+  indiceTroco = 0; vidasTroco = MAX_VIDAS; respostasTroco = [];
+  esconderTudo(); $("tela-troco").style.display = "block";
   $("titulo-fim-troco").textContent = "Atividade concluída! 🎉";
   $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
   $("nota-final-troco").className = "nota";
@@ -920,7 +1031,7 @@ function mostrarQuestaoTroco(){
   const pagamento = item.pagamento;
   const troco = Math.round((pagamento - produto.preco) * 100) / 100;
 
-  $("progresso-troco").textContent = `Acertos: ${respostasTroco.length} de ${totalTroco}`;
+  $("progresso-troco").textContent = `Pergunta ${Math.min(respostasTroco.length + 1, totalTroco)} de ${totalTroco}`;
   $("barra-troco").style.width = `${(respostasTroco.length / totalTroco) * 100}%`;
   atualizarVidas("vidas-troco", vidasTroco);
   $("feedback-troco").textContent = "";
@@ -931,11 +1042,8 @@ function mostrarQuestaoTroco(){
   box.innerHTML = "";
   if(produto.img){
     const img = document.createElement("img");
-    img.src = produto.img;
-    img.alt = produto.nome;
-    img.onerror = () => {
-      box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
-    };
+    img.src = produto.img; img.alt = produto.nome;
+    img.onerror = () => { box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`; };
     box.appendChild(img);
   } else {
     box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
@@ -956,8 +1064,7 @@ function mostrarQuestaoTroco(){
     btn.dataset.valor = valor;
     if(valor === 0){
       const chip = document.createElement("span");
-      chip.className = "chip-sem-img";
-      chip.textContent = "Sem troco";
+      chip.className = "chip-sem-img"; chip.textContent = "Sem troco";
       btn.appendChild(chip);
     } else {
       decompor(valor).forEach(v => btn.appendChild(criarItemDinheiro(v)));
@@ -985,7 +1092,7 @@ function responderTroco(botao, valor, item, trocoCorreto){
     filaTroco.push(item);
   }
   atualizarVidas("vidas-troco", vidasTroco);
-  $("progresso-troco").textContent = `Acertos: ${respostasTroco.length} de ${totalTroco}`;
+  $("progresso-troco").textContent = `Pergunta ${Math.min(respostasTroco.length + 1, totalTroco)} de ${totalTroco}`;
   $("barra-troco").style.width = `${(respostasTroco.length / totalTroco) * 100}%`;
   if(vidasTroco <= 0){
     $("btn-proxima-troco").style.display = "inline-block";
@@ -1003,8 +1110,6 @@ function proximaTroco(){
   if(respostasTroco.length >= totalTroco){ finalizarTroco(true); return; }
   if(indiceTroco >= filaTroco.length){
     if(respostasTroco.length < totalTroco){
-      const faltam = PRODUTOS.filter(p => !respostasTroco.some(r => r.item.produto.nome === p.nome));
-      filaTroco = embaralhar(faltam).map(p => ({ produto: p, pagamento: escolherPagamento(p.preco) }));
       indiceTroco = 0;
     } else { finalizarTroco(true); return; }
   }
@@ -1012,8 +1117,7 @@ function proximaTroco(){
 }
 
 function finalizarTroco(vitoria){
-  esconderTudo();
-  $("tela-fim-troco").style.display = "block";
+  esconderTudo(); $("tela-fim-troco").style.display = "block";
   if(vitoria){
     $("titulo-fim-troco").textContent = "Atividade concluída! 🎉";
     $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
@@ -1029,59 +1133,45 @@ function finalizarTroco(vitoria){
     $("btn-menu-fim-troco").style.display = "none";
     $("btn-recomecar-troco").style.display = "inline-block";
   }
-  $("revisao-troco").innerHTML = "<h3>Revisão (troco correto de cada produto):</h3>" + respostasTroco.map(r => {
-    const p = r.item.produto;
-    const pag = r.item.pagamento;
+  $("revisao-troco").innerHTML = "<h3>Revisão:</h3>" + respostasTroco.map(r => {
+    const p = r.item.produto; const pag = r.item.pagamento;
     const troco = Math.round((pag - p.preco) * 100) / 100;
-    return `
-    <div class="rev-item">
+    return `<div class="rev-item">
       <span class="mini">${p.img ? `<img src="${p.img}" onerror="this.remove()">` : ""}</span>
-      <span style="flex:1">${p.nome}<br>
-        <b>R$ ${fmt(p.preco)}</b> · pago com R$ ${fmt(pag)}<br>
-        <b style="color:var(--azul)">Troco: R$ ${fmt(troco)}</b>
-      </span>
+      <span style="flex:1">${p.nome}<br><b>R$ ${fmt(p.preco)}</b> · pago com R$ ${fmt(pag)}<br>
+        <b style="color:var(--azul)">Troco: R$ ${fmt(troco)}</b></span>
       <span class="rev-dinheiro">${troco > 0 ? decompor(troco).map(v => {
         const url = IMG_DINHEIRO[v];
         return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
       }).join("") : '<span class="chip-sem-img">Sem troco</span>'}</span>
-      <span class="rev-ok">✔</span>
-    </div>`;
+      <span class="rev-ok">✔</span></div>`;
   }).join("");
   if(!vitoria){
-    $("revisao-troco").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalTroco - respostasTroco.length} produto(s) para completar.</p>`;
+    $("revisao-troco").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalTroco - respostasTroco.length} produto(s).</p>`;
   }
 }
 
-/* ---------- ATIVIDADE 3 — COMPRA DUPLA ---------- */
+/* ============= ATIVIDADE 3 ============= */
 let filaCompra, indiceCompra, vidasCompra, respostasCompra, totalCompra;
 
 function gerarTodosParesUnicos(lista){
   const pares = [];
-  for(let i = 0; i < lista.length; i++){
-    for(let j = i + 1; j < lista.length; j++){
+  for(let i = 0; i < lista.length; i++)
+    for(let j = i + 1; j < lista.length; j++)
       pares.push({ a: lista[i], b: lista[j] });
-    }
-  }
   return pares;
 }
 
-function gerarParesCompra(quantidade){
+function iniciarCompra(){
   const todos = gerarTodosParesUnicos(PRODUTOS);
-  const sorteados = embaralhar(todos).slice(0, Math.min(quantidade, todos.length));
-  return sorteados.map(par => {
+  const sorteados = embaralhar(todos).slice(0, PRODUTOS.length);
+  filaCompra = sorteados.map(par => {
     const soma = Math.round((par.a.preco + par.b.preco) * 100) / 100;
     return { ...par, soma, pagamento: escolherPagamento(soma) };
   });
-}
-
-function iniciarCompra(){
-  filaCompra = gerarParesCompra(PRODUTOS.length);
   totalCompra = filaCompra.length;
-  indiceCompra = 0;
-  vidasCompra = MAX_VIDAS;
-  respostasCompra = [];
-  esconderTudo();
-  $("tela-compra").style.display = "block";
+  indiceCompra = 0; vidasCompra = MAX_VIDAS; respostasCompra = [];
+  esconderTudo(); $("tela-compra").style.display = "block";
   $("titulo-fim-compra").textContent = "Atividade concluída! 🎉";
   $("sub-fim-compra").textContent = "Você acertou todos os cálculos!";
   $("nota-final-compra").className = "nota";
@@ -1092,7 +1182,7 @@ function mostrarQuestaoCompra(){
   const item = filaCompra[indiceCompra];
   const troco = Math.round((item.pagamento - item.soma) * 100) / 100;
 
-  $("progresso-compra").textContent = `Acertos: ${respostasCompra.length} de ${totalCompra}`;
+  $("progresso-compra").textContent = `Pergunta ${Math.min(respostasCompra.length + 1, totalCompra)} de ${totalCompra}`;
   $("barra-compra").style.width = `${(respostasCompra.length / totalCompra) * 100}%`;
   atualizarVidas("vidas-compra", vidasCompra);
   $("feedback-compra").textContent = "";
@@ -1104,19 +1194,16 @@ function mostrarQuestaoCompra(){
   [item.a, item.b].forEach(p => {
     if(p.img){
       const img = document.createElement("img");
-      img.src = p.img;
-      img.alt = p.nome;
+      img.src = p.img; img.alt = p.nome;
       img.onerror = () => {
         const ph = document.createElement("span");
-        ph.className = "placeholder-txt";
-        ph.textContent = "📦 " + p.nome;
+        ph.className = "placeholder-txt"; ph.textContent = "📦 " + p.nome;
         img.replaceWith(ph);
       };
       box.appendChild(img);
     } else {
       const ph = document.createElement("span");
-      ph.className = "placeholder-txt";
-      ph.textContent = "📦 " + p.nome;
+      ph.className = "placeholder-txt"; ph.textContent = "📦 " + p.nome;
       box.appendChild(ph);
     }
   });
@@ -1141,8 +1228,7 @@ function mostrarQuestaoCompra(){
     btn.dataset.valor = valor;
     if(valor === 0){
       const chip = document.createElement("span");
-      chip.className = "chip-sem-img";
-      chip.textContent = "Sem troco";
+      chip.className = "chip-sem-img"; chip.textContent = "Sem troco";
       btn.appendChild(chip);
     } else {
       decompor(valor).forEach(v => btn.appendChild(criarItemDinheiro(v)));
@@ -1167,13 +1253,12 @@ function responderCompra(botao, valor, item, trocoCorreto){
   } else {
     vidasCompra--;
     $("feedback-compra").innerHTML =
-      `❌ Errou! A compra totaliza R$ ${fmt(item.soma)}. ` +
-      `De R$ ${fmt(item.pagamento)}, sobram R$ ${fmt(trocoCorreto)} de troco. Esta pergunta voltará ao final.`;
+      `❌ Errou! A compra totaliza R$ ${fmt(item.soma)}. De R$ ${fmt(item.pagamento)}, sobram R$ ${fmt(trocoCorreto)}. Esta pergunta voltará ao final.`;
     $("feedback-compra").classList.add("nao");
     filaCompra.push(item);
   }
   atualizarVidas("vidas-compra", vidasCompra);
-  $("progresso-compra").textContent = `Acertos: ${respostasCompra.length} de ${totalCompra}`;
+  $("progresso-compra").textContent = `Pergunta ${Math.min(respostasCompra.length + 1, totalCompra)} de ${totalCompra}`;
   $("barra-compra").style.width = `${(respostasCompra.length / totalCompra) * 100}%`;
   if(vidasCompra <= 0){
     $("btn-proxima-compra").style.display = "inline-block";
@@ -1191,17 +1276,6 @@ function proximaCompra(){
   if(respostasCompra.length >= totalCompra){ finalizarCompra(true); return; }
   if(indiceCompra >= filaCompra.length){
     if(respostasCompra.length < totalCompra){
-      const idsAcertados = new Set(
-        respostasCompra.map(r => [r.item.a.nome, r.item.b.nome].sort().join("|"))
-      );
-      const todos = gerarTodosParesUnicos(PRODUTOS).filter(par => {
-        const id = [par.a.nome, par.b.nome].sort().join("|");
-        return !idsAcertados.has(id);
-      });
-      filaCompra = embaralhar(todos).map(par => {
-        const soma = Math.round((par.a.preco + par.b.preco) * 100) / 100;
-        return { ...par, soma, pagamento: escolherPagamento(soma) };
-      });
       indiceCompra = 0;
     } else { finalizarCompra(true); return; }
   }
@@ -1209,8 +1283,7 @@ function proximaCompra(){
 }
 
 function finalizarCompra(vitoria){
-  esconderTudo();
-  $("tela-fim-compra").style.display = "block";
+  esconderTudo(); $("tela-fim-compra").style.display = "block";
   if(vitoria){
     $("titulo-fim-compra").textContent = "Atividade concluída! 🎉";
     $("sub-fim-compra").textContent = "Você acertou todos os cálculos!";
@@ -1226,60 +1299,383 @@ function finalizarCompra(vitoria){
     $("btn-menu-fim-compra").style.display = "none";
     $("btn-recomecar-compra").style.display = "inline-block";
   }
-
-  $("revisao-compra").innerHTML = "<h3>Revisão (total e troco corretos):</h3>" + respostasCompra.map(r => {
+  $("revisao-compra").innerHTML = "<h3>Revisão:</h3>" + respostasCompra.map(r => {
     const it = r.item;
     const troco = Math.round((it.pagamento - it.soma) * 100) / 100;
-    return `
-    <div class="rev-item">
+    return `<div class="rev-item">
       <span class="mini">${it.a.img ? `<img src="${it.a.img}" onerror="this.remove()">` : ""}</span>
       <span class="mini">${it.b.img ? `<img src="${it.b.img}" onerror="this.remove()">` : ""}</span>
       <span style="flex:1">${it.a.nome} e ${it.b.nome}<br>
         <b>R$ ${fmt(it.a.preco)} e R$ ${fmt(it.b.preco)} totalizam R$ ${fmt(it.soma)}</b> · pago com R$ ${fmt(it.pagamento)}<br>
-        <b style="color:var(--roxo)">Troco: R$ ${fmt(troco)}</b>
-      </span>
+        <b style="color:var(--roxo)">Troco: R$ ${fmt(troco)}</b></span>
       <span class="rev-dinheiro">${troco > 0 ? decompor(troco).map(v => {
         const url = IMG_DINHEIRO[v];
         return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
       }).join("") : '<span class="chip-sem-img">Sem troco</span>'}</span>
-      <span class="rev-ok">✔</span>
-    </div>`;
+      <span class="rev-ok">✔</span></div>`;
   }).join("");
-
   if(!vitoria){
-    $("revisao-compra").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalCompra - respostasCompra.length} par(es) para completar.</p>`;
+    $("revisao-compra").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalCompra - respostasCompra.length} par(es).</p>`;
   }
 }
 
-/* ---------- NAVEGAÇÃO ---------- */
-function esconderTudo(){
-  ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco","tela-compra","tela-fim-compra","tela-info"].forEach(id => {
-    const el = $(id);
-    if(el) el.style.display = "none";
+/* ============= ATIVIDADE 4 — COMPRAS EM QUANTIDADE ============= */
+let vidasMulti, respostasMulti, faseMulti;
+let filaMulti, indiceMulti, totalFaseMulti;
+let produtoAtualMulti, quantidadeAtualMulti, totalAtualMulti, pagamentoAtualMulti;
+let todasRespostasMulti = [];
+
+const FASES = [
+  { numero: 1, nome: "Compras simples", desc: "Quantidade de 2 a 5. Pergunta: quanto paguei ao todo?" },
+  { numero: 2, nome: "Compras com troco pequeno", desc: "Quantidade de 2 a 3. Pergunta: quanto de troco?" },
+  { numero: 3, nome: "Compras com troco maior", desc: "Quantidade de 3 a 5 (limitada pelo preço). Pergunta: quanto de troco?" }
+];
+
+function iniciarMulti(){
+  vidasMulti = MAX_VIDAS;
+  respostasMulti = [];
+  todasRespostasMulti = [];
+  faseMulti = 1;
+  gerarFilaFase(1);
+  esconderTudo();
+  $("tela-multi").style.display = "block";
+  $("titulo-fim-multi").textContent = "Atividade concluída! 🎉";
+  $("sub-fim-multi").textContent = "Você acertou todos os cálculos!";
+  $("nota-final-multi").className = "nota";
+  mostrarQuestaoMulti();
+}
+
+function gerarFilaFase(fase){
+  let elegiveis = PRODUTOS.slice();
+  if(fase === 3) elegiveis = PRODUTOS.filter(p => p.preco <= 30);
+
+  const combinacoes = [];
+  for(const p of elegiveis){
+    for(let q = 2; q <= 5; q++){
+      if(fase === 1){
+        combinacoes.push({ produto: p, quantidade: q });
+      } else if(fase === 2){
+        if(q === 2 || q === 3) combinacoes.push({ produto: p, quantidade: q });
+      } else {
+        if(q >= 3 && q <= 5){
+          let maxQ = 5;
+          if(p.preco >= 21) maxQ = 3;
+          else if(p.preco >= 11) maxQ = 4;
+          if(q <= maxQ) combinacoes.push({ produto: p, quantidade: q });
+        }
+      }
+    }
+  }
+  filaMulti = embaralhar(combinacoes).slice(0, EXERCICIOS_POR_FASE_MULTI).map(c => {
+    const total = Math.round(c.produto.preco * c.quantidade * 100) / 100;
+    let pagamento = null;
+    if(fase === 2) pagamento = escolherPagamento(total);
+    else if(fase === 3) pagamento = escolherPagamentoFase3(total);
+    return { ...c, total, pagamento };
+  });
+  indiceMulti = 0;
+  totalFaseMulti = filaMulti.length;
+}
+
+function mostrarQuestaoMulti(){
+  const item = filaMulti[indiceMulti];
+  produtoAtualMulti = item.produto;
+  quantidadeAtualMulti = item.quantidade;
+  totalAtualMulti = item.total;
+  pagamentoAtualMulti = item.pagamento;
+
+  $("fase-tag-multi").textContent = `Fase ${faseMulti} de 3`;
+  $("progresso-multi").textContent = `Pergunta ${Math.min(respostasMulti.length + 1, totalFaseMulti)} de ${totalFaseMulti}`;
+  $("barra-multi").style.width = `${(respostasMulti.length / totalFaseMulti) * 100}%`;
+  atualizarVidas("vidas-multi", vidasMulti);
+  $("feedback-multi").textContent = "";
+  $("feedback-multi").className = "feedback";
+  $("btn-proxima-multi").style.display = "none";
+
+  if(faseMulti === 1){
+    $("pergunta-multi").textContent = "Quanto paguei ao todo?";
+  } else {
+    $("pergunta-multi").textContent = "Quanto de troco devo receber?";
+  }
+
+  // Layout B+F: imagem + badge + preço + enunciado
+  const imgEl = $("multi-img-produto");
+  imgEl.alt = `${quantidadeAtualMulti} unidade(s) de ${produtoAtualMulti.nome}`;
+  if(produtoAtualMulti.img){
+    imgEl.src = produtoAtualMulti.img;
+    imgEl.style.display = "block";
+    imgEl.onerror = () => {
+      imgEl.style.display = "none";
+      const ph = document.createElement("span");
+      ph.className = "placeholder-txt";
+      ph.textContent = "📦";
+      imgEl.parentNode.insertBefore(ph, imgEl);
+    };
+  } else {
+    imgEl.style.display = "none";
+  }
+  
+  $("multi-preco").textContent = `R$ ${fmt(produtoAtualMulti.preco)} cada`;
+  $("multi-badge").textContent = quantidadeAtualMulti;
+  $("multi-badge").setAttribute("aria-label", `${quantidadeAtualMulti} unidades`);
+
+  const enun = $("enunciado-multi");
+  const unidade = "unidade" + (quantidadeAtualMulti === 1 ? "" : "s");
+  if(faseMulti === 1){
+    enun.innerHTML = `Comprei <b>${quantidadeAtualMulti} ${unidade}</b> de <b>${produtoAtualMulti.nome}</b>. Cada uma custa <strong>R$ ${fmt(produtoAtualMulti.preco)}</strong>. Quanto paguei ao todo?`;
+  } else {
+    enun.innerHTML = `Comprei <b>${quantidadeAtualMulti} ${unidade}</b> de <b>${produtoAtualMulti.nome}</b>. Cada uma custa <strong>R$ ${fmt(produtoAtualMulti.preco)}</strong> e paguei com <strong>R$ ${fmt(pagamentoAtualMulti)}</strong>. Quanto de troco devo receber?`;
+  }
+
+  const opcoesEl = $("opcoes-multi");
+  opcoesEl.innerHTML = "";
+  let valores;
+  if(faseMulti === 1){
+    valores = montarAlternativasTotalMulti(totalAtualMulti, produtoAtualMulti.preco, quantidadeAtualMulti);
+  } else {
+    const troco = Math.round((pagamentoAtualMulti - totalAtualMulti) * 100) / 100;
+    valores = montarAlternativasTroco(troco);
+  }
+  valores.forEach(valor => {
+    const btn = document.createElement("button");
+    btn.className = "opcao laranja";
+    btn.dataset.valor = valor;
+    if(valor === 0){
+      const chip = document.createElement("span");
+      chip.className = "chip-sem-img"; chip.textContent = "Sem troco";
+      btn.appendChild(chip);
+    } else {
+      decompor(valor).forEach(v => btn.appendChild(criarItemDinheiro(v)));
+    }
+    btn.onclick = () => responderMulti(btn, valor);
+    opcoesEl.appendChild(btn);
   });
 }
 
+function montarAlternativasTotalMulti(total, preco, quantidade){
+  const cands = new Set();
+  [total + 1, total - 1, total + 2, total - 2,
+   total + preco, total - preco,
+   total + quantidade, total - quantidade,
+   total + preco * 2, total / 2, total * 2]
+    .forEach(v => { if(v > 0 && v <= 500) cands.add(Math.round(v * 100) / 100); });
+  cands.delete(total);
+  const errados = embaralhar([...cands]).slice(0, 3);
+  return embaralhar([total, ...errados]);
+}
+
+function responderMulti(botao, valor){
+  let correta, valorCorreto, feedbackOk, feedbackErro;
+  if(faseMulti === 1){
+    valorCorreto = totalAtualMulti;
+    correta = Math.abs(valor - valorCorreto) < 0.001;
+    feedbackOk = `✅ Muito bem! ${quantidadeAtualMulti} × R$ ${fmt(produtoAtualMulti.preco)} = R$ ${fmt(valorCorreto)}.`;
+    feedbackErro = `❌ Errou! ${quantidadeAtualMulti} × R$ ${fmt(produtoAtualMulti.preco)} = R$ ${fmt(valorCorreto)}. Esta pergunta voltará ao final.`;
+  } else {
+    valorCorreto = Math.round((pagamentoAtualMulti - totalAtualMulti) * 100) / 100;
+    correta = Math.abs(valor - valorCorreto) < 0.001;
+    feedbackOk = `✅ Muito bem! ${quantidadeAtualMulti} × R$ ${fmt(produtoAtualMulti.preco)} = R$ ${fmt(totalAtualMulti)}; o troco é R$ ${fmt(valorCorreto)}.`;
+    feedbackErro = `❌ Errou! ${quantidadeAtualMulti} × R$ ${fmt(produtoAtualMulti.preco)} = R$ ${fmt(totalAtualMulti)}; de R$ ${fmt(pagamentoAtualMulti)} sobram R$ ${fmt(valorCorreto)}. Esta pergunta voltará ao final.`;
+  }
+
+  document.querySelectorAll("#opcoes-multi .opcao").forEach(b => {
+    b.disabled = true;
+    if(Math.abs(Number(b.dataset.valor) - valorCorreto) < 0.001) b.classList.add("correta");
+    else if(b === botao) b.classList.add("errada");
+  });
+
+  const itemAtual = filaMulti[indiceMulti];
+  if(correta){
+    respostasMulti.push({ item: itemAtual, correta: true, fase: faseMulti });
+    $("feedback-multi").textContent = feedbackOk;
+    $("feedback-multi").classList.add("ok");
+  } else {
+    vidasMulti--;
+    $("feedback-multi").textContent = feedbackErro;
+    $("feedback-multi").classList.add("nao");
+    filaMulti.push(itemAtual);
+  }
+
+  atualizarVidas("vidas-multi", vidasMulti);
+  $("progresso-multi").textContent = `Pergunta ${Math.min(respostasMulti.length + 1, totalFaseMulti)} de ${totalFaseMulti}`;
+  $("barra-multi").style.width = `${(respostasMulti.length / totalFaseMulti) * 100}%`;
+
+  if(vidasMulti <= 0){
+    $("btn-proxima-multi").style.display = "inline-block";
+    $("btn-proxima-multi").textContent = "Ver resultado";
+    $("btn-proxima-multi").onclick = () => finalizarMulti(false);
+    return;
+  }
+
+  const fimDaFase = respostasMulti.length >= totalFaseMulti;
+  const ultimaFase = faseMulti === 3;
+  $("btn-proxima-multi").style.display = "inline-block";
+  if(fimDaFase && !ultimaFase){
+    $("btn-proxima-multi").textContent = "Ver resultado da fase";
+    $("btn-proxima-multi").onclick = () => mostrarResultadoFase();
+  } else if(fimDaFase && ultimaFase){
+    $("btn-proxima-multi").textContent = "Ver resultado";
+    $("btn-proxima-multi").onclick = () => finalizarMulti(true);
+  } else {
+    $("btn-proxima-multi").textContent = "Próxima";
+    $("btn-proxima-multi").onclick = proximaMulti;
+  }
+}
+
+function proximaMulti(){
+  indiceMulti++;
+  
+  if(respostasMulti.length >= totalFaseMulti){ 
+    mostrarResultadoFase(); 
+    return; 
+  }
+  
+  if(indiceMulti >= filaMulti.length){
+    if(respostasMulti.length < totalFaseMulti){
+      // A fila tem as questões erradas no final. Voltamos ao início para revisá-las.
+      indiceMulti = 0;
+    } else { 
+      mostrarResultadoFase(); 
+      return; 
+    }
+  }
+  
+  mostrarQuestaoMulti();
+}
+
+function mostrarResultadoFase(){
+  const fase = FASES[faseMulti - 1];
+  const acertosFase = respostasMulti.length;
+  const totalFase = totalFaseMulti;
+  const vitoriaFase = acertosFase >= totalFase;
+
+  respostasMulti.forEach(r => todasRespostasMulti.push(r));
+
+  $("emoji-transicao").textContent = vitoriaFase ? "🎉" : "💔";
+  $("titulo-transicao").textContent = vitoriaFase
+    ? `Fase ${faseMulti} concluída!`
+    : `Fase ${faseMulti} interrompida`;
+  $("texto-transicao").textContent = vitoriaFase
+    ? `Você acertou todos os ${totalFase} exercícios da Fase ${faseMulti}!`
+    : `Você acertou ${acertosFase} de ${totalFase} exercícios da Fase ${faseMulti}.`;
+
+  const notaEl = $("nota-transicao");
+  notaEl.textContent = `${acertosFase} / ${totalFase}`;
+  notaEl.className = "nota-fase" + (vitoriaFase ? "" : " derrota");
+
+  $("revisao-transicao").innerHTML = `<h3>Revisão da Fase ${faseMulti} (${fase.nome}):</h3>` +
+    respostasMulti.map(r => {
+      const it = r.item;
+      const troco = it.pagamento ? Math.round((it.pagamento - it.total) * 100) / 100 : 0;
+      return `<div class="rev-item">
+        <span class="mini">${it.produto.img ? `<img src="${it.produto.img}" onerror="this.remove()">` : ""}</span>
+        <span style="flex:1">${it.produto.nome} · <b>${it.quantidade} × R$ ${fmt(it.produto.preco)} = R$ ${fmt(it.total)}</b>
+          ${it.pagamento ? `<br>pago com R$ ${fmt(it.pagamento)} · <b style="color:var(--laranja)">Troco: R$ ${fmt(troco)}</b>` : ""}
+        </span>
+        <span class="rev-dinheiro">${it.pagamento && troco > 0 ? decompor(troco).map(v => {
+          const url = IMG_DINHEIRO[v];
+          return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
+        }).join("") : ""}</span>
+        <span class="rev-ok">✔</span>
+      </div>`;
+    }).join("");
+
+  const proxima = faseMulti + 1;
+  if(proxima <= 3){
+    const proxFase = FASES[proxima - 1];
+    $("info-transicao").innerHTML =
+      `<strong>Próxima: Fase ${proxima} — ${proxFase.nome}</strong><br>` +
+      `<span style="color:#555">${proxFase.desc}</span><br>` +
+      `<span style="color:#555;margin-top:4px;display:inline-block">Você tem <b>${vidasMulti} vidas ❤️</b> restantes.</span>`;
+    $("btn-continuar-fase").textContent = "Continuar para a Fase " + proxima;
+    $("btn-continuar-fase").onclick = () => {
+      faseMulti = proxima;
+      respostasMulti = [];
+      gerarFilaFase(faseMulti);
+      esconderTudo();
+      $("tela-multi").style.display = "block";
+      mostrarQuestaoMulti();
+    };
+  } else {
+    $("info-transicao").innerHTML =
+      `<strong>Todas as fases concluídas!</strong><br>` +
+      `<span style="color:#555">Você terminou a atividade. Veja o resultado final com a revisão completa.</span>`;
+    $("btn-continuar-fase").textContent = "Ver resultado final";
+    $("btn-continuar-fase").onclick = () => finalizarMulti(true);
+  }
+
+  esconderTudo();
+  $("tela-transicao").style.display = "block";
+}
+
+function finalizarMulti(vitoria){
+  esconderTudo();
+  $("tela-fim-multi").style.display = "block";
+
+  const totalGeral = todasRespostasMulti.length;
+  const fasesConcluidas = vitoria && faseMulti === 3;
+
+  if(fasesConcluidas){
+    $("titulo-fim-multi").textContent = "Atividade concluída! 🎉";
+    $("sub-fim-multi").textContent = "Você acertou todos os cálculos das 3 fases!";
+    $("nota-final-multi").className = "nota";
+    $("nota-final-multi").textContent = `${totalGeral} acertos`;
+    $("btn-menu-fim-multi").style.display = "inline-block";
+    $("btn-recomecar-multi").style.display = "none";
+  } else {
+    $("titulo-fim-multi").textContent = "Suas vidas acabaram! 💔";
+    $("sub-fim-multi").textContent = `Você estava na Fase ${faseMulti}. Tente novamente!`;
+    $("nota-final-multi").className = "nota derrota";
+    $("nota-final-multi").textContent = `${totalGeral} acertos no total`;
+    $("btn-menu-fim-multi").style.display = "none";
+    $("btn-recomecar-multi").style.display = "inline-block";
+  }
+
+  $("revisao-multi").innerHTML = "<h3>Revisão completa (todas as fases):</h3>" +
+    todasRespostasMulti.map(r => {
+      const it = r.item;
+      const troco = it.pagamento ? Math.round((it.pagamento - it.total) * 100) / 100 : 0;
+      return `<div class="rev-item">
+        <span class="mini">${it.produto.img ? `<img src="${it.produto.img}" onerror="this.remove()">` : ""}</span>
+        <span style="flex:1"><span style="font-size:.75em;color:var(--laranja);font-weight:700">Fase ${r.fase}</span><br>
+          ${it.produto.nome} · <b>${it.quantidade} × R$ ${fmt(it.produto.preco)} = R$ ${fmt(it.total)}</b>
+          ${it.pagamento ? `<br>pago com R$ ${fmt(it.pagamento)} · <b style="color:var(--laranja)">Troco: R$ ${fmt(troco)}</b>` : ""}
+        </span>
+        <span class="rev-dinheiro">${it.pagamento && troco > 0 ? decompor(troco).map(v => {
+          const url = IMG_DINHEIRO[v];
+          return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
+        }).join("") : ""}</span>
+        <span class="rev-ok">✔</span>
+      </div>`;
+    }).join("");
+
+  if(!fasesConcluidas){
+    $("revisao-multi").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram exercícios na Fase ${faseMulti}.</p>`;
+  }
+}
+
+/* ============= NAVEGAÇÃO ============= */
 let telaAnteriorInfo = "menu";
 function abrirInfo(){
-  if($("tela-jogo").style.display === "block") telaAnteriorInfo = "jogo";
-  else if($("tela-compra").style.display === "block") telaAnteriorInfo = "compra";
-  else if($("tela-fim-compra").style.display === "block") telaAnteriorInfo = "fim-compra";
-  else if($("tela-troco").style.display === "block") telaAnteriorInfo = "troco";
-  else if($("tela-fim").style.display === "block") telaAnteriorInfo = "fim";
-  else if($("tela-fim-troco").style.display === "block") telaAnteriorInfo = "fim-troco";
-  else telaAnteriorInfo = "menu";
+  const map = { "tela-jogo":"jogo", "tela-troco":"troco", "tela-compra":"compra",
+                "tela-multi":"multi", "tela-fim":"fim", "tela-fim-troco":"fim-troco",
+                "tela-fim-compra":"fim-compra", "tela-fim-multi":"fim-multi",
+                "tela-transicao":"transicao" };
+  telaAnteriorInfo = "menu";
+  for(const [id, nome] of Object.entries(map)){
+    if($(id) && $(id).style.display === "block"){ telaAnteriorInfo = nome; break; }
+  }
   esconderTudo();
   $("tela-info").style.display = "block";
 }
 function voltarInfo(){
   esconderTudo();
-  if(telaAnteriorInfo === "jogo") $("tela-jogo").style.display = "block";
-  else if(telaAnteriorInfo === "compra") $("tela-compra").style.display = "block";
-  else if(telaAnteriorInfo === "fim-compra") $("tela-fim-compra").style.display = "block";
-  else if(telaAnteriorInfo === "troco") $("tela-troco").style.display = "block";
-  else if(telaAnteriorInfo === "fim") $("tela-fim").style.display = "block";
-  else if(telaAnteriorInfo === "fim-troco") $("tela-fim-troco").style.display = "block";
-  else $("tela-menu").style.display = "block";
+  const map = { "jogo":"tela-jogo", "troco":"tela-troco", "compra":"tela-compra",
+                "multi":"tela-multi", "fim":"tela-fim", "fim-troco":"tela-fim-troco",
+                "fim-compra":"tela-fim-compra", "fim-multi":"tela-fim-multi",
+                "transicao":"tela-transicao" };
+  const id = map[telaAnteriorInfo] || "tela-menu";
+  $(id).style.display = "block";
 }
 function irParaMenu(){ esconderTudo(); $("tela-menu").style.display = "block"; }
 
@@ -1295,15 +1691,21 @@ function configurarTabs(){
   });
 }
 
+/* ============= HANDLERS ============= */
 $("btn-ir-valor").onclick = iniciarValor;
 $("btn-ir-troco").onclick = iniciarTroco;
 $("btn-ir-compra").onclick = iniciarCompra;
+$("btn-ir-multi").onclick = iniciarMulti;
+
+$("btn-recomecar").onclick = iniciarValor;
+$("btn-menu-fim").onclick = irParaMenu;
+$("btn-recomecar-troco").onclick = iniciarTroco;
+$("btn-menu-fim-troco").onclick = irParaMenu;
 $("btn-recomecar-compra").onclick = iniciarCompra;
 $("btn-menu-fim-compra").onclick = irParaMenu;
-$("btn-recomecar").onclick = iniciarValor;
-$("btn-recomecar-troco").onclick = iniciarTroco;
-$("btn-menu-fim").onclick = irParaMenu;
-$("btn-menu-fim-troco").onclick = irParaMenu;
+$("btn-recomecar-multi").onclick = iniciarMulti;
+$("btn-menu-fim-multi").onclick = irParaMenu;
+
 $("btn-info").onclick = abrirInfo;
 $("btn-info-menu").onclick = abrirInfo;
 $("btn-voltar-info").onclick = voltarInfo;
