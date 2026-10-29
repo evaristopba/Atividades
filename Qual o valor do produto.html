@@ -174,6 +174,18 @@
   .rev-dinheiro img.moeda{border-radius:50%;}
   .rev-ok{color:var(--verde);font-weight:700;}
 
+  /* ---- AVISO DE DERROTA (motivo do reinício) ---- */
+  .aviso-derrota{
+    background:#ffebee;border:2px solid var(--vermelho);border-radius:12px;
+    padding:14px 18px;margin:16px 0;text-align:left;
+    font-size:clamp(.82rem,2.4vw,.92rem);color:#b71c1c;line-height:1.55;
+  }
+  .aviso-derrota strong{color:var(--vermelho);}
+  .aviso-derrota .titulo{
+    display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05em;
+    margin-bottom:6px;color:var(--vermelho);
+  }
+
   /* ---- ABA INFORMATIVA ---- */
   #tela-info{display:none;}
   #tela-info h1{margin-bottom:16px;padding-right:0;}
@@ -320,7 +332,6 @@
     <p class="feedback" id="feedback-valor"></p>
     <div class="centro">
       <button class="btn" id="btn-proxima-valor" style="display:none;">Próxima</button>
-      <button class="btn secundario" id="btn-menu-valor" style="display:none;">Menu</button>
     </div>
   </div>
 
@@ -359,7 +370,6 @@
     <p class="feedback" id="feedback-troco"></p>
     <div class="centro">
       <button class="btn azul" id="btn-proxima-troco" style="display:none;">Próxima</button>
-      <button class="btn secundario azul" id="btn-menu-troco" style="display:none;">Menu</button>
     </div>
   </div>
 
@@ -399,6 +409,7 @@
           <li>Você começa com <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Se errar, a pergunta <b>volta ao final da fila</b> e será mostrada novamente.</li>
           <li>O objetivo é <b>acertar todos os produtos</b> antes de perder as 5 vidas.</li>
+          <li>Ao perder as 5 vidas, você verá o resultado e o motivo do reinício e voltará ao menu.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> comece pelas cédulas de maior valor e depois some as moedas.</div>
       </div>
@@ -412,6 +423,7 @@
           <li>Você também tem <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
           <li>O objetivo é <b>acertar todos os trocos</b> antes de perder as 5 vidas.</li>
+          <li>Ao perder as 5 vidas, você verá o resultado e o motivo do reinício e voltará ao menu.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2. Confira a decomposição do troco nas opções.</div>
       </div>
@@ -605,7 +617,6 @@ function criarItemDinheiro(valor){
   return chip;
 }
 
-/* ---------- Gerador de distratores para "Qual é o valor?" ---------- */
 function gerarErrados(preco){
   const cands = new Set();
   CEDULAS.forEach(v => { if(v !== preco) cands.add(v); });
@@ -621,7 +632,6 @@ function montarAlternativas(preco){
   return embaralhar([preco, ...gerarErrados(preco)]);
 }
 
-/* ---------- Gerador de distratores para "Troco" ---------- */
 function gerarErradosTroco(troco){
   const cands = new Set();
   [troco + 1, troco - 1, troco + 2, troco - 2,
@@ -636,25 +646,18 @@ function montarAlternativasTroco(troco){
   return embaralhar([troco, ...gerarErradosTroco(troco)]);
 }
 
-/* ---------- Escolhe a cédula/moeda de pagamento para o troco ---------- */
 function escolherPagamento(preco){
-  // Pagamento deve ser maior que o preço e preferencialmente uma cédula
-  // ou moeda única, para o cálculo ficar claro.
   const opcoes = [];
-  // Cédulas e moedas maiores que o preço
   [...CEDULAS, ...MOEDAS].forEach(v => {
     if(v > preco){
-      // Pagamento não deve ser absurdamente maior (limita a 100)
       if(v - preco <= 100) opcoes.push(v);
     }
   });
-  // Se não houver opção (preço muito alto), usa a próxima cédula maior
   if(opcoes.length === 0){
     const maior = [...CEDULAS].find(c => c > preco);
     if(maior) return maior;
     return Math.ceil(preco / 10) * 10;
   }
-  // Prefere pagamentos que gerem troco "redondo" (sem centavos)
   const semCentavos = opcoes.filter(v => Math.abs((v - preco) % 1) < 0.001);
   if(semCentavos.length > 0) return embaralhar(semCentavos)[0];
   return embaralhar(opcoes)[0];
@@ -700,7 +703,6 @@ function mostrarQuestaoValor(){
   $("feedback-valor").textContent = "";
   $("feedback-valor").className = "feedback";
   $("btn-proxima-valor").style.display = "none";
-  $("btn-menu-valor").style.display = "none";
 
   const box = $("imagem-box-valor");
   box.innerHTML = "";
@@ -785,11 +787,13 @@ function finalizarValor(vitoria){
     $("sub-fim").textContent = "Você acertou todas as questões!";
     $("nota-final").className = "nota";
     $("nota-final").textContent = `${respostasValor.length} / ${totalValor}`;
+    $("aviso-derrota-valor").style.display = "none";
   } else {
     $("titulo-fim").textContent = "Suas vidas acabaram! 💔";
     $("sub-fim").textContent = "Não foi dessa vez. Tente novamente!";
     $("nota-final").className = "nota derrota";
     $("nota-final").textContent = `${respostasValor.length} / ${totalValor}`;
+    $("aviso-derrota-valor").style.display = "block";
   }
 
   $("revisao").innerHTML = "<h3>Revisão (valor correto de cada produto):</h3>" + respostasValor.map(r => `
@@ -843,9 +847,7 @@ function mostrarQuestaoTroco(){
   $("feedback-troco").textContent = "";
   $("feedback-troco").className = "feedback";
   $("btn-proxima-troco").style.display = "none";
-  $("btn-menu-troco").style.display = "none";
 
-  // Imagem do produto
   const box = $("imagem-box-troco");
   box.innerHTML = "";
   if(produto.img){
@@ -860,17 +862,14 @@ function mostrarQuestaoTroco(){
     box.innerHTML = `<span class="placeholder-txt">📦<br>${produto.nome}</span>`;
   }
 
-  // Contexto: preço + pagamento
   const ctx = $("contexto-troco");
   ctx.innerHTML = `<span>${produto.nome} custa <strong>R$ ${fmt(produto.preco)}</strong> e foi pago com:</span>`;
   const imgPag = criarItemDinheiro(pagamento);
-  // Se for chip (sem imagem), aplica estilo de chip já existente
   ctx.appendChild(imgPag);
   const spanValor = document.createElement("strong");
   spanValor.textContent = `R$ ${fmt(pagamento)}`;
   ctx.appendChild(spanValor);
 
-  // Opções
   const opcoesEl = $("opcoes-troco");
   opcoesEl.innerHTML = "";
   montarAlternativasTroco(troco).forEach(valor => {
@@ -878,7 +877,6 @@ function mostrarQuestaoTroco(){
     btn.className = "opcao azul";
     btn.dataset.valor = valor;
     if(valor === 0){
-      // Troco zero: mostra chip especial
       const chip = document.createElement("span");
       chip.className = "chip-sem-img";
       chip.textContent = "Sem troco";
@@ -931,7 +929,6 @@ function proximaTroco(){
   if(respostasTroco.length >= totalTroco){ finalizarTroco(true); return; }
   if(indiceTroco >= filaTroco.length){
     if(respostasTroco.length < totalTroco){
-      // Regera a fila com os produtos que faltam (novo pagamento sorteado)
       const faltam = PRODUTOS.filter(p => !respostasTroco.some(r => r.item.produto.nome === p.nome));
       filaTroco = embaralhar(faltam).map(p => ({
         produto: p,
@@ -952,11 +949,13 @@ function finalizarTroco(vitoria){
     $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
     $("nota-final-troco").className = "nota";
     $("nota-final-troco").textContent = `${respostasTroco.length} / ${totalTroco}`;
+    $("aviso-derrota-troco").style.display = "none";
   } else {
     $("titulo-fim-troco").textContent = "Suas vidas acabaram! 💔";
     $("sub-fim-troco").textContent = "Não foi dessa vez. Tente novamente!";
     $("nota-final-troco").className = "nota derrota";
     $("nota-final-troco").textContent = `${respostasTroco.length} / ${totalTroco}`;
+    $("aviso-derrota-troco").style.display = "block";
   }
 
   $("revisao-troco").innerHTML = "<h3>Revisão (troco correto de cada produto):</h3>" + respostasTroco.map(r => {
@@ -1016,6 +1015,11 @@ function voltarInfo(){
   else $("tela-menu").style.display = "block";
 }
 
+function irParaMenu(){
+  esconderTudo();
+  $("tela-menu").style.display = "block";
+}
+
 /* ---- Abas internas da tela informativa ---- */
 function configurarTabs(){
   document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1034,10 +1038,8 @@ $("btn-ir-valor").onclick = iniciarValor;
 $("btn-ir-troco").onclick = iniciarTroco;
 $("btn-recomecar").onclick = iniciarValor;
 $("btn-recomecar-troco").onclick = iniciarTroco;
-$("btn-menu-valor").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
-$("btn-menu-troco").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
-$("btn-menu-fim").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
-$("btn-menu-fim-troco").onclick = () => { esconderTudo(); $("tela-menu").style.display = "block"; };
+$("btn-menu-fim").onclick = irParaMenu;
+$("btn-menu-fim-troco").onclick = irParaMenu;
 $("btn-info").onclick = abrirInfo;
 $("btn-info-menu").onclick = abrirInfo;
 $("btn-voltar-info").onclick = voltarInfo;
