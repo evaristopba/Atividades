@@ -9,6 +9,7 @@
     --verde:#2e7d32; --verde-claro:#e8f5e9; --vermelho:#c62828;
     --cinza:#f5f5f5; --texto:#212121; --amarelo:#f9a825;
     --azul:#1565c0; --azul-claro:#e3f2fd;
+    --roxo:#6a1b9a; --roxo-claro:#f3e5f5;
     --sombra:0 10px 30px rgba(0,0,0,.12);
   }
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
@@ -79,7 +80,7 @@
   .imagem-box{
     background:var(--cinza);border:2px dashed #bbb;border-radius:14px;
     height:clamp(140px,30vw,200px);display:flex;align-items:center;justify-content:center;
-    margin-bottom:14px;overflow:hidden;padding:10px;
+    gap:12px;margin-bottom:14px;overflow:hidden;padding:10px;
   }
   .imagem-box img{max-width:100%;max-height:100%;object-fit:contain;}
   .placeholder-txt{color:#999;font-size:clamp(.85rem,2.5vw,1rem);text-align:center;padding:8px;}
@@ -153,6 +154,20 @@
   .btn.secundario:hover{background:var(--verde-claro);box-shadow:none;}
   .btn.secundario.azul{color:var(--azul);border-color:var(--azul);}
   .btn.secundario.azul:hover{background:var(--azul-claro);}
+  .btn.roxo{background:var(--roxo);}
+  .btn.roxo:hover{box-shadow:0 6px 16px rgba(106,27,154,.35);}
+  .btn.secundario.roxo{color:var(--roxo);border-color:var(--roxo);}
+  .btn.secundario.roxo:hover{background:var(--roxo-claro);}
+  .btn-atividade.roxo{background:var(--roxo);box-shadow:0 4px 12px rgba(106,27,154,.25);}
+  .barra-fill.roxo{background:var(--roxo);}
+  .opcao.roxo{border-color:var(--roxo);}
+  .opcao.roxo:hover:not(:disabled){background:var(--roxo-claro);}
+  .contexto-pagamento.roxo{background:var(--roxo-claro);border-color:var(--roxo);}
+  .contexto-pagamento.roxo strong{color:var(--roxo);}
+  .info-secao.roxo h2{color:var(--roxo);}
+  .hab-item.roxo{border-left-color:var(--roxo);}
+  .hab-item.roxo .codigo{color:var(--roxo);}
+  .hab-item.roxo .serie-tag{background:var(--roxo-claro);color:var(--roxo);}
 
   /* ---- TELA FINAL ---- */
   #tela-fim, #tela-fim-troco{display:none;text-align:center;}
@@ -280,6 +295,7 @@
   }
 </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -305,6 +321,13 @@
         <span class="texto">
           <strong>Calculando o troco</strong>
           <small>Descubra quanto de troco deve receber quem pagou com uma cédula ou moeda.</small>
+        </span>
+      </button>
+      <button class="btn-atividade roxo" id="btn-ir-compra">
+        <span class="icone">🧾</span>
+        <span class="texto">
+          <strong>Compra dupla</strong>
+          <small>Some os preços de dois produtos e descubra o troco do pagamento.</small>
         </span>
       </button>
     </div>
@@ -387,6 +410,44 @@
   </div>
 
   <!-- ============================================================
+       ATIVIDADE 3 — COMPRA DUPLA (SOMAR E CALCULAR O TROCO)
+       ============================================================ -->
+  <div id="tela-compra">
+    <div class="topo">
+      <span class="progresso" id="progresso-compra"></span>
+      <span class="vidas" id="vidas-compra"></span>
+    </div>
+    <div class="barra"><div class="barra-fill roxo" id="barra-compra"></div></div>
+
+    <p class="pergunta">Quanto de troco deve receber?</p>
+
+    <div class="imagem-box" id="imagem-box-compra">
+      <span class="placeholder-txt">Imagens dos dois produtos</span>
+    </div>
+
+    <div class="contexto-pagamento roxo" id="contexto-compra"></div>
+
+    <div class="opcoes" id="opcoes-compra"></div>
+    <p class="feedback" id="feedback-compra"></p>
+    <div class="centro">
+      <button class="btn roxo" id="btn-proxima-compra" style="display:none;">Próxima</button>
+    </div>
+  </div>
+
+  <!-- Tela final da atividade 3 -->
+  <div id="tela-fim-compra">
+    <h1 id="titulo-fim-compra">Atividade concluída! 🎉</h1>
+    <p class="sub" id="sub-fim-compra">Você acertou todos os cálculos!</p>
+    <div class="nota" id="nota-final-compra"></div>
+    <div class="revisao" id="revisao-compra"></div>
+    <br>
+    <div class="centro">
+      <button class="btn roxo" id="btn-recomecar-compra">Jogar de novo</button>
+      <button class="btn secundario roxo" id="btn-menu-fim-compra">Voltar ao menu</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
        ABA INFORMATIVA (com abas internas)
        ============================================================ -->
   <div id="tela-info">
@@ -426,6 +487,20 @@
           <li>Ao acertar todos, você poderá <b>voltar ao menu</b>. Se errar e perder as 5 vidas, será preciso <b>jogar de novo</b>.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2. Confira a decomposição do troco nas opções.</div>
+      </div>
+
+      <div class="info-secao roxo">
+        <h2>🧾 Atividade "Compra dupla"</h2>
+        <ol>
+          <li>Observe os <b>dois produtos</b> e os preços de cada um.</li>
+          <li><b>Some os dois preços</b> para descobrir o valor total da compra.</li>
+          <li>Veja a <b>cédula ou moeda usada no pagamento</b> e calcule: <b>troco = valor pago − total da compra</b>.</li>
+          <li>Analise as <b>4 opções</b> de troco (cédulas e moedas) e clique na correta.</li>
+          <li>Você tem <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
+          <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
+          <li>O objetivo é <b>acertar todos os pares</b> antes de perder as 5 vidas.</li>
+        </ol>
+        <div class="dica">💡 <b>Dica:</b> some primeiro (ex.: R$ 18 + R$ 7 = R$ 25) e só depois calcule o troco (R$ 50 − R$ 25 = R$ 25).</div>
       </div>
     </div>
 
@@ -517,6 +592,26 @@
           </div>
           <div class="desc">Resolver e elaborar problemas de adição e subtração com os significados de juntar, acrescentar, separar, retirar, comparar e completar quantidades, utilizando diferentes estratégias de cálculo.</div>
           <div class="corresp">→ <b>Plenamente</b>: o cálculo do troco é uma subtração (valor pago − preço) com significado de "retirar/completar".</div>
+        </div>
+      </div>
+
+      <div class="info-secao roxo">
+        <h2>🧾 Habilidades — "Compra dupla"</h2>
+        <div class="hab-item roxo">
+          <div class="codigo">EF03MA06
+            <span class="serie-tag">3º ano</span>
+            <span class="nivel plena">Plena</span>
+          </div>
+          <div class="desc">Resolver e elaborar problemas de adição e subtração com os significados de juntar, acrescentar, separar, retirar, comparar e completar quantidades, utilizando diferentes estratégias de cálculo.</div>
+          <div class="corresp">→ <b>Plenamente</b>: soma-se os dois preços (juntar) e subtrai-se do valor pago (retirar).</div>
+        </div>
+        <div class="hab-item roxo">
+          <div class="codigo">EF03MA24
+            <span class="serie-tag">3º ano</span>
+            <span class="nivel plena">Plena</span>
+          </div>
+          <div class="desc">Resolver e elaborar problemas envolvendo comparação e equivalência de valores monetários do sistema brasileiro em situações de compra, venda e troca.</div>
+          <div class="corresp">→ <b>Plenamente</b>: situação de compra com dois itens, pagamento e troco.</div>
         </div>
       </div>
     </div>
@@ -992,10 +1087,202 @@ function finalizarTroco(vitoria){
 }
 
 /* =====================================================================
+   ESTADO — ATIVIDADE 3 (COMPRA DUPLA: SOMAR 2 PRODUTOS E CALCULAR TROCO)
+   ===================================================================== */
+let filaCompra, indiceCompra, vidasCompra, respostasCompra, totalCompra;
+
+function iniciarCompra(){
+  const embaralhados = embaralhar(PRODUTOS);
+  const pares = [];
+  for(let i = 0; i < embaralhados.length - 1; i += 2){
+    pares.push({ a: embaralhados[i], b: embaralhados[i + 1] });
+  }
+  filaCompra = embaralhar(pares).map(par => {
+    const soma = Math.round((par.a.preco + par.b.preco) * 100) / 100;
+    return { ...par, soma, pagamento: escolherPagamento(soma) };
+  });
+  totalCompra = filaCompra.length;
+  indiceCompra = 0;
+  vidasCompra = MAX_VIDAS;
+  respostasCompra = [];
+  esconderTudo();
+  $("tela-compra").style.display = "block";
+  mostrarQuestaoCompra();
+}
+
+function mostrarQuestaoCompra(){
+  const item = filaCompra[indiceCompra];
+  const troco = Math.round((item.pagamento - item.soma) * 100) / 100;
+
+  $("progresso-compra").textContent = `Acertos: ${respostasCompra.length} de ${totalCompra}`;
+  $("barra-compra").style.width = `${(respostasCompra.length / totalCompra) * 100}%`;
+  atualizarVidas("vidas-compra", vidasCompra);
+  $("feedback-compra").textContent = "";
+  $("feedback-compra").className = "feedback";
+  $("btn-proxima-compra").style.display = "none";
+
+  // Imagens dos dois produtos
+  const box = $("imagem-box-compra");
+  box.innerHTML = "";
+  [item.a, item.b].forEach(p => {
+    if(p.img){
+      const img = document.createElement("img");
+      img.src = p.img;
+      img.alt = p.nome;
+      img.onerror = () => {
+        const ph = document.createElement("span");
+        ph.className = "placeholder-txt";
+        ph.textContent = "📦 " + p.nome;
+        img.replaceWith(ph);
+      };
+      box.appendChild(img);
+    } else {
+      const ph = document.createElement("span");
+      ph.className = "placeholder-txt";
+      ph.textContent = "📦 " + p.nome;
+      box.appendChild(ph);
+    }
+  });
+
+  // Contexto: os dois preços (sem revelar a soma) + forma de pagamento
+  const ctx = $("contexto-compra");
+  ctx.innerHTML = "";
+  const spanPrecos = document.createElement("span");
+  spanPrecos.innerHTML =
+    `<b>${item.a.nome}</b> R$ ${fmt(item.a.preco)} e ` +
+    `<b>${item.b.nome}</b> R$ ${fmt(item.b.preco)} &nbsp;·&nbsp; pago com:`;
+  ctx.appendChild(spanPrecos);
+  ctx.appendChild(criarItemDinheiro(item.pagamento));
+  const spanPago = document.createElement("strong");
+  spanPago.textContent = `R$ ${fmt(item.pagamento)}`;
+  ctx.appendChild(spanPago);
+
+  // Opções de troco
+  const opcoesEl = $("opcoes-compra");
+  opcoesEl.innerHTML = "";
+  montarAlternativasTroco(troco).forEach(valor => {
+    const btn = document.createElement("button");
+    btn.className = "opcao roxo";
+    btn.dataset.valor = valor;
+    if(valor === 0){
+      const chip = document.createElement("span");
+      chip.className = "chip-sem-img";
+      chip.textContent = "Sem troco";
+      btn.appendChild(chip);
+    } else {
+      decompor(valor).forEach(v => btn.appendChild(criarItemDinheiro(v)));
+    }
+    btn.onclick = () => responderCompra(btn, valor, item, troco);
+    opcoesEl.appendChild(btn);
+  });
+}
+
+function responderCompra(botao, valor, item, trocoCorreto){
+  const correta = Math.abs(valor - trocoCorreto) < 0.001;
+  document.querySelectorAll("#opcoes-compra .opcao").forEach(b => {
+    b.disabled = true;
+    if(Math.abs(Number(b.dataset.valor) - trocoCorreto) < 0.001) b.classList.add("correta");
+    else if(b === botao) b.classList.add("errada");
+  });
+
+  if(correta){
+    respostasCompra.push({ item, correta: true });
+    $("feedback-compra").textContent =
+      `✅ Isso! ${item.a.nome} e ${item.b.nome} custam juntos R$ ${fmt(item.soma)}; o troco é R$ ${fmt(trocoCorreto)}.`;
+    $("feedback-compra").classList.add("ok");
+  } else {
+    vidasCompra--;
+    $("feedback-compra").innerHTML =
+      `❌ Errou! A compra soma R$ ${fmt(item.soma)} (R$ ${fmt(item.pagamento)} − R$ ${fmt(item.soma)} = ` +
+      `R$ ${fmt(trocoCorreto)}). Esta pergunta voltará ao final.`;
+    $("feedback-compra").classList.add("nao");
+    filaCompra.push(item);
+  }
+
+  atualizarVidas("vidas-compra", vidasCompra);
+  $("progresso-compra").textContent = `Acertos: ${respostasCompra.length} de ${totalCompra}`;
+  $("barra-compra").style.width = `${(respostasCompra.length / totalCompra) * 100}%`;
+
+  if(vidasCompra <= 0){
+    $("btn-proxima-compra").style.display = "inline-block";
+    $("btn-proxima-compra").textContent = "Ver resultado";
+    $("btn-proxima-compra").onclick = () => finalizarCompra(false);
+    return;
+  }
+
+  $("btn-proxima-compra").style.display = "inline-block";
+  $("btn-proxima-compra").textContent = (respostasCompra.length === totalCompra) ? "Ver resultado" : "Próxima";
+  $("btn-proxima-compra").onclick = proximaCompra;
+}
+
+function proximaCompra(){
+  indiceCompra++;
+  if(respostasCompra.length >= totalCompra){ finalizarCompra(true); return; }
+  if(indiceCompra >= filaCompra.length){
+    if(respostasCompra.length < totalCompra){
+      const faltam = filaCompra
+        .filter(it => !respostasCompra.some(r => r.item === it))
+        .map(it => ({ a: it.a, b: it.b }));
+      filaCompra = embaralhar(faltam).map(par => {
+        const soma = Math.round((par.a.preco + par.b.preco) * 100) / 100;
+        return { ...par, soma, pagamento: escolherPagamento(soma) };
+      });
+      indiceCompra = 0;
+    } else { finalizarCompra(true); return; }
+  }
+  mostrarQuestaoCompra();
+}
+
+function finalizarCompra(vitoria){
+  esconderTudo();
+  $("tela-fim-compra").style.display = "block";
+
+  if(vitoria){
+    $("titulo-fim-compra").textContent = "Atividade concluída! 🎉";
+    $("sub-fim-compra").textContent = "Você acertou todos os cálculos!";
+    $("nota-final-compra").className = "nota";
+    $("nota-final-compra").textContent = `${respostasCompra.length} / ${totalCompra}`;
+    $("btn-menu-fim-compra").style.display = "inline-block";
+    $("btn-recomecar-compra").style.display = "none";
+  } else {
+    $("titulo-fim-compra").textContent = "Suas vidas acabaram! 💔";
+    $("sub-fim-compra").textContent = "Não foi dessa vez. Tente novamente!";
+    $("nota-final-compra").className = "nota derrota";
+    $("nota-final-compra").textContent = `${respostasCompra.length} / ${totalCompra}`;
+    $("btn-menu-fim-compra").style.display = "none";
+    $("btn-recomecar-compra").style.display = "inline-block";
+  }
+
+  $("revisao-compra").innerHTML = "<h3>Revisão (soma e troco corretos):</h3>" + respostasCompra.map(r => {
+    const it = r.item;
+    const troco = Math.round((it.pagamento - it.soma) * 100) / 100;
+    return `
+    <div class="rev-item">
+      <span class="mini">${it.a.img ? `<img src="${it.a.img}" onerror="this.remove()">` : ""}</span>
+      <span class="mini">${it.b.img ? `<img src="${it.b.img}" onerror="this.remove()">` : ""}</span>
+      <span style="flex:1">${it.a.nome} + ${it.b.nome}<br>
+        <b>R$ ${fmt(it.a.preco)} + R$ ${fmt(it.b.preco)} = R$ ${fmt(it.soma)}</b> · pago com R$ ${fmt(it.pagamento)}<br>
+        <b style="color:var(--roxo)">Troco: R$ ${fmt(troco)}</b>
+      </span>
+      <span class="rev-dinheiro">${troco > 0 ? decompor(troco).map(v => {
+        const url = IMG_DINHEIRO[v];
+        return url ? `<img src="${url}" class="${v < 2 ? "moeda" : ""}">` : "";
+      }).join("") : '<span class="chip-sem-img">Sem troco</span>'}</span>
+      <span class="rev-ok">✔</span>
+    </div>`;
+  }).join("");
+
+  if(!vitoria){
+    $("revisao-compra").innerHTML += `<p style="margin-top:12px;color:#c62828;font-weight:700;text-align:center;">
+      Faltaram ${totalCompra - respostasCompra.length} par(es) para completar.</p>`;
+  }
+}
+
+/* =====================================================================
    NAVEGAÇÃO GERAL
    ===================================================================== */
 function esconderTudo(){
-  ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco","tela-info"].forEach(id => {
+  ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco","tela-compra","tela-fim-compra","tela-info"].forEach(id => {
     const el = $(id);
     if(el) el.style.display = "none";
   });
@@ -1005,6 +1292,8 @@ let telaAnteriorInfo = "menu";
 
 function abrirInfo(){
   if($("tela-jogo").style.display === "block") telaAnteriorInfo = "jogo";
+  else if($("tela-compra").style.display === "block") telaAnteriorInfo = "compra";
+  else if($("tela-fim-compra").style.display === "block") telaAnteriorInfo = "fim-compra";
   else if($("tela-troco").style.display === "block") telaAnteriorInfo = "troco";
   else if($("tela-fim").style.display === "block") telaAnteriorInfo = "fim";
   else if($("tela-fim-troco").style.display === "block") telaAnteriorInfo = "fim-troco";
@@ -1017,6 +1306,8 @@ function abrirInfo(){
 function voltarInfo(){
   esconderTudo();
   if(telaAnteriorInfo === "jogo") $("tela-jogo").style.display = "block";
+  else if(telaAnteriorInfo === "compra") $("tela-compra").style.display = "block";
+  else if(telaAnteriorInfo === "fim-compra") $("tela-fim-compra").style.display = "block";
   else if(telaAnteriorInfo === "troco") $("tela-troco").style.display = "block";
   else if(telaAnteriorInfo === "fim") $("tela-fim").style.display = "block";
   else if(telaAnteriorInfo === "fim-troco") $("tela-fim-troco").style.display = "block";
@@ -1044,6 +1335,9 @@ function configurarTabs(){
 /* ---- Handlers ---- */
 $("btn-ir-valor").onclick = iniciarValor;
 $("btn-ir-troco").onclick = iniciarTroco;
+$("btn-ir-compra").onclick = iniciarCompra;
+$("btn-recomecar-compra").onclick = iniciarCompra;
+$("btn-menu-fim-compra").onclick = irParaMenu;
 $("btn-recomecar").onclick = iniciarValor;
 $("btn-recomecar-troco").onclick = iniciarTroco;
 $("btn-menu-fim").onclick = irParaMenu;
