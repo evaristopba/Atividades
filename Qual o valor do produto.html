@@ -409,7 +409,7 @@
           <li>Você começa com <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Se errar, a pergunta <b>volta ao final da fila</b> e será mostrada novamente.</li>
           <li>O objetivo é <b>acertar todos os produtos</b> antes de perder as 5 vidas.</li>
-          <li>Ao perder as 5 vidas, você verá o resultado e o motivo do reinício e voltará ao menu.</li>
+          <li>Ao acertar todos, você poderá <b>voltar ao menu</b>. Se errar e perder as 5 vidas, será preciso <b>jogar de novo</b>.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> comece pelas cédulas de maior valor e depois some as moedas.</div>
       </div>
@@ -423,7 +423,7 @@
           <li>Você também tem <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
           <li>O objetivo é <b>acertar todos os trocos</b> antes de perder as 5 vidas.</li>
-          <li>Ao perder as 5 vidas, você verá o resultado e o motivo do reinício e voltará ao menu.</li>
+          <li>Ao acertar todos, você poderá <b>voltar ao menu</b>. Se errar e perder as 5 vidas, será preciso <b>jogar de novo</b>.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2. Confira a decomposição do troco nas opções.</div>
       </div>
@@ -787,13 +787,17 @@ function finalizarValor(vitoria){
     $("sub-fim").textContent = "Você acertou todas as questões!";
     $("nota-final").className = "nota";
     $("nota-final").textContent = `${respostasValor.length} / ${totalValor}`;
-    $("aviso-derrota-valor").style.display = "none";
+    // Vitória: só "Voltar ao menu" disponível
+    $("btn-menu-fim").style.display = "inline-block";
+    $("btn-recomecar").style.display = "none";
   } else {
     $("titulo-fim").textContent = "Suas vidas acabaram! 💔";
     $("sub-fim").textContent = "Não foi dessa vez. Tente novamente!";
     $("nota-final").className = "nota derrota";
     $("nota-final").textContent = `${respostasValor.length} / ${totalValor}`;
-    $("aviso-derrota-valor").style.display = "block";
+    // Derrota: só "Jogar de novo" disponível
+    $("btn-menu-fim").style.display = "none";
+    $("btn-recomecar").style.display = "inline-block";
   }
 
   $("revisao").innerHTML = "<h3>Revisão (valor correto de cada produto):</h3>" + respostasValor.map(r => `
@@ -949,13 +953,17 @@ function finalizarTroco(vitoria){
     $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
     $("nota-final-troco").className = "nota";
     $("nota-final-troco").textContent = `${respostasTroco.length} / ${totalTroco}`;
-    $("aviso-derrota-troco").style.display = "none";
+    // Vitória: só "Voltar ao menu" disponível
+    $("btn-menu-fim-troco").style.display = "inline-block";
+    $("btn-recomecar-troco").style.display = "none";
   } else {
     $("titulo-fim-troco").textContent = "Suas vidas acabaram! 💔";
     $("sub-fim-troco").textContent = "Não foi dessa vez. Tente novamente!";
     $("nota-final-troco").className = "nota derrota";
     $("nota-final-troco").textContent = `${respostasTroco.length} / ${totalTroco}`;
-    $("aviso-derrota-troco").style.display = "block";
+    // Derrota: só "Jogar de novo" disponível
+    $("btn-menu-fim-troco").style.display = "none";
+    $("btn-recomecar-troco").style.display = "inline-block";
   }
 
   $("revisao-troco").innerHTML = "<h3>Revisão (troco correto de cada produto):</h3>" + respostasTroco.map(r => {
