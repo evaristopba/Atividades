@@ -15,35 +15,15 @@
   }
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
   html{-webkit-text-size-adjust:100%;}
-  body{
-    background:linear-gradient(135deg,#e8f5e9,#e3f2fd);
-    min-height:100vh;display:flex;align-items:center;justify-content:center;
-    padding:8px;color:var(--texto);
-  }
-  .card{
-    background:#fff;border-radius:20px;box-shadow:var(--sombra);
-    max-width:780px;width:100%;padding:clamp(12px,2.5vw,24px);
-    position:relative;
-  }
-  .btn-info{
-    position:absolute;top:10px;right:10px;width:34px;height:34px;
-    border-radius:50%;border:2px solid var(--verde);background:#fff;
-    color:var(--verde);font-size:1rem;font-weight:700;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    transition:all .15s;z-index:10;
-  }
+  body{background:linear-gradient(135deg,#e8f5e9,#e3f2fd);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:8px;color:var(--texto);}
+  .card{background:#fff;border-radius:20px;box-shadow:var(--sombra);max-width:780px;width:100%;padding:clamp(12px,2.5vw,24px);position:relative;}
+  .btn-info{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:2px solid var(--verde);background:#fff;color:var(--verde);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:10;}
   .btn-info:hover{background:var(--verde-claro);}
   h1{font-size:clamp(1.1rem,3.2vw,1.4rem);color:var(--verde);text-align:center;margin-bottom:6px;padding-right:40px;}
   .sub{text-align:center;color:#666;margin-bottom:16px;font-size:clamp(.82rem,2.3vw,.9rem);}
   #tela-menu{text-align:center;}
   .menu-botoes{display:flex;flex-direction:column;gap:10px;max-width:440px;margin:0 auto;}
-  .btn-atividade{
-    background:var(--verde);color:#fff;border:none;border-radius:14px;
-    padding:14px 18px;font-size:clamp(.9rem,2.6vw,1.05rem);cursor:pointer;font-weight:600;
-    transition:transform .15s, box-shadow .15s;
-    display:flex;align-items:center;gap:12px;text-align:left;
-    box-shadow:0 4px 12px rgba(46,125,50,.25);
-  }
+  .btn-atividade{background:var(--verde);color:#fff;border:none;border-radius:14px;padding:14px 18px;font-size:clamp(.9rem,2.6vw,1.05rem);cursor:pointer;font-weight:600;transition:transform .15s, box-shadow .15s;display:flex;align-items:center;gap:12px;text-align:left;box-shadow:0 4px 12px rgba(46,125,50,.25);}
   .btn-atividade.azul{background:var(--azul);box-shadow:0 4px 12px rgba(21,101,192,.25);}
   .btn-atividade.roxo{background:var(--roxo);box-shadow:0 4px 12px rgba(106,27,154,.25);}
   .btn-atividade.laranja{background:var(--laranja);box-shadow:0 4px 12px rgba(230,81,0,.25);}
@@ -52,24 +32,12 @@
   .btn-atividade .texto{display:flex;flex-direction:column;gap:2px;}
   .btn-atividade .texto strong{font-size:1.02em;}
   .btn-atividade .texto small{font-weight:400;opacity:.85;font-size:.78em;line-height:1.3;}
-  .btn-secundario{
-    background:#fff;color:var(--verde);border:2px solid var(--verde);
-    border-radius:12px;padding:10px 18px;font-size:clamp(.82rem,2.4vw,.92rem);cursor:pointer;
-    font-weight:600;transition:all .15s;margin-top:10px;
-  }
+  .btn-secundario{background:#fff;color:var(--verde);border:2px solid var(--verde);border-radius:12px;padding:10px 18px;font-size:clamp(.82rem,2.4vw,.92rem);cursor:pointer;font-weight:600;transition:all .15s;margin-top:10px;}
   .btn-secundario:hover{background:var(--verde-claro);}
   #tela-jogo, #tela-troco, #tela-compra, #tela-multi{display:none;}
-  .topo{
-    display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:6px;gap:6px;flex-wrap:wrap;
-    padding-right:40px;
-  }
+  .topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px;flex-wrap:wrap;padding-right:40px;}
   .progresso{font-size:clamp(.75rem,2.1vw,.85rem);color:#555;font-weight:600;}
-  .fase-tag{
-    display:inline-block;background:var(--laranja-claro);color:var(--laranja);
-    border-radius:99px;padding:2px 10px;font-size:clamp(.7rem,1.9vw,.78rem);
-    font-weight:700;margin-right:6px;
-  }
+  .fase-tag{display:inline-block;background:var(--laranja-claro);color:var(--laranja);border-radius:99px;padding:2px 10px;font-size:clamp(.7rem,1.9vw,.78rem);font-weight:700;margin-right:6px;}
   .vidas{font-size:clamp(.9rem,2.5vw,1rem);letter-spacing:2px;white-space:nowrap;}
   .vidas .viva{color:var(--vermelho);}
   .vidas .perdida{color:#ccc;}
@@ -79,124 +47,29 @@
   .barra-fill.roxo{background:var(--roxo);}
   .barra-fill.laranja{background:var(--laranja);}
   .pergunta{font-size:clamp(.95rem,2.6vw,1.1rem);font-weight:700;text-align:center;margin-bottom:10px;}
-
-  /* ---- IMAGEM-BOX (genérica e segura) ---- */
-  .imagem-box{
-    background:var(--cinza);border:2px dashed #bbb;border-radius:12px;
-    height:clamp(100px, 24vw, 160px);
-    display:flex;align-items:center;justify-content:center;
-    gap:10px;margin-bottom:10px;overflow:hidden;padding:8px;
-    position:relative; /* Necessário para o badge absoluto */
-  }
+  .imagem-box{background:var(--cinza);border:2px dashed #bbb;border-radius:12px;height:clamp(100px, 24vw, 160px);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;overflow:hidden;padding:8px;position:relative;}
   .imagem-box img{max-width:100%;max-height:100%;object-fit:contain;}
   .placeholder-txt{color:#999;font-size:clamp(.8rem,2.2vw,.95rem);text-align:center;padding:4px;}
-  
-  /* Layout específico para compra dupla */
   .imagem-box.dupla{ gap: clamp(6px, 1.5vw, 12px); }
   .imagem-box.dupla img{ max-width: 45%; }
-
-  /* ---- LAYOUT DA ATIVIDADE "COMPRAS EM QUANTIDADE" ---- */
-  .multi-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .multi-produto-bloco {
-    background: var(--cinza);
-    border: 2px dashed #bbb;
-    border-radius: 12px;
-    height: clamp(100px, 24vw, 160px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px 10px 10px; /* espaço extra na direita para o badge */
-    position: relative;
-  }
-  .multi-produto-bloco img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-  .multi-preco-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 4px;
-  }
-  .multi-preco {
-    font-size: clamp(.9rem, 2.5vw, 1.1rem);
-    font-weight: 700;
-    color: var(--laranja);
-  }
-  /* Badge sobreposto no canto superior direito do bloco da imagem */
-  .multi-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--laranja);
-    color: #fff;
-    border-radius: 50%;
-    min-width: clamp(30px, 8vw, 38px);
-    min-height: clamp(30px, 8vw, 38px);
-    padding: 0 clamp(4px, 1vw, 6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(1rem, 3.2vw, 1.3rem);
-    font-weight: 800;
-    box-shadow: 0 3px 8px rgba(230, 81, 0, 0.45);
-    border: 2px solid #fff;
-    line-height: 1;
-    z-index: 2;
-  }
-
-  /* Contexto de pagamento (troco / compra) */
-  .contexto-pagamento{
-    background:var(--azul-claro);border:2px solid var(--azul);border-radius:10px;
-    padding:8px 10px;margin-bottom:10px;
-    display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;
-    font-size:clamp(.75rem,2.1vw,.88rem);color:var(--texto);
-    min-height: 40px;
-  }
+  .multi-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .multi-produto-bloco { background: var(--cinza); border: 2px dashed #bbb; border-radius: 12px; height: clamp(100px, 24vw, 160px); display: flex; align-items: center; justify-content: center; padding: 10px 20px 10px 10px; position: relative; }
+  .multi-produto-bloco img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .multi-preco-badge { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 4px; }
+  .multi-preco { font-size: clamp(.9rem, 2.5vw, 1.1rem); font-weight: 700; color: var(--laranja); }
+  .multi-badge { position: absolute; top: 8px; right: 8px; background: var(--laranja); color: #fff; border-radius: 50%; min-width: clamp(30px, 8vw, 38px); min-height: clamp(30px, 8vw, 38px); padding: 0 clamp(4px, 1vw, 6px); display: flex; align-items: center; justify-content: center; font-size: clamp(1rem, 3.2vw, 1.3rem); font-weight: 800; box-shadow: 0 3px 8px rgba(230, 81, 0, 0.45); border: 2px solid #fff; line-height: 1; z-index: 2; }
+  .contexto-pagamento{background:var(--azul-claro);border:2px solid var(--azul);border-radius:10px;padding:8px 10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;font-size:clamp(.75rem,2.1vw,.88rem);color:var(--texto);min-height: 40px;}
   .contexto-pagamento strong{color:var(--azul);}
-  .contexto-pagamento img{
-    height:clamp(24px,6vw,34px);width:auto;border-radius:4px;
-    box-shadow:0 2px 5px rgba(0,0,0,.25);background:#fff;object-fit:contain;
-  }
+  .contexto-pagamento img{ height:clamp(24px,6vw,34px);width:auto;border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,.25);background:#fff;object-fit:contain; }
   .contexto-pagamento img.moeda{border-radius:50%;}
-  .contexto-pagamento.roxo{
-    background:var(--roxo-claro);border-color:var(--roxo);
-    padding: 6px 10px; line-height: 1.5;
-  }
+  .contexto-pagamento.roxo{ background:var(--roxo-claro);border-color:var(--roxo); padding: 6px 10px; line-height: 1.5; }
   .contexto-pagamento.roxo strong{color:var(--roxo);}
   .contexto-pagamento.roxo b{color:var(--texto);}
-
-  /* Enunciado narrativo (Compras em quantidade) */
-  .enunciado-multi{
-    background:var(--laranja-claro);border:2px solid var(--laranja);border-radius:10px;
-    padding:10px 14px;margin-bottom:10px;
-    font-size:clamp(.85rem,2.4vw,.98rem);line-height:1.55;color:var(--texto);
-    text-align:center;
-  }
+  .enunciado-multi{background:var(--laranja-claro);border:2px solid var(--laranja);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:clamp(.85rem,2.4vw,.98rem);line-height:1.55;color:var(--texto);text-align:center;}
   .enunciado-multi strong{color:var(--laranja);font-weight:800;}
   .enunciado-multi b{color:var(--texto);}
-
-  .opcoes{
-    display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:clamp(6px,1.5vw,10px);
-  }
-  .opcao{
-    border:2px solid var(--verde);border-radius:12px;
-    padding:clamp(6px,1.5vw,10px);
-    min-height:clamp(56px,12vw,76px);
-    background:#fff;cursor:pointer;transition:all .15s;
-    display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-    gap:clamp(2px,.8vw,5px);
-    position:relative;
-  }
+  .opcoes{ display:grid; grid-template-columns:repeat(2, 1fr); gap:clamp(6px,1.5vw,10px); }
+  .opcao{border:2px solid var(--verde);border-radius:12px;padding:clamp(6px,1.5vw,10px);min-height:clamp(56px,12vw,76px);background:#fff;cursor:pointer;transition:all .15s;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:clamp(2px,.8vw,5px);position:relative;}
   .opcao.azul{border-color:var(--azul);}
   .opcao.roxo{border-color:var(--roxo);}
   .opcao.laranja{border-color:var(--laranja);}
@@ -205,37 +78,17 @@
   .opcao.roxo:hover:not(:disabled){background:var(--roxo-claro);}
   .opcao.laranja:hover:not(:disabled){background:var(--laranja-claro);}
   .opcao:disabled{cursor:default;}
-  .opcao img{
-    height:clamp(24px,6vw,38px);
-    width:auto;border-radius:5px;
-    box-shadow:0 2px 4px rgba(0,0,0,.25);
-    background:#fff;object-fit:contain;
-    transition:height .2s;
-  }
+  .opcao img{ height:clamp(24px,6vw,38px);width:auto;border-radius:5px; box-shadow:0 2px 4px rgba(0,0,0,.25); background:#fff;object-fit:contain; transition:height .2s; }
   .opcao img.moeda{border-radius:50%;}
-  .opcao .chip-sem-img{
-    background:#eceff1;border:1px dashed #90a4ae;border-radius:6px;
-    padding:clamp(3px,.8vw,6px) clamp(4px,1vw,8px);
-    font-size:clamp(.6rem,1.6vw,.75rem);font-weight:600;color:#546e7a;
-  }
+  .opcao .chip-sem-img{ background:#eceff1;border:1px dashed #90a4ae;border-radius:6px; padding:clamp(3px,.8vw,6px) clamp(4px,1vw,8px); font-size:clamp(.6rem,1.6vw,.75rem);font-weight:600;color:#546e7a; }
   .opcao.correta{background:var(--verde);border-color:var(--verde);}
   .opcao.errada{background:var(--vermelho);border-color:var(--vermelho);}
   .opcao.correta img, .opcao.errada img{box-shadow:0 2px 6px rgba(0,0,0,.4);}
-  .feedback{
-    text-align:center;margin-top:8px;font-weight:700;min-height:1.2em;
-    font-size:clamp(.78rem,2.2vw,.9rem);
-  }
+  .feedback{ text-align:center;margin-top:8px;font-weight:700;min-height:1.2em; font-size:clamp(.78rem,2.2vw,.9rem); }
   .feedback.ok{color:var(--verde);}
   .feedback.nao{color:var(--vermelho);}
-  .centro{
-    text-align:center;margin-top:10px;
-    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
-  }
-  .btn{
-    background:var(--verde);color:#fff;border:none;border-radius:10px;
-    padding:10px 24px;font-size:clamp(.88rem,2.5vw,1rem);cursor:pointer;font-weight:600;
-    transition:transform .15s, box-shadow .15s;
-  }
+  .centro{ text-align:center;margin-top:10px; display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
+  .btn{background:var(--verde);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:clamp(.88rem,2.5vw,1rem);cursor:pointer;font-weight:600;transition:transform .15s, box-shadow .15s;}
   .btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(46,125,50,.35);}
   .btn.azul{background:var(--azul);}
   .btn.azul:hover{box-shadow:0 6px 16px rgba(21,101,192,.35);}
@@ -251,75 +104,83 @@
   .btn.secundario.roxo:hover{background:var(--roxo-claro);}
   .btn.secundario.laranja{color:var(--laranja);border-color:var(--laranja);}
   .btn.secundario.laranja:hover{background:var(--laranja-claro);}
-
-  /* Tela de resultado por fase (transição) */
   #tela-transicao{display:none;text-align:center;padding:10px 4px;}
   #tela-transicao .emoji{font-size:3rem;margin-bottom:8px;}
   #tela-transicao h2{color:var(--laranja);font-size:clamp(1.1rem,3.2vw,1.3rem);margin-bottom:8px;}
   #tela-transicao p{color:#555;font-size:clamp(.85rem,2.4vw,.95rem);line-height:1.5;margin-bottom:6px;}
-  #tela-transicao .nota-fase{
-    font-size:clamp(2rem,7vw,2.8rem);font-weight:800;color:var(--laranja);margin:8px 0;
-  }
+  #tela-transicao .nota-fase{ font-size:clamp(2rem,7vw,2.8rem);font-weight:800;color:var(--laranja);margin:8px 0; }
   #tela-transicao .nota-fase.derrota{color:var(--vermelho);}
-  #tela-transicao .fase-info{
-    background:var(--laranja-claro);border-radius:10px;padding:10px 14px;
-    margin:10px 0;font-size:clamp(.82rem,2.3vw,.92rem);color:#5d4037;text-align:left;
-  }
-
+  #tela-transicao .fase-info{ background:var(--laranja-claro);border-radius:10px;padding:10px 14px; margin:10px 0;font-size:clamp(.82rem,2.3vw,.92rem);color:#5d4037;text-align:left; }
   #tela-fim, #tela-fim-troco, #tela-fim-compra, #tela-fim-multi{display:none;text-align:center;}
-  #tela-fim .nota, #tela-fim-troco .nota, #tela-fim-compra .nota, #tela-fim-multi .nota{
-    font-size:clamp(2rem,7vw,2.8rem);font-weight:800;color:var(--verde);margin:8px 0;
-  }
+  #tela-fim .nota, #tela-fim-troco .nota, #tela-fim-compra .nota, #tela-fim-multi .nota{ font-size:clamp(2rem,7vw,2.8rem);font-weight:800;color:var(--verde);margin:8px 0; }
   #tela-fim-troco .nota{color:var(--azul);}
   #tela-fim-compra .nota{color:var(--roxo);}
   #tela-fim-multi .nota{color:var(--laranja);}
   #tela-fim .nota.derrota, #tela-fim-troco .nota.derrota, #tela-fim-compra .nota.derrota, #tela-fim-multi .nota.derrota{color:var(--vermelho);}
   .revisao{margin-top:14px;text-align:left;max-height:40vh;overflow-y:auto;padding-right:4px;}
   .revisao h3{margin-bottom:8px;color:#555;font-size:clamp(.88rem,2.4vw,.95rem);}
-  .rev-item{
-    display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;
-    margin-bottom:5px;background:var(--cinza);font-size:clamp(.78rem,2.2vw,.9rem);
-    flex-wrap:wrap;
-  }
-  .rev-item .mini{width:38px;height:38px;border-radius:6px;background:#fff;
-    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+  .rev-item{ display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px; margin-bottom:5px;background:var(--cinza);font-size:clamp(.78rem,2.2vw,.9rem); flex-wrap:wrap; }
+  .rev-item .mini{width:38px;height:38px;border-radius:6px;background:#fff; display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
   .rev-item .mini img{width:100%;height:100%;object-fit:contain;}
   .rev-dinheiro{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;}
   .rev-dinheiro img{height:18px;border-radius:3px;background:#fff;}
   .rev-dinheiro img.moeda{border-radius:50%;}
   .rev-ok{color:var(--verde);font-weight:700;}
-
+  #tela-codigo{display:none;text-align:center;padding:10px 4px;}
+  #tela-codigo .emoji{font-size:3rem;margin-bottom:6px;}
+  #tela-codigo h2{color:var(--verde);font-size:clamp(1.1rem,3.2vw,1.35rem);margin-bottom:10px;}
+  #tela-codigo .aviso{color:#555;font-size:clamp(.82rem,2.3vw,.92rem);line-height:1.5;margin-bottom:12px;}
+  .caixa-codigo{background:var(--cinza);border:2px dashed var(--verde);border-radius:12px;padding:14px 12px;margin:0 auto 12px;max-width:560px;}
+  .caixa-codigo .label{font-size:clamp(.7rem,1.9vw,.78rem);color:#777;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .caixa-codigo .codigo{font-family:'Courier New',monospace;font-weight:800;font-size:clamp(.95rem,3vw,1.25rem);color:var(--verde);word-break:break-all;letter-spacing:1px;user-select:all;}
+  .caixa-codigo .resumo{margin-top:10px;padding-top:10px;border-top:1px solid #ddd;font-size:clamp(.75rem,2vw,.85rem);color:#555;text-align:left;line-height:1.6;}
+  .caixa-codigo .resumo b{color:var(--texto);}
+  .status-download{display:inline-flex;align-items:center;gap:6px;font-size:clamp(.75rem,2vw,.85rem);font-weight:700;color:var(--verde);margin-bottom:10px;}
+  .status-download.erro{color:var(--vermelho);}
+  #tela-login-prof{display:none;text-align:center;padding:10px 4px;}
+  #tela-login-prof h2{color:var(--verde);font-size:clamp(1.1rem,3.2vw,1.3rem);margin-bottom:8px;}
+  #tela-login-prof p{color:#666;font-size:clamp(.82rem,2.3vw,.92rem);margin-bottom:14px;}
+  .campo-senha{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+  .campo-senha input{border:2px solid var(--verde);border-radius:10px;padding:10px 14px;font-size:clamp(.9rem,2.5vw,1rem);width:min(240px,70vw);outline:none;font-family:'Courier New',monospace;letter-spacing:2px;text-align:center;}
+  .campo-senha input:focus{background:var(--verde-claro);}
+  .erro-senha{color:var(--vermelho);font-weight:700;font-size:clamp(.8rem,2.2vw,.9rem);min-height:1.2em;}
+  #tela-professor{display:none;}
+  #tela-professor h1{color:var(--verde);}
+  .prof-bloco{background:var(--cinza);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+  .prof-bloco h3{font-size:clamp(.88rem,2.4vw,.98rem);color:var(--verde);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .prof-entrada{display:flex;flex-direction:column;gap:8px;}
+  .prof-entrada textarea{border:2px solid var(--verde);border-radius:10px;padding:10px;font-family:'Courier New',monospace;font-size:clamp(.8rem,2.2vw,.9rem);resize:vertical;min-height:70px;outline:none;width:100%;}
+  .prof-entrada textarea:focus{background:var(--verde-claro);}
+  .prof-entrada .linha-botoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .prof-entrada input[type=file]{font-size:clamp(.75rem,2vw,.85rem);padding:8px;border:2px dashed #bbb;border-radius:10px;background:#fff;cursor:pointer;flex:1;min-width:180px;}
+  .prof-entrada input[type=file]::file-selector-button{background:var(--verde);color:#fff;border:none;border-radius:6px;padding:6px 12px;margin-right:8px;cursor:pointer;font-weight:600;}
+  .erro-codigo{color:var(--vermelho);font-weight:700;font-size:clamp(.8rem,2.2vw,.9rem);min-height:1.2em;}
+  .prof-tabela-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table.prof-tabela{width:100%;border-collapse:collapse;font-size:clamp(.72rem,2vw,.84rem);min-width:520px;}
+  table.prof-tabela th, table.prof-tabela td{padding:8px 6px;text-align:left;border-bottom:1px solid #e0e0e0;}
+  table.prof-tabela th{background:var(--verde-claro);color:var(--verde);font-weight:800;position:sticky;top:0;}
+  table.prof-tabela tr:nth-child(even) td{background:#fafafa;}
+  table.prof-tabela .cor-ok{color:var(--verde);font-weight:700;}
+  .prof-vazio{color:#999;font-size:clamp(.78rem,2.2vw,.88rem);text-align:center;padding:14px;}
+  .prof-total{text-align:right;font-size:clamp(.78rem,2.2vw,.88rem);color:#555;font-weight:700;margin-top:6px;}
+  .btn-perigo{background:#fff;color:var(--vermelho);border:2px solid var(--vermelho);border-radius:10px;padding:8px 16px;font-size:clamp(.78rem,2.2vw,.88rem);cursor:pointer;font-weight:700;transition:all .15s;}
+  .btn-perigo:hover{background:#ffebee;}
   #tela-info{display:none;}
   #tela-info h1{margin-bottom:12px;padding-right:0;}
-  .info-secao{
-    background:var(--cinza);border-radius:12px;padding:12px 14px;
-    margin-bottom:10px;text-align:left;
-  }
-  .info-secao h2{
-    font-size:clamp(.9rem,2.5vw,1rem);color:var(--verde);margin-bottom:6px;
-    display:flex;align-items:center;gap:6px;
-  }
+  .info-secao{ background:var(--cinza);border-radius:12px;padding:12px 14px; margin-bottom:10px;text-align:left; }
+  .info-secao h2{ font-size:clamp(.9rem,2.5vw,1rem);color:var(--verde);margin-bottom:6px; display:flex;align-items:center;gap:6px; }
   .info-secao.azul h2{color:var(--azul);}
   .info-secao.roxo h2{color:var(--roxo);}
   .info-secao.laranja h2{color:var(--laranja);}
-  .info-secao p, .info-secao li{
-    font-size:clamp(.8rem,2.2vw,.9rem);color:#444;line-height:1.5;
-  }
+  .info-secao p, .info-secao li{ font-size:clamp(.8rem,2.2vw,.9rem);color:#444;line-height:1.5; }
   .info-secao ol, .info-secao ul{padding-left:18px;margin-top:4px;}
   .info-secao li{margin-bottom:3px;}
-  .serie-badge{
-    display:inline-block;background:var(--verde);color:#fff;
-    border-radius:99px;padding:2px 10px;font-size:clamp(.68rem,1.8vw,.75rem);font-weight:700;
-    margin:2px 4px 2px 0;
-  }
+  .serie-badge{ display:inline-block;background:var(--verde);color:#fff; border-radius:99px;padding:2px 10px;font-size:clamp(.68rem,1.8vw,.75rem);font-weight:700; margin:2px 4px 2px 0; }
   .serie-badge.destaque{background:var(--amarelo);color:#212121;}
   .serie-badge.azul{background:var(--azul);}
   .serie-badge.roxo{background:var(--roxo);}
   .serie-badge.laranja{background:var(--laranja);}
-  .hab-item{
-    background:#fff;border-left:4px solid var(--verde);border-radius:6px;
-    padding:6px 10px;margin-bottom:6px;
-  }
+  .hab-item{ background:#fff;border-left:4px solid var(--verde);border-radius:6px; padding:6px 10px;margin-bottom:6px; }
   .hab-item.azul{border-left-color:var(--azul);}
   .hab-item.roxo{border-left-color:var(--roxo);}
   .hab-item.laranja{border-left-color:var(--laranja);}
@@ -327,40 +188,21 @@
   .hab-item.azul .codigo{color:var(--azul);}
   .hab-item.roxo .codigo{color:var(--roxo);}
   .hab-item.laranja .codigo{color:var(--laranja);}
-  .hab-item .serie-tag{
-    display:inline-block;background:var(--verde-claro);color:var(--verde);
-    border-radius:99px;padding:1px 8px;font-size:clamp(.62rem,1.7vw,.7rem);
-    font-weight:700;margin-left:4px;vertical-align:middle;
-  }
+  .hab-item .serie-tag{ display:inline-block;background:var(--verde-claro);color:var(--verde); border-radius:99px;padding:1px 8px;font-size:clamp(.62rem,1.7vw,.7rem); font-weight:700;margin-left:4px;vertical-align:middle; }
   .hab-item.azul .serie-tag{background:var(--azul-claro);color:var(--azul);}
   .hab-item.roxo .serie-tag{background:var(--roxo-claro);color:var(--roxo);}
   .hab-item.laranja .serie-tag{background:var(--laranja-claro);color:var(--laranja);}
-  .hab-item .nivel{
-    display:inline-block;border-radius:99px;padding:1px 8px;
-    font-size:clamp(.62rem,1.7vw,.7rem);font-weight:700;margin-left:3px;vertical-align:middle;
-  }
+  .hab-item .nivel{ display:inline-block;border-radius:99px;padding:1px 8px; font-size:clamp(.62rem,1.7vw,.7rem);font-weight:700;margin-left:3px;vertical-align:middle; }
   .hab-item .nivel.parcial{background:#fff3e0;color:#e65100;border:1px solid #ffb74d;}
   .hab-item .nivel.plena{background:#e8f5e9;color:var(--verde);border:1px solid #81c784;}
   .hab-item .desc{font-size:clamp(.78rem,2.2vw,.86rem);color:#444;margin-top:2px;}
   .hab-item .corresp{font-size:clamp(.7rem,1.9vw,.78rem);color:#666;font-style:italic;margin-top:3px;}
-  .dica{
-    background:#fff8e1;border-left:4px solid var(--amarelo);
-    border-radius:6px;padding:8px 12px;font-size:clamp(.78rem,2.2vw,.86rem);color:#5d4037;
-    margin-top:6px;
-  }
-  .tabs{
-    display:flex;gap:4px;margin-bottom:10px;border-bottom:2px solid #e0e0e0;
-    flex-wrap: wrap;
-  }
-  .tab-btn{
-    background:none;border:none;padding:8px 12px;cursor:pointer;
-    font-size:clamp(.8rem,2.2vw,.9rem);font-weight:700;color:#888;
-    border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;
-  }
+  .dica{ background:#fff8e1;border-left:4px solid var(--amarelo); border-radius:6px;padding:8px 12px;font-size:clamp(.78rem,2.2vw,.86rem);color:#5d4037; margin-top:6px; }
+  .tabs{ display:flex;gap:4px;margin-bottom:10px;border-bottom:2px solid #e0e0e0; flex-wrap: wrap; }
+  .tab-btn{ background:none;border:none;padding:8px 12px;cursor:pointer; font-size:clamp(.8rem,2.2vw,.9rem);font-weight:700;color:#888; border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s; }
   .tab-btn.active{color:var(--verde);border-bottom-color:var(--verde);}
   .tab-conteudo{display:none;max-height:62vh;overflow-y:auto;padding-right:4px;}
   .tab-conteudo.active{display:block;}
-
   @media (max-width: 520px){
     body{padding:6px;}
     .card{border-radius:14px;padding:12px;padding-top:48px;}
@@ -458,8 +300,9 @@
     </div>
     <br>
     <button class="btn-secundario" id="btn-info-menu">ℹ️ Instruções, séries e habilidades</button>
+    <br>
+    <button class="btn-secundario" id="btn-abrir-prof" style="color:var(--azul);border-color:var(--azul)">🔐 Área do Professor</button>
   </div>
-
   <!-- ATIVIDADE 1 -->
   <div id="tela-jogo">
     <div class="topo">
@@ -545,7 +388,6 @@
     </div>
     <div class="barra"><div class="barra-fill laranja" id="barra-multi"></div></div>
     <p class="pergunta" id="pergunta-multi">Quanto paguei ao todo?</p>
-
     <div class="multi-container">
       <div class="multi-produto-bloco" id="imagem-box-multi">
         <img id="multi-img-produto" src="" alt="">
@@ -555,14 +397,12 @@
         <span class="multi-preco" id="multi-preco"></span>
       </div>
     </div>
-
     <div class="enunciado-multi" id="enunciado-multi"></div>
     <div class="opcoes" id="opcoes-multi"></div>
     <p class="feedback" id="feedback-multi"></p>
     <div class="centro"><button class="btn laranja" id="btn-proxima-multi" style="display:none;">Próxima</button></div>
   </div>
-
-  <!-- TELA DE RESULTADO POR FASE -->
+  <!-- TELA DE RESULTADO POR FASE (transição) -->
   <div id="tela-transicao">
     <div class="emoji" id="emoji-transicao">🎉</div>
     <h2 id="titulo-transicao">Fase 1 concluída!</h2>
@@ -586,6 +426,79 @@
     </div>
   </div>
 
+  <!-- TELA DE CÓDIGO GERADO (aparece na vitória, antes da tela de fim) -->
+  <div id="tela-codigo">
+    <div class="emoji">🎉</div>
+    <h2 id="titulo-codigo">Código gerado com sucesso!</h2>
+    <p class="aviso" id="aviso-codigo">Guarde este código ou o arquivo baixado. O professor vai usá-lo para registrar seu resultado.</p>
+    <div class="caixa-codigo">
+      <div class="label">Código do resultado</div>
+      <div class="codigo" id="codigo-gerado">—</div>
+      <div class="resumo" id="resumo-codigo"></div>
+    </div>
+    <div class="status-download" id="status-download"></div>
+    <div class="centro">
+      <button class="btn" id="btn-baixar-novamente">⬇️ Baixar novamente</button>
+      <button class="btn secundario" id="btn-continuar-codigo">Continuar</button>
+    </div>
+  </div>
+
+  <!-- LOGIN ÁREA DO PROFESSOR -->
+  <div id="tela-login-prof">
+    <h2>🔐 Área do Professor</h2>
+    <p>Digite a senha para acessar.</p>
+    <div class="campo-senha">
+      <input type="password" id="input-senha-prof" placeholder="Senha" autocomplete="off">
+    </div>
+    <p class="erro-senha" id="erro-senha-prof"></p>
+    <div class="centro">
+      <button class="btn" id="btn-entrar-prof">Entrar</button>
+      <button class="btn secundario" id="btn-voltar-login">Voltar ao menu</button>
+    </div>
+  </div>
+
+  <!-- ÁREA DO PROFESSOR -->
+  <div id="tela-professor">
+    <h1>🔐 Área do Professor</h1>
+    <p class="sub">Cole o código ou envie o arquivo <code>.txt</code> baixado pelo aluno. Os resultados ficam listados apenas nesta sessão (não são salvos no dispositivo).</p>
+
+    <div class="prof-bloco">
+      <h3>📥 Registrar resultado</h3>
+      <div class="prof-entrada">
+        <textarea id="input-codigo-prof" placeholder="Cole aqui o código do aluno (ex.: ABCD1-EFGH2-...)" autocomplete="off"></textarea>
+        <div class="linha-botoes">
+          <button class="btn" id="btn-processar-codigo">Processar código</button>
+          <input type="file" id="input-arquivo-prof" accept=".txt,text/plain">
+        </div>
+        <p class="erro-codigo" id="erro-codigo-prof"></p>
+      </div>
+    </div>
+
+    <div class="prof-bloco">
+      <h3>📋 Resultados desta sessão</h3>
+      <div class="prof-tabela-wrap">
+        <table class="prof-tabela" id="tabela-prof">
+          <thead>
+            <tr>
+              <th>Data/hora</th>
+              <th>Atividade</th>
+              <th>Fase</th>
+              <th>Acertos</th>
+              <th>Vidas</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela-prof"></tbody>
+        </table>
+      </div>
+      <div class="prof-vazio" id="prof-vazio">Nenhum resultado registrado nesta sessão ainda.</div>
+      <div class="prof-total" id="prof-total"></div>
+      <div class="centro">
+        <button class="btn-perigo" id="btn-limpar-prof">Limpar lista desta sessão</button>
+        <button class="btn secundario" id="btn-sair-prof">Sair</button>
+      </div>
+    </div>
+  </div>
+
   <!-- INFO -->
   <div id="tela-info">
     <h1>ℹ️ Sobre as atividades</h1>
@@ -605,7 +518,8 @@
           <li>Você começa com <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Se errar, a pergunta <b>volta ao final da fila</b> e será mostrada novamente.</li>
           <li>O objetivo é <b>acertar todos os produtos</b> antes de perder as 5 vidas.</li>
-          <li>Ao acertar todos, você poderá <b>voltar ao menu</b>. Se errar e perder as 5 vidas, será preciso <b>jogar de novo</b>.</li>
+          <li>Ao acertar todos, um <b>código de resultado</b> é gerado e baixado automaticamente. Ele deve ser entregue ao professor.</li>
+          <li>Se perder as 5 vidas, será preciso <b>jogar de novo</b> (não gera código).</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> comece pelas cédulas de maior valor e depois some as moedas.</div>
       </div>
@@ -618,7 +532,7 @@
           <li>Você também tem <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
           <li>O objetivo é <b>acertar todos os trocos</b> antes de perder as 5 vidas.</li>
-          <li>Ao acertar todos, você poderá <b>voltar ao menu</b>. Se errar e perder as 5 vidas, será preciso <b>jogar de novo</b>.</li>
+          <li>Ao acertar todos, um <b>código de resultado</b> é gerado e baixado automaticamente.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> se o pagamento for R$ 20 e o produto custa R$ 18, o troco é R$ 2.</div>
       </div>
@@ -631,7 +545,7 @@
           <li>Analise as <b>4 opções</b> de troco (cédulas e moedas) e clique na correta.</li>
           <li>Você tem <b>5 vidas ❤️</b>. Cada erro perde 1 vida.</li>
           <li>Perguntas erradas <b>voltam ao final da fila</b>.</li>
-          <li>O objetivo é <b>acertar todos os pares</b> antes de perder as 5 vidas.</li>
+          <li>Ao acertar todos, um <b>código de resultado</b> é gerado e baixado automaticamente.</li>
         </ol>
         <div class="dica">💡 <b>Dica:</b> primeiro descubra o total da compra e só depois calcule o troco.</div>
       </div>
@@ -655,7 +569,7 @@
           <li>Mesmo raciocínio da Fase 2, com <b>quantidade de 3 a 5</b>.</li>
           <li>Atenção: o total pode ser alto e o pagamento usa notas maiores.</li>
         </ol>
-        <div class="dica">💡 <b>Dica:</b> o badge mostra a quantidade, mas não há sinal de multiplicação na tela. O aluno precisa <b>interpretar o enunciado</b> e perceber que é uma compra de várias unidades iguais. Ao final de <b>cada fase</b>, você verá sua nota e a revisão dos exercícios daquela fase.</div>
+        <div class="dica">💡 <b>Dica:</b> o badge mostra a quantidade, mas não há sinal de multiplicação na tela. Ao final de <b>cada fase</b>, um <b>código de resultado</b> é gerado e baixado automaticamente (somente se a fase for concluída com sucesso).</div>
       </div>
     </div>
 
@@ -698,7 +612,7 @@
         <div class="hab-item"><div class="codigo">EF02MA20<span class="serie-tag">2º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Equivalência entre moedas e cédulas.</div><div class="corresp">→ Plena: identifica a combinação equivalente.</div></div>
         <div class="hab-item"><div class="codigo">EF03MA24<span class="serie-tag">3º ano</span><span class="nivel plena">Plena</span></div><div class="desc">Problemas de compra, venda e troca.</div><div class="corresp">→ Plena: cada questão simula uma compra.</div></div>
         <div class="hab-item"><div class="codigo">EF04MA25<span class="serie-tag">4º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Compra e venda com troco, desconto, acréscimo, lucro, prejuízo.</div><div class="corresp">→ Parcial: não explora desconto/lucro/prejuízo.</div></div>
-        <div class="hab-item"><div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><span class="nivel parcial">Parcial</span></div><div class="desc">Sistema monetário em compra, venda e planejamento de gastos.</div><div class="corresp">→ Parcial: foca em equivalência.</div></div>
+        <div class="hab-item"><div class="codigo">EF05MA23<span class="serie-tag">5º ano</span><div class="nivel parcial">Parcial</div></div><div class="desc">Sistema monetário em compra, venda e planejamento de gastos.</div><div class="corresp">→ Parcial: foca em equivalência.</div></div>
       </div>
       <div class="info-secao azul">
         <h2>💰 Habilidades — "Calculando o troco"</h2>
@@ -776,6 +690,7 @@ const IMG_DINHEIRO = {
 
 const MAX_VIDAS = 5;
 const EXERCICIOS_POR_FASE_MULTI = 10;
+const SENHA_PROFESSOR = "30102026";
 const fmt = v => v.toFixed(2).replace(".", ",");
 
 function embaralhar(arr){
@@ -882,7 +797,8 @@ function atualizarVidas(elId, vidas){
 function esconderTudo(){
   ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco",
    "tela-compra","tela-fim-compra","tela-multi","tela-fim-multi",
-   "tela-transicao","tela-info"].forEach(id => {
+   "tela-transicao","tela-info","tela-codigo","tela-login-prof",
+   "tela-professor"].forEach(id => {
     const el = $(id);
     if(el) el.style.display = "none";
   });
@@ -970,17 +886,28 @@ function proximaValor(){
   indiceValor++;
   if(respostasValor.length >= totalValor){ finalizarValor(true); return; }
   if(indiceValor >= filaValor.length){
-    if(respostasValor.length < totalValor){
-      // Se a fila acabou mas ainda faltam acertos, significa que as questões erradas
-      // já estão no final da fila (pois foram empurradas). Basta voltar ao início.
-      indiceValor = 0; 
-    } else { finalizarValor(true); return; }
+    if(respostasValor.length < totalValor){ indiceValor = 0; }
+    else { finalizarValor(true); return; }
   }
   mostrarQuestaoValor();
 }
 
 function finalizarValor(vitoria){
+  if(vitoria){
+    gerarCodigoEDownload({
+      atividade: "qual-e-o-valor", atividadeLabel: "Qual é o valor?",
+      fase: null, faseLabel: null,
+      acertos: respostasValor.length, total: totalValor, vidas: vidasValor,
+      onContinuar: () => exibirResultadoValor()
+    });
+  } else {
+    exibirResultadoValor();
+  }
+}
+
+function exibirResultadoValor(){
   esconderTudo(); $("tela-fim").style.display = "block";
+  const vitoria = respostasValor.length >= totalValor;
   if(vitoria){
     $("titulo-fim").textContent = "Atividade concluída! 🎉";
     $("sub-fim").textContent = "Você acertou todas as questões!";
@@ -1109,15 +1036,28 @@ function proximaTroco(){
   indiceTroco++;
   if(respostasTroco.length >= totalTroco){ finalizarTroco(true); return; }
   if(indiceTroco >= filaTroco.length){
-    if(respostasTroco.length < totalTroco){
-      indiceTroco = 0;
-    } else { finalizarTroco(true); return; }
+    if(respostasTroco.length < totalTroco){ indiceTroco = 0; }
+    else { finalizarTroco(true); return; }
   }
   mostrarQuestaoTroco();
 }
 
 function finalizarTroco(vitoria){
+  if(vitoria){
+    gerarCodigoEDownload({
+      atividade: "troco", atividadeLabel: "Calculando o troco",
+      fase: null, faseLabel: null,
+      acertos: respostasTroco.length, total: totalTroco, vidas: vidasTroco,
+      onContinuar: () => exibirResultadoTroco()
+    });
+  } else {
+    exibirResultadoTroco();
+  }
+}
+
+function exibirResultadoTroco(){
   esconderTudo(); $("tela-fim-troco").style.display = "block";
+  const vitoria = respostasTroco.length >= totalTroco;
   if(vitoria){
     $("titulo-fim-troco").textContent = "Atividade concluída! 🎉";
     $("sub-fim-troco").textContent = "Você acertou todos os trocos!";
@@ -1275,15 +1215,28 @@ function proximaCompra(){
   indiceCompra++;
   if(respostasCompra.length >= totalCompra){ finalizarCompra(true); return; }
   if(indiceCompra >= filaCompra.length){
-    if(respostasCompra.length < totalCompra){
-      indiceCompra = 0;
-    } else { finalizarCompra(true); return; }
+    if(respostasCompra.length < totalCompra){ indiceCompra = 0; }
+    else { finalizarCompra(true); return; }
   }
   mostrarQuestaoCompra();
 }
 
 function finalizarCompra(vitoria){
+  if(vitoria){
+    gerarCodigoEDownload({
+      atividade: "compra-dupla", atividadeLabel: "Compra dupla",
+      fase: null, faseLabel: null,
+      acertos: respostasCompra.length, total: totalCompra, vidas: vidasCompra,
+      onContinuar: () => exibirResultadoCompra()
+    });
+  } else {
+    exibirResultadoCompra();
+  }
+}
+
+function exibirResultadoCompra(){
   esconderTudo(); $("tela-fim-compra").style.display = "block";
+  const vitoria = respostasCompra.length >= totalCompra;
   if(vitoria){
     $("titulo-fim-compra").textContent = "Atividade concluída! 🎉";
     $("sub-fim-compra").textContent = "Você acertou todos os cálculos!";
@@ -1318,7 +1271,6 @@ function finalizarCompra(vitoria){
     $("revisao-compra").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram ${totalCompra - respostasCompra.length} par(es).</p>`;
   }
 }
-
 /* ============= ATIVIDADE 4 — COMPRAS EM QUANTIDADE ============= */
 let vidasMulti, respostasMulti, faseMulti;
 let filaMulti, indiceMulti, totalFaseMulti;
@@ -1398,7 +1350,6 @@ function mostrarQuestaoMulti(){
     $("pergunta-multi").textContent = "Quanto de troco devo receber?";
   }
 
-  // Layout B+F: imagem + badge + preço + enunciado
   const imgEl = $("multi-img-produto");
   imgEl.alt = `${quantidadeAtualMulti} unidade(s) de ${produtoAtualMulti.nome}`;
   if(produtoAtualMulti.img){
@@ -1414,7 +1365,7 @@ function mostrarQuestaoMulti(){
   } else {
     imgEl.style.display = "none";
   }
-  
+
   $("multi-preco").textContent = `R$ ${fmt(produtoAtualMulti.preco)} cada`;
   $("multi-badge").textContent = quantidadeAtualMulti;
   $("multi-badge").setAttribute("aria-label", `${quantidadeAtualMulti} unidades`);
@@ -1524,22 +1475,14 @@ function responderMulti(botao, valor){
 
 function proximaMulti(){
   indiceMulti++;
-  
-  if(respostasMulti.length >= totalFaseMulti){ 
-    mostrarResultadoFase(); 
-    return; 
+  if(respostasMulti.length >= totalFaseMulti){
+    mostrarResultadoFase();
+    return;
   }
-  
   if(indiceMulti >= filaMulti.length){
-    if(respostasMulti.length < totalFaseMulti){
-      // A fila tem as questões erradas no final. Voltamos ao início para revisá-las.
-      indiceMulti = 0;
-    } else { 
-      mostrarResultadoFase(); 
-      return; 
-    }
+    if(respostasMulti.length < totalFaseMulti){ indiceMulti = 0; }
+    else { mostrarResultadoFase(); return; }
   }
-  
   mostrarQuestaoMulti();
 }
 
@@ -1589,19 +1532,46 @@ function mostrarResultadoFase(){
       `<span style="color:#555;margin-top:4px;display:inline-block">Você tem <b>${vidasMulti} vidas ❤️</b> restantes.</span>`;
     $("btn-continuar-fase").textContent = "Continuar para a Fase " + proxima;
     $("btn-continuar-fase").onclick = () => {
-      faseMulti = proxima;
-      respostasMulti = [];
-      gerarFilaFase(faseMulti);
-      esconderTudo();
-      $("tela-multi").style.display = "block";
-      mostrarQuestaoMulti();
+      if(vitoriaFase){
+        gerarCodigoEDownload({
+          atividade: "compras-quantidade", atividadeLabel: "Compras em quantidade",
+          fase: faseMulti, faseLabel: `Fase ${faseMulti}`,
+          acertos: acertosFase, total: totalFase, vidas: vidasMulti,
+          onContinuar: () => {
+            faseMulti = proxima;
+            respostasMulti = [];
+            gerarFilaFase(faseMulti);
+            esconderTudo();
+            $("tela-multi").style.display = "block";
+            mostrarQuestaoMulti();
+          }
+        });
+      } else {
+        faseMulti = proxima;
+        respostasMulti = [];
+        gerarFilaFase(faseMulti);
+        esconderTudo();
+        $("tela-multi").style.display = "block";
+        mostrarQuestaoMulti();
+      }
     };
   } else {
     $("info-transicao").innerHTML =
       `<strong>Todas as fases concluídas!</strong><br>` +
       `<span style="color:#555">Você terminou a atividade. Veja o resultado final com a revisão completa.</span>`;
     $("btn-continuar-fase").textContent = "Ver resultado final";
-    $("btn-continuar-fase").onclick = () => finalizarMulti(true);
+    $("btn-continuar-fase").onclick = () => {
+      if(vitoriaFase){
+        gerarCodigoEDownload({
+          atividade: "compras-quantidade", atividadeLabel: "Compras em quantidade",
+          fase: faseMulti, faseLabel: `Fase ${faseMulti}`,
+          acertos: acertosFase, total: totalFase, vidas: vidasMulti,
+          onContinuar: () => finalizarMulti(true)
+        });
+      } else {
+        finalizarMulti(true);
+      }
+    };
   }
 
   esconderTudo();
@@ -1653,14 +1623,341 @@ function finalizarMulti(vitoria){
     $("revisao-multi").innerHTML += `<p style="margin-top:10px;color:#c62828;font-weight:700;text-align:center;">Faltaram exercícios na Fase ${faseMulti}.</p>`;
   }
 }
+/* ============= CÓDIGO BASE62 + HASH FNV-1a ============= */
+const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const VERSAO_FORMATO = 1;
+
+const ATIVIDADES_ID = {
+  "qual-e-o-valor": 1,
+  "troco": 2,
+  "compra-dupla": 3,
+  "compras-quantidade": 4
+};
+const ATIVIDADES_NOME = {
+  1: "Qual é o valor?",
+  2: "Calculando o troco",
+  3: "Compra dupla",
+  4: "Compras em quantidade"
+};
+
+function fnv1a(bytes){
+  let h = 0x811c9dc5;
+  for(let i = 0; i < bytes.length; i++){
+    h ^= bytes[i];
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+}
+
+function bytesParaBase62(bytes){
+  let n = 0n;
+  for(const b of bytes) n = (n << 8n) | BigInt(b);
+  if(n === 0n) return "0";
+  let s = "";
+  while(n > 0n){
+    s = BASE62[Number(n % 62n)] + s;
+    n = n / 62n;
+  }
+  return s;
+}
+
+function base62ParaBytes(str, tamanhoEsperado){
+  let n = 0n;
+  for(const ch of str){
+    const idx = BASE62.indexOf(ch);
+    if(idx < 0) throw new Error("caractere inválido");
+    n = n * 62n + BigInt(idx);
+  }
+  const bytes = [];
+  while(n > 0n){
+    bytes.unshift(Number(n & 0xffn));
+    n >>= 8n;
+  }
+  while(bytes.length < tamanhoEsperado) bytes.unshift(0);
+  if(bytes.length > tamanhoEsperado) throw new Error("payload grande demais");
+  return bytes;
+}
+
+function montarPayload(dados){
+  const buf = new Uint8Array(10);
+  buf[0] = VERSAO_FORMATO;
+  buf[1] = ATIVIDADES_ID[dados.atividade] || 0;
+  buf[2] = dados.fase || 0;
+  buf[3] = dados.acertos & 0xff;
+  buf[4] = dados.total & 0xff;
+  buf[5] = dados.vidas & 0xff;
+  const ts = Math.floor(Date.now() / 1000) >>> 0;
+  buf[6] = (ts >>> 24) & 0xff;
+  buf[7] = (ts >>> 16) & 0xff;
+  buf[8] = (ts >>> 8) & 0xff;
+  buf[9] = ts & 0xff;
+  return buf;
+}
+
+function gerarCodigo(dados){
+  const payload = montarPayload(dados);
+  const hash = fnv1a(payload);
+  const hashBytes = new Uint8Array([
+    (hash >>> 24) & 0xff, (hash >>> 16) & 0xff, (hash >>> 8) & 0xff, hash & 0xff
+  ]);
+  const todos = new Uint8Array(payload.length + hashBytes.length);
+  todos.set(payload, 0);
+  todos.set(hashBytes, payload.length);
+  const b62 = bytesParaBase62(todos).padStart(20, "0");
+  return b62.match(/.{1,5}/g).join("-");
+}
+
+function decodificarCodigo(codigo){
+  const limpo = codigo.replace(/[^0-9A-Za-z]/g, "");
+  if(limpo.length < 15) throw new Error("código curto demais");
+  const bytes = base62ParaBytes(limpo, 14);
+  const payload = bytes.slice(0, 10);
+  const hashRecebido = bytes.slice(10, 14);
+  const hashCalculado = fnv1a(payload);
+  const hb = new Uint8Array([
+    (hashCalculado >>> 24) & 0xff, (hashCalculado >>> 16) & 0xff,
+    (hashCalculado >>> 8) & 0xff, hashCalculado & 0xff
+  ]);
+  for(let i = 0; i < 4; i++){
+    if(hb[i] !== hashRecebido[i]) throw new Error("hash não confere (código inválido)");
+  }
+  const versao = payload[0];
+  if(versao !== VERSAO_FORMATO) throw new Error("versão de código desconhecida");
+  const atividadeId = payload[1];
+  const fase = payload[2] || null;
+  const acertos = payload[3];
+  const total = payload[4];
+  const vidas = payload[5];
+  const ts = ((payload[6] << 24) | (payload[7] << 16) | (payload[8] << 8) | payload[9]) >>> 0;
+  const data = new Date(ts * 1000);
+  return {
+    versao, atividadeId,
+    atividade: ATIVIDADES_NOME[atividadeId] || "Desconhecida",
+    fase, acertos, total, vidas, data
+  };
+}
+
+/* ============= GERAÇÃO + DOWNLOAD + TELA DE CÓDIGO ============= */
+let _codigoPendente = null;
+
+function nomeArquivo(dados){
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const dataStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const horaStr = `${pad(d.getHours())}h${pad(d.getMinutes())}`;
+  const slug = dados.atividade;
+  const faseStr = dados.fase ? `_fase${dados.fase}` : "";
+  return `resultado_${slug}${faseStr}_${dataStr}_${horaStr}.txt`;
+}
+
+function conteudoArquivo(dados, codigo){
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const dataHora = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const faseTxt = dados.fase ? `Fase ${dados.fase}` : "—";
+  return [
+    "=== RESULTADO DE ATIVIDADE — EDUCAÇÃO FINANCEIRA ===",
+    "",
+    `Atividade: ${dados.atividadeLabel}`,
+    `Fase: ${faseTxt}`,
+    `Acertos: ${dados.acertos} / ${dados.total}`,
+    `Vidas restantes: ${dados.vidas}`,
+    `Data/hora: ${dataHora}`,
+    "",
+    "CÓDIGO:",
+    codigo,
+    "",
+    "Entregue este código ao professor."
+  ].join("\n");
+}
+
+function baixarArquivo(nome, conteudo){
+  const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nome;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function gerarCodigoEDownload(dados){
+  const codigo = gerarCodigo(dados);
+  const nome = nomeArquivo(dados);
+  const conteudo = conteudoArquivo(dados, codigo);
+  _codigoPendente = { codigo, nome, conteudo, dados };
+
+  $("codigo-gerado").textContent = codigo;
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const dataHora = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const faseTxt = dados.fase ? `Fase ${dados.fase}` : "—";
+  $("resumo-codigo").innerHTML =
+    `<b>Atividade:</b> ${dados.atividadeLabel}<br>` +
+    `<b>Fase:</b> ${faseTxt}<br>` +
+    `<b>Acertos:</b> ${dados.acertos} / ${dados.total}<br>` +
+    `<b>Vidas restantes:</b> ${dados.vidas}<br>` +
+    `<b>Data/hora:</b> ${dataHora}`;
+
+  const statusEl = $("status-download");
+  statusEl.className = "status-download";
+  statusEl.textContent = "⏳ Baixando arquivo...";
+
+  esconderTudo();
+  $("tela-codigo").style.display = "block";
+
+  try {
+    baixarArquivo(nome, conteudo);
+    statusEl.textContent = "✅ Arquivo baixado: " + nome;
+  } catch(e){
+    statusEl.className = "status-download erro";
+    statusEl.textContent = "⚠️ Não foi possível baixar automaticamente. Use o botão abaixo.";
+  }
+
+  $("btn-baixar-novamente").onclick = () => {
+    try {
+      baixarArquivo(nome, conteudo);
+      statusEl.className = "status-download";
+      statusEl.textContent = "✅ Arquivo baixado novamente: " + nome;
+    } catch(e){
+      statusEl.className = "status-download erro";
+      statusEl.textContent = "⚠️ Falha ao baixar. Copie o código acima manualmente.";
+    }
+  };
+
+  $("btn-continuar-codigo").onclick = () => {
+    const cb = _codigoPendente && _codigoPendente.dados.onContinuar;
+    _codigoPendente = null;
+    if(typeof cb === "function") cb();
+  };
+}
+/* ============= ÁREA DO PROFESSOR ============= */
+let resultadosProfessor = [];
+
+function abrirLoginProfessor(){
+  esconderTudo();
+  $("input-senha-prof").value = "";
+  $("erro-senha-prof").textContent = "";
+  $("tela-login-prof").style.display = "block";
+  setTimeout(() => $("input-senha-prof").focus(), 50);
+}
+
+function tentarEntrarProfessor(){
+  const senha = $("input-senha-prof").value.trim();
+  if(senha === SENHA_PROFESSOR){
+    $("erro-senha-prof").textContent = "";
+    abrirAreaProfessor();
+  } else {
+    $("erro-senha-prof").textContent = "Senha incorreta.";
+    $("input-senha-prof").value = "";
+    $("input-senha-prof").focus();
+  }
+}
+
+function abrirAreaProfessor(){
+  esconderTudo();
+  $("input-codigo-prof").value = "";
+  $("erro-codigo-prof").textContent = "";
+  $("tela-professor").style.display = "block";
+  renderizarTabelaProfessor();
+}
+
+function formatarDataHora(d){
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function processarCodigoProfessor(){
+  const bruto = $("input-codigo-prof").value.trim();
+  const erroEl = $("erro-codigo-prof");
+  erroEl.textContent = "";
+  if(!bruto){ erroEl.textContent = "Cole um código para processar."; return; }
+  const match = bruto.match(/C[ÓO]DIGO:\s*([0-9A-Za-z\-]+)/i);
+  const codigo = match ? match[1] : bruto;
+  try {
+    const r = decodificarCodigo(codigo);
+    resultadosProfessor.push(r);
+    $("input-codigo-prof").value = "";
+    renderizarTabelaProfessor();
+  } catch(e){
+    erroEl.textContent = "Código inválido: " + e.message;
+  }
+}
+
+function processarArquivoProfessor(file){
+  const erroEl = $("erro-codigo-prof");
+  erroEl.textContent = "";
+  if(!file) return;
+  const leitor = new FileReader();
+  leitor.onload = () => {
+    const texto = String(leitor.result || "");
+    const match = texto.match(/C[ÓO]DIGO:\s*([0-9A-Za-z\-]+)/i);
+    if(!match){
+      erroEl.textContent = "Arquivo não contém um código válido.";
+      return;
+    }
+    try {
+      const r = decodificarCodigo(match[1]);
+      resultadosProfessor.push(r);
+      renderizarTabelaProfessor();
+    } catch(e){
+      erroEl.textContent = "Código inválido no arquivo: " + e.message;
+    }
+  };
+  leitor.onerror = () => { erroEl.textContent = "Falha ao ler o arquivo."; };
+  leitor.readAsText(file, "utf-8");
+}
+
+function renderizarTabelaProfessor(){
+  const corpo = $("corpo-tabela-prof");
+  const vazio = $("prof-vazio");
+  const totalEl = $("prof-total");
+  corpo.innerHTML = "";
+  if(resultadosProfessor.length === 0){
+    vazio.style.display = "block";
+    totalEl.textContent = "";
+    return;
+  }
+  vazio.style.display = "none";
+  const ordenados = resultadosProfessor.slice().sort((a, b) => b.data - a.data);
+  ordenados.forEach(r => {
+    const tr = document.createElement("tr");
+    const faseTxt = r.fase ? `Fase ${r.fase}` : "—";
+    tr.innerHTML =
+      `<td>${formatarDataHora(r.data)}</td>` +
+      `<td>${r.atividade}</td>` +
+      `<td>${faseTxt}</td>` +
+      `<td class="cor-ok">${r.acertos} / ${r.total}</td>` +
+      `<td>${r.vidas}</td>`;
+    corpo.appendChild(tr);
+  });
+  const totalRegistros = resultadosProfessor.length;
+  const totalAcertos = resultadosProfessor.reduce((s, r) => s + r.acertos, 0);
+  const totalExerc = resultadosProfessor.reduce((s, r) => s + r.total, 0);
+  totalEl.textContent = `${totalRegistros} registro(s) · ${totalAcertos} acerto(s) de ${totalExerc} exercício(s)`;
+}
+
+function limparProfessor(){
+  if(resultadosProfessor.length === 0) return;
+  if(confirm("Limpar todos os resultados desta sessão? Esta ação não pode ser desfeita.")){
+    resultadosProfessor = [];
+    renderizarTabelaProfessor();
+    $("erro-codigo-prof").textContent = "";
+  }
+}
 
 /* ============= NAVEGAÇÃO ============= */
 let telaAnteriorInfo = "menu";
+
 function abrirInfo(){
-  const map = { "tela-jogo":"jogo", "tela-troco":"troco", "tela-compra":"compra",
-                "tela-multi":"multi", "tela-fim":"fim", "tela-fim-troco":"fim-troco",
-                "tela-fim-compra":"fim-compra", "tela-fim-multi":"fim-multi",
-                "tela-transicao":"transicao" };
+  const map = {
+    "tela-jogo":"jogo", "tela-troco":"troco", "tela-compra":"compra",
+    "tela-multi":"multi", "tela-fim":"fim", "tela-fim-troco":"fim-troco",
+    "tela-fim-compra":"fim-compra", "tela-fim-multi":"fim-multi",
+    "tela-transicao":"transicao"
+  };
   telaAnteriorInfo = "menu";
   for(const [id, nome] of Object.entries(map)){
     if($(id) && $(id).style.display === "block"){ telaAnteriorInfo = nome; break; }
@@ -1668,15 +1965,19 @@ function abrirInfo(){
   esconderTudo();
   $("tela-info").style.display = "block";
 }
+
 function voltarInfo(){
   esconderTudo();
-  const map = { "jogo":"tela-jogo", "troco":"tela-troco", "compra":"tela-compra",
-                "multi":"tela-multi", "fim":"tela-fim", "fim-troco":"tela-fim-troco",
-                "fim-compra":"tela-fim-compra", "fim-multi":"tela-fim-multi",
-                "transicao":"tela-transicao" };
+  const map = {
+    "jogo":"tela-jogo", "troco":"tela-troco", "compra":"tela-compra",
+    "multi":"tela-multi", "fim":"tela-fim", "fim-troco":"tela-fim-troco",
+    "fim-compra":"tela-fim-compra", "fim-multi":"tela-fim-multi",
+    "transicao":"tela-transicao"
+  };
   const id = map[telaAnteriorInfo] || "tela-menu";
   $(id).style.display = "block";
 }
+
 function irParaMenu(){ esconderTudo(); $("tela-menu").style.display = "block"; }
 
 function configurarTabs(){
@@ -1709,6 +2010,21 @@ $("btn-menu-fim-multi").onclick = irParaMenu;
 $("btn-info").onclick = abrirInfo;
 $("btn-info-menu").onclick = abrirInfo;
 $("btn-voltar-info").onclick = voltarInfo;
+
+$("btn-abrir-prof").onclick = abrirLoginProfessor;
+$("btn-voltar-login").onclick = irParaMenu;
+$("btn-entrar-prof").onclick = tentarEntrarProfessor;
+$("input-senha-prof").addEventListener("keydown", e => {
+  if(e.key === "Enter") tentarEntrarProfessor();
+});
+
+$("btn-processar-codigo").onclick = processarCodigoProfessor;
+$("input-arquivo-prof").addEventListener("change", e => {
+  processarArquivoProfessor(e.target.files[0]);
+  e.target.value = "";
+});
+$("btn-limpar-prof").onclick = limparProfessor;
+$("btn-sair-prof").onclick = irParaMenu;
 
 configurarTabs();
 </script>
