@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esportes Olímpicos em Ordem Alfabética</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap">
+<style>
+:root{
+  --bg:#fff8ec; --ink:#1d2340; --card:#ffffff; --line:#e6dcc8; --muted:#5a6080;
+  --ok:#1f9d55; --bad:#d6293e; --brand:#2a3fd6;
+  --f:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#141833; --ink:#f4f1ff; --card:#1e2347; --line:#363d70; --muted:#b6bbe0;}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--f);background:var(--bg);color:var(--ink);padding:16px;line-height:1.35}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin:0 0 4px}
+.sub{margin:0 0 14px;color:var(--muted);font-weight:500}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.bar .lbl{font-weight:700;margin-right:2px}
+.chip{font:inherit;font-weight:700;border:2px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:999px;padding:4px 14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip:focus-visible,.btn:focus-visible,.tile:focus-visible,.slot:focus-visible{outline:3px solid #ff9f1c;outline-offset:2px}
+.bank{min-height:92px;padding:12px;border:3px dashed var(--line);border-radius:16px;display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:16px;background:color-mix(in srgb,var(--card) 60%,transparent)}
+.bank.over{border-color:var(--brand)}
+.bank .done{margin:auto;color:var(--ok);font-weight:800}
+.tile{--c1:#22a6f2;--c2:#0c7fd0;font:inherit;font-weight:700;font-size:1.05rem;text-transform:uppercase;letter-spacing:.03em;color:#fff;border:0;cursor:grab;
+  padding:10px 14px;min-width:104px;min-height:56px;border-radius:10px;touch-action:none;user-select:none;
+  background:linear-gradient(180deg,var(--c1),var(--c2));
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -5px 0 rgba(0,0,0,.22),0 3px 0 rgba(0,0,0,.18);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center;line-height:1.05}
+.tile.sel{outline:3px solid #ff9f1c;outline-offset:2px}
+.tile.ghost{position:fixed;z-index:99;pointer-events:none;opacity:.92;transform:rotate(-3deg) scale(1.06);margin:0;
+  box-shadow:0 10px 18px rgba(0,0,0,.3)}
+.tile.lift{opacity:.35}
+.c0{--c1:#3fb6ff;--c2:#1d8fe0}.c1{--c1:#f2384c;--c2:#c01228}.c2{--c1:#ff9418;--c2:#f06a00}
+.c3{--c1:#2f9e5c;--c2:#1b7a42}.c4{--c1:#d86bec;--c2:#b247c6}.c5{--c1:#3b52e8;--c2:#1f2fc4}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.slot{position:relative;min-height:76px;border:3px dashed var(--line);border-radius:14px;background:var(--card);
+  display:flex;align-items:center;justify-content:center;padding:18px 6px 6px}
+.slot.over{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,var(--card))}
+.slot .n{position:absolute;top:2px;left:8px;font-size:.8rem;font-weight:800;color:var(--muted)}
+.slot .tile{width:100%;cursor:grab}
+.slot.ok{border:3px solid var(--ok)}
+.slot.no{border:3px solid var(--bad)}
+.slot.ok::after,.slot.no::after{position:absolute;top:0;right:8px;font-weight:800}
+.slot.ok::after{content:"✓";color:var(--ok)}
+.slot.no::after{content:"✗";color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
+.btn{font:inherit;font-weight:800;font-size:1.05rem;border:0;border-radius:12px;padding:10px 20px;cursor:pointer;
+  background:var(--brand);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.msg{font-weight:700;min-height:1.4em}
+.msg.good{color:var(--ok)} .msg.bad{color:var(--bad)}
+.info{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:8px}
+.info ul{margin:6px 0 0;padding-left:20px}
+.info li{margin-bottom:5px;font-weight:500}
+.info small{color:var(--muted);display:block;margin-top:8px}
+@media (prefers-reduced-motion:no-preference){.slot,.tile{transition:border-color .15s,background .15s}}
+.vidas{display:flex;align-items:center;gap:4px;margin-left:auto;font-weight:800}
+.vidas .h{font-size:1.5rem;line-height:1;transition:transform .2s}
+.vidas .h.off{filter:grayscale(1);opacity:.35}
+.vidas.hit{animation:tremer .4s}
+@keyframes tremer{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.ov{position:fixed;inset:0;z-index:200;background:rgba(10,14,40,.65);display:none;align-items:center;justify-content:center;padding:16px}
+.ov.on{display:flex}
+.ov .box{background:var(--card);color:var(--ink);border:3px solid var(--line);border-radius:20px;padding:24px 28px;max-width:420px;text-align:center}
+.ov .big{font-size:3rem;line-height:1}
+.ov h2{margin:8px 0 4px;font-size:1.6rem;font-weight:800}
+.ov p{margin:0 0 16px;color:var(--muted);font-weight:500}
+@media (prefers-reduced-motion:reduce){.vidas.hit{animation:none}}
+.res-in{width:100%;box-sizing:border-box;font:inherit;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:8px}
+textarea.res-in{font-family:ui-monospace,Consolas,monospace;font-size:.9rem;word-break:break-all}
+.res-st{display:inline-block;font-weight:800;border-radius:999px;padding:4px 14px;margin:10px 0 6px}
+.res-st.ok{background:color-mix(in srgb,#2ea44f 22%,var(--card));border:2px solid #2ea44f}
+.res-st.warn{background:color-mix(in srgb,#ff9f1c 22%,var(--card));border:2px solid #ff9f1c}
+.res-st.bad{background:color-mix(in srgb,#e5384c 22%,var(--card));border:2px solid #e5384c}
+.res-big{font-size:1.8rem;font-weight:800;margin:4px 0 10px}
+.res-tb{border-collapse:collapse;margin-top:8px;min-width:260px}
+.res-tb th,.res-tb td{border:2px solid var(--line);padding:6px 12px;text-align:left}
+.panel-t{font-weight:800;font-size:1.05rem;margin:0 0 6px}
+.tabs{display:flex;gap:6px;margin:0 0 14px;border-bottom:3px solid var(--line)}
+.tab{font:inherit;font-weight:800;font-size:1.05rem;border:3px solid var(--line);border-bottom:0;background:var(--card);color:var(--muted);
+  border-radius:12px 12px 0 0;padding:6px 18px;cursor:pointer;margin-bottom:-3px}
+.tab[aria-selected=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+.tab:focus-visible{outline:3px solid #ff9f1c;outline-offset:2px}
+[hidden]{display:none!important}
+.how h2{font-size:1.15rem;font-weight:800;margin:18px 0 6px}
+.how h2:first-child{margin-top:0}
+.how h3.comp{font-size:1rem;font-weight:800;margin:14px 0 4px}
+.how ol,.how ul{margin:6px 0 0;padding-left:22px}
+.how li{margin-bottom:6px;font-weight:500}
+.cred{margin:18px 0 0}
+.cred a{color:var(--brand);font-weight:700}
+.how code{font-weight:800;background:color-mix(in srgb,var(--brand) 14%,transparent);padding:0 6px;border-radius:6px}
+.chip:disabled{cursor:not-allowed;box-shadow:none}
+.chip.locked{opacity:.5;background:var(--card);color:var(--muted)}
+.chip.done{opacity:.75;background:color-mix(in srgb,#2ea44f 18%,var(--card));border-color:#2ea44f;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏅 Esportes Olímpicos em Ordem Alfabética</h1>
+  <p class="sub">Arraste os cartões para as casas numeradas, de A a Z. No celular, você também pode tocar no cartão e depois na casa.</p>
+
+  <div class="tabs" role="tablist" aria-label="Seções">
+    <button class="tab" role="tab" id="tabJ" aria-controls="pJogo" aria-selected="true">🎮 Jogo</button>
+    <button class="tab" role="tab" id="tabH" aria-controls="pAjuda" aria-selected="false" tabindex="-1">📖 Como jogar</button>
+    <button class="tab" role="tab" id="tabK" aria-controls="pHab" aria-selected="false" tabindex="-1">🎯 Habilidades</button>
+    <button class="tab" role="tab" id="tabR" aria-controls="pRes" aria-selected="false" tabindex="-1">📊 Resultado</button>
+  </div>
+
+  <div id="pJogo" role="tabpanel" aria-labelledby="tabJ">
+  <div class="bar" role="group" aria-label="Níveis de dificuldade">
+    <span class="lbl">Nível:</span>
+    <div id="series" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div class="vidas" id="pontos" role="status" aria-live="polite" style="margin-left:auto"></div>
+    <div class="vidas" id="vidas" role="status" aria-live="polite" style="margin-left:14px"></div>
+  </div>
+
+  <p class="panel-t">Cartões</p>
+  <div class="bank" id="bank" aria-label="Cartões para ordenar"></div>
+
+  <p class="panel-t">Sua ordem</p>
+  <div class="grid" id="grid"></div>
+
+  <div class="actions">
+    <button class="btn" id="check">Verificar</button>
+    <button class="btn alt" id="again">Novo sorteio</button>
+    <button class="btn alt" id="clear">Recomeçar</button>
+    <span class="msg" id="msg" role="status" aria-live="polite"></span>
+  </div>
+
+  <section class="info" id="info"></section>
+  </div>
+
+  <section class="info how" id="pAjuda" role="tabpanel" aria-labelledby="tabH" hidden>
+    <h2>Objetivo</h2>
+    <p style="margin:0;font-weight:500">Colocar os esportes olímpicos em <b>ordem alfabética</b> (de A a Z), do 1º ao último lugar.</p>
+
+    <h2>Passo a passo</h2>
+    <ol>
+      <li>Arraste cada cartão do quadro <b>Cartões</b> para uma casa numerada em <b>Sua ordem</b>. No celular, toque no cartão e depois na casa.</li>
+      <li>Para trocar de lugar, arraste o cartão para outra casa ou devolva-o ao quadro de cartões.</li>
+      <li>Com todas as casas preenchidas, clique em <b>Verificar</b>. ✓ mostra o cartão certo e ✗ o que está fora de lugar.</li>
+      <li>Acertou tudo? Você avança para o próximo nível.</li>
+    </ol>
+
+    <h2>Vidas ❤️</h2>
+    <ul>
+      <li>O jogo começa com <b>3 vidas</b>, e elas valem para o jogo inteiro: passam de um nível para o outro.</li>
+      <li>Se errar uma ou mais palavras, você perde <b>1 vida</b> e refaz a ordem.</li>
+      <li>Se perder todas as vidas, o nível recomeça com um novo sorteio e você volta com as vidas que tinha ao entrar nele.</li>
+      <li>Verificar com cartões faltando não tira vida.</li>
+    </ul>
+
+    <h2>Pontuação ⭐</h2>
+    <ul>
+      <li>Cada cartão no lugar certo vale <b>10 pontos</b>, contados uma única vez por nível.</li>
+      <li>Se perder todas as vidas e refazer o nível, os pontos daquele nível são descontados.</li>
+      <li>Ao terminar o jogo, o resultado é salvo em um arquivo <b>.txt</b> (código em base62).</li>
+      <li>Para ver esse resultado depois, abra o jogo, entre na aba <b>Resultado</b> e carregue o arquivo.</li>
+    </ul>
+
+    <h2>Níveis</h2>
+    <p style="margin:0 0 6px;font-weight:500">Os níveis são liberados em sequência: 🔒 bloqueado, ✓ concluído. Só o nível atual fica ativo e o próximo abre quando você acerta a ordem.</p>
+    <ul id="howNiveis"></ul>
+
+  
+    <p class="cred"><small>Inspirado na <a href="https://wordwall.net/pt/resource/32694723/colocar-os-esportes-ol%C3%ADmpicos-em-ordem-alfabetica" target="_blank" rel="noopener noreferrer">atividade do Wordwall</a>.</small></p>
+  </section>
+
+  <section class="info how" id="pRes" role="tabpanel" aria-labelledby="tabR" hidden>
+    <h2>Resultado do aluno</h2>
+    <p style="margin:0 0 8px;font-weight:500">Carregue o arquivo <b>.txt</b> salvo ao final do jogo para ver e verificar o resultado.</p>
+    <p style="margin:0 0 12px"><input type="file" id="resFile" class="res-in" accept=".txt,text/plain" aria-label="Arquivo de resultado .txt"></p>
+    <p style="margin:0 0 4px;font-weight:500">Ou cole o código do arquivo:</p>
+    <textarea id="resTxt" class="res-in" rows="3" aria-label="Código do resultado"></textarea>
+    <p style="margin:8px 0 0"><button class="btn" id="resBtn" type="button">Verificar</button></p>
+    <div id="resOut" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="info how" id="pHab" role="tabpanel" aria-labelledby="tabK" hidden>
+    <h2>Habilidades contempladas</h2>
+    <p style="margin:0 0 6px;font-weight:500">Trabalhadas em todos os níveis, independente da série.</p>
+    <div id="howHab"></div>
+    <small>Códigos e textos conforme a BNCC e o seu Complemento de Computação (MEC/CNE). Confira nos documentos oficiais antes de usar no planejamento.</small>
+  </section>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovT">
+  <div class="box">
+    <div class="big" id="ovI"></div>
+    <h2 id="ovT"></h2>
+    <p id="ovP"></p>
+    <button class="btn" id="ovB"></button>
+    <button class="btn" id="ovB2" hidden style="margin-left:8px"></button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== Dados ===== */
+var ESPORTES = ["tênis de mesa","maratona","skate","atletismo","esgrima","remo","basquete","futebol","pentatlo moderno",
+  "lutas","ginástica","hipismo","iatismo","canoagem","karatê","judô","vôlei","natação"];
+
+/* Níveis de dificuldade: quantidade de cartões em cada nível */
+var NIVEIS = {
+  "Fácil":{n:6, desc:"6 cartões para ordenar."},
+  "Médio":{n:9, desc:"9 cartões para ordenar."},
+  "Difícil":{n:12, desc:"12 cartões para ordenar."},
+  "Desafio":{n:18, desc:"Todos os 18 esportes, sem nenhuma pista."}
+};
+
+/* Habilidades da BNCC (código, texto conforme a BNCC), agrupadas por componente */
+var HABILIDADES = [
+  ["Língua Portuguesa",[
+    ["EF01LP10","Nomear as letras do alfabeto e recitá-lo na ordem das letras."],
+    ["EF12LP01","Ler palavras novas com precisão na decodificação, no caso de palavras de uso frequente, ler globalmente, por memorização."]
+  ]],
+  ["Matemática",[
+    ["EF01MA01","Utilizar números naturais como indicador de quantidade ou de ordem em diferentes situações cotidianas e reconhecer situações em que os números não indicam contagem nem ordem, mas sim código de identificação."]
+  ]],
+  ["Computação (Complemento à BNCC)",[
+    ["EF01CO06","Reconhecer e explorar artefatos computacionais voltados a atender necessidades pessoais ou coletivas."],
+    ["EF03CO06","Reconhecer que, para um computador realizar tarefas, ele se comunica com o mundo exterior com o uso de interfaces físicas (dispositivos de entrada e saída)."]
+  ]]
+];
+
+/* ===== Utilidades ===== */
+function norm(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
+function byAlpha(a,b){return norm(a.nome).localeCompare(norm(b.nome),"pt-BR");}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function $(id){return document.getElementById(id);}
+
+/* ===== Estado ===== */
+var nivel="Fácil", itens=[], gabarito=[], slots=[], selecionado=null;
+var NOMES=Object.keys(NIVEIS), VIDAS_MAX=3, vidas=VIDAS_MAX, vidasEntrada=VIDAS_MAX, jogoFim=false, acao=null;
+var PTS_CARTAO=10, pontos=0, pontosEntrada=0, creditados={}, resultados=[];
+var MAX_PONTOS=NOMES.reduce(function(t,k){return t+NIVEIS[k].n*PTS_CARTAO;},0);
+var bank=$("bank"), grid=$("grid"), msg=$("msg");
+
+/* Cores fixas por esporte, como nos cartões originais */
+var TODOS = ESPORTES.map(function(n,i){return {id:i,nome:n,cor:i%6};});
+
+function novoJogo(){
+  var s=NIVEIS[nivel];
+  itens=shuffle(TODOS).slice(0,s.n);
+  gabarito=itens.slice().sort(byAlpha);
+  slots=itens.map(function(){return null;});
+  selecionado=null;
+  var ordemBanco=shuffle(itens);
+  bank._ids=ordemBanco.map(function(x){return x.id;});
+  creditados={};
+  msg.textContent="";msg.className="msg";
+  mostraVidas();mostraPontos();
+  desenhar();
+}
+
+function mostraVidas(perdeu){
+  var v=$("vidas");v.innerHTML="Vidas: ";
+  for(var i=0;i<VIDAS_MAX;i++){
+    var h=document.createElement("span");h.className="h"+(i<vidas?"":" off");h.textContent="❤️";
+    h.setAttribute("aria-hidden","true");v.appendChild(h);
+  }
+  v.setAttribute("aria-label",vidas+" de "+VIDAS_MAX+" vidas");
+  if(perdeu){v.classList.remove("hit");void v.offsetWidth;v.classList.add("hit");}
+}
+function mostraPontos(){
+  $("pontos").innerHTML='<span aria-hidden="true">⭐</span> Pontos: '+pontos;
+}
+var A62="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+function paraBase62(txt){
+  var bytes=new TextEncoder().encode(txt),n=BigInt(1),b256=BigInt(256),b62=BigInt(62),out="";
+  for(var i=0;i<bytes.length;i++)n=n*b256+BigInt(bytes[i]);
+  while(n>0){out=A62.charAt(Number(n%b62))+out;n=n/b62;}
+  return out;
+}
+function hash32(str){
+  var h=0x811c9dc5;
+  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}
+  return ("00000000"+h.toString(16)).slice(-8);
+}
+function textoResultado(){
+  var o={
+    jogo:"Esportes olímpicos",
+    data:new Date().toISOString(),
+    pontos:pontos,maximo:MAX_PONTOS,vidas:vidas,
+    niveis:resultados
+  };
+  o.ck=hash32(JSON.stringify(o));
+  return paraBase62(JSON.stringify(o));
+}
+function deBase62(txt){
+  txt=String(txt).replace(/\s+/g,"");
+  if(!txt||txt.length>5000||/[^0-9A-Za-z]/.test(txt))return null;
+  var n=BigInt(0),b62=BigInt(62),b255=BigInt(255),b8=BigInt(8),um=BigInt(1),bytes=[],i;
+  for(i=0;i<txt.length;i++)n=n*b62+BigInt(A62.indexOf(txt.charAt(i)));
+  while(n>um){bytes.unshift(Number(n&b255));n=n>>b8;}
+  if(n!==um)return null;
+  try{return new TextDecoder("utf-8",{fatal:true}).decode(Uint8Array.from(bytes));}catch(e){return null;}
+}
+/* Lê e confere um resultado. Retorna {ok:false,msg} ou {ok:true,dados,estado,avisos} */
+function leResultado(txt){
+  var js=deBase62(txt),o;
+  if(js===null)return {ok:false,msg:"Não foi possível decodificar. Confira se o arquivo ou o código está completo e sem alterações."};
+  try{o=JSON.parse(js);}catch(e){return {ok:false,msg:"O conteúdo decodificado não é um resultado válido do jogo."};}
+  var okNum=function(x){return typeof x==="number"&&isFinite(x)&&x>=0&&Math.floor(x)===x;};
+  if(!o||typeof o!=="object"||o.jogo!=="Esportes olímpicos"||!okNum(o.pontos)||!okNum(o.maximo)||!okNum(o.vidas)||!Array.isArray(o.niveis)||typeof o.data!=="string")
+    return {ok:false,msg:"O conteúdo decodificado não é um resultado válido do jogo."};
+  var avisos=[],estado="ok",soma=0,i;
+  for(i=0;i<o.niveis.length;i++){
+    var v=o.niveis[i];
+    if(!v||typeof v.n!=="string"||!okNum(v.p))return {ok:false,msg:"O conteúdo decodificado não é um resultado válido do jogo."};
+    soma+=v.p;
+  }
+  if(o.pontos>o.maximo){estado="bad";avisos.push("A pontuação é maior que o máximo possível.");}
+  if(soma!==o.pontos){estado="bad";avisos.push("A soma dos pontos dos níveis ("+soma+") não confere com o total ("+o.pontos+").");}
+  if(typeof o.ck==="string"){
+    var c={};Object.keys(o).forEach(function(k){if(k!=="ck")c[k]=o[k];});
+    if(hash32(JSON.stringify(c))!==o.ck){estado="bad";avisos.push("O código de verificação não confere: o arquivo foi alterado.");}
+  }else{
+    if(estado==="ok")estado="warn";
+    avisos.push("Este arquivo não tem código de verificação (gerado por uma versão anterior do jogo).");
+  }
+  return {ok:true,dados:o,estado:estado,avisos:avisos};
+}
+function mostraResultado(r){
+  var out=$("resOut");out.innerHTML="";
+  var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+  if(!r.ok){out.appendChild(el("div","res-st bad","✗ Arquivo inválido"));out.appendChild(el("p",null,r.msg));return;}
+  var o=r.dados;
+  var rot={ok:"✓ Arquivo íntegro",warn:"ℹ Sem verificação de integridade",bad:"⚠ Arquivo não confere"};
+  out.appendChild(el("div","res-st "+(r.estado==="bad"?"bad":r.estado),rot[r.estado]));
+  r.avisos.forEach(function(a){out.appendChild(el("p",null,a));});
+  var pc=o.maximo?Math.round(o.pontos*100/o.maximo):0;
+  out.appendChild(el("div","res-big","⭐ "+o.pontos+" de "+o.maximo+" pontos ("+pc+"%)"));
+  var d=new Date(o.data);
+  out.appendChild(el("p",null,"Data: "+(isNaN(d)?"data inválida":d.toLocaleString("pt-BR"))));
+  out.appendChild(el("p",null,"Vidas restantes ao final: "+o.vidas+" de "+VIDAS_MAX));
+  var tb=el("table","res-tb"),th=el("tr");
+  ["Nível","Pontos","Máximo do nível"].forEach(function(h){th.appendChild(el("th",null,h));});
+  tb.appendChild(th);
+  o.niveis.forEach(function(v){
+    var tr=el("tr"),mx=NIVEIS[v.n]?NIVEIS[v.n].n*PTS_CARTAO:"-";
+    tr.appendChild(el("td",null,v.n));tr.appendChild(el("td",null,String(v.p)));tr.appendChild(el("td",null,String(mx)));
+    tb.appendChild(tr);
+  });
+  out.appendChild(tb);
+}
+function baixaResultado(cod){
+  var d=new Date(),z=function(x){return String(x).padStart(2,"0");};
+  var nome="esportes-olimpicos-"+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"-"+z(d.getHours())+z(d.getMinutes())+".txt";
+  var url=URL.createObjectURL(new Blob([cod],{type:"text/plain;charset=utf-8"}));
+  var a=document.createElement("a");a.href=url;a.download=nome;document.body.appendChild(a);a.click();
+  document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+function abreOverlay(ic,t,p,btn,fn){
+  $("ovB2").hidden=true;
+  $("ovI").textContent=ic;$("ovT").textContent=t;$("ovP").textContent=p;$("ovB").textContent=btn;
+  acao=fn;$("ov").classList.add("on");$("ovB").focus();
+}
+$("ovB2").addEventListener("click",function(){baixaResultado(textoResultado());});
+$("ovB").addEventListener("click",function(){$("ov").classList.remove("on");var f=acao;acao=null;if(f)f();});
+
+function porId(id){return TODOS[id];}
+
+function criaTile(it){
+  var b=document.createElement("button");
+  b.type="button";b.className="tile c"+it.cor;b.dataset.id=it.id;
+  b.setAttribute("aria-label",it.nome);
+  var t=document.createElement("span");t.textContent=it.nome;
+  b.appendChild(t);
+  if(selecionado===it.id)b.classList.add("sel");
+  b.addEventListener("pointerdown",inicioArraste);
+  b.addEventListener("click",function(e){
+    if(b._moveu){b._moveu=false;return;}
+    selecionado=(selecionado===it.id)?null:it.id;desenhar(true);
+  });
+  return b;
+}
+
+function desenhar(manterMsg){
+  /* banco */
+  bank.innerHTML="";
+  bank._ids.forEach(function(id){bank.appendChild(criaTile(porId(id)));});
+  if(!bank._ids.length){var d=document.createElement("span");d.className="done";d.textContent="Todos os cartões foram colocados! Clique em Verificar.";bank.appendChild(d);}
+  /* casas */
+  grid.innerHTML="";
+  slots.forEach(function(id,i){
+    var s=document.createElement("div");s.className="slot";s.dataset.i=i;s.tabIndex=0;
+    s.setAttribute("aria-label","Casa "+(i+1));
+    var n=document.createElement("span");n.className="n";n.textContent=(i+1)+"º";s.appendChild(n);
+    if(id!==null)s.appendChild(criaTile(porId(id)));
+    s.addEventListener("click",function(e){
+      if(selecionado!==null&&e.target.closest(".tile")===null){colocar(selecionado,"slot",i);}
+    });
+    grid.appendChild(s);
+  });
+  if(!manterMsg){msg.textContent="";msg.className="msg";}
+}
+
+/* Move cartão id para destino ("bank" ou "slot",i) */
+function colocar(id,tipo,i){
+  var origemSlot=slots.indexOf(id);
+  var origemBanco=bank._ids.indexOf(id);
+  var ocupante=(tipo==="slot")?slots[i]:null;
+  if(tipo==="slot"&&ocupante===id)return;
+  if(origemSlot>-1)slots[origemSlot]=null;
+  if(origemBanco>-1)bank._ids.splice(origemBanco,1);
+  if(tipo==="slot"){
+    slots[i]=id;
+    if(ocupante!==null){
+      if(origemSlot>-1)slots[origemSlot]=ocupante;else bank._ids.push(ocupante);
+    }
+  }else{
+    bank._ids.push(id);
+  }
+  selecionado=null;desenhar();
+}
+
+/* ===== Arrastar e soltar (mouse, toque e caneta) ===== */
+var arr=null;
+function inicioArraste(e){
+  if(e.button>0)return;
+  var el=e.currentTarget;
+  arr={el:el,id:+el.dataset.id,x:e.clientX,y:e.clientY,ghost:null,ativo:false};
+  document.addEventListener("pointermove",moverArraste);
+  document.addEventListener("pointerup",fimArraste);
+  document.addEventListener("pointercancel",cancelaArraste);
+}
+function moverArraste(e){
+  if(!arr)return;
+  if(!arr.ativo){
+    if(Math.abs(e.clientX-arr.x)+Math.abs(e.clientY-arr.y)<6)return;
+    arr.ativo=true;
+    var r=arr.el.getBoundingClientRect();
+    arr.dx=e.clientX-r.left;arr.dy=e.clientY-r.top;
+    var g=arr.el.cloneNode(true);g.classList.add("ghost");g.style.width=r.width+"px";g.style.height=r.height+"px";
+    document.body.appendChild(g);arr.ghost=g;arr.el.classList.add("lift");
+  }
+  arr.ghost.style.left=(e.clientX-arr.dx)+"px";arr.ghost.style.top=(e.clientY-arr.dy)+"px";
+  limpaOver();
+  var alvo=alvoEm(e.clientX,e.clientY);
+  if(alvo)alvo.classList.add("over");
+}
+function alvoEm(x,y){
+  var el=document.elementFromPoint(x,y);
+  return el?(el.closest(".slot")||el.closest("#bank")):null;
+}
+function limpaOver(){
+  var o=document.querySelectorAll(".over");
+  for(var i=0;i<o.length;i++)o[i].classList.remove("over");
+}
+function fim(){
+  document.removeEventListener("pointermove",moverArraste);
+  document.removeEventListener("pointerup",fimArraste);
+  document.removeEventListener("pointercancel",cancelaArraste);
+  limpaOver();
+  if(arr&&arr.ghost)arr.ghost.remove();
+}
+function fimArraste(e){
+  if(!arr)return;
+  var a=arr,foi=a.ativo;
+  var alvo=foi?alvoEm(e.clientX,e.clientY):null;
+  fim();arr=null;
+  if(!foi)return;
+  a.el._moveu=true;
+  setTimeout(function(){a.el._moveu=false;},0);
+  if(!alvo){a.el.classList.remove("lift");return;}
+  if(alvo.classList.contains("slot"))colocar(a.id,"slot",+alvo.dataset.i);
+  else colocar(a.id,"bank");
+}
+function cancelaArraste(){if(arr){arr.el.classList.remove("lift");}fim();arr=null;}
+
+/* Clicar no banco com um cartão selecionado devolve o cartão */
+bank.addEventListener("click",function(e){
+  if(selecionado!==null&&e.target.closest(".tile")===null&&slots.indexOf(selecionado)>-1)colocar(selecionado,"bank");
+});
+
+/* ===== Verificar ===== */
+$("check").addEventListener("click",function(){
+  var vazias=slots.filter(function(x){return x===null;}).length;
+  var certas=0;
+  var els=grid.querySelectorAll(".slot");
+  slots.forEach(function(id,i){
+    els[i].classList.remove("ok","no");
+    if(id===null)return;
+    if(id===gabarito[i].id){els[i].classList.add("ok");certas++;}
+    else els[i].classList.add("no");
+  });
+  if(!vazias){
+    slots.forEach(function(id,i){
+      if(id===gabarito[i].id&&!creditados[id]){creditados[id]=1;pontos+=PTS_CARTAO;}
+    });
+    mostraPontos();
+  }
+  if(certas===itens.length){
+    var i=NOMES.indexOf(nivel);
+    resultados.push({n:nivel,p:pontos-pontosEntrada});
+    if(i<NOMES.length-1){
+      msg.className="msg good";msg.textContent="🎉 Tudo certo!";
+      abreOverlay("🎉","Muito bem!","Nível "+nivel+" concluído. Você segue para o próximo com "+vidas+(vidas===1?" vida.":" vidas."),"Próximo nível ▶",function(){
+        nivel=NOMES[i+1];vidasEntrada=vidas;pontosEntrada=pontos;montaNiveis();novoJogo();mostraInfo();
+      });
+    }else{
+      jogoFim=true;montaNiveis();
+      var cod=textoResultado();baixaResultado(cod);
+      abreOverlay("🏆","Parabéns, campeão!","Você fez "+pontos+" de "+MAX_PONTOS+" pontos. O resultado foi salvo em um arquivo .txt.","Jogar de novo",function(){
+        jogoFim=false;nivel=NOMES[0];vidas=VIDAS_MAX;vidasEntrada=VIDAS_MAX;pontos=0;pontosEntrada=0;resultados=[];mostraPontos();montaNiveis();novoJogo();mostraInfo();
+      });
+      $("ovB2").textContent="💾 Baixar de novo";$("ovB2").hidden=false;
+    }
+  }else if(vazias){
+    msg.className="msg bad";msg.textContent="Faltam "+vazias+" cartão(ões). Coloque todos antes de verificar.";
+  }else{
+    vidas--;mostraVidas(true);
+    if(vidas<=0){
+      msg.className="msg";msg.textContent="";
+      abreOverlay("💔","Acabaram as vidas","Você volta ao início do nível "+nivel+" com "+vidasEntrada+(vidasEntrada===1?" vida":" vidas")+" e "+pontosEntrada+" pontos, com novo sorteio.","Refazer nível",function(){
+        vidas=vidasEntrada;pontos=pontosEntrada;novoJogo();
+      });
+    }else{
+      msg.className="msg";msg.textContent="";
+      abreOverlay("😬","Ops! Você perdeu 1 vida","Acertou "+certas+" de "+itens.length+". Restam "+vidas+(vidas===1?" vida":" vidas")+". Vamos refazer a ordem!","Tentar de novo",function(){
+        slots=itens.map(function(){return null;});
+        bank._ids=shuffle(itens).map(function(x){return x.id;});
+        selecionado=null;desenhar();
+      });
+    }
+  }
+});
+$("clear").addEventListener("click",function(){
+  slots=itens.map(function(){return null;});
+  bank._ids=shuffle(itens).map(function(x){return x.id;});
+  selecionado=null;desenhar();
+});
+$("again").addEventListener("click",novoJogo);
+
+/* ===== Níveis de dificuldade ===== */
+function montaNiveis(){
+  var box=$("series");box.innerHTML="";
+  var cur=NOMES.indexOf(nivel);
+  NOMES.forEach(function(k,i){
+    var b=document.createElement("button");b.type="button";b.className="chip";
+    var feito=i<cur||(jogoFim&&i===cur), atual=i===cur&&!jogoFim;
+    if(feito){b.classList.add("done");b.textContent="✓ "+k;b.disabled=true;b.setAttribute("aria-label",k+", concluído");}
+    else if(atual){b.textContent=k;b.setAttribute("aria-current","step");b.setAttribute("aria-label",k+", nível atual");}
+    else{b.classList.add("locked");b.textContent="🔒 "+k;b.disabled=true;b.setAttribute("aria-label",k+", bloqueado");}
+    b.setAttribute("aria-pressed",atual?"true":"false");
+    box.appendChild(b);
+  });
+}
+function mostraInfo(){
+  var s=NIVEIS[nivel];
+  $("info").innerHTML='<p class="panel-t">Nível '+nivel+'</p><p style="margin:0;font-weight:500">'+s.desc+'</p>';
+}
+
+/* ===== Aba "Como jogar" ===== */
+(function(){
+  var ln="";Object.keys(NIVEIS).forEach(function(k){ln+="<li><b>"+k+":</b> "+NIVEIS[k].desc+"</li>";});
+  $("howNiveis").innerHTML=ln;
+  var lh="";HABILIDADES.forEach(function(g){
+    lh+='<h3 class="comp">'+g[0]+'</h3><ul>';
+    g[1].forEach(function(x){lh+="<li><code>"+x[0]+"</code> "+x[1]+"</li>";});
+    lh+="</ul>";
+  });
+  $("howHab").innerHTML=lh;
+  var abas=[["tabJ","pJogo"],["tabH","pAjuda"],["tabK","pHab"],["tabR","pRes"]];
+  $("resBtn").addEventListener("click",function(){mostraResultado(leResultado($("resTxt").value));});
+  $("resFile").addEventListener("change",function(){
+    var f=this.files&&this.files[0];if(!f)return;
+    if(f.size>20000){mostraResultado({ok:false,msg:"O arquivo é grande demais para ser um resultado do jogo."});return;}
+    var rd=new FileReader();
+    rd.onload=function(){$("resTxt").value=String(rd.result).trim();mostraResultado(leResultado(rd.result));};
+    rd.onerror=function(){mostraResultado({ok:false,msg:"Não foi possível ler o arquivo."});};
+    rd.readAsText(f);
+  });
+  function ativa(i,foco){
+    abas.forEach(function(a,j){
+      var t=$(a[0]);t.setAttribute("aria-selected",j===i?"true":"false");t.tabIndex=j===i?0:-1;
+      $(a[1]).hidden=j!==i;
+    });
+    if(foco)$(abas[i][0]).focus();
+  }
+  abas.forEach(function(a,i){
+    $(a[0]).addEventListener("click",function(){ativa(i);});
+    $(a[0]).addEventListener("keydown",function(e){
+      if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();ativa((i+1)%abas.length,true);}
+    });
+  });
+})();
+
+montaNiveis();novoJogo();mostraInfo();
+})();
+</script>
+</body>
+</html>
