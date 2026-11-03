@@ -55,6 +55,7 @@ h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin:0 0 4px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
 .btn{font:inherit;font-weight:800;font-size:1.05rem;border:0;border-radius:12px;padding:10px 20px;cursor:pointer;
   background:var(--brand);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;filter:grayscale(.4)}
 .btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:none}
 .msg{font-weight:700;min-height:1.4em}
 .msg.good{color:var(--ok)} .msg.bad{color:var(--bad)}
@@ -406,6 +407,9 @@ function desenhar(manterMsg){
     grid.appendChild(s);
   });
   if(!manterMsg){msg.textContent="";msg.className="msg";}
+  var cheio=slots.every(function(id){return id!==null;}),bt=$("check");
+  bt.disabled=!cheio;
+  bt.title=cheio?"":"Coloque todos os cartões nas casas para poder verificar";
 }
 
 /* Move cartão id para destino ("bank" ou "slot",i) */
