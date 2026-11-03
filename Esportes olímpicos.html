@@ -85,6 +85,10 @@ textarea.res-in{font-family:ui-monospace,Consolas,monospace;font-size:.9rem;word
 .res-big{font-size:1.8rem;font-weight:800;margin:4px 0 10px}
 .res-tb{border-collapse:collapse;margin-top:8px;min-width:260px}
 .res-tb th,.res-tb td{border:2px solid var(--line);padding:6px 12px;text-align:left}
+.res-wrap{overflow-x:auto;margin-top:8px}
+.res-wrap .res-tb{margin-top:0;min-width:640px}
+.res-tb tr.bad td{background:color-mix(in srgb,#e5384c 16%,var(--card))}
+.res-tb .btn{padding:4px 12px;font-size:.9rem}
 .panel-t{font-weight:800;font-size:1.05rem;margin:0 0 6px}
 .tabs{display:flex;gap:6px;margin:0 0 14px;border-bottom:3px solid var(--line)}
 .tab{font:inherit;font-weight:800;font-size:1.05rem;border:3px solid var(--line);border-bottom:0;background:var(--card);color:var(--muted);
@@ -166,7 +170,7 @@ textarea.res-in{font-family:ui-monospace,Consolas,monospace;font-size:.9rem;word
       <li>Cada cartão no lugar certo vale <b>10 pontos</b>, contados uma única vez por nível.</li>
       <li>Se perder todas as vidas e refazer o nível, os pontos daquele nível são descontados.</li>
       <li>Ao terminar o último nível, o jogo pede o <b>nome do aluno</b> e salva o resultado em um arquivo <b>.txt</b> (código em base62).</li>
-      <li>Para ver esse resultado depois, abra o jogo, entre na aba <b>Resultado</b> e carregue o arquivo.</li>
+      <li>Para ver esse resultado depois, abra o jogo, entre na aba <b>Resultado</b> e carregue o arquivo. Dá para carregar vários de uma vez e ver a turma toda.</li>
     </ul>
 
     <h2>Níveis</h2>
@@ -179,8 +183,8 @@ textarea.res-in{font-family:ui-monospace,Consolas,monospace;font-size:.9rem;word
 
   <section class="info how" id="pRes" role="tabpanel" aria-labelledby="tabR" hidden>
     <h2>Resultado do aluno</h2>
-    <p style="margin:0 0 8px;font-weight:500">Carregue o arquivo <b>.txt</b> salvo ao final do jogo para ver e verificar o resultado.</p>
-    <p style="margin:0 0 12px"><input type="file" id="resFile" class="res-in" accept=".txt,text/plain" aria-label="Arquivo de resultado .txt"></p>
+    <p style="margin:0 0 8px;font-weight:500">Carregue o arquivo <b>.txt</b> de um aluno para ver o resultado detalhado, ou selecione <b>vários arquivos de uma vez</b> para ver a turma toda em uma tabela.</p>
+    <p style="margin:0 0 12px"><input type="file" id="resFile" class="res-in" accept=".txt,text/plain" multiple aria-label="Arquivos de resultado .txt"></p>
     <p style="margin:0 0 4px;font-weight:500">Ou cole o código do arquivo:</p>
     <textarea id="resTxt" class="res-in" rows="3" aria-label="Código do resultado"></textarea>
     <p style="margin:8px 0 0"><button class="btn" id="resBtn" type="button">Verificar</button></p>
@@ -352,8 +356,8 @@ function leResultado(txt){
   }
   return {ok:true,dados:o,estado:estado,avisos:avisos};
 }
-function mostraResultado(r){
-  var out=$("resOut");out.innerHTML="";
+function mostraResultado(r,alvo){
+  var out=alvo||$("resOut");out.innerHTML="";
   var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
   if(!r.ok){out.appendChild(el("div","res-st bad","✗ Arquivo inválido"));out.appendChild(el("p",null,r.msg));return;}
   var o=r.dados;
@@ -376,12 +380,64 @@ function mostraResultado(r){
   });
   out.appendChild(tb);
 }
-function baixaResultado(cod){
+function lerArquivo(f){
+  return new Promise(function(ok){
+    if(f.size>20000){ok({nome:f.name,texto:null,r:{ok:false,msg:"O arquivo é grande demais para ser um resultado do jogo."}});return;}
+    var rd=new FileReader();
+    rd.onload=function(){var t=String(rd.result);ok({nome:f.name,texto:t,r:leResultado(t)});};
+    rd.onerror=function(){ok({nome:f.name,texto:null,r:{ok:false,msg:"Não foi possível ler o arquivo."}});};
+    rd.readAsText(f);
+  });
+}
+function mostraTurma(lst){
+  var out=$("resOut");out.innerHTML="";
+  var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;};
+  var chave=function(x){return x.r.ok?x.r.dados.aluno||"":"";};
+  var cont={ok:0,warn:0,bad:0,inv:0},soma=0,nv=0,rep={};
+  lst.forEach(function(x){
+    if(!x.r.ok){cont.inv++;return;}
+    cont[x.r.estado]++;soma+=x.r.dados.pontos;nv++;
+    var k=chave(x).toLowerCase();if(k)rep[k]=(rep[k]||0)+1;
+  });
+  var nf=function(n){return n.toLocaleString("pt-BR",{maximumFractionDigits:1});};
+  var resumo=lst.length+" arquivos lidos: "+cont.ok+" íntegros, "+cont.warn+" sem verificação, "+cont.bad+" que não conferem, "+cont.inv+" inválidos.";
+  if(nv){var mx=lst.filter(function(x){return x.r.ok;})[0].r.dados.maximo;resumo+=" Média de pontos: "+nf(soma/nv)+" de "+mx+".";}
+  out.appendChild(el("p",null,resumo));
+  var ord=lst.slice().sort(function(a,b){
+    var na=chave(a),nb=chave(b);
+    if(!na!==!nb)return na?-1:1;
+    return na.localeCompare(nb,"pt",{sensitivity:"base"})||a.nome.localeCompare(b.nome,"pt");
+  });
+  var wrap=el("div","res-wrap"),tb=el("table","res-tb"),th=el("tr");
+  ["Aluno","Pontos","%","Vidas","Data","Situação","Arquivo",""].forEach(function(h){th.appendChild(el("th",null,h));});
+  tb.appendChild(th);
+  var det=el("div");det.tabIndex=-1;
+  var rot={ok:"✓ Íntegro",warn:"ℹ Sem verificação",bad:"⚠ Não confere"};
+  ord.forEach(function(x){
+    var tr=el("tr"),r=x.r,o=r.dados,td=function(t){tr.appendChild(el("td",null,t));};
+    if(!r.ok||r.estado==="bad")tr.className="bad";
+    if(r.ok){
+      var d=new Date(o.data),k=(o.aluno||"").toLowerCase();
+      td(o.aluno||"(sem nome)");td(o.pontos+" / "+o.maximo);td((o.maximo?Math.round(o.pontos*100/o.maximo):0)+"%");td(String(o.vidas));
+      td(isNaN(d)?"data inválida":d.toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}));
+      td(rot[r.estado]+(k&&rep[k]>1?" · nome repetido":""));
+    }else{td("—");td("—");td("—");td("—");td("—");td("✗ Inválido");}
+    td(x.nome);
+    var c=el("td"),b=el("button","btn alt","Detalhes");b.type="button";
+    b.setAttribute("aria-label","Ver detalhes de "+(r.ok?(o.aluno||"aluno sem nome"):x.nome));
+    b.addEventListener("click",function(){mostraResultado(r,det);det.focus();if(det.scrollIntoView)det.scrollIntoView({block:"nearest"});});
+    c.appendChild(b);tr.appendChild(c);tb.appendChild(tr);
+  });
+  wrap.appendChild(tb);out.appendChild(wrap);out.appendChild(det);
+}
+function nomeArquivo(){
   var d=new Date(),z=function(x){return String(x).padStart(2,"0");};
   var slug=nomeSalvo.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,30).replace(/-+$/,"");
-  var nome="esportes-olimpicos-"+(slug?slug+"-":"")+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"-"+z(d.getHours())+z(d.getMinutes())+".txt";
-  var url=URL.createObjectURL(new Blob([cod],{type:"text/plain;charset=utf-8"}));
-  var a=document.createElement("a");a.href=url;a.download=nome;document.body.appendChild(a);a.click();
+  return "esportes-olimpicos-"+(slug?slug+"-":"")+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"-"+z(d.getHours())+z(d.getMinutes())+".txt";
+}
+function baixaArquivo(f){
+  var url=URL.createObjectURL(new Blob([f.cod],{type:"text/plain;charset=utf-8"}));
+  var a=document.createElement("a");a.href=url;a.download=f.nome;document.body.appendChild(a);a.click();
   document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);
 }
 function abreOverlay(ic,t,p,btn,fn){
@@ -390,7 +446,7 @@ function abreOverlay(ic,t,p,btn,fn){
   acao=fn;$("ov").classList.add("on");$("ovB").focus();
 }
 /* ===== Modal do nome do aluno (pedido ao finalizar) ===== */
-var nomeSalvo="", acaoNome=null;
+var nomeSalvo="", acaoNome=null, arquivoFinal=null;
 function limpaNome(v){return String(v).replace(/[\u0000-\u001f\u007f]/g," ").replace(/\s+/g," ").trim().slice(0,40);}
 function atualizaNome(){$("nomeOk").disabled=EXIGIR_NOME&&limpaNome($("nomeIn").value)==="";}
 function pedeNome(fn){
@@ -412,7 +468,7 @@ $("ovNome").addEventListener("keydown",function(e){
   var a=$("nomeIn"),b=$("nomeOk"),l=b.disabled?[a]:[a,b],i=l.indexOf(document.activeElement);
   l[e.shiftKey?(i<=0?l.length-1:i-1):(i<0||i===l.length-1?0:i+1)].focus();
 });
-$("ovB2").addEventListener("click",function(){baixaResultado(textoResultado());});
+$("ovB2").addEventListener("click",function(){if(arquivoFinal)baixaArquivo(arquivoFinal);});
 $("ovB").addEventListener("click",function(){$("ov").classList.remove("on");var f=acao;acao=null;if(f)f();});
 
 function porId(id){return TODOS[id];}
@@ -559,9 +615,9 @@ $("check").addEventListener("click",function(){
     }else{
       jogoFim=true;montaNiveis();
       pedeNome(function(){
-      baixaResultado(textoResultado());
+      arquivoFinal={cod:textoResultado(),nome:nomeArquivo()};baixaArquivo(arquivoFinal);
       abreOverlay("🏆","Parabéns, campeão!","Você fez "+pontos+" de "+MAX_PONTOS+" pontos. O resultado foi salvo em um arquivo .txt.","Jogar de novo",function(){
-        nomeSalvo="";jogoFim=false;nivel=NOMES[0];vidas=VIDAS_MAX;vidasEntrada=VIDAS_MAX;pontos=0;pontosEntrada=0;resultados=[];mostraPontos();montaNiveis();novoJogo();mostraInfo();
+        nomeSalvo="";arquivoFinal=null;jogoFim=false;nivel=NOMES[0];vidas=VIDAS_MAX;vidasEntrada=VIDAS_MAX;pontos=0;pontosEntrada=0;resultados=[];mostraPontos();montaNiveis();novoJogo();mostraInfo();
       });
       $("ovB2").textContent="💾 Baixar de novo";$("ovB2").hidden=false;
       });
@@ -624,12 +680,12 @@ function mostraInfo(){
   var abas=[["tabJ","pJogo"],["tabH","pAjuda"],["tabK","pHab"],["tabR","pRes"]];
   $("resBtn").addEventListener("click",function(){mostraResultado(leResultado($("resTxt").value));});
   $("resFile").addEventListener("change",function(){
-    var f=this.files&&this.files[0];if(!f)return;
-    if(f.size>20000){mostraResultado({ok:false,msg:"O arquivo é grande demais para ser um resultado do jogo."});return;}
-    var rd=new FileReader();
-    rd.onload=function(){$("resTxt").value=String(rd.result).trim();mostraResultado(leResultado(rd.result));};
-    rd.onerror=function(){mostraResultado({ok:false,msg:"Não foi possível ler o arquivo."});};
-    rd.readAsText(f);
+    var fs=Array.prototype.slice.call(this.files||[]);if(!fs.length)return;
+    if(fs.length>80){mostraResultado({ok:false,msg:"Selecione no máximo 80 arquivos por vez."});return;}
+    Promise.all(fs.map(lerArquivo)).then(function(lst){
+      if(lst.length===1){if(lst[0].texto!==null)$("resTxt").value=lst[0].texto.trim();mostraResultado(lst[0].r);}
+      else mostraTurma(lst);
+    });
   });
   function ativa(i,foco){
     abas.forEach(function(a,j){
