@@ -690,7 +690,11 @@ const IMG_DINHEIRO = {
 
 const MAX_VIDAS = 5;
 const EXERCICIOS_POR_FASE_MULTI = 10;
-const SENHA_PROFESSOR = "30102026";
+// Senha do professor = data de hoje no formato DDMMAAAA (relógio do dispositivo)
+function senhaProfessorDoDia(){
+  const d = new Date();
+  return String(d.getDate()).padStart(2, "0") + String(d.getMonth() + 1).padStart(2, "0") + d.getFullYear();
+}
 const fmt = v => v.toFixed(2).replace(".", ",");
 
 function embaralhar(arr){
@@ -1454,7 +1458,11 @@ function responderMulti(botao, valor){
   if(vidasMulti <= 0){
     $("btn-proxima-multi").style.display = "inline-block";
     $("btn-proxima-multi").textContent = "Ver resultado";
-    $("btn-proxima-multi").onclick = () => finalizarMulti(false);
+    $("btn-proxima-multi").onclick = () => {
+      respostasMulti.forEach(r => todasRespostasMulti.push(r));
+      respostasMulti = [];
+      finalizarMulti(false);
+    };
     return;
   }
 
@@ -1465,8 +1473,8 @@ function responderMulti(botao, valor){
     $("btn-proxima-multi").textContent = "Ver resultado da fase";
     $("btn-proxima-multi").onclick = () => mostrarResultadoFase();
   } else if(fimDaFase && ultimaFase){
-    $("btn-proxima-multi").textContent = "Ver resultado";
-    $("btn-proxima-multi").onclick = () => finalizarMulti(true);
+    $("btn-proxima-multi").textContent = "Ver resultado da fase";
+    $("btn-proxima-multi").onclick = () => mostrarResultadoFase();
   } else {
     $("btn-proxima-multi").textContent = "Próxima";
     $("btn-proxima-multi").onclick = proximaMulti;
@@ -1845,8 +1853,8 @@ function abrirLoginProfessor(){
 }
 
 function tentarEntrarProfessor(){
-  const senha = $("input-senha-prof").value.trim();
-  if(senha === SENHA_PROFESSOR){
+  const senha = $("input-senha-prof").value.replace(/\D/g, "");
+  if(senha === senhaProfessorDoDia()){
     $("erro-senha-prof").textContent = "";
     abrirAreaProfessor();
   } else {
