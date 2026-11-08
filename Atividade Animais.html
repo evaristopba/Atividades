@@ -157,6 +157,26 @@
     border:none; border-radius:14px; background:var(--btn); color:var(--text); cursor:pointer;
   }
 
+  /* jogo 4: abrir a caixa */
+  #game4 h1{font-size:1.5rem; margin:8px 0}
+  .caixas{display:grid; grid-template-columns:repeat(auto-fit,minmax(78px,1fr)); gap:12px; margin:16px auto 0; max-width:560px}
+  .cx{
+    font:inherit; font-size:2rem; font-weight:bold; aspect-ratio:1/1; border:none; border-radius:16px;
+    background:var(--btn); color:var(--text); cursor:pointer; box-shadow:0 4px 0 var(--accent);
+  }
+  .cx:hover:not(:disabled){background:var(--btn-hover); transform:scale(1.05)}
+  .cx.aberta{background:var(--ok); color:#fff; box-shadow:none; cursor:default}
+  .palavra{font-size:3rem; font-weight:bold; text-transform:uppercase; margin:16px 0; letter-spacing:2px}
+  .figuras{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:560px; margin:0 auto}
+  .fig{
+    aspect-ratio:1/1; border:4px solid var(--accent); border-radius:16px; background:#fff; padding:4px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .fig img{max-width:100%; max-height:100%; object-fit:contain}
+  .fig.certo{border-color:var(--ok); box-shadow:0 0 0 4px var(--ok)}
+  .fig.errado{border-color:var(--bad); box-shadow:0 0 0 4px var(--bad)}
+  .fig:disabled{cursor:default}
+
   /* barra do aluno, pontos e progresso */
   .barra{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; margin-bottom:8px}
   .barra input[type=text]{
@@ -189,6 +209,7 @@
     <button class="aba" role="tab" id="t-jogo" aria-selected="true" aria-controls="p-jogo" data-alvo="p-jogo">🎮 Escolher</button>
     <button class="aba" role="tab" id="t-combo" aria-selected="false" aria-controls="p-combo" data-alvo="p-combo">🔗 Combinar</button>
     <button class="aba" role="tab" id="t-ana" aria-selected="false" aria-controls="p-ana" data-alvo="p-ana">🔤 Anagrama</button>
+    <button class="aba" role="tab" id="t-caixa" aria-selected="false" aria-controls="p-caixa" data-alvo="p-caixa">📦 Abrir a caixa</button>
     <button class="aba" role="tab" id="t-como" aria-selected="false" aria-controls="p-como" data-alvo="p-como">❓ Como jogar</button>
     <button class="aba" role="tab" id="t-bncc" aria-selected="false" aria-controls="p-bncc" data-alvo="p-bncc">📚 Habilidades</button>
   </div>
@@ -203,6 +224,10 @@
 
   <section class="painel" id="p-ana" role="tabpanel" aria-labelledby="t-ana" hidden>
     <div id="game3"></div>
+  </section>
+
+  <section class="painel" id="p-caixa" role="tabpanel" aria-labelledby="t-caixa" hidden>
+    <div id="game4"></div>
   </section>
 
   <section class="painel info" id="p-como" role="tabpanel" aria-labelledby="t-como" hidden>
@@ -239,6 +264,17 @@
       <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
       <li>Para ganhar, forme o nome de todos os animais! 🏆</li>
     </ol>
+    <h3>📦 Abrir a caixa</h3>
+    <ol>
+      <li>Toque em uma caixa numerada para abrir. Você escolhe a ordem!</li>
+      <li>Leia o nome do animal que aparece.</li>
+      <li>Toque na imagem que combina com o nome. São três imagens.</li>
+      <li>Se acertar, a caixa fica verde ✅ e você volta para as caixas.</li>
+      <li>Se errar, você perde um coração ❤️ e a caixa continua fechada para tentar de novo mais tarde.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Para ganhar, abra todas as caixas! 🏆</li>
+    </ol>
+
     <h3>⭐ Pontos e progresso</h3>
     <ol>
       <li>Escreva o nome do aluno no alto da página.</li>
@@ -247,7 +283,7 @@
       <li>Toque em <strong>💾 Salvar</strong> para baixar o arquivo do progresso. Mais tarde, use <strong>📂 Restaurar</strong> para continuar de onde parou.</li>
       <li>Só as atividades já terminadas são guardadas. A atividade em andamento recomeça.</li>
     </ol>
-    <p class="nota creditos">Todas as atividades desta página (Escolher, Combinar e Anagrama) foram inspiradas em um recurso do Wordwall: <a href="https://wordwall.net/pt/resource/31919531/coloque-as-letras-em-ordem-para-formar-o-nome-dos-animais" target="_blank" rel="noopener noreferrer">COLOQUE AS LETRAS EM ORDEM PARA FORMAR O NOME DOS ANIMAIS.</a></p>
+    <p class="nota creditos">Todas as atividades desta página (Escolher, Combinar, Anagrama e Abrir a caixa) foram inspiradas em um recurso do Wordwall: <a href="https://wordwall.net/pt/resource/31919531/coloque-as-letras-em-ordem-para-formar-o-nome-dos-animais" target="_blank" rel="noopener noreferrer">COLOQUE AS LETRAS EM ORDEM PARA FORMAR O NOME DOS ANIMAIS.</a></p>
   </section>
 
   <section class="painel info" id="p-bncc" role="tabpanel" aria-labelledby="t-bncc" hidden>
@@ -343,8 +379,8 @@
   }
 
   const Prog = (() => {
-    const ABAS = ["t-jogo", "t-combo", "t-ana"], PAINEIS = ["p-jogo", "p-combo", "p-ana"];
-    const feito = [false, false, false], pts = [0, 0, 0], jogos = [];
+    const ABAS = ["t-jogo", "t-combo", "t-ana", "t-caixa"], PAINEIS = ["p-jogo", "p-combo", "p-ana", "p-caixa"];
+    const feito = [false, false, false, false], pts = [0, 0, 0, 0], jogos = [];
     const $ = id => document.getElementById(id);
     const total = () => pts.reduce((a, b) => a + b, 0);
     const aviso = (t, ok = true) => { const el = $("aviso"); el.textContent = t; el.className = "aviso " + (ok ? "ok" : "erro"); };
@@ -364,11 +400,22 @@
           <p style="font-size:1.3rem">${j.texto}</p>
           <p style="font-size:1.3rem">⭐ ${pts[i]} pontos nesta atividade</p>
           ${ultima
-            ? `<p style="font-size:1.3rem"><strong>Total: ${total()} pontos</strong></p><p>Toque em <strong>💾 Salvar</strong> para guardar o progresso.</p>`
+            ? `<p style="font-size:1.3rem"><strong>Total: ${total()} pontos</strong></p><p>Toque em <strong>💾 Salvar</strong> para guardar o progresso.</p><button id="de-novo">Jogar novamente</button>`
             : '<button id="prox">Próxima atividade ➜</button>'}
         </div>`;
       const b = j.el.querySelector("#prox");
       if (b) b.addEventListener("click", () => abrir(PAINEIS[i + 1]));
+      const r = j.el.querySelector("#de-novo");
+      if (r) r.addEventListener("click", reiniciar);
+    }
+
+    // recomeça tudo: zera pontos e libera só a primeira atividade (o nome do aluno continua)
+    function reiniciar() {
+      for (let i = 0; i < ABAS.length; i++) { feito[i] = false; pts[i] = 0; }
+      jogos.forEach(j => j.iniciar());
+      atualizar();
+      abrir(PAINEIS[0]);
+      $("aviso").textContent = "";
     }
 
     function salvar() {
@@ -959,6 +1006,109 @@
     });
 
     Prog.reg(2, { el: jogo, texto: "Você formou o nome de todos os animais!", iniciar, salvar, carregar });
+    iniciar();
+  })();
+
+  /* =====================================================
+     ATIVIDADE 4 — ABRIR A CAIXA (ler o nome e achar a imagem)
+     ===================================================== */
+  (function caixa() {
+    const jogo = document.getElementById("game4");
+    let ordem, feitos, vidas, pts, errou, travado;   // ordem[i] = animal que está na caixa i
+
+    function iniciar() {
+      ordem = embaralhar(ANIMAIS.map((_, i) => i));
+      feitos = ordem.map(() => false);
+      vidas = VIDAS_INICIAIS;
+      pts = 0; errou = new Set(); Prog.pts(3, 0);
+      grade();
+    }
+
+    function grade() {
+      travado = false;
+      jogo.innerHTML = `
+        <div class="top">
+          <span>📦 ${feitos.filter(Boolean).length} / ${feitos.length}</span>
+          <span class="vidas" aria-label="${vidas} vidas">${coracoes(vidas)}</span>
+        </div>
+        <h1>Escolha uma caixa para abrir</h1>
+        <div class="caixas">
+          ${ordem.map((_, i) => `<button class="cx${feitos[i] ? " aberta" : ""}" data-i="${i}" ${feitos[i] ? "disabled" : ""} aria-label="Caixa ${i + 1}">${feitos[i] ? "✅" : i + 1}</button>`).join("")}
+        </div>
+        <div class="msg" id="msg"></div>
+      `;
+      jogo.querySelectorAll(".cx:not(:disabled)").forEach(b =>
+        b.addEventListener("click", () => abrirCaixa(Number(b.dataset.i))));
+    }
+
+    function abrirCaixa(i) {
+      travado = false;
+      const k = ordem[i];
+      const outras = embaralhar(ANIMAIS.map((_, j) => j).filter(j => j !== k)).slice(0, 2);
+      const opcoes = embaralhar([k, ...outras]);
+      jogo.innerHTML = `
+        <div class="top">
+          <span>📦 Caixa ${i + 1}</span>
+          <span class="vidas" aria-label="${vidas} vidas">${coracoes(vidas)}</span>
+        </div>
+        <h1>Leia o nome e escolha a imagem certa</h1>
+        <div class="palavra">${ANIMAIS[k].nome}</div>
+        <div class="figuras">
+          ${opcoes.map(j => `<button class="fig" data-j="${j}"><img src="${ANIMAIS[j].img}" alt="Imagem de um animal"></button>`).join("")}
+        </div>
+        <div class="msg" id="msg"></div>
+      `;
+      jogo.querySelectorAll(".fig").forEach(b => b.addEventListener("click", () => responder(b, i, k)));
+    }
+
+    function responder(botao, i, k) {
+      if (travado) return;
+      travado = true;
+      const msg = jogo.querySelector("#msg");
+      jogo.querySelectorAll(".fig").forEach(b => b.disabled = true);
+
+      if (Number(botao.dataset.j) === k) {
+        botao.classList.add("certo");
+        feitos[i] = true;
+        pts += errou.has(k) ? 5 : 10; Prog.pts(3, pts);
+        msg.textContent = "🎉 Muito bem!";
+        setTimeout(() => feitos.every(Boolean) ? vitoria() : grade(), 1200);
+        return;
+      }
+
+      botao.classList.add("errado");
+      errou.add(k);
+      jogo.classList.remove("shake");
+      void jogo.offsetWidth;
+      jogo.classList.add("shake");
+      vidas--;
+      jogo.querySelector(".vidas").textContent = coracoes(vidas);
+
+      if (vidas === 0) {
+        msg.textContent = "😢 As vidas acabaram. Vamos recomeçar!";
+        setTimeout(iniciar, 2000);
+      } else {
+        msg.innerHTML = 'Quase! Essa caixa continua fechada.<br><button class="proxima" id="voltar">Voltar às caixas ➜</button>';
+        jogo.querySelector("#voltar").addEventListener("click", () => grade());
+      }
+    }
+
+    function vitoria() { Prog.concluir(3); }
+
+    function salvar() {
+      return { c: ordem.slice(), d: feitos.map(Number), v: vidas, p: pts, e: [...errou] };
+    }
+    function carregar(st) {
+      if (!st || !idsOk(st.c) || st.c.length !== ANIMAIS.length || new Set(st.c).size !== st.c.length ||
+          !Array.isArray(st.d) || st.d.length !== st.c.length || !idsOk(st.e) ||
+          !numOk(st.v, 1, VIDAS_INICIAIS) || !numOk(st.p, 0, 100000)) return false;
+      ordem = st.c.slice(); feitos = st.d.map(Boolean); vidas = st.v; pts = st.p; errou = new Set(st.e);
+      Prog.pts(3, pts);
+      feitos.every(Boolean) ? vitoria() : grade();
+      return true;
+    }
+
+    Prog.reg(3, { el: jogo, texto: "Você abriu todas as caixas!", iniciar, salvar, carregar });
     iniciar();
   })();
 
