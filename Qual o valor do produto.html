@@ -19,6 +19,7 @@
   .card{background:#fff;border-radius:20px;box-shadow:var(--sombra);max-width:780px;width:100%;padding:clamp(12px,2.5vw,24px);position:relative;}
   .btn-info{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:2px solid var(--verde);background:#fff;color:var(--verde);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:10;}
   .btn-info:hover{background:var(--verde-claro);}
+  .btn-salvar-topo{right:52px;font-size:.95rem;}
   h1{font-size:clamp(1.1rem,3.2vw,1.4rem);color:var(--verde);text-align:center;margin-bottom:6px;padding-right:40px;}
   .sub{text-align:center;color:#666;margin-bottom:16px;font-size:clamp(.82rem,2.3vw,.9rem);}
   #tela-menu{text-align:center;}
@@ -31,6 +32,9 @@
   .btn-atividade .icone{font-size:1.6rem;flex-shrink:0;}
   .btn-atividade .texto{display:flex;flex-direction:column;gap:2px;}
   .btn-atividade .texto strong{font-size:1.02em;}
+  .btn-atividade:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.7);box-shadow:none;transform:none;}
+  .btn-atividade .status-ativ{font-size:.78em;font-weight:700;}
+  .aviso-progresso{font-size:clamp(.75rem,2.1vw,.85rem);color:#555;text-align:center;margin-top:10px;}
   .btn-atividade .texto small{font-weight:400;opacity:.85;font-size:.78em;line-height:1.3;}
   .btn-secundario{background:#fff;color:var(--verde);border:2px solid var(--verde);border-radius:12px;padding:10px 18px;font-size:clamp(.82rem,2.4vw,.92rem);cursor:pointer;font-weight:600;transition:all .15s;margin-top:10px;}
   .btn-secundario:hover{background:var(--verde-claro);}
@@ -263,6 +267,7 @@
 
 <div class="card">
   <button class="btn-info" id="btn-info" title="Instruções, séries e habilidades">i</button>
+  <button class="btn-info btn-salvar-topo" id="btn-salvar-topo" title="Salvar / restaurar progresso">💾</button>
 
   <!-- MENU -->
   <div id="tela-menu">
@@ -298,6 +303,8 @@
         </span>
       </button>
     </div>
+    <p class="aviso-progresso" id="aviso-progresso"></p>
+    <button class="btn-secundario" id="btn-progresso-menu">💾 Salvar / restaurar progresso (arquivo)</button>
     <br>
     <button class="btn-secundario" id="btn-info-menu">ℹ️ Instruções, séries e habilidades</button>
     <br>
@@ -443,6 +450,26 @@
     </div>
   </div>
 
+  <!-- SALVAR / RESTAURAR PROGRESSO -->
+  <div id="tela-progresso" style="display:none">
+    <h2>💾 Salvar / restaurar progresso</h2>
+    <p><b>Salvar:</b> digite seu nome e baixe o arquivo. Guarde-o para continuar outro dia ou em outro computador.</p>
+    <div class="campo-senha">
+      <input type="text" id="input-nome-aluno" placeholder="Nome do aluno" maxlength="40" autocomplete="off" style="letter-spacing:0;font-family:inherit">
+    </div>
+    <div class="centro"><button class="btn" id="btn-salvar-progresso">⬇️ Salvar em arquivo</button></div>
+    <hr style="margin:16px 0;border:none;border-top:1px solid #ddd">
+    <p><b>Restaurar:</b> escolha o arquivo salvo (.txt) ou cole o código.</p>
+    <textarea id="input-codigo-progresso" placeholder="Cole aqui o código do progresso" autocomplete="off" style="width:100%;min-height:70px;border:2px solid #ccc;border-radius:10px;padding:8px;font-family:'Courier New',monospace;font-size:.8rem"></textarea>
+    <div class="centro">
+      <label class="btn secundario" style="cursor:pointer">📂 Escolher arquivo<input type="file" id="input-arquivo-progresso" accept=".txt,text/plain" style="display:none"></label>
+      <button class="btn" id="btn-restaurar-progresso">Restaurar</button>
+      <button class="btn secundario" id="btn-voltar-progresso">Voltar</button>
+      <button class="btn-perigo" id="btn-trocar-aluno">🔄 Trocar de aluno</button>
+    </div>
+    <p class="aviso-progresso" id="msg-progresso" style="font-weight:700"></p>
+  </div>
+
   <!-- LOGIN ÁREA DO PROFESSOR -->
   <div id="tela-login-prof">
     <h2>🔐 Área do Professor</h2>
@@ -495,6 +522,20 @@
       <div class="centro">
         <button class="btn-perigo" id="btn-limpar-prof">Limpar lista desta sessão</button>
         <button class="btn secundario" id="btn-sair-prof">Sair</button>
+      </div>
+    </div>
+    <div class="prof-bloco">
+      <h3>⚙️ Progresso do aluno (nesta sessão)</h3>
+      <p id="prof-progresso-status" style="font-size:.85rem;color:#555;margin-bottom:8px"></p>
+      <div class="linha-botoes">
+        <select id="sel-ativ-prof">
+          <option value="1">1 — Qual é o valor?</option>
+          <option value="2">2 — Calculando o troco</option>
+          <option value="3">3 — Compra dupla</option>
+          <option value="4">4 — Compras em quantidade</option>
+        </select>
+        <button class="btn" id="btn-liberar-ativ">Liberar esta atividade</button>
+        <button class="btn-perigo" id="btn-zerar-progresso">Zerar progresso</button>
       </div>
     </div>
   </div>
@@ -802,7 +843,7 @@ function esconderTudo(){
   ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco",
    "tela-compra","tela-fim-compra","tela-multi","tela-fim-multi",
    "tela-transicao","tela-info","tela-codigo","tela-login-prof",
-   "tela-professor"].forEach(id => {
+   "tela-professor","tela-progresso"].forEach(id => {
     const el = $(id);
     if(el) el.style.display = "none";
   });
@@ -824,6 +865,7 @@ function iniciarValor(){
 }
 
 function mostrarQuestaoValor(){
+  salvarProgresso(1);
   const produto = filaValor[indiceValor];
   $("progresso-valor").textContent = `Pergunta ${Math.min(respostasValor.length + 1, totalValor)} de ${totalValor}`;
   $("barra-valor").style.width = `${(respostasValor.length / totalValor) * 100}%`;
@@ -875,6 +917,7 @@ function responderValor(botao, valor, produto){
   atualizarVidas("vidas-valor", vidasValor);
   $("progresso-valor").textContent = `Pergunta ${Math.min(respostasValor.length + 1, totalValor)} de ${totalValor}`;
   $("barra-valor").style.width = `${(respostasValor.length / totalValor) * 100}%`;
+  salvarProgresso(1, true);
   if(vidasValor <= 0){
     $("btn-proxima-valor").style.display = "inline-block";
     $("btn-proxima-valor").textContent = "Ver resultado";
@@ -902,9 +945,10 @@ function finalizarValor(vitoria){
       atividade: "qual-e-o-valor", atividadeLabel: "Qual é o valor?",
       fase: null, faseLabel: null,
       acertos: respostasValor.length, total: totalValor, vidas: vidasValor,
-      onContinuar: () => exibirResultadoValor()
+      onContinuar: () => { concluirAtividade(1); exibirResultadoValor(); }
     });
   } else {
+    limparSnapshot(1);
     exibirResultadoValor();
   }
 }
@@ -957,6 +1001,7 @@ function iniciarTroco(){
 }
 
 function mostrarQuestaoTroco(){
+  salvarProgresso(2);
   const item = filaTroco[indiceTroco];
   const produto = item.produto;
   const pagamento = item.pagamento;
@@ -1025,6 +1070,7 @@ function responderTroco(botao, valor, item, trocoCorreto){
   atualizarVidas("vidas-troco", vidasTroco);
   $("progresso-troco").textContent = `Pergunta ${Math.min(respostasTroco.length + 1, totalTroco)} de ${totalTroco}`;
   $("barra-troco").style.width = `${(respostasTroco.length / totalTroco) * 100}%`;
+  salvarProgresso(2, true);
   if(vidasTroco <= 0){
     $("btn-proxima-troco").style.display = "inline-block";
     $("btn-proxima-troco").textContent = "Ver resultado";
@@ -1052,9 +1098,10 @@ function finalizarTroco(vitoria){
       atividade: "troco", atividadeLabel: "Calculando o troco",
       fase: null, faseLabel: null,
       acertos: respostasTroco.length, total: totalTroco, vidas: vidasTroco,
-      onContinuar: () => exibirResultadoTroco()
+      onContinuar: () => { concluirAtividade(2); exibirResultadoTroco(); }
     });
   } else {
+    limparSnapshot(2);
     exibirResultadoTroco();
   }
 }
@@ -1123,6 +1170,7 @@ function iniciarCompra(){
 }
 
 function mostrarQuestaoCompra(){
+  salvarProgresso(3);
   const item = filaCompra[indiceCompra];
   const troco = Math.round((item.pagamento - item.soma) * 100) / 100;
 
@@ -1204,6 +1252,7 @@ function responderCompra(botao, valor, item, trocoCorreto){
   atualizarVidas("vidas-compra", vidasCompra);
   $("progresso-compra").textContent = `Pergunta ${Math.min(respostasCompra.length + 1, totalCompra)} de ${totalCompra}`;
   $("barra-compra").style.width = `${(respostasCompra.length / totalCompra) * 100}%`;
+  salvarProgresso(3, true);
   if(vidasCompra <= 0){
     $("btn-proxima-compra").style.display = "inline-block";
     $("btn-proxima-compra").textContent = "Ver resultado";
@@ -1231,9 +1280,10 @@ function finalizarCompra(vitoria){
       atividade: "compra-dupla", atividadeLabel: "Compra dupla",
       fase: null, faseLabel: null,
       acertos: respostasCompra.length, total: totalCompra, vidas: vidasCompra,
-      onContinuar: () => exibirResultadoCompra()
+      onContinuar: () => { concluirAtividade(3); exibirResultadoCompra(); }
     });
   } else {
+    limparSnapshot(3);
     exibirResultadoCompra();
   }
 }
@@ -1334,6 +1384,7 @@ function gerarFilaFase(fase){
 }
 
 function mostrarQuestaoMulti(){
+  salvarProgresso(4);
   const item = filaMulti[indiceMulti];
   produtoAtualMulti = item.produto;
   quantidadeAtualMulti = item.quantidade;
@@ -1455,6 +1506,7 @@ function responderMulti(botao, valor){
   $("progresso-multi").textContent = `Pergunta ${Math.min(respostasMulti.length + 1, totalFaseMulti)} de ${totalFaseMulti}`;
   $("barra-multi").style.width = `${(respostasMulti.length / totalFaseMulti) * 100}%`;
 
+  salvarProgresso(4, true);
   if(vidasMulti <= 0){
     $("btn-proxima-multi").style.display = "inline-block";
     $("btn-proxima-multi").textContent = "Ver resultado";
@@ -1500,6 +1552,7 @@ function mostrarResultadoFase(){
   const totalFase = totalFaseMulti;
   const vitoriaFase = acertosFase >= totalFase;
 
+  salvarProgresso(4, false, true); // snapshot antes de somar a fase (restaura na tela de transição)
   respostasMulti.forEach(r => todasRespostasMulti.push(r));
 
   $("emoji-transicao").textContent = vitoriaFase ? "🎉" : "💔";
@@ -1574,7 +1627,7 @@ function mostrarResultadoFase(){
           atividade: "compras-quantidade", atividadeLabel: "Compras em quantidade",
           fase: faseMulti, faseLabel: `Fase ${faseMulti}`,
           acertos: acertosFase, total: totalFase, vidas: vidasMulti,
-          onContinuar: () => finalizarMulti(true)
+          onContinuar: () => { concluirAtividade(4); finalizarMulti(true); }
         });
       } else {
         finalizarMulti(true);
@@ -1592,6 +1645,7 @@ function finalizarMulti(vitoria){
 
   const totalGeral = todasRespostasMulti.length;
   const fasesConcluidas = vitoria && faseMulti === 3;
+  if(!fasesConcluidas) limparSnapshot(4);
 
   if(fasesConcluidas){
     $("titulo-fim-multi").textContent = "Atividade concluída! 🎉";
@@ -1986,7 +2040,7 @@ function voltarInfo(){
   $(id).style.display = "block";
 }
 
-function irParaMenu(){ esconderTudo(); $("tela-menu").style.display = "block"; }
+function irParaMenu(){ esconderTudo(); atualizarMenu(); $("tela-menu").style.display = "block"; }
 
 function configurarTabs(){
   document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -2000,11 +2054,98 @@ function configurarTabs(){
   });
 }
 
+/* ============= PROGRESSO (salvo no navegador) ============= */
+let _progresso = { atual: 1, snap: null, nome: "" }; // atual: 1..4 liberada; 5 = tudo concluído
+const _repProd = (k, v) => (v && typeof v === "object" && PRODUTOS.includes(v)) ? { $p: v.nome } : v;
+const _revProd = (k, v) => {
+  if(v && typeof v === "object" && "$p" in v){
+    const p = PRODUTOS.find(x => x.nome === v.$p);
+    if(!p) throw new Error("produto não encontrado");
+    return p;
+  }
+  return v;
+};
+function salvarProgresso(n, aguardando = false, transicao = false){
+  if(_progresso.atual !== n) return;
+  let d;
+  if(n === 1) d = { fila: filaValor, indice: indiceValor, vidas: vidasValor, respostas: respostasValor, total: totalValor };
+  else if(n === 2) d = { fila: filaTroco, indice: indiceTroco, vidas: vidasTroco, respostas: respostasTroco, total: totalTroco };
+  else if(n === 3) d = { fila: filaCompra, indice: indiceCompra, vidas: vidasCompra, respostas: respostasCompra, total: totalCompra };
+  else d = { fila: filaMulti, indice: indiceMulti, vidas: vidasMulti, respostas: respostasMulti, fase: faseMulti, todas: todasRespostasMulti, totalFase: totalFaseMulti };
+  d.aguardando = aguardando; d.transicao = transicao;
+  try{ _progresso.snap = { n, d: JSON.stringify(d, _repProd) }; }catch(e){}
+}
+function limparSnapshot(n){
+  if(_progresso.snap && _progresso.snap.n === n){ _progresso.snap = null; }
+}
+function concluirAtividade(n){
+  if(_progresso.atual === n) _progresso.atual = n + 1; // libera a próxima e bloqueia a anterior
+  _progresso.snap = null;
+ 
+}
+function restaurarSimples(d, n){
+  const M = {
+    1: () => { filaValor = d.fila; indiceValor = d.indice; vidasValor = d.vidas; respostasValor = d.respostas; totalValor = d.total;
+      esconderTudo(); $("tela-jogo").style.display = "block";
+      $("titulo-fim").textContent = "Atividade concluída! 🎉"; $("sub-fim").textContent = "Você acertou todas as questões!"; $("nota-final").className = "nota";
+      if(!d.aguardando) mostrarQuestaoValor(); else if(vidasValor <= 0) finalizarValor(false); else proximaValor(); },
+    2: () => { filaTroco = d.fila; indiceTroco = d.indice; vidasTroco = d.vidas; respostasTroco = d.respostas; totalTroco = d.total;
+      esconderTudo(); $("tela-troco").style.display = "block";
+      $("titulo-fim-troco").textContent = "Atividade concluída! 🎉"; $("sub-fim-troco").textContent = "Você acertou todos os trocos!"; $("nota-final-troco").className = "nota";
+      if(!d.aguardando) mostrarQuestaoTroco(); else if(vidasTroco <= 0) finalizarTroco(false); else proximaTroco(); },
+    3: () => { filaCompra = d.fila; indiceCompra = d.indice; vidasCompra = d.vidas; respostasCompra = d.respostas; totalCompra = d.total;
+      esconderTudo(); $("tela-compra").style.display = "block";
+      $("titulo-fim-compra").textContent = "Atividade concluída! 🎉"; $("sub-fim-compra").textContent = "Você acertou todos os cálculos!"; $("nota-final-compra").className = "nota";
+      if(!d.aguardando) mostrarQuestaoCompra(); else if(vidasCompra <= 0) finalizarCompra(false); else proximaCompra(); }
+  };
+  M[n]();
+}
+function restaurarMulti(d){
+  filaMulti = d.fila; indiceMulti = d.indice; vidasMulti = d.vidas; respostasMulti = d.respostas;
+  faseMulti = d.fase; todasRespostasMulti = d.todas; totalFaseMulti = d.totalFase;
+  esconderTudo(); $("tela-multi").style.display = "block";
+  $("titulo-fim-multi").textContent = "Atividade concluída! 🎉"; $("sub-fim-multi").textContent = "Você acertou todos os cálculos!"; $("nota-final-multi").className = "nota";
+  if(d.transicao){ mostrarResultadoFase(); return; }
+  if(!d.aguardando){ mostrarQuestaoMulti(); return; }
+  if(vidasMulti <= 0){ respostasMulti.forEach(r => todasRespostasMulti.push(r)); respostasMulti = []; finalizarMulti(false); return; }
+  proximaMulti();
+}
+function abrirAtividade(n){
+  if(n !== _progresso.atual) return;
+  const s = _progresso.snap;
+  if(s && s.n === n){
+    try{
+      const d = JSON.parse(s.d, _revProd);
+      if(n === 4) restaurarMulti(d); else restaurarSimples(d, n);
+      return;
+    }catch(e){ _progresso.snap = null; }
+  }
+  [iniciarValor, iniciarTroco, iniciarCompra, iniciarMulti][n - 1]();
+}
+function atualizarMenu(){
+  ["btn-ir-valor","btn-ir-troco","btn-ir-compra","btn-ir-multi"].forEach((id, i) => {
+    const n = i + 1, b = $(id); if(!b) return;
+    const ativa = n === _progresso.atual, feita = n < _progresso.atual;
+    b.disabled = !ativa;
+    let st = b.querySelector(".status-ativ");
+    if(!st){ st = document.createElement("span"); st.className = "status-ativ"; b.querySelector(".texto").appendChild(st); }
+    st.textContent = feita ? "✅ Concluída"
+      : !ativa ? "🔒 Bloqueada"
+      : (_progresso.snap && _progresso.snap.n === n) ? "▶️ Em andamento — toque para continuar de onde parou"
+      : "🟢 Disponível";
+  });
+  $("aviso-progresso").textContent = [_progresso.nome ? "👤 " + _progresso.nome : "", _progresso.atual > 4 ? "🎉 Você concluiu todas as atividades!" : ""].filter(Boolean).join(" · ");
+  const nomes = ["", "Qual é o valor?", "Calculando o troco", "Compra dupla", "Compras em quantidade"];
+  $("prof-progresso-status").textContent = _progresso.atual > 4
+    ? "Aluno concluiu todas as atividades."
+    : `Atividade liberada: ${_progresso.atual} — ${nomes[_progresso.atual]}${_progresso.snap ? " (em andamento)" : ""}.`;
+}
+
 /* ============= HANDLERS ============= */
-$("btn-ir-valor").onclick = iniciarValor;
-$("btn-ir-troco").onclick = iniciarTroco;
-$("btn-ir-compra").onclick = iniciarCompra;
-$("btn-ir-multi").onclick = iniciarMulti;
+$("btn-ir-valor").onclick = () => abrirAtividade(1);
+$("btn-ir-troco").onclick = () => abrirAtividade(2);
+$("btn-ir-compra").onclick = () => abrirAtividade(3);
+$("btn-ir-multi").onclick = () => abrirAtividade(4);
 
 $("btn-recomecar").onclick = iniciarValor;
 $("btn-menu-fim").onclick = irParaMenu;
@@ -2034,7 +2175,106 @@ $("input-arquivo-prof").addEventListener("change", e => {
 $("btn-limpar-prof").onclick = limparProfessor;
 $("btn-sair-prof").onclick = irParaMenu;
 
+$("btn-liberar-ativ").onclick = () => {
+  _progresso.atual = Number($("sel-ativ-prof").value); _progresso.snap = null; atualizarMenu();
+};
+$("btn-zerar-progresso").onclick = () => {
+  if(!confirm("Zerar o progresso desta sessão? O aluno voltará para a atividade 1.")) return;
+  _progresso = { atual: 1, snap: null, nome: "" }; atualizarMenu();
+};
+
+/* ============= PROGRESSO EM ARQUIVO (base62 + hash FNV-1a) ============= */
+function slugNome(n){
+  return n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "aluno";
+}
+function gerarCodigoProgresso(){
+  const obj = { v: 1, nome: _progresso.nome, atual: _progresso.atual, snap: _progresso.snap, t: Math.floor(Date.now() / 1000) };
+  const dados = new TextEncoder().encode(JSON.stringify(obj));
+  const h = fnv1a(dados);
+  const bytes = new Uint8Array(dados.length + 5);
+  bytes[0] = 1; // marcador (preserva zeros à esquerda)
+  bytes.set(dados, 1);
+  bytes.set([(h >>> 24) & 255, (h >>> 16) & 255, (h >>> 8) & 255, h & 255], dados.length + 1);
+  return bytesParaBase62(bytes);
+}
+function decodificarProgresso(txt){
+  let t = txt;
+  const m = t.match(/C[OÓ]DIGO:/i);
+  if(m) t = t.slice(m.index + m[0].length);
+  t = t.replace(/[^0-9A-Za-z]/g, "");
+  if(t.length < 10) throw new Error("código curto demais");
+  let n = 0n;
+  for(const ch of t) n = n * 62n + BigInt(BASE62.indexOf(ch));
+  const arr = [];
+  while(n > 0n){ arr.push(Number(n & 255n)); n >>= 8n; }
+  arr.reverse();
+  if(arr[0] !== 1 || arr.length < 6) throw new Error("formato inválido");
+  const dados = Uint8Array.from(arr.slice(1, -4)), hr = arr.slice(-4), h = fnv1a(dados);
+  const hb = [(h >>> 24) & 255, (h >>> 16) & 255, (h >>> 8) & 255, h & 255];
+  if(hb.some((b, i) => b !== hr[i])) throw new Error("hash não confere");
+  return JSON.parse(new TextDecoder().decode(dados));
+}
+function msgProgresso(txt, ok){
+  const el = $("msg-progresso"); el.textContent = txt; el.style.color = ok ? "#2e7d32" : "#c62828";
+}
+function salvarProgressoArquivo(){
+  const nome = $("input-nome-aluno").value.trim();
+  if(!nome){ msgProgresso("Digite o nome do aluno para salvar.", false); return; }
+  _progresso.nome = nome; atualizarMenu();
+  const codigo = gerarCodigoProgresso();
+  const d = new Date(), pad = x => String(x).padStart(2, "0");
+  const nomes = ["", "Qual é o valor?", "Calculando o troco", "Compra dupla", "Compras em quantidade"];
+  const linhas = codigo.match(/.{1,80}/g).join("\n");
+  const conteudo = [
+    "=== PROGRESSO — EDUCAÇÃO FINANCEIRA ===", "",
+    `Aluno: ${nome}`,
+    `Atividade liberada: ${_progresso.atual > 4 ? "todas concluídas" : _progresso.atual + " — " + nomes[_progresso.atual] + (_progresso.snap ? " (em andamento)" : "")}`,
+    `Data/hora: ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`,
+    "", "CÓDIGO:", linhas, "",
+    "Para continuar: abra a atividade, toque em \"Salvar / restaurar progresso\" e envie este arquivo."
+  ].join("\n");
+  const arq = `progresso_${slugNome(nome)}_${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}h${pad(d.getMinutes())}.txt`;
+  try{ baixarArquivo(arq, conteudo); msgProgresso("✅ Arquivo baixado: " + arq, true); }
+  catch(e){ msgProgresso("⚠️ Não foi possível baixar o arquivo.", false); }
+}
+function restaurarProgressoTexto(txt){
+  try{
+    const o = decodificarProgresso(txt);
+    if(o.v !== 1 || !(o.atual >= 1 && o.atual <= 5)) throw new Error("dados inválidos");
+    const snap = (o.snap && o.snap.n === o.atual && typeof o.snap.d === "string") ? o.snap : null;
+    if((_progresso.atual > 1 || _progresso.snap) && !confirm("Substituir o progresso atual desta sessão pelo do arquivo?")) return;
+    _progresso = { atual: o.atual, snap, nome: String(o.nome || "").slice(0, 40) };
+    _telaAntesProgresso = "tela-menu";
+    atualizarMenu();
+    $("input-nome-aluno").value = _progresso.nome;
+    msgProgresso(`✅ Progresso de ${_progresso.nome || "aluno"} restaurado. ` + (_progresso.atual > 4 ? "Todas as atividades concluídas." : `Atividade ${_progresso.atual} liberada${snap ? ", continua de onde parou" : ""}.`), true);
+  }catch(e){ msgProgresso("❌ Arquivo ou código inválido.", false); }
+}
+let _telaAntesProgresso = "tela-menu";
+function abrirTelaProgresso(){
+  const ids = ["tela-menu","tela-jogo","tela-fim","tela-troco","tela-fim-troco","tela-compra","tela-fim-compra","tela-multi","tela-fim-multi","tela-transicao","tela-codigo"];
+  const atual = ids.find(id => $(id) && $(id).style.display === "block");
+  if(atual) _telaAntesProgresso = atual;
+  esconderTudo(); $("tela-progresso").style.display = "block";
+  $("input-nome-aluno").value = _progresso.nome || ""; $("input-codigo-progresso").value = ""; msgProgresso("", true);
+}
+$("btn-progresso-menu").onclick = abrirTelaProgresso;
+$("btn-salvar-topo").onclick = abrirTelaProgresso;
+$("btn-trocar-aluno").onclick = () => {
+  if(!confirm("Trocar de aluno? O progresso que não foi salvo em arquivo será perdido.")) return;
+  _progresso = { atual: 1, snap: null, nome: "" }; _telaAntesProgresso = "tela-menu";
+  $("input-nome-aluno").value = ""; $("input-codigo-progresso").value = ""; atualizarMenu(); irParaMenu();
+};
+$("btn-salvar-progresso").onclick = salvarProgressoArquivo;
+$("btn-restaurar-progresso").onclick = () => restaurarProgressoTexto($("input-codigo-progresso").value);
+$("btn-voltar-progresso").onclick = () => { esconderTudo(); $(_telaAntesProgresso).style.display = "block"; if(_telaAntesProgresso === "tela-menu") atualizarMenu(); };
+$("input-arquivo-progresso").addEventListener("change", e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if(f) f.text().then(restaurarProgressoTexto).catch(() => msgProgresso("❌ Não foi possível ler o arquivo.", false));
+});
+
 configurarTabs();
+atualizarMenu();
 </script>
 
 </body>
