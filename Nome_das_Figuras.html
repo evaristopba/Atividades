@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nome das Figuras</title>
+<style>
+  :root{
+    --bg:#fff7e6; --card:#ffffff; --text:#2b2b2b; --accent:#ff8a00;
+    --ok:#2e9e4f; --bad:#d93b3b; --btn:#ffe08a; --btn-hover:#ffd05c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#1d1b16; --card:#2a2720; --text:#f5f0e6; --btn:#5a4a1c; --btn-hover:#74601f; }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--text);
+    font-family:"Trebuchet MS","Comic Sans MS",Arial,sans-serif;
+    display:flex; align-items:flex-start; justify-content:center; padding:16px;
+  }
+  .app{
+    background:var(--card); border-radius:24px; padding:24px;
+    width:100%; max-width:760px; text-align:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.15);
+  }
+
+  /* abas */
+  .abas{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px}
+  .aba{
+    flex:1 1 130px; font:inherit; font-size:1rem; font-weight:bold; padding:10px 6px;
+    border:none; border-radius:12px; background:var(--btn); color:var(--text); cursor:pointer;
+  }
+  .aba[aria-selected="true"]{background:var(--accent); color:#fff}
+  .painel[hidden]{display:none}
+  .info{text-align:left; font-size:1.1rem; line-height:1.5}
+  .info h2{font-size:1.5rem; margin:0 0 10px; text-align:center}
+  .info h3{font-size:1.2rem; margin:18px 0 8px}
+  .info ol, .info ul{padding-left:22px; margin:0}
+  .info li{margin-bottom:10px}
+  .info .cod{
+    display:inline-block; background:var(--accent); color:#fff; font-weight:bold;
+    border-radius:8px; padding:1px 8px; margin-right:6px; font-size:.95rem;
+  }
+  .info .nota{font-size:.95rem; opacity:.8; margin-top:14px}
+  .info .nota a{color:inherit; font-weight:bold}
+  .info .creditos{margin-top:22px; padding-top:12px; border-top:2px dashed var(--accent)}
+
+  /* partes comuns aos jogos */
+  .top{display:flex; justify-content:space-between; align-items:center; font-size:1.1rem; font-weight:bold}
+  .vidas{font-size:2rem; letter-spacing:4px}
+  .msg{min-height:2rem; margin-top:14px; font-size:1.3rem; font-weight:bold}
+  .fim h2{font-size:2rem; margin:8px 0}
+  .fim button{
+    font:inherit; font-size:1.4rem; padding:12px 28px; border:none; border-radius:16px;
+    background:var(--accent); color:#fff; cursor:pointer; margin-top:12px;
+  }
+  .shake{animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+  /* jogo 1: escolher o nome */
+  #game h1{font-size:1.5rem; margin:8px 0}
+  #game .img-box{
+    margin:16px auto; width:100%; max-width:320px; aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    border:4px solid var(--accent); border-radius:20px; overflow:hidden;
+    background:#fff;
+  }
+  #game .img-box img{max-width:100%; max-height:100%; object-fit:contain}
+  .opcoes{display:grid; gap:12px; margin:12px auto 0; max-width:520px}
+  .opcoes button{
+    font:inherit; font-size:2rem; font-weight:bold; text-transform:uppercase;
+    padding:14px; border:none; border-radius:16px; cursor:pointer;
+    background:var(--btn); color:var(--text); transition:transform .1s;
+  }
+  .opcoes button:hover:not(:disabled){background:var(--btn-hover); transform:scale(1.02)}
+  .opcoes button.certo{background:var(--ok); color:#fff}
+  .opcoes button.errado{background:var(--bad); color:#fff}
+  .opcoes button:disabled{cursor:default}
+  .proxima{
+    font:inherit; font-size:1.5rem; font-weight:bold; padding:12px 32px; margin-top:10px;
+    border:none; border-radius:16px; background:var(--accent); color:#fff; cursor:pointer;
+  }
+  .proxima:hover{filter:brightness(1.1)}
+
+  /* jogo 2: combinar nome e imagem */
+  #game2 h1{font-size:1.4rem; margin:8px 0 10px}
+  .banco{
+    position:sticky; top:0; z-index:5; background:var(--card);
+    padding:10px 0 12px; margin-bottom:10px; border-bottom:3px dashed var(--accent);
+    display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; min-height:70px;
+  }
+  .banco .vazio{opacity:.7; font-size:1rem}
+  .chip{
+    font-size:1.5rem; font-weight:bold; text-transform:uppercase;
+    padding:8px 16px; border-radius:14px; background:var(--btn); color:var(--text);
+    border:3px solid transparent; cursor:grab; user-select:none; -webkit-user-select:none;
+    touch-action:none;
+  }
+  .chip.sel{border-color:var(--accent)}
+  .chip.arrastando{opacity:.35}
+  .chip.fixo{cursor:default; background:var(--ok); color:#fff}
+  .ghost{
+    position:fixed; z-index:1000; pointer-events:none; transform:translate(-50%,-50%);
+    box-shadow:0 6px 16px rgba(0,0,0,.3);
+  }
+  .linhas{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px}
+  .linha{display:flex; align-items:center; justify-content:center; gap:12px}
+  #game2 .img-box{
+    width:110px; height:110px; flex:none; background:#fff; overflow:hidden;
+    border:4px solid var(--accent); border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #game2 .img-box img{max-width:100%; max-height:100%; object-fit:contain}
+  .slot{
+    flex:1; max-width:230px; min-height:70px; padding:4px;
+    border:3px dashed var(--accent); border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .slot .dica{opacity:.55; font-size:.95rem}
+  .slot.alvo{background:var(--btn); border-style:solid}
+  .slot.certo{border-color:var(--ok); border-style:solid}
+  .slot.errado{border-color:var(--bad); border-style:solid; background:rgba(217,59,59,.15)}
+  .slot.errado .chip{background:var(--bad); color:#fff}
+  .conferir{
+    font:inherit; font-size:1.5rem; font-weight:bold; padding:12px 32px; margin-top:18px;
+    border:none; border-radius:16px; background:var(--accent); color:#fff; cursor:pointer;
+  }
+  .conferir:disabled{opacity:.4; cursor:not-allowed}
+
+  /* jogo 3: anagrama */
+  #game3 h1{font-size:1.5rem; margin:8px 0}
+  #game3 .img-box{
+    margin:12px auto; width:100%; max-width:240px; aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    border:4px solid var(--accent); border-radius:20px; overflow:hidden; background:#fff;
+  }
+  #game3 .img-box img{max-width:100%; max-height:100%; object-fit:contain}
+  .respostas, .tiles{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:14px}
+  .caixa{
+    width:52px; height:64px; border:3px dashed var(--accent); border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:2rem; font-weight:bold; cursor:pointer;
+  }
+  .caixa.certo{border:3px solid var(--ok); background:var(--ok); color:#fff}
+  .caixa.errado{border:3px solid var(--bad); background:var(--bad); color:#fff}
+  .tile{
+    font:inherit; font-size:2rem; font-weight:bold; width:56px; height:64px;
+    border:none; border-radius:14px; background:var(--btn); color:var(--text);
+    cursor:pointer; transition:transform .1s;
+  }
+  .tile:hover{background:var(--btn-hover); transform:scale(1.05)}
+  .tile.usada{visibility:hidden}
+  .acoes{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; margin-top:16px}
+  .acoes .conferir{margin-top:0}
+  .limpar{
+    font:inherit; font-size:1.2rem; font-weight:bold; padding:10px 22px;
+    border:none; border-radius:14px; background:var(--btn); color:var(--text); cursor:pointer;
+  }
+
+  /* jogo 4: abrir a caixa */
+  #game4 h1{font-size:1.5rem; margin:8px 0}
+  .caixas{display:grid; grid-template-columns:repeat(auto-fit,minmax(78px,1fr)); gap:12px; margin:16px auto 0; max-width:560px}
+  .cx{
+    font:inherit; font-size:2rem; font-weight:bold; aspect-ratio:1/1; border:none; border-radius:16px;
+    background:var(--btn); color:var(--text); cursor:pointer; box-shadow:0 4px 0 var(--accent);
+  }
+  .cx:hover:not(:disabled){background:var(--btn-hover); transform:scale(1.05)}
+  .cx.aberta{background:var(--ok); color:#fff; box-shadow:none; cursor:default}
+  .palavra{font-size:3rem; font-weight:bold; text-transform:uppercase; margin:16px 0; letter-spacing:2px}
+  .figuras{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:560px; margin:0 auto}
+  .fig{
+    aspect-ratio:1/1; border:4px solid var(--accent); border-radius:16px; background:#fff; padding:4px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .fig img{max-width:100%; max-height:100%; object-fit:contain}
+  .fig.certo{border-color:var(--ok); box-shadow:0 0 0 4px var(--ok)}
+  .fig.errado{border-color:var(--bad); box-shadow:0 0 0 4px var(--bad)}
+  .fig:disabled{cursor:default}
+
+  /* barra do aluno, pontos e progresso */
+  .barra{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; margin-bottom:8px}
+  .barra input[type=text]{
+    font:inherit; font-size:1.1rem; padding:8px 12px; min-width:0; flex:1 1 180px; max-width:280px;
+    border:3px solid var(--accent); border-radius:12px; background:var(--card); color:var(--text);
+  }
+  .pontos{font-weight:bold; font-size:1.3rem; padding:6px 14px; border-radius:12px; background:var(--btn)}
+  .bt{
+    font:inherit; font-size:1rem; font-weight:bold; padding:9px 14px; border:none;
+    border-radius:12px; background:var(--accent); color:#fff; cursor:pointer;
+  }
+  .bt:hover{filter:brightness(1.1)}
+  .aviso{min-height:1.4rem; margin-bottom:8px; font-weight:bold}
+  .aviso.ok{color:var(--ok)} .aviso.erro{color:var(--bad)}
+  .aba:disabled{opacity:.4; cursor:not-allowed}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="barra">
+    <input type="text" id="nome" maxlength="40" placeholder="👤 Nome do aluno" autocomplete="off" aria-label="Nome do aluno">
+    <span class="pontos" id="pontos" aria-live="polite">⭐ 0</span>
+    <button class="bt" id="salvar">💾 Salvar</button>
+    <button class="bt" id="restaurar">📂 Restaurar</button>
+    <input type="file" id="arq" accept=".txt,text/plain" hidden>
+  </div>
+  <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+  <div class="abas" role="tablist">
+    <button class="aba" role="tab" id="t-jogo" aria-selected="true" aria-controls="p-jogo" data-alvo="p-jogo">🎮 Escolher</button>
+    <button class="aba" role="tab" id="t-combo" aria-selected="false" aria-controls="p-combo" data-alvo="p-combo">🔗 Combinar</button>
+    <button class="aba" role="tab" id="t-ana" aria-selected="false" aria-controls="p-ana" data-alvo="p-ana">🔤 Anagrama</button>
+    <button class="aba" role="tab" id="t-caixa" aria-selected="false" aria-controls="p-caixa" data-alvo="p-caixa">📦 Abrir a caixa</button>
+    <button class="aba" role="tab" id="t-como" aria-selected="false" aria-controls="p-como" data-alvo="p-como">❓ Como jogar</button>
+    <button class="aba" role="tab" id="t-bncc" aria-selected="false" aria-controls="p-bncc" data-alvo="p-bncc">📚 Habilidades</button>
+  </div>
+
+  <section class="painel" id="p-jogo" role="tabpanel" aria-labelledby="t-jogo">
+    <div id="game"></div>
+  </section>
+
+  <section class="painel" id="p-combo" role="tabpanel" aria-labelledby="t-combo" hidden>
+    <div id="game2"></div>
+  </section>
+
+  <section class="painel" id="p-ana" role="tabpanel" aria-labelledby="t-ana" hidden>
+    <div id="game3"></div>
+  </section>
+
+  <section class="painel" id="p-caixa" role="tabpanel" aria-labelledby="t-caixa" hidden>
+    <div id="game4"></div>
+  </section>
+
+  <section class="painel info" id="p-como" role="tabpanel" aria-labelledby="t-como" hidden>
+    <h2>Como jogar</h2>
+
+    <h3>🎮 Escolher</h3>
+    <ol>
+      <li>Leia a pergunta e olhe bem para a imagem da figura.</li>
+      <li>Toque no nome que você acha que é o certo. São três opções.</li>
+      <li>Se acertar, o botão fica verde e a próxima imagem aparece sozinha. 🎉</li>
+      <li>Se errar, você perde um coração ❤️. A pergunta vai para o final e volta mais tarde. Toque em <strong>Próxima</strong> para continuar.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Para ganhar, acerte todas as figuras! 🏆</li>
+    </ol>
+
+    <h3>🔗 Combinar</h3>
+    <ol>
+      <li>Olhe as imagens das figuras e a lista de nomes no alto da tela.</li>
+      <li>Arraste um nome até o retângulo ao lado da imagem certa. O nome sai da lista. No celular ou tablet, também dá para tocar no nome e depois tocar no retângulo.</li>
+      <li>Mudou de ideia? Toque no nome que está no retângulo e ele volta para a lista.</li>
+      <li>Quando todos os retângulos estiverem preenchidos, toque em <strong>Conferir ✔</strong>.</li>
+      <li>Os nomes certos ficam verdes e fixos. Os errados voltam para a lista e você perde um coração ❤️.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Acerte todas as rodadas para ganhar! 🏆</li>
+    </ol>
+
+    <h3>🔤 Anagrama</h3>
+    <ol>
+      <li>Olhe a imagem da figura. Embaixo, as letras do nome aparecem embaralhadas.</li>
+      <li>Toque nas letras, uma por uma, na ordem certa. Elas vão para as caixinhas de cima.</li>
+      <li>Tocou na letra errada? Toque na letra que está na caixinha e ela volta. O botão <strong>Limpar</strong> devolve todas.</li>
+      <li>Quando todas as caixinhas estiverem cheias, toque em <strong>Conferir ✔</strong>.</li>
+      <li>Se errar, você perde um coração ❤️. A pergunta vai para o final e volta mais tarde. Toque em <strong>Próxima</strong> para continuar.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Para ganhar, forme o nome de todas as figuras! 🏆</li>
+    </ol>
+    <h3>📦 Abrir a caixa</h3>
+    <ol>
+      <li>Toque em uma caixa numerada para abrir. Você escolhe a ordem!</li>
+      <li>Leia o nome da figura que aparece.</li>
+      <li>Toque na imagem que combina com o nome. São três imagens.</li>
+      <li>Se acertar, a caixa fica verde ✅ e você volta para as caixas.</li>
+      <li>Se errar, você perde um coração ❤️ e a caixa continua fechada para tentar de novo mais tarde.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Para ganhar, abra todas as caixas! 🏆</li>
+    </ol>
+
+    <h3>⭐ Pontos e progresso</h3>
+    <ol>
+      <li>Escreva o nome do aluno no alto da página.</li>
+      <li>Cada acerto de primeira vale 10 pontos. Acertar depois de errar vale 5.</li>
+      <li>Comece por <strong>Escolher</strong>. Ao terminar uma atividade, ela fica bloqueada e a próxima é liberada.</li>
+      <li>Toque em <strong>💾 Salvar</strong> para baixar o arquivo do progresso. Mais tarde, use <strong>📂 Restaurar</strong> para continuar de onde parou.</li>
+      <li>Só as atividades já terminadas são guardadas. A atividade em andamento recomeça.</li>
+    </ol>
+    <p class="nota creditos">Todas as atividades desta página (Escolher, Combinar, Anagrama e Abrir a caixa) foram inspiradas em um recurso do Wordwall: <a href="https://wordwall.net/pt/resource/31919531/coloque-as-letras-em-ordem-para-formar-o-nome-dos-animais" target="_blank" rel="noopener noreferrer">COLOQUE AS LETRAS EM ORDEM PARA FORMAR O NOME DOS ANIMAIS.</a></p>
+  </section>
+
+  <section class="painel info" id="p-bncc" role="tabpanel" aria-labelledby="t-bncc" hidden>
+    <h2>Habilidades trabalhadas</h2>
+    <p>Língua Portuguesa, Análise linguística/semiótica (Alfabetização e Ortografização), do 1º ao 3º ano do Ensino Fundamental.</p>
+    <p><strong>Principais</strong></p>
+    <ul>
+      <li><span class="cod">EF12LP01</span>Ler palavras novas com precisão na decodificação; no caso de palavras de uso frequente, ler globalmente, por memorização. (1º e 2º ano)</li>
+      <li><span class="cod">EF01LP05</span>Reconhecer o sistema de escrita alfabética como representação dos sons da fala. (1º ano)</li>
+      <li><span class="cod">EF01LP08</span>Relacionar elementos sonoros (sílabas, fonemas, partes de palavras) com sua representação escrita. (1º ano)</li>
+      <li><span class="cod">EF02LP04</span>Ler e escrever corretamente palavras com sílabas CV, V, CVC, CCV, identificando que existem vogais em todas as sílabas. (2º ano)</li>
+      <li><span class="cod">EF02LP05</span>Ler e escrever corretamente palavras com marcas de nasalização (til, m, n). (2º ano)</li>
+      <li><span class="cod">EF03LP01</span>Ler e escrever palavras com correspondências regulares contextuais entre grafemas e fonemas (c/qu, g/gu, r/rr, s/ss) e com marcas de nasalização (til, m, n). (3º ano)</li>
+    </ul>
+    <p><strong>Complementares (com mediação do professor)</strong></p>
+    <ul>
+      <li><span class="cod">EF01LP06</span>Segmentar oralmente palavras em sílabas. (1º ano)</li>
+      <li><span class="cod">EF01LP07</span>Identificar fonemas e sua representação por letras. (1º ano)</li>
+      <li><span class="cod">EF02LP02</span>Segmentar palavras em sílabas e remover e substituir sílabas iniciais, mediais ou finais para criar novas palavras. (2º ano)</li>
+      <li><span class="cod">EF03LP03</span>Ler e escrever corretamente palavras com os dígrafos lh, nh, ch. (3º ano)</li>
+      <li><span class="cod">EF03LP05</span>Identificar o número de sílabas de palavras, classificando-as em monossílabas, dissílabas, trissílabas e polissílabas. (3º ano)</li>
+    </ul>
+    <p class="nota">Palavras como Borracha, Pássaro, Balão, Botão, Pão e Sabão permitem trabalhar r/rr, s/ss, ch, til e acentuação. Algumas redes de ensino adaptam a redação das habilidades em seus currículos próprios.</p>
+  </section>
+</div>
+
+<script>
+  // Para adicionar mais figuras, basta incluir novas linhas nesta lista.
+  // As duas atividades (Escolher e Combinar) usam a mesma lista.
+  const FIGURAS = [
+    { nome: "Borracha", img: "https://i.postimg.cc/Qt652mQt/N01.png" },
+    { nome: "Caderno", img: "https://i.postimg.cc/tJYPp6kk/N02.png" },
+    { nome: "Livro", img: "https://i.postimg.cc/3NdpYG1B/N03.png" },
+    { nome: "Apontador", img: "https://i.postimg.cc/wM7JgN2X/N04.png" },
+    { nome: "Flor", img: "https://i.postimg.cc/PJPZTDym/N05.png" },
+    { nome: "Papel", img: "https://i.postimg.cc/vTc9bnh5/N06.png" },
+    { nome: "Balão", img: "https://i.postimg.cc/VvdMmtgn/N07.png" },
+    { nome: "Botão", img: "https://i.postimg.cc/fyJXDdC0/N08.png" },
+    { nome: "Pão", img: "https://i.postimg.cc/3RLps1XB/N09.png" },
+    { nome: "Sabão", img: "https://i.postimg.cc/XJ2FRLfg/N10.png" },
+    { nome: "Elefante", img: "https://i.postimg.cc/1tW6kBGr/N11.png" },
+    { nome: "Gato", img: "https://i.postimg.cc/3RLps1XX/N12.png" },
+    { nome: "Jacaré", img: "https://i.postimg.cc/vBP9Jhr9/N13.png" },
+    { nome: "Pássaro", img: "https://i.postimg.cc/0QtmTnYS/N14.png" },
+    { nome: "Anta", img: "https://i.postimg.cc/63HRkcr7/N15.png" },
+    { nome: "Rinoceronte", img: "https://i.postimg.cc/rmhWBj1K/N16.png" },
+    { nome: "Leão", img: "https://i.postimg.cc/LXyfcDth/N17.png" }
+  ];
+  const VIDAS_INICIAIS = 3;
+
+  const embaralhar = a => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const coracoes = v => "❤️".repeat(v) + "🤍".repeat(VIDAS_INICIAIS - v);
+
+  /* =====================================================
+     PONTOS, PROGRESSO E SALVAR/RESTAURAR (base62)
+     ===================================================== */
+  const idsOk = a => Array.isArray(a) && a.every(k => Number.isInteger(k) && k >= 0 && k < FIGURAS.length);
+  const numOk = (n, mn, mx) => Number.isInteger(n) && n >= mn && n <= mx;
+  // valida o andamento salvo de Escolher/Anagrama
+  const filaOk = st => !!st && idsOk(st.f) && st.f.length > 0 && idsOk(st.e) &&
+    numOk(st.i, 0, st.f.length) && numOk(st.v, 1, VIDAS_INICIAIS) && numOk(st.p, 0, 100000);
+
+  function abrir(painel) {
+    document.querySelectorAll(".aba").forEach(a =>
+      a.setAttribute("aria-selected", a.dataset.alvo === painel ? "true" : "false"));
+    document.querySelectorAll(".painel").forEach(p => p.hidden = p.id !== painel);
+  }
+
+  const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const hash = bytes => { let h = 2166136261; for (const b of bytes) { h ^= b; h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
+  function paraB62(obj) {
+    const corpo = new TextEncoder().encode(JSON.stringify(obj));
+    const h = hash(corpo);
+    const bytes = [1, h >>> 24 & 255, h >>> 16 & 255, h >>> 8 & 255, h & 255, ...corpo];
+    let n = 0n, r = "";
+    for (const b of bytes) n = (n << 8n) | BigInt(b);
+    while (n > 0n) { r = B62[Number(n % 62n)] + r; n /= 62n; }
+    return r;
+  }
+  function deB62(txt) {
+    txt = txt.trim();
+    if (!/^[0-9A-Za-z]+$/.test(txt)) throw 0;
+    let n = 0n; const bytes = [];
+    for (const c of txt) n = n * 62n + BigInt(B62.indexOf(c));
+    while (n > 0n) { bytes.unshift(Number(n & 255n)); n >>= 8n; }
+    if (bytes.shift() !== 1) throw 0;
+    const h = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+    const corpo = Uint8Array.from(bytes.slice(4));
+    if (hash(corpo) !== h) throw 0;
+    return JSON.parse(new TextDecoder().decode(corpo));
+  }
+
+  const Prog = (() => {
+    const ABAS = ["t-jogo", "t-combo", "t-ana", "t-caixa"], PAINEIS = ["p-jogo", "p-combo", "p-ana", "p-caixa"];
+    const feito = [false, false, false, false], pts = [0, 0, 0, 0], jogos = [];
+    const $ = id => document.getElementById(id);
+    const total = () => pts.reduce((a, b) => a + b, 0);
+    const aviso = (t, ok = true) => { const el = $("aviso"); el.textContent = t; el.className = "aviso " + (ok ? "ok" : "erro"); };
+
+    // só a primeira atividade começa liberada; as resolvidas ficam bloqueadas
+    function atualizar() {
+      ABAS.forEach((id, i) => { $(id).disabled = feito[i] || (i > 0 && !feito[i - 1]); });
+      $("pontos").textContent = "⭐ " + total();
+    }
+
+    function tela(i) {
+      const j = jogos[i], ultima = i === ABAS.length - 1;
+      j.el.innerHTML = `
+        <div class="fim">
+          <div style="font-size:4rem">🏆</div>
+          <h2>Parabéns!</h2>
+          <p style="font-size:1.3rem">${j.texto}</p>
+          <p style="font-size:1.3rem">⭐ ${pts[i]} pontos nesta atividade</p>
+          ${ultima
+            ? `<p style="font-size:1.3rem"><strong>Total: ${total()} pontos</strong></p><p>Toque em <strong>💾 Salvar</strong> para guardar o progresso.</p><button id="de-novo">Jogar novamente</button>`
+            : '<button id="prox">Próxima atividade ➜</button>'}
+        </div>`;
+      const b = j.el.querySelector("#prox");
+      if (b) b.addEventListener("click", () => abrir(PAINEIS[i + 1]));
+      const r = j.el.querySelector("#de-novo");
+      if (r) r.addEventListener("click", reiniciar);
+    }
+
+    // recomeça tudo: zera pontos e libera só a primeira atividade (o nome do aluno continua)
+    function reiniciar() {
+      for (let i = 0; i < ABAS.length; i++) { feito[i] = false; pts[i] = 0; }
+      jogos.forEach(j => j.iniciar());
+      atualizar();
+      abrir(PAINEIS[0]);
+      $("aviso").textContent = "";
+    }
+
+    function salvar() {
+      const nome = $("nome").value.trim();
+      if (!nome) { aviso("Digite o nome do aluno antes de salvar.", false); $("nome").focus(); return; }
+      const cod = paraB62({ v: 2, n: nome, f: feito.map(Number), p: pts, g: jogos.map((j, i) => feito[i] ? null : j.salvar()) });
+      const slug = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "").toLowerCase() || "aluno";
+      const url = URL.createObjectURL(new Blob([cod], { type: "text/plain" }));
+      const a = document.createElement("a");
+      a.href = url; a.download = "progresso-" + slug + ".txt";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      aviso("✅ Progresso salvo em progresso-" + slug + ".txt");
+    }
+
+    function restaurar(txt) {
+      let o;
+      try {
+        o = deB62(txt);
+        if ((o.v !== 1 && o.v !== 2) || typeof o.n !== "string" || !Array.isArray(o.f) || !Array.isArray(o.p)) throw 0;
+      } catch (e) { aviso("Arquivo de progresso inválido.", false); return; }
+      let ok = true;
+      for (let i = 0; i < ABAS.length; i++) {
+        ok = ok && !!o.f[i];
+        feito[i] = ok;
+        pts[i] = ok ? Math.max(0, Number(o.p[i]) || 0) : 0;
+      }
+      $("nome").value = o.n.slice(0, 40);
+      for (let i = 0; i < ABAS.length; i++) {
+        if (feito[i]) { tela(i); continue; }
+        let carregou = false;
+        const g = Array.isArray(o.g) ? o.g[i] : null;
+        if (g) { try { carregou = jogos[i].carregar(g); } catch (e) { carregou = false; } }
+        if (!carregou) jogos[i].iniciar();
+      }
+      atualizar();
+      const prox = feito.indexOf(false);
+      abrir(PAINEIS[prox < 0 ? ABAS.length - 1 : prox]);
+      aviso("✅ Progresso de " + o.n + " restaurado.");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      $("salvar").addEventListener("click", salvar);
+      $("restaurar").addEventListener("click", () => $("arq").click());
+      $("arq").addEventListener("change", e => {
+        const f = e.target.files[0];
+        if (f) f.text().then(restaurar, () => aviso("Não foi possível ler o arquivo.", false));
+        e.target.value = "";
+      });
+    });
+
+    return {
+      reg: (i, j) => { jogos[i] = j; },
+      pts: (i, v) => { pts[i] = v; atualizar(); },
+      concluir: i => { feito[i] = true; atualizar(); tela(i); }
+    };
+  })();
+
+  /* =====================================================
+     ATIVIDADE 1 — ESCOLHER O NOME (três opções)
+     ===================================================== */
+  (function escolher() {
+    const jogo = document.getElementById("game");
+    let fila, indice, vidas, travado, pts, errou, acertou, opcAtual;
+
+    function iniciar() {
+      fila = embaralhar(FIGURAS);
+      indice = 0;
+      vidas = VIDAS_INICIAIS;
+      travado = false;
+      pts = 0; errou = new Set(); Prog.pts(0, 0);
+      mostrarPergunta();
+    }
+
+    function mostrarPergunta(op) {
+      travado = false;
+      acertou = false;
+      const atual = fila[indice];
+      const erradas = embaralhar(FIGURAS.filter(a => a.nome !== atual.nome)).slice(0, 2);
+      const opcoes = Array.isArray(op) ? op.map(k => FIGURAS[k]) : embaralhar([atual, ...erradas]);
+      opcAtual = opcoes;
+
+      jogo.innerHTML = `
+        <div class="top">
+          <span>${indice + 1} / ${fila.length}</span>
+          <span class="vidas" aria-label="${vidas} vidas">${coracoes(vidas)}</span>
+        </div>
+        <h1>Que figura é esta?</h1>
+        <div class="img-box"><img src="${atual.img}" alt="Imagem de uma figura"></div>
+        <div class="opcoes">
+          ${opcoes.map(o => `<button data-nome="${o.nome}">${o.nome}</button>`).join("")}
+        </div>
+        <div class="msg" id="msg"></div>
+      `;
+
+      jogo.querySelectorAll(".opcoes button").forEach(b =>
+        b.addEventListener("click", () => responder(b, atual.nome))
+      );
+    }
+
+    function responder(botao, correto) {
+      if (travado) return;
+      const msg = jogo.querySelector("#msg");
+
+      if (botao.dataset.nome === correto) {
+        travado = true;
+        botao.classList.add("certo");
+        acertou = true;
+        pts += errou.has(correto) ? 5 : 10; Prog.pts(0, pts);
+        msg.textContent = "🎉 Muito bem!";
+        jogo.querySelectorAll(".opcoes button").forEach(b => b.disabled = true);
+        setTimeout(() => {
+          indice++;
+          indice >= fila.length ? vitoria() : mostrarPergunta();
+        }, 1200);
+      } else {
+        travado = true;
+        botao.classList.add("errado");
+        errou.add(correto);
+        jogo.classList.remove("shake");
+        void jogo.offsetWidth;
+        jogo.classList.add("shake");
+        vidas--;
+        jogo.querySelector(".vidas").textContent = coracoes(vidas);
+        jogo.querySelectorAll(".opcoes button").forEach(b => b.disabled = true);
+
+        if (vidas === 0) {
+          msg.textContent = "😢 As vidas acabaram. Vamos recomeçar!";
+          setTimeout(iniciar, 2000);
+        } else {
+          // a pergunta errada vai para o final da lista
+          fila.push(fila.splice(indice, 1)[0]);
+          msg.innerHTML = 'Quase! Essa pergunta vai voltar mais tarde.<br><button class="proxima" id="proxima">Próxima ➜</button>';
+          jogo.querySelector("#proxima").addEventListener("click", () => mostrarPergunta());
+        }
+      }
+    }
+
+    function vitoria() { Prog.concluir(0); }
+
+    function salvar() {
+      return { f: fila.map(a => FIGURAS.indexOf(a)), i: indice + (acertou ? 1 : 0), v: vidas, p: pts,
+               o: acertou || !opcAtual ? undefined : opcAtual.map(a => FIGURAS.indexOf(a)),
+               e: [...errou].map(n => FIGURAS.findIndex(a => a.nome === n)) };
+    }
+    function carregar(st) {
+      if (!filaOk(st)) return false;
+      fila = st.f.map(k => FIGURAS[k]); indice = st.i; vidas = st.v; pts = st.p;
+      errou = new Set(st.e.map(k => FIGURAS[k].nome));
+      Prog.pts(0, pts);
+      let op = null;   // reaproveita as opções sorteadas, se forem válidas
+      if (indice < fila.length && idsOk(st.o) && st.o.length === 3 && new Set(st.o).size === 3 &&
+          st.o.includes(FIGURAS.indexOf(fila[indice]))) op = st.o;
+      indice >= fila.length ? vitoria() : mostrarPergunta(op);
+      return true;
+    }
+
+    Prog.reg(0, { el: jogo, texto: "Você acertou todas as figuras!", iniciar, salvar, carregar });
+    iniciar();
+  })();
+
+  /* =====================================================
+     ATIVIDADE 2 — COMBINAR (arrastar o nome até a imagem)
+     ===================================================== */
+  (function combinar() {
+    const POR_RODADA = 6;     // quantas imagens aparecem por rodada
+    const jogo = document.getElementById("game2");
+    let rodadas, rIdx, vidas, travado, slots, ordemBanco, selecionado, drag = null, pts;
+
+    const chip = (nome, cls = "") => `<div class="chip ${cls}" data-nome="${nome}">${nome}</div>`;
+    const msg = txt => { jogo.querySelector("#msg").textContent = txt; };
+
+    function iniciar() {
+      const fila = embaralhar(FIGURAS);
+      rodadas = [];
+      for (let i = 0; i < fila.length; i += POR_RODADA) rodadas.push(fila.slice(i, i + POR_RODADA));
+      // evita uma última rodada com poucas imagens
+      if (rodadas.length > 1 && rodadas[rodadas.length - 1].length < 3) {
+        const resto = rodadas.pop();
+        rodadas[rodadas.length - 1].push(...resto);
+      }
+      vidas = VIDAS_INICIAIS;
+      rIdx = 0;
+      pts = 0; Prog.pts(1, 0);
+      iniciarRodada();
+    }
+
+    function iniciarRodada() {
+      const grupo = rodadas[rIdx];
+      slots = grupo.map(a => ({ figura: a, placed: null, locked: false, erro: false, errou: false }));
+      ordemBanco = embaralhar(grupo.map(a => a.nome));
+      selecionado = null;
+      travado = false;
+      desenharBase();
+      atualizar();
+    }
+
+    function desenharBase() {
+      jogo.innerHTML = `
+        <div class="top">
+          <span>Rodada ${rIdx + 1} / ${rodadas.length}</span>
+          <span class="vidas" id="vidas"></span>
+        </div>
+        <h1>Arraste cada nome para a figura certa</h1>
+        <div class="banco" id="banco"></div>
+        <div class="linhas">
+          ${slots.map((s, i) => `
+            <div class="linha">
+              <div class="img-box"><img src="${s.figura.img}" alt="Imagem de uma figura"></div>
+              <div class="slot" data-i="${i}"></div>
+            </div>`).join("")}
+        </div>
+        <button class="conferir" id="conferir">Conferir ✔</button>
+        <div class="msg" id="msg"></div>
+      `;
+      jogo.querySelector("#conferir").addEventListener("click", conferir);
+    }
+
+    function atualizar() {
+      const vidasEl = jogo.querySelector("#vidas");
+      vidasEl.textContent = coracoes(vidas);
+      vidasEl.setAttribute("aria-label", vidas + " vidas");
+
+      const usados = slots.map(s => s.placed);
+      const livres = ordemBanco.filter(n => !usados.includes(n));
+      jogo.querySelector("#banco").innerHTML = livres.length
+        ? livres.map(n => chip(n, n === selecionado ? "sel" : "")).join("")
+        : '<span class="vazio">Todos os nomes já foram colocados</span>';
+
+      jogo.querySelectorAll(".slot").forEach(el => {
+        const s = slots[el.dataset.i];
+        el.className = "slot" + (s.locked ? " certo" : "") + (s.erro ? " errado" : "");
+        el.innerHTML = s.placed
+          ? chip(s.placed, s.locked ? "fixo" : "")
+          : '<span class="dica">solte aqui</span>';
+      });
+
+      const abertos = slots.filter(s => !s.locked);
+      jogo.querySelector("#conferir").disabled =
+        travado || abertos.length === 0 || abertos.some(s => !s.placed);
+    }
+
+    /* ---------- mover nomes ---------- */
+    function colocar(nome, origem, i) {
+      const alvo = slots[i];
+      if (alvo.locked || origem === i) { atualizar(); return; }
+      const deslocado = alvo.placed;                    // quem já estava no retângulo
+      if (origem !== "banco") slots[origem].placed = deslocado || null;  // troca de lugar
+      alvo.placed = nome;
+      selecionado = null;
+      atualizar();
+    }
+
+    function devolver(i) {
+      if (slots[i].locked) return;
+      slots[i].placed = null;                           // volta para a lista
+      atualizar();
+    }
+
+    /* ---------- arrastar (mouse, toque e caneta) ---------- */
+    const slotSob = e => {
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      return el ? el.closest("#game2 .slot") : null;
+    };
+
+    jogo.addEventListener("pointerdown", e => {
+      const el = e.target.closest(".chip");
+      if (!el || travado || el.classList.contains("fixo") || e.button > 0) return;
+      const slotEl = el.closest(".slot");
+      drag = {
+        el, nome: el.dataset.nome,
+        origem: slotEl ? Number(slotEl.dataset.i) : "banco",
+        x0: e.clientX, y0: e.clientY, moveu: false, ghost: null
+      };
+      window.addEventListener("pointermove", mover);
+      window.addEventListener("pointerup", soltar);
+      window.addEventListener("pointercancel", cancelar);
+    });
+
+    function mover(e) {
+      if (!drag) return;
+      if (!drag.moveu && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 6) {
+        drag.moveu = true;
+        const g = drag.el.cloneNode(true);
+        g.classList.remove("sel");
+        g.classList.add("ghost");
+        document.body.appendChild(g);
+        drag.ghost = g;
+        drag.el.classList.add("arrastando");
+      }
+      if (drag.moveu) {
+        drag.ghost.style.left = e.clientX + "px";
+        drag.ghost.style.top = e.clientY + "px";
+        jogo.querySelectorAll(".slot.alvo").forEach(s => s.classList.remove("alvo"));
+        const s = slotSob(e);
+        if (s && !slots[s.dataset.i].locked) s.classList.add("alvo");
+      }
+    }
+
+    function limpar(d) {
+      window.removeEventListener("pointermove", mover);
+      window.removeEventListener("pointerup", soltar);
+      window.removeEventListener("pointercancel", cancelar);
+      if (d.ghost) d.ghost.remove();
+      jogo.querySelectorAll(".slot.alvo").forEach(s => s.classList.remove("alvo"));
+    }
+
+    function soltar(e) {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      limpar(d);
+      if (d.moveu) {
+        const s = slotSob(e);
+        if (s) {
+          colocar(d.nome, d.origem, Number(s.dataset.i));
+        } else {
+          const el = document.elementFromPoint(e.clientX, e.clientY);
+          if (d.origem !== "banco" && el && el.closest("#game2 #banco")) devolver(d.origem);
+          else atualizar();
+        }
+      } else if (d.origem !== "banco") {
+        devolver(d.origem);                              // clique no nome já colocado: volta para a lista
+      } else {
+        selecionado = selecionado === d.nome ? null : d.nome;  // toque para selecionar
+        atualizar();
+      }
+    }
+
+    function cancelar() {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      limpar(d);
+      atualizar();
+    }
+
+    // toque no nome da lista e depois no retângulo vazio
+    jogo.addEventListener("click", e => {
+      if (travado || !selecionado || e.target.closest(".chip")) return;
+      const s = e.target.closest(".slot");
+      if (s) colocar(selecionado, "banco", Number(s.dataset.i));
+    });
+
+    /* ---------- conferir ---------- */
+    function conferir() {
+      if (travado) return;
+      travado = true;
+      const erradas = [];
+      slots.forEach((s, i) => {
+        if (s.locked) return;
+        if (s.placed === s.figura.nome) { s.locked = true; pts += s.errou ? 5 : 10; Prog.pts(1, pts); }
+        else { s.erro = true; s.errou = true; erradas.push(i); }
+      });
+
+      if (erradas.length === 0) {
+        atualizar();
+        msg("🎉 Muito bem!");
+        setTimeout(() => {
+          rIdx++;
+          rIdx >= rodadas.length ? vitoria() : iniciarRodada();
+        }, 1400);
+        return;
+      }
+
+      vidas--;
+      atualizar();
+      jogo.classList.remove("shake");
+      void jogo.offsetWidth;
+      jogo.classList.add("shake");
+
+      if (vidas === 0) {
+        msg("😢 As vidas acabaram. Vamos recomeçar!");
+        setTimeout(iniciar, 2200);
+        return;
+      }
+      msg("Algum nome está no lugar errado. Tente de novo!");
+      setTimeout(() => {
+        erradas.forEach(i => { slots[i].placed = null; slots[i].erro = false; });
+        travado = false;
+        atualizar();
+        msg("");
+      }, 1400);
+    }
+
+    function vitoria() { Prog.concluir(1); }
+
+    function salvar() {
+      return { r: rodadas.map(g => g.map(a => FIGURAS.indexOf(a))), i: rIdx, v: vidas, p: pts,
+               s: slots.map(s => [s.locked ? 1 : 0, s.errou ? 1 : 0,
+                   s.placed && !s.locked && !s.erro ? FIGURAS.findIndex(a => a.nome === s.placed) : -1]),
+               b: ordemBanco.map(n => FIGURAS.findIndex(a => a.nome === n)) };
+    }
+    function carregar(st) {
+      if (!st || !Array.isArray(st.r) || !st.r.length || !st.r.every(g => idsOk(g) && g.length > 0)) return false;
+      if (!numOk(st.i, 0, st.r.length - 1) || !numOk(st.v, 1, VIDAS_INICIAIS) || !numOk(st.p, 0, 100000)) return false;
+      const grupo = st.r[st.i].map(k => FIGURAS[k]);
+      if (!Array.isArray(st.s) || st.s.length !== grupo.length || !st.s.every(x => Array.isArray(x))) return false;
+      rodadas = st.r.map(g => g.map(k => FIGURAS[k]));
+      rIdx = st.i; vidas = st.v; pts = st.p;
+      Prog.pts(1, pts);
+      const usados = new Set(grupo.filter((a, k) => st.s[k][0]).map(a => a.nome));
+      const colocado = x => {   // nome colocado e ainda não conferido, se for válido
+        const a = FIGURAS[x[2]];
+        if (x[0] || !a || !grupo.includes(a) || usados.has(a.nome)) return null;
+        usados.add(a.nome); return a.nome;
+      };
+      slots = grupo.map((a, k) => ({ figura: a, placed: st.s[k][0] ? a.nome : colocado(st.s[k]),
+        locked: !!st.s[k][0], erro: false, errou: !!st.s[k][1] }));
+      if (slots.every(s => s.locked)) {            // rodada já estava completa: vai para a próxima
+        rIdx++;
+        rIdx >= rodadas.length ? vitoria() : iniciarRodada();
+        return true;
+      }
+      const nomes = grupo.map(a => a.nome);
+      const b = idsOk(st.b) ? st.b.map(k => FIGURAS[k].nome) : [];
+      ordemBanco = b.length === nomes.length && b.slice().sort().join("|") === nomes.slice().sort().join("|")
+        ? b : embaralhar(nomes);
+      selecionado = null; travado = false;
+      desenharBase(); atualizar();
+      return true;
+    }
+
+    Prog.reg(1, { el: jogo, texto: "Você combinou todas as figuras!", iniciar, salvar, carregar });
+    iniciar();
+  })();
+
+  /* =====================================================
+     ATIVIDADE 3 — ANAGRAMA (formar o nome com as letras)
+     ===================================================== */
+  (function anagrama() {
+    const jogo = document.getElementById("game3");
+    let fila, indice, vidas, travado, nome, tiles, slots, marca, pts, errou;
+
+    const msg = html => { jogo.querySelector("#msg").innerHTML = html; };
+
+    function embaralharLetras(letras) {
+      let r = embaralhar(letras);
+      // tenta evitar que as letras já venham na ordem certa
+      for (let t = 0; t < 10 && letras.length > 1 && r.join("") === letras.join(""); t++) {
+        r = embaralhar(letras);
+      }
+      return r;
+    }
+
+    function iniciar() {
+      fila = embaralhar(FIGURAS);
+      indice = 0;
+      vidas = VIDAS_INICIAIS;
+      pts = 0; errou = new Set(); Prog.pts(2, 0);
+      mostrarPergunta();
+    }
+
+    function mostrarPergunta(ordem) {
+      travado = false;
+      marca = "";
+      const atual = fila[indice];
+      nome = atual.nome.toUpperCase();
+      const letras = Array.from(nome);
+      tiles = (ordem || embaralharLetras(letras)).map((ch, id) => ({ id, ch, usada: false }));
+      slots = letras.map(() => null);   // guarda o id da letra em cada caixinha
+
+      jogo.innerHTML = `
+        <div class="top">
+          <span>${indice + 1} / ${fila.length}</span>
+          <span class="vidas" aria-label="${vidas} vidas">${coracoes(vidas)}</span>
+        </div>
+        <h1>Forme o nome da figura</h1>
+        <div class="img-box"><img src="${atual.img}" alt="Imagem de uma figura"></div>
+        <div class="respostas" id="respostas"></div>
+        <div class="tiles" id="tiles"></div>
+        <div class="acoes">
+          <button class="conferir" id="conferir">Conferir ✔</button>
+          <button class="limpar" id="limpar">Limpar</button>
+        </div>
+        <div class="msg" id="msg"></div>
+      `;
+      desenhar();
+    }
+
+    function desenhar() {
+      jogo.querySelector("#respostas").innerHTML = slots.map((id, i) =>
+        `<div class="caixa ${marca}" data-i="${i}">${id === null ? "" : tiles[id].ch}</div>`
+      ).join("");
+      jogo.querySelector("#tiles").innerHTML = tiles.map(t =>
+        `<button class="tile ${t.usada ? "usada" : ""}" data-id="${t.id}">${t.ch}</button>`
+      ).join("");
+      jogo.querySelector("#conferir").disabled = travado || slots.includes(null);
+    }
+
+    function colocar(id) {
+      const t = tiles[id];
+      const i = slots.indexOf(null);
+      if (travado || t.usada || i < 0) return;
+      slots[i] = id;
+      t.usada = true;
+      desenhar();
+    }
+
+    function remover(i) {
+      if (travado || slots[i] === null) return;
+      tiles[slots[i]].usada = false;
+      slots[i] = null;
+      desenhar();
+    }
+
+    function limpar() {
+      if (travado) return;
+      slots.fill(null);
+      tiles.forEach(t => t.usada = false);
+      desenhar();
+    }
+
+    function conferir() {
+      if (travado || slots.includes(null)) return;
+      travado = true;
+      const formada = slots.map(id => tiles[id].ch).join("");
+
+      if (formada === nome) {
+        marca = "certo";
+        pts += errou.has(nome) ? 5 : 10; Prog.pts(2, pts);
+        desenhar();
+        msg("🎉 Muito bem!");
+        setTimeout(() => {
+          indice++;
+          indice >= fila.length ? vitoria() : mostrarPergunta();
+        }, 1300);
+        return;
+      }
+
+      marca = "errado";
+      errou.add(nome);
+      desenhar();
+      jogo.classList.remove("shake");
+      void jogo.offsetWidth;
+      jogo.classList.add("shake");
+      vidas--;
+      jogo.querySelector(".vidas").textContent = coracoes(vidas);
+
+      if (vidas === 0) {
+        msg("😢 As vidas acabaram. Vamos recomeçar!");
+        setTimeout(iniciar, 2000);
+      } else {
+        // a pergunta errada vai para o final da lista
+        fila.push(fila.splice(indice, 1)[0]);
+        msg('Quase! Essa pergunta vai voltar mais tarde.<br><button class="proxima" id="proxima">Próxima ➜</button>');
+        jogo.querySelector("#proxima").addEventListener("click", () => mostrarPergunta());
+      }
+    }
+
+    function vitoria() { Prog.concluir(2); }
+
+    function salvar() {
+      return { f: fila.map(a => FIGURAS.indexOf(a)), i: indice + (travado && marca === "certo" ? 1 : 0), v: vidas, p: pts,
+               t: travado && marca === "certo" ? undefined : tiles.map(t => t.ch).join(""),
+               c: travado ? undefined : slots.slice(),
+               e: [...errou].map(n => FIGURAS.findIndex(a => a.nome.toUpperCase() === n)) };
+    }
+    function carregar(st) {
+      if (!filaOk(st)) return false;
+      fila = st.f.map(k => FIGURAS[k]); indice = st.i; vidas = st.v; pts = st.p;
+      errou = new Set(st.e.map(k => FIGURAS[k].nome.toUpperCase()));
+      Prog.pts(2, pts);
+      let ordem = null;   // reaproveita as letras embaralhadas, se baterem com o nome
+      if (indice < fila.length && typeof st.t === "string") {
+        const l = Array.from(fila[indice].nome.toUpperCase()), t = Array.from(st.t);
+        if (l.length === t.length && l.slice().sort().join("") === t.slice().sort().join("")) ordem = t;
+      }
+      if (indice >= fila.length) { vitoria(); return true; }
+      mostrarPergunta(ordem);
+      if (ordem && Array.isArray(st.c) && st.c.length === slots.length) {   // letras já nas caixinhas
+        const usadas = new Set();
+        const ok = st.c.every(id => id === null || (Number.isInteger(id) && id >= 0 && id < tiles.length &&
+          !usadas.has(id) && usadas.add(id)));
+        if (ok) { slots = st.c.slice(); tiles.forEach(t => { t.usada = usadas.has(t.id); }); desenhar(); }
+      }
+      return true;
+    }
+
+    jogo.addEventListener("click", e => {
+      const tile = e.target.closest(".tile");
+      if (tile) return colocar(Number(tile.dataset.id));
+      const caixa = e.target.closest(".caixa");
+      if (caixa) return remover(Number(caixa.dataset.i));
+      if (e.target.closest("#conferir")) return conferir();
+      if (e.target.closest("#limpar")) return limpar();
+    });
+
+    Prog.reg(2, { el: jogo, texto: "Você formou o nome de todas as figuras!", iniciar, salvar, carregar });
+    iniciar();
+  })();
+
+  /* =====================================================
+     ATIVIDADE 4 — ABRIR A CAIXA (ler o nome e achar a imagem)
+     ===================================================== */
+  (function caixa() {
+    const jogo = document.getElementById("game4");
+    let ordem, feitos, vidas, pts, errou, travado;   // ordem[i] = figura que está na caixa i
+
+    function iniciar() {
+      ordem = embaralhar(FIGURAS.map((_, i) => i));
+      feitos = ordem.map(() => false);
+      vidas = VIDAS_INICIAIS;
+      pts = 0; errou = new Set(); Prog.pts(3, 0);
+      grade();
+    }
+
+    function grade() {
+      travado = false;
+      jogo.innerHTML = `
+        <div class="top">
+          <span>📦 ${feitos.filter(Boolean).length} / ${feitos.length}</span>
+          <span class="vidas" aria-label="${vidas} vidas">${coracoes(vidas)}</span>
+        </div>
+        <h1>Escolha uma caixa para abrir</h1>
+        <div class="caixas">
+          ${ordem.map((_, i) => `<button class="cx${feitos[i] ? " aberta" : ""}" data-i="${i}" ${feitos[i] ? "disabled" : ""} aria-label="Caixa ${i + 1}">${feitos[i] ? "✅" : i + 1}</button>`).join("")}
+        </div>
+        <div class="msg" id="msg"></div>
+      `;
+      jogo.querySelectorAll(".cx:not(:disabled)").forEach(b =>
+        b.addEventListener("click", () => abrirCaixa(Number(b.dataset.i))));
+    }
+
+    function abrirCaixa(i) {
+      travado = false;
+      const k = ordem[i];
+      const outras = embaralhar(FIGURAS.map((_, j) => j).filter(j => j !== k)).slice(0, 2);
+      const opcoes = embaralhar([k, ...outras]);
+      jogo.innerHTML = `
+        <div class="top">
+          <span>📦 Caixa ${i + 1}</span>
+          <span class="vidas" aria-label="${vidas} vidas">${coracoes(vidas)}</span>
+        </div>
+        <h1>Leia o nome e escolha a imagem certa</h1>
+        <div class="palavra">${FIGURAS[k].nome}</div>
+        <div class="figuras">
+          ${opcoes.map(j => `<button class="fig" data-j="${j}"><img src="${FIGURAS[j].img}" alt="Imagem de uma figura"></button>`).join("")}
+        </div>
+        <div class="msg" id="msg"></div>
+      `;
+      jogo.querySelectorAll(".fig").forEach(b => b.addEventListener("click", () => responder(b, i, k)));
+    }
+
+    function responder(botao, i, k) {
+      if (travado) return;
+      travado = true;
+      const msg = jogo.querySelector("#msg");
+      jogo.querySelectorAll(".fig").forEach(b => b.disabled = true);
+
+      if (Number(botao.dataset.j) === k) {
+        botao.classList.add("certo");
+        feitos[i] = true;
+        pts += errou.has(k) ? 5 : 10; Prog.pts(3, pts);
+        msg.textContent = "🎉 Muito bem!";
+        setTimeout(() => feitos.every(Boolean) ? vitoria() : grade(), 1200);
+        return;
+      }
+
+      botao.classList.add("errado");
+      errou.add(k);
+      jogo.classList.remove("shake");
+      void jogo.offsetWidth;
+      jogo.classList.add("shake");
+      vidas--;
+      jogo.querySelector(".vidas").textContent = coracoes(vidas);
+
+      if (vidas === 0) {
+        msg.textContent = "😢 As vidas acabaram. Vamos recomeçar!";
+        setTimeout(iniciar, 2000);
+      } else {
+        msg.innerHTML = 'Quase! Essa caixa continua fechada.<br><button class="proxima" id="voltar">Voltar às caixas ➜</button>';
+        jogo.querySelector("#voltar").addEventListener("click", () => grade());
+      }
+    }
+
+    function vitoria() { Prog.concluir(3); }
+
+    function salvar() {
+      return { c: ordem.slice(), d: feitos.map(Number), v: vidas, p: pts, e: [...errou] };
+    }
+    function carregar(st) {
+      if (!st || !idsOk(st.c) || st.c.length !== FIGURAS.length || new Set(st.c).size !== st.c.length ||
+          !Array.isArray(st.d) || st.d.length !== st.c.length || !idsOk(st.e) ||
+          !numOk(st.v, 1, VIDAS_INICIAIS) || !numOk(st.p, 0, 100000)) return false;
+      ordem = st.c.slice(); feitos = st.d.map(Boolean); vidas = st.v; pts = st.p; errou = new Set(st.e);
+      Prog.pts(3, pts);
+      feitos.every(Boolean) ? vitoria() : grade();
+      return true;
+    }
+
+    Prog.reg(3, { el: jogo, texto: "Você abriu todas as caixas!", iniciar, salvar, carregar });
+    iniciar();
+  })();
+
+  /* ---------- abas ---------- */
+  document.querySelectorAll(".aba").forEach(aba =>
+    aba.addEventListener("click", () => abrir(aba.dataset.alvo))
+  );
+</script>
+</body>
+</html>
