@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atividade: Ábaco</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b2a49;--sky:#e8f3fd;--card:#fff;--ok:#1f9d55;--bad:#d64545;--line:#c9dcef;--accent:#2f6fd6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sky);color:var(--ink);font-family:'Baloo 2','Trebuchet MS',Verdana,sans-serif;font-size:18px;line-height:1.45}
+header{padding:18px 16px 8px;text-align:center}
+h1{margin:0;font-size:2rem}
+header p{margin:2px 0 0;font-size:1rem}
+main{max-width:760px;margin:0 auto;padding:0 12px 40px}
+[role=tablist]{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0 14px}
+[role=tab]{font:inherit;font-weight:700;border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:12px 12px 4px 4px;padding:6px 14px;cursor:pointer}
+[role=tab][aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+:focus-visible,label.btn:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.panel{background:var(--card);border-radius:16px;padding:18px;border:2px solid var(--line)}
+.panel[hidden]{display:none}
+h2{margin:0 0 8px;font-size:1.4rem}
+.btn{display:inline-block;font:inherit;font-weight:700;border:0;border-radius:12px;padding:8px 18px;background:var(--accent);color:#fff;cursor:pointer}
+.btn.alt{background:#fff;color:var(--ink);border:2px solid var(--ink)}
+.btn.danger{background:var(--bad)}
+.btn input{position:absolute;opacity:0;width:1px;height:1px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+input[type=text]{font:inherit;width:100%;max-width:420px;border:2px solid var(--line);border-radius:10px;padding:6px 10px}
+.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.info{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.95rem;margin-bottom:4px}
+.abacus{display:block;margin:8px auto;max-width:100%;height:auto}
+.q{font-size:1.25rem;font-weight:700;margin:8px 0}
+.opts{display:grid;gap:10px;margin:12px 0}
+.opt{font:inherit;font-size:1.3rem;font-weight:700;text-align:left;border:3px solid var(--line);background:#fff;color:var(--ink);border-radius:14px;padding:10px 16px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{background:#dff5e7;border-color:var(--ok)}
+.opt.wrong{background:#fde4e4;border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.opts.pics{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.opt.pic{padding:8px;text-align:center}
+.aviso{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:#fff6d6;border:2px solid #f0d27a;border-radius:12px;padding:6px 12px;font-size:.9rem;margin-bottom:10px}
+.btn.sm{padding:2px 12px;font-size:.9rem}
+.fb{padding:10px 14px;border-radius:12px;margin-bottom:10px}
+.fb.right{background:#dff5e7}.fb.wrong{background:#fde4e4}
+.skill{border-left:6px solid var(--accent);padding:4px 12px;margin:10px 0;background:#f4f9ff;border-radius:0 10px 10px 0}
+.skill>b{display:block}
+.tag{display:inline-block;background:#fff0c9;border:1px solid #e0b84a;border-radius:8px;padding:0 8px;font-size:.85rem}
+table{width:100%;border-collapse:collapse;margin:8px 0}
+td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.msg{min-height:1.5em;font-weight:700}
+ol,ul{padding-left:22px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧮 Aventura no Ábaco<span id="serie-tag"></span></h1>
+  <p>Leia o ábaco, conte as contas e descubra o valor de cada algarismo.</p>
+</header>
+<main>
+  <div role="tablist" aria-label="Seções">
+    <button role="tab" id="t-jogar" aria-controls="p-jogar" aria-selected="true">Jogar</button>
+    <button role="tab" id="t-como" aria-controls="p-como" aria-selected="false">Como jogar</button>
+    <button role="tab" id="t-hab" aria-controls="p-hab" aria-selected="false">Habilidades</button>
+    <button role="tab" id="t-prog" aria-controls="p-prog" aria-selected="false">Progresso</button>
+  </div>
+
+  <section class="panel" id="p-jogar" role="tabpanel" aria-labelledby="t-jogar"></section>
+
+  <section class="panel" id="p-como" role="tabpanel" aria-labelledby="t-como" hidden>
+    <h2>Como jogar</h2>
+    <ol>
+      <li>O nível vem do endereço da página: <b>?serie=3</b> (Nível 1), <b>?serie=4</b> (Nível 2) ou <b>?serie=5</b> (Nível 3). Na aba <b>Jogar</b>, clique em <b>Começar</b>.</li>
+      <li>São 40 perguntas. Cada aluno recebe perguntas diferentes, em ordem diferente.</li>
+      <li>Olhe o ábaco da pergunta e clique na resposta que você acha certa. Só uma das 3 opções está correta. Nas situações-problema, faça a conta no caderno e clique no ábaco que mostra a resposta.</li>
+      <li>Leia a explicação e clique em <b>Próxima pergunta</b>.</li>
+      <li><b>Pontos:</b> acertar de primeira vale 10 pontos, acertar na segunda chance vale 5, e da terceira em diante vale 3 (se ainda sobrarem vidas).</li>
+      <li>Você tem <b>3 vidas</b> (❤️). Cada erro custa uma vida, e a pergunta errada volta no final. A atividade termina quando você acertar as 40. Se as vidas acabarem, a atividade volta ao ponto inicial: o começo, ou o ponto de onde você restaurou o arquivo.</li>
+      <li>Para salvar, vá na aba <b>Progresso</b>, escreva seu nome e clique em <b>Salvar progresso em arquivo</b>. O nome fica travado até o fim da atividade. Para continuar depois, use <b>Restaurar de arquivo</b>. Quando você acertar as 40, o arquivo é salvo sozinho (se o nome estiver escrito), o nome é apagado e a atividade reinicia.</li>
+    </ol>
+    <h2>Como ler o ábaco</h2>
+    <div id="ex"></div>
+    <p>Cada haste é uma ordem do número. Da direita para a esquerda: <b>U</b> unidade, <b>D</b> dezena, <b>C</b> centena, <b>UM</b> unidade de milhar e <b>DM</b> dezena de milhar. Cada conta vale 1 daquela ordem. No exemplo, 2 centenas, 4 dezenas e 5 unidades formam <b>245</b>. Haste vazia é o algarismo <b>0</b>.</p>
+  </section>
+
+  <section class="panel" id="p-hab" role="tabpanel" aria-labelledby="t-hab" hidden>
+    <div id="hab-lista"></div>
+  </section>
+
+  <section class="panel" id="p-prog" role="tabpanel" aria-labelledby="t-prog" hidden>
+    <h2>Progresso</h2>
+    <table aria-label="Resumo">
+      <tbody>
+        <tr><th>Nível</th><td id="s-serie">—</td></tr>
+        <tr><th>Aluno</th><td id="s-name">—</td></tr>
+        <tr><th>Melhor pontuação</th><td id="s-best">—</td></tr>
+        <tr><th>Arquivo salvo em</th><td id="s-data">—</td></tr>
+        <tr><th>Situação</th><td id="s-cur">—</td></tr>
+      </tbody>
+    </table>
+    <h2>Salvar e restaurar</h2>
+    <p>O progresso <b>não fica guardado no navegador</b>: se a página for fechada ou recarregada, ele se perde. Para continuar depois, ou em outro computador, salve o arquivo e restaure depois.</p>
+    <p><label for="pname"><b>Nome do aluno</b></label><br><input type="text" id="pname" maxlength="40" autocomplete="off"><br><small id="pname-dica"></small></p>
+    <div class="row">
+      <button class="btn" id="save">Salvar progresso em arquivo</button>
+      <label class="btn alt">Restaurar de arquivo<input type="file" id="rest" accept=".txt,text/plain"></label>
+    </div>
+    <p class="msg" id="pmsg" role="status"></p>
+  </section>
+</main>
+
+<script>
+const NOVO=40;
+const T=()=>S.qs?S.qs.length:NOVO;
+const GEN=['das unidades','das dezenas','das centenas','das unidades de milhar','das dezenas de milhar','das centenas de milhar'];
+const ABBR=['U','D','C','UM','DM','CM'],DABBR=['0,1','0,01'],DCOL=['#0d9488','#64748b'];
+const PK=['p','m','f','i','q','pc','pd'];
+const COLORS=['#2f6fd6','#1f9d55','#f08a24','#8e44ad','#e0457b','#0f766e'];
+const SERIE=(()=>{let v=null;try{v=new URLSearchParams(location.search).get('serie')}catch(e){}return ['3','4','5'].includes(v)?+v:0})();
+const NR={3:[3,4],4:[4,5],5:[5,6]};
+const nvl=a=>'Nível '+(a-2);
+const nn=()=>rnd(...NR[SERIE||4]);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hearts=n=>'❤️'.repeat(n)+'🖤'.repeat(3-n);
+const fmt=n=>Number(n).toLocaleString('pt-BR');
+const fmtData=iso=>{const d=new Date(iso);return isNaN(d)?'—':d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=(a,k)=>shuffle(a.slice()).slice(0,k);
+
+/* ---------- estado ---------- */
+let S=fresh();
+['abaco_progresso_v1','abaco_progresso_v2','abaco_ponto_v2'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+let FIM=null;
+let NOME_FIXO=false;
+let PONTO=null;
+function getPonto(){try{const o=JSON.parse(PONTO);return valid(o)&&o.qs&&o.vidas>0?o:null}catch(e){return null}}
+function setPonto(){PONTO=JSON.stringify(S)}
+function clearPonto(){PONTO=null}
+function voltarPonto(){
+  const o=getPonto();
+  if(!o){newGame();return}
+  const nm=S.name,b=S.best;
+  FIM=null;S=norm(o);S.name=nm;S.best=b;save();renderGame();
+}
+function fresh(){return{v:2,name:'',best:null,qs:null,i:0,score:0,pontos:0,vidas:3,sel:null}}
+const pts=e=>e===0?10:e===1?5:3;
+const erros=q=>q.x!==undefined?q.x:(q.r?1:0);
+function norm(o){if(o.pontos===undefined){o.pontos=o.score*10;if(o.best!==null)o.best=o.best*10}
+  if(o.vidas===undefined)o.vidas=3;if(o.serie===undefined)o.serie=SERIE;return o}
+function valid(o){
+  const int=(x,a,b)=>Number.isInteger(x)&&x>=a&&x<=b;
+  if(!o||o.v!==2||typeof o.name!=='string'||o.name.length>40)return false;
+  if(o.best!==null&&!int(o.best,0,400))return false;
+  const L=o.qs?o.qs.length:NOVO;
+  if(!int(o.i,0,L)||!int(o.score,0,L))return false;
+  if(o.sel!==null&&!int(o.sel,0,2))return false;
+  if(o.pontos!==undefined&&!int(o.pontos,0,400))return false;
+  if(o.salvoEm!==undefined&&(typeof o.salvoEm!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?Z$/.test(o.salvoEm)))return false;
+  if(o.vidas!==undefined&&!int(o.vidas,0,3))return false;
+  if(o.serie!==undefined&&!int(o.serie,3,5))return false;
+  if(o.qs===null)return true;
+  return Array.isArray(o.qs)&&(o.qs.length===30||o.qs.length===40)&&o.qs.every(q=>q&&(q.r===undefined||typeof q.r==='boolean')&&(q.x===undefined||int(q.x,0,99))&&typeof q.t==='string'&&typeof q.e==='string'&&/^[0-9]{1,6}$/.test(q.n)&&int(q.p,-2,5)&&(q.dec===undefined||int(q.dec,0,2))&&['l','c','v','p','m','d','f','i','q','pc','ld','vd','pd'].includes(q.k)&&Array.isArray(q.o)&&q.o.length===3&&q.o.every(x=>typeof x==='string')&&q.o.includes(q.a));
+}
+function save(){renderProg()}
+
+/* ---------- base62 ---------- */
+const B62='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+function toB62(str){
+  const hex=[...new TextEncoder().encode(str)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  let n=BigInt('0x1'+hex),out=[];
+  while(n>0n){out.push(B62[Number(n%62n)]);n/=62n}
+  return out.reverse().join('');
+}
+function fromB62(s){
+  let n=0n;
+  for(const c of s){const k=B62.indexOf(c);if(k<0)throw 0;n=n*62n+BigInt(k)}
+  const hex=n.toString(16).slice(1);
+  const by=new Uint8Array(hex.length/2);
+  for(let i=0;i<by.length;i++)by[i]=parseInt(hex.substr(i*2,2),16);
+  return new TextDecoder('utf-8',{fatal:true}).decode(by);
+}
+const safeName=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')||'aluno';
+function saveFile(){
+  if(!S.qs){say('Não há progresso para salvar. Comece a atividade primeiro.');return}
+  const v=NOME_FIXO?S.name:(S.name||$('pname').value.trim());
+  if(!v){
+    const g=$('gname');
+    if(g&&!$('p-jogar').hidden){$('gname-dica').textContent='Digite o nome do aluno para salvar.';g.focus()}
+    else{say('Digite o nome do aluno para salvar.');$('pname').focus()}
+    return}
+  S.name=v.slice(0,40);
+  if(S.i>=T()&&S.vidas>0){finish();return}
+  const fn=downloadState();NOME_FIXO=true;save();
+  say('Arquivo salvo: '+fn+' ('+fmtData(S.salvoEm)+'). O nome fica travado até o fim da atividade.');
+}
+function downloadState(){
+  S.salvoEm=new Date().toISOString();
+  const blob=new Blob([toB62(JSON.stringify(S))],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=safeName(S.name)+'_abaco.txt';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  return a.download;
+}
+function finish(){
+  const fn=downloadState();
+  FIM={name:S.name,score:S.score,pontos:S.pontos,vidas:S.vidas,fn,tot:T(),em:S.salvoEm};
+  S=fresh();clearPonto();NOME_FIXO=false;
+  save();renderGame();openTab($('t-jogar'));say('Arquivo salvo: '+fn+' ('+fmtData(FIM.em)+'). O nome foi apagado e a atividade foi reiniciada.');
+}
+function restoreFile(file,done){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const t=String(r.result).trim();
+      if(!/^[0-9A-Za-z]+$/.test(t))throw 0;
+      const o=JSON.parse(fromB62(t));
+      if(!valid(o))throw 0;
+      if(!SERIE){say('Abra a atividade pelo link com serie=3, 4 ou 5 para restaurar.');if(done)done();return}
+      if(o.serie!==undefined&&o.serie!==SERIE){say('Este arquivo é do '+nvl(o.serie)+'. Abra o link com serie='+o.serie+' para restaurá-lo.');if(done)done();return}
+      NOME_FIXO=!!o.name;S=norm(o);save();setPonto();renderGame();openTab($('t-jogar'));say('Progresso de '+S.name+' restaurado'+(S.salvoEm?' (arquivo salvo em '+fmtData(S.salvoEm)+')':'')+'!');
+    }catch(e){say('Arquivo inválido. Escolha o arquivo _abaco.txt salvo pelo jogo.')}
+    if(done)done();
+  };
+  r.readAsText(file);
+}
+
+/* ---------- ábaco (SVG) ---------- */
+function svgAbacus(s,o={}){
+  const n=s.length,k=o.dec||0,w=n*96+40,h=250,bar=h-70;
+  let g=`<svg class="abacus" viewBox="0 0 ${w} ${h}" width="${o.w||Math.min(w,460)}" role="img" aria-label="Ábaco com ${n} hastes">`;
+  g+=`<rect x="4" y="6" width="${w-8}" height="${h-32}" rx="14" fill="#fbeedd" stroke="#8b5e3c" stroke-width="8"/>`;
+  for(let i=0;i<n;i++){
+    const p=n-1-i-k,cx=20+i*96+48,d=+s[i],dc=p<0,col=dc?DCOL[-p-1]:COLORS[p],lb=dc?DABBR[-p-1]:ABBR[p];
+    g+=`<line x1="${cx}" y1="18" x2="${cx}" y2="${h-34}" stroke="#8b5e3c" stroke-width="5" stroke-linecap="round"/>`;
+    for(let j=0;j<d;j++)g+=`<ellipse cx="${cx}" cy="${bar-14-j*19}" rx="20" ry="9" fill="${col}" stroke="#0003"/>`;
+    g+=`<text x="${cx}" y="${h-6}" text-anchor="middle" font-size="${dc?15:18}" font-weight="700" fill="${col}">${lb}</text>`;
+    if(p===0&&k>0)g+=`<line x1="${cx+48}" y1="26" x2="${cx+48}" y2="${h-40}" stroke="#8b5e3c" stroke-width="3" stroke-dasharray="6 6" opacity=".6"/><text x="${cx+48}" y="${bar+30}" text-anchor="middle" font-size="44" font-weight="700" fill="#1b2a49">,</text>`;
+  }
+  g+=`<rect x="8" y="${bar}" width="${w-16}" height="8" fill="#8b5e3c"/>`;
+  return g+'</svg>';
+}
+
+/* ---------- perguntas ---------- */
+const fmtD=(s,d)=>{s=String(s).padStart(d+1,'0');return fmt(s.slice(0,s.length-d))+(d?','+s.slice(s.length-d):'')};
+const fmtM=s=>'R$ '+fmtD(s,2);
+const fmtV=x=>Number(x).toLocaleString('pt-BR',{maximumFractionDigits:2});
+const money=n=>'R$ '+fmt(n);
+const rg=r=>rnd(r[0],r[1]);
+const numAleat=n=>{let x=String(rnd(1,9));for(let i=1;i<n;i++)x+=rnd(0,9);return x};
+const AM={3:[250,4999],4:[2500,49999],5:[25000,499999]};
+const MF={3:[12,48],4:[120,480],5:[250,999]};
+const MB={3:[2,3,4,5,10],4:[3,4,5,6,7,8,9],5:[6,7,8,9,12,15]};
+const RF={3:[3,12],4:[12,40],5:[25,99]};
+const DB={3:[2,3,4,5,6,7,8,9,10],4:[5,6,8,10,12,15,20],5:[12,15,24,25]};
+const DQ={3:[12,120],4:[25,250],5:[120,999]};
+const LIM={3:1e4,4:1e5,5:1e6};
+const par=()=>{let x=rg(AM[SERIE]),y=rg(AM[SERIE]);if(x===y)x++;return x>y?[x,y]:[y,x]};
+function mkOptions(ans,pool){
+  const set=new Set([ans]);
+  pool.forEach(x=>{if(set.size<3&&!set.has(x))set.add(x)});
+  while(set.size<3)set.add(String(Number(ans)+rnd(1,9)*10));
+  return shuffle([...set]);
+}
+function mkRes(P,k,dec=0){
+  const r=P.r,sw=String(r).split('');
+  if(sw.length>1){const j=rnd(0,sw.length-2);[sw[j],sw[j+1]]=[sw[j+1],sw[j]]}
+  const lim=LIM[SERIE||4];
+  const pool=[...new Set(shuffle([...(P.w||[]),r+10,r-10,r+100,r-100,r+1,r-1,r*10,Math.floor(r/10),+sw.join('')]).filter(x=>Number.isInteger(x)&&x>0&&x<lim&&x!==r).map(String))];
+  return{t:P.t,n:String(r),p:-1,dec,o:mkOptions(String(r),pool),a:String(r),e:P.e,k};
+}
+const PROBLEMS=[
+()=>{const a=rg(AM[SERIE]),b=rg(AM[SERIE]);return{t:`📦 Um centro de distribuição enviou ${fmt(a)} caixas em maio e ${fmt(b)} em junho. Quantas caixas enviou nos dois meses?`,r:a+b,w:[Math.abs(a-b)],e:`${fmt(a)} + ${fmt(b)} = ${fmt(a+b)} caixas.`}},
+()=>{const[a,b]=par();return{t:`🏭 Uma fábrica produziu ${fmt(a)} peças e vendeu ${fmt(b)}. Quantas peças sobraram no estoque?`,r:a-b,w:[a+b],e:`${fmt(a)} − ${fmt(b)} = ${fmt(a-b)} peças.`}},
+()=>{const[a,b]=par();return{t:`📺 Um canal de vídeos tem ${fmt(a)} inscritos e outro tem ${fmt(b)}. Quantos inscritos o primeiro tem a mais?`,r:a-b,w:[a+b],e:`${fmt(a)} − ${fmt(b)} = ${fmt(a-b)} inscritos a mais.`}},
+()=>{const[a,b]=par();return{t:`🥫 A meta de uma campanha é arrecadar ${fmt(a)} kg de alimentos e já foram arrecadados ${fmt(b)} kg. Quantos quilos faltam para completar a meta?`,r:a-b,w:[a+b],e:`${fmt(a)} − ${fmt(b)} = ${fmt(a-b)} kg.`}},
+()=>{const a=rg(MF[SERIE]),b=pick(MB[SERIE],1)[0];return{t:`🔩 Uma caixa tem ${a} parafusos. Quantos parafusos há em ${b} caixas?`,r:a*b,w:[a+b],e:`${a} × ${b} = ${fmt(a*b)} parafusos.`}},
+()=>{const a=rg(MF[SERIE]),b=pick(MB[SERIE],1)[0];return{t:`🎟️ Cada ingresso custa ${money(a)}. Quanto custam ${b} ingressos?`,r:a*b,w:[a+b],e:`${money(a)} × ${b} = ${money(a*b)}.`}},
+()=>{const a=rg(RF[SERIE]),b=pick(MB[SERIE],1)[0];return{t:`🌳 Um pomar tem ${a} fileiras com ${b} árvores em cada uma. Quantas árvores há no pomar?`,r:a*b,w:[a+b],e:`${a} × ${b} = ${fmt(a*b)} árvores.`}},
+()=>{const b=pick(DB[SERIE],1)[0],q=rg(DQ[SERIE]),a=b*q;return{t:`🎴 ${fmt(a)} figurinhas serão divididas igualmente entre ${b} amigos. Quantas figurinhas cada um recebe?`,r:q,w:[q+b],e:`${fmt(a)} ÷ ${b} = ${q} figurinhas para cada amigo.`}},
+()=>{const b=pick(DB[SERIE],1)[0],q=rg(DQ[SERIE]),a=b*q;return{t:`🥖 Uma padaria empacota ${fmt(a)} pães em sacos com ${b} pães cada. Quantos sacos são usados?`,r:q,w:[q+b],e:`${fmt(a)} ÷ ${b} = ${q} sacos.`}},
+()=>{const b=pick(DB[SERIE],1)[0],q=rg(DQ[SERIE]),r=rnd(1,b-1),a=b*q+r;return{t:`📏 Uma loja tem ${fmt(a)} metros de fita e corta pedaços de ${b} metros cada. Quantos metros sobram?`,r,w:[q,b-r],e:`${fmt(a)} ÷ ${b} = ${q}, e sobram ${r} metros.`}}
+];
+const MONEY=[
+()=>{const a=rnd(250,4999),b=rnd(250,4999);return{t:`🛒 Ana comprou um caderno de ${fmtM(a)} e uma mochila de ${fmtM(b)}. Quanto ela gastou ao todo?`,r:a+b,w:[Math.abs(a-b)],e:`${fmtM(a)} + ${fmtM(b)} = ${fmtM(a+b)}.`}},
+()=>{const p=rnd(300,4999),g=Math.ceil((p+100)/1000)*1000;return{t:`💵 Pedro pagou ${fmtM(g)} por um lanche de ${fmtM(p)}. Quanto recebeu de troco?`,r:g-p,w:[g+p],e:`${fmtM(g)} − ${fmtM(p)} = ${fmtM(g-p)}.`}},
+()=>{const a=rnd(150,2599),b=rnd(2,9);return{t:`🎟️ Cada ingresso custa ${fmtM(a)}. Quanto custam ${b} ingressos?`,r:a*b,w:[a+b],e:`${fmtM(a)} × ${b} = ${fmtM(a*b)}.`}},
+()=>{const q=rnd(150,2599),b=rnd(2,9),a=q*b;return{t:`🍕 ${fmtM(a)} serão divididos igualmente entre ${b} amigos. Quanto cada um paga?`,r:q,w:[q*10,a-b],e:`${fmtM(a)} ÷ ${b} = ${fmtM(q)}.`}}
+];
+function mkFato(){
+  if(SERIE===3&&Math.random()<.5){const a=rnd(5,9),b=rnd(5,9);return mkRes({t:`Qual ábaco mostra o resultado de ${a} + ${b}?`,r:a+b,w:[Math.abs(a-b)],e:`${a} + ${b} = ${a+b}.`},'f')}
+  const a=pick(SERIE===3?[2,3,4,5,10]:[6,7,8,9],1)[0],b=rnd(2,10);
+  return mkRes({t:`Qual ábaco mostra o resultado de ${a} × ${b}?`,r:a*b,w:[a+b],e:`${a} × ${b} = ${a*b}.`},'f');
+}
+function mkInversa(){
+  if(Math.random()<.5){const a=rnd(12,99),b=rnd(3,9),c=a*b;return mkRes({t:`Sabendo que ${a} × ${b} = ${c}, qual ábaco mostra o resultado de ${c} ÷ ${b}?`,r:a,w:[c-b,b],e:`A divisão desfaz a multiplicação: ${c} ÷ ${b} = ${a}.`},'i')}
+  const a=rnd(120,899),b=rnd(120,899),c=a+b;
+  return mkRes({t:`Sabendo que ${fmt(a)} + ${fmt(b)} = ${fmt(c)}, qual ábaco mostra o resultado de ${fmt(c)} − ${fmt(b)}?`,r:a,w:[c+b,Math.abs(a-b)],e:`A subtração desfaz a adição: ${fmt(c)} − ${fmt(b)} = ${fmt(a)}.`},'i');
+}
+const PARTES=[['a metade',2],['a terça parte',3],['a quarta parte',4],['a quinta parte',5],['a décima parte',10]];
+function mkPartes(){
+  const[nm,d]=pick(PARTES,1)[0],q=rnd(20,400),N=d*q;
+  return mkRes({t:`Qual ábaco mostra ${nm} de ${fmt(N)}?`,r:q,w:[N-d,q+d],e:`${nm[0].toUpperCase()+nm.slice(1)} de ${fmt(N)} é ${fmt(N)} ÷ ${d} = ${q}.`},'q');
+}
+const PCT={10:'a décima parte',25:'a quarta parte',50:'a metade',75:'três quartos',100:'o inteiro'};
+function mkPct(){
+  const p=pick([10,25,50,75,100],1)[0],b=40*rnd(2,60),r=b*p/100;
+  const t=Math.random()<.5?`🛍️ Uma loja dá ${p}% de desconto em um produto de ${money(b)}. De quantos reais é o desconto?`:`🏫 Em uma escola com ${fmt(b)} alunos, ${p}% vão de ônibus. Quantos alunos vão de ônibus?`;
+  return mkRes({t,r,w:[b-r,b+r],e:`${p}% é ${PCT[p]}: ${p}% de ${fmt(b)} = ${fmt(r)}.`},'pc');
+}
+function mkLerDec(){
+  const dec=rnd(1,2),s=numAleat(rnd(1,3)+dec),ans=fmtD(s,dec),ds=s.split(''),sw=ds.slice(),j=rnd(0,ds.length-2);
+  [sw[j],sw[j+1]]=[sw[j+1],sw[j]];
+  const ch=ds.slice(),c=rnd(0,ds.length-1);ch[c]=String((+ch[c]+rnd(1,8))%10);if(c===0&&ch[0]==='0')ch[0]='1';
+  const pool=[...new Set([...[0,1,2].filter(x=>x!==dec).map(x=>fmtD(s,x)),fmtD(sw.join(''),dec),fmtD(ch.join(''),dec)].filter(x=>x!==ans))];
+  return{t:'Que número o ábaco mostra?',n:s,p:-1,dec,o:mkOptions(ans,pool),a:ans,e:`As hastes à direita da vírgula são os décimos e os centésimos. O número é ${ans}.`,k:'ld'};
+}
+function mkValDec(){
+  const dec=2,s=numAleat(rnd(1,3)+dec),n=s.length;
+  const x=pick([...s].map((d,i)=>({d,p:n-1-i-dec})).filter(y=>y.d!=='0'),1)[0];
+  const nome=x.p===-1?'dos décimos':x.p===-2?'dos centésimos':GEN[x.p],ans=fmtV(x.d*Math.pow(10,x.p));
+  const pool=[-2,-1,0,1,2].filter(k=>k!==x.p).map(k=>fmtV(x.d*Math.pow(10,k)));
+  return{t:`No número ${fmtD(s,dec)}, qual é o valor do algarismo da ordem ${nome}?`,n:s,p:x.p,dec,o:mkOptions(ans,pick(pool.filter(z=>z!==ans),2)),a:ans,e:`O algarismo ${x.d} está na ordem ${nome}. Seu valor é ${ans}.`,k:'vd'};
+}
+function mkMaior(){
+  const n=nn(),set=new Set();
+  while(set.size<3)set.add(numAleat(n));
+  const v=[...set],ord=v.slice().sort((a,b)=>a-b),mode=pick(['maior','menor','meio'],1)[0];
+  const a=mode==='maior'?ord[2]:mode==='menor'?ord[0]:ord[1];
+  const t=mode==='meio'?'Qual ábaco mostra o número do meio, quando os três são colocados em ordem crescente?':`Qual ábaco mostra o ${mode} número?`;
+  return{t,n:a,p:-1,dec:0,o:shuffle(v),a,e:`Em ordem crescente: ${ord.map(fmt).join(' < ')}. ${mode==='maior'?'O maior é ':mode==='menor'?'O menor é ':'O do meio é '}${fmt(a)}.`,k:'m'};
+}
+function mkDecomp(){
+  const n=nn(),s=numAleat(n);
+  const P10=['1','10','100','1.000','10.000','100.000'];
+  const partes=[...s].map((d,i)=>({d,p:n-1-i})).filter(x=>x.d!=='0');
+  const txt=ps=>ps.map(x=>`${x.d} × ${P10[x.p]}`).join(' + ');
+  const ans=txt(partes),w=new Set();
+  for(let t=0;t<80&&w.size<2;t++){
+    const q=partes.map(x=>({...x})),i=rnd(0,q.length-1),m=rnd(0,2);
+    if(m===0&&q.length>1){const j=(i+1)%q.length;[q[i].p,q[j].p]=[q[j].p,q[i].p]}
+    else if(m===1){const np=q[i].p+(rnd(0,1)?1:-1);if(np<0||np>5)continue;q[i].p=np}
+    else q[i].d=String((+q[i].d+rnd(0,7))%9+1);
+    if(q.reduce((a,x)=>a+ +x.d*Math.pow(10,x.p),0)!==+s)w.add(txt(q));
+  }
+  for(let z=1;w.size<2;z++)w.add(ans+' + '+z+' × 1');
+  return{t:'Qual decomposição corresponde ao número do ábaco? (Ordens com zero não aparecem.)',n:s,p:-1,dec:0,o:mkOptions(ans,[...w]),a:ans,e:`O ábaco mostra ${fmt(s)}. Cada algarismo é multiplicado pelo valor da sua ordem: ${ans}.`,k:'d'};
+}
+function mkQuestion(kind){
+  const G={p:()=>mkRes(PROBLEMS[rnd(0,PROBLEMS.length-1)](),'p'),pd:()=>mkRes(MONEY[rnd(0,MONEY.length-1)](),'pd',2),m:mkMaior,d:mkDecomp,f:mkFato,i:mkInversa,q:mkPartes,pc:mkPct,ld:mkLerDec,vd:mkValDec};
+  if(G[kind])return G[kind]();
+  const n=nn(),s=numAleat(n);
+  if(kind==='l'){
+    const ds=s.split(''),sw=ds.slice(),k=rnd(0,n-2);[sw[k],sw[k+1]]=[sw[k+1],sw[k]];
+    const ch=ds.slice(),j=rnd(0,n-1);ch[j]=String((+ch[j]+rnd(1,8))%10);
+    const pool=[sw.join(''),ch.join(''),String(+s+10),String(+s-1)].filter(x=>x!==s&&x[0]!=='0');
+    return{t:'Que número o ábaco mostra?',n:s,p:-1,dec:0,o:mkOptions(s,pool).map(fmt),a:fmt(s),e:`Cada haste mostra um algarismo, da maior ordem para a menor. O número é ${fmt(s)}.`,k:'l'};
+  }
+  if(kind==='c'){
+    const p=rnd(0,n-1),d=s[n-1-p];
+    const pool=pick([...Array(10).keys()].map(String).filter(x=>x!==d),2);
+    return{t:`Para formar ${fmt(s)}, quantas contas devem ficar na haste ${GEN[p]}?`,n:s,p,dec:0,o:mkOptions(d,pool),a:d,e:`No número ${fmt(s)}, o algarismo da ordem ${GEN[p]} é ${d}. Por isso a haste tem ${d} conta${d==='1'?'':'s'}.`,k:'c'};
+  }
+  let p,d;do{p=rnd(0,n-1);d=s[n-1-p]}while(d==='0');
+  const ans=d*Math.pow(10,p);
+  const pool=pick([...Array(n+1).keys()].filter(x=>x!==p).map(x=>String(d*Math.pow(10,x))),2);
+  return{t:`No número ${fmt(s)}, qual é o valor do algarismo da ordem ${GEN[p]}?`,n:s,p,dec:0,o:mkOptions(String(ans),pool).map(fmt),a:fmt(ans),e:`O algarismo ${d} está na ordem ${GEN[p]}. Seu valor é ${d} × ${fmt(Math.pow(10,p))} = ${fmt(ans)}.`,k:'v'};
+}
+const MIX={
+  3:{l:5,c:3,v:4,d:4,m:4,p:12,f:4,q:4},
+  4:{l:5,c:4,v:4,d:5,m:5,p:12,i:3,f:2},
+  5:{l:4,c:2,v:3,d:4,m:4,ld:4,vd:3,pd:6,p:6,pc:4}
+};
+function newGame(){
+  if(!SERIE)return;
+  const kinds=shuffle(Object.entries(MIX[SERIE]).flatMap(([k,c])=>Array(c).fill(k)));
+  const seen=new Set(),qs=[];
+  kinds.forEach(k=>{let q,t=0;do{q=mkQuestion(k);t++}while(seen.has(q.k+q.t+q.n+q.p)&&t<30);seen.add(q.k+q.t+q.n+q.p);qs.push(q)});
+  FIM=null;delete S.salvoEm;S.serie=SERIE;S.qs=qs;S.i=0;S.score=0;S.pontos=0;S.vidas=3;S.sel=null;save();setPonto();renderGame();
+}
+
+/* ---------- telas ---------- */
+function say(t){$('pmsg').textContent=t}
+const nameBox=()=>`<p><label for="gname"><b>Nome do aluno</b></label><br><input type="text" id="gname" maxlength="40" autocomplete="off" value="${esc(S.name)}"${NOME_FIXO?' disabled':''}><br><small id="gname-dica">${NOME_FIXO?'Nome travado até o fim da atividade.':''}</small></p>`;
+function bindName(){const g=$('gname');if(g)g.oninput=()=>{if(NOME_FIXO)return;S.name=g.value.trim().slice(0,40);$('gname-dica').textContent='';save()}}
+function jogarNovamente(){
+  NOME_FIXO=false;FIM=null;
+  S=fresh();clearPonto();save();renderGame();
+  const g=$('gname');if(g)g.focus();
+}
+function renderGame(){
+  const el=$('p-jogar');
+  if(!S.qs){
+    el.innerHTML=`${FIM?`<div class="fb right" role="status"><b>Parabéns, ${esc(FIM.name)}! 🎉</b><br>Pontos: ${FIM.pontos} de ${FIM.tot*10}. Acertos de primeira: ${FIM.score} de ${FIM.tot}. Vidas que sobraram: ${hearts(FIM.vidas)}<br>Seu progresso foi salvo em ${fmtData(FIM.em)} no arquivo <b>${esc(FIM.fn)}</b> e a atividade foi reiniciada.</div>`:''}<h2>Vamos jogar!</h2>${svgAbacus('358')}<p>São ${T()} perguntas sobre o ábaco, sorteadas só para você.</p>
+    ${SERIE?nameBox()+'<div class="row"><button class="btn" id="go">Começar</button></div>':'<p><b>Escolha o nível:</b></p><div class="row"><a class="btn" href="?serie=3">Nível 1</a><a class="btn" href="?serie=4">Nível 2</a><a class="btn" href="?serie=5">Nível 3</a></div>'}`;
+    if(SERIE){$('go').onclick=()=>{
+      const g=$('gname');if(!S.name)S.name=g.value.trim().slice(0,40);
+      if(!S.name){$('gname-dica').textContent='Digite o nome do aluno para começar.';g.focus();return}
+      newGame()};bindName()}
+    return;
+  }
+  if(S.vidas<=0&&S.sel===null){
+    const pt=getPonto(),ini=!pt||pt.i===0;
+    el.innerHTML=`<h2>Fim de jogo 💔</h2>${svgAbacus(String(S.i).padStart(2,'0'))}<p class="q">As 3 vidas acabaram.</p><p>Você fez ${S.pontos} pontos e acertou ${S.i} de ${T()} perguntas. A atividade volta ${ini?'para o início, com as mesmas perguntas.':`para o ponto restaurado (${pt.i} de ${T()} certas e ${pt.vidas} vida${pt.vidas===1?'':'s'}).`}</p><div class="row"><button class="btn" id="again">${ini?'Recomeçar do início':'Voltar ao ponto restaurado'}</button></div>`;
+    $('again').onclick=voltarPonto;return;
+  }
+  if(S.i>=T()){
+    const sc=S.score,pc=S.pontos/(10*T());
+    const msg=pc===1?'Perfeito! Você domina o ábaco! 🏆':pc>=.7?'Muito bem! Quase lá! 🌟':pc>=.4?'Bom começo! Jogue de novo para melhorar. 👍':'Vamos treinar mais um pouco. Releia a aba Como jogar e tente de novo. 💪';
+    el.innerHTML=`<h2>Fim da atividade${S.name?', '+esc(S.name):''}!</h2>${svgAbacus(String(sc))}<p class="q">Pontos: ${S.pontos} de ${10*T()}. Acertos de primeira: ${sc} de ${T()}. Vidas que sobraram: <span aria-label="${S.vidas} de 3">${hearts(S.vidas)}</span></p><p>${msg}</p>${nameBox()}<div class="row"><button class="btn" id="again">Jogar novamente</button><button class="btn alt" id="sv">Salvar progresso em arquivo</button></div>`;
+    $('again').onclick=jogarNovamente;$('sv').onclick=saveFile;bindName();
+    return;
+  }
+  const q=S.qs[S.i],done=S.sel!==null;
+  let h=`<div class="aviso"><span>💾 Seu progresso fica só nesta página. Salve o arquivo antes de sair ou recarregar.</span><button class="btn alt sm" id="sv2">Salvar progresso</button></div><div class="info"><span>Pergunta ${S.i+1} de ${T()}${q.r?' · de volta ↻':''} · vale ${pts(erros(q))} pts</span><span aria-label="Vidas: ${S.vidas} de 3">${hearts(S.vidas)} · Pontos: ${S.pontos}</span></div><div class="bar"><i style="width:${S.i/T()*100}%"></i></div>`;
+  const P=PK.includes(q.k),dc=q.dec||0,rn=P?Math.max(3,dc+1,...q.o.map(x=>x.length)):0,limpa=t=>t.replace(' (haste destacada)','').replace(', marcada com “?”','');
+  if(!P)h+=svgAbacus(q.k==='c'?'0'.repeat(q.n.length):q.n,{dec:dc});
+  h+=`<p class="q">${limpa(q.t)}</p>${P?`<p>${q.k==='m'?'Compare os números e clique no ábaco correto.':'Faça a conta no caderno e clique no ábaco que mostra a resposta.'}${q.k==='pd'?' Depois da vírgula ficam os centavos.':''}</p>`:''}<div class="opts${P?' pics':''}">`;
+  q.o.forEach((o,k)=>{
+    let c='opt'+(P?' pic':''),m='';if(done){if(o===q.a){c+=' right';m='✔ '}else if(k===S.sel){c+=' wrong';m='✖ '}}
+    h+=`<button class="${c}" data-k="${k}" ${done?'disabled':''}${P?` aria-label="Ábaco da opção ${'ABC'[k]}"`:''}>${m}${'ABC'[k]})${P?svgAbacus(o.padStart(rn,'0'),{w:230,dec:dc}):' '+o}</button>`;
+  });
+  h+='</div>';
+  if(done){
+    const ok=q.o[S.sel]===q.a,last=S.vidas<=0;
+    const lose=ok?'':last?'Suas vidas acabaram.':`Você perdeu uma vida. Esta pergunta volta no final e vai valer ${pts(erros(q))} pontos.`;
+    const bt=last||(ok&&S.i===T()-1)?'Ver resultado':(!ok&&T()-S.i===1)?'Tentar de novo':'Próxima pergunta';
+    h+=`<div class="fb ${ok?'right':'wrong'}" role="status"><b>${ok?`Você acertou! 🎉 +${pts(erros(q))} pontos`:'Quase! A resposta certa é '+(q.k==='pd'?fmtM(q.a):P?fmtD(q.a,dc):q.a)+'.'}</b>${lose?'<br><b>'+lose+'</b>':''}<br>${q.e}</div><button class="btn" id="next">${bt}</button>`;
+  }
+  el.innerHTML=h;$('sv2').onclick=goSave;
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(S.sel!==null)return;
+    S.sel=+b.dataset.k;const er=erros(q);if(q.o[S.sel]===q.a){if(er===0)S.score++;S.pontos+=pts(er)}else{S.vidas--;q.x=er+1}save();renderGame();
+  });
+  if(done)$('next').onclick=()=>{
+    const ok=q.o[S.sel]===q.a;
+    if(S.vidas<=0){S.sel=null}
+    else if(ok){S.i++;S.sel=null;if(S.i>=T()){if(S.best===null||S.pontos>S.best)S.best=S.pontos;if(S.name){finish();return}}}
+    else{const x=S.qs.splice(S.i,1)[0];x.r=true;S.qs.push(x);S.sel=null}
+    save();renderGame();
+  };
+}
+function renderProg(){
+  $('s-serie').textContent=SERIE?nvl(SERIE):'—';
+  $('pname').disabled=NOME_FIXO;$('pname-dica').textContent=NOME_FIXO?'Nome travado até o fim da atividade.':'';
+  $('s-data').textContent=S.salvoEm?fmtData(S.salvoEm):'—';
+  $('s-name').textContent=S.name||'—';
+  if(document.activeElement!==$('pname'))$('pname').value=S.name;
+  const g=$('gname');if(g){g.disabled=NOME_FIXO;if(document.activeElement!==g)g.value=S.name;$('gname-dica').textContent=NOME_FIXO?'Nome travado até o fim da atividade.':$('gname-dica').textContent}
+  $('s-best').textContent=S.best!==null?S.best+' de '+10*T()+' pontos':'—';
+  $('s-cur').textContent=!S.qs?'Nenhuma fase em andamento':S.vidas<=0&&S.sel===null?'Fim de jogo: reinicie a atividade':S.i>=T()?'Atividade concluída':`Em andamento: ${S.i} de ${T()} certas · ${S.pontos} pontos · vidas: ${S.vidas}`;
+}
+function goSave(){openTab($('t-prog'));$('pname').focus();say('Escreva o nome do aluno e clique em Salvar progresso em arquivo.')}
+$('pname').oninput=()=>{if(NOME_FIXO)return;S.name=$('pname').value.trim().slice(0,40);save()};
+$('save').onclick=saveFile;
+$('rest').onchange=e=>{restoreFile(e.target.files[0]);e.target.value=''};
+
+/* ---------- habilidades (BNCC) ---------- */
+const HAB=[
+{a:3,c:'EF03MA01',t:'Ler, escrever e comparar números naturais de até a ordem de unidade de milhar, estabelecendo relações entre os registros numéricos e em língua materna.',y:'leitura de números de até 4 ordens no ábaco e comparação (maior, menor e número do meio).',n:'escrever números.'},
+{a:3,c:'EF03MA02',t:'Identificar características do sistema de numeração decimal, utilizando a composição e a decomposição de número natural de até quatro ordens.',y:'valor posicional (contar contas e valor do algarismo) e escolha da decomposição do número em ordens, até 4 ordens.',n:'o aluno não monta a decomposição nem faz a composição.'},
+{a:3,c:'EF03MA03',t:'Construir e utilizar fatos básicos da adição e da multiplicação para o cálculo mental ou escrito.',y:'fatos básicos da adição e da multiplicação (por 2, 3, 4, 5 e 10), com a resposta no ábaco.',n:'construir os fatos; o aluno só os usa.'},
+{a:3,c:'EF03MA05',t:'Utilizar diferentes procedimentos de cálculo mental e escrito, inclusive os convencionais, para resolver problemas significativos envolvendo adição e subtração com números naturais.',y:'problemas do dia a dia de adição e subtração com números naturais.',n:'não verifica quais procedimentos de cálculo o aluno usou.'},
+{a:3,c:'EF03MA06',t:'Resolver e elaborar problemas de adição e subtração com os significados de juntar, acrescentar, separar, retirar, comparar e completar quantidades, utilizando diferentes estratégias de cálculo exato ou aproximado, incluindo cálculo mental.',y:'os significados juntar, acrescentar, separar, retirar, comparar e completar.',n:'elaborar problemas; cálculo aproximado.'},
+{a:3,c:'EF03MA07',t:'Resolver e elaborar problemas de multiplicação (por 2, 3, 4, 5 e 10) com os significados de adição de parcelas iguais e elementos apresentados em disposição retangular, utilizando diferentes estratégias de cálculo e registros.',y:'multiplicação por 2, 3, 4, 5 e 10 como adição de parcelas iguais e em disposição retangular.',n:'elaborar problemas.'},
+{a:3,c:'EF03MA08',t:'Resolver e elaborar problemas de divisão de um número natural por outro (até 10), com resto zero e com resto diferente de zero, com os significados de repartição equitativa e de medida, por meio de estratégias e registros pessoais.',y:'divisão por números até 10, com resto zero e com resto diferente de zero (perguntando quanto sobra), em repartição equitativa e em medida.',n:'elaborar problemas.'},
+{a:3,c:'EF03MA09',t:'Associar o quociente de uma divisão com resto zero de um número natural por 2, 3, 4, 5 e 10 às ideias de metade, terça, quarta, quinta e décima partes.',y:'metade, terça, quarta, quinta e décima partes de um número (4 perguntas por jogo).',n:'as cinco partes são sorteadas, então nem todas aparecem em todo jogo.'},
+{a:4,c:'EF04MA01',t:'Ler, escrever e ordenar números naturais até a ordem de dezenas de milhar.',y:'leitura e ordenação (maior, menor e número do meio) de números de até 5 ordens no ábaco.',n:'escrever números.'},
+{a:4,c:'EF04MA02',t:'Mostrar, por decomposição e composição, que todo número natural pode ser escrito por meio de adições e multiplicações por potências de dez, para compreender o sistema de numeração decimal e desenvolver estratégias de cálculo.',y:'valor do algarismo como produto por uma potência de dez e escolha da decomposição em adições de multiplicações (por exemplo, 3 × 100 + 5 × 1).',n:'o aluno não escreve a decomposição nem faz o caminho inverso (composição).'},
+{a:4,c:'EF04MA03',t:'Resolver e elaborar problemas com números naturais envolvendo adição e subtração, utilizando estratégias diversas, como cálculo, cálculo mental e algoritmos, além de fazer estimativas do resultado.',y:'problemas de adição e subtração com números naturais de até 5 ordens.',n:'estimar o resultado; elaborar problemas.'},
+{a:4,c:'EF04MA04',t:'Utilizar as relações entre adição e subtração, bem como entre multiplicação e divisão, para ampliar as estratégias de cálculo.',y:'relações entre adição e subtração e entre multiplicação e divisão (3 perguntas por jogo).',n:'o aluno aplica a relação dada; não a descobre sozinho.'},
+{a:4,c:'EF04MA06',t:'Resolver e elaborar problemas envolvendo diferentes significados da multiplicação (adição de parcelas iguais, organização retangular e proporcionalidade), utilizando estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.',y:'adição de parcelas iguais, organização retangular e proporcionalidade (preço × quantidade).',n:'estimativa; elaborar problemas.'},
+{a:4,c:'EF04MA07',t:'Resolver e elaborar problemas de divisão cujo divisor tenha no máximo dois algarismos, envolvendo os significados de repartição equitativa e de medida, utilizando estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.',y:'divisão com divisor de até dois algarismos, em repartição equitativa e em medida, inclusive com resto (perguntando quanto sobra).',n:'estimativa; elaborar problemas.'},
+{a:5,c:'EF05MA01',t:'Ler, escrever e ordenar números naturais até a ordem das centenas de milhar com compreensão das principais características do sistema de numeração decimal.',y:'leitura, ordenação e valor posicional de números naturais de até 6 ordens (centenas de milhar).',n:'escrever números.'},
+{a:5,c:'EF05MA02',t:'Ler, escrever e ordenar números racionais na forma decimal com compreensão das principais características do sistema de numeração decimal, utilizando, como recursos, a composição e decomposição e a reta numérica.',y:'leitura e valor posicional de números decimais com décimos e centésimos, no ábaco.',n:'escrever e ordenar decimais; reta numérica.'},
+{a:5,c:'EF05MA06',t:'Associar as representações 10%, 25%, 50%, 75% e 100% respectivamente à décima parte, quarta parte, metade, três quartos e um inteiro, para calcular porcentagens, utilizando estratégias pessoais, cálculo mental e calculadora, em contextos de educação financeira, entre outros.',y:'porcentagens 10%, 25%, 50%, 75% e 100% de valores inteiros, em situações de desconto e de contagem de alunos.',n:'o uso de calculadora e de estratégias pessoais não é verificado.'},
+{a:5,c:'EF05MA07',t:'Resolver e elaborar problemas de adição e subtração com números naturais e com números racionais, cuja representação decimal seja finita, utilizando estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.',y:'adição e subtração com números naturais e com valores em reais (decimais com centésimos).',n:'estimativa; elaborar problemas.'},
+{a:5,c:'EF05MA08',t:'Resolver e elaborar problemas de multiplicação e divisão com números naturais e com números racionais cuja representação decimal é finita (com multiplicador natural e divisor natural e diferente de zero), utilizando estratégias diversas, como cálculo por estimativa, cálculo mental e algoritmos.',y:'multiplicação e divisão com números naturais e com valores em reais (multiplicador e divisor naturais).',n:'estimativa; elaborar problemas.'}
+];
+const RES={
+3:'Trabalha 8 das 9 habilidades de Números do 3º ano, com números de até 4 ordens, multiplicação por 2, 3, 4, 5 e 10 e divisão por números até 10. Fica de fora a reta numérica (EF03MA04) e as demais unidades temáticas.',
+4:'Trabalha 6 das 10 habilidades de Números do 4º ano, com números de até 5 ordens. Ficam de fora propriedades das operações, problemas de contagem, frações unitárias e decimais no sistema monetário, além das demais unidades temáticas.',
+5:'Trabalha 5 das 9 habilidades de Números do 5º ano, com números de até 6 ordens e decimais com centésimos. Ficam de fora frações, frações equivalentes, comparação de racionais e problemas de contagem, além das demais unidades temáticas.'
+};
+function renderHab(){
+  let h=`<h2>Habilidades trabalhadas${SERIE?' · '+nvl(SERIE):''}</h2><p>Habilidades do eixo <b>Números</b> da BNCC (Matemática). <b>Total</b>: a atividade trabalha a habilidade inteira. <b>Parcial</b>: trabalha só parte dela. Por ser de múltipla escolha, a atividade não pede que o aluno escreva números, estime resultados nem elabore problemas.</p>`;
+  (SERIE?[SERIE]:[3,4,5]).forEach(a=>{
+    h+=`<h2>${nvl(a)} · habilidades do ${a}º ano (BNCC)</h2><div class="skill"><b>Nível atendido · <span class="tag">Atendimento parcial</span></b>${RES[a]}</div>`+HAB.filter(x=>x.a===a).map(x=>`<div class="skill"><b>${x.c} · <span class="tag">Parcial</span></b>${x.t}<br><small><b>Trabalha:</b> ${x.y}<br><b>Fica de fora:</b> ${x.n}</small></div>`).join('');
+  });
+  h+='<p><small>Códigos e textos conforme a BNCC (Ministério da Educação). Confira no documento oficial antes de usar em planejamentos.</small></p>';
+  $('hab-lista').innerHTML=h;
+}
+
+/* ---------- abas ---------- */
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function openTab(t){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$(x.getAttribute('aria-controls')).hidden=!on})}
+tabs.forEach((t,i)=>{
+  t.onclick=()=>openTab(t);
+  t.onkeydown=e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
+      const n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];n.focus();openTab(n);
+    }
+  };
+});
+$('ex').innerHTML=svgAbacus('245');
+if(SERIE){$('serie-tag').textContent=' · '+nvl(SERIE);document.title='Atividade: Ábaco · '+nvl(SERIE)}
+renderGame();renderProg();renderHab();
+</script>
+</body>
+</html>
