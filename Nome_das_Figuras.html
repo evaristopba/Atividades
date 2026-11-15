@@ -48,6 +48,8 @@
   /* partes comuns aos jogos */
   .top{display:flex; justify-content:space-between; align-items:center; font-size:1.1rem; font-weight:bold}
   .vidas{font-size:2rem; letter-spacing:4px}
+  .vidas::after{content:"cada vida que sobrar vale +10 pontos"; font-size:.8rem; font-weight:bold; letter-spacing:0; margin-left:8px; vertical-align:middle; color:var(--text); opacity:.8}
+  .fim .bonus{font-size:1.2rem; font-weight:bold; background:var(--btn); display:inline-block; padding:6px 14px; border-radius:12px}
   .msg{min-height:2rem; margin-top:14px; font-size:1.3rem; font-weight:bold}
   .fim h2{font-size:2rem; margin:8px 0}
   .fim button{
@@ -183,6 +185,7 @@
     font:inherit; font-size:1.1rem; padding:8px 12px; min-width:0; flex:1 1 180px; max-width:280px;
     border:3px solid var(--accent); border-radius:12px; background:var(--card); color:var(--text);
   }
+  .barra input[type=text][readonly]{background:var(--btn); cursor:not-allowed; opacity:.85}
   .pontos{font-weight:bold; font-size:1.3rem; padding:6px 14px; border-radius:12px; background:var(--btn)}
   .bt{
     font:inherit; font-size:1rem; font-weight:bold; padding:9px 14px; border:none;
@@ -239,7 +242,7 @@
       <li>Toque no nome que você acha que é o certo. São três opções.</li>
       <li>Se acertar, o botão fica verde e a próxima imagem aparece sozinha. 🎉</li>
       <li>Se errar, você perde um coração ❤️. A pergunta vai para o final e volta mais tarde. Toque em <strong>Próxima</strong> para continuar.</li>
-      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início. As vidas que sobrarem no final viram pontos extras: cada ❤️ vale 10 pontos.</li>
       <li>Para ganhar, acerte todas as figuras! 🏆</li>
     </ol>
 
@@ -250,7 +253,7 @@
       <li>Mudou de ideia? Toque no nome que está no retângulo e ele volta para a lista.</li>
       <li>Quando todos os retângulos estiverem preenchidos, toque em <strong>Conferir ✔</strong>.</li>
       <li>Os nomes certos ficam verdes e fixos. Os errados voltam para a lista e você perde um coração ❤️.</li>
-      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início. As vidas que sobrarem no final viram pontos extras: cada ❤️ vale 10 pontos.</li>
       <li>Acerte todas as rodadas para ganhar! 🏆</li>
     </ol>
 
@@ -261,7 +264,7 @@
       <li>Tocou na letra errada? Toque na letra que está na caixinha e ela volta. O botão <strong>Limpar</strong> devolve todas.</li>
       <li>Quando todas as caixinhas estiverem cheias, toque em <strong>Conferir ✔</strong>.</li>
       <li>Se errar, você perde um coração ❤️. A pergunta vai para o final e volta mais tarde. Toque em <strong>Próxima</strong> para continuar.</li>
-      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início. As vidas que sobrarem no final viram pontos extras: cada ❤️ vale 10 pontos.</li>
       <li>Para ganhar, forme o nome de todas as figuras! 🏆</li>
     </ol>
     <h3>📦 Abrir a caixa</h3>
@@ -271,16 +274,16 @@
       <li>Toque na imagem que combina com o nome. São três imagens.</li>
       <li>Se acertar, a caixa fica verde ✅ e você volta para as caixas.</li>
       <li>Se errar, você perde um coração ❤️ e a caixa continua fechada para tentar de novo mais tarde.</li>
-      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início.</li>
+      <li>Você tem 3 vidas. Se os corações acabarem, a atividade recomeça do início. As vidas que sobrarem no final viram pontos extras: cada ❤️ vale 10 pontos.</li>
       <li>Para ganhar, abra todas as caixas! 🏆</li>
     </ol>
 
     <h3>⭐ Pontos e progresso</h3>
     <ol>
-      <li>Escreva o nome do aluno no alto da página.</li>
-      <li>Cada acerto de primeira vale 10 pontos. Acertar depois de errar vale 5.</li>
+      <li>Escreva o nome do aluno no alto da página e aperte Enter. Depois de preenchido, o nome não pode mais ser alterado.</li>
+      <li>Cada acerto de primeira vale 10 pontos. Acertar depois de errar vale 5. Ao terminar a atividade, cada vida que sobrou vale 10 pontos extras.</li>
       <li>Comece por <strong>Escolher</strong>. Ao terminar uma atividade, ela fica bloqueada e a próxima é liberada.</li>
-      <li>Toque em <strong>💾 Salvar</strong> para baixar o arquivo do progresso. Mais tarde, use <strong>📂 Restaurar</strong> para continuar de onde parou.</li>
+      <li>Ao terminar a última atividade, o resultado (nome, acertos, erros e data) é salvo automaticamente em um arquivo. Você também pode tocar em <strong>💾 Salvar</strong> a qualquer momento. Mais tarde, use <strong>📂 Restaurar</strong> para continuar de onde parou.</li>
       <li>Só as atividades já terminadas são guardadas. A atividade em andamento recomeça.</li>
     </ol>
     <p class="nota creditos">Todas as atividades desta página (Escolher, Combinar, Anagrama e Abrir a caixa) foram inspiradas em um recurso do Wordwall: <a href="https://wordwall.net/pt/resource/31919531/coloque-as-letras-em-ordem-para-formar-o-nome-dos-animais" target="_blank" rel="noopener noreferrer">COLOQUE AS LETRAS EM ORDEM PARA FORMAR O NOME DOS ANIMAIS.</a></p>
@@ -333,6 +336,7 @@
     { nome: "Leão", img: "https://i.postimg.cc/LXyfcDth/N17.png" }
   ];
   const VIDAS_INICIAIS = 3;
+  const PONTOS_POR_VIDA = 10;   // cada vida que sobra ao terminar a atividade vira pontos extras
 
   const embaralhar = a => {
     a = a.slice();
@@ -386,6 +390,11 @@
   const Prog = (() => {
     const ABAS = ["t-jogo", "t-combo", "t-ana", "t-caixa"], PAINEIS = ["p-jogo", "p-combo", "p-ana", "p-caixa"];
     const feito = [false, false, false, false], pts = [0, 0, 0, 0], jogos = [];
+    // identifica esta atividade (nomes + imagens): arquivos de outra atividade não podem ser restaurados aqui
+    const idAtividade = () => "figuras-" + hash(new TextEncoder().encode(FIGURAS.map(f => f.nome + "@" + f.img).join("|"))).toString(36);
+    const acertos = [0, 0, 0, 0], erros = [0, 0, 0, 0], NOMES = ["Escolher", "Combinar", "Anagrama", "Abrir a caixa"];
+    const vx = [0, 0, 0, 0];   // vidas extras convertidas em pontos, por atividade
+    let conclusao = null;   // data/hora (ISO) em que a última atividade foi concluída
     const $ = id => document.getElementById(id);
     const total = () => pts.reduce((a, b) => a + b, 0);
     const aviso = (t, ok = true) => { const el = $("aviso"); el.textContent = t; el.className = "aviso " + (ok ? "ok" : "erro"); };
@@ -403,68 +412,124 @@
           <div style="font-size:4rem">🏆</div>
           <h2>Parabéns!</h2>
           <p style="font-size:1.3rem">${j.texto}</p>
+          <p class="bonus">${vx[i] > 0 ? `❤️ Vidas extras: ${vx[i]} × ${PONTOS_POR_VIDA} = +${vx[i] * PONTOS_POR_VIDA} pontos de bônus` : "🤍 Nenhuma vida extra sobrou"}</p>
           <p style="font-size:1.3rem">⭐ ${pts[i]} pontos nesta atividade</p>
           ${ultima
-            ? `<p style="font-size:1.3rem"><strong>Total: ${total()} pontos</strong></p><p>Toque em <strong>💾 Salvar</strong> para guardar o progresso.</p><button id="de-novo">Jogar novamente</button>`
+            ? `<p style="font-size:1.3rem"><strong>Total: ${total()} pontos</strong></p><p id="auto-msg"></p><button id="baixar" class="bt">💾 Baixar resultado</button> <button id="de-novo">Jogar novamente</button>`
             : '<button id="prox">Próxima atividade ➜</button>'}
         </div>`;
       const b = j.el.querySelector("#prox");
       if (b) b.addEventListener("click", () => abrir(PAINEIS[i + 1]));
       const r = j.el.querySelector("#de-novo");
       if (r) r.addEventListener("click", reiniciar);
+      const bx = j.el.querySelector("#baixar");
+      if (bx) bx.addEventListener("click", () => salvar());
     }
 
-    // recomeça tudo: zera pontos e libera só a primeira atividade (o nome do aluno continua)
+    // trava / destrava o campo do nome
+    function travarNome(travar) {
+      const el = $("nome");
+      el.readOnly = travar;
+      el.title = travar ? "O nome não pode ser alterado" : "";
+    }
+
+    // recomeça tudo: zera pontos, acertos, erros e data, limpa o nome do aluno e libera só a primeira atividade
     function reiniciar() {
-      for (let i = 0; i < ABAS.length; i++) { feito[i] = false; pts[i] = 0; }
+      for (let i = 0; i < ABAS.length; i++) { feito[i] = false; pts[i] = 0; acertos[i] = 0; erros[i] = 0; vx[i] = 0; }
+      conclusao = null;
+      $("nome").value = "";
+      travarNome(false);
       jogos.forEach(j => j.iniciar());
       atualizar();
       abrir(PAINEIS[0]);
       $("aviso").textContent = "";
+      $("aviso").className = "aviso";
     }
 
-    function salvar() {
+    const dataBR = iso => {
+      const d = new Date(iso);
+      return d.toLocaleDateString("pt-BR") + " às " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    };
+
+    // monta o arquivo: resumo legível + código de progresso (usado pelo botão Restaurar)
+    function montarArquivo(nome) {
+      const concluida = feito.every(Boolean);
+      const sum = a => a.reduce((x, y) => x + y, 0);
+      const linhas = [
+        "NOME DAS FIGURAS - RESULTADO",
+        "",
+        "Aluno: " + nome,
+        "Situação: " + (concluida ? "Concluída" : "Em andamento (" + feito.filter(Boolean).length + " de " + ABAS.length + " atividades)"),
+        "Data da conclusão: " + (concluida && conclusao ? dataBR(conclusao) : "—"),
+        "",
+        "Atividade: acertos | erros | pontos"
+      ];
+      NOMES.forEach((n, i) => linhas.push(n + ": " + acertos[i] + " acertos | " + erros[i] + " erros | " + pts[i] + " pontos (inclui " + vx[i] * PONTOS_POR_VIDA + " de bônus por " + vx[i] + (vx[i] === 1 ? " vida extra)" : " vidas extras)")));
+      linhas.push("TOTAL: " + sum(acertos) + " acertos | " + sum(erros) + " erros | " + total() + " pontos", "");
+      const cod = paraB62({ v: 3, k: idAtividade(), n: nome, f: feito.map(Number), p: pts, a: acertos, e: erros, x: vx, d: conclusao,
+                            g: jogos.map((j, i) => feito[i] ? null : j.salvar()) });
+      linhas.push("Código de progresso (não altere): " + cod);
+      return { texto: linhas.join("\r\n"), concluida };
+    }
+
+    // devolve true se o arquivo foi baixado
+    function salvar(auto) {
       const nome = $("nome").value.trim();
-      if (!nome) { aviso("Digite o nome do aluno antes de salvar.", false); $("nome").focus(); return; }
-      const cod = paraB62({ v: 2, n: nome, f: feito.map(Number), p: pts, g: jogos.map((j, i) => feito[i] ? null : j.salvar()) });
+      if (!nome) { aviso("Digite o nome do aluno antes de salvar.", false); $("nome").focus(); return false; }
+      const { texto, concluida } = montarArquivo(nome);
       const slug = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-")
         .replace(/^-|-$/g, "").toLowerCase() || "aluno";
-      const url = URL.createObjectURL(new Blob([cod], { type: "text/plain" }));
+      const arquivo = (concluida ? "resultado-" : "progresso-") + slug + ".txt";
+      const url = URL.createObjectURL(new Blob(["\ufeff" + texto], { type: "text/plain;charset=utf-8" }));
       const a = document.createElement("a");
-      a.href = url; a.download = "progresso-" + slug + ".txt";
+      a.href = url; a.download = arquivo;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      aviso("✅ Progresso salvo em progresso-" + slug + ".txt");
+      aviso("✅ " + (auto === true ? "Resultado salvo automaticamente em " : "Progresso salvo em ") + arquivo);
+      return true;
     }
 
     function restaurar(txt) {
       let o;
       try {
-        o = deB62(txt);
-        if ((o.v !== 1 && o.v !== 2) || typeof o.n !== "string" || !Array.isArray(o.f) || !Array.isArray(o.p)) throw 0;
+        const m = txt.match(/C[óo]digo de progresso[^:]*:\s*([0-9A-Za-z]+)/);
+        o = deB62(m ? m[1] : txt);
+        if (o.v !== 3 || typeof o.k !== "string" || typeof o.n !== "string" || !Array.isArray(o.f) || !Array.isArray(o.p)) throw 0;
       } catch (e) { aviso("Arquivo de progresso inválido.", false); return; }
+      if (o.k !== idAtividade()) { aviso("Este arquivo é de outra atividade e não pode ser restaurado aqui.", false); return; }
       let ok = true;
       for (let i = 0; i < ABAS.length; i++) {
         ok = ok && !!o.f[i];
         feito[i] = ok;
         pts[i] = ok ? Math.max(0, Number(o.p[i]) || 0) : 0;
+        acertos[i] = Array.isArray(o.a) ? Math.max(0, Number(o.a[i]) || 0) : 0;
+        erros[i] = Array.isArray(o.e) ? Math.max(0, Number(o.e[i]) || 0) : 0;
+        vx[i] = ok && Array.isArray(o.x) ? Math.min(VIDAS_INICIAIS, Math.max(0, Number(o.x[i]) || 0)) : 0;
       }
+      conclusao = feito.every(Boolean) && typeof o.d === "string" && !isNaN(new Date(o.d)) ? o.d : null;
       $("nome").value = o.n.slice(0, 40);
+      travarNome(!!o.n.trim());
+      let refeita = false;   // true se alguma atividade em andamento não pôde ser restaurada
       for (let i = 0; i < ABAS.length; i++) {
         if (feito[i]) { tela(i); continue; }
         let carregou = false;
         const g = Array.isArray(o.g) ? o.g[i] : null;
         if (g) { try { carregou = jogos[i].carregar(g); } catch (e) { carregou = false; } }
-        if (!carregou) jogos[i].iniciar();
+        if (!carregou) { jogos[i].iniciar(); refeita = true; }
       }
       atualizar();
       const prox = feito.indexOf(false);
       abrir(PAINEIS[prox < 0 ? ABAS.length - 1 : prox]);
-      aviso("✅ Progresso de " + o.n + " restaurado.");
+      aviso(refeita ? "⚠️ Progresso de " + o.n + " restaurado, mas uma atividade em andamento foi sorteada de novo."
+                    : "✅ Progresso de " + o.n + " restaurado.");
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      $("salvar").addEventListener("click", salvar);
+      $("salvar").addEventListener("click", () => salvar());
+      const nomeEl = $("nome");
+      const fixar = () => { if (nomeEl.value.trim()) { nomeEl.value = nomeEl.value.trim(); travarNome(true); } };
+      nomeEl.addEventListener("blur", fixar);
+      nomeEl.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); fixar(); nomeEl.blur(); } });
       $("restaurar").addEventListener("click", () => $("arq").click());
       $("arq").addEventListener("change", e => {
         const f = e.target.files[0];
@@ -476,7 +541,20 @@
     return {
       reg: (i, j) => { jogos[i] = j; },
       pts: (i, v) => { pts[i] = v; atualizar(); },
-      concluir: i => { feito[i] = true; atualizar(); tela(i); }
+      // converte as vidas que sobraram em pontos extras (chamado ao terminar a atividade)
+      bonus: (i, vidas) => { vx[i] = Math.max(0, Math.min(VIDAS_INICIAIS, vidas | 0)); pts[i] += vx[i] * PONTOS_POR_VIDA; atualizar(); },
+      ok: i => { acertos[i]++; },
+      err: i => { erros[i]++; },
+      concluir: i => {
+        feito[i] = true; atualizar(); tela(i);
+        if (!feito.every(Boolean)) return;
+        // última atividade: registra a data e salva o arquivo sozinho
+        conclusao = new Date().toISOString();
+        travarNome(!!$("nome").value.trim());
+        const msg = document.getElementById("auto-msg");
+        if (salvar(true)) { if (msg) msg.textContent = "✅ Resultado salvo automaticamente."; }
+        else if (msg) msg.textContent = "Digite o nome do aluno no alto da página e toque em Baixar resultado.";
+      }
     };
   })();
 
@@ -530,7 +608,7 @@
         travado = true;
         botao.classList.add("certo");
         acertou = true;
-        pts += errou.has(correto) ? 5 : 10; Prog.pts(0, pts);
+        pts += errou.has(correto) ? 5 : 10; Prog.pts(0, pts); Prog.ok(0);
         msg.textContent = "🎉 Muito bem!";
         jogo.querySelectorAll(".opcoes button").forEach(b => b.disabled = true);
         setTimeout(() => {
@@ -540,7 +618,7 @@
       } else {
         travado = true;
         botao.classList.add("errado");
-        errou.add(correto);
+        errou.add(correto); Prog.err(0);
         jogo.classList.remove("shake");
         void jogo.offsetWidth;
         jogo.classList.add("shake");
@@ -560,7 +638,7 @@
       }
     }
 
-    function vitoria() { Prog.concluir(0); }
+    function vitoria() { Prog.bonus(0, vidas); Prog.concluir(0); }
 
     function salvar() {
       return { f: fila.map(a => FIGURAS.indexOf(a)), i: indice + (acertou ? 1 : 0), v: vidas, p: pts,
@@ -773,8 +851,8 @@
       const erradas = [];
       slots.forEach((s, i) => {
         if (s.locked) return;
-        if (s.placed === s.figura.nome) { s.locked = true; pts += s.errou ? 5 : 10; Prog.pts(1, pts); }
-        else { s.erro = true; s.errou = true; erradas.push(i); }
+        if (s.placed === s.figura.nome) { s.locked = true; pts += s.errou ? 5 : 10; Prog.pts(1, pts); Prog.ok(1); }
+        else { s.erro = true; s.errou = true; erradas.push(i); Prog.err(1); }
       });
 
       if (erradas.length === 0) {
@@ -807,7 +885,7 @@
       }, 1400);
     }
 
-    function vitoria() { Prog.concluir(1); }
+    function vitoria() { Prog.bonus(1, vidas); Prog.concluir(1); }
 
     function salvar() {
       return { r: rodadas.map(g => g.map(a => FIGURAS.indexOf(a))), i: rIdx, v: vidas, p: pts,
@@ -942,7 +1020,7 @@
 
       if (formada === nome) {
         marca = "certo";
-        pts += errou.has(nome) ? 5 : 10; Prog.pts(2, pts);
+        pts += errou.has(nome) ? 5 : 10; Prog.pts(2, pts); Prog.ok(2);
         desenhar();
         msg("🎉 Muito bem!");
         setTimeout(() => {
@@ -953,7 +1031,7 @@
       }
 
       marca = "errado";
-      errou.add(nome);
+      errou.add(nome); Prog.err(2);
       desenhar();
       jogo.classList.remove("shake");
       void jogo.offsetWidth;
@@ -972,7 +1050,7 @@
       }
     }
 
-    function vitoria() { Prog.concluir(2); }
+    function vitoria() { Prog.bonus(2, vidas); Prog.concluir(2); }
 
     function salvar() {
       return { f: fila.map(a => FIGURAS.indexOf(a)), i: indice + (travado && marca === "certo" ? 1 : 0), v: vidas, p: pts,
@@ -1019,11 +1097,12 @@
      ===================================================== */
   (function caixa() {
     const jogo = document.getElementById("game4");
-    let ordem, feitos, vidas, pts, errou, travado;   // ordem[i] = figura que está na caixa i
+    let ordem, feitos, vidas, pts, errou, travado, opcs;   // ordem[i] = figura que está na caixa i
 
     function iniciar() {
       ordem = embaralhar(FIGURAS.map((_, i) => i));
       feitos = ordem.map(() => false);
+      opcs = ordem.map(() => null);   // opções sorteadas de cada caixa (ficam iguais se a caixa for reaberta)
       vidas = VIDAS_INICIAIS;
       pts = 0; errou = new Set(); Prog.pts(3, 0);
       grade();
@@ -1050,7 +1129,7 @@
       travado = false;
       const k = ordem[i];
       const outras = embaralhar(FIGURAS.map((_, j) => j).filter(j => j !== k)).slice(0, 2);
-      const opcoes = embaralhar([k, ...outras]);
+      const opcoes = opcs[i] || (opcs[i] = embaralhar([k, ...outras]));
       jogo.innerHTML = `
         <div class="top">
           <span>📦 Caixa ${i + 1}</span>
@@ -1075,14 +1154,14 @@
       if (Number(botao.dataset.j) === k) {
         botao.classList.add("certo");
         feitos[i] = true;
-        pts += errou.has(k) ? 5 : 10; Prog.pts(3, pts);
+        pts += errou.has(k) ? 5 : 10; Prog.pts(3, pts); Prog.ok(3);
         msg.textContent = "🎉 Muito bem!";
         setTimeout(() => feitos.every(Boolean) ? vitoria() : grade(), 1200);
         return;
       }
 
       botao.classList.add("errado");
-      errou.add(k);
+      errou.add(k); Prog.err(3);
       jogo.classList.remove("shake");
       void jogo.offsetWidth;
       jogo.classList.add("shake");
@@ -1098,16 +1177,20 @@
       }
     }
 
-    function vitoria() { Prog.concluir(3); }
+    function vitoria() { Prog.bonus(3, vidas); Prog.concluir(3); }
 
     function salvar() {
-      return { c: ordem.slice(), d: feitos.map(Number), v: vidas, p: pts, e: [...errou] };
+      return { c: ordem.slice(), d: feitos.map(Number), v: vidas, p: pts, e: [...errou], o: opcs };
     }
     function carregar(st) {
       if (!st || !idsOk(st.c) || st.c.length !== FIGURAS.length || new Set(st.c).size !== st.c.length ||
           !Array.isArray(st.d) || st.d.length !== st.c.length || !idsOk(st.e) ||
           !numOk(st.v, 1, VIDAS_INICIAIS) || !numOk(st.p, 0, 100000)) return false;
       ordem = st.c.slice(); feitos = st.d.map(Boolean); vidas = st.v; pts = st.p; errou = new Set(st.e);
+      opcs = ordem.map((k, i) => {   // reaproveita as opções sorteadas, se forem válidas
+        const o = Array.isArray(st.o) ? st.o[i] : null;
+        return idsOk(o) && o.length === 3 && new Set(o).size === 3 && o.includes(k) ? o.slice() : null;
+      });
       Prog.pts(3, pts);
       feitos.every(Boolean) ? vitoria() : grade();
       return true;
