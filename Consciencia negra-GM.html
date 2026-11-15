@@ -325,6 +325,22 @@
             border-bottom: none;
         }
 
+        .btn-secondary { background-color: var(--secondary-color); }
+        .btn-secondary:hover { background-color: #1976D2; }
+        #student-name, .code-box { padding: 10px; border-radius: 8px; border: 1px solid #ccc; width: 100%; max-width: 360px; font-size: 1em; box-sizing: border-box; font-family: inherit; }
+        #student-name { display: block; margin: 0 auto 10px; text-align: center; }
+        #student-name:read-only { background: #eee; color: #666; cursor: not-allowed; }
+        .code-box { max-width: 100%; min-height: 110px; word-break: break-all; resize: vertical; font-family: monospace; }
+        .name-label { display: block; font-weight: 600; margin-bottom: 6px; }
+        #player-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; }
+        #lives { font-size: 1.4em; letter-spacing: 2px; }
+        #player-bar { flex-wrap: wrap; gap: 8px; }
+        #player-bar button { display: inline-block; width: auto; margin: 0; padding: 8px 14px; font-size: 0.9em; }
+        .skills-table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+        .skills-table th, .skills-table td { border-bottom: 1px solid #eee; padding: 8px; vertical-align: top; text-align: left; }
+        .skills-table td:first-child { font-weight: 700; color: var(--primary-dark); white-space: nowrap; }
+        .modal-content ol, .modal-content ul { padding-left: 22px; }
+
         /* Responsividade */
         @media (max-width: 768px) {
             #app {
@@ -401,11 +417,17 @@
 <div id="start-screen" class="screen active">
 <h1>Dia da Consciência Negra</h1>
 <p>Teste seus conhecimentos e aprenda mais sobre a história e a cultura afro-brasileira!</p>
+<label for="student-name" class="name-label">Nome do aluno</label>
+<input type="text" id="student-name" maxlength="40" placeholder="Digite seu nome" autocomplete="off">
 <button id="start-game-btn">Iniciar Jogo</button>
+<button id="restore-btn" class="btn-secondary">Restaurar progresso</button>
+<button id="how-btn" class="btn-secondary">Como jogar</button>
+<button id="skills-btn" class="btn-secondary">Habilidades</button>
 <button id="open-modal-btn">Ler sobre o tema</button>
 <button id="history-btn">Ver Histórico</button>
 </div>
 <div id="game-screen" class="screen hidden">
+        <div id="player-bar"><button id="save-btn" class="btn-secondary">💾 Salvar progresso</button><span id="player-name"></span><span id="lives" aria-label="Vidas"></span></div>
         <div id="progress-container">
             <p id="progress-text">Questão 1 de 22</p>
             <div id="progress-bar-outline">
@@ -470,6 +492,65 @@
     </div>
 </div>
 
+<!-- Modal Como jogar -->
+<div id="how-modal" class="modal hidden"><div class="modal-content">
+<span class="close-button">&times;</span>
+<h2>Como jogar</h2>
+<ol>
+<li>Digite o <strong>nome do aluno</strong> e clique em <strong>Iniciar Jogo</strong>. Depois que o jogo começa, o nome fica bloqueado.</li>
+<li>As <strong>22 perguntas são sorteadas</strong> em ordem aleatória a cada rodada.</li>
+<li>Cada acerto de primeira vale <strong>10 pontos</strong>; cada acerto em revisão vale <strong>5 pontos</strong>.</li>
+<li>Você tem <strong>3 vidas</strong> (❤️). Cada resposta errada tira uma vida e a pergunta <strong>volta no final</strong> da fila.</li>
+<li>Se perder as 3 vidas, o jogo <strong>recomeça</strong>: do zero (com novo sorteio) se a partida começou do zero, ou do ponto restaurado se veio de um arquivo.</li>
+<li>Clique em <strong>Salvar progresso</strong> (no topo da tela) para baixar um arquivo <strong>.txt</strong> com o código em base62. Guarde-o para continuar depois.</li>
+<li>Para continuar, use <strong>Restaurar progresso</strong> e escolha o arquivo .txt. O jogo volta com o nome, as vidas, os acertos e a mesma lista de perguntas.</li>
+<li>Ao terminar, cada <strong>vida que sobrou vira 1 ponto extra</strong>. O resultado é gravado no histórico e a tela é limpa para o <strong>próximo aluno</strong>.</li>
+</ol>
+</div></div>
+
+<!-- Modal Habilidades -->
+<div id="skills-modal" class="modal hidden"><div class="modal-content">
+<span class="close-button">&times;</span>
+<h2>Habilidades da BNCC</h2>
+<p>Habilidades da Base Nacional Comum Curricular trabalhadas nesta atividade:</p>
+<div style="overflow-x:auto"><table class="skills-table">
+<thead><tr><th>Código</th><th>Componente / Ano</th><th>Habilidade</th></tr></thead>
+<tbody>
+<tr><td>EF03HI03</td><td>História · 3º ano</td><td>Identificar e comparar pontos de vista em relação a eventos significativos do local em que vive, aspectos relacionados a condições sociais e à presença de diferentes grupos sociais e culturais, com especial destaque para as culturas africanas, indígenas e de migrantes.</td></tr>
+<tr><td>EF05HI04</td><td>História · 5º ano</td><td>Associar a noção de cidadania com os princípios de respeito à diversidade, à pluralidade e aos direitos humanos.</td></tr>
+<tr><td>EF05HI05</td><td>História · 5º ano</td><td>Associar o conceito de cidadania à conquista de direitos dos povos e das sociedades, compreendendo-o como conquista histórica.</td></tr>
+<tr><td>EF09HI03</td><td>História · 9º ano</td><td>Identificar os mecanismos de inserção dos negros na sociedade brasileira pós-abolição e avaliar os seus resultados.</td></tr>
+<tr><td>EF09HI04</td><td>História · 9º ano</td><td>Discutir a importância da participação da população negra na formação econômica, política e social do Brasil.</td></tr>
+<tr><td>EF15AR25</td><td>Arte · 1º ao 5º ano</td><td>Conhecer e valorizar o patrimônio cultural, material e imaterial, de culturas diversas, em especial a brasileira, incluindo-se suas matrizes indígenas, africanas e europeias, de diferentes épocas, favorecendo a construção de vocabulário e repertório relativos às diferentes linguagens artísticas.</td></tr>
+<tr><td>EF35LP03</td><td>Língua Portuguesa · 3º ao 5º ano</td><td>Identificar a ideia central do texto, demonstrando compreensão global.</td></tr>
+</tbody></table></div>
+</div></div>
+
+<!-- Modal de mensagem (substitui alert nativo) -->
+<div id="msg-modal" class="modal hidden"><div class="modal-content" style="max-width:480px;text-align:center">
+<h2 id="msg-title"></h2>
+<p id="msg-text" style="white-space:pre-line"></p>
+<button id="msg-ok-btn">OK</button>
+</div></div>
+
+<!-- Modal Salvar -->
+<div id="save-modal" class="modal hidden"><div class="modal-content">
+<span class="close-button">&times;</span>
+<h2>Progresso salvo</h2>
+<p id="save-info"></p>
+<p>O arquivo <strong>.txt</strong> com o código base62 foi baixado. Guarde-o para continuar depois.</p>
+<button id="download-again-btn">Baixar novamente</button>
+</div></div>
+
+<!-- Modal Restaurar -->
+<div id="restore-modal" class="modal hidden"><div class="modal-content">
+<span class="close-button">&times;</span>
+<h2>Restaurar progresso</h2>
+<p>Escolha o arquivo <strong>.txt</strong> salvo anteriormente:</p>
+<input type="file" id="restore-file" accept=".txt,text/plain">
+<p id="restore-feedback"></p>
+</div></div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const startScreen = document.getElementById('start-screen');
@@ -504,6 +585,24 @@
         let score = 0;
         let questionsAnswered = 0;
         let gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
+        let studentName = '';
+        let order = [];
+        let lives = 3;
+        let answeredCurrent = false;
+        let gameOver = false;
+        const MAX_LIVES = 3;
+        const FIRST_POINTS = 10;  // acerto de primeira
+        const REVIEW_POINTS = 5;  // acerto em revisão
+        const LIFE_POINTS = 1;    // pontos por vida restante
+        let revScore = 0;         // acertos feitos em revisão
+        let lastSavedCode = '';
+        let restartPoint = null; // ponto de recomeço após game over (null = do zero)
+        const ACTIVITY_ID = 'CN-GM';
+        const B62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        const nameInput = document.getElementById('student-name');
+        const playerName = document.getElementById('player-name');
+        const livesEl = document.getElementById('lives');
+        const saveBtn = document.getElementById('save-btn');
 
         // Perguntas do jogo - ATUALIZADAS COM AS NOVAS QUESTÕES
         const questions = [
@@ -620,6 +719,127 @@
             }
         ];
 
+        // ---------- Utilitários: sorteio, hash, base62 ----------
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        function fnv(s) {
+            let h = 0x811c9dc5;
+            for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+            return h.toString(36);
+        }
+        function toB62(str) {
+            let n = 0n;
+            for (const b of [1, ...new TextEncoder().encode(str)]) n = n * 256n + BigInt(b);
+            let s = '';
+            while (n > 0n) { s = B62[Number(n % 62n)] + s; n /= 62n; }
+            return s;
+        }
+        function fromB62(s) {
+            let n = 0n;
+            for (const c of s) {
+                const i = B62.indexOf(c);
+                if (i < 0) throw new Error('char');
+                n = n * 62n + BigInt(i);
+            }
+            const bytes = [];
+            while (n > 0n) { bytes.unshift(Number(n % 256n)); n /= 256n; }
+            if (bytes[0] !== 1) throw new Error('prefix');
+            return new TextDecoder().decode(new Uint8Array(bytes.slice(1)));
+        }
+        // Assinatura da atividade: muda se as perguntas/respostas forem alteradas
+        const ACTIVITY_HASH = fnv(ACTIVITY_ID + questions.map(q => q.question + '|' + q.correctAnswer).join('\n'));
+
+        function scoreBreakdown(correct, rev, livesLeft) {
+            const first = correct - rev;
+            const bonus = livesLeft * LIFE_POINTS;
+            const total = first * FIRST_POINTS + rev * REVIEW_POINTS + bonus;
+            const text = `Acertos: ${correct}/${questions.length}\nDe primeira: ${first} × ${FIRST_POINTS} = ${first * FIRST_POINTS}\nEm revisão: ${rev} × ${REVIEW_POINTS} = ${rev * REVIEW_POINTS}\nVidas extras: ${livesLeft} × ${LIFE_POINTS} = ${bonus}\nTotal: ${total} pontos`;
+            return { first, rev, bonus, total, text };
+        }
+        function encodeProgress(idx, ts = Date.now()) {
+            const ord = order.map(i => B62[i]).join('');
+            const cleanName = studentName.replace(/\|/g, ' ');
+            const body = ['CN2', ACTIVITY_HASH, cleanName, ord, idx, score, lives, ts.toString(36), revScore].join('|');
+            return toB62(body + '|' + fnv(body));
+        }
+        function decodeProgress(code) {
+            try {
+                const raw = fromB62(code.replace(/\s+/g, ''));
+                const k = raw.lastIndexOf('|');
+                const body = raw.slice(0, k);
+                if (fnv(body) !== raw.slice(k + 1)) return { error: 'Código inválido ou alterado.' };
+                const [tag, hash, name, ord, idx, sc, lv, tsRaw, rvRaw] = body.split('|');
+                if (tag !== 'CN2' || hash !== ACTIVITY_HASH) return { error: 'Este código não pertence a esta atividade.' };
+                const o = [...ord].map(c => B62.indexOf(c));
+                const n = questions.length;
+                const validOrder = o.length >= n && o.length <= n + MAX_LIVES - 1 && new Set(o.slice(0, n)).size === n && o.every(v => v >= 0 && v < n);
+                const i = Number(idx), s = Number(sc), l = Number(lv);
+                const rv = rvRaw === undefined ? 0 : Number(rvRaw);
+                const ts = tsRaw === undefined ? null : parseInt(tsRaw, 36); // data/hora gravada no arquivo
+                if (!name || !validOrder || !(i >= 0 && i <= o.length) || !(s >= 0 && s <= Math.min(i, n)) || l !== MAX_LIVES - (o.length - n) || (ts !== null && !(ts > 0)) || !(rv >= 0 && rv <= s && rv <= Math.max(0, i - n))) {
+                    return { error: 'Código com dados inconsistentes.' };
+                }
+                return { name, order: o, idx: i, score: s, lives: l, ts, rev: rv };
+            } catch (e) {
+                return { error: 'Código inválido.' };
+            }
+        }
+
+        // ---------- Estado do jogador ----------
+        function lockName() { nameInput.readOnly = true; }
+        function unlockName() { nameInput.readOnly = false; }
+        function renderLives() {
+            livesEl.textContent = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
+        }
+        function newRound() {
+            order = shuffle(questions.map((_, i) => i));
+            currentQuestionIndex = 0;
+            score = 0;
+            revScore = 0;
+            questionsAnswered = 0;
+            lives = MAX_LIVES;
+            gameOver = false;
+            answeredCurrent = false;
+            renderLives();
+        }
+        function openGame() {
+            playerName.textContent = '👤 ' + studentName;
+            showScreen(gameScreen);
+            renderLives();
+            loadQuestion();
+        }
+        let msgCallback = null;
+        function showMessage(title, text, onClose, btnLabel) {
+            document.getElementById('msg-title').textContent = title;
+            document.getElementById('msg-text').textContent = text;
+            document.getElementById('msg-ok-btn').textContent = btnLabel || 'OK';
+            msgCallback = onClose || null;
+            document.getElementById('msg-modal').classList.add('active');
+        }
+        function resetForNextStudent() {
+            studentName = '';
+            nameInput.value = '';
+            unlockName();
+            order = [];
+            currentQuestionIndex = 0;
+            score = 0;
+            revScore = 0;
+            questionsAnswered = 0;
+            lives = MAX_LIVES;
+            gameOver = false;
+            answeredCurrent = false;
+            lastSavedCode = '';
+            restartPoint = null;
+            updateProgressBar();
+            showScreen(startScreen);
+            nameInput.focus();
+        }
+
         function showScreen(screenToShow) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.add('hidden');
@@ -630,20 +850,19 @@
         }
 
         function updateProgressBar() {
-            let displayedQuestionNum = currentQuestionIndex; // O número da questão que o usuário está respondendo
-            let progressPercentage = 0;
-
-            if (currentQuestionIndex < questions.length) {
-                displayedQuestionNum = currentQuestionIndex + 1; // Para exibir "Questão 1 de X", etc.
-                progressPercentage = (currentQuestionIndex / questions.length) * 100; // Progresso baseado nas perguntas JÁ respondidas (ou indo para a próxima)
-                progressText.textContent = `Questão ${displayedQuestionNum} de ${questions.length}`;
+            const total = order.length || questions.length;
+            let pct = 0;
+            if (!order.length) {
+                progressText.textContent = `Questão 1 de ${total}`;
+            } else if (currentQuestionIndex < total) {
+                const rev = currentQuestionIndex >= questions.length ? ' · revisão' : '';
+                progressText.textContent = `Questão ${currentQuestionIndex + 1} de ${total}${rev}`;
+                pct = (currentQuestionIndex / total) * 100;
             } else {
-                // Fim do jogo
-                displayedQuestionNum = questions.length;
-                progressPercentage = 100;
-                progressText.textContent = `Fim do Jogo! ${questions.length} de ${questions.length}`;
+                progressText.textContent = `Fim do Jogo! ${total} de ${total}`;
+                pct = 100;
             }
-            progressBarFill.style.width = `${progressPercentage}%`;
+            progressBarFill.style.width = `${pct}%`;
         }
 
 
@@ -652,12 +871,15 @@
             nextQuestionBtn.classList.add('hidden');
             optionsContainer.innerHTML = '';
 
-            if (currentQuestionIndex < questions.length) {
-                const q = questions[currentQuestionIndex];
+            if (currentQuestionIndex < order.length) {
+                const q = questions[order[currentQuestionIndex]];
+                answeredCurrent = false;
+                nextQuestionBtn.textContent = 'Próxima Pergunta';
+                saveBtn.classList.remove('hidden');
                 questionElement.textContent = q.question;
 
                 // Embaralha as opções
-                const shuffledOptions = q.options.sort(() => Math.random() - 0.5);
+                const shuffledOptions = shuffle([...q.options]);
 
                 shuffledOptions.forEach(option => {
                     const button = document.createElement('button');
@@ -683,10 +905,17 @@
                 feedbackElement.style.color = 'var(--correct-text)';
                 selectedButton.classList.add('correct');
                 score++;
+                if (currentQuestionIndex >= questions.length) revScore++; // acerto em revisão
             } else {
                 feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer} 😔`;
                 feedbackElement.style.color = 'var(--incorrect-text)';
                 selectedButton.classList.add('incorrect');
+                lives--;
+                renderLives();
+                if (lives > 0) {
+                    order.push(order[currentQuestionIndex]); // pergunta errada volta no final
+                    feedbackElement.textContent += ' Esta pergunta volta no final.';
+                }
                 // Encontrar e marcar a resposta correta
                 Array.from(optionsContainer.children).forEach(button => {
                     if (button.textContent === correctAnswer) {
@@ -695,26 +924,40 @@
                 });
             }
             questionsAnswered++;
+            answeredCurrent = true;
+            if (lives <= 0) {
+                gameOver = true;
+                feedbackElement.textContent += ' Suas 3 vidas acabaram!';
+                nextQuestionBtn.textContent = 'Recomeçar jogo';
+                saveBtn.classList.add('hidden');
+            }
             nextQuestionBtn.classList.remove('hidden');
             // A barra de progresso não é atualizada aqui, só no "Próxima Pergunta" ou "Fim do Jogo"
         }
 
         function endGame() {
-            const result = `Você respondeu ${questionsAnswered} perguntas e acertou ${score} delas!`;
-            alert(`Fim do jogo!\n${result}`);
-
-            // Salvar histórico
             const date = new Date();
-            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-            gameHistory.push({ date: formattedDate, score: score, totalQuestions: questionsAnswered });
+            const b = scoreBreakdown(score, revScore, lives);
+            const code = encodeProgress(order.length, date.getTime());
+            studentName = studentName || 'aluno';
+            downloadProgress(code);
+
+            gameHistory.push({
+                name: studentName,
+                date: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
+                ts: date.getTime(),
+                score: score,
+                rev: revScore,
+                bonus: b.bonus,
+                points: b.total,
+                totalQuestions: questions.length,
+                lives: lives,
+                code: code
+            });
             localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
 
-            // Reiniciar variáveis
-            currentQuestionIndex = 0;
-            score = 0;
-            questionsAnswered = 0;
-            updateProgressBar(); // Atualiza a barra para 0% e texto inicial ao voltar para a tela inicial
-            showScreen(startScreen);
+            // Mostra o resultado; ao confirmar, limpa os dados e inicia nova rodada para outro aluno
+            showMessage('Fim do jogo! 🎉', `${studentName}\n${b.text}`, resetForNextStudent, 'Próximo aluno');
         }
 
         function displayHistory() {
@@ -723,10 +966,10 @@
                 historyList.innerHTML = '<li>Nenhum histórico de jogo ainda.</li>';
             } else {
                 // Ordena o histórico do mais recente para o mais antigo
-                const sortedHistory = [...gameHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+                const sortedHistory = [...gameHistory].sort((a, b) => (b.ts || 0) - (a.ts || 0));
                 sortedHistory.forEach(entry => {
                     const li = document.createElement('li');
-                    li.textContent = `Data: ${entry.date} - Acertos: ${entry.score}/${entry.totalQuestions}`;
+                    li.textContent = `${entry.name ? 'Aluno: ' + entry.name + ' - ' : ''}Data: ${entry.date} - Acertos: ${entry.score}/${entry.totalQuestions}${entry.points !== undefined ? ' - Vidas: ' + entry.lives + ' - Pontos: ' + entry.points : ''}`;
                     historyList.appendChild(li);
                 });
             }
@@ -743,16 +986,122 @@
 
         // Event Listeners
         startGameBtn.addEventListener('click', () => {
-            showScreen(gameScreen);
-            currentQuestionIndex = 0; // Resetar o índice da pergunta para um novo jogo
-            score = 0; // Resetar o score
-            questionsAnswered = 0; // Resetar perguntas respondidas
-            loadQuestion();
+            const name = nameInput.value.trim().replace(/\s+/g, ' ');
+            if (!name) {
+                showMessage('Nome do aluno', 'Digite o nome do aluno para iniciar.', () => nameInput.focus());
+                return;
+            }
+            studentName = name;
+            nameInput.value = name;
+            lockName();
+            newRound();
+            restartPoint = null; // partida do zero: game over volta ao zero
+            openGame();
         });
 
         nextQuestionBtn.addEventListener('click', () => {
+            if (gameOver) {
+                if (restartPoint) {
+                    // partida restaurada: volta ao ponto da restauração
+                    order = [...restartPoint.order];
+                    currentQuestionIndex = restartPoint.idx;
+                    questionsAnswered = restartPoint.idx;
+                    score = restartPoint.score;
+                    revScore = restartPoint.rev;
+                    lives = restartPoint.lives;
+                    gameOver = false;
+                    answeredCurrent = false;
+                    renderLives();
+                } else {
+                    newRound(); // partida do zero: novo sorteio e recomeço total
+                }
+                loadQuestion();
+                return;
+            }
             currentQuestionIndex++;
-            loadQuestion(); // loadQuestion já chama updateProgressBar
+            loadQuestion();
+        });
+
+        function downloadProgress(code) {
+            const safe = (studentName || 'aluno').replace(/[^\p{L}\p{N}]+/gu, '_');
+            const url = URL.createObjectURL(new Blob([code], { type: 'text/plain;charset=utf-8' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ConscienciaNegra-GM_${safe}_progresso.txt`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        saveBtn.addEventListener('click', () => {
+            lockName(); // bloqueia o nome ao salvar
+            const idx = answeredCurrent ? currentQuestionIndex + 1 : currentQuestionIndex;
+            lastSavedCode = encodeProgress(idx);
+            downloadProgress(lastSavedCode);
+            document.getElementById('save-info').textContent = `Aluno: ${studentName} · Pergunta ${Math.min(idx + 1, order.length)} de ${order.length} · Acertos: ${score} · Vidas: ${lives}`;
+            document.getElementById('save-modal').classList.add('active');
+        });
+
+        document.getElementById('download-again-btn').addEventListener('click', () => downloadProgress(lastSavedCode));
+
+        const restoreFile = document.getElementById('restore-file');
+        const restoreFeedback = document.getElementById('restore-feedback');
+        document.getElementById('restore-btn').addEventListener('click', () => {
+            restoreFile.value = '';
+            restoreFeedback.textContent = '';
+            document.getElementById('restore-modal').classList.add('active');
+        });
+
+        restoreFile.addEventListener('change', () => {
+            const file = restoreFile.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const data = decodeProgress(String(reader.result));
+                restoreFeedback.style.color = 'var(--incorrect-text)';
+                if (data.error) { restoreFeedback.textContent = data.error; return; }
+                if (data.idx >= data.order.length) {
+                    // atividade concluída: feedback ao professor, sem reabrir o jogo
+                    const when = data.ts ? new Date(data.ts) : null;
+                    const b = scoreBreakdown(data.score, data.rev, data.lives);
+                    document.getElementById('restore-modal').classList.remove('active');
+                    showMessage('Atividade já concluída',
+                        `Aluno: ${data.name}\n${b.text}`
+                        + (when ? `\nConcluída em: ${when.toLocaleDateString()} ${when.toLocaleTimeString()}` : '')
+                        + '\n\nEste progresso não pode ser continuado. Para uma nova rodada, inicie com o nome do aluno.',
+                        null, 'Entendi');
+                    return;
+                }
+                studentName = data.name;
+                nameInput.value = data.name;
+                lockName();
+                order = data.order; // restaura a lista de perguntas (com as repetidas no final)
+                currentQuestionIndex = data.idx;
+                questionsAnswered = data.idx;
+                score = data.score;
+                revScore = data.rev;
+                lives = data.lives;
+                gameOver = false;
+                restartPoint = { order: [...order], idx: data.idx, score: data.score, rev: data.rev, lives: data.lives };
+                document.getElementById('restore-modal').classList.remove('active');
+                openGame();
+            };
+            reader.onerror = () => { restoreFeedback.textContent = 'Não foi possível ler o arquivo.'; };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('how-btn').addEventListener('click', () => document.getElementById('how-modal').classList.add('active'));
+        document.getElementById('skills-btn').addEventListener('click', () => document.getElementById('skills-modal').classList.add('active'));
+        document.getElementById('msg-ok-btn').addEventListener('click', () => {
+            document.getElementById('msg-modal').classList.remove('active');
+            const cb = msgCallback;
+            msgCallback = null;
+            if (cb) cb();
+        });
+        document.querySelectorAll('.modal').forEach(m => {
+            if (m.id === 'msg-modal') return; // só fecha pelo botão
+            m.addEventListener('click', e => { if (e.target === m || e.target.classList.contains('close-button')) m.classList.remove('active'); });
         });
 
         openModalBtn.addEventListener('click', () => {
