@@ -596,6 +596,7 @@
         const LIFE_POINTS = 1;    // pontos por vida restante
         let revScore = 0;         // acertos feitos em revisão
         let lastSavedCode = '';
+        let lastSavedIdx = 0;
         let restartPoint = null; // ponto de recomeço após game over (null = do zero)
         const ACTIVITY_ID = 'CN-GM';
         const B62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -1022,12 +1023,31 @@
             loadQuestion();
         });
 
+        function progressFileName(name) {
+            const safe = (name || 'aluno').replace(/[^\p{L}\p{N}]+/gu, '_');
+            return `ConscienciaNegra-GM_${safe}_progresso.txt`;
+        }
+
+        // Indícios de alteração: nome do arquivo e data de modificação (não bloqueiam a restauração)
+        function checkIndicators(file, data) {
+            const flags = [];
+            const expected = progressFileName(data.name).normalize('NFC');
+            const received = file.name.normalize('NFC').replace(/ \(\d+\)(\.txt)$/i, '$1'); // ignora "(1)" do navegador
+            if (received !== expected) {
+                flags.push(`Nome do arquivo diferente do esperado: “${file.name}” (esperado “${expected}”).`);
+            }
+            if (data.ts && file.lastModified && Math.abs(file.lastModified - data.ts) > 5 * 60 * 1000) {
+                const fmt = t => `${new Date(t).toLocaleDateString()} ${new Date(t).toLocaleTimeString()}`;
+                flags.push(`Data de modificação do arquivo (${fmt(file.lastModified)}) difere da data gravada no código (${fmt(data.ts)}).`);
+            }
+            return flags;
+        }
+
         function downloadProgress(code) {
-            const safe = (studentName || 'aluno').replace(/[^\p{L}\p{N}]+/gu, '_');
             const url = URL.createObjectURL(new Blob([code], { type: 'text/plain;charset=utf-8' }));
             const a = document.createElement('a');
             a.href = url;
-            a.download = `ConscienciaNegra-GM_${safe}_progresso.txt`;
+            a.download = progressFileName(studentName);
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -1037,13 +1057,17 @@
         saveBtn.addEventListener('click', () => {
             lockName(); // bloqueia o nome ao salvar
             const idx = answeredCurrent ? currentQuestionIndex + 1 : currentQuestionIndex;
+            lastSavedIdx = idx;
             lastSavedCode = encodeProgress(idx);
             downloadProgress(lastSavedCode);
             document.getElementById('save-info').textContent = `Aluno: ${studentName} · Pergunta ${Math.min(idx + 1, order.length)} de ${order.length} · Acertos: ${score} · Vidas: ${lives}`;
             document.getElementById('save-modal').classList.add('active');
         });
 
-        document.getElementById('download-again-btn').addEventListener('click', () => downloadProgress(lastSavedCode));
+        document.getElementById('download-again-btn').addEventListener('click', () => {
+            lastSavedCode = encodeProgress(lastSavedIdx); // nova data/hora para bater com a data do arquivo
+            downloadProgress(lastSavedCode);
+        });
 
         const restoreFile = document.getElementById('restore-file');
         const restoreFeedback = document.getElementById('restore-feedback');
@@ -1061,6 +1085,7 @@
                 const data = decodeProgress(String(reader.result));
                 restoreFeedback.style.color = 'var(--incorrect-text)';
                 if (data.error) { restoreFeedback.textContent = data.error; return; }
+                const flags = checkIndicators(file, data);
                 if (data.idx >= data.order.length) {
                     // atividade concluída: feedback ao professor, sem reabrir o jogo
                     const when = data.ts ? new Date(data.ts) : null;
@@ -1069,23 +1094,34 @@
                     showMessage('Atividade já concluída',
                         `Aluno: ${data.name}\n${b.text}`
                         + (when ? `\nConcluída em: ${when.toLocaleDateString()} ${when.toLocaleTimeString()}` : '')
+                        + (flags.length ? '\n\n⚠ Indícios de alteração:\n' + flags.map(f => '• ' + f).join('\n') : '')
                         + '\n\nEste progresso não pode ser continuado. Para uma nova rodada, inicie com o nome do aluno.',
                         null, 'Entendi');
                     return;
                 }
-                studentName = data.name;
-                nameInput.value = data.name;
-                lockName();
-                order = data.order; // restaura a lista de perguntas (com as repetidas no final)
-                currentQuestionIndex = data.idx;
-                questionsAnswered = data.idx;
-                score = data.score;
-                revScore = data.rev;
-                lives = data.lives;
-                gameOver = false;
-                restartPoint = { order: [...order], idx: data.idx, score: data.score, rev: data.rev, lives: data.lives };
+                const startRestored = () => {
+                    studentName = data.name;
+                    nameInput.value = data.name;
+                    lockName();
+                    order = data.order; // restaura a lista de perguntas (com as repetidas no final)
+                    currentQuestionIndex = data.idx;
+                    questionsAnswered = data.idx;
+                    score = data.score;
+                    revScore = data.rev;
+                    lives = data.lives;
+                    gameOver = false;
+                    restartPoint = { order: [...order], idx: data.idx, score: data.score, rev: data.rev, lives: data.lives };
+                    openGame();
+                };
                 document.getElementById('restore-modal').classList.remove('active');
-                openGame();
+                if (flags.length) {
+                    showMessage('⚠ Indícios de alteração',
+                        `Aluno: ${data.name}\n` + flags.map(f => '• ' + f).join('\n')
+                        + '\n\nA restauração não foi bloqueada. Confirme com o aluno antes de continuar.',
+                        startRestored, 'Continuar mesmo assim');
+                } else {
+                    startRestored();
+                }
             };
             reader.onerror = () => { restoreFeedback.textContent = 'Não foi possível ler o arquivo.'; };
             reader.readAsText(file);
