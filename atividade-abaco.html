@@ -51,6 +51,7 @@ td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
 .msg{min-height:1.5em;font-weight:700}
 ol,ul{padding-left:22px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -61,12 +62,21 @@ ol,ul{padding-left:22px}
 <main>
   <div role="tablist" aria-label="Seções">
     <button role="tab" id="t-jogar" aria-controls="p-jogar" aria-selected="true">Jogar</button>
+    <button role="tab" id="t-rank" aria-controls="p-rank" aria-selected="false">Ranking</button>
     <button role="tab" id="t-como" aria-controls="p-como" aria-selected="false">Como jogar</button>
     <button role="tab" id="t-hab" aria-controls="p-hab" aria-selected="false">Habilidades</button>
     <button role="tab" id="t-prog" aria-controls="p-prog" aria-selected="false">Progresso</button>
   </div>
 
   <section class="panel" id="p-jogar" role="tabpanel" aria-labelledby="t-jogar"></section>
+
+  <section class="panel" id="p-rank" role="tabpanel" aria-labelledby="t-rank" hidden>
+    <h2 id="rk-titulo">🏆 Ranking Top 10</h2>
+    <div id="rk-meu" role="status"></div>
+    <p id="rk-st" role="status"></p>
+    <div class="row"><button class="btn" id="rk-re" hidden>Tentar reenviar</button><button class="btn" id="rk-up">Atualizar ranking</button></div>
+    <div id="rk-lista"></div>
+  </section>
 
   <section class="panel" id="p-como" role="tabpanel" aria-labelledby="t-como" hidden>
     <h2>Como jogar</h2>
@@ -143,7 +153,7 @@ function voltarPonto(){
   const o=getPonto();
   if(!o){newGame();return}
   const nm=S.name,b=S.best;
-  FIM=null;S=norm(o);S.name=nm;S.best=b;save();renderGame();
+  FIM=null;tick();const ms0=S.ms;S=norm(o);S.ms=ms0;S.seg=Date.now();S.name=nm;S.best=b;save();renderGame();
 }
 function fresh(){return{v:2,name:'',best:null,qs:null,i:0,score:0,pontos:0,vidas:3,sel:null}}
 const pts=e=>e===0?10:e===1?5:3;
@@ -197,18 +207,24 @@ function saveFile(){
   say('Arquivo salvo: '+fn+' ('+fmtData(S.salvoEm)+'). O nome fica travado até o fim da atividade.');
 }
 function downloadState(){
+  tick();
   S.salvoEm=new Date().toISOString();
-  const blob=new Blob([toB62(JSON.stringify(S))],{type:'text/plain'});
+  const pj=JSON.stringify(S),hm=hmacHex(SEAL_KEY,pj);LASTSEAL=hm.slice(0,12).toUpperCase();
+  const blob=new Blob([toB62(JSON.stringify({schema:'ABACO_SIGNED_V1',payloadJson:pj,hmac:hm}))],{type:'text/plain'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download=safeName(S.name)+'_abaco.txt';
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   return a.download;
 }
 function finish(){
-  const fn=downloadState();
-  FIM={name:S.name,score:S.score,pontos:S.pontos,vidas:S.vidas,fn,tot:T(),em:S.salvoEm};
+  tick();if(!S.sid)S.sid=genSid();
+  const entry={activity:rkAct(),sessionId:S.sid,studentName:S.name,outcome:'VICTORY',score:S.pontos,baseScore:S.pontos,bonusScore:0,accuracyPercent:Math.round(S.score/T()*100),elapsedSeconds:Math.round((S.ms||0)/1000),masteredCount:S.score,totalQuestions:T(),finishedAt:Date.now(),integritySeal:''};
+  const jaEnviado=!!S.sent;S.sent=true;
+  const fn=downloadState();entry.integritySeal=LASTSEAL;
+  FIM={name:S.name,score:S.score,pontos:S.pontos,vidas:S.vidas,fn,tot:T(),em:S.salvoEm,seal:LASTSEAL};
   S=fresh();clearPonto();NOME_FIXO=false;
-  save();renderGame();openTab($('t-jogar'));say('Arquivo salvo: '+fn+' ('+fmtData(FIM.em)+'). O nome foi apagado e a atividade foi reiniciada.');
+  save();renderGame();openTab($('t-rank'));say('Arquivo salvo: '+fn+' ('+fmtData(FIM.em)+'). O nome foi apagado e a atividade foi reiniciada.');
+  if(!jaEnviado){rkLocalSave(entry);enviar(entry)}
 }
 function restoreFile(file,done){
   if(!file)return;
@@ -217,11 +233,14 @@ function restoreFile(file,done){
     try{
       const t=String(r.result).trim();
       if(!/^[0-9A-Za-z]+$/.test(t))throw 0;
-      const o=JSON.parse(fromB62(t));
+      const env=JSON.parse(fromB62(t));
+      if(!env||env.schema!=='ABACO_SIGNED_V1'||typeof env.payloadJson!=='string'||typeof env.hmac!=='string'){say('Este arquivo não tem assinatura (versão antiga) e não é aceito. Comece a atividade novamente.');if(done)done();return}
+      if(!safeEq(hmacHex(SEAL_KEY,env.payloadJson),env.hmac.toLowerCase())){say('Alerta de adulteração: este arquivo foi modificado depois de salvo e não pode ser restaurado.');if(done)done();return}
+      const o=JSON.parse(env.payloadJson);
       if(!valid(o))throw 0;
       if(!SERIE){say('Abra a atividade pelo link com serie=3, 4 ou 5 para restaurar.');if(done)done();return}
       if(o.serie!==undefined&&o.serie!==SERIE){say('Este arquivo é do '+nvl(o.serie)+'. Abra o link com serie='+o.serie+' para restaurá-lo.');if(done)done();return}
-      NOME_FIXO=!!o.name;S=norm(o);save();setPonto();renderGame();openTab($('t-jogar'));say('Progresso de '+S.name+' restaurado'+(S.salvoEm?' (arquivo salvo em '+fmtData(S.salvoEm)+')':'')+'!');
+      NOME_FIXO=!!o.name;S=norm(o);S.seg=Date.now();save();setPonto();renderGame();openTab($('t-jogar'));say('Progresso de '+S.name+' restaurado'+(S.salvoEm?' (arquivo salvo em '+fmtData(S.salvoEm)+')':'')+'!');
     }catch(e){say('Arquivo inválido. Escolha o arquivo _abaco.txt salvo pelo jogo.')}
     if(done)done();
   };
@@ -379,7 +398,7 @@ function newGame(){
   const kinds=shuffle(Object.entries(MIX[SERIE]).flatMap(([k,c])=>Array(c).fill(k)));
   const seen=new Set(),qs=[];
   kinds.forEach(k=>{let q,t=0;do{q=mkQuestion(k);t++}while(seen.has(q.k+q.t+q.n+q.p)&&t<30);seen.add(q.k+q.t+q.n+q.p);qs.push(q)});
-  FIM=null;delete S.salvoEm;S.serie=SERIE;S.qs=qs;S.i=0;S.score=0;S.pontos=0;S.vidas=3;S.sel=null;save();setPonto();renderGame();
+  FIM=null;delete S.salvoEm;S.sid=genSid();S.sent=false;S.ms=0;S.seg=Date.now();S.serie=SERIE;S.qs=qs;S.i=0;S.score=0;S.pontos=0;S.vidas=3;S.sel=null;save();setPonto();renderGame();
 }
 
 /* ---------- telas ---------- */
@@ -394,7 +413,7 @@ function jogarNovamente(){
 function renderGame(){
   const el=$('p-jogar');
   if(!S.qs){
-    el.innerHTML=`${FIM?`<div class="fb right" role="status"><b>Parabéns, ${esc(FIM.name)}! 🎉</b><br>Pontos: ${FIM.pontos} de ${FIM.tot*10}. Acertos de primeira: ${FIM.score} de ${FIM.tot}. Vidas que sobraram: ${hearts(FIM.vidas)}<br>Seu progresso foi salvo em ${fmtData(FIM.em)} no arquivo <b>${esc(FIM.fn)}</b> e a atividade foi reiniciada.</div>`:''}<h2>Vamos jogar!</h2>${svgAbacus('358')}<p>São ${T()} perguntas sobre o ábaco, sorteadas só para você.</p>
+    el.innerHTML=`${FIM?`<div class="fb right" role="status"><b>Parabéns, ${esc(FIM.name)}! 🎉</b><br>Pontos: ${FIM.pontos} de ${FIM.tot*10}. Acertos de primeira: ${FIM.score} de ${FIM.tot}. Vidas que sobraram: ${hearts(FIM.vidas)}<br>Seu progresso foi salvo em ${fmtData(FIM.em)} no arquivo <b>${esc(FIM.fn)}</b> e a atividade foi reiniciada.<br>Selo de integridade: <b>${FIM.seal}</b></div>`:''}<h2>Vamos jogar!</h2>${svgAbacus('358')}<p>São ${T()} perguntas sobre o ábaco, sorteadas só para você.</p>
     ${SERIE?nameBox()+'<div class="row"><button class="btn" id="go">Começar</button></div>':'<p><b>Escolha o nível:</b></p><div class="row"><a class="btn" href="?serie=3">Nível 1</a><a class="btn" href="?serie=4">Nível 2</a><a class="btn" href="?serie=5">Nível 3</a></div>'}`;
     if(SERIE){$('go').onclick=()=>{
       const g=$('gname');if(!S.name)S.name=g.value.trim().slice(0,40);
@@ -458,6 +477,110 @@ $('pname').oninput=()=>{if(NOME_FIXO)return;S.name=$('pname').value.trim().slice
 $('save').onclick=saveFile;
 $('rest').onchange=e=>{restoreFile(e.target.files[0]);e.target.value=''};
 
+
+
+/* ---------- selo de integridade: HMAC-SHA256 do arquivo salvo (12 primeiros caracteres) ---------- */
+const SEAL_KEY='ABACO_AUDIT_INTEGRITY_2026_V1';let LASTSEAL='';
+function sha256(m){
+  const P=[];for(let n=2;P.length<64;n++)if(P.every(p=>n%p))P.push(n);
+  const fr=x=>Math.floor((x-Math.floor(x))*4294967296),K=P.map(p=>fr(Math.cbrt(p))),H=P.slice(0,8).map(p=>fr(Math.sqrt(p)));
+  const l=m.length,n=((l+9+63)>>6)<<6,u=new Uint8Array(n);u.set(m);u[l]=128;
+  const dv=new DataView(u.buffer);dv.setUint32(n-8,Math.floor(l/536870912));dv.setUint32(n-4,(l<<3)>>>0);
+  const w=new Uint32Array(64),R=(x,k)=>(x>>>k)|(x<<(32-k));
+  for(let o=0;o<n;o+=64){
+    for(let i=0;i<16;i++)w[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){const a=w[i-15],c=w[i-2];w[i]=(w[i-16]+(R(a,7)^R(a,18)^(a>>>3))+w[i-7]+(R(c,17)^R(c,19)^(c>>>10)))>>>0}
+    let[a,b,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){
+      const t1=(h+(R(e,6)^R(e,11)^R(e,25))+((e&f)^(~e&g))+K[i]+w[i])>>>0,t2=((R(a,2)^R(a,13)^R(a,22))+((a&b)^(a&c)^(b&c)))>>>0;
+      h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0}
+    [a,b,c,d,e,f,g,h].forEach((x,i)=>H[i]=(H[i]+x)>>>0);
+  }
+  const out=new Uint8Array(32),o2=new DataView(out.buffer);H.forEach((x,i)=>o2.setUint32(i*4,x));return out;
+}
+function hmacHex(key,msg){
+  const te=new TextEncoder();let k=te.encode(key);if(k.length>64)k=sha256(k);
+  const ip=new Uint8Array(64),op=new Uint8Array(64);for(let i=0;i<64;i++){const v=k[i]||0;ip[i]=v^54;op[i]=v^92}
+  const m=te.encode(msg),a=new Uint8Array(64+m.length);a.set(ip);a.set(m,64);
+  const h1=sha256(a),b=new Uint8Array(96);b.set(op);b.set(h1,64);
+  return Array.from(sha256(b),x=>x.toString(16).padStart(2,'0')).join('');
+}
+function safeEq(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let d=0;for(let i=0;i<a.length;i++)d|=a.charCodeAt(i)^b.charCodeAt(i);return d===0}
+
+/* ---------- ranking online (Google Sheets / Apps Script) + fallback local ---------- */
+const RANK_URL='https://script.google.com/macros/s/AKfycbzKBAFdTe9384igZqS-r90625vEYtXqW0qHfeLZIQCW7vv6A59UIz5QedwcdQlxXr6DSg/exec';
+const rkAct=()=>'Abaco'+(SERIE-2),rkKey=()=>'abaco_rank_v1_'+SERIE; /* série 3/4/5 = Nível 1/2/3 = abas Abaco1/Abaco2/Abaco3 */
+let RK={ent:null,st:'',rows:null,fonte:'',at:0};
+function genSid(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';try{const u=crypto.getRandomValues(new Uint8Array(6));for(const b of u)r+=a[b%32]}catch(e){for(let i=0;i<6;i++)r+=a[Math.floor(Math.random()*32)]}return 'ABA-'+(SERIE-2)+'-'+r}
+function tick(){const n=Date.now();S.ms=(S.ms||0)+(S.seg?n-S.seg:0);S.seg=n}
+function fetchT(url,opt,ms){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(url,Object.assign({credentials:'omit',signal:c.signal},opt)).finally(()=>clearTimeout(t))}
+const rkUrl=(lim)=>RANK_URL+'?action=top10&activity='+rkAct()+'&limit='+lim+'&_t='+Date.now();
+function rkRows(j){if(Array.isArray(j))return j;if(!j||typeof j!=='object')return null;for(const k of['top10','top','entries','ranking','rows','items','data']){const v=j[k];if(Array.isArray(v))return v;if(v&&typeof v==='object'){const r=rkRows(v);if(r)return r}}return null}
+async function getTop10(){
+  for(let a=0;a<2;a++){try{const r=await fetchT(rkUrl(10),{},12000);const j=await r.json();if(j&&typeof j.activity==='string'&&j.activity!==rkAct())return[];const rows=rkRows(j);if(rows)return rows}catch(e){}}
+  return null}
+async function postEntry(entry){
+  const body=JSON.stringify({action:'submit',activity:rkAct(),entry}),hd={'Content-Type':'text/plain;charset=utf-8'};
+  for(let a=1;a<=3;a++){
+    try{
+      if(a>1){try{await fetchT(rkUrl(1),{},8000)}catch(e){}}
+      const r=await fetchT(RANK_URL,{method:'POST',headers:hd,body},10000);
+      let j=null;try{j=await r.json()}catch(e){}
+      if(j&&(j.ok===false||j.success===false))throw new Error('rejeitado');
+      return 'ok';
+    }catch(e){}
+  }
+  try{
+    await fetchT(RANK_URL,{method:'POST',mode:'no-cors',headers:hd,body},10000);
+    const rows=await getTop10();
+    return rows&&rows.some(x=>x&&x.sessionId===entry.sessionId)?'ok':'incerto';
+  }catch(e){return 'falhou'}
+}
+async function enviar(entry){
+  RK.ent=entry;RK.st='enviando';rkStatus();
+  RK.st=await postEntry(entry);rkStatus();
+  RK.at=0;rkLoad();
+}
+function rkStatus(){
+  const m={enviando:'Enviando seu resultado para o ranking…',ok:'✅ Resultado enviado ao ranking online.',incerto:'⚠️ Enviado, mas não consegui confirmar no ranking. Se não aparecer, use "Tentar reenviar".',falhou:'❌ Não foi possível enviar agora. Seu resultado ficou guardado neste aparelho; use "Tentar reenviar".'};
+  const st=$('rk-st'),re=$('rk-re');
+  if(st)st.textContent=RK.st&&RK.ent?RK.ent.studentName+': '+m[RK.st]:'';
+  if(re)re.hidden=!(RK.ent&&(RK.st==='falhou'||RK.st==='incerto'));
+}
+function rkLocalGet(){try{const a=JSON.parse(localStorage.getItem(rkKey()));return Array.isArray(a)?a:[]}catch(e){return[]}}
+function rkLocalSave(e){RK.at=0;try{const a=rkLocalGet().filter(x=>x.sessionId!==e.sessionId);a.push(e);a.sort((x,y)=>y.score-x.score||x.elapsedSeconds-y.elapsedSeconds);localStorage.setItem(rkKey(),JSON.stringify(a.slice(0,50)))}catch(x){}}
+const fmtT=n=>{n=Math.max(0,Math.round(+n||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')};
+async function rkLoad(){
+  const box=$('rk-lista');if(!box)return;
+  if(!SERIE){box.textContent='Abra a atividade por um nível (serie=3, 4 ou 5) para ver o ranking.';return}
+  if(RK.rows&&Date.now()-RK.at<30000){rkDraw();return}
+  box.textContent='Carregando ranking…';
+  let rows=await getTop10(),fonte='online';
+  if(rows)rows=rows.filter(x=>x&&(x.activity===undefined||x.activity===rkAct())&&String(x.sessionId||'').indexOf('ABA-'+(SERIE-2)+'-')===0);
+  if(!rows){rows=rkLocalGet().slice(0,10);fonte='local (sem conexão com o ranking online)'}
+  RK.rows=rows;RK.fonte=fonte;RK.at=Date.now();rkDraw();
+}
+function rkDraw(){
+  const box=$('rk-lista');if(!box)return;
+  const r=(RK.rows||[]).slice(0,10),me=RK.ent?RK.ent.sessionId:null,pos=me?r.findIndex(x=>x&&x.sessionId===me):-1;
+  const meu=$('rk-meu');
+  if(meu)meu.innerHTML=RK.ent?`<div class="fb right"><b>${esc(RK.ent.studentName)}</b>: ${RK.ent.score} pontos · ${RK.ent.accuracyPercent}% de aproveitamento · ${fmtT(RK.ent.elapsedSeconds)}<br>${pos>=0?'Você está em <b>'+(pos+1)+'º lugar</b> no Top 10! 🎉':(RK.st==='ok'?'Você ficou fora do Top 10 desta vez. Jogue de novo para subir!':'Seu resultado ainda não aparece no ranking online.')}</div>`:'';
+  box.innerHTML=r.length?`<table><thead><tr><th>#</th><th>Aluno</th><th>Pontos</th><th>Aproveit.</th><th>Tempo</th></tr></thead><tbody>${r.map((x,i)=>`<tr${i===pos?' style="font-weight:700"':''}><td>${i+1}</td><td>${esc(String(x.studentName||x.name||x.nome||x.aluno||'—'))}${i===pos?' ← você':''}</td><td>${esc(String(x.score??x.pontos??'—'))}</td><td>${esc(String(x.accuracyPercent??x.aproveitamento??'—'))}%</td><td>${fmtT(x.elapsedSeconds??x.tempo)}</td></tr>`).join('')}</tbody></table><p><small>Fonte: ${RK.fonte}</small></p>`:'<p>Ainda não há resultados no ranking.</p>';
+}
+function rkInit(){
+  $('rk-titulo').textContent='🏆 Ranking Top 10'+(SERIE?' · '+nvl(SERIE):'');
+  $('rk-re').onclick=()=>RK.ent&&enviar(RK.ent);
+  $('rk-up').onclick=()=>{RK.at=0;rkLoad()};
+  rkStatus();
+}
+/* exportação em arquivo único: só aparece com ?export=1 (oculta em produção) */
+if(/[?&]export=1\b/.test(location.search)){
+  const b=document.createElement('button');b.className='btn';b.textContent='Exportar .html único';b.style.cssText='position:fixed;right:8px;bottom:8px;z-index:9';
+  b.onclick=async()=>{let h;try{h=await (await fetch(location.href.split('#')[0].split('?')[0])).text()}catch(e){h='<!DOCTYPE html>\n'+document.documentElement.outerHTML}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='atividade-abaco.html';document.body.appendChild(a);a.click();a.remove()};
+  document.body.appendChild(b);
+}
+
 /* ---------- habilidades (BNCC) ---------- */
 const HAB=[
 {a:3,c:'EF03MA01',t:'Ler, escrever e comparar números naturais de até a ordem de unidade de milhar, estabelecendo relações entre os registros numéricos e em língua materna.',y:'leitura de números de até 4 ordens no ábaco e comparação (maior, menor e número do meio).',n:'escrever números.'},
@@ -496,7 +619,8 @@ function renderHab(){
 
 /* ---------- abas ---------- */
 const tabs=[...document.querySelectorAll('[role=tab]')];
-function openTab(t){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$(x.getAttribute('aria-controls')).hidden=!on})}
+function openTab(t){if(t.id==='t-rank')rkLoad();
+  tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$(x.getAttribute('aria-controls')).hidden=!on})}
 tabs.forEach((t,i)=>{
   t.onclick=()=>openTab(t);
   t.onkeydown=e=>{
@@ -507,7 +631,7 @@ tabs.forEach((t,i)=>{
 });
 $('ex').innerHTML=svgAbacus('245');
 if(SERIE){$('serie-tag').textContent=' · '+nvl(SERIE);document.title='Atividade: Ábaco · '+nvl(SERIE)}
-renderGame();renderProg();renderHab();
+renderGame();renderProg();renderHab();rkInit();
 </script>
 </body>
 </html>
