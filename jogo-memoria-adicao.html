@@ -15,7 +15,9 @@
     .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
     .preserve-3d { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
     .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
+    .rotate-y-180 { transform: rotateY(180deg) !important; -webkit-transform: rotateY(180deg) !important; }
+    .card-back-face { transform: rotateY(0deg) translateZ(1px); -webkit-transform: rotateY(0deg) translateZ(1px); }
+    .card-front-face { transform: rotateY(180deg) translateZ(1px); -webkit-transform: rotateY(180deg) translateZ(1px); }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .animate-fade-in { animation: 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards fadeIn; }
@@ -433,11 +435,11 @@
       board.innerHTML = state.cartas.map((c, idx) => {
         const rev = c.isVirada || c.isCombinada;
         return '<button type="button" data-card="' + idx + '" ' + (state.bloqueado || rev ? 'disabled' : '') + ' class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 perspective-1000 cursor-pointer disabled:cursor-default select-none group rounded-2xl">' +
-          '<div class="card-inner relative w-full h-full duration-500 transform-gpu preserve-3d transition-transform rounded-2xl shadow-md ' + (rev ? 'rotate-y-180' : 'hover:-translate-y-1 hover:shadow-lg') + '">' +
-            '<div class="absolute inset-0 w-full h-full backface-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-600 to-cyan-600 border-2 border-cyan-200/80 flex items-center justify-center text-white shadow-inner">' +
+          '<div class="card-inner relative w-full h-full duration-500 preserve-3d transition-transform rounded-2xl shadow-md ' + (rev ? 'rotate-y-180' : 'hover:-translate-y-1 hover:shadow-lg') + '">' +
+            '<div class="card-back-face absolute inset-0 w-full h-full backface-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-600 to-cyan-600 border-2 border-cyan-200/80 flex items-center justify-center text-white shadow-inner">' +
               '<div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/30 flex items-center justify-center bg-white/10 group-hover:bg-white/20 transition-colors"><span class="text-white/90 font-extrabold text-2xl sm:text-3xl leading-none">+</span></div>' +
             '</div>' +
-            '<div class="card-front absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl border-2 flex flex-col items-center justify-center p-1 text-center font-bold text-lg sm:text-2xl shadow-inner transition-colors ' + (c.isCombinada ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300' : 'bg-gradient-to-br from-sky-600 to-blue-700 text-white border-sky-300') + '">' +
+            '<div class="card-front card-front-face absolute inset-0 w-full h-full backface-hidden rounded-2xl border-2 flex flex-col items-center justify-center p-1 text-center font-bold text-lg sm:text-2xl shadow-inner transition-colors ' + (c.isCombinada ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300' : 'bg-gradient-to-br from-sky-600 to-blue-700 text-white border-sky-300') + '">' +
               '<span>' + escapeHtml(c.value) + '</span>' +
               '<span class="badge-check ' + (c.isCombinada ? '' : 'hidden') + ' mt-0.5 sm:mt-1 p-0.5 bg-white/20 rounded-full text-xs leading-none">✓</span>' +
             '</div>' +
@@ -467,7 +469,7 @@
             [a, b].forEach(i => {
               const bEl = document.querySelector('#tabuleiro [data-card="' + i + '"]'); if (!bEl) return;
               const front = bEl.querySelector('.card-front');
-              if (front) front.className = 'card-front absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl border-2 flex flex-col items-center justify-center p-1 text-center font-bold text-lg sm:text-2xl shadow-inner transition-colors bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300';
+              if (front) front.className = 'card-front card-front-face absolute inset-0 w-full h-full backface-hidden rounded-2xl border-2 flex flex-col items-center justify-center p-1 text-center font-bold text-lg sm:text-2xl shadow-inner transition-colors bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300';
               const badge = bEl.querySelector('.badge-check'); if (badge) badge.classList.remove('hidden');
             });
             updateHudDom();
@@ -519,7 +521,7 @@
         const stCls = state.submissionStatus === 'submitting' ? 'bg-slate-50 border-slate-200 text-slate-700' : state.submissionStatus === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700';
         inner = '<div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-scale-up"><h2 class="text-2xl font-extrabold text-slate-800 mb-1">Parabéns, ' + escapeHtml(f.studentName) + '! 🎉</h2><p class="text-xs text-slate-500 mb-3 font-mono">Sessão ' + escapeHtml(f.sessionId) + ' • Todas as 10 tabuadas concluídas!</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-4 tabular-nums"><span class="block text-xs uppercase font-bold text-amber-800">Pontuação Final</span><span class="text-3xl font-black text-amber-900">' + f.score + ' Pontos</span><span class="block text-xs text-amber-800/80 mt-0.5">' + f.baseScore + ' base + ' + f.bonusScore + ' bônus • ' + f.accuracyPercent + '% precisão • ' + fmtTime(f.elapsedSeconds) + '</span></div><div class="p-3 rounded-xl border text-xs font-semibold mb-4 ' + stCls + '">' + escapeHtml(state.submissionMessage) + '</div><div class="flex flex-col gap-2.5">' + (state.submissionStatus === 'error' ? '<button type="button" id="mRetryBtn" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl cursor-pointer">Tentar reenviar</button>' : '') + '<button type="button" id="mGoRankBtn" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl cursor-pointer">Ver Ranking Top 20</button><button type="button" id="mPlayAgainBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl cursor-pointer">Jogar Novamente</button></div></div>';
       }
-      host.innerHTML = '<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-xs animate-fade-in">' + inner + '</div>';
+      host.innerHTML = '<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-sm animate-fade-in">' + inner + '</div>';
       const closeModal = () => { if (state.returnModal === 'confirmarReinicio') { state.returnModal = 'none'; openModal('confirmarReinicio'); } else { openModal('none'); } };
       if (document.getElementById('mOkBtn')) document.getElementById('mOkBtn').onclick = closeModal;
       if (document.getElementById('mCancelBtn')) document.getElementById('mCancelBtn').onclick = closeModal;
