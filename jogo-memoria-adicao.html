@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo da Memória - Tabuada de Adição</title>
+  <meta name="description" content="Jogo educativo da memória para treino e memorização da tabuada de adição." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
+    .preserve-3d { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .animate-fade-in { animation: 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards fadeIn; }
+    .animate-scale-up { animation: 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards scaleUp; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-cyan-50 via-sky-50 to-indigo-50 text-slate-800 pb-12 flex flex-col justify-between selection:bg-cyan-200">
+  <div class="w-full">
+    <div class="w-full max-w-4xl mx-auto px-4">
+      <header class="py-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-cyan-200/60 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-cyan-600 text-white rounded-2xl shadow-md shadow-cyan-600/20 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v12M6 12h12"/></svg>
+          </div>
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Jogo da Memória</h1>
+            <p class="text-xs sm:text-sm font-semibold text-cyan-700">Tabuada de Adição • Ensino Fundamental 1</p>
+          </div>
+        </div>
+        <button id="soundBtn" type="button" class="p-2 rounded-xl border bg-cyan-50 border-cyan-300 text-cyan-700 hover:bg-cyan-100 transition-colors cursor-pointer shrink-0" title="Alternar Som" aria-label="Alternar Som">
+          <svg id="iconSomOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+          <svg id="iconSomOff" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+        </button>
+      </header>
+
+      <nav class="mb-6 bg-white/95 backdrop-blur-sm border border-cyan-100 rounded-2xl p-1.5 shadow-sm grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+        <button type="button" data-tab="jogar" class="tab-btn flex-1 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl bg-cyan-600 text-white shadow-sm cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 transition-colors">Jogar</button>
+        <button type="button" data-tab="ranking" class="tab-btn flex-1 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 transition-colors">Ranking</button>
+        <button type="button" data-tab="como-jogar" class="tab-btn flex-1 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 transition-colors">Como jogar</button>
+        <button type="button" data-tab="bncc" class="tab-btn flex-1 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 transition-colors">Habilidades BNCC</button>
+      </nav>
+    </div>
+
+    <main class="w-full">
+      <section id="tab-jogar"></section>
+      <section id="tab-ranking" class="hidden"></section>
+      <section id="tab-como-jogar" class="hidden">
+        <div class="w-full max-w-4xl mx-auto px-4 mb-8">
+          <div class="bg-white/95 border border-cyan-100 rounded-2xl p-6 sm:p-7 shadow-md space-y-5">
+            <div class="pb-4 border-b border-cyan-100">
+              <h2 class="text-xl font-bold text-slate-800">Como Jogar</h2>
+              <p class="text-xs sm:text-sm text-slate-500">Regras e pontuação do Jogo da Memória da Tabuada de Adição</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              <div class="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-3 text-sm text-slate-700 leading-relaxed">
+                <h3 class="font-bold text-slate-800 text-base">Objetivo e Controles</h3>
+                <p><strong>1. Identificação:</strong> Na aba <strong>Jogar</strong>, informe o nome do aluno para iniciar na tabuada de adição de 1.</p>
+                <p><strong>2. Pares de Adição:</strong> Clique em duas cartas para virá-las e combine cada conta (ex: <strong>2 + 3</strong>) com o seu resultado correto (ex: <strong>5</strong>).</p>
+                <p><strong>3. Progressão:</strong> Cada tabuada possui 10 pares. Complete todos os 10 pares para avançar até a tabuada 10.</p>
+              </div>
+              <div class="bg-cyan-50/50 border border-cyan-100 rounded-2xl p-5 space-y-3 text-sm text-slate-700 leading-relaxed">
+                <h3 class="font-bold text-cyan-800 text-base">Pontuação e Ranking</h3>
+                <ul class="space-y-2.5">
+                  <li>• Cada par correto soma <strong>10 pontos base</strong>.</li>
+                  <li>• Ao concluir a tabuada 10, sua pontuação total inclui bônus de aproveitamento e tempo.</li>
+                  <li>• Cada partida gera uma sessão única (ex: <code class="font-mono text-xs bg-white/80 px-1.5 py-0.5 rounded border border-cyan-200/70">ADI-XXXXXX</code>) enviada automaticamente para o <strong>Ranking Top 20</strong>.</li>
+                  <li>• Você também pode usar <strong>Salvar Progresso</strong> e <strong>Carregar Progresso</strong> em arquivo <code class="font-mono text-xs bg-white/80 px-1.5 py-0.5 rounded border border-cyan-200/70">.txt</code>.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="tab-bncc" class="hidden">
+        <div class="w-full max-w-4xl mx-auto px-4 mb-8">
+          <div class="bg-white rounded-2xl overflow-hidden border border-emerald-100 shadow-md">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 sm:p-6">
+              <h2 class="text-xl font-bold tracking-tight">Habilidades da BNCC Trabalhadas</h2>
+              <p class="text-xs sm:text-sm text-emerald-100">Matemática, Computação, Língua Portuguesa e Competências Gerais (1º ao 5º ano)</p>
+            </div>
+            <div class="p-5 sm:p-6 space-y-5 bg-white text-sm text-slate-700">
+              <div class="space-y-3">
+                <h3 class="text-base font-bold text-slate-800 border-b border-slate-200 pb-1.5">Matemática</h3>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF01MA06</span> <span class="text-xs text-slate-500">1º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Construir fatos básicos da adição e utilizá-los em procedimentos de cálculo para resolver problemas.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF01MA07</span> <span class="text-xs text-slate-500">1º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Compor e decompor número de até duas ordens, por meio de diferentes adições, contribuindo para a compreensão do sistema de numeração decimal e estratégias de cálculo.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF01MA08</span> <span class="text-xs text-slate-500">1º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Resolver e elaborar problemas de adição e de subtração, envolvendo números de até dois algarismos, com os significados de juntar, acrescentar, separar e retirar.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF02MA05</span> <span class="text-xs text-slate-500">2º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Construir fatos básicos da adição e subtração e utilizá-los no cálculo mental ou escrito.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF02MA06</span> <span class="text-xs text-slate-500">2º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Resolver e elaborar problemas de adição e de subtração, envolvendo números de até três ordens.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF03MA03</span> <span class="text-xs text-slate-500">3º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Construir e utilizar fatos básicos da adição e da multiplicação para o cálculo mental ou escrito.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF03MA05</span> <span class="text-xs text-slate-500">3º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Utilizar diferentes procedimentos de cálculo mental e escrito para resolver problemas envolvendo adição e subtração.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF04MA03</span> <span class="text-xs text-slate-500">4º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Resolver e elaborar problemas com números naturais envolvendo adição e subtração com cálculo mental e estimativas.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-md">EF05MA07</span> <span class="text-xs text-slate-500">5º ano • Matemática</span><p class="font-semibold text-slate-800 mt-1.5">Resolver e elaborar problemas de adição e subtração com números naturais e racionais decimais finitos.</p></div>
+              </div>
+              <div class="space-y-3">
+                <h3 class="text-base font-bold text-slate-800 border-b border-slate-200 pb-1.5">Computação (Complemento à BNCC)</h3>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-cyan-100 text-cyan-800 rounded-md">EF01CO01</span> <span class="text-xs text-slate-500">1º ano • Pensamento Computacional</span><p class="font-semibold text-slate-800 mt-1.5">Organizar objetos físicos ou digitais considerando diferentes características para esta organização, explicitando semelhanças (padrões) e diferenças.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-cyan-100 text-cyan-800 rounded-md">EF01CO06</span> <span class="text-xs text-slate-500">1º ano • Cultura Digital</span><p class="font-semibold text-slate-800 mt-1.5">Reconhecer e explorar artefatos computacionais voltados a atender necessidades pessoais ou coletivas.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-cyan-100 text-cyan-800 rounded-md">EF04CO01</span> <span class="text-xs text-slate-500">4º ano • Pensamento Computacional</span><p class="font-semibold text-slate-800 mt-1.5">Reconhecer objetos que podem ser representados através de matrizes com posições definidas por coordenadas, fazendo manipulações simples sobre estas representações.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-cyan-100 text-cyan-800 rounded-md">EF15CO08</span> <span class="text-xs text-slate-500">1º ao 5º ano • Cultura Digital</span><p class="font-semibold text-slate-800 mt-1.5">Reconhecer e utilizar tecnologias computacionais para pesquisar e acessar informações, expressar-se crítica e criativamente e resolver problemas.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-cyan-100 text-cyan-800 rounded-md">EF15CO09</span> <span class="text-xs text-slate-500">1º ao 5º ano • Cultura Digital</span><p class="font-semibold text-slate-800 mt-1.5">Entender que as tecnologias devem ser utilizadas de maneira segura, ética e responsável, respeitando direitos autorais, de imagem e as leis vigentes.</p></div>
+              </div>
+              <div class="space-y-3">
+                <h3 class="text-base font-bold text-slate-800 border-b border-slate-200 pb-1.5">Língua Portuguesa</h3>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-sky-100 text-sky-800 rounded-md">EF12LP04</span> <span class="text-xs text-slate-500">1º e 2º anos • Língua Portuguesa</span><p class="font-semibold text-slate-800 mt-1.5">Ler e compreender instruções de montagem e regras (digitais ou impressos) do campo da vida cotidiana, relacionando sua organização à sua finalidade.</p></div>
+                <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/40"><span class="px-2 py-0.5 text-xs font-bold bg-sky-100 text-sky-800 rounded-md">EF15LP01</span> <span class="text-xs text-slate-500">1º ao 5º ano • Língua Portuguesa</span><p class="font-semibold text-slate-800 mt-1.5">Identificar a função social de textos que circulam em campos da vida social e nas mídias impressa, de massa e digital.</p></div>
+              </div>
+              <div class="space-y-3">
+                <h3 class="text-base font-bold text-slate-800 border-b border-slate-200 pb-1.5">Competências Gerais da BNCC</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div class="p-4 rounded-2xl border border-indigo-100 bg-indigo-50/30"><span class="px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-800 rounded-md">Competência Geral 2</span><p class="font-bold text-slate-800 mt-1.5">Pensamento científico, crítico e criativo</p><p class="text-xs text-slate-600 mt-1">Raciocínio lógico, memória operacional e cálculo mental ágil.</p></div>
+                  <div class="p-4 rounded-2xl border border-indigo-100 bg-indigo-50/30"><span class="px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-800 rounded-md">Competência Geral 5</span><p class="font-bold text-slate-800 mt-1.5">Cultura Digital</p><p class="text-xs text-slate-600 mt-1">Uso crítico, significativo e ético das tecnologias digitais na aprendizagem.</p></div>
+                  <div class="p-4 rounded-2xl border border-indigo-100 bg-indigo-50/30"><span class="px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-800 rounded-md">Competência Geral 8</span><p class="font-bold text-slate-800 mt-1.5">Autoconhecimento e autorregulação</p><p class="text-xs text-slate-600 mt-1">Foco, persistência diante de erros e acompanhamento do próprio progresso.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="text-center text-xs text-slate-500 py-3 px-4 border-t border-slate-200/60 mt-auto">
+    Jogo da Memória Pedagógico — Tabuada de Adição • Alinhado à BNCC (Matemática, Computação e Língua Portuguesa)
+  </footer>
+
+  <div id="modalHost"></div>
+  <input type="file" id="inputArquivo" accept=".txt" class="hidden" />
+
+  <script>
+    const ENDPOINT = "https://script.google.com/macros/s/AKfycbzKBAFdTe9384igZqS-r90625vEYtXqW0qHfeLZIQCW7vv6A59UIz5QedwcdQlxXr6DSg/exec";
+    const ACTIVITY = "MemoriaAdicao";
+    const TIPO_JOGO = "adicao";
+    const LIMIT = 20;
+    const TOTAL_QUESTIONS = 100;
+    const STORAGE_KEY = "ranking_memoria_adicao_v1";
+
+    let state = {
+      tab: 'jogar', muted: false, started: false, nomeAluno: '', nameError: '',
+      runId: 0, sessionId: '', currentTabuada: 1, cartas: [], viradas: [], bloqueado: false,
+      paresEncontrados: 0, masteredTotal: 0, attempts: 0, baseScore: 0, elapsedSeconds: 0, timerId: null,
+      activeModal: 'none', returnModal: 'none', mensagemData: { titulo: '', lines: [], isError: false },
+      finishedEntry: null, submissionStatus: 'idle', submissionMessage: '',
+      ranking: [], rankingSource: 'online', rankingLoading: false, rankingError: ''
+    };
+
+    const audio = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      },
+      playFlip() {
+        if (state.muted) return; this.init(); if (!this.ctx) return;
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(300, this.ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.08);
+        g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.08);
+      },
+      playMatch() {
+        if (state.muted) return; this.init(); if (!this.ctx) return;
+        const now = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'triangle'; o.frequency.setValueAtTime(523.25, now);
+        o.frequency.setValueAtTime(659.25, now + 0.1); o.frequency.setValueAtTime(783.99, now + 0.2);
+        g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        o.connect(g); g.connect(this.ctx.destination); o.start(now); o.stop(now + 0.35);
+      },
+      playMismatch() {
+        if (state.muted) return; this.init(); if (!this.ctx) return;
+        const now = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(220, now); o.frequency.setValueAtTime(180, now + 0.12);
+        g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        o.connect(g); g.connect(this.ctx.destination); o.start(now); o.stop(now + 0.25);
+      },
+      playVictory() {
+        if (state.muted) return; this.init(); if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = 'triangle'; o.frequency.setValueAtTime(freq, now + idx * 0.12);
+          g.gain.setValueAtTime(0.2, now + idx * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.3);
+          o.connect(g); g.connect(this.ctx.destination); o.start(now + idx * 0.12); o.stop(now + idx * 0.12 + 0.3);
+        });
+      }
+    };
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    function genId() {
+      const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = '';
+      if (window.crypto && window.crypto.getRandomValues) {
+        const a = new Uint32Array(6); window.crypto.getRandomValues(a);
+        for (let i = 0; i < 6; i++) s += c[a[i] % c.length];
+      } else {
+        for (let i = 0; i < 6; i++) s += c[Math.floor(Math.random() * c.length)];
+      }
+      return 'ADI-' + s;
+    }
+    function fmtTime(sec) {
+      const safe = Math.max(0, Math.floor(sec));
+      return String(Math.floor(safe / 60)).padStart(2, '0') + ':' + String(safe % 60).padStart(2, '0');
+    }
+    function getLocal() {
+      try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(d) ? d.slice(0, LIMIT) : []; } catch { return []; }
+    }
+    function saveLocal(entry) {
+      const cur = getLocal().filter(x => !(entry.sessionId && x.sessionId === entry.sessionId));
+      cur.push(entry);
+      cur.sort((a, b) => (b.score - a.score) || (b.accuracyPercent - a.accuracyPercent) || (a.elapsedSeconds - b.elapsedSeconds));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cur.slice(0, LIMIT)));
+    }
+    async function fetchWithTimeout(url, opts, ms) {
+      const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), ms);
+      try { return await fetch(url, { ...opts, signal: ctrl.signal }); } finally { clearTimeout(t); }
+    }
+    async function fetchTop20() {
+      state.rankingLoading = true; state.rankingError = ''; renderRanking();
+      for (let i = 1; i <= 2; i++) {
+        try {
+          const url = ENDPOINT + '?action=top10&activity=' + encodeURIComponent(ACTIVITY) + '&limit=' + LIMIT + '&_t=' + Date.now();
+          const res = await fetchWithTimeout(url, { method: 'GET', credentials: 'omit' }, 12000);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          if (data && typeof data === 'object' && data.ok === false) throw new Error(data.error || 'Erro');
+          const list = Array.isArray(data) ? data : (data.entries || data.ranking || data.data || data.rows || data.items || []);
+          state.ranking = list.slice(0, LIMIT); state.rankingSource = 'online'; state.rankingError = ''; state.rankingLoading = false;
+          renderRanking(); return;
+        } catch {
+          if (i === 2) { state.ranking = getLocal(); state.rankingSource = 'local'; state.rankingError = 'Não foi possível conectar à planilha online. Exibindo ranking salvo neste navegador.'; }
+        }
+      }
+      state.rankingLoading = false; renderRanking();
+    }
+    async function submitEntry(entry) {
+      saveLocal(entry);
+      state.submissionStatus = 'submitting'; state.submissionMessage = 'Enviando pontuação para a planilha online...'; renderModals();
+      const body = JSON.stringify({ action: 'submit', activity: ACTIVITY, entry });
+      for (let i = 1; i <= 3; i++) {
+        if (i > 1) { try { await fetchWithTimeout(ENDPOINT + '?action=top10&activity=' + encodeURIComponent(ACTIVITY) + '&limit=1&_t=' + Date.now(), { method: 'GET', credentials: 'omit' }, 6000); } catch {} }
+        try {
+          const res = await fetchWithTimeout(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, credentials: 'omit', body }, 10000);
+          if (res.ok) {
+            state.submissionStatus = 'success'; state.submissionMessage = 'Pontuação registrada no Ranking Online!';
+            if (state.sessionId === entry.sessionId) renderModals();
+            return;
+          }
+        } catch {}
+      }
+      state.submissionStatus = 'error'; state.submissionMessage = 'Sua pontuação foi salva localmente, mas o envio para a planilha online falhou. Você pode tentar reenviar.';
+      if (state.sessionId === entry.sessionId) renderModals();
+    }
+    function buildDeck(tab) {
+      const list = [];
+      for (let i = 1; i <= 10; i++) {
+        const sum = tab + i;
+        list.push({ id: 'expr_' + i, value: tab + ' + ' + i, result: sum, isVirada: false, isCombinada: false });
+        list.push({ id: 'res_' + i, value: String(sum), result: sum, isVirada: false, isCombinada: false });
+      }
+      for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+      state.cartas = list; state.viradas = []; state.bloqueado = false;
+    }
+    function stopTimer() { if (state.timerId) { clearInterval(state.timerId); state.timerId = null; } }
+    function syncTimer() {
+      const shouldRun = state.started && state.tab === 'jogar' && state.activeModal === 'none' && state.paresEncontrados < 10 && !state.finishedEntry;
+      if (!shouldRun) { stopTimer(); return; }
+      if (!state.timerId) {
+        state.timerId = setInterval(() => {
+          state.elapsedSeconds++;
+          const el = document.getElementById('hud-time');
+          if (el) el.textContent = 'Tempo: ' + fmtTime(state.elapsedSeconds);
+        }, 1000);
+      }
+    }
+    function openModal(modal) { state.activeModal = modal; syncTimer(); renderModals(); }
+    function finalizeGame(finalMastered, finalBaseScore, finalAttempts, overrideElapsed) {
+      const finalElapsed = typeof overrideElapsed === 'number' ? overrideElapsed : state.elapsedSeconds;
+      const acc = finalAttempts > 0 ? Math.min(100, Math.round((finalMastered / finalAttempts) * 100)) : 100;
+      const bonus = Math.round(finalBaseScore * (acc / 100) * 0.5) + Math.max(0, finalMastered * 3 - Math.floor(finalElapsed / 2));
+      state.finishedEntry = {
+        activity: ACTIVITY, sessionId: state.sessionId || genId(), studentName: state.nomeAluno.trim() || 'Aluno',
+        outcome: 'VICTORY', score: finalBaseScore + bonus, baseScore: finalBaseScore, bonusScore: bonus,
+        accuracyPercent: acc, elapsedSeconds: finalElapsed, masteredCount: finalMastered, totalQuestions: TOTAL_QUESTIONS,
+        finishedAt: Date.now(), integritySeal: ''
+      };
+      audio.playVictory();
+      openModal('gameOver');
+      submitEntry(state.finishedEntry);
+    }
+    function salvarProgresso(nextReturn = 'none') {
+      state.returnModal = nextReturn;
+      const payload = {
+        tipo: TIPO_JOGO, nomeAluno: state.nomeAluno, sessionId: state.sessionId || genId(),
+        currentTabuada: state.currentTabuada, paresEncontrados: state.paresEncontrados,
+        score: state.baseScore, baseScore: state.baseScore, attempts: state.attempts,
+        masteredTotal: state.masteredTotal, elapsedSeconds: state.elapsedSeconds,
+        cartas: state.cartas.map(c => ({ ...c, isVirada: false })),
+        data: new Date().toLocaleString('pt-BR')
+      };
+      try {
+        const blob = new Blob([btoa(unescape(encodeURIComponent(JSON.stringify(payload))))], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a');
+        const clean = state.nomeAluno.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20) || 'aluno';
+        a.href = url; a.download = 'progresso_adicao_' + clean + '.txt';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        state.mensagemData = {
+          titulo: 'Progresso Salvo!',
+          lines: ['Arquivo salvo para ' + state.nomeAluno + '.', 'Tabuada: ' + state.currentTabuada + ' • Pares: ' + Math.min(10, state.paresEncontrados) + '/10 • Pontuação: ' + state.baseScore + ' pts'],
+          isError: false
+        };
+        openModal('mensagem');
+      } catch {
+        state.mensagemData = { titulo: 'Erro ao Salvar', lines: ['Ocorreu um erro ao gerar o arquivo de salvamento.'], isError: true };
+        openModal('mensagem');
+      }
+    }
+    function carregarProgresso(ev) {
+      const f = ev.target && ev.target.files && ev.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = function(e) {
+        try {
+          const raw = (e.target.result || '').trim(); if (!raw) throw new Error();
+          let js = ''; try { js = decodeURIComponent(escape(atob(raw))); } catch { js = raw; }
+          const st = JSON.parse(js);
+          if (!st || typeof st !== 'object') throw new Error();
+          if (st.tipo && st.tipo !== TIPO_JOGO) {
+            state.mensagemData = { titulo: 'Arquivo Incorreto', lines: ['Este arquivo de progresso pertence a outro jogo.', 'Por favor utilize um arquivo salvo no jogo de Adição.'], isError: true };
+            openModal('mensagem'); return;
+          }
+          state.runId++;
+          const ln = (typeof st.nomeAluno === 'string' && st.nomeAluno.trim()) ? st.nomeAluno.trim().substring(0, 40) : ((typeof st.studentName === 'string' && st.studentName.trim()) ? st.studentName.trim().substring(0, 40) : 'Aluno');
+          const tab = isNaN(Number(st.currentTabuada)) ? 1 : Math.max(1, Math.min(10, Number(st.currentTabuada)));
+          const pares = isNaN(Number(st.paresEncontrados)) ? 0 : Math.max(0, Math.min(10, Number(st.paresEncontrados)));
+          const base = isNaN(Number(st.baseScore ?? st.score)) ? 0 : Math.max(0, Number(st.baseScore ?? st.score));
+          const mastered = isNaN(Number(st.masteredTotal)) ? Math.floor(base / 10) : Math.max(0, Number(st.masteredTotal));
+          const att = isNaN(Number(st.attempts)) ? mastered : Math.max(mastered, Number(st.attempts));
+          const el = isNaN(Number(st.elapsedSeconds)) ? 0 : Math.max(0, Number(st.elapsedSeconds));
+
+          state.nomeAluno = ln; state.sessionId = (typeof st.sessionId === 'string' && st.sessionId.trim()) ? st.sessionId.trim().substring(0, 20) : genId();
+          state.currentTabuada = tab; state.paresEncontrados = pares; state.baseScore = base;
+          state.masteredTotal = mastered; state.attempts = att; state.elapsedSeconds = el;
+          state.finishedEntry = null; state.submissionStatus = 'idle'; state.submissionMessage = '';
+          state.started = true; state.nameError = ''; state.returnModal = 'none';
+
+          if (Array.isArray(st.cartas) && st.cartas.length === 20 && st.cartas.every(c => c && typeof c.id === 'string' && typeof c.value === 'string' && typeof c.result === 'number')) {
+            state.cartas = st.cartas.map(c => ({ id: c.id, value: c.value, result: c.result, isVirada: false, isCombinada: Boolean(c.isCombinada) }));
+          } else if (Array.isArray(st.cards) && st.cards.length === 20) {
+            state.cartas = st.cards.map((c, idx) => ({ id: c.id || 'c_' + idx, value: String(c.value ?? ''), result: Number(c.result) || 0, isVirada: false, isCombinada: Boolean(c.matched) }));
+          } else {
+            const nl = [];
+            for (let i = 1; i <= 10; i++) {
+              const m = i <= pares, sum = tab + i;
+              nl.push({ id: 'expr_' + i, value: tab + ' + ' + i, result: sum, isVirada: false, isCombinada: m });
+              nl.push({ id: 'res_' + i, value: String(sum), result: sum, isVirada: false, isCombinada: m });
+            }
+            for (let i = nl.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [nl[i], nl[j]] = [nl[j], nl[i]]; }
+            state.cartas = nl;
+          }
+          state.viradas = []; state.bloqueado = false;
+          switchTab('jogar');
+          if (pares >= 10) {
+            if (tab < 10) openModal('nivelConcluido');
+            else finalizeGame(mastered, base, att, el);
+          } else {
+            state.mensagemData = { titulo: 'Progresso Carregado!', lines: ['Bem-vindo de volta, ' + ln + '!', 'Tabuada: ' + tab + ' • Pares: ' + pares + '/10 • Pontuação: ' + base + ' pts'], isError: false };
+            openModal('mensagem');
+          }
+        } catch {
+          state.mensagemData = { titulo: 'Arquivo Inválido ou Danificado', lines: ['Não foi possível ler o arquivo enviado.', 'Verifique se é um arquivo de progresso válido.'], isError: true };
+          openModal('mensagem');
+        }
+      };
+      r.readAsText(f); if (ev.target) ev.target.value = '';
+    }
+    function updateHudDom() {
+      const acc = state.attempts > 0 ? Math.min(100, Math.round((state.masteredTotal / state.attempts) * 100)) : 100;
+      const p = document.getElementById('hud-pairs'), s = document.getElementById('hud-score'), t = document.getElementById('hud-time'), a = document.getElementById('hud-acc');
+      if (p) p.textContent = state.paresEncontrados + ' / 10';
+      if (s) s.textContent = state.baseScore + ' pts';
+      if (t) t.textContent = 'Tempo: ' + fmtTime(state.elapsedSeconds);
+      if (a) a.textContent = 'Aproveitamento: ' + acc + '%';
+    }
+    function updateControlsBar() {
+      const bar = document.getElementById('controlsBar'); if (!bar) return;
+      const canNext = state.paresEncontrados === 10 && state.currentTabuada < 10;
+      bar.innerHTML =
+        '<button type="button" id="nextTab" ' + (canNext ? '' : 'disabled') + ' class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm transition-all cursor-pointer ' + (canNext ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none') + '">Próxima Tabuada →</button>' +
+        '<button type="button" id="restartBtn" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition-all cursor-pointer shadow-xs">Reiniciar Tabuada</button>' +
+        '<button type="button" id="saveBtn" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-sm transition-all cursor-pointer">Salvar Progresso</button>' +
+        '<button type="button" id="loadBtn" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-sm transition-all cursor-pointer">Carregar Progresso</button>';
+      document.getElementById('nextTab').onclick = nextTabuada;
+      document.getElementById('restartBtn').onclick = () => openModal('confirmarReinicio');
+      document.getElementById('saveBtn').onclick = () => salvarProgresso('none');
+      document.getElementById('loadBtn').onclick = () => { const inp = document.getElementById('inputArquivo'); inp.value = ''; inp.click(); };
+    }
+    function nextTabuada() {
+      if (state.paresEncontrados >= 10 && state.currentTabuada < 10) {
+        state.runId++; state.currentTabuada++; state.paresEncontrados = 0; buildDeck(state.currentTabuada);
+        state.activeModal = 'none'; renderJogar(); renderModals(); syncTimer();
+      }
+    }
+    function restartTabuadaOnly() {
+      state.runId++;
+      state.baseScore = Math.max(0, state.baseScore - state.paresEncontrados * 10);
+      state.masteredTotal = Math.max(0, state.masteredTotal - state.paresEncontrados);
+      state.paresEncontrados = 0; buildDeck(state.currentTabuada);
+      state.activeModal = 'none'; renderJogar(); renderModals(); syncTimer();
+    }
+    function restartFullGame() {
+      state.runId++; state.started = false; state.currentTabuada = 1; state.paresEncontrados = 0;
+      state.masteredTotal = 0; state.attempts = 0; state.baseScore = 0; state.elapsedSeconds = 0;
+      state.finishedEntry = null; state.submissionStatus = 'idle'; state.submissionMessage = '';
+      buildDeck(1); state.activeModal = 'none'; state.returnModal = 'none';
+      renderJogar(); renderModals(); syncTimer();
+    }
+    function mountBoardDom() {
+      const board = document.getElementById('tabuleiro'); if (!board) return;
+      board.innerHTML = state.cartas.map((c, idx) => {
+        const rev = c.isVirada || c.isCombinada;
+        return '<button type="button" data-card="' + idx + '" ' + (state.bloqueado || rev ? 'disabled' : '') + ' class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 perspective-1000 cursor-pointer disabled:cursor-default select-none group rounded-2xl">' +
+          '<div class="card-inner relative w-full h-full duration-500 transform-gpu preserve-3d transition-transform rounded-2xl shadow-md ' + (rev ? 'rotate-y-180' : 'hover:-translate-y-1 hover:shadow-lg') + '">' +
+            '<div class="absolute inset-0 w-full h-full backface-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-600 to-cyan-600 border-2 border-cyan-200/80 flex items-center justify-center text-white shadow-inner">' +
+              '<div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/30 flex items-center justify-center bg-white/10 group-hover:bg-white/20 transition-colors"><span class="text-white/90 font-extrabold text-2xl sm:text-3xl leading-none">+</span></div>' +
+            '</div>' +
+            '<div class="card-front absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl border-2 flex flex-col items-center justify-center p-1 text-center font-bold text-lg sm:text-2xl shadow-inner transition-colors ' + (c.isCombinada ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300' : 'bg-gradient-to-br from-sky-600 to-blue-700 text-white border-sky-300') + '">' +
+              '<span>' + escapeHtml(c.value) + '</span>' +
+              '<span class="badge-check ' + (c.isCombinada ? '' : 'hidden') + ' mt-0.5 sm:mt-1 p-0.5 bg-white/20 rounded-full text-xs leading-none">✓</span>' +
+            '</div>' +
+          '</div>' +
+        '</button>';
+      }).join('');
+      board.querySelectorAll('[data-card]').forEach(el => { const i = Number(el.dataset.card); el.onclick = () => onCardClick(i); });
+    }
+    function onCardClick(idx) {
+      const card = state.cartas[idx]; if (state.bloqueado || !card || card.isVirada || card.isCombinada) return;
+      audio.playFlip(); card.isVirada = true; state.viradas.push(idx);
+      const btn = document.querySelector('#tabuleiro [data-card="' + idx + '"]');
+      if (btn) {
+        btn.disabled = true;
+        const inner = btn.querySelector('.card-inner');
+        if (inner) { inner.classList.remove('hover:-translate-y-1', 'hover:shadow-lg'); inner.classList.add('rotate-y-180'); }
+      }
+      if (state.viradas.length === 2) {
+        state.bloqueado = true; state.attempts++; updateHudDom();
+        const runId = state.runId; const [a, b] = state.viradas;
+        if (state.cartas[a].result === state.cartas[b].result) {
+          setTimeout(() => {
+            if (runId !== state.runId) return;
+            audio.playMatch();
+            state.cartas[a].isCombinada = true; state.cartas[b].isCombinada = true;
+            state.paresEncontrados++; state.masteredTotal++; state.baseScore += 10; state.viradas = []; state.bloqueado = false;
+            [a, b].forEach(i => {
+              const bEl = document.querySelector('#tabuleiro [data-card="' + i + '"]'); if (!bEl) return;
+              const front = bEl.querySelector('.card-front');
+              if (front) front.className = 'card-front absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl border-2 flex flex-col items-center justify-center p-1 text-center font-bold text-lg sm:text-2xl shadow-inner transition-colors bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-emerald-300';
+              const badge = bEl.querySelector('.badge-check'); if (badge) badge.classList.remove('hidden');
+            });
+            updateHudDom();
+            if (state.paresEncontrados === 10) {
+              updateControlsBar();
+              if (state.currentTabuada >= 10) setTimeout(() => { if (runId === state.runId) finalizeGame(state.masteredTotal, state.baseScore, state.attempts); }, 350);
+              else setTimeout(() => { if (runId === state.runId) { audio.playVictory(); openModal('nivelConcluido'); } }, 350);
+            }
+          }, 280);
+        } else {
+          setTimeout(() => {
+            if (runId !== state.runId) return;
+            audio.playMismatch();
+            state.cartas[a].isVirada = false; state.cartas[b].isVirada = false;
+            [a, b].forEach(i => {
+              const bEl = document.querySelector('#tabuleiro [data-card="' + i + '"]'); if (!bEl) return;
+              bEl.disabled = false;
+              const inner = bEl.querySelector('.card-inner');
+              if (inner) { inner.classList.remove('rotate-y-180'); inner.classList.add('hover:-translate-y-1', 'hover:shadow-lg'); }
+            });
+            state.viradas = []; state.bloqueado = false;
+          }, 850);
+        }
+      }
+    }
+    function handleStart(e) {
+      if (e) e.preventDefault();
+      const inp = document.getElementById('student-name-input'); const name = (inp ? inp.value : state.nomeAluno || '').trim();
+      if (name.length < 2) { state.nameError = 'Digite o nome do aluno para iniciar (mínimo 2 letras).'; renderJogar(); return; }
+      state.runId++; state.nameError = ''; state.nomeAluno = name; state.sessionId = genId();
+      state.started = true; state.currentTabuada = 1; state.paresEncontrados = 0; state.masteredTotal = 0;
+      state.attempts = 0; state.baseScore = 0; state.elapsedSeconds = 0; state.finishedEntry = null;
+      state.submissionStatus = 'idle'; state.submissionMessage = ''; state.activeModal = 'none'; state.returnModal = 'none';
+      buildDeck(1); renderJogar(); syncTimer();
+    }
+    function renderModals() {
+      const host = document.getElementById('modalHost'); if (!host) return;
+      if (state.activeModal === 'none') { host.innerHTML = ''; return; }
+      let inner = '';
+      if (state.activeModal === 'mensagem') {
+        const d = state.mensagemData;
+        inner = '<div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-scale-up"><h2 class="text-xl font-bold text-slate-800 mb-2">' + escapeHtml(d.titulo) + '</h2><div class="text-sm text-slate-600 mb-6 leading-relaxed space-y-1">' + d.lines.map(l => '<p>' + escapeHtml(l) + '</p>').join('') + '</div><button type="button" id="mOkBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md cursor-pointer">OK</button></div>';
+      } else if (state.activeModal === 'confirmarReinicio') {
+        inner = '<div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-scale-up"><h2 class="text-xl font-bold text-slate-800 mb-1">Atenção ao Reiniciar!</h2><p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">Confira seu progresso atual para evitar perder dados de aprendizagem:</p><div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 text-left space-y-1.5 text-xs sm:text-sm text-slate-700 tabular-nums"><div class="flex justify-between items-center"><span class="font-semibold text-slate-500">Aluno:</span><span class="font-bold text-slate-800">' + escapeHtml(state.nomeAluno || 'Não informado') + '</span></div><div class="flex justify-between items-center"><span class="font-semibold text-slate-500">Tabuada Atual:</span><span class="font-bold text-slate-800">Adição de ' + state.currentTabuada + '</span></div><div class="flex justify-between items-center"><span class="font-semibold text-slate-500">Pares na Tabuada:</span><span class="font-bold text-slate-800">' + state.paresEncontrados + ' / 10</span></div><div class="flex justify-between items-center"><span class="font-semibold text-slate-500">Pontuação Total:</span><span class="font-bold text-amber-800">' + state.baseScore + ' pts</span></div></div><div class="flex flex-col gap-2"><button type="button" id="mSaveRestartBtn" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl cursor-pointer text-xs sm:text-sm">Salvar Progresso em Arquivo</button><div class="grid grid-cols-2 gap-2 mt-1"><button type="button" id="mRestartTabBtn" class="py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl cursor-pointer text-xs p-2">Reiniciar Só Esta Tabuada</button><button type="button" id="mRestartAllBtn" class="py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl cursor-pointer text-xs p-2">Reiniciar Todo o Jogo</button></div><button type="button" id="mCancelBtn" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer text-xs sm:text-sm mt-1">Cancelar (Continuar Jogando)</button></div></div>';
+      } else if (state.activeModal === 'nivelConcluido') {
+        inner = '<div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-scale-up"><h2 class="text-2xl font-extrabold text-slate-800 mb-1">Tabuada Concluída! 🎉</h2><p class="text-sm text-slate-600 mb-4 font-medium">' + (state.nomeAluno ? 'Muito bem, ' + escapeHtml(state.nomeAluno) + '!' : 'Muito bem!') + ' Você encontrou todos os 10 pares com sucesso!</p><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-5 text-left text-xs space-y-1.5 text-slate-700 tabular-nums"><div class="flex justify-between"><span class="font-medium text-slate-500">Tabuada Concluída:</span><strong>Adição de ' + state.currentTabuada + '</strong></div><div class="flex justify-between"><span class="font-medium text-slate-500">Próxima Tabuada:</span><strong class="text-emerald-700">Adição de ' + (state.currentTabuada + 1) + '</strong></div><div class="flex justify-between"><span class="font-medium text-slate-500">Pontuação Atual:</span><strong class="text-amber-600">' + state.baseScore + ' pts</strong></div></div><div class="flex flex-col gap-2.5"><button type="button" id="mNextTabBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md cursor-pointer">Avançar para a Próxima Tabuada →</button><button type="button" id="mCloseLvlBtn" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs cursor-pointer">Ver Tabuleiro Completo</button></div></div>';
+      } else if (state.activeModal === 'gameOver' && state.finishedEntry) {
+        const f = state.finishedEntry;
+        const stCls = state.submissionStatus === 'submitting' ? 'bg-slate-50 border-slate-200 text-slate-700' : state.submissionStatus === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700';
+        inner = '<div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 text-center animate-scale-up"><h2 class="text-2xl font-extrabold text-slate-800 mb-1">Parabéns, ' + escapeHtml(f.studentName) + '! 🎉</h2><p class="text-xs text-slate-500 mb-3 font-mono">Sessão ' + escapeHtml(f.sessionId) + ' • Todas as 10 tabuadas concluídas!</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-4 tabular-nums"><span class="block text-xs uppercase font-bold text-amber-800">Pontuação Final</span><span class="text-3xl font-black text-amber-900">' + f.score + ' Pontos</span><span class="block text-xs text-amber-800/80 mt-0.5">' + f.baseScore + ' base + ' + f.bonusScore + ' bônus • ' + f.accuracyPercent + '% precisão • ' + fmtTime(f.elapsedSeconds) + '</span></div><div class="p-3 rounded-xl border text-xs font-semibold mb-4 ' + stCls + '">' + escapeHtml(state.submissionMessage) + '</div><div class="flex flex-col gap-2.5">' + (state.submissionStatus === 'error' ? '<button type="button" id="mRetryBtn" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl cursor-pointer">Tentar reenviar</button>' : '') + '<button type="button" id="mGoRankBtn" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl cursor-pointer">Ver Ranking Top 20</button><button type="button" id="mPlayAgainBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl cursor-pointer">Jogar Novamente</button></div></div>';
+      }
+      host.innerHTML = '<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-xs animate-fade-in">' + inner + '</div>';
+      const closeModal = () => { if (state.returnModal === 'confirmarReinicio') { state.returnModal = 'none'; openModal('confirmarReinicio'); } else { openModal('none'); } };
+      if (document.getElementById('mOkBtn')) document.getElementById('mOkBtn').onclick = closeModal;
+      if (document.getElementById('mCancelBtn')) document.getElementById('mCancelBtn').onclick = closeModal;
+      if (document.getElementById('mSaveRestartBtn')) document.getElementById('mSaveRestartBtn').onclick = () => salvarProgresso('confirmarReinicio');
+      if (document.getElementById('mRestartTabBtn')) document.getElementById('mRestartTabBtn').onclick = restartTabuadaOnly;
+      if (document.getElementById('mRestartAllBtn')) document.getElementById('mRestartAllBtn').onclick = restartFullGame;
+      if (document.getElementById('mNextTabBtn')) document.getElementById('mNextTabBtn').onclick = nextTabuada;
+      if (document.getElementById('mCloseLvlBtn')) document.getElementById('mCloseLvlBtn').onclick = closeModal;
+      if (document.getElementById('mRetryBtn')) document.getElementById('mRetryBtn').onclick = () => { if (state.finishedEntry) submitEntry(state.finishedEntry); };
+      if (document.getElementById('mGoRankBtn')) document.getElementById('mGoRankBtn').onclick = () => { openModal('none'); switchTab('ranking'); };
+      if (document.getElementById('mPlayAgainBtn')) document.getElementById('mPlayAgainBtn').onclick = restartFullGame;
+    }
+    function renderJogar() {
+      const el = document.getElementById('tab-jogar');
+      if (!state.started) {
+        el.innerHTML = '<div class="w-full max-w-4xl mx-auto px-4 mb-8"><form id="startForm" class="max-w-lg mx-auto bg-white/95 backdrop-blur-sm border border-cyan-100 rounded-2xl p-6 sm:p-7 shadow-lg space-y-5"><div class="text-center space-y-2"><h2 class="text-xl font-bold text-slate-800">Identificação do Aluno</h2><p class="text-sm text-slate-600 leading-relaxed">Informe o nome do aluno antes de iniciar as tabuadas de adição de 1 a 10.</p></div><div class="space-y-1.5"><label for="student-name-input" class="block text-xs font-bold uppercase tracking-wider text-cyan-800">Nome do aluno</label><input id="student-name-input" type="text" maxlength="40" value="' + escapeHtml(state.nomeAluno) + '" placeholder="Ex: Maria Silva" class="w-full px-4 py-3 border-2 border-cyan-200 focus:border-cyan-500 focus:outline-none rounded-xl text-center text-base font-semibold text-slate-800 bg-white" />' + (state.nameError ? '<p class="text-xs font-semibold text-rose-600 text-center">' + escapeHtml(state.nameError) + '</p>' : '') + '</div><div class="flex flex-col sm:flex-row gap-2.5 pt-1"><button type="submit" class="flex-1 py-3 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md cursor-pointer text-sm">Jogar Agora</button><button type="button" id="loadStartBtn" class="py-3 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md cursor-pointer text-sm">Carregar Progresso</button></div></form></div>';
+        document.getElementById('student-name-input').oninput = e => { state.nomeAluno = e.target.value; };
+        document.getElementById('startForm').onsubmit = handleStart;
+        document.getElementById('loadStartBtn').onclick = () => { const inp = document.getElementById('inputArquivo'); inp.value = ''; inp.click(); };
+        return;
+      }
+      const acc = state.attempts > 0 ? Math.min(100, Math.round((state.masteredTotal / state.attempts) * 100)) : 100;
+      el.innerHTML =
+        '<div class="w-full max-w-4xl mx-auto px-4 mb-5"><div class="bg-white/90 backdrop-blur-sm border border-cyan-100 rounded-2xl p-3 sm:p-4 shadow-md space-y-2.5"><div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700"><div class="bg-cyan-50/70 p-2.5 rounded-xl border border-cyan-100/80"><span class="block text-[11px] font-semibold text-cyan-800 uppercase">Aluno</span><span class="block text-sm font-bold text-slate-800 truncate">' + escapeHtml(state.nomeAluno || '—') + '</span></div><div class="bg-sky-50/70 p-2.5 rounded-xl border border-sky-100/80"><span class="block text-[11px] font-semibold text-sky-800 uppercase">Tabuada</span><span class="block text-sm font-bold text-slate-800">Adição de ' + state.currentTabuada + '</span></div><div class="bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100/80"><span class="block text-[11px] font-semibold text-emerald-800 uppercase">Pares</span><span id="hud-pairs" class="block text-sm font-bold text-slate-800 tabular-nums">' + state.paresEncontrados + ' / 10</span></div><div class="bg-amber-50/70 p-2.5 rounded-xl border border-amber-100/80"><span class="block text-[11px] font-semibold text-amber-800 uppercase">Pontuação</span><span id="hud-score" class="block text-sm font-bold text-amber-900 tabular-nums">' + state.baseScore + ' pts</span></div></div><div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-cyan-100/80 text-xs text-slate-600 tabular-nums"><div class="flex items-center gap-4"><span id="hud-time" class="font-semibold">Tempo: ' + fmtTime(state.elapsedSeconds) + '</span><span id="hud-acc" class="font-semibold">Aproveitamento: ' + acc + '%</span></div><span class="font-mono text-[11px] text-slate-500">Sessão: ' + escapeHtml(state.sessionId) + '</span></div></div></div>' +
+        '<div class="w-full max-w-4xl mx-auto px-4 mb-6"><div id="controlsBar" class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 bg-slate-50/80 p-3 rounded-2xl border border-slate-200 shadow-sm"></div></div>' +
+        '<div class="w-full max-w-4xl mx-auto px-4 mb-8"><div id="tabuleiro" class="grid grid-cols-4 sm:grid-cols-5 gap-2.5 sm:gap-4 justify-items-center"></div></div>';
+      updateControlsBar(); mountBoardDom();
+    }
+    function renderRanking() {
+      const el = document.getElementById('tab-ranking');
+      el.innerHTML = '<div class="w-full max-w-4xl mx-auto px-4 mb-8"><section class="bg-white/95 border border-cyan-100 rounded-2xl p-5 sm:p-6 shadow-md space-y-4"><div class="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-100 pb-4"><div><h2 class="text-lg sm:text-xl font-bold text-slate-800">Ranking Top ' + LIMIT + '</h2><p class="text-xs font-medium text-slate-500 mt-0.5">' + (state.rankingSource === 'online' ? 'Conectado à planilha Google Sheets' : 'Modo local (navegador)') + '</p></div><button type="button" id="refreshRank" ' + (state.rankingLoading ? 'disabled' : '') + ' class="px-4 py-2 text-xs sm:text-sm font-bold rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:bg-cyan-300 text-white cursor-pointer">' + (state.rankingLoading ? 'Atualizando...' : 'Atualizar Ranking') + '</button></div>' + (state.rankingError ? '<div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">' + escapeHtml(state.rankingError) + '</div>' : '') + (state.rankingLoading && state.ranking.length === 0 ? '<p class="text-sm text-slate-500 py-10 text-center">Carregando as ' + LIMIT + ' melhores posições...</p>' : state.ranking.length === 0 ? '<p class="text-sm text-slate-500 py-10 text-center">Nenhuma pontuação registrada ainda.</p>' : '<div class="overflow-x-auto"><table class="w-full text-sm text-left tabular-nums"><thead><tr class="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase"><th class="py-2.5 pr-3">Pos.</th><th class="py-2.5 pr-4">Aluno</th><th class="py-2.5 pr-4 text-right">Pontuação</th><th class="py-2.5 pr-4 text-right">Aproveit.</th><th class="py-2.5 pr-4 text-right">Tempo</th><th class="py-2.5 pr-4 text-right">Pares</th><th class="py-2.5 text-right hidden sm:table-cell">Data</th></tr></thead><tbody class="divide-y divide-slate-100">' + state.ranking.slice(0, LIMIT).map((r, idx) => {
+        const cur = Boolean(state.sessionId && r.sessionId === state.sessionId);
+        const dt = r.finishedAt ? new Date(r.finishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '—';
+        return '<tr class="' + (cur ? 'bg-cyan-50/80 font-semibold text-slate-900' : 'hover:bg-slate-50/80 text-slate-700') + '"><td class="py-2.5 pr-3 font-bold text-slate-800">' + (idx + 1) + 'º</td><td class="py-2.5 pr-4"><span class="font-semibold text-slate-800">' + escapeHtml(r.studentName) + '</span>' + (cur ? '<span class="ml-2 text-[11px] font-bold text-cyan-600">(Você)</span>' : '') + '</td><td class="py-2.5 pr-4 text-right font-bold text-amber-700">' + (Number(r.score) || 0) + ' pts</td><td class="py-2.5 pr-4 text-right">' + (Number(r.accuracyPercent) || 0) + '%</td><td class="py-2.5 pr-4 text-right font-mono">' + fmtTime(Number(r.elapsedSeconds) || 0) + '</td><td class="py-2.5 pr-4 text-right">' + (Number(r.masteredCount) || 0) + '/' + (Number(r.totalQuestions || r.masteredCount) || 0) + '</td><td class="py-2.5 text-right text-slate-500 hidden sm:table-cell">' + dt + '</td></tr>';
+      }).join('') + '</tbody></table></div>') + '</section></div>';
+      document.getElementById('refreshRank').onclick = fetchTop20;
+    }
+    function switchTab(tab) {
+      state.tab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        const active = b.dataset.tab === tab;
+        b.className = 'tab-btn flex-1 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 transition-colors ' + (active ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50');
+      });
+      ['jogar', 'ranking', 'como-jogar', 'bncc'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab));
+      syncTimer();
+      if (tab === 'ranking') fetchTop20();
+    }
+    document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+    document.getElementById('soundBtn').onclick = () => {
+      state.muted = !state.muted;
+      const btn = document.getElementById('soundBtn');
+      btn.className = 'p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ' + (state.muted ? 'bg-slate-100 border-slate-300 text-slate-500 hover:bg-slate-200' : 'bg-cyan-50 border-cyan-300 text-cyan-700 hover:bg-cyan-100');
+      document.getElementById('iconSomOn').classList.toggle('hidden', state.muted);
+      document.getElementById('iconSomOff').classList.toggle('hidden', !state.muted);
+    };
+    document.getElementById('inputArquivo').addEventListener('change', carregarProgresso);
+    renderJogar();
+  </script>
+</body>
+</html>
