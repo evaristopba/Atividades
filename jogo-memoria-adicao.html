@@ -372,6 +372,7 @@
           }
           state.viradas = []; state.bloqueado = false;
           switchTab('jogar');
+          renderJogar();
           if (pares >= 10) {
             if (tab < 10) openModal('nivelConcluido');
             else finalizeGame(mastered, base, att, el);
